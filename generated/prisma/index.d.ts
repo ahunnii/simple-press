@@ -284,6 +284,24 @@ export type QuoteCalculator = $Result.DefaultSelection<Prisma.$QuoteCalculatorPa
  * 
  */
 export type QuoteSubmission = $Result.DefaultSelection<Prisma.$QuoteSubmissionPayload>
+/**
+ * Model QuickBooksConnection
+ * One QuickBooks Online company connection per business (1:1). Updated in
+ * place on reconnect and never deleted by the app, so deposit settings and
+ * the cached QBO reference ids survive a disconnect/reconnect cycle.
+ * Tokens are `/// @encrypted` (prisma-field-encryption) and are nulled on
+ * disconnect. Encrypted columns can never appear in a `where`.
+ */
+export type QuickBooksConnection = $Result.DefaultSelection<Prisma.$QuickBooksConnectionPayload>
+/**
+ * Model QuickBooksInvoice
+ * One row per invoice SimplePress created in QuickBooks: audit trail, the
+ * /admin/invoices list, and the cron sync target. Customer fields are a
+ * snapshot taken at issue time (encrypted like QuoteSubmission's contact
+ * fields). `realmId` is snapshotted per row so invoices from a previous
+ * QBO company are recognizable after a reconnect.
+ */
+export type QuickBooksInvoice = $Result.DefaultSelection<Prisma.$QuickBooksInvoicePayload>
 
 /**
  * Enums
@@ -895,6 +913,26 @@ export class PrismaClient<
     * ```
     */
   get quoteSubmission(): Prisma.QuoteSubmissionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.quickBooksConnection`: Exposes CRUD operations for the **QuickBooksConnection** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more QuickBooksConnections
+    * const quickBooksConnections = await prisma.quickBooksConnection.findMany()
+    * ```
+    */
+  get quickBooksConnection(): Prisma.QuickBooksConnectionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.quickBooksInvoice`: Exposes CRUD operations for the **QuickBooksInvoice** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more QuickBooksInvoices
+    * const quickBooksInvoices = await prisma.quickBooksInvoice.findMany()
+    * ```
+    */
+  get quickBooksInvoice(): Prisma.QuickBooksInvoiceDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1380,7 +1418,9 @@ export namespace Prisma {
     ShippingRate: 'ShippingRate',
     BackInStockRequest: 'BackInStockRequest',
     QuoteCalculator: 'QuoteCalculator',
-    QuoteSubmission: 'QuoteSubmission'
+    QuoteSubmission: 'QuoteSubmission',
+    QuickBooksConnection: 'QuickBooksConnection',
+    QuickBooksInvoice: 'QuickBooksInvoice'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1399,7 +1439,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4733,6 +4773,154 @@ export namespace Prisma {
           }
         }
       }
+      QuickBooksConnection: {
+        payload: Prisma.$QuickBooksConnectionPayload<ExtArgs>
+        fields: Prisma.QuickBooksConnectionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.QuickBooksConnectionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.QuickBooksConnectionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>
+          }
+          findFirst: {
+            args: Prisma.QuickBooksConnectionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.QuickBooksConnectionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>
+          }
+          findMany: {
+            args: Prisma.QuickBooksConnectionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>[]
+          }
+          create: {
+            args: Prisma.QuickBooksConnectionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>
+          }
+          createMany: {
+            args: Prisma.QuickBooksConnectionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.QuickBooksConnectionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>[]
+          }
+          delete: {
+            args: Prisma.QuickBooksConnectionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>
+          }
+          update: {
+            args: Prisma.QuickBooksConnectionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>
+          }
+          deleteMany: {
+            args: Prisma.QuickBooksConnectionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.QuickBooksConnectionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.QuickBooksConnectionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>[]
+          }
+          upsert: {
+            args: Prisma.QuickBooksConnectionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksConnectionPayload>
+          }
+          aggregate: {
+            args: Prisma.QuickBooksConnectionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuickBooksConnection>
+          }
+          groupBy: {
+            args: Prisma.QuickBooksConnectionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<QuickBooksConnectionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.QuickBooksConnectionCountArgs<ExtArgs>
+            result: $Utils.Optional<QuickBooksConnectionCountAggregateOutputType> | number
+          }
+        }
+      }
+      QuickBooksInvoice: {
+        payload: Prisma.$QuickBooksInvoicePayload<ExtArgs>
+        fields: Prisma.QuickBooksInvoiceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.QuickBooksInvoiceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.QuickBooksInvoiceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>
+          }
+          findFirst: {
+            args: Prisma.QuickBooksInvoiceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.QuickBooksInvoiceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>
+          }
+          findMany: {
+            args: Prisma.QuickBooksInvoiceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>[]
+          }
+          create: {
+            args: Prisma.QuickBooksInvoiceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>
+          }
+          createMany: {
+            args: Prisma.QuickBooksInvoiceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.QuickBooksInvoiceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>[]
+          }
+          delete: {
+            args: Prisma.QuickBooksInvoiceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>
+          }
+          update: {
+            args: Prisma.QuickBooksInvoiceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>
+          }
+          deleteMany: {
+            args: Prisma.QuickBooksInvoiceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.QuickBooksInvoiceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.QuickBooksInvoiceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>[]
+          }
+          upsert: {
+            args: Prisma.QuickBooksInvoiceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuickBooksInvoicePayload>
+          }
+          aggregate: {
+            args: Prisma.QuickBooksInvoiceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuickBooksInvoice>
+          }
+          groupBy: {
+            args: Prisma.QuickBooksInvoiceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<QuickBooksInvoiceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.QuickBooksInvoiceCountArgs<ExtArgs>
+            result: $Utils.Optional<QuickBooksInvoiceCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4874,6 +5062,8 @@ export namespace Prisma {
     backInStockRequest?: BackInStockRequestOmit
     quoteCalculator?: QuoteCalculatorOmit
     quoteSubmission?: QuoteSubmissionOmit
+    quickBooksConnection?: QuickBooksConnectionOmit
+    quickBooksInvoice?: QuickBooksInvoiceOmit
   }
 
   /* Types for Logging */
@@ -5066,6 +5256,7 @@ export namespace Prisma {
     backInStockRequests: number
     quoteCalculators: number
     quoteSubmissions: number
+    quickBooksInvoices: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5096,6 +5287,7 @@ export namespace Prisma {
     backInStockRequests?: boolean | BusinessCountOutputTypeCountBackInStockRequestsArgs
     quoteCalculators?: boolean | BusinessCountOutputTypeCountQuoteCalculatorsArgs
     quoteSubmissions?: boolean | BusinessCountOutputTypeCountQuoteSubmissionsArgs
+    quickBooksInvoices?: boolean | BusinessCountOutputTypeCountQuickBooksInvoicesArgs
   }
 
   // Custom InputTypes
@@ -5296,6 +5488,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountQuoteSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuoteSubmissionWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountQuickBooksInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuickBooksInvoiceWhereInput
   }
 
 
@@ -5865,6 +6064,37 @@ export namespace Prisma {
    */
   export type QuoteCalculatorCountOutputTypeCountSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuoteSubmissionWhereInput
+  }
+
+
+  /**
+   * Count Type QuoteSubmissionCountOutputType
+   */
+
+  export type QuoteSubmissionCountOutputType = {
+    quickBooksInvoices: number
+  }
+
+  export type QuoteSubmissionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    quickBooksInvoices?: boolean | QuoteSubmissionCountOutputTypeCountQuickBooksInvoicesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * QuoteSubmissionCountOutputType without action
+   */
+  export type QuoteSubmissionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmissionCountOutputType
+     */
+    select?: QuoteSubmissionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * QuoteSubmissionCountOutputType without action
+   */
+  export type QuoteSubmissionCountOutputTypeCountQuickBooksInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuickBooksInvoiceWhereInput
   }
 
 
@@ -12112,6 +12342,8 @@ export namespace Prisma {
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     quoteCalculators?: boolean | Business$quoteCalculatorsArgs<ExtArgs>
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
+    quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
+    quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -12283,6 +12515,8 @@ export namespace Prisma {
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     quoteCalculators?: boolean | Business$quoteCalculatorsArgs<ExtArgs>
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
+    quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
+    quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -12319,6 +12553,8 @@ export namespace Prisma {
       backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
       quoteCalculators: Prisma.$QuoteCalculatorPayload<ExtArgs>[]
       quoteSubmissions: Prisma.$QuoteSubmissionPayload<ExtArgs>[]
+      quickBooksConnection: Prisma.$QuickBooksConnectionPayload<ExtArgs> | null
+      quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12786,6 +13022,8 @@ export namespace Prisma {
     backInStockRequests<T extends Business$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Business$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quoteCalculators<T extends Business$quoteCalculatorsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteCalculatorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quoteSubmissions<T extends Business$quoteSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    quickBooksConnection<T extends Business$quickBooksConnectionArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksConnectionArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    quickBooksInvoices<T extends Business$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13910,6 +14148,49 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: QuoteSubmissionScalarFieldEnum | QuoteSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Business.quickBooksConnection
+   */
+  export type Business$quickBooksConnectionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    where?: QuickBooksConnectionWhereInput
+  }
+
+  /**
+   * Business.quickBooksInvoices
+   */
+  export type Business$quickBooksInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    where?: QuickBooksInvoiceWhereInput
+    orderBy?: QuickBooksInvoiceOrderByWithRelationInput | QuickBooksInvoiceOrderByWithRelationInput[]
+    cursor?: QuickBooksInvoiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuickBooksInvoiceScalarFieldEnum | QuickBooksInvoiceScalarFieldEnum[]
   }
 
   /**
@@ -60753,7 +61034,9 @@ export namespace Prisma {
     calculatorId?: boolean
     businessId?: boolean
     calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    quickBooksInvoices?: boolean | QuoteSubmission$quickBooksInvoicesArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    _count?: boolean | QuoteSubmissionCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["quoteSubmission"]>
 
   export type QuoteSubmissionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -60826,7 +61109,9 @@ export namespace Prisma {
   export type QuoteSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "status" | "contactName" | "contactEmail" | "contactPhone" | "answers" | "estimateCents" | "formulaSnapshot" | "finalQuoteCents" | "quoteSentAt" | "sentQuoteCents" | "sentMessage" | "calculatorName" | "showEstimateToCustomer" | "calculatorId" | "businessId", ExtArgs["result"]["quoteSubmission"]>
   export type QuoteSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    quickBooksInvoices?: boolean | QuoteSubmission$quickBooksInvoicesArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    _count?: boolean | QuoteSubmissionCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type QuoteSubmissionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
@@ -60841,6 +61126,7 @@ export namespace Prisma {
     name: "QuoteSubmission"
     objects: {
       calculator: Prisma.$QuoteCalculatorPayload<ExtArgs> | null
+      quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
       business: Prisma.$BusinessPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -61269,6 +61555,7 @@ export namespace Prisma {
   export interface Prisma__QuoteSubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     calculator<T extends QuoteSubmission$calculatorArgs<ExtArgs> = {}>(args?: Subset<T, QuoteSubmission$calculatorArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    quickBooksInvoices<T extends QuoteSubmission$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, QuoteSubmission$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -61732,6 +62019,30 @@ export namespace Prisma {
   }
 
   /**
+   * QuoteSubmission.quickBooksInvoices
+   */
+  export type QuoteSubmission$quickBooksInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    where?: QuickBooksInvoiceWhereInput
+    orderBy?: QuickBooksInvoiceOrderByWithRelationInput | QuickBooksInvoiceOrderByWithRelationInput[]
+    cursor?: QuickBooksInvoiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuickBooksInvoiceScalarFieldEnum | QuickBooksInvoiceScalarFieldEnum[]
+  }
+
+  /**
    * QuoteSubmission without action
    */
   export type QuoteSubmissionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -61747,6 +62058,2764 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: QuoteSubmissionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model QuickBooksConnection
+   */
+
+  export type AggregateQuickBooksConnection = {
+    _count: QuickBooksConnectionCountAggregateOutputType | null
+    _avg: QuickBooksConnectionAvgAggregateOutputType | null
+    _sum: QuickBooksConnectionSumAggregateOutputType | null
+    _min: QuickBooksConnectionMinAggregateOutputType | null
+    _max: QuickBooksConnectionMaxAggregateOutputType | null
+  }
+
+  export type QuickBooksConnectionAvgAggregateOutputType = {
+    depositPercent: number | null
+    depositFixedCents: number | null
+    defaultDueDays: number | null
+  }
+
+  export type QuickBooksConnectionSumAggregateOutputType = {
+    depositPercent: number | null
+    depositFixedCents: number | null
+    defaultDueDays: number | null
+  }
+
+  export type QuickBooksConnectionMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    status: string | null
+    realmId: string | null
+    environment: string | null
+    companyName: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    accessTokenExpiresAt: Date | null
+    refreshTokenExpiresAt: Date | null
+    lastRefreshAt: Date | null
+    connectedAt: Date | null
+    disconnectedAt: Date | null
+    depositMode: string | null
+    depositPercent: number | null
+    depositFixedCents: number | null
+    defaultDueDays: number | null
+    incomeAccountId: string | null
+    depositItemId: string | null
+    serviceItemId: string | null
+    depositItemName: string | null
+    serviceItemName: string | null
+    lastSyncAt: Date | null
+    lastSyncError: string | null
+  }
+
+  export type QuickBooksConnectionMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    status: string | null
+    realmId: string | null
+    environment: string | null
+    companyName: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    accessTokenExpiresAt: Date | null
+    refreshTokenExpiresAt: Date | null
+    lastRefreshAt: Date | null
+    connectedAt: Date | null
+    disconnectedAt: Date | null
+    depositMode: string | null
+    depositPercent: number | null
+    depositFixedCents: number | null
+    defaultDueDays: number | null
+    incomeAccountId: string | null
+    depositItemId: string | null
+    serviceItemId: string | null
+    depositItemName: string | null
+    serviceItemName: string | null
+    lastSyncAt: Date | null
+    lastSyncError: string | null
+  }
+
+  export type QuickBooksConnectionCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    status: number
+    realmId: number
+    environment: number
+    companyName: number
+    accessToken: number
+    refreshToken: number
+    accessTokenExpiresAt: number
+    refreshTokenExpiresAt: number
+    lastRefreshAt: number
+    connectedAt: number
+    disconnectedAt: number
+    depositMode: number
+    depositPercent: number
+    depositFixedCents: number
+    defaultDueDays: number
+    incomeAccountId: number
+    depositItemId: number
+    serviceItemId: number
+    depositItemName: number
+    serviceItemName: number
+    lastSyncAt: number
+    lastSyncError: number
+    _all: number
+  }
+
+
+  export type QuickBooksConnectionAvgAggregateInputType = {
+    depositPercent?: true
+    depositFixedCents?: true
+    defaultDueDays?: true
+  }
+
+  export type QuickBooksConnectionSumAggregateInputType = {
+    depositPercent?: true
+    depositFixedCents?: true
+    defaultDueDays?: true
+  }
+
+  export type QuickBooksConnectionMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    status?: true
+    realmId?: true
+    environment?: true
+    companyName?: true
+    accessToken?: true
+    refreshToken?: true
+    accessTokenExpiresAt?: true
+    refreshTokenExpiresAt?: true
+    lastRefreshAt?: true
+    connectedAt?: true
+    disconnectedAt?: true
+    depositMode?: true
+    depositPercent?: true
+    depositFixedCents?: true
+    defaultDueDays?: true
+    incomeAccountId?: true
+    depositItemId?: true
+    serviceItemId?: true
+    depositItemName?: true
+    serviceItemName?: true
+    lastSyncAt?: true
+    lastSyncError?: true
+  }
+
+  export type QuickBooksConnectionMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    status?: true
+    realmId?: true
+    environment?: true
+    companyName?: true
+    accessToken?: true
+    refreshToken?: true
+    accessTokenExpiresAt?: true
+    refreshTokenExpiresAt?: true
+    lastRefreshAt?: true
+    connectedAt?: true
+    disconnectedAt?: true
+    depositMode?: true
+    depositPercent?: true
+    depositFixedCents?: true
+    defaultDueDays?: true
+    incomeAccountId?: true
+    depositItemId?: true
+    serviceItemId?: true
+    depositItemName?: true
+    serviceItemName?: true
+    lastSyncAt?: true
+    lastSyncError?: true
+  }
+
+  export type QuickBooksConnectionCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    status?: true
+    realmId?: true
+    environment?: true
+    companyName?: true
+    accessToken?: true
+    refreshToken?: true
+    accessTokenExpiresAt?: true
+    refreshTokenExpiresAt?: true
+    lastRefreshAt?: true
+    connectedAt?: true
+    disconnectedAt?: true
+    depositMode?: true
+    depositPercent?: true
+    depositFixedCents?: true
+    defaultDueDays?: true
+    incomeAccountId?: true
+    depositItemId?: true
+    serviceItemId?: true
+    depositItemName?: true
+    serviceItemName?: true
+    lastSyncAt?: true
+    lastSyncError?: true
+    _all?: true
+  }
+
+  export type QuickBooksConnectionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuickBooksConnection to aggregate.
+     */
+    where?: QuickBooksConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksConnections to fetch.
+     */
+    orderBy?: QuickBooksConnectionOrderByWithRelationInput | QuickBooksConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: QuickBooksConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksConnections.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned QuickBooksConnections
+    **/
+    _count?: true | QuickBooksConnectionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: QuickBooksConnectionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: QuickBooksConnectionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: QuickBooksConnectionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: QuickBooksConnectionMaxAggregateInputType
+  }
+
+  export type GetQuickBooksConnectionAggregateType<T extends QuickBooksConnectionAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuickBooksConnection]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuickBooksConnection[P]>
+      : GetScalarType<T[P], AggregateQuickBooksConnection[P]>
+  }
+
+
+
+
+  export type QuickBooksConnectionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuickBooksConnectionWhereInput
+    orderBy?: QuickBooksConnectionOrderByWithAggregationInput | QuickBooksConnectionOrderByWithAggregationInput[]
+    by: QuickBooksConnectionScalarFieldEnum[] | QuickBooksConnectionScalarFieldEnum
+    having?: QuickBooksConnectionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: QuickBooksConnectionCountAggregateInputType | true
+    _avg?: QuickBooksConnectionAvgAggregateInputType
+    _sum?: QuickBooksConnectionSumAggregateInputType
+    _min?: QuickBooksConnectionMinAggregateInputType
+    _max?: QuickBooksConnectionMaxAggregateInputType
+  }
+
+  export type QuickBooksConnectionGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    status: string
+    realmId: string
+    environment: string
+    companyName: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    accessTokenExpiresAt: Date | null
+    refreshTokenExpiresAt: Date | null
+    lastRefreshAt: Date | null
+    connectedAt: Date
+    disconnectedAt: Date | null
+    depositMode: string
+    depositPercent: number
+    depositFixedCents: number
+    defaultDueDays: number
+    incomeAccountId: string | null
+    depositItemId: string | null
+    serviceItemId: string | null
+    depositItemName: string
+    serviceItemName: string
+    lastSyncAt: Date | null
+    lastSyncError: string | null
+    _count: QuickBooksConnectionCountAggregateOutputType | null
+    _avg: QuickBooksConnectionAvgAggregateOutputType | null
+    _sum: QuickBooksConnectionSumAggregateOutputType | null
+    _min: QuickBooksConnectionMinAggregateOutputType | null
+    _max: QuickBooksConnectionMaxAggregateOutputType | null
+  }
+
+  type GetQuickBooksConnectionGroupByPayload<T extends QuickBooksConnectionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<QuickBooksConnectionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof QuickBooksConnectionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], QuickBooksConnectionGroupByOutputType[P]>
+            : GetScalarType<T[P], QuickBooksConnectionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type QuickBooksConnectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    status?: boolean
+    realmId?: boolean
+    environment?: boolean
+    companyName?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    accessTokenExpiresAt?: boolean
+    refreshTokenExpiresAt?: boolean
+    lastRefreshAt?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    depositMode?: boolean
+    depositPercent?: boolean
+    depositFixedCents?: boolean
+    defaultDueDays?: boolean
+    incomeAccountId?: boolean
+    depositItemId?: boolean
+    serviceItemId?: boolean
+    depositItemName?: boolean
+    serviceItemName?: boolean
+    lastSyncAt?: boolean
+    lastSyncError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quickBooksConnection"]>
+
+  export type QuickBooksConnectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    status?: boolean
+    realmId?: boolean
+    environment?: boolean
+    companyName?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    accessTokenExpiresAt?: boolean
+    refreshTokenExpiresAt?: boolean
+    lastRefreshAt?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    depositMode?: boolean
+    depositPercent?: boolean
+    depositFixedCents?: boolean
+    defaultDueDays?: boolean
+    incomeAccountId?: boolean
+    depositItemId?: boolean
+    serviceItemId?: boolean
+    depositItemName?: boolean
+    serviceItemName?: boolean
+    lastSyncAt?: boolean
+    lastSyncError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quickBooksConnection"]>
+
+  export type QuickBooksConnectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    status?: boolean
+    realmId?: boolean
+    environment?: boolean
+    companyName?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    accessTokenExpiresAt?: boolean
+    refreshTokenExpiresAt?: boolean
+    lastRefreshAt?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    depositMode?: boolean
+    depositPercent?: boolean
+    depositFixedCents?: boolean
+    defaultDueDays?: boolean
+    incomeAccountId?: boolean
+    depositItemId?: boolean
+    serviceItemId?: boolean
+    depositItemName?: boolean
+    serviceItemName?: boolean
+    lastSyncAt?: boolean
+    lastSyncError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quickBooksConnection"]>
+
+  export type QuickBooksConnectionSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    status?: boolean
+    realmId?: boolean
+    environment?: boolean
+    companyName?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    accessTokenExpiresAt?: boolean
+    refreshTokenExpiresAt?: boolean
+    lastRefreshAt?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    depositMode?: boolean
+    depositPercent?: boolean
+    depositFixedCents?: boolean
+    defaultDueDays?: boolean
+    incomeAccountId?: boolean
+    depositItemId?: boolean
+    serviceItemId?: boolean
+    depositItemName?: boolean
+    serviceItemName?: boolean
+    lastSyncAt?: boolean
+    lastSyncError?: boolean
+  }
+
+  export type QuickBooksConnectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "status" | "realmId" | "environment" | "companyName" | "accessToken" | "refreshToken" | "accessTokenExpiresAt" | "refreshTokenExpiresAt" | "lastRefreshAt" | "connectedAt" | "disconnectedAt" | "depositMode" | "depositPercent" | "depositFixedCents" | "defaultDueDays" | "incomeAccountId" | "depositItemId" | "serviceItemId" | "depositItemName" | "serviceItemName" | "lastSyncAt" | "lastSyncError", ExtArgs["result"]["quickBooksConnection"]>
+  export type QuickBooksConnectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type QuickBooksConnectionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type QuickBooksConnectionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $QuickBooksConnectionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "QuickBooksConnection"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      status: string
+      realmId: string
+      environment: string
+      companyName: string | null
+      /**
+       * @encrypted
+       */
+      accessToken: string | null
+      /**
+       * @encrypted
+       */
+      refreshToken: string | null
+      accessTokenExpiresAt: Date | null
+      refreshTokenExpiresAt: Date | null
+      lastRefreshAt: Date | null
+      connectedAt: Date
+      disconnectedAt: Date | null
+      depositMode: string
+      depositPercent: number
+      depositFixedCents: number
+      defaultDueDays: number
+      incomeAccountId: string | null
+      depositItemId: string | null
+      serviceItemId: string | null
+      depositItemName: string
+      serviceItemName: string
+      lastSyncAt: Date | null
+      lastSyncError: string | null
+    }, ExtArgs["result"]["quickBooksConnection"]>
+    composites: {}
+  }
+
+  type QuickBooksConnectionGetPayload<S extends boolean | null | undefined | QuickBooksConnectionDefaultArgs> = $Result.GetResult<Prisma.$QuickBooksConnectionPayload, S>
+
+  type QuickBooksConnectionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<QuickBooksConnectionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: QuickBooksConnectionCountAggregateInputType | true
+    }
+
+  export interface QuickBooksConnectionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['QuickBooksConnection'], meta: { name: 'QuickBooksConnection' } }
+    /**
+     * Find zero or one QuickBooksConnection that matches the filter.
+     * @param {QuickBooksConnectionFindUniqueArgs} args - Arguments to find a QuickBooksConnection
+     * @example
+     * // Get one QuickBooksConnection
+     * const quickBooksConnection = await prisma.quickBooksConnection.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends QuickBooksConnectionFindUniqueArgs>(args: SelectSubset<T, QuickBooksConnectionFindUniqueArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one QuickBooksConnection that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {QuickBooksConnectionFindUniqueOrThrowArgs} args - Arguments to find a QuickBooksConnection
+     * @example
+     * // Get one QuickBooksConnection
+     * const quickBooksConnection = await prisma.quickBooksConnection.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends QuickBooksConnectionFindUniqueOrThrowArgs>(args: SelectSubset<T, QuickBooksConnectionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuickBooksConnection that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksConnectionFindFirstArgs} args - Arguments to find a QuickBooksConnection
+     * @example
+     * // Get one QuickBooksConnection
+     * const quickBooksConnection = await prisma.quickBooksConnection.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends QuickBooksConnectionFindFirstArgs>(args?: SelectSubset<T, QuickBooksConnectionFindFirstArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuickBooksConnection that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksConnectionFindFirstOrThrowArgs} args - Arguments to find a QuickBooksConnection
+     * @example
+     * // Get one QuickBooksConnection
+     * const quickBooksConnection = await prisma.quickBooksConnection.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends QuickBooksConnectionFindFirstOrThrowArgs>(args?: SelectSubset<T, QuickBooksConnectionFindFirstOrThrowArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more QuickBooksConnections that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksConnectionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all QuickBooksConnections
+     * const quickBooksConnections = await prisma.quickBooksConnection.findMany()
+     * 
+     * // Get first 10 QuickBooksConnections
+     * const quickBooksConnections = await prisma.quickBooksConnection.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const quickBooksConnectionWithIdOnly = await prisma.quickBooksConnection.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends QuickBooksConnectionFindManyArgs>(args?: SelectSubset<T, QuickBooksConnectionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a QuickBooksConnection.
+     * @param {QuickBooksConnectionCreateArgs} args - Arguments to create a QuickBooksConnection.
+     * @example
+     * // Create one QuickBooksConnection
+     * const QuickBooksConnection = await prisma.quickBooksConnection.create({
+     *   data: {
+     *     // ... data to create a QuickBooksConnection
+     *   }
+     * })
+     * 
+     */
+    create<T extends QuickBooksConnectionCreateArgs>(args: SelectSubset<T, QuickBooksConnectionCreateArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many QuickBooksConnections.
+     * @param {QuickBooksConnectionCreateManyArgs} args - Arguments to create many QuickBooksConnections.
+     * @example
+     * // Create many QuickBooksConnections
+     * const quickBooksConnection = await prisma.quickBooksConnection.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends QuickBooksConnectionCreateManyArgs>(args?: SelectSubset<T, QuickBooksConnectionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many QuickBooksConnections and returns the data saved in the database.
+     * @param {QuickBooksConnectionCreateManyAndReturnArgs} args - Arguments to create many QuickBooksConnections.
+     * @example
+     * // Create many QuickBooksConnections
+     * const quickBooksConnection = await prisma.quickBooksConnection.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many QuickBooksConnections and only return the `id`
+     * const quickBooksConnectionWithIdOnly = await prisma.quickBooksConnection.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends QuickBooksConnectionCreateManyAndReturnArgs>(args?: SelectSubset<T, QuickBooksConnectionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a QuickBooksConnection.
+     * @param {QuickBooksConnectionDeleteArgs} args - Arguments to delete one QuickBooksConnection.
+     * @example
+     * // Delete one QuickBooksConnection
+     * const QuickBooksConnection = await prisma.quickBooksConnection.delete({
+     *   where: {
+     *     // ... filter to delete one QuickBooksConnection
+     *   }
+     * })
+     * 
+     */
+    delete<T extends QuickBooksConnectionDeleteArgs>(args: SelectSubset<T, QuickBooksConnectionDeleteArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one QuickBooksConnection.
+     * @param {QuickBooksConnectionUpdateArgs} args - Arguments to update one QuickBooksConnection.
+     * @example
+     * // Update one QuickBooksConnection
+     * const quickBooksConnection = await prisma.quickBooksConnection.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends QuickBooksConnectionUpdateArgs>(args: SelectSubset<T, QuickBooksConnectionUpdateArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more QuickBooksConnections.
+     * @param {QuickBooksConnectionDeleteManyArgs} args - Arguments to filter QuickBooksConnections to delete.
+     * @example
+     * // Delete a few QuickBooksConnections
+     * const { count } = await prisma.quickBooksConnection.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends QuickBooksConnectionDeleteManyArgs>(args?: SelectSubset<T, QuickBooksConnectionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuickBooksConnections.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksConnectionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many QuickBooksConnections
+     * const quickBooksConnection = await prisma.quickBooksConnection.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends QuickBooksConnectionUpdateManyArgs>(args: SelectSubset<T, QuickBooksConnectionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuickBooksConnections and returns the data updated in the database.
+     * @param {QuickBooksConnectionUpdateManyAndReturnArgs} args - Arguments to update many QuickBooksConnections.
+     * @example
+     * // Update many QuickBooksConnections
+     * const quickBooksConnection = await prisma.quickBooksConnection.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more QuickBooksConnections and only return the `id`
+     * const quickBooksConnectionWithIdOnly = await prisma.quickBooksConnection.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends QuickBooksConnectionUpdateManyAndReturnArgs>(args: SelectSubset<T, QuickBooksConnectionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one QuickBooksConnection.
+     * @param {QuickBooksConnectionUpsertArgs} args - Arguments to update or create a QuickBooksConnection.
+     * @example
+     * // Update or create a QuickBooksConnection
+     * const quickBooksConnection = await prisma.quickBooksConnection.upsert({
+     *   create: {
+     *     // ... data to create a QuickBooksConnection
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the QuickBooksConnection we want to update
+     *   }
+     * })
+     */
+    upsert<T extends QuickBooksConnectionUpsertArgs>(args: SelectSubset<T, QuickBooksConnectionUpsertArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of QuickBooksConnections.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksConnectionCountArgs} args - Arguments to filter QuickBooksConnections to count.
+     * @example
+     * // Count the number of QuickBooksConnections
+     * const count = await prisma.quickBooksConnection.count({
+     *   where: {
+     *     // ... the filter for the QuickBooksConnections we want to count
+     *   }
+     * })
+    **/
+    count<T extends QuickBooksConnectionCountArgs>(
+      args?: Subset<T, QuickBooksConnectionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], QuickBooksConnectionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a QuickBooksConnection.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksConnectionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends QuickBooksConnectionAggregateArgs>(args: Subset<T, QuickBooksConnectionAggregateArgs>): Prisma.PrismaPromise<GetQuickBooksConnectionAggregateType<T>>
+
+    /**
+     * Group by QuickBooksConnection.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksConnectionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends QuickBooksConnectionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: QuickBooksConnectionGroupByArgs['orderBy'] }
+        : { orderBy?: QuickBooksConnectionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, QuickBooksConnectionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuickBooksConnectionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the QuickBooksConnection model
+   */
+  readonly fields: QuickBooksConnectionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for QuickBooksConnection.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__QuickBooksConnectionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the QuickBooksConnection model
+   */
+  interface QuickBooksConnectionFieldRefs {
+    readonly id: FieldRef<"QuickBooksConnection", 'String'>
+    readonly createdAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly updatedAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly businessId: FieldRef<"QuickBooksConnection", 'String'>
+    readonly status: FieldRef<"QuickBooksConnection", 'String'>
+    readonly realmId: FieldRef<"QuickBooksConnection", 'String'>
+    readonly environment: FieldRef<"QuickBooksConnection", 'String'>
+    readonly companyName: FieldRef<"QuickBooksConnection", 'String'>
+    readonly accessToken: FieldRef<"QuickBooksConnection", 'String'>
+    readonly refreshToken: FieldRef<"QuickBooksConnection", 'String'>
+    readonly accessTokenExpiresAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly refreshTokenExpiresAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly lastRefreshAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly connectedAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly disconnectedAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly depositMode: FieldRef<"QuickBooksConnection", 'String'>
+    readonly depositPercent: FieldRef<"QuickBooksConnection", 'Int'>
+    readonly depositFixedCents: FieldRef<"QuickBooksConnection", 'Int'>
+    readonly defaultDueDays: FieldRef<"QuickBooksConnection", 'Int'>
+    readonly incomeAccountId: FieldRef<"QuickBooksConnection", 'String'>
+    readonly depositItemId: FieldRef<"QuickBooksConnection", 'String'>
+    readonly serviceItemId: FieldRef<"QuickBooksConnection", 'String'>
+    readonly depositItemName: FieldRef<"QuickBooksConnection", 'String'>
+    readonly serviceItemName: FieldRef<"QuickBooksConnection", 'String'>
+    readonly lastSyncAt: FieldRef<"QuickBooksConnection", 'DateTime'>
+    readonly lastSyncError: FieldRef<"QuickBooksConnection", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * QuickBooksConnection findUnique
+   */
+  export type QuickBooksConnectionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksConnection to fetch.
+     */
+    where: QuickBooksConnectionWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksConnection findUniqueOrThrow
+   */
+  export type QuickBooksConnectionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksConnection to fetch.
+     */
+    where: QuickBooksConnectionWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksConnection findFirst
+   */
+  export type QuickBooksConnectionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksConnection to fetch.
+     */
+    where?: QuickBooksConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksConnections to fetch.
+     */
+    orderBy?: QuickBooksConnectionOrderByWithRelationInput | QuickBooksConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuickBooksConnections.
+     */
+    cursor?: QuickBooksConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksConnections.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuickBooksConnections.
+     */
+    distinct?: QuickBooksConnectionScalarFieldEnum | QuickBooksConnectionScalarFieldEnum[]
+  }
+
+  /**
+   * QuickBooksConnection findFirstOrThrow
+   */
+  export type QuickBooksConnectionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksConnection to fetch.
+     */
+    where?: QuickBooksConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksConnections to fetch.
+     */
+    orderBy?: QuickBooksConnectionOrderByWithRelationInput | QuickBooksConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuickBooksConnections.
+     */
+    cursor?: QuickBooksConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksConnections.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuickBooksConnections.
+     */
+    distinct?: QuickBooksConnectionScalarFieldEnum | QuickBooksConnectionScalarFieldEnum[]
+  }
+
+  /**
+   * QuickBooksConnection findMany
+   */
+  export type QuickBooksConnectionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksConnections to fetch.
+     */
+    where?: QuickBooksConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksConnections to fetch.
+     */
+    orderBy?: QuickBooksConnectionOrderByWithRelationInput | QuickBooksConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing QuickBooksConnections.
+     */
+    cursor?: QuickBooksConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksConnections.
+     */
+    skip?: number
+    distinct?: QuickBooksConnectionScalarFieldEnum | QuickBooksConnectionScalarFieldEnum[]
+  }
+
+  /**
+   * QuickBooksConnection create
+   */
+  export type QuickBooksConnectionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a QuickBooksConnection.
+     */
+    data: XOR<QuickBooksConnectionCreateInput, QuickBooksConnectionUncheckedCreateInput>
+  }
+
+  /**
+   * QuickBooksConnection createMany
+   */
+  export type QuickBooksConnectionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many QuickBooksConnections.
+     */
+    data: QuickBooksConnectionCreateManyInput | QuickBooksConnectionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * QuickBooksConnection createManyAndReturn
+   */
+  export type QuickBooksConnectionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * The data used to create many QuickBooksConnections.
+     */
+    data: QuickBooksConnectionCreateManyInput | QuickBooksConnectionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuickBooksConnection update
+   */
+  export type QuickBooksConnectionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a QuickBooksConnection.
+     */
+    data: XOR<QuickBooksConnectionUpdateInput, QuickBooksConnectionUncheckedUpdateInput>
+    /**
+     * Choose, which QuickBooksConnection to update.
+     */
+    where: QuickBooksConnectionWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksConnection updateMany
+   */
+  export type QuickBooksConnectionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update QuickBooksConnections.
+     */
+    data: XOR<QuickBooksConnectionUpdateManyMutationInput, QuickBooksConnectionUncheckedUpdateManyInput>
+    /**
+     * Filter which QuickBooksConnections to update
+     */
+    where?: QuickBooksConnectionWhereInput
+    /**
+     * Limit how many QuickBooksConnections to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuickBooksConnection updateManyAndReturn
+   */
+  export type QuickBooksConnectionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * The data used to update QuickBooksConnections.
+     */
+    data: XOR<QuickBooksConnectionUpdateManyMutationInput, QuickBooksConnectionUncheckedUpdateManyInput>
+    /**
+     * Filter which QuickBooksConnections to update
+     */
+    where?: QuickBooksConnectionWhereInput
+    /**
+     * Limit how many QuickBooksConnections to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuickBooksConnection upsert
+   */
+  export type QuickBooksConnectionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the QuickBooksConnection to update in case it exists.
+     */
+    where: QuickBooksConnectionWhereUniqueInput
+    /**
+     * In case the QuickBooksConnection found by the `where` argument doesn't exist, create a new QuickBooksConnection with this data.
+     */
+    create: XOR<QuickBooksConnectionCreateInput, QuickBooksConnectionUncheckedCreateInput>
+    /**
+     * In case the QuickBooksConnection was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<QuickBooksConnectionUpdateInput, QuickBooksConnectionUncheckedUpdateInput>
+  }
+
+  /**
+   * QuickBooksConnection delete
+   */
+  export type QuickBooksConnectionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+    /**
+     * Filter which QuickBooksConnection to delete.
+     */
+    where: QuickBooksConnectionWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksConnection deleteMany
+   */
+  export type QuickBooksConnectionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuickBooksConnections to delete
+     */
+    where?: QuickBooksConnectionWhereInput
+    /**
+     * Limit how many QuickBooksConnections to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuickBooksConnection without action
+   */
+  export type QuickBooksConnectionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksConnection
+     */
+    select?: QuickBooksConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksConnection
+     */
+    omit?: QuickBooksConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksConnectionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model QuickBooksInvoice
+   */
+
+  export type AggregateQuickBooksInvoice = {
+    _count: QuickBooksInvoiceCountAggregateOutputType | null
+    _avg: QuickBooksInvoiceAvgAggregateOutputType | null
+    _sum: QuickBooksInvoiceSumAggregateOutputType | null
+    _min: QuickBooksInvoiceMinAggregateOutputType | null
+    _max: QuickBooksInvoiceMaxAggregateOutputType | null
+  }
+
+  export type QuickBooksInvoiceAvgAggregateOutputType = {
+    amountCents: number | null
+    balanceCents: number | null
+  }
+
+  export type QuickBooksInvoiceSumAggregateOutputType = {
+    amountCents: number | null
+    balanceCents: number | null
+  }
+
+  export type QuickBooksInvoiceMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    quoteSubmissionId: string | null
+    kind: string | null
+    amountCents: number | null
+    memo: string | null
+    description: string | null
+    customerName: string | null
+    customerEmail: string | null
+    customerPhone: string | null
+    status: string | null
+    balanceCents: number | null
+    dueDate: Date | null
+    sentAt: Date | null
+    paidAt: Date | null
+    realmId: string | null
+    qboCustomerId: string | null
+    qboInvoiceId: string | null
+    qboDocNumber: string | null
+    qboSyncToken: string | null
+    lastSyncedAt: Date | null
+    lastError: string | null
+  }
+
+  export type QuickBooksInvoiceMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    quoteSubmissionId: string | null
+    kind: string | null
+    amountCents: number | null
+    memo: string | null
+    description: string | null
+    customerName: string | null
+    customerEmail: string | null
+    customerPhone: string | null
+    status: string | null
+    balanceCents: number | null
+    dueDate: Date | null
+    sentAt: Date | null
+    paidAt: Date | null
+    realmId: string | null
+    qboCustomerId: string | null
+    qboInvoiceId: string | null
+    qboDocNumber: string | null
+    qboSyncToken: string | null
+    lastSyncedAt: Date | null
+    lastError: string | null
+  }
+
+  export type QuickBooksInvoiceCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    quoteSubmissionId: number
+    kind: number
+    amountCents: number
+    memo: number
+    description: number
+    customerName: number
+    customerEmail: number
+    customerPhone: number
+    status: number
+    balanceCents: number
+    dueDate: number
+    sentAt: number
+    paidAt: number
+    realmId: number
+    qboCustomerId: number
+    qboInvoiceId: number
+    qboDocNumber: number
+    qboSyncToken: number
+    lastSyncedAt: number
+    lastError: number
+    _all: number
+  }
+
+
+  export type QuickBooksInvoiceAvgAggregateInputType = {
+    amountCents?: true
+    balanceCents?: true
+  }
+
+  export type QuickBooksInvoiceSumAggregateInputType = {
+    amountCents?: true
+    balanceCents?: true
+  }
+
+  export type QuickBooksInvoiceMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    quoteSubmissionId?: true
+    kind?: true
+    amountCents?: true
+    memo?: true
+    description?: true
+    customerName?: true
+    customerEmail?: true
+    customerPhone?: true
+    status?: true
+    balanceCents?: true
+    dueDate?: true
+    sentAt?: true
+    paidAt?: true
+    realmId?: true
+    qboCustomerId?: true
+    qboInvoiceId?: true
+    qboDocNumber?: true
+    qboSyncToken?: true
+    lastSyncedAt?: true
+    lastError?: true
+  }
+
+  export type QuickBooksInvoiceMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    quoteSubmissionId?: true
+    kind?: true
+    amountCents?: true
+    memo?: true
+    description?: true
+    customerName?: true
+    customerEmail?: true
+    customerPhone?: true
+    status?: true
+    balanceCents?: true
+    dueDate?: true
+    sentAt?: true
+    paidAt?: true
+    realmId?: true
+    qboCustomerId?: true
+    qboInvoiceId?: true
+    qboDocNumber?: true
+    qboSyncToken?: true
+    lastSyncedAt?: true
+    lastError?: true
+  }
+
+  export type QuickBooksInvoiceCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    quoteSubmissionId?: true
+    kind?: true
+    amountCents?: true
+    memo?: true
+    description?: true
+    customerName?: true
+    customerEmail?: true
+    customerPhone?: true
+    status?: true
+    balanceCents?: true
+    dueDate?: true
+    sentAt?: true
+    paidAt?: true
+    realmId?: true
+    qboCustomerId?: true
+    qboInvoiceId?: true
+    qboDocNumber?: true
+    qboSyncToken?: true
+    lastSyncedAt?: true
+    lastError?: true
+    _all?: true
+  }
+
+  export type QuickBooksInvoiceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuickBooksInvoice to aggregate.
+     */
+    where?: QuickBooksInvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksInvoices to fetch.
+     */
+    orderBy?: QuickBooksInvoiceOrderByWithRelationInput | QuickBooksInvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: QuickBooksInvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksInvoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksInvoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned QuickBooksInvoices
+    **/
+    _count?: true | QuickBooksInvoiceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: QuickBooksInvoiceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: QuickBooksInvoiceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: QuickBooksInvoiceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: QuickBooksInvoiceMaxAggregateInputType
+  }
+
+  export type GetQuickBooksInvoiceAggregateType<T extends QuickBooksInvoiceAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuickBooksInvoice]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuickBooksInvoice[P]>
+      : GetScalarType<T[P], AggregateQuickBooksInvoice[P]>
+  }
+
+
+
+
+  export type QuickBooksInvoiceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuickBooksInvoiceWhereInput
+    orderBy?: QuickBooksInvoiceOrderByWithAggregationInput | QuickBooksInvoiceOrderByWithAggregationInput[]
+    by: QuickBooksInvoiceScalarFieldEnum[] | QuickBooksInvoiceScalarFieldEnum
+    having?: QuickBooksInvoiceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: QuickBooksInvoiceCountAggregateInputType | true
+    _avg?: QuickBooksInvoiceAvgAggregateInputType
+    _sum?: QuickBooksInvoiceSumAggregateInputType
+    _min?: QuickBooksInvoiceMinAggregateInputType
+    _max?: QuickBooksInvoiceMaxAggregateInputType
+  }
+
+  export type QuickBooksInvoiceGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    quoteSubmissionId: string | null
+    kind: string
+    amountCents: number
+    memo: string | null
+    description: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone: string | null
+    status: string
+    balanceCents: number | null
+    dueDate: Date | null
+    sentAt: Date | null
+    paidAt: Date | null
+    realmId: string
+    qboCustomerId: string | null
+    qboInvoiceId: string | null
+    qboDocNumber: string | null
+    qboSyncToken: string | null
+    lastSyncedAt: Date | null
+    lastError: string | null
+    _count: QuickBooksInvoiceCountAggregateOutputType | null
+    _avg: QuickBooksInvoiceAvgAggregateOutputType | null
+    _sum: QuickBooksInvoiceSumAggregateOutputType | null
+    _min: QuickBooksInvoiceMinAggregateOutputType | null
+    _max: QuickBooksInvoiceMaxAggregateOutputType | null
+  }
+
+  type GetQuickBooksInvoiceGroupByPayload<T extends QuickBooksInvoiceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<QuickBooksInvoiceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof QuickBooksInvoiceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], QuickBooksInvoiceGroupByOutputType[P]>
+            : GetScalarType<T[P], QuickBooksInvoiceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type QuickBooksInvoiceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    quoteSubmissionId?: boolean
+    kind?: boolean
+    amountCents?: boolean
+    memo?: boolean
+    description?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    status?: boolean
+    balanceCents?: boolean
+    dueDate?: boolean
+    sentAt?: boolean
+    paidAt?: boolean
+    realmId?: boolean
+    qboCustomerId?: boolean
+    qboInvoiceId?: boolean
+    qboDocNumber?: boolean
+    qboSyncToken?: boolean
+    lastSyncedAt?: boolean
+    lastError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    quoteSubmission?: boolean | QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>
+  }, ExtArgs["result"]["quickBooksInvoice"]>
+
+  export type QuickBooksInvoiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    quoteSubmissionId?: boolean
+    kind?: boolean
+    amountCents?: boolean
+    memo?: boolean
+    description?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    status?: boolean
+    balanceCents?: boolean
+    dueDate?: boolean
+    sentAt?: boolean
+    paidAt?: boolean
+    realmId?: boolean
+    qboCustomerId?: boolean
+    qboInvoiceId?: boolean
+    qboDocNumber?: boolean
+    qboSyncToken?: boolean
+    lastSyncedAt?: boolean
+    lastError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    quoteSubmission?: boolean | QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>
+  }, ExtArgs["result"]["quickBooksInvoice"]>
+
+  export type QuickBooksInvoiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    quoteSubmissionId?: boolean
+    kind?: boolean
+    amountCents?: boolean
+    memo?: boolean
+    description?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    status?: boolean
+    balanceCents?: boolean
+    dueDate?: boolean
+    sentAt?: boolean
+    paidAt?: boolean
+    realmId?: boolean
+    qboCustomerId?: boolean
+    qboInvoiceId?: boolean
+    qboDocNumber?: boolean
+    qboSyncToken?: boolean
+    lastSyncedAt?: boolean
+    lastError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    quoteSubmission?: boolean | QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>
+  }, ExtArgs["result"]["quickBooksInvoice"]>
+
+  export type QuickBooksInvoiceSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    quoteSubmissionId?: boolean
+    kind?: boolean
+    amountCents?: boolean
+    memo?: boolean
+    description?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    status?: boolean
+    balanceCents?: boolean
+    dueDate?: boolean
+    sentAt?: boolean
+    paidAt?: boolean
+    realmId?: boolean
+    qboCustomerId?: boolean
+    qboInvoiceId?: boolean
+    qboDocNumber?: boolean
+    qboSyncToken?: boolean
+    lastSyncedAt?: boolean
+    lastError?: boolean
+  }
+
+  export type QuickBooksInvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "quoteSubmissionId" | "kind" | "amountCents" | "memo" | "description" | "customerName" | "customerEmail" | "customerPhone" | "status" | "balanceCents" | "dueDate" | "sentAt" | "paidAt" | "realmId" | "qboCustomerId" | "qboInvoiceId" | "qboDocNumber" | "qboSyncToken" | "lastSyncedAt" | "lastError", ExtArgs["result"]["quickBooksInvoice"]>
+  export type QuickBooksInvoiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    quoteSubmission?: boolean | QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>
+  }
+  export type QuickBooksInvoiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    quoteSubmission?: boolean | QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>
+  }
+  export type QuickBooksInvoiceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    quoteSubmission?: boolean | QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>
+  }
+
+  export type $QuickBooksInvoicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "QuickBooksInvoice"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      quoteSubmission: Prisma.$QuoteSubmissionPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      quoteSubmissionId: string | null
+      kind: string
+      amountCents: number
+      memo: string | null
+      description: string | null
+      /**
+       * @encrypted
+       */
+      customerName: string
+      /**
+       * @encrypted
+       */
+      customerEmail: string
+      /**
+       * @encrypted
+       */
+      customerPhone: string | null
+      status: string
+      balanceCents: number | null
+      dueDate: Date | null
+      sentAt: Date | null
+      paidAt: Date | null
+      realmId: string
+      qboCustomerId: string | null
+      qboInvoiceId: string | null
+      qboDocNumber: string | null
+      qboSyncToken: string | null
+      lastSyncedAt: Date | null
+      lastError: string | null
+    }, ExtArgs["result"]["quickBooksInvoice"]>
+    composites: {}
+  }
+
+  type QuickBooksInvoiceGetPayload<S extends boolean | null | undefined | QuickBooksInvoiceDefaultArgs> = $Result.GetResult<Prisma.$QuickBooksInvoicePayload, S>
+
+  type QuickBooksInvoiceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<QuickBooksInvoiceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: QuickBooksInvoiceCountAggregateInputType | true
+    }
+
+  export interface QuickBooksInvoiceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['QuickBooksInvoice'], meta: { name: 'QuickBooksInvoice' } }
+    /**
+     * Find zero or one QuickBooksInvoice that matches the filter.
+     * @param {QuickBooksInvoiceFindUniqueArgs} args - Arguments to find a QuickBooksInvoice
+     * @example
+     * // Get one QuickBooksInvoice
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends QuickBooksInvoiceFindUniqueArgs>(args: SelectSubset<T, QuickBooksInvoiceFindUniqueArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one QuickBooksInvoice that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {QuickBooksInvoiceFindUniqueOrThrowArgs} args - Arguments to find a QuickBooksInvoice
+     * @example
+     * // Get one QuickBooksInvoice
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends QuickBooksInvoiceFindUniqueOrThrowArgs>(args: SelectSubset<T, QuickBooksInvoiceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuickBooksInvoice that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksInvoiceFindFirstArgs} args - Arguments to find a QuickBooksInvoice
+     * @example
+     * // Get one QuickBooksInvoice
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends QuickBooksInvoiceFindFirstArgs>(args?: SelectSubset<T, QuickBooksInvoiceFindFirstArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuickBooksInvoice that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksInvoiceFindFirstOrThrowArgs} args - Arguments to find a QuickBooksInvoice
+     * @example
+     * // Get one QuickBooksInvoice
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends QuickBooksInvoiceFindFirstOrThrowArgs>(args?: SelectSubset<T, QuickBooksInvoiceFindFirstOrThrowArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more QuickBooksInvoices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksInvoiceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all QuickBooksInvoices
+     * const quickBooksInvoices = await prisma.quickBooksInvoice.findMany()
+     * 
+     * // Get first 10 QuickBooksInvoices
+     * const quickBooksInvoices = await prisma.quickBooksInvoice.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const quickBooksInvoiceWithIdOnly = await prisma.quickBooksInvoice.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends QuickBooksInvoiceFindManyArgs>(args?: SelectSubset<T, QuickBooksInvoiceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a QuickBooksInvoice.
+     * @param {QuickBooksInvoiceCreateArgs} args - Arguments to create a QuickBooksInvoice.
+     * @example
+     * // Create one QuickBooksInvoice
+     * const QuickBooksInvoice = await prisma.quickBooksInvoice.create({
+     *   data: {
+     *     // ... data to create a QuickBooksInvoice
+     *   }
+     * })
+     * 
+     */
+    create<T extends QuickBooksInvoiceCreateArgs>(args: SelectSubset<T, QuickBooksInvoiceCreateArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many QuickBooksInvoices.
+     * @param {QuickBooksInvoiceCreateManyArgs} args - Arguments to create many QuickBooksInvoices.
+     * @example
+     * // Create many QuickBooksInvoices
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends QuickBooksInvoiceCreateManyArgs>(args?: SelectSubset<T, QuickBooksInvoiceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many QuickBooksInvoices and returns the data saved in the database.
+     * @param {QuickBooksInvoiceCreateManyAndReturnArgs} args - Arguments to create many QuickBooksInvoices.
+     * @example
+     * // Create many QuickBooksInvoices
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many QuickBooksInvoices and only return the `id`
+     * const quickBooksInvoiceWithIdOnly = await prisma.quickBooksInvoice.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends QuickBooksInvoiceCreateManyAndReturnArgs>(args?: SelectSubset<T, QuickBooksInvoiceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a QuickBooksInvoice.
+     * @param {QuickBooksInvoiceDeleteArgs} args - Arguments to delete one QuickBooksInvoice.
+     * @example
+     * // Delete one QuickBooksInvoice
+     * const QuickBooksInvoice = await prisma.quickBooksInvoice.delete({
+     *   where: {
+     *     // ... filter to delete one QuickBooksInvoice
+     *   }
+     * })
+     * 
+     */
+    delete<T extends QuickBooksInvoiceDeleteArgs>(args: SelectSubset<T, QuickBooksInvoiceDeleteArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one QuickBooksInvoice.
+     * @param {QuickBooksInvoiceUpdateArgs} args - Arguments to update one QuickBooksInvoice.
+     * @example
+     * // Update one QuickBooksInvoice
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends QuickBooksInvoiceUpdateArgs>(args: SelectSubset<T, QuickBooksInvoiceUpdateArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more QuickBooksInvoices.
+     * @param {QuickBooksInvoiceDeleteManyArgs} args - Arguments to filter QuickBooksInvoices to delete.
+     * @example
+     * // Delete a few QuickBooksInvoices
+     * const { count } = await prisma.quickBooksInvoice.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends QuickBooksInvoiceDeleteManyArgs>(args?: SelectSubset<T, QuickBooksInvoiceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuickBooksInvoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksInvoiceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many QuickBooksInvoices
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends QuickBooksInvoiceUpdateManyArgs>(args: SelectSubset<T, QuickBooksInvoiceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuickBooksInvoices and returns the data updated in the database.
+     * @param {QuickBooksInvoiceUpdateManyAndReturnArgs} args - Arguments to update many QuickBooksInvoices.
+     * @example
+     * // Update many QuickBooksInvoices
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more QuickBooksInvoices and only return the `id`
+     * const quickBooksInvoiceWithIdOnly = await prisma.quickBooksInvoice.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends QuickBooksInvoiceUpdateManyAndReturnArgs>(args: SelectSubset<T, QuickBooksInvoiceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one QuickBooksInvoice.
+     * @param {QuickBooksInvoiceUpsertArgs} args - Arguments to update or create a QuickBooksInvoice.
+     * @example
+     * // Update or create a QuickBooksInvoice
+     * const quickBooksInvoice = await prisma.quickBooksInvoice.upsert({
+     *   create: {
+     *     // ... data to create a QuickBooksInvoice
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the QuickBooksInvoice we want to update
+     *   }
+     * })
+     */
+    upsert<T extends QuickBooksInvoiceUpsertArgs>(args: SelectSubset<T, QuickBooksInvoiceUpsertArgs<ExtArgs>>): Prisma__QuickBooksInvoiceClient<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of QuickBooksInvoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksInvoiceCountArgs} args - Arguments to filter QuickBooksInvoices to count.
+     * @example
+     * // Count the number of QuickBooksInvoices
+     * const count = await prisma.quickBooksInvoice.count({
+     *   where: {
+     *     // ... the filter for the QuickBooksInvoices we want to count
+     *   }
+     * })
+    **/
+    count<T extends QuickBooksInvoiceCountArgs>(
+      args?: Subset<T, QuickBooksInvoiceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], QuickBooksInvoiceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a QuickBooksInvoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksInvoiceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends QuickBooksInvoiceAggregateArgs>(args: Subset<T, QuickBooksInvoiceAggregateArgs>): Prisma.PrismaPromise<GetQuickBooksInvoiceAggregateType<T>>
+
+    /**
+     * Group by QuickBooksInvoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuickBooksInvoiceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends QuickBooksInvoiceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: QuickBooksInvoiceGroupByArgs['orderBy'] }
+        : { orderBy?: QuickBooksInvoiceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, QuickBooksInvoiceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuickBooksInvoiceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the QuickBooksInvoice model
+   */
+  readonly fields: QuickBooksInvoiceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for QuickBooksInvoice.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__QuickBooksInvoiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    quoteSubmission<T extends QuickBooksInvoice$quoteSubmissionArgs<ExtArgs> = {}>(args?: Subset<T, QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the QuickBooksInvoice model
+   */
+  interface QuickBooksInvoiceFieldRefs {
+    readonly id: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly createdAt: FieldRef<"QuickBooksInvoice", 'DateTime'>
+    readonly updatedAt: FieldRef<"QuickBooksInvoice", 'DateTime'>
+    readonly businessId: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly quoteSubmissionId: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly kind: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly amountCents: FieldRef<"QuickBooksInvoice", 'Int'>
+    readonly memo: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly description: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly customerName: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly customerEmail: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly customerPhone: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly status: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly balanceCents: FieldRef<"QuickBooksInvoice", 'Int'>
+    readonly dueDate: FieldRef<"QuickBooksInvoice", 'DateTime'>
+    readonly sentAt: FieldRef<"QuickBooksInvoice", 'DateTime'>
+    readonly paidAt: FieldRef<"QuickBooksInvoice", 'DateTime'>
+    readonly realmId: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly qboCustomerId: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly qboInvoiceId: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly qboDocNumber: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly qboSyncToken: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly lastSyncedAt: FieldRef<"QuickBooksInvoice", 'DateTime'>
+    readonly lastError: FieldRef<"QuickBooksInvoice", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * QuickBooksInvoice findUnique
+   */
+  export type QuickBooksInvoiceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksInvoice to fetch.
+     */
+    where: QuickBooksInvoiceWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksInvoice findUniqueOrThrow
+   */
+  export type QuickBooksInvoiceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksInvoice to fetch.
+     */
+    where: QuickBooksInvoiceWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksInvoice findFirst
+   */
+  export type QuickBooksInvoiceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksInvoice to fetch.
+     */
+    where?: QuickBooksInvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksInvoices to fetch.
+     */
+    orderBy?: QuickBooksInvoiceOrderByWithRelationInput | QuickBooksInvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuickBooksInvoices.
+     */
+    cursor?: QuickBooksInvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksInvoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksInvoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuickBooksInvoices.
+     */
+    distinct?: QuickBooksInvoiceScalarFieldEnum | QuickBooksInvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * QuickBooksInvoice findFirstOrThrow
+   */
+  export type QuickBooksInvoiceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksInvoice to fetch.
+     */
+    where?: QuickBooksInvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksInvoices to fetch.
+     */
+    orderBy?: QuickBooksInvoiceOrderByWithRelationInput | QuickBooksInvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuickBooksInvoices.
+     */
+    cursor?: QuickBooksInvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksInvoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksInvoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuickBooksInvoices.
+     */
+    distinct?: QuickBooksInvoiceScalarFieldEnum | QuickBooksInvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * QuickBooksInvoice findMany
+   */
+  export type QuickBooksInvoiceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which QuickBooksInvoices to fetch.
+     */
+    where?: QuickBooksInvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuickBooksInvoices to fetch.
+     */
+    orderBy?: QuickBooksInvoiceOrderByWithRelationInput | QuickBooksInvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing QuickBooksInvoices.
+     */
+    cursor?: QuickBooksInvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuickBooksInvoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuickBooksInvoices.
+     */
+    skip?: number
+    distinct?: QuickBooksInvoiceScalarFieldEnum | QuickBooksInvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * QuickBooksInvoice create
+   */
+  export type QuickBooksInvoiceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a QuickBooksInvoice.
+     */
+    data: XOR<QuickBooksInvoiceCreateInput, QuickBooksInvoiceUncheckedCreateInput>
+  }
+
+  /**
+   * QuickBooksInvoice createMany
+   */
+  export type QuickBooksInvoiceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many QuickBooksInvoices.
+     */
+    data: QuickBooksInvoiceCreateManyInput | QuickBooksInvoiceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * QuickBooksInvoice createManyAndReturn
+   */
+  export type QuickBooksInvoiceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to create many QuickBooksInvoices.
+     */
+    data: QuickBooksInvoiceCreateManyInput | QuickBooksInvoiceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuickBooksInvoice update
+   */
+  export type QuickBooksInvoiceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a QuickBooksInvoice.
+     */
+    data: XOR<QuickBooksInvoiceUpdateInput, QuickBooksInvoiceUncheckedUpdateInput>
+    /**
+     * Choose, which QuickBooksInvoice to update.
+     */
+    where: QuickBooksInvoiceWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksInvoice updateMany
+   */
+  export type QuickBooksInvoiceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update QuickBooksInvoices.
+     */
+    data: XOR<QuickBooksInvoiceUpdateManyMutationInput, QuickBooksInvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which QuickBooksInvoices to update
+     */
+    where?: QuickBooksInvoiceWhereInput
+    /**
+     * Limit how many QuickBooksInvoices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuickBooksInvoice updateManyAndReturn
+   */
+  export type QuickBooksInvoiceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to update QuickBooksInvoices.
+     */
+    data: XOR<QuickBooksInvoiceUpdateManyMutationInput, QuickBooksInvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which QuickBooksInvoices to update
+     */
+    where?: QuickBooksInvoiceWhereInput
+    /**
+     * Limit how many QuickBooksInvoices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuickBooksInvoice upsert
+   */
+  export type QuickBooksInvoiceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the QuickBooksInvoice to update in case it exists.
+     */
+    where: QuickBooksInvoiceWhereUniqueInput
+    /**
+     * In case the QuickBooksInvoice found by the `where` argument doesn't exist, create a new QuickBooksInvoice with this data.
+     */
+    create: XOR<QuickBooksInvoiceCreateInput, QuickBooksInvoiceUncheckedCreateInput>
+    /**
+     * In case the QuickBooksInvoice was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<QuickBooksInvoiceUpdateInput, QuickBooksInvoiceUncheckedUpdateInput>
+  }
+
+  /**
+   * QuickBooksInvoice delete
+   */
+  export type QuickBooksInvoiceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
+    /**
+     * Filter which QuickBooksInvoice to delete.
+     */
+    where: QuickBooksInvoiceWhereUniqueInput
+  }
+
+  /**
+   * QuickBooksInvoice deleteMany
+   */
+  export type QuickBooksInvoiceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuickBooksInvoices to delete
+     */
+    where?: QuickBooksInvoiceWhereInput
+    /**
+     * Limit how many QuickBooksInvoices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuickBooksInvoice.quoteSubmission
+   */
+  export type QuickBooksInvoice$quoteSubmissionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    where?: QuoteSubmissionWhereInput
+  }
+
+  /**
+   * QuickBooksInvoice without action
+   */
+  export type QuickBooksInvoiceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuickBooksInvoice
+     */
+    select?: QuickBooksInvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuickBooksInvoice
+     */
+    omit?: QuickBooksInvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuickBooksInvoiceInclude<ExtArgs> | null
   }
 
 
@@ -62644,6 +65713,68 @@ export namespace Prisma {
   export type QuoteSubmissionScalarFieldEnum = (typeof QuoteSubmissionScalarFieldEnum)[keyof typeof QuoteSubmissionScalarFieldEnum]
 
 
+  export const QuickBooksConnectionScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    status: 'status',
+    realmId: 'realmId',
+    environment: 'environment',
+    companyName: 'companyName',
+    accessToken: 'accessToken',
+    refreshToken: 'refreshToken',
+    accessTokenExpiresAt: 'accessTokenExpiresAt',
+    refreshTokenExpiresAt: 'refreshTokenExpiresAt',
+    lastRefreshAt: 'lastRefreshAt',
+    connectedAt: 'connectedAt',
+    disconnectedAt: 'disconnectedAt',
+    depositMode: 'depositMode',
+    depositPercent: 'depositPercent',
+    depositFixedCents: 'depositFixedCents',
+    defaultDueDays: 'defaultDueDays',
+    incomeAccountId: 'incomeAccountId',
+    depositItemId: 'depositItemId',
+    serviceItemId: 'serviceItemId',
+    depositItemName: 'depositItemName',
+    serviceItemName: 'serviceItemName',
+    lastSyncAt: 'lastSyncAt',
+    lastSyncError: 'lastSyncError'
+  };
+
+  export type QuickBooksConnectionScalarFieldEnum = (typeof QuickBooksConnectionScalarFieldEnum)[keyof typeof QuickBooksConnectionScalarFieldEnum]
+
+
+  export const QuickBooksInvoiceScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    quoteSubmissionId: 'quoteSubmissionId',
+    kind: 'kind',
+    amountCents: 'amountCents',
+    memo: 'memo',
+    description: 'description',
+    customerName: 'customerName',
+    customerEmail: 'customerEmail',
+    customerPhone: 'customerPhone',
+    status: 'status',
+    balanceCents: 'balanceCents',
+    dueDate: 'dueDate',
+    sentAt: 'sentAt',
+    paidAt: 'paidAt',
+    realmId: 'realmId',
+    qboCustomerId: 'qboCustomerId',
+    qboInvoiceId: 'qboInvoiceId',
+    qboDocNumber: 'qboDocNumber',
+    qboSyncToken: 'qboSyncToken',
+    lastSyncedAt: 'lastSyncedAt',
+    lastError: 'lastError'
+  };
+
+  export type QuickBooksInvoiceScalarFieldEnum = (typeof QuickBooksInvoiceScalarFieldEnum)[keyof typeof QuickBooksInvoiceScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -63303,6 +66434,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestListRelationFilter
     quoteCalculators?: QuoteCalculatorListRelationFilter
     quoteSubmissions?: QuoteSubmissionListRelationFilter
+    quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
+    quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -63377,6 +66510,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
     quoteCalculators?: QuoteCalculatorOrderByRelationAggregateInput
     quoteSubmissions?: QuoteSubmissionOrderByRelationAggregateInput
+    quickBooksConnection?: QuickBooksConnectionOrderByWithRelationInput
+    quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -63454,6 +66589,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestListRelationFilter
     quoteCalculators?: QuoteCalculatorListRelationFilter
     quoteSubmissions?: QuoteSubmissionListRelationFilter
+    quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
+    quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -67434,6 +70571,7 @@ export namespace Prisma {
     calculatorId?: StringNullableFilter<"QuoteSubmission"> | string | null
     businessId?: StringFilter<"QuoteSubmission"> | string
     calculator?: XOR<QuoteCalculatorNullableScalarRelationFilter, QuoteCalculatorWhereInput> | null
+    quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
 
@@ -67457,6 +70595,7 @@ export namespace Prisma {
     calculatorId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     calculator?: QuoteCalculatorOrderByWithRelationInput
+    quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
     business?: BusinessOrderByWithRelationInput
   }
 
@@ -67483,6 +70622,7 @@ export namespace Prisma {
     calculatorId?: StringNullableFilter<"QuoteSubmission"> | string | null
     businessId?: StringFilter<"QuoteSubmission"> | string
     calculator?: XOR<QuoteCalculatorNullableScalarRelationFilter, QuoteCalculatorWhereInput> | null
+    quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id">
 
@@ -67534,6 +70674,324 @@ export namespace Prisma {
     showEstimateToCustomer?: BoolWithAggregatesFilter<"QuoteSubmission"> | boolean
     calculatorId?: StringNullableWithAggregatesFilter<"QuoteSubmission"> | string | null
     businessId?: StringWithAggregatesFilter<"QuoteSubmission"> | string
+  }
+
+  export type QuickBooksConnectionWhereInput = {
+    AND?: QuickBooksConnectionWhereInput | QuickBooksConnectionWhereInput[]
+    OR?: QuickBooksConnectionWhereInput[]
+    NOT?: QuickBooksConnectionWhereInput | QuickBooksConnectionWhereInput[]
+    id?: StringFilter<"QuickBooksConnection"> | string
+    createdAt?: DateTimeFilter<"QuickBooksConnection"> | Date | string
+    updatedAt?: DateTimeFilter<"QuickBooksConnection"> | Date | string
+    businessId?: StringFilter<"QuickBooksConnection"> | string
+    status?: StringFilter<"QuickBooksConnection"> | string
+    realmId?: StringFilter<"QuickBooksConnection"> | string
+    environment?: StringFilter<"QuickBooksConnection"> | string
+    companyName?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    accessToken?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    refreshToken?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    accessTokenExpiresAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    refreshTokenExpiresAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    lastRefreshAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    connectedAt?: DateTimeFilter<"QuickBooksConnection"> | Date | string
+    disconnectedAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    depositMode?: StringFilter<"QuickBooksConnection"> | string
+    depositPercent?: IntFilter<"QuickBooksConnection"> | number
+    depositFixedCents?: IntFilter<"QuickBooksConnection"> | number
+    defaultDueDays?: IntFilter<"QuickBooksConnection"> | number
+    incomeAccountId?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    depositItemId?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    serviceItemId?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    depositItemName?: StringFilter<"QuickBooksConnection"> | string
+    serviceItemName?: StringFilter<"QuickBooksConnection"> | string
+    lastSyncAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    lastSyncError?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type QuickBooksConnectionOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    status?: SortOrder
+    realmId?: SortOrder
+    environment?: SortOrder
+    companyName?: SortOrderInput | SortOrder
+    accessToken?: SortOrderInput | SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    accessTokenExpiresAt?: SortOrderInput | SortOrder
+    refreshTokenExpiresAt?: SortOrderInput | SortOrder
+    lastRefreshAt?: SortOrderInput | SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrderInput | SortOrder
+    depositMode?: SortOrder
+    depositPercent?: SortOrder
+    depositFixedCents?: SortOrder
+    defaultDueDays?: SortOrder
+    incomeAccountId?: SortOrderInput | SortOrder
+    depositItemId?: SortOrderInput | SortOrder
+    serviceItemId?: SortOrderInput | SortOrder
+    depositItemName?: SortOrder
+    serviceItemName?: SortOrder
+    lastSyncAt?: SortOrderInput | SortOrder
+    lastSyncError?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type QuickBooksConnectionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    businessId?: string
+    AND?: QuickBooksConnectionWhereInput | QuickBooksConnectionWhereInput[]
+    OR?: QuickBooksConnectionWhereInput[]
+    NOT?: QuickBooksConnectionWhereInput | QuickBooksConnectionWhereInput[]
+    createdAt?: DateTimeFilter<"QuickBooksConnection"> | Date | string
+    updatedAt?: DateTimeFilter<"QuickBooksConnection"> | Date | string
+    status?: StringFilter<"QuickBooksConnection"> | string
+    realmId?: StringFilter<"QuickBooksConnection"> | string
+    environment?: StringFilter<"QuickBooksConnection"> | string
+    companyName?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    accessToken?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    refreshToken?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    accessTokenExpiresAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    refreshTokenExpiresAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    lastRefreshAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    connectedAt?: DateTimeFilter<"QuickBooksConnection"> | Date | string
+    disconnectedAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    depositMode?: StringFilter<"QuickBooksConnection"> | string
+    depositPercent?: IntFilter<"QuickBooksConnection"> | number
+    depositFixedCents?: IntFilter<"QuickBooksConnection"> | number
+    defaultDueDays?: IntFilter<"QuickBooksConnection"> | number
+    incomeAccountId?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    depositItemId?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    serviceItemId?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    depositItemName?: StringFilter<"QuickBooksConnection"> | string
+    serviceItemName?: StringFilter<"QuickBooksConnection"> | string
+    lastSyncAt?: DateTimeNullableFilter<"QuickBooksConnection"> | Date | string | null
+    lastSyncError?: StringNullableFilter<"QuickBooksConnection"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "businessId">
+
+  export type QuickBooksConnectionOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    status?: SortOrder
+    realmId?: SortOrder
+    environment?: SortOrder
+    companyName?: SortOrderInput | SortOrder
+    accessToken?: SortOrderInput | SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    accessTokenExpiresAt?: SortOrderInput | SortOrder
+    refreshTokenExpiresAt?: SortOrderInput | SortOrder
+    lastRefreshAt?: SortOrderInput | SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrderInput | SortOrder
+    depositMode?: SortOrder
+    depositPercent?: SortOrder
+    depositFixedCents?: SortOrder
+    defaultDueDays?: SortOrder
+    incomeAccountId?: SortOrderInput | SortOrder
+    depositItemId?: SortOrderInput | SortOrder
+    serviceItemId?: SortOrderInput | SortOrder
+    depositItemName?: SortOrder
+    serviceItemName?: SortOrder
+    lastSyncAt?: SortOrderInput | SortOrder
+    lastSyncError?: SortOrderInput | SortOrder
+    _count?: QuickBooksConnectionCountOrderByAggregateInput
+    _avg?: QuickBooksConnectionAvgOrderByAggregateInput
+    _max?: QuickBooksConnectionMaxOrderByAggregateInput
+    _min?: QuickBooksConnectionMinOrderByAggregateInput
+    _sum?: QuickBooksConnectionSumOrderByAggregateInput
+  }
+
+  export type QuickBooksConnectionScalarWhereWithAggregatesInput = {
+    AND?: QuickBooksConnectionScalarWhereWithAggregatesInput | QuickBooksConnectionScalarWhereWithAggregatesInput[]
+    OR?: QuickBooksConnectionScalarWhereWithAggregatesInput[]
+    NOT?: QuickBooksConnectionScalarWhereWithAggregatesInput | QuickBooksConnectionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"QuickBooksConnection"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"QuickBooksConnection"> | Date | string
+    businessId?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    status?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    realmId?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    environment?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    companyName?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
+    accessToken?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
+    refreshToken?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
+    accessTokenExpiresAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksConnection"> | Date | string | null
+    refreshTokenExpiresAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksConnection"> | Date | string | null
+    lastRefreshAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksConnection"> | Date | string | null
+    connectedAt?: DateTimeWithAggregatesFilter<"QuickBooksConnection"> | Date | string
+    disconnectedAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksConnection"> | Date | string | null
+    depositMode?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    depositPercent?: IntWithAggregatesFilter<"QuickBooksConnection"> | number
+    depositFixedCents?: IntWithAggregatesFilter<"QuickBooksConnection"> | number
+    defaultDueDays?: IntWithAggregatesFilter<"QuickBooksConnection"> | number
+    incomeAccountId?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
+    depositItemId?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
+    serviceItemId?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
+    depositItemName?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    serviceItemName?: StringWithAggregatesFilter<"QuickBooksConnection"> | string
+    lastSyncAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksConnection"> | Date | string | null
+    lastSyncError?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
+  }
+
+  export type QuickBooksInvoiceWhereInput = {
+    AND?: QuickBooksInvoiceWhereInput | QuickBooksInvoiceWhereInput[]
+    OR?: QuickBooksInvoiceWhereInput[]
+    NOT?: QuickBooksInvoiceWhereInput | QuickBooksInvoiceWhereInput[]
+    id?: StringFilter<"QuickBooksInvoice"> | string
+    createdAt?: DateTimeFilter<"QuickBooksInvoice"> | Date | string
+    updatedAt?: DateTimeFilter<"QuickBooksInvoice"> | Date | string
+    businessId?: StringFilter<"QuickBooksInvoice"> | string
+    quoteSubmissionId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    kind?: StringFilter<"QuickBooksInvoice"> | string
+    amountCents?: IntFilter<"QuickBooksInvoice"> | number
+    memo?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    description?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    customerName?: StringFilter<"QuickBooksInvoice"> | string
+    customerEmail?: StringFilter<"QuickBooksInvoice"> | string
+    customerPhone?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    status?: StringFilter<"QuickBooksInvoice"> | string
+    balanceCents?: IntNullableFilter<"QuickBooksInvoice"> | number | null
+    dueDate?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    paidAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    realmId?: StringFilter<"QuickBooksInvoice"> | string
+    qboCustomerId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboInvoiceId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboDocNumber?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboSyncToken?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    lastSyncedAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    lastError?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    quoteSubmission?: XOR<QuoteSubmissionNullableScalarRelationFilter, QuoteSubmissionWhereInput> | null
+  }
+
+  export type QuickBooksInvoiceOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    quoteSubmissionId?: SortOrderInput | SortOrder
+    kind?: SortOrder
+    amountCents?: SortOrder
+    memo?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    status?: SortOrder
+    balanceCents?: SortOrderInput | SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    paidAt?: SortOrderInput | SortOrder
+    realmId?: SortOrder
+    qboCustomerId?: SortOrderInput | SortOrder
+    qboInvoiceId?: SortOrderInput | SortOrder
+    qboDocNumber?: SortOrderInput | SortOrder
+    qboSyncToken?: SortOrderInput | SortOrder
+    lastSyncedAt?: SortOrderInput | SortOrder
+    lastError?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    quoteSubmission?: QuoteSubmissionOrderByWithRelationInput
+  }
+
+  export type QuickBooksInvoiceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    realmId_qboInvoiceId?: QuickBooksInvoiceRealmIdQboInvoiceIdCompoundUniqueInput
+    AND?: QuickBooksInvoiceWhereInput | QuickBooksInvoiceWhereInput[]
+    OR?: QuickBooksInvoiceWhereInput[]
+    NOT?: QuickBooksInvoiceWhereInput | QuickBooksInvoiceWhereInput[]
+    createdAt?: DateTimeFilter<"QuickBooksInvoice"> | Date | string
+    updatedAt?: DateTimeFilter<"QuickBooksInvoice"> | Date | string
+    businessId?: StringFilter<"QuickBooksInvoice"> | string
+    quoteSubmissionId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    kind?: StringFilter<"QuickBooksInvoice"> | string
+    amountCents?: IntFilter<"QuickBooksInvoice"> | number
+    memo?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    description?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    customerName?: StringFilter<"QuickBooksInvoice"> | string
+    customerEmail?: StringFilter<"QuickBooksInvoice"> | string
+    customerPhone?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    status?: StringFilter<"QuickBooksInvoice"> | string
+    balanceCents?: IntNullableFilter<"QuickBooksInvoice"> | number | null
+    dueDate?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    paidAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    realmId?: StringFilter<"QuickBooksInvoice"> | string
+    qboCustomerId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboInvoiceId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboDocNumber?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboSyncToken?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    lastSyncedAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    lastError?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    quoteSubmission?: XOR<QuoteSubmissionNullableScalarRelationFilter, QuoteSubmissionWhereInput> | null
+  }, "id" | "realmId_qboInvoiceId">
+
+  export type QuickBooksInvoiceOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    quoteSubmissionId?: SortOrderInput | SortOrder
+    kind?: SortOrder
+    amountCents?: SortOrder
+    memo?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    status?: SortOrder
+    balanceCents?: SortOrderInput | SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    paidAt?: SortOrderInput | SortOrder
+    realmId?: SortOrder
+    qboCustomerId?: SortOrderInput | SortOrder
+    qboInvoiceId?: SortOrderInput | SortOrder
+    qboDocNumber?: SortOrderInput | SortOrder
+    qboSyncToken?: SortOrderInput | SortOrder
+    lastSyncedAt?: SortOrderInput | SortOrder
+    lastError?: SortOrderInput | SortOrder
+    _count?: QuickBooksInvoiceCountOrderByAggregateInput
+    _avg?: QuickBooksInvoiceAvgOrderByAggregateInput
+    _max?: QuickBooksInvoiceMaxOrderByAggregateInput
+    _min?: QuickBooksInvoiceMinOrderByAggregateInput
+    _sum?: QuickBooksInvoiceSumOrderByAggregateInput
+  }
+
+  export type QuickBooksInvoiceScalarWhereWithAggregatesInput = {
+    AND?: QuickBooksInvoiceScalarWhereWithAggregatesInput | QuickBooksInvoiceScalarWhereWithAggregatesInput[]
+    OR?: QuickBooksInvoiceScalarWhereWithAggregatesInput[]
+    NOT?: QuickBooksInvoiceScalarWhereWithAggregatesInput | QuickBooksInvoiceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"QuickBooksInvoice"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"QuickBooksInvoice"> | Date | string
+    businessId?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
+    quoteSubmissionId?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    kind?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
+    amountCents?: IntWithAggregatesFilter<"QuickBooksInvoice"> | number
+    memo?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    description?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    customerName?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
+    customerEmail?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
+    customerPhone?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    status?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
+    balanceCents?: IntNullableWithAggregatesFilter<"QuickBooksInvoice"> | number | null
+    dueDate?: DateTimeNullableWithAggregatesFilter<"QuickBooksInvoice"> | Date | string | null
+    sentAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksInvoice"> | Date | string | null
+    paidAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksInvoice"> | Date | string | null
+    realmId?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
+    qboCustomerId?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    qboInvoiceId?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    qboDocNumber?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    qboSyncToken?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    lastSyncedAt?: DateTimeNullableWithAggregatesFilter<"QuickBooksInvoice"> | Date | string | null
+    lastError?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
   }
 
   export type UserCreateInput = {
@@ -68073,6 +71531,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -68147,6 +71607,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -68221,6 +71683,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -68295,6 +71759,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -72816,6 +76282,7 @@ export namespace Prisma {
     calculatorName: string
     showEstimateToCustomer?: boolean
     calculator?: QuoteCalculatorCreateNestedOneWithoutSubmissionsInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutQuoteSubmissionInput
     business: BusinessCreateNestedOneWithoutQuoteSubmissionsInput
   }
 
@@ -72838,6 +76305,7 @@ export namespace Prisma {
     showEstimateToCustomer?: boolean
     calculatorId?: string | null
     businessId: string
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutQuoteSubmissionInput
   }
 
   export type QuoteSubmissionUpdateInput = {
@@ -72858,6 +76326,7 @@ export namespace Prisma {
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     calculator?: QuoteCalculatorUpdateOneWithoutSubmissionsNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutQuoteSubmissionNestedInput
     business?: BusinessUpdateOneRequiredWithoutQuoteSubmissionsNestedInput
   }
 
@@ -72880,6 +76349,7 @@ export namespace Prisma {
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutQuoteSubmissionNestedInput
   }
 
   export type QuoteSubmissionCreateManyInput = {
@@ -72941,6 +76411,395 @@ export namespace Prisma {
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type QuickBooksConnectionCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    realmId: string
+    environment: string
+    companyName?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    accessTokenExpiresAt?: Date | string | null
+    refreshTokenExpiresAt?: Date | string | null
+    lastRefreshAt?: Date | string | null
+    connectedAt?: Date | string
+    disconnectedAt?: Date | string | null
+    depositMode?: string
+    depositPercent?: number
+    depositFixedCents?: number
+    defaultDueDays?: number
+    incomeAccountId?: string | null
+    depositItemId?: string | null
+    serviceItemId?: string | null
+    depositItemName?: string
+    serviceItemName?: string
+    lastSyncAt?: Date | string | null
+    lastSyncError?: string | null
+    business: BusinessCreateNestedOneWithoutQuickBooksConnectionInput
+  }
+
+  export type QuickBooksConnectionUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    status?: string
+    realmId: string
+    environment: string
+    companyName?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    accessTokenExpiresAt?: Date | string | null
+    refreshTokenExpiresAt?: Date | string | null
+    lastRefreshAt?: Date | string | null
+    connectedAt?: Date | string
+    disconnectedAt?: Date | string | null
+    depositMode?: string
+    depositPercent?: number
+    depositFixedCents?: number
+    defaultDueDays?: number
+    incomeAccountId?: string | null
+    depositItemId?: string | null
+    serviceItemId?: string | null
+    depositItemName?: string
+    serviceItemName?: string
+    lastSyncAt?: Date | string | null
+    lastSyncError?: string | null
+  }
+
+  export type QuickBooksConnectionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    realmId?: StringFieldUpdateOperationsInput | string
+    environment?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    accessTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    refreshTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastRefreshAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositMode?: StringFieldUpdateOperationsInput | string
+    depositPercent?: IntFieldUpdateOperationsInput | number
+    depositFixedCents?: IntFieldUpdateOperationsInput | number
+    defaultDueDays?: IntFieldUpdateOperationsInput | number
+    incomeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemName?: StringFieldUpdateOperationsInput | string
+    serviceItemName?: StringFieldUpdateOperationsInput | string
+    lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutQuickBooksConnectionNestedInput
+  }
+
+  export type QuickBooksConnectionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    realmId?: StringFieldUpdateOperationsInput | string
+    environment?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    accessTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    refreshTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastRefreshAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositMode?: StringFieldUpdateOperationsInput | string
+    depositPercent?: IntFieldUpdateOperationsInput | number
+    depositFixedCents?: IntFieldUpdateOperationsInput | number
+    defaultDueDays?: IntFieldUpdateOperationsInput | number
+    incomeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemName?: StringFieldUpdateOperationsInput | string
+    serviceItemName?: StringFieldUpdateOperationsInput | string
+    lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksConnectionCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    status?: string
+    realmId: string
+    environment: string
+    companyName?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    accessTokenExpiresAt?: Date | string | null
+    refreshTokenExpiresAt?: Date | string | null
+    lastRefreshAt?: Date | string | null
+    connectedAt?: Date | string
+    disconnectedAt?: Date | string | null
+    depositMode?: string
+    depositPercent?: number
+    depositFixedCents?: number
+    defaultDueDays?: number
+    incomeAccountId?: string | null
+    depositItemId?: string | null
+    serviceItemId?: string | null
+    depositItemName?: string
+    serviceItemName?: string
+    lastSyncAt?: Date | string | null
+    lastSyncError?: string | null
+  }
+
+  export type QuickBooksConnectionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    realmId?: StringFieldUpdateOperationsInput | string
+    environment?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    accessTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    refreshTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastRefreshAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositMode?: StringFieldUpdateOperationsInput | string
+    depositPercent?: IntFieldUpdateOperationsInput | number
+    depositFixedCents?: IntFieldUpdateOperationsInput | number
+    defaultDueDays?: IntFieldUpdateOperationsInput | number
+    incomeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemName?: StringFieldUpdateOperationsInput | string
+    serviceItemName?: StringFieldUpdateOperationsInput | string
+    lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksConnectionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    realmId?: StringFieldUpdateOperationsInput | string
+    environment?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    accessTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    refreshTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastRefreshAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositMode?: StringFieldUpdateOperationsInput | string
+    depositPercent?: IntFieldUpdateOperationsInput | number
+    depositFixedCents?: IntFieldUpdateOperationsInput | number
+    defaultDueDays?: IntFieldUpdateOperationsInput | number
+    incomeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemName?: StringFieldUpdateOperationsInput | string
+    serviceItemName?: StringFieldUpdateOperationsInput | string
+    lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksInvoiceCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+    business: BusinessCreateNestedOneWithoutQuickBooksInvoicesInput
+    quoteSubmission?: QuoteSubmissionCreateNestedOneWithoutQuickBooksInvoicesInput
+  }
+
+  export type QuickBooksInvoiceUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    quoteSubmissionId?: string | null
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type QuickBooksInvoiceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutQuickBooksInvoicesNestedInput
+    quoteSubmission?: QuoteSubmissionUpdateOneWithoutQuickBooksInvoicesNestedInput
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    quoteSubmissionId?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksInvoiceCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    quoteSubmissionId?: string | null
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type QuickBooksInvoiceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    quoteSubmissionId?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -73605,6 +77464,17 @@ export namespace Prisma {
     none?: QuoteSubmissionWhereInput
   }
 
+  export type QuickBooksConnectionNullableScalarRelationFilter = {
+    is?: QuickBooksConnectionWhereInput | null
+    isNot?: QuickBooksConnectionWhereInput | null
+  }
+
+  export type QuickBooksInvoiceListRelationFilter = {
+    every?: QuickBooksInvoiceWhereInput
+    some?: QuickBooksInvoiceWhereInput
+    none?: QuickBooksInvoiceWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -73690,6 +77560,10 @@ export namespace Prisma {
   }
 
   export type QuoteSubmissionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type QuickBooksInvoiceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -76398,6 +80272,206 @@ export namespace Prisma {
     sentQuoteCents?: SortOrder
   }
 
+  export type QuickBooksConnectionCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    status?: SortOrder
+    realmId?: SortOrder
+    environment?: SortOrder
+    companyName?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    accessTokenExpiresAt?: SortOrder
+    refreshTokenExpiresAt?: SortOrder
+    lastRefreshAt?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrder
+    depositMode?: SortOrder
+    depositPercent?: SortOrder
+    depositFixedCents?: SortOrder
+    defaultDueDays?: SortOrder
+    incomeAccountId?: SortOrder
+    depositItemId?: SortOrder
+    serviceItemId?: SortOrder
+    depositItemName?: SortOrder
+    serviceItemName?: SortOrder
+    lastSyncAt?: SortOrder
+    lastSyncError?: SortOrder
+  }
+
+  export type QuickBooksConnectionAvgOrderByAggregateInput = {
+    depositPercent?: SortOrder
+    depositFixedCents?: SortOrder
+    defaultDueDays?: SortOrder
+  }
+
+  export type QuickBooksConnectionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    status?: SortOrder
+    realmId?: SortOrder
+    environment?: SortOrder
+    companyName?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    accessTokenExpiresAt?: SortOrder
+    refreshTokenExpiresAt?: SortOrder
+    lastRefreshAt?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrder
+    depositMode?: SortOrder
+    depositPercent?: SortOrder
+    depositFixedCents?: SortOrder
+    defaultDueDays?: SortOrder
+    incomeAccountId?: SortOrder
+    depositItemId?: SortOrder
+    serviceItemId?: SortOrder
+    depositItemName?: SortOrder
+    serviceItemName?: SortOrder
+    lastSyncAt?: SortOrder
+    lastSyncError?: SortOrder
+  }
+
+  export type QuickBooksConnectionMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    status?: SortOrder
+    realmId?: SortOrder
+    environment?: SortOrder
+    companyName?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    accessTokenExpiresAt?: SortOrder
+    refreshTokenExpiresAt?: SortOrder
+    lastRefreshAt?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrder
+    depositMode?: SortOrder
+    depositPercent?: SortOrder
+    depositFixedCents?: SortOrder
+    defaultDueDays?: SortOrder
+    incomeAccountId?: SortOrder
+    depositItemId?: SortOrder
+    serviceItemId?: SortOrder
+    depositItemName?: SortOrder
+    serviceItemName?: SortOrder
+    lastSyncAt?: SortOrder
+    lastSyncError?: SortOrder
+  }
+
+  export type QuickBooksConnectionSumOrderByAggregateInput = {
+    depositPercent?: SortOrder
+    depositFixedCents?: SortOrder
+    defaultDueDays?: SortOrder
+  }
+
+  export type QuoteSubmissionNullableScalarRelationFilter = {
+    is?: QuoteSubmissionWhereInput | null
+    isNot?: QuoteSubmissionWhereInput | null
+  }
+
+  export type QuickBooksInvoiceRealmIdQboInvoiceIdCompoundUniqueInput = {
+    realmId: string
+    qboInvoiceId: string
+  }
+
+  export type QuickBooksInvoiceCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    quoteSubmissionId?: SortOrder
+    kind?: SortOrder
+    amountCents?: SortOrder
+    memo?: SortOrder
+    description?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    status?: SortOrder
+    balanceCents?: SortOrder
+    dueDate?: SortOrder
+    sentAt?: SortOrder
+    paidAt?: SortOrder
+    realmId?: SortOrder
+    qboCustomerId?: SortOrder
+    qboInvoiceId?: SortOrder
+    qboDocNumber?: SortOrder
+    qboSyncToken?: SortOrder
+    lastSyncedAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type QuickBooksInvoiceAvgOrderByAggregateInput = {
+    amountCents?: SortOrder
+    balanceCents?: SortOrder
+  }
+
+  export type QuickBooksInvoiceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    quoteSubmissionId?: SortOrder
+    kind?: SortOrder
+    amountCents?: SortOrder
+    memo?: SortOrder
+    description?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    status?: SortOrder
+    balanceCents?: SortOrder
+    dueDate?: SortOrder
+    sentAt?: SortOrder
+    paidAt?: SortOrder
+    realmId?: SortOrder
+    qboCustomerId?: SortOrder
+    qboInvoiceId?: SortOrder
+    qboDocNumber?: SortOrder
+    qboSyncToken?: SortOrder
+    lastSyncedAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type QuickBooksInvoiceMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    quoteSubmissionId?: SortOrder
+    kind?: SortOrder
+    amountCents?: SortOrder
+    memo?: SortOrder
+    description?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    status?: SortOrder
+    balanceCents?: SortOrder
+    dueDate?: SortOrder
+    sentAt?: SortOrder
+    paidAt?: SortOrder
+    realmId?: SortOrder
+    qboCustomerId?: SortOrder
+    qboInvoiceId?: SortOrder
+    qboDocNumber?: SortOrder
+    qboSyncToken?: SortOrder
+    lastSyncedAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type QuickBooksInvoiceSumOrderByAggregateInput = {
+    amountCents?: SortOrder
+    balanceCents?: SortOrder
+  }
+
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -76975,6 +81049,19 @@ export namespace Prisma {
     connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
   }
 
+  export type QuickBooksConnectionCreateNestedOneWithoutBusinessInput = {
+    create?: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: QuickBooksConnectionCreateOrConnectWithoutBusinessInput
+    connect?: QuickBooksConnectionWhereUniqueInput
+  }
+
+  export type QuickBooksInvoiceCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutBusinessInput, QuickBooksInvoiceUncheckedCreateWithoutBusinessInput> | QuickBooksInvoiceCreateWithoutBusinessInput[] | QuickBooksInvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutBusinessInput | QuickBooksInvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuickBooksInvoiceCreateManyBusinessInputEnvelope
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -77168,6 +81255,19 @@ export namespace Prisma {
     connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutBusinessInput | QuoteSubmissionCreateOrConnectWithoutBusinessInput[]
     createMany?: QuoteSubmissionCreateManyBusinessInputEnvelope
     connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+  }
+
+  export type QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput = {
+    create?: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: QuickBooksConnectionCreateOrConnectWithoutBusinessInput
+    connect?: QuickBooksConnectionWhereUniqueInput
+  }
+
+  export type QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutBusinessInput, QuickBooksInvoiceUncheckedCreateWithoutBusinessInput> | QuickBooksInvoiceCreateWithoutBusinessInput[] | QuickBooksInvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutBusinessInput | QuickBooksInvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuickBooksInvoiceCreateManyBusinessInputEnvelope
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -77583,6 +81683,30 @@ export namespace Prisma {
     deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
   }
 
+  export type QuickBooksConnectionUpdateOneWithoutBusinessNestedInput = {
+    create?: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: QuickBooksConnectionCreateOrConnectWithoutBusinessInput
+    upsert?: QuickBooksConnectionUpsertWithoutBusinessInput
+    disconnect?: QuickBooksConnectionWhereInput | boolean
+    delete?: QuickBooksConnectionWhereInput | boolean
+    connect?: QuickBooksConnectionWhereUniqueInput
+    update?: XOR<XOR<QuickBooksConnectionUpdateToOneWithWhereWithoutBusinessInput, QuickBooksConnectionUpdateWithoutBusinessInput>, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutBusinessInput, QuickBooksInvoiceUncheckedCreateWithoutBusinessInput> | QuickBooksInvoiceCreateWithoutBusinessInput[] | QuickBooksInvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutBusinessInput | QuickBooksInvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuickBooksInvoiceUpsertWithWhereUniqueWithoutBusinessInput | QuickBooksInvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuickBooksInvoiceCreateManyBusinessInputEnvelope
+    set?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    disconnect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    delete?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    update?: QuickBooksInvoiceUpdateWithWhereUniqueWithoutBusinessInput | QuickBooksInvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuickBooksInvoiceUpdateManyWithWhereWithoutBusinessInput | QuickBooksInvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -77969,6 +82093,30 @@ export namespace Prisma {
     update?: QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput | QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput | QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+  }
+
+  export type QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput = {
+    create?: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: QuickBooksConnectionCreateOrConnectWithoutBusinessInput
+    upsert?: QuickBooksConnectionUpsertWithoutBusinessInput
+    disconnect?: QuickBooksConnectionWhereInput | boolean
+    delete?: QuickBooksConnectionWhereInput | boolean
+    connect?: QuickBooksConnectionWhereUniqueInput
+    update?: XOR<XOR<QuickBooksConnectionUpdateToOneWithWhereWithoutBusinessInput, QuickBooksConnectionUpdateWithoutBusinessInput>, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutBusinessInput, QuickBooksInvoiceUncheckedCreateWithoutBusinessInput> | QuickBooksInvoiceCreateWithoutBusinessInput[] | QuickBooksInvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutBusinessInput | QuickBooksInvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuickBooksInvoiceUpsertWithWhereUniqueWithoutBusinessInput | QuickBooksInvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuickBooksInvoiceCreateManyBusinessInputEnvelope
+    set?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    disconnect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    delete?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    update?: QuickBooksInvoiceUpdateWithWhereUniqueWithoutBusinessInput | QuickBooksInvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuickBooksInvoiceUpdateManyWithWhereWithoutBusinessInput | QuickBooksInvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
@@ -80094,10 +84242,24 @@ export namespace Prisma {
     connect?: QuoteCalculatorWhereUniqueInput
   }
 
+  export type QuickBooksInvoiceCreateNestedManyWithoutQuoteSubmissionInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput> | QuickBooksInvoiceCreateWithoutQuoteSubmissionInput[] | QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput | QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput[]
+    createMany?: QuickBooksInvoiceCreateManyQuoteSubmissionInputEnvelope
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutQuoteSubmissionsInput = {
     create?: XOR<BusinessCreateWithoutQuoteSubmissionsInput, BusinessUncheckedCreateWithoutQuoteSubmissionsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutQuoteSubmissionsInput
     connect?: BusinessWhereUniqueInput
+  }
+
+  export type QuickBooksInvoiceUncheckedCreateNestedManyWithoutQuoteSubmissionInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput> | QuickBooksInvoiceCreateWithoutQuoteSubmissionInput[] | QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput | QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput[]
+    createMany?: QuickBooksInvoiceCreateManyQuoteSubmissionInputEnvelope
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
   }
 
   export type QuoteCalculatorUpdateOneWithoutSubmissionsNestedInput = {
@@ -80110,12 +84272,84 @@ export namespace Prisma {
     update?: XOR<XOR<QuoteCalculatorUpdateToOneWithWhereWithoutSubmissionsInput, QuoteCalculatorUpdateWithoutSubmissionsInput>, QuoteCalculatorUncheckedUpdateWithoutSubmissionsInput>
   }
 
+  export type QuickBooksInvoiceUpdateManyWithoutQuoteSubmissionNestedInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput> | QuickBooksInvoiceCreateWithoutQuoteSubmissionInput[] | QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput | QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput[]
+    upsert?: QuickBooksInvoiceUpsertWithWhereUniqueWithoutQuoteSubmissionInput | QuickBooksInvoiceUpsertWithWhereUniqueWithoutQuoteSubmissionInput[]
+    createMany?: QuickBooksInvoiceCreateManyQuoteSubmissionInputEnvelope
+    set?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    disconnect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    delete?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    update?: QuickBooksInvoiceUpdateWithWhereUniqueWithoutQuoteSubmissionInput | QuickBooksInvoiceUpdateWithWhereUniqueWithoutQuoteSubmissionInput[]
+    updateMany?: QuickBooksInvoiceUpdateManyWithWhereWithoutQuoteSubmissionInput | QuickBooksInvoiceUpdateManyWithWhereWithoutQuoteSubmissionInput[]
+    deleteMany?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
+  }
+
   export type BusinessUpdateOneRequiredWithoutQuoteSubmissionsNestedInput = {
     create?: XOR<BusinessCreateWithoutQuoteSubmissionsInput, BusinessUncheckedCreateWithoutQuoteSubmissionsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutQuoteSubmissionsInput
     upsert?: BusinessUpsertWithoutQuoteSubmissionsInput
     connect?: BusinessWhereUniqueInput
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutQuoteSubmissionsInput, BusinessUpdateWithoutQuoteSubmissionsInput>, BusinessUncheckedUpdateWithoutQuoteSubmissionsInput>
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateManyWithoutQuoteSubmissionNestedInput = {
+    create?: XOR<QuickBooksInvoiceCreateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput> | QuickBooksInvoiceCreateWithoutQuoteSubmissionInput[] | QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput[]
+    connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput | QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput[]
+    upsert?: QuickBooksInvoiceUpsertWithWhereUniqueWithoutQuoteSubmissionInput | QuickBooksInvoiceUpsertWithWhereUniqueWithoutQuoteSubmissionInput[]
+    createMany?: QuickBooksInvoiceCreateManyQuoteSubmissionInputEnvelope
+    set?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    disconnect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    delete?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+    update?: QuickBooksInvoiceUpdateWithWhereUniqueWithoutQuoteSubmissionInput | QuickBooksInvoiceUpdateWithWhereUniqueWithoutQuoteSubmissionInput[]
+    updateMany?: QuickBooksInvoiceUpdateManyWithWhereWithoutQuoteSubmissionInput | QuickBooksInvoiceUpdateManyWithWhereWithoutQuoteSubmissionInput[]
+    deleteMany?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
+  }
+
+  export type BusinessCreateNestedOneWithoutQuickBooksConnectionInput = {
+    create?: XOR<BusinessCreateWithoutQuickBooksConnectionInput, BusinessUncheckedCreateWithoutQuickBooksConnectionInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuickBooksConnectionInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutQuickBooksConnectionNestedInput = {
+    create?: XOR<BusinessCreateWithoutQuickBooksConnectionInput, BusinessUncheckedCreateWithoutQuickBooksConnectionInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuickBooksConnectionInput
+    upsert?: BusinessUpsertWithoutQuickBooksConnectionInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutQuickBooksConnectionInput, BusinessUpdateWithoutQuickBooksConnectionInput>, BusinessUncheckedUpdateWithoutQuickBooksConnectionInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutQuickBooksInvoicesInput = {
+    create?: XOR<BusinessCreateWithoutQuickBooksInvoicesInput, BusinessUncheckedCreateWithoutQuickBooksInvoicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuickBooksInvoicesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type QuoteSubmissionCreateNestedOneWithoutQuickBooksInvoicesInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutQuickBooksInvoicesInput, QuoteSubmissionUncheckedCreateWithoutQuickBooksInvoicesInput>
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutQuickBooksInvoicesInput
+    connect?: QuoteSubmissionWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutQuickBooksInvoicesNestedInput = {
+    create?: XOR<BusinessCreateWithoutQuickBooksInvoicesInput, BusinessUncheckedCreateWithoutQuickBooksInvoicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuickBooksInvoicesInput
+    upsert?: BusinessUpsertWithoutQuickBooksInvoicesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutQuickBooksInvoicesInput, BusinessUpdateWithoutQuickBooksInvoicesInput>, BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput>
+  }
+
+  export type QuoteSubmissionUpdateOneWithoutQuickBooksInvoicesNestedInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutQuickBooksInvoicesInput, QuoteSubmissionUncheckedCreateWithoutQuickBooksInvoicesInput>
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutQuickBooksInvoicesInput
+    upsert?: QuoteSubmissionUpsertWithoutQuickBooksInvoicesInput
+    disconnect?: QuoteSubmissionWhereInput | boolean
+    delete?: QuoteSubmissionWhereInput | boolean
+    connect?: QuoteSubmissionWhereUniqueInput
+    update?: XOR<XOR<QuoteSubmissionUpdateToOneWithWhereWithoutQuickBooksInvoicesInput, QuoteSubmissionUpdateWithoutQuickBooksInvoicesInput>, QuoteSubmissionUncheckedUpdateWithoutQuickBooksInvoicesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -81070,6 +85304,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -81143,6 +85379,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -81281,6 +85519,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -81354,6 +85594,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -82755,6 +86997,7 @@ export namespace Prisma {
     calculatorName: string
     showEstimateToCustomer?: boolean
     calculator?: QuoteCalculatorCreateNestedOneWithoutSubmissionsInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutQuoteSubmissionInput
   }
 
   export type QuoteSubmissionUncheckedCreateWithoutBusinessInput = {
@@ -82775,6 +87018,7 @@ export namespace Prisma {
     calculatorName: string
     showEstimateToCustomer?: boolean
     calculatorId?: string | null
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutQuoteSubmissionInput
   }
 
   export type QuoteSubmissionCreateOrConnectWithoutBusinessInput = {
@@ -82784,6 +87028,129 @@ export namespace Prisma {
 
   export type QuoteSubmissionCreateManyBusinessInputEnvelope = {
     data: QuoteSubmissionCreateManyBusinessInput | QuoteSubmissionCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type QuickBooksConnectionCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    realmId: string
+    environment: string
+    companyName?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    accessTokenExpiresAt?: Date | string | null
+    refreshTokenExpiresAt?: Date | string | null
+    lastRefreshAt?: Date | string | null
+    connectedAt?: Date | string
+    disconnectedAt?: Date | string | null
+    depositMode?: string
+    depositPercent?: number
+    depositFixedCents?: number
+    defaultDueDays?: number
+    incomeAccountId?: string | null
+    depositItemId?: string | null
+    serviceItemId?: string | null
+    depositItemName?: string
+    serviceItemName?: string
+    lastSyncAt?: Date | string | null
+    lastSyncError?: string | null
+  }
+
+  export type QuickBooksConnectionUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    realmId: string
+    environment: string
+    companyName?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    accessTokenExpiresAt?: Date | string | null
+    refreshTokenExpiresAt?: Date | string | null
+    lastRefreshAt?: Date | string | null
+    connectedAt?: Date | string
+    disconnectedAt?: Date | string | null
+    depositMode?: string
+    depositPercent?: number
+    depositFixedCents?: number
+    defaultDueDays?: number
+    incomeAccountId?: string | null
+    depositItemId?: string | null
+    serviceItemId?: string | null
+    depositItemName?: string
+    serviceItemName?: string
+    lastSyncAt?: Date | string | null
+    lastSyncError?: string | null
+  }
+
+  export type QuickBooksConnectionCreateOrConnectWithoutBusinessInput = {
+    where: QuickBooksConnectionWhereUniqueInput
+    create: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type QuickBooksInvoiceCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+    quoteSubmission?: QuoteSubmissionCreateNestedOneWithoutQuickBooksInvoicesInput
+  }
+
+  export type QuickBooksInvoiceUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quoteSubmissionId?: string | null
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type QuickBooksInvoiceCreateOrConnectWithoutBusinessInput = {
+    where: QuickBooksInvoiceWhereUniqueInput
+    create: XOR<QuickBooksInvoiceCreateWithoutBusinessInput, QuickBooksInvoiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type QuickBooksInvoiceCreateManyBusinessInputEnvelope = {
+    data: QuickBooksInvoiceCreateManyBusinessInput | QuickBooksInvoiceCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -83747,6 +88114,119 @@ export namespace Prisma {
     businessId?: StringFilter<"QuoteSubmission"> | string
   }
 
+  export type QuickBooksConnectionUpsertWithoutBusinessInput = {
+    update: XOR<QuickBooksConnectionUpdateWithoutBusinessInput, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
+    create: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
+    where?: QuickBooksConnectionWhereInput
+  }
+
+  export type QuickBooksConnectionUpdateToOneWithWhereWithoutBusinessInput = {
+    where?: QuickBooksConnectionWhereInput
+    data: XOR<QuickBooksConnectionUpdateWithoutBusinessInput, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type QuickBooksConnectionUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    realmId?: StringFieldUpdateOperationsInput | string
+    environment?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    accessTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    refreshTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastRefreshAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositMode?: StringFieldUpdateOperationsInput | string
+    depositPercent?: IntFieldUpdateOperationsInput | number
+    depositFixedCents?: IntFieldUpdateOperationsInput | number
+    defaultDueDays?: IntFieldUpdateOperationsInput | number
+    incomeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemName?: StringFieldUpdateOperationsInput | string
+    serviceItemName?: StringFieldUpdateOperationsInput | string
+    lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksConnectionUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    realmId?: StringFieldUpdateOperationsInput | string
+    environment?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    accessTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    refreshTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastRefreshAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositMode?: StringFieldUpdateOperationsInput | string
+    depositPercent?: IntFieldUpdateOperationsInput | number
+    depositFixedCents?: IntFieldUpdateOperationsInput | number
+    defaultDueDays?: IntFieldUpdateOperationsInput | number
+    incomeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceItemId?: NullableStringFieldUpdateOperationsInput | string | null
+    depositItemName?: StringFieldUpdateOperationsInput | string
+    serviceItemName?: StringFieldUpdateOperationsInput | string
+    lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksInvoiceUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: QuickBooksInvoiceWhereUniqueInput
+    update: XOR<QuickBooksInvoiceUpdateWithoutBusinessInput, QuickBooksInvoiceUncheckedUpdateWithoutBusinessInput>
+    create: XOR<QuickBooksInvoiceCreateWithoutBusinessInput, QuickBooksInvoiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type QuickBooksInvoiceUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: QuickBooksInvoiceWhereUniqueInput
+    data: XOR<QuickBooksInvoiceUpdateWithoutBusinessInput, QuickBooksInvoiceUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type QuickBooksInvoiceUpdateManyWithWhereWithoutBusinessInput = {
+    where: QuickBooksInvoiceScalarWhereInput
+    data: XOR<QuickBooksInvoiceUpdateManyMutationInput, QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type QuickBooksInvoiceScalarWhereInput = {
+    AND?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
+    OR?: QuickBooksInvoiceScalarWhereInput[]
+    NOT?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
+    id?: StringFilter<"QuickBooksInvoice"> | string
+    createdAt?: DateTimeFilter<"QuickBooksInvoice"> | Date | string
+    updatedAt?: DateTimeFilter<"QuickBooksInvoice"> | Date | string
+    businessId?: StringFilter<"QuickBooksInvoice"> | string
+    quoteSubmissionId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    kind?: StringFilter<"QuickBooksInvoice"> | string
+    amountCents?: IntFilter<"QuickBooksInvoice"> | number
+    memo?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    description?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    customerName?: StringFilter<"QuickBooksInvoice"> | string
+    customerEmail?: StringFilter<"QuickBooksInvoice"> | string
+    customerPhone?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    status?: StringFilter<"QuickBooksInvoice"> | string
+    balanceCents?: IntNullableFilter<"QuickBooksInvoice"> | number | null
+    dueDate?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    paidAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    realmId?: StringFilter<"QuickBooksInvoice"> | string
+    qboCustomerId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboInvoiceId?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboDocNumber?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    qboSyncToken?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    lastSyncedAt?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
+    lastError?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -83818,6 +88298,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -83891,6 +88373,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -83980,6 +88464,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -84053,6 +88539,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -84126,6 +88614,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -84199,6 +88689,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -84288,6 +88780,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -84361,6 +88855,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -84471,6 +88967,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -84544,6 +89042,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -84936,6 +89436,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -85009,6 +89511,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -85567,6 +90071,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -85640,6 +90146,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -85751,6 +90259,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -85824,6 +90334,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -86189,6 +90701,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -86262,6 +90776,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -86403,6 +90919,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -86476,6 +90994,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -86682,6 +91202,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEventsInput = {
@@ -86755,6 +91277,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEventsInput = {
@@ -86844,6 +91368,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEventsInput = {
@@ -86917,6 +91443,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutVideoSourcesInput = {
@@ -86990,6 +91518,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
@@ -87063,6 +91593,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
@@ -87198,6 +91730,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
@@ -87271,6 +91805,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
@@ -87393,6 +91929,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideosInput = {
@@ -87466,6 +92004,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideosInput = {
@@ -87594,6 +92134,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideosInput = {
@@ -87667,6 +92209,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductCreateWithoutImagesInput = {
@@ -87833,6 +92377,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -87906,6 +92452,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -88094,6 +92642,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -88167,6 +92717,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -88283,6 +92835,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -88356,6 +92910,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -88764,6 +93320,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -88837,6 +93395,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -89217,6 +93777,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -89290,6 +93852,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -89674,6 +94238,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -89747,6 +94313,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -90659,6 +95227,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -90732,6 +95302,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -90907,6 +95479,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -90980,6 +95554,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -91238,6 +95814,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -91311,6 +95889,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -91711,6 +96291,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -91784,6 +96366,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -91993,6 +96577,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -92066,6 +96652,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -92293,6 +96881,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -92366,6 +96956,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -92471,6 +97063,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -92544,6 +97138,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -92633,6 +97229,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -92706,6 +97304,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -92779,6 +97379,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -92852,6 +97454,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -92941,6 +97545,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -93014,6 +97620,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutEditorNotesInput = {
@@ -93087,6 +97695,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEditorNotesInput = {
@@ -93160,6 +97770,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEditorNotesInput = {
@@ -93292,6 +97904,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
@@ -93365,6 +97979,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutEditorNotesInput = {
@@ -93487,6 +98103,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -93560,6 +98178,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -93649,6 +98269,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -93722,6 +98344,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -93795,6 +98419,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -93868,6 +98494,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -93989,6 +98617,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -94062,6 +98692,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -94250,6 +98882,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -94323,6 +98957,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -94461,6 +99097,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -94534,6 +99172,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -94662,6 +99302,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -94735,6 +99377,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -94873,6 +99517,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -94946,6 +99592,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -95704,6 +100352,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -95777,6 +100427,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -95909,6 +100561,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -95982,6 +100636,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -96104,6 +100760,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -96177,6 +100835,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -96266,6 +100926,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -96339,6 +101001,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutZonesInput = {
@@ -96412,6 +101076,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -96485,6 +101151,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -96596,6 +101264,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -96669,6 +101339,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -96909,6 +101581,8 @@ export namespace Prisma {
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -96982,6 +101656,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -97170,6 +101846,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -97243,6 +101921,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuoteCalculatorsInput = {
@@ -97316,6 +101996,8 @@ export namespace Prisma {
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteCalculatorsInput = {
@@ -97389,6 +102071,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteCalculatorsInput = {
@@ -97413,6 +102097,7 @@ export namespace Prisma {
     sentMessage?: string | null
     calculatorName: string
     showEstimateToCustomer?: boolean
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutQuoteSubmissionInput
     business: BusinessCreateNestedOneWithoutQuoteSubmissionsInput
   }
 
@@ -97434,6 +102119,7 @@ export namespace Prisma {
     calculatorName: string
     showEstimateToCustomer?: boolean
     businessId: string
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutQuoteSubmissionInput
   }
 
   export type QuoteSubmissionCreateOrConnectWithoutCalculatorInput = {
@@ -97528,6 +102214,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteCalculatorsInput = {
@@ -97601,6 +102289,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput = {
@@ -97642,6 +102332,68 @@ export namespace Prisma {
   export type QuoteCalculatorCreateOrConnectWithoutSubmissionsInput = {
     where: QuoteCalculatorWhereUniqueInput
     create: XOR<QuoteCalculatorCreateWithoutSubmissionsInput, QuoteCalculatorUncheckedCreateWithoutSubmissionsInput>
+  }
+
+  export type QuickBooksInvoiceCreateWithoutQuoteSubmissionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+    business: BusinessCreateNestedOneWithoutQuickBooksInvoicesInput
+  }
+
+  export type QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type QuickBooksInvoiceCreateOrConnectWithoutQuoteSubmissionInput = {
+    where: QuickBooksInvoiceWhereUniqueInput
+    create: XOR<QuickBooksInvoiceCreateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput>
+  }
+
+  export type QuickBooksInvoiceCreateManyQuoteSubmissionInputEnvelope = {
+    data: QuickBooksInvoiceCreateManyQuoteSubmissionInput | QuickBooksInvoiceCreateManyQuoteSubmissionInput[]
+    skipDuplicates?: boolean
   }
 
   export type BusinessCreateWithoutQuoteSubmissionsInput = {
@@ -97715,6 +102467,8 @@ export namespace Prisma {
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteSubmissionsInput = {
@@ -97788,6 +102542,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteSubmissionsInput = {
@@ -97824,6 +102580,22 @@ export namespace Prisma {
     definition?: JsonNullValueInput | InputJsonValue
     published?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type QuickBooksInvoiceUpsertWithWhereUniqueWithoutQuoteSubmissionInput = {
+    where: QuickBooksInvoiceWhereUniqueInput
+    update: XOR<QuickBooksInvoiceUpdateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedUpdateWithoutQuoteSubmissionInput>
+    create: XOR<QuickBooksInvoiceCreateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedCreateWithoutQuoteSubmissionInput>
+  }
+
+  export type QuickBooksInvoiceUpdateWithWhereUniqueWithoutQuoteSubmissionInput = {
+    where: QuickBooksInvoiceWhereUniqueInput
+    data: XOR<QuickBooksInvoiceUpdateWithoutQuoteSubmissionInput, QuickBooksInvoiceUncheckedUpdateWithoutQuoteSubmissionInput>
+  }
+
+  export type QuickBooksInvoiceUpdateManyWithWhereWithoutQuoteSubmissionInput = {
+    where: QuickBooksInvoiceScalarWhereInput
+    data: XOR<QuickBooksInvoiceUpdateManyMutationInput, QuickBooksInvoiceUncheckedUpdateManyWithoutQuoteSubmissionInput>
   }
 
   export type BusinessUpsertWithoutQuoteSubmissionsInput = {
@@ -97908,6 +102680,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteSubmissionsInput = {
@@ -97981,6 +102755,740 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutQuickBooksConnectionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutQuickBooksConnectionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutQuickBooksConnectionInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutQuickBooksConnectionInput, BusinessUncheckedCreateWithoutQuickBooksConnectionInput>
+  }
+
+  export type BusinessUpsertWithoutQuickBooksConnectionInput = {
+    update: XOR<BusinessUpdateWithoutQuickBooksConnectionInput, BusinessUncheckedUpdateWithoutQuickBooksConnectionInput>
+    create: XOR<BusinessCreateWithoutQuickBooksConnectionInput, BusinessUncheckedCreateWithoutQuickBooksConnectionInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutQuickBooksConnectionInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutQuickBooksConnectionInput, BusinessUncheckedUpdateWithoutQuickBooksConnectionInput>
+  }
+
+  export type BusinessUpdateWithoutQuickBooksConnectionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutQuickBooksConnectionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutQuickBooksInvoicesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutQuickBooksInvoicesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutQuickBooksInvoicesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutQuickBooksInvoicesInput, BusinessUncheckedCreateWithoutQuickBooksInvoicesInput>
+  }
+
+  export type QuoteSubmissionCreateWithoutQuickBooksInvoicesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculator?: QuoteCalculatorCreateNestedOneWithoutSubmissionsInput
+    business: BusinessCreateNestedOneWithoutQuoteSubmissionsInput
+  }
+
+  export type QuoteSubmissionUncheckedCreateWithoutQuickBooksInvoicesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculatorId?: string | null
+    businessId: string
+  }
+
+  export type QuoteSubmissionCreateOrConnectWithoutQuickBooksInvoicesInput = {
+    where: QuoteSubmissionWhereUniqueInput
+    create: XOR<QuoteSubmissionCreateWithoutQuickBooksInvoicesInput, QuoteSubmissionUncheckedCreateWithoutQuickBooksInvoicesInput>
+  }
+
+  export type BusinessUpsertWithoutQuickBooksInvoicesInput = {
+    update: XOR<BusinessUpdateWithoutQuickBooksInvoicesInput, BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput>
+    create: XOR<BusinessCreateWithoutQuickBooksInvoicesInput, BusinessUncheckedCreateWithoutQuickBooksInvoicesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutQuickBooksInvoicesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutQuickBooksInvoicesInput, BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput>
+  }
+
+  export type BusinessUpdateWithoutQuickBooksInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+  }
+
+  export type QuoteSubmissionUpsertWithoutQuickBooksInvoicesInput = {
+    update: XOR<QuoteSubmissionUpdateWithoutQuickBooksInvoicesInput, QuoteSubmissionUncheckedUpdateWithoutQuickBooksInvoicesInput>
+    create: XOR<QuoteSubmissionCreateWithoutQuickBooksInvoicesInput, QuoteSubmissionUncheckedCreateWithoutQuickBooksInvoicesInput>
+    where?: QuoteSubmissionWhereInput
+  }
+
+  export type QuoteSubmissionUpdateToOneWithWhereWithoutQuickBooksInvoicesInput = {
+    where?: QuoteSubmissionWhereInput
+    data: XOR<QuoteSubmissionUpdateWithoutQuickBooksInvoicesInput, QuoteSubmissionUncheckedUpdateWithoutQuickBooksInvoicesInput>
+  }
+
+  export type QuoteSubmissionUpdateWithoutQuickBooksInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculator?: QuoteCalculatorUpdateOneWithoutSubmissionsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutQuoteSubmissionsNestedInput
+  }
+
+  export type QuoteSubmissionUncheckedUpdateWithoutQuickBooksInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type SessionCreateManyUserInput = {
@@ -98801,6 +104309,32 @@ export namespace Prisma {
     calculatorName: string
     showEstimateToCustomer?: boolean
     calculatorId?: string | null
+  }
+
+  export type QuickBooksInvoiceCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quoteSubmissionId?: string | null
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
   }
 
   export type ProductUpdateWithoutBusinessInput = {
@@ -100089,6 +105623,7 @@ export namespace Prisma {
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     calculator?: QuoteCalculatorUpdateOneWithoutSubmissionsNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutQuoteSubmissionNestedInput
   }
 
   export type QuoteSubmissionUncheckedUpdateWithoutBusinessInput = {
@@ -100109,6 +105644,7 @@ export namespace Prisma {
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutQuoteSubmissionNestedInput
   }
 
   export type QuoteSubmissionUncheckedUpdateManyWithoutBusinessInput = {
@@ -100129,6 +105665,84 @@ export namespace Prisma {
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksInvoiceUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteSubmission?: QuoteSubmissionUpdateOneWithoutQuickBooksInvoicesNestedInput
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quoteSubmissionId?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quoteSubmissionId?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ImageCreateManyProductInput = {
@@ -102118,6 +107732,7 @@ export namespace Prisma {
     sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutQuoteSubmissionNestedInput
     business?: BusinessUpdateOneRequiredWithoutQuoteSubmissionsNestedInput
   }
 
@@ -102139,6 +107754,7 @@ export namespace Prisma {
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutQuoteSubmissionNestedInput
   }
 
   export type QuoteSubmissionUncheckedUpdateManyWithoutCalculatorInput = {
@@ -102159,6 +107775,110 @@ export namespace Prisma {
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type QuickBooksInvoiceCreateManyQuoteSubmissionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    kind: string
+    amountCents: number
+    memo?: string | null
+    description?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    status?: string
+    balanceCents?: number | null
+    dueDate?: Date | string | null
+    sentAt?: Date | string | null
+    paidAt?: Date | string | null
+    realmId: string
+    qboCustomerId?: string | null
+    qboInvoiceId?: string | null
+    qboDocNumber?: string | null
+    qboSyncToken?: string | null
+    lastSyncedAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type QuickBooksInvoiceUpdateWithoutQuoteSubmissionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutQuickBooksInvoicesNestedInput
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateWithoutQuoteSubmissionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuickBooksInvoiceUncheckedUpdateManyWithoutQuoteSubmissionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    amountCents?: IntFieldUpdateOperationsInput | number
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    realmId?: StringFieldUpdateOperationsInput | string
+    qboCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    qboDocNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

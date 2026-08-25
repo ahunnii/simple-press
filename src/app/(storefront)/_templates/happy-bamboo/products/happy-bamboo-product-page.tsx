@@ -83,6 +83,7 @@ export function HappyBambooProductPage({
               images={product.images}
               productName={product.name}
               enableLightbox={true}
+              mainImageFit="contain"
             />
           </FadeIn>
 

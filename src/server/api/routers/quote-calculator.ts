@@ -3,17 +3,22 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { CustomerEstimate } from "~/lib/quote/customer-estimate";
 import { checkBusiness } from "~/lib/check-business";
-import { lookupZip } from "~/lib/geo/zip-lookup";
+import { loadZipDataset, lookupZip } from "~/lib/geo/zip-lookup";
+import { customerEstimateFrom } from "~/lib/quote/customer-estimate";
+import { computeQuote } from "~/lib/quote/evaluate";
 import {
   getClientIpFromHeaders,
+  quoteLivePreviewLimiter,
   quoteZipLookupLimiter,
 } from "~/lib/rate-limit";
 import {
+  parseStoredQuoteDefinition,
   QUOTE_ID_MAX_LENGTH,
   quoteCalculatorCreateSchema,
-  quoteCalculatorDefinitionSchema,
   quoteCalculatorUpdateSchema,
+  quotePreviewEstimateSchema,
   toPublicCalculatorDefinition,
 } from "~/lib/validators/quote-calculator";
 import {
@@ -42,6 +47,13 @@ import {
  * `quoteCalculatorDefinitionSchema` on purpose: this feeds a preview card, and
  * a drifted definition should show "0 questions" in the editor, not blow up
  * the picker for every OTHER calculator in the list.
+ *
+ * Reads BOTH definition shapes, and migrates neither: v2 nests questions inside
+ * `screens[]`, while a v1 blob that has not been re-saved since screens shipped
+ * still carries a flat `questions[]`. Running `migrateQuoteDefinition` here to
+ * collapse the two would pull the whole validator into a function that only
+ * ever prints a number — and would go straight back to "0 questions" for any
+ * definition that has drifted, which is the one thing this must not do.
  */
 function countQuestions(definition: Prisma.JsonValue): number {
   if (
@@ -51,7 +63,23 @@ function countQuestions(definition: Prisma.JsonValue): number {
   ) {
     return 0;
   }
-  const questions = (definition as Record<string, unknown>).questions;
+  const record = definition as Record<string, unknown>;
+
+  // v2. A screen that is not an object, or whose `questions` is not an array,
+  // contributes zero rather than throwing — same fail-soft rule as above.
+  const screens: unknown = record.screens;
+  if (Array.isArray(screens)) {
+    let total = 0;
+    for (const screen of screens as unknown[]) {
+      if (screen === null || typeof screen !== "object") continue;
+      const questions = (screen as Record<string, unknown>).questions;
+      if (Array.isArray(questions)) total += questions.length;
+    }
+    return total;
+  }
+
+  // v1: a flat list at the top level.
+  const questions = record.questions;
   return Array.isArray(questions) ? questions.length : 0;
 }
 
@@ -254,14 +282,18 @@ export const quoteCalculatorRouter = createTRPCRouter({
         });
       }
 
-      // Drift guard. A stored definition that no longer satisfies the current
-      // schema cannot be safely projected (the public mapper assumes validated
-      // shape) and could not be evaluated on submit anyway, so serving it would
-      // hand the visitor a form that dead-ends at the last step. Fail closed
-      // and page the developer — the owner cannot fix this from the builder.
-      const parsed = quoteCalculatorDefinitionSchema.safeParse(
-        calculator.definition,
-      );
+      // Drift guard. `parseStoredQuoteDefinition`, not the strict schema: a v1
+      // blob is migrated to v2 on the way through, so a calculator that has not
+      // been re-saved since screens shipped still serves. (The strict schema
+      // would NOT_FOUND every one of them — see the drift-wall note on
+      // `storedQuoteDefinitionSchema`.)
+      //
+      // A definition that fails even after migration cannot be safely projected
+      // (the public mapper assumes validated shape) and could not be evaluated
+      // on submit anyway, so serving it would hand the visitor a form that
+      // dead-ends at the last step. Fail closed and page the developer — the
+      // owner cannot fix this from the builder.
+      const parsed = parseStoredQuoteDefinition(calculator.definition);
       if (!parsed.success) {
         Sentry.captureException(parsed.error, {
           tags: { feature: "quote", step: "definition-drift" },
@@ -330,4 +362,144 @@ export const quoteCalculatorRouter = createTRPCRouter({
       // the price is built on.
       return { city: entry.city, state: entry.state };
     }),
+
+  /**
+   * The live running estimate — the ONE public read that prices on demand.
+   *
+   * Everything else in this feature either serves a projection that has already
+   * had the pricing stripped out of it (`getByIdPublic`) or prices exactly once,
+   * behind a captcha, while writing a lead (`quoteSubmission.submit`). This
+   * prices anonymously, on request, as often as a visitor changes an answer.
+   * Three things keep that acceptable, and all three have to stay:
+   *
+   * 1. **Both switches are enforced HERE, server-side.** The public projection
+   *    reports the EFFECTIVE `showLiveEstimate` (`showEstimateToCustomer &&
+   *    showLiveEstimate`), but that is a rendering hint the browser is free to
+   *    lie about. An owner who keeps their pricing internal gets a FORBIDDEN
+   *    from this endpoint regardless of what a hand-written client claims the
+   *    projection said.
+   * 2. **No captcha, deliberately.** The runner would have to mint a token per
+   *    answer change; reCAPTCHA's free quota cannot carry one call per answer,
+   *    and a token spent that freely proves very little anyway. The substitute
+   *    is `quoteLivePreviewLimiter` (30/min per ip:host) plus the fact that
+   *    this query persists nothing, emails nobody and pings no Discord webhook
+   *    — there is no side effect here worth flooding for.
+   * 3. **It returns only what the visitor would be shown at the end.** The
+   *    response is a `CustomerEstimate` and nothing else: never the formula,
+   *    never a variable, never a per-option value. It is precisely the figure
+   *    `customerEstimateFrom` would print on the thank-you screen, recomputed
+   *    from the STORED definition against option IDs and raw values.
+   *
+   * The probing tradeoff is real, and the owner opted into it: with both
+   * switches on, a visitor can flip one answer back and forth and watch the
+   * number move, which effectively discloses what that option is worth. Fine
+   * for menu-style pricing, wrong for a sensitive rate table — which is why the
+   * builder says exactly that next to the switch and why the default is off.
+   *
+   * `mode: "preview"` makes `computeQuote` lenient: a half-answered form is the
+   * normal case on this path, so missing required answers fall to their hidden
+   * defaults and an unknown ZIP is never fatal. `submit` stays strict.
+   */
+  previewEstimate: publicProcedure
+    // Throttle FIRST, for the same reason as `lookupZip` above: `featureGate`
+    // runs `getBusinessFlags()`, a database round trip, on every call, and this
+    // endpoint fires while the visitor is still answering. Ordering constraint:
+    // nothing that touches the database may be inserted above this `.use()`.
+    .use(async ({ ctx, next }) => {
+      const requestHost = ctx.headers.get("host") ?? "";
+      const rawIp = getClientIpFromHeaders(ctx.headers);
+      try {
+        await quoteLivePreviewLimiter.consume(`${rawIp}:${requestHost}`);
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many requests. Please slow down.",
+        });
+      }
+      return next();
+    })
+    .use(featureGate("quoteCalculator"))
+    .input(quotePreviewEstimateSchema)
+    .query(
+      async ({
+        ctx,
+        input,
+      }): Promise<{ estimate: CustomerEstimate | null }> => {
+        // Same `checkBusiness()` resolution as `getByIdPublic` and
+        // `quoteSubmission.submit` — one active-status rule across every public
+        // surface of this feature.
+        const business = await checkBusiness();
+        if (!business) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Quote calculator not found",
+          });
+        }
+        const businessId = business.id;
+
+        const calculator = await ctx.db.quoteCalculator.findUnique({
+          where: { id: input.calculatorId, businessId },
+          select: { id: true, definition: true, published: true },
+        });
+
+        // Missing and unpublished stay indistinguishable, exactly as in
+        // `getByIdPublic`. This endpoint must not become the enumeration oracle
+        // that one refuses to be.
+        if (!calculator?.published) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Quote calculator not found",
+          });
+        }
+
+        // Migrating read (v1 blobs included), same drift guard as
+        // `getByIdPublic`: a definition that cannot be parsed cannot be priced.
+        const parsed = parseStoredQuoteDefinition(calculator.definition);
+        if (!parsed.success) {
+          Sentry.captureException(parsed.error, {
+            tags: { feature: "quote", step: "definition-drift" },
+            extra: { calculatorId: calculator.id, businessId },
+          });
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Quote calculator not found",
+          });
+        }
+        const definition = parsed.data;
+
+        // The gate — point (1) of the docblock. The projection is the hint;
+        // this is the rule.
+        if (
+          !definition.showEstimateToCustomer ||
+          !definition.showLiveEstimate
+        ) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Live estimates are not enabled for this calculator",
+          });
+        }
+
+        // Awaited once and read synchronously inside `computeQuote`, as in
+        // `submit`: a definition can pair several location questions.
+        const dataset = await loadZipDataset();
+        const result = computeQuote(
+          definition,
+          input.answers,
+          (zip) => dataset.get(zip) ?? null,
+          { mode: "preview" },
+        );
+
+        // No Sentry here, deliberately. `submit` already pages on definition
+        // drift and on a broken formula, with the same definition and far
+        // better context; repeating that on a path which runs once per answer
+        // change, per visitor, would bury the signal under its own volume. A
+        // preview that cannot price yet simply shows nothing.
+        if (!result.ok) return { estimate: null };
+
+        return {
+          estimate:
+            customerEstimateFrom(definition, result.estimateCents) ?? null,
+        };
+      },
+    ),
 });

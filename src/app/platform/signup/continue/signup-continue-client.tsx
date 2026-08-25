@@ -110,7 +110,9 @@ export function SignupContinueClient() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {(status === "loading" || status === "creating" || status === "done") && (
+        {(status === "loading" ||
+          status === "creating" ||
+          status === "done") && (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <Loader2 className="h-4 w-4 animate-spin" />
             {status === "done"

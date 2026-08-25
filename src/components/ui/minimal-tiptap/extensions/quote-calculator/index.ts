@@ -27,7 +27,13 @@ declare module "@tiptap/core" {
       /**
        * Insert a quote calculator
        */
-      insertQuoteCalculator: (attrs?: { calculatorId?: string }) => ReturnType;
+      insertQuoteCalculator: (attrs?: {
+        calculatorId?: string;
+        width?: string;
+        height?: string;
+        density?: string;
+        layout?: string;
+      }) => ReturnType;
     };
   }
 }
@@ -70,6 +76,58 @@ export const QuoteCalculator = Node.create<QuoteCalculatorOptions>({
       // Documents saved before this change still parse — the stale
       // `data-business-id` in their stored HTML is simply dropped as an
       // unknown attribute, and re-saving them cleans it out of the output.
+      width: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-quote-width"),
+        renderHTML: (attributes) => {
+          const width = attributes.width as string | null;
+          if (!width) {
+            return {};
+          }
+          return {
+            "data-quote-width": width,
+          };
+        },
+      },
+      height: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-quote-height"),
+        renderHTML: (attributes) => {
+          const height = attributes.height as string | null;
+          if (!height) {
+            return {};
+          }
+          return {
+            "data-quote-height": height,
+          };
+        },
+      },
+      density: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-quote-density"),
+        renderHTML: (attributes) => {
+          const density = attributes.density as string | null;
+          if (!density) {
+            return {};
+          }
+          return {
+            "data-quote-density": density,
+          };
+        },
+      },
+      layout: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-quote-layout"),
+        renderHTML: (attributes) => {
+          const layout = attributes.layout as string | null;
+          if (!layout) {
+            return {};
+          }
+          return {
+            "data-quote-layout": layout,
+          };
+        },
+      },
     };
   },
 

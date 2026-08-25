@@ -65,6 +65,13 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   membershipRole?: AdminRole | null;
   /** Drives the sidebar's "Finish setup" nudge — see WelcomeNotification. */
   welcomeSetupStatus?: { stripeConnected: boolean; hasProducts: boolean };
+  /**
+   * Count of unapproved `ProductReview` rows for the business, fetched once
+   * in the admin layout. Rendered as a badge on the Reviews nav item only —
+   * see the `item.key === "reviews"` check below. Undefined/0 renders no
+   * badge.
+   */
+  pendingReviewCount?: number;
 };
 
 export function AppSidebar({
@@ -73,6 +80,7 @@ export function AppSidebar({
   featureData,
   membershipRole,
   welcomeSetupStatus,
+  pendingReviewCount,
   ...props
 }: AppSidebarProps) {
   const { isEnabled, isDisabledByDependency } = useFeatureFlags({
@@ -98,11 +106,16 @@ export function AppSidebar({
         title: item.title,
         url: item.href,
         icon: item.icon,
+        // Only the Reviews item carries a badge today. Gated on the item
+        // itself already having survived the feature/role filter above, so
+        // the count never renders for a nav entry the sidebar wouldn't
+        // otherwise show.
+        badge: item.key === "reviews" ? pendingReviewCount : undefined,
       }));
 
       return { section, label: NAV_SECTION_LABELS[section], items };
     }).filter((group) => group.items.length > 0);
-  }, [isEnabled, isDisabledByDependency, roleForFiltering]);
+  }, [isEnabled, isDisabledByDependency, roleForFiltering, pendingReviewCount]);
 
   const secondaryItems = useMemo(() => {
     if (roleForFiltering !== "STAFF") return navSecondary;

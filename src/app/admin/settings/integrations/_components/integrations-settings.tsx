@@ -3,19 +3,34 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import type { PaymentsHealth } from "~/lib/stripe/payments-health";
 import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 
+import { QuickBooksSettings } from "./quickbooks-settings";
 import { StripeSettings } from "./stripe-settings";
 import { UmamiSettings } from "./umami-settings";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
+  /** Verified against Stripe by the server page; type-only import, the module itself is `server-only`. */
+  paymentsHealth: PaymentsHealth;
   umamiBaseUrl: string;
+  /**
+   * `null` when the `quickbooks` feature flag is off for this business (the
+   * server page never calls the gated `getConnection` procedure in that
+   * case) — the card is omitted entirely rather than shown disabled.
+   */
+  quickbooks?: RouterOutputs["quickbooks"]["getConnection"] | null;
 };
 
-export function IntegrationsSettings({ business, umamiBaseUrl }: Props) {
+export function IntegrationsSettings({
+  business,
+  paymentsHealth,
+  umamiBaseUrl,
+  quickbooks,
+}: Props) {
   // This page has no single form-wide save state to report: Stripe's
   // auto-tax toggle saves itself immediately on change, and Umami has its
   // own independent form with its own Save button and pending/success
@@ -47,11 +62,17 @@ export function IntegrationsSettings({ business, umamiBaseUrl }: Props) {
           <StripeSettings
             businessId={business.id}
             stripeAccountId={business.stripeAccountId}
+            paymentsHealth={paymentsHealth}
             stripeAutoTaxEnabled={business.stripeAutoTaxEnabled}
           />
 
           {/* Umami Analytics */}
           <UmamiSettings business={business} umamiBaseUrl={umamiBaseUrl} />
+
+          {/* QuickBooks Online */}
+          {quickbooks ? (
+            <QuickBooksSettings businessId={business.id} data={quickbooks} />
+          ) : null}
         </div>
       </div>
     </>

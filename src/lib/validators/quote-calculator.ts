@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { US_STATES_AND_TERRITORIES } from "~/lib/geo/regions";
 import { parseFormula } from "~/lib/quote/formula";
 import {
   ADMIN_BULK_DELETE_LIMIT,
@@ -9,11 +10,12 @@ import {
 /**
  * Schemas for the Quote Calculator feature.
  *
- * One calculator is a `QuoteCalculatorDefinition`: an ordered list of question
- * slides, a handful of owner-assigned variable names, optional zip-pair
- * distance variables, and a single pricing formula the SERVER evaluates.
+ * One calculator is a `QuoteCalculatorDefinition`: an ordered list of SCREENS,
+ * each holding one or more question fields, a handful of owner-assigned
+ * variable names, optional location-pair distance variables, and a single
+ * pricing formula the SERVER evaluates.
  *
- * Two invariants run through this whole file:
+ * Three invariants run through this whole file:
  *
  * 1. **The client never sees pricing internals.** Option `value`s, every
  *    `hiddenDefault`, the `distances` list and the `formula` itself are
@@ -24,8 +26,14 @@ import {
  *    `superRefine` at the bottom is what makes that true: it proves the
  *    formula parses, that every variable it names actually exists, that no
  *    show-if points at a question the visitor has not reached yet, and that
- *    every distance pairs two real zip questions. Anything it lets through,
- *    `computeQuote` can evaluate without a "this owner misconfigured it" path.
+ *    every distance pairs two real location questions. Anything it lets
+ *    through, `computeQuote` can evaluate without a "this owner
+ *    misconfigured it" path.
+ * 3. **Reads migrate, writes are strict.** `quoteCalculatorDefinitionSchema`
+ *    accepts v2 and nothing else — it is what `create`/`update` and the
+ *    builder form are typed against. Every path that READS a stored blob must
+ *    go through `parseStoredQuoteDefinition`, which migrates v1 first. See the
+ *    drift-wall note above `migrateQuoteDefinition`.
  */
 
 // ─── Variable names ─────────────────────────────────────────────────────────
@@ -62,11 +70,25 @@ export const QUOTE_FORMULA_MAX_LENGTH = 500;
 export const QUOTE_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 export const QUOTE_ZIP_RE = /^\d{5}$/;
 
+/**
+ * The two-letter codes an `address` question's state field accepts, derived
+ * from `US_STATES_AND_TERRITORIES` — the 50 states + DC plus the US
+ * territories (PR/VI/GU/AS/MP) — the same list the storefront `<select>`
+ * renders. Derived, not hand-copied: a state present in one and absent from
+ * the other is a field the visitor can select and the server then rejects.
+ * Quote addresses deliberately include the territories even though
+ * checkout/shipping's `US_STATES` does not — see the comment on
+ * `US_STATES_AND_TERRITORIES` in `~/lib/geo/regions`.
+ */
+export const US_STATE_CODES: ReadonlySet<string> = new Set(
+  US_STATES_AND_TERRITORIES.map((state) => state.code),
+);
+
 // The field-level schema stays deliberately loose (non-empty trimmed string).
 // The regex / length / reserved-word / uniqueness checks all live in the
 // definition-level `superRefine` so each one can report against a precise
-// path — `["questions", 3, "variableName"]` — and the builder can highlight
-// the exact row rather than the whole form.
+// path — `["screens", 1, "questions", 0, "variableName"]` — and the builder
+// can highlight the exact row rather than the whole form.
 const quoteVariableNameField = z
   .string()
   .trim()
@@ -80,6 +102,7 @@ export const QUOTE_QUESTION_TYPE_VALUES = [
   "dropdown",
   "number",
   "zip",
+  "address",
   "text",
   "longtext",
   "date",
@@ -228,6 +251,22 @@ export const quoteZipQuestionSchema = z.object({
   ...quoteQuestionBaseShape,
 });
 
+/**
+ * A full US street address collected as one field group (line 1, optional line
+ * 2, city, state, ZIP).
+ *
+ * Informational like `zip` — it declares no variable and contributes nothing to
+ * the price directly — but its ZIP half may serve as a distance endpoint, which
+ * is why it carries no extra config here and why `isQuoteLocationQuestion`
+ * exists below. The sub-field shapes live on the WIRE schema
+ * (`quoteWireAddressSchema`), not here: the definition only says "ask for an
+ * address", the wire says what a valid answer looks like.
+ */
+export const quoteAddressQuestionSchema = z.object({
+  type: z.literal("address"),
+  ...quoteQuestionBaseShape,
+});
+
 export const quoteTextQuestionSchema = z.object({
   type: z.literal("text"),
   ...quoteQuestionBaseShape,
@@ -249,6 +288,7 @@ export const quoteQuestionSchema = z.discriminatedUnion("type", [
   quoteDropdownQuestionSchema,
   quoteNumberQuestionSchema,
   quoteZipQuestionSchema,
+  quoteAddressQuestionSchema,
   quoteTextQuestionSchema,
   quoteLongtextQuestionSchema,
   quoteDateQuestionSchema,
@@ -267,6 +307,21 @@ export type QuoteVariableQuestion = Extract<
 export type QuoteOptionQuestion = Extract<
   QuoteQuestion,
   { options: unknown[] }
+>;
+
+/**
+ * Any question that yields a ZIP the server can resolve to coordinates — i.e.
+ * anything usable as a distance endpoint.
+ *
+ * Both members are informational (no variable, no price), so this is NOT a
+ * pricing predicate; it is "can this question anchor a distance?". Keep it in
+ * lockstep with the `case "zip"` / `case "address"` arms of `computeQuote` that
+ * populate `zipCoordinates`: a type accepted here but not resolved there is a
+ * distance that silently falls to its `hiddenDefault` forever.
+ */
+export type QuoteLocationQuestion = Extract<
+  QuoteQuestion,
+  { type: "zip" | "address" }
 >;
 
 export function isQuoteVariableQuestion(
@@ -290,13 +345,20 @@ export function isQuoteOptionQuestion(
   );
 }
 
+export function isQuoteLocationQuestion(
+  question: QuoteQuestion,
+): question is QuoteLocationQuestion {
+  return question.type === "zip" || question.type === "address";
+}
+
 // ─── Distance variable ──────────────────────────────────────────────────────
 
 /**
- * Pairs two zip questions into a straight-line-miles variable.
+ * Pairs two location questions (`zip` or `address`) into a straight-line-miles
+ * variable.
  *
- * Kept out of `questions` because it is not a slide — the visitor never sees
- * it and never answers it. It is a derived variable, computed from two answers
+ * Kept out of `screens` because it is not a step — the visitor never sees it
+ * and never answers it. It is a derived variable, computed from two answers
  * they already gave.
  */
 export const quoteDistanceVariableSchema = z.object({
@@ -310,18 +372,83 @@ export const quoteDistanceVariableSchema = z.object({
 
 export type QuoteDistanceVariable = z.infer<typeof quoteDistanceVariableSchema>;
 
+// ─── Screen ─────────────────────────────────────────────────────────────────
+
+/** Total questions across every screen. */
+export const QUOTE_MAX_QUESTIONS = 30;
+
+/**
+ * Questions on one screen. Low on purpose: a step the visitor has to scroll
+ * through is a step they abandon, and the whole shape of this feature is
+ * "one small ask at a time".
+ */
+export const QUOTE_MAX_QUESTIONS_PER_SCREEN = 8;
+
+/** Also the maximum number of steps, since the floor is one question each. */
+export const QUOTE_MAX_SCREENS = QUOTE_MAX_QUESTIONS;
+
+/**
+ * One step in the visitor's flow.
+ *
+ * `title`/`description` are optional because the overwhelmingly common screen
+ * holds exactly one question, and the runner renders THAT question's title as
+ * the heading (today's one-question-per-slide look, preserved bit-for-bit).
+ * A heading only earns its place once a screen groups several questions.
+ *
+ * Nullable as well as optional: the builder's text inputs clear to `""` and the
+ * v1 migration writes explicit `null`s, and an owner deleting a heading must be
+ * able to persist that deletion.
+ */
+export const quoteScreenSchema = z.object({
+  id: z.string().min(1),
+  title: z
+    .string()
+    .trim()
+    .max(120, "Screen heading must be 120 characters or fewer")
+    .optional()
+    .nullable(),
+  description: z
+    .string()
+    .trim()
+    .max(300, "Intro text must be 300 characters or fewer")
+    .optional()
+    .nullable(),
+  questions: z
+    .array(quoteQuestionSchema)
+    .min(1, "Add at least one question to this screen")
+    .max(
+      QUOTE_MAX_QUESTIONS_PER_SCREEN,
+      `A screen can hold at most ${QUOTE_MAX_QUESTIONS_PER_SCREEN} questions`,
+    ),
+});
+
+export type QuoteScreen = z.infer<typeof quoteScreenSchema>;
+
 // ─── Definition ─────────────────────────────────────────────────────────────
+
+/**
+ * Shown under the live running estimate. Owner-editable, but never absent —
+ * a number that moves as the visitor answers reads as a firm price unless
+ * something says otherwise, and that is a quote the owner did not make.
+ */
+export const QUOTE_LIVE_ESTIMATE_DISCLAIMER_DEFAULT =
+  "This running estimate is for guidance only — we'll confirm your final quote after reviewing your details.";
 
 const quoteCalculatorDefinitionObjectSchema = z.object({
   /**
-   * Definition format version, pinned to 1. Stored on every saved calculator
-   * so a future shape change can migrate rather than guess.
+   * Definition format version, pinned to 2 — the current shape, and the only
+   * one this schema accepts. v1 (`questions` at the top level) is still out
+   * there in the database and is upgraded on read by
+   * `parseStoredQuoteDefinition`; see the drift-wall note there.
    */
-  version: z.literal(1),
-  questions: z
-    .array(quoteQuestionSchema)
+  version: z.literal(2),
+  screens: z
+    .array(quoteScreenSchema)
     .min(1, "Add at least one question")
-    .max(30, "A calculator can have at most 30 questions"),
+    .max(
+      QUOTE_MAX_SCREENS,
+      `A calculator can have at most ${QUOTE_MAX_SCREENS} screens`,
+    ),
   distances: z
     .array(quoteDistanceVariableSchema)
     .max(5, "A calculator can have at most 5 distance variables")
@@ -343,6 +470,32 @@ const quoteCalculatorDefinitionObjectSchema = z.object({
   /** Show "$2,000 – $2,400" instead of a single figure. */
   displayAsRange: z.boolean().default(false),
   rangePaddingPercent: z.number().int().min(1).max(50).default(10),
+  /**
+   * A final "Review & send" step listing every visible answer with an Edit
+   * link, after the contact details.
+   *
+   * Defaults ON for calculators built from here on — correcting an answer
+   * without Back-stepping through the whole flow is plainly better. The v1
+   * migration deliberately writes `false` instead, so an existing calculator
+   * does not silently grow a step its owner never chose.
+   */
+  showReviewStep: z.boolean().default(true),
+  /**
+   * A running estimate that updates as the visitor answers.
+   *
+   * Off by default, and meaningless without `showEstimateToCustomer` — the
+   * public projection ANDs the two so a stale `true` here can never leak a
+   * price the owner turned off. The tradeoff is real and is the owner's to
+   * make: a visitor can flip one answer back and forth and watch the number
+   * move, which reveals what that answer is worth. Fine for menu-style
+   * pricing, not for a sensitive rate table.
+   */
+  showLiveEstimate: z.boolean().default(false),
+  liveEstimateDisclaimer: z
+    .string()
+    .trim()
+    .max(300, "Disclaimer must be 300 characters or fewer")
+    .default(QUOTE_LIVE_ESTIMATE_DISCLAIMER_DEFAULT),
   requirePhone: z.boolean().default(false),
   /** "We'll get back to you within N business days." */
   responseDays: z.number().int().min(1).max(14).default(1),
@@ -367,41 +520,96 @@ function isReservedWord(name: string): boolean {
 /**
  * Every cross-field rule for a definition, each with a precise `path` so the
  * builder can attach the message to the exact row/field that caused it.
+ *
+ * Everything below reasons over ONE flattened list built up front, because
+ * every rule here is about the order the visitor meets questions in, not about
+ * which screen they happen to sit on. `path` carries the screen coordinates
+ * (`["screens", 1, "questions", 0, …]`) so the message still lands on the right
+ * card; `flatIndex` carries the ordering. Conflating the two is how a show-if
+ * that is legal within a screen ends up rejected — or, worse, one that points
+ * forward ends up accepted and resolves to permanently-hidden at runtime.
  */
 function checkQuoteDefinition(
   definition: QuoteCalculatorDefinitionShape,
   ctx: z.RefinementCtx,
 ): void {
-  const { questions, distances } = definition;
+  const { screens, distances } = definition;
 
-  // ── Unique question ids ──────────────────────────────────────────────────
-  const seenQuestionIds = new Set<string>();
-  questions.forEach((question, index) => {
-    if (seenQuestionIds.has(question.id)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Duplicate question id "${question.id}"`,
-        path: ["questions", index, "id"],
+  type FlatQuestion = {
+    question: QuoteQuestion;
+    /** Position in visitor order — the axis every ordering rule uses. */
+    flatIndex: number;
+    /** `["screens", screenIndex, "questions", questionIndex]`. */
+    path: (string | number)[];
+  };
+
+  const flat: FlatQuestion[] = [];
+  screens.forEach((screen, screenIndex) => {
+    screen.questions.forEach((question, questionIndex) => {
+      flat.push({
+        question,
+        flatIndex: flat.length,
+        path: ["screens", screenIndex, "questions", questionIndex],
       });
-    }
-    seenQuestionIds.add(question.id);
+    });
   });
 
+  // ── Total question ceiling ───────────────────────────────────────────────
+  // Per-screen and per-array caps are enforced by the schema; only the total
+  // across screens has nowhere else to live. Reported against ["screens"] —
+  // no single row is at fault.
+  if (flat.length > QUOTE_MAX_QUESTIONS) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `A calculator can have at most ${QUOTE_MAX_QUESTIONS} questions`,
+      path: ["screens"],
+    });
+  }
+
+  // ── Unique screen ids ────────────────────────────────────────────────────
+  const seenScreenIds = new Set<string>();
+  screens.forEach((screen, screenIndex) => {
+    if (seenScreenIds.has(screen.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duplicate screen id "${screen.id}"`,
+        path: ["screens", screenIndex, "id"],
+      });
+    }
+    seenScreenIds.add(screen.id);
+  });
+
+  // ── Unique question ids, across ALL screens ──────────────────────────────
+  // One namespace, not one per screen: show-if and distances reference a
+  // question by bare id, so two screens holding the same id makes both of
+  // those ambiguous.
+  const seenQuestionIds = new Set<string>();
+  for (const entry of flat) {
+    if (seenQuestionIds.has(entry.question.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duplicate question id "${entry.question.id}"`,
+        path: [...entry.path, "id"],
+      });
+    }
+    seenQuestionIds.add(entry.question.id);
+  }
+
   // ── Unique option ids within each question ───────────────────────────────
-  questions.forEach((question, index) => {
-    if (!isQuoteOptionQuestion(question)) return;
+  for (const entry of flat) {
+    if (!isQuoteOptionQuestion(entry.question)) continue;
     const seenOptionIds = new Set<string>();
-    question.options.forEach((option, optionIndex) => {
+    entry.question.options.forEach((option, optionIndex) => {
       if (seenOptionIds.has(option.id)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Duplicate option id "${option.id}"`,
-          path: ["questions", index, "options", optionIndex, "id"],
+          path: [...entry.path, "options", optionIndex, "id"],
         });
       }
       seenOptionIds.add(option.id);
     });
-  });
+  }
 
   // ── Variable names ───────────────────────────────────────────────────────
   // One namespace shared by variable-producing questions AND distances: they
@@ -442,14 +650,13 @@ function checkQuoteDefinition(
     declaredVariables.add(name);
   }
 
-  questions.forEach((question, index) => {
-    if (!isQuoteVariableQuestion(question)) return;
-    checkVariableName(question.variableName, [
-      "questions",
-      index,
+  for (const entry of flat) {
+    if (!isQuoteVariableQuestion(entry.question)) continue;
+    checkVariableName(entry.question.variableName, [
+      ...entry.path,
       "variableName",
     ]);
-  });
+  }
 
   distances.forEach((distance, index) => {
     checkVariableName(distance.variableName, [
@@ -464,52 +671,61 @@ function checkQuoteDefinition(
   // storefront runner resolves visibility in one forward pass (see
   // `resolveVisibility`), and single-answer because "which of several checked
   // boxes counts?" has no good answer.
-  const indexById = new Map<string, number>();
-  questions.forEach((question, index) => {
-    if (!indexById.has(question.id)) indexById.set(question.id, index);
-  });
+  //
+  // "Backward" is measured on the FLATTENED index, so a question may depend on
+  // an earlier question ON THE SAME SCREEN — that is a live reveal within one
+  // step, which is exactly what multi-question screens are for. What it may not
+  // do is depend on a question the visitor has not reached, whether that sits
+  // later on this screen or on a later screen.
+  const flatByQuestionId = new Map<string, FlatQuestion>();
+  for (const entry of flat) {
+    if (!flatByQuestionId.has(entry.question.id)) {
+      flatByQuestionId.set(entry.question.id, entry);
+    }
+  }
 
-  questions.forEach((question, index) => {
-    const condition = question.showIf;
-    if (!condition) return;
+  for (const entry of flat) {
+    const condition = entry.question.showIf;
+    if (!condition) continue;
 
-    const targetIndex = indexById.get(condition.questionId);
-    if (targetIndex === undefined || targetIndex >= index) {
+    const targetEntry = flatByQuestionId.get(condition.questionId);
+    if (!targetEntry || targetEntry.flatIndex >= entry.flatIndex) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
           "A conditional question must depend on a question that comes before it",
-        path: ["questions", index, "showIf", "questionId"],
+        path: [...entry.path, "showIf", "questionId"],
       });
-      return;
+      continue;
     }
 
-    const target = questions[targetIndex];
-    if (!target) return;
+    const target = targetEntry.question;
 
     if (target.type !== "choice" && target.type !== "dropdown") {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
           "A conditional question can only depend on a single-choice or dropdown question",
-        path: ["questions", index, "showIf", "questionId"],
+        path: [...entry.path, "showIf", "questionId"],
       });
-      return;
+      continue;
     }
 
     if (!target.options.some((option) => option.id === condition.optionId)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `"${target.title}" has no option matching this condition`,
-        path: ["questions", index, "showIf", "optionId"],
+        path: [...entry.path, "showIf", "optionId"],
       });
     }
-  });
+  }
 
   // ── Distance endpoints ───────────────────────────────────────────────────
   const questionById = new Map<string, QuoteQuestion>();
-  for (const question of questions) {
-    if (!questionById.has(question.id)) questionById.set(question.id, question);
+  for (const entry of flat) {
+    if (!questionById.has(entry.question.id)) {
+      questionById.set(entry.question.id, entry.question);
+    }
   }
 
   distances.forEach((distance, index) => {
@@ -526,15 +742,15 @@ function checkQuoteDefinition(
       if (!target) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Pick a ZIP code question",
+          message: "Pick a ZIP code or address question",
           path: ["distances", index, endpoint.key],
         });
         continue;
       }
-      if (target.type !== "zip") {
+      if (!isQuoteLocationQuestion(target)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: `"${target.title}" is not a ZIP code question`,
+          message: `"${target.title}" is not a ZIP code or address question`,
           path: ["distances", index, endpoint.key],
         });
       }
@@ -573,12 +789,101 @@ function checkQuoteDefinition(
   }
 }
 
+/**
+ * The STRICT schema: v2 only, and the one `create`/`update` accept.
+ *
+ * Kept as a plain object + `superRefine` (no `preprocess`, no cast) on purpose.
+ * It is what the builder's react-hook-form resolver and `CalculatorFormValues =
+ * z.input<typeof quoteCalculatorCreateSchema>` are typed against, and a
+ * preprocess here would type the form's input as `unknown` and take every
+ * field-level type with it.
+ */
 export const quoteCalculatorDefinitionSchema =
   quoteCalculatorDefinitionObjectSchema.superRefine(checkQuoteDefinition);
 
 export type QuoteCalculatorDefinition = z.infer<
   typeof quoteCalculatorDefinitionSchema
 >;
+
+// ─── Stored-definition migration (v1 → v2) ──────────────────────────────────
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Upgrades a stored v1 definition (`{ version: 1, questions: [...] }`) to the
+ * v2 shape in memory. Pure, deterministic and idempotent — anything that is not
+ * recognizably v1 is returned untouched, so running it on a v2 blob, on
+ * garbage, or twice, all no-op.
+ *
+ * **Never delete this.** v1 blobs are not rewritten in place; a calculator is
+ * only written back as v2 the next time its owner saves. Some of them will
+ * never be saved again. Removing this function does not "finish" the
+ * migration — it 404s those calculators.
+ *
+ * Shape rules, and why each is what it is:
+ *
+ * - one screen per question, so an existing calculator keeps its exact
+ *   one-question-per-step flow;
+ * - screen ids are derived (`screen_<questionId>`), never random: the same blob
+ *   must migrate to the same ids on every read, or React keys and the builder's
+ *   open-card state would churn on every render;
+ * - `showReviewStep: false`, unlike the v2 default of `true` — an existing
+ *   calculator must not silently grow a step its owner never chose. New
+ *   calculators get the better default; old ones keep their behavior.
+ */
+export function migrateQuoteDefinition(raw: unknown): unknown {
+  if (!isPlainRecord(raw)) return raw;
+  if (raw.version !== 1 || !Array.isArray(raw.questions)) return raw;
+
+  const { questions, ...rest } = raw;
+
+  return {
+    ...rest,
+    version: 2,
+    screens: questions.map((question, index) => ({
+      // The index fallback only fires for a question whose id is missing or
+      // non-string — which the strict schema rejects a moment later anyway.
+      // It exists so the migration itself stays total and never produces two
+      // screens with the same id.
+      id:
+        isPlainRecord(question) && typeof question.id === "string"
+          ? `screen_${question.id}`
+          : `screen_${index}`,
+      title: null,
+      description: null,
+      questions: [question],
+    })),
+    showReviewStep: false,
+    showLiveEstimate: false,
+    liveEstimateDisclaimer: QUOTE_LIVE_ESTIMATE_DISCLAIMER_DEFAULT,
+  };
+}
+
+/**
+ * The READ schema: migrate, then validate strictly.
+ *
+ * **Drift wall.** Every path that loads a definition out of the database has to
+ * use this (via `parseStoredQuoteDefinition`) rather than
+ * `quoteCalculatorDefinitionSchema.safeParse` — `getByIdPublic`, `submit`,
+ * `previewEstimate`, the builder's `[id]/page.tsx`. A read path left on the
+ * strict schema does not degrade gracefully: it NOT_FOUNDs (or blanks) every
+ * calculator that has not been re-saved since v2 shipped.
+ *
+ * The cast is the same trade `quoteShowIfField` makes: `z.preprocess` types its
+ * input as `unknown`, which is correct here (a stored JSON blob IS unknown) but
+ * would erase the output type. Runtime behavior is untouched.
+ */
+export const storedQuoteDefinitionSchema = z.preprocess(
+  migrateQuoteDefinition,
+  quoteCalculatorDefinitionSchema,
+) as unknown as z.ZodType<QuoteCalculatorDefinition, z.ZodTypeDef, unknown>;
+
+/** `safeParse` a stored `QuoteCalculator.definition` blob of any version. */
+export function parseStoredQuoteDefinition(raw: unknown) {
+  return storedQuoteDefinitionSchema.safeParse(raw);
+}
 
 // ─── Public projection (THE SECURITY CONTRACT) ──────────────────────────────
 
@@ -601,9 +906,32 @@ export type PublicQuoteQuestion = {
   unitLabel?: string | null;
 };
 
-export type PublicQuoteCalculatorDefinition = {
+export type PublicQuoteScreen = {
+  id: string;
+  title: string | null;
+  description: string | null;
   questions: PublicQuoteQuestion[];
+};
+
+export type PublicQuoteCalculatorDefinition = {
+  /**
+   * The single source of truth for what the runner renders. There is
+   * deliberately no flat `questions` copy alongside it — two orderings of the
+   * same list is exactly how a runner and a server disagree about which
+   * question came "before" another. Callers that need the flat list build it
+   * with `flattenScreens` (`~/lib/quote/screens`).
+   */
+  screens: PublicQuoteScreen[];
   showEstimateToCustomer: boolean;
+  showReviewStep: boolean;
+  /**
+   * The EFFECTIVE value: `showEstimateToCustomer && showLiveEstimate`. The
+   * runner never has to re-AND them, and a definition left with a stale
+   * `showLiveEstimate: true` after the owner hid the estimate cannot leak a
+   * price through the preview endpoint.
+   */
+  showLiveEstimate: boolean;
+  liveEstimateDisclaimer: string;
   requirePhone: boolean;
   responseDays: number;
   thankYouMessage: string;
@@ -660,11 +988,17 @@ function toPublicQuestion(question: QuoteQuestion): PublicQuoteQuestion {
  * What it strips, and why each one matters:
  *
  * - `formula` — the entire pricing model in one string.
- * - `distances` — reveals which zip pair drives price and by how much.
+ * - `distances` — reveals which location pair drives price and by how much.
  * - every option `value` — with the formula, this is the price list.
  * - every `hiddenDefault` — the "doesn't apply" price for each variable.
  * - `displayAsRange` / `rangePaddingPercent` — presentation of an estimate the
  *   server renders; the client is not trusted to widen or narrow a range.
+ *
+ * Note what is NOT projected even though the runner might seem to want it:
+ * there is no per-question "affects the price" flag. The live-estimate hook
+ * decides which answers are worth a preview call from the question TYPE alone
+ * (`toPreviewWireAnswers`), so nothing about which questions carry money
+ * crosses the boundary.
  *
  * The client submits option IDs, never labels and never values; the server
  * recomputes the estimate from the stored definition on every submission.
@@ -673,8 +1007,17 @@ export function toPublicCalculatorDefinition(
   definition: QuoteCalculatorDefinition,
 ): PublicQuoteCalculatorDefinition {
   return {
-    questions: definition.questions.map(toPublicQuestion),
+    screens: definition.screens.map((screen) => ({
+      id: screen.id,
+      title: screen.title ?? null,
+      description: screen.description ?? null,
+      questions: screen.questions.map(toPublicQuestion),
+    })),
     showEstimateToCustomer: definition.showEstimateToCustomer,
+    showReviewStep: definition.showReviewStep,
+    showLiveEstimate:
+      definition.showEstimateToCustomer && definition.showLiveEstimate,
+    liveEstimateDisclaimer: definition.liveEstimateDisclaimer,
     requirePhone: definition.requirePhone,
     responseDays: definition.responseDays,
     thankYouMessage: definition.thankYouMessage,
@@ -703,12 +1046,46 @@ export const QUOTE_ID_MAX_LENGTH = 64;
 export const QUOTE_MAX_ANSWER_NUMBER = 1_000_000_000;
 
 /**
+ * A US address as the browser sends it, for an `address` question.
+ *
+ * All-or-nothing at this level: a visitor either supplies a complete address or
+ * omits the key entirely. "Half an address" is a client-side state, not a wire
+ * state — `computeQuote` still re-checks completeness, because a stored
+ * submission being replayed never went through this schema.
+ */
+export const quoteWireAddressSchema = z.object({
+  line1: z
+    .string()
+    .trim()
+    .min(1, "Enter a street address")
+    .max(120, "Street address must be 120 characters or fewer"),
+  line2: z
+    .string()
+    .trim()
+    .max(120, "Apartment/suite must be 120 characters or fewer")
+    .optional(),
+  city: z
+    .string()
+    .trim()
+    .min(1, "Enter a city")
+    .max(80, "City must be 80 characters or fewer"),
+  state: z
+    .string()
+    .trim()
+    .length(2, "Pick a state")
+    .refine((code) => US_STATE_CODES.has(code), "Pick a state"),
+  zip: z.string().regex(QUOTE_ZIP_RE, "Enter a 5-digit ZIP code"),
+});
+
+export type QuoteWireAddress = z.infer<typeof quoteWireAddressSchema>;
+
+/**
  * One answer as the browser sends it: IDs and raw values only, never labels
  * and never prices. Everything here is re-validated against the stored
  * definition in `computeQuote`, so a hand-crafted payload can at worst produce
  * an error, never a price the owner did not configure.
  *
- * Every field is optional because a single shape covers all eight question
+ * Every field is optional because a single shape covers all nine question
  * types; `computeQuote` reads only the field its question type calls for and
  * ignores the rest.
  */
@@ -746,6 +1123,8 @@ export const quoteWireAnswerSchema = z.object({
   date: z.string().regex(QUOTE_DATE_RE, "Enter a valid date").optional(),
   /** zip */
   zip: z.string().regex(QUOTE_ZIP_RE, "Enter a 5-digit ZIP code").optional(),
+  /** address */
+  address: quoteWireAddressSchema.optional(),
 });
 
 export type QuoteWireAnswer = z.infer<typeof quoteWireAnswerSchema>;
@@ -774,6 +1153,25 @@ export const quoteSubmitSchema = z.object({
 
 export type QuoteSubmitData = z.infer<typeof quoteSubmitSchema>;
 
+/**
+ * The live running estimate's input — the answers, and nothing else.
+ *
+ * Derived from `quoteSubmitSchema` with `.pick()` rather than restated, so the
+ * bounds that make the submit path safe against an anonymous caller (the 30-
+ * answer cap, `QUOTE_ID_MAX_LENGTH`, the ±1e9 number ceiling) apply verbatim to
+ * an endpoint that gets hit on every keystroke-adjacent answer change. No
+ * contact details and no captcha token: this query persists nothing, emails
+ * nobody, and is throttled by its own rate limiter instead.
+ */
+export const quotePreviewEstimateSchema = quoteSubmitSchema.pick({
+  calculatorId: true,
+  answers: true,
+});
+
+export type QuotePreviewEstimateData = z.infer<
+  typeof quotePreviewEstimateSchema
+>;
+
 // ─── Submission snapshot (stored) ───────────────────────────────────────────
 
 /**
@@ -799,7 +1197,25 @@ export const quoteSubmissionAnswerSchema = z.object({
   zip: z.string().optional(),
   zipCity: z.string().optional(),
   zipState: z.string().optional(),
-  /** Human-readable rendering, e.g. "3-4 bedrooms" or "48601 (Saginaw, MI)". */
+  /**
+   * `address` questions only. Structured alongside `display` so a consumer that
+   * wants two lines (the admin detail page) can have them, while everything
+   * that just prints a string keeps working. Optional, so submissions stored
+   * before the `address` type existed still parse.
+   */
+  address: z
+    .object({
+      line1: z.string(),
+      line2: z.string().optional(),
+      city: z.string(),
+      state: z.string(),
+      zip: z.string(),
+    })
+    .optional(),
+  /**
+   * Human-readable rendering, e.g. "3-4 bedrooms", "48601 (Saginaw, MI)" or
+   * "123 Main St, Apt 4, Saginaw, MI 48601".
+   */
   display: z.string(),
 });
 

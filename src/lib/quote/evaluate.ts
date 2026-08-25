@@ -1,4 +1,4 @@
-import type { FormulaFailureCode } from "~/lib/quote/formula";
+import type { EvalResult, FormulaFailureCode } from "~/lib/quote/formula";
 import type {
   QuoteCalculatorDefinition,
   QuoteQuestion,
@@ -6,13 +6,15 @@ import type {
   QuoteWireAnswer,
 } from "~/lib/validators/quote-calculator";
 import { haversineMiles } from "~/lib/geo/haversine";
-import { evaluateFormula } from "~/lib/quote/formula";
+import { evaluateAst, parseFormula } from "~/lib/quote/formula";
+import { flattenScreens } from "~/lib/quote/screens";
 import { resolveVisibility } from "~/lib/quote/visibility";
 import {
   isQuoteVariableQuestion,
   QUOTE_DATE_RE,
   QUOTE_MAX_FINAL_CENTS,
   QUOTE_ZIP_RE,
+  US_STATE_CODES,
 } from "~/lib/validators/quote-calculator";
 
 /**
@@ -30,6 +32,28 @@ import {
  * unit-testable and deterministic. Same inputs, same estimate, forever — which
  * matters because the estimate and its variable snapshot are stored and shown
  * back to the owner months later.
+ *
+ * ── Two modes ──────────────────────────────────────────────────────────────
+ *
+ * `mode: "submit"` (the default) is the strict, authoritative path: it is what
+ * produces the stored estimate, the answer snapshot and the owner's lead, so a
+ * required question with no answer is a hard failure.
+ *
+ * `mode: "preview"` serves the LIVE RUNNING ESTIMATE only — a number shown mid-
+ * flow, persisted nowhere and emailed to nobody. Half the form is legitimately
+ * unanswered at that point, so every "required but missing" branch takes the
+ * same path an OPTIONAL blank takes (its `hiddenDefault`, or `0` for a
+ * multiselect), and an unrecognized ZIP lets its distance fall to that
+ * distance's `hiddenDefault` instead of failing. Preview is also the only mode
+ * that accepts a ZIP-ONLY answer for an `address` question, because it is the
+ * only shape the preview wire is allowed to send one in — the street address
+ * would otherwise ride the query string of an anonymous GET on every keystroke
+ * (see `toPreviewWireAnswers` in `src/components/quote/quote-answers.ts`, the
+ * other half of that contract). Nothing else softens:
+ * `unknown-option`, `bad-answer` and `formula-failed` still fail in preview,
+ * because each of those means the payload or the definition is wrong rather
+ * than merely incomplete. Preview never widens what a visitor can learn — it
+ * runs the same formula over the same stored values and returns one number.
  */
 
 export type ZipLocation = {
@@ -69,7 +93,8 @@ export type QuoteComputationError = {
  *
  * - `value-error` — the formula itself is fine; THIS visitor's numbers broke
  *   it. A `0` typed into a divisor with no configured `min`, a `hiddenDefault`
- *   of 0 feeding a divisor, or inputs large enough to overflow to Infinity.
+ *   of 0 feeding a divisor, inputs large enough to overflow to Infinity, or a
+ *   stack of negative-value discount options that lands the total BELOW ZERO.
  *   The owner cannot "fix" a definition that is already valid, and the visitor
  *   did nothing wrong — so neither gets an error, and the owner gets a lead
  *   with a blank estimate to price by hand.
@@ -166,26 +191,59 @@ function baseSnapshot(
   return row;
 }
 
+export type QuoteComputationMode = "submit" | "preview";
+
+export type QuoteComputationOptions = {
+  /** Defaults to `"submit"`. See the "Two modes" note at the top of the file. */
+  mode?: QuoteComputationMode;
+};
+
 export function computeQuote(
   definition: QuoteCalculatorDefinition,
   wireAnswers: QuoteWireAnswer[],
   lookupZip: ZipLookupFn,
+  options?: QuoteComputationOptions,
 ): QuoteComputationResult {
+  /**
+   * "Incomplete is expected." Guards every `missing-required` branch, the
+   * distance-endpoint `unknown-zip` branch, and the zip-only address the
+   * preview wire sends — and nothing else.
+   */
+  const lenient = options?.mode === "preview";
+
+  // Parsed ONCE, here, because two separate things need it: deciding which
+  // distances can fail a submission over an unknown ZIP (just below), and
+  // pricing at the end.
+  const parsedFormula = parseFormula(definition.formula);
+
+  // `null` means "we could not read the formula", NOT "the formula names
+  // nothing" — the two must not collapse, because the first has to keep
+  // today's conservative behavior (see the distance set below) while the
+  // second legitimately narrows it to nothing.
+  const formulaVariables = parsedFormula.ok
+    ? new Set(parsedFormula.variables)
+    : null;
+
   // Last write wins on a duplicated questionId. Arbitrary but total — the
   // alternative (reject) turns a harmless double-submit race in the runner
   // into a dead end for the visitor.
   const answers = new Map<string, QuoteWireAnswer>();
   for (const answer of wireAnswers) answers.set(answer.questionId, answer);
 
+  // Screen order, then in-screen order — the same list the runner walks and the
+  // same order the validator measured "comes before" against. See
+  // `src/lib/quote/screens.ts`: nothing may enumerate questions any other way.
+  const questions = flattenScreens(definition.screens);
+
   const questionById = new Map<string, QuoteQuestion>();
-  for (const question of definition.questions) {
+  for (const question of questions) {
     if (!questionById.has(question.id)) questionById.set(question.id, question);
   }
 
   // Visibility is resolved from the SUBMITTED choice/dropdown selections, using
   // the exact helper the storefront runner used to decide what to show. See
   // `src/lib/quote/visibility.ts` for why that sharing is load-bearing.
-  const visibility = resolveVisibility(definition.questions, (questionId) => {
+  const visibility = resolveVisibility(questions, (questionId) => {
     const question = questionById.get(questionId);
     if (!question) return undefined;
     if (question.type !== "choice" && question.type !== "dropdown") {
@@ -194,11 +252,21 @@ export function computeQuote(
     return answers.get(questionId)?.optionId;
   });
 
-  // Which zip questions feed a distance variable. Only those have to resolve
-  // to real coordinates — a standalone "what's your ZIP?" question is just
-  // contact context and must not fail a submission when the table misses it.
+  // Which location questions feed a distance the FORMULA ACTUALLY PRICES WITH.
+  // Only those have to resolve to real coordinates: without them there is no
+  // distance and therefore no price. A standalone "what's your ZIP?" question
+  // is just contact context — and so is an endpoint of a distance row the owner
+  // built once and then stopped referencing. Turning a visitor away over a ZIP
+  // that changes no number is a lost lead for nothing.
+  //
+  // When the formula does not parse, every distance stays in the set. That
+  // submission is about to fail as `formula-failed` regardless, and narrowing
+  // off a parse that did not happen would be guessing.
   const zipQuestionIdsUsedByDistance = new Set<string>();
   for (const distance of definition.distances) {
+    if (formulaVariables && !formulaVariables.has(distance.variableName)) {
+      continue;
+    }
     zipQuestionIdsUsedByDistance.add(distance.fromQuestionId);
     zipQuestionIdsUsedByDistance.add(distance.toQuestionId);
   }
@@ -207,13 +275,16 @@ export function computeQuote(
   // object literal: variable names are lowercase identifiers, so `__proto__`
   // is a legal name, and `obj["__proto__"] = n` on a normal object silently
   // does nothing. `fromEntries` defines a real own property instead — which is
-  // also what `evaluateFormula`'s hasOwnProperty lookup requires.
+  // also what `evaluateAst`'s hasOwnProperty lookup requires.
   const variables = new Map<string, number>();
   const snapshots: QuoteSubmissionAnswer[] = [];
-  /** Resolved coordinates for visible, answered zip questions, by question id. */
+  /**
+   * Resolved coordinates for visible, answered location questions (`zip` and
+   * `address` alike), by question id.
+   */
   const zipCoordinates = new Map<string, ZipLocation>();
 
-  for (const question of definition.questions) {
+  for (const question of questions) {
     const isVisible = visibility.get(question.id) ?? false;
 
     // ── Hidden ────────────────────────────────────────────────────────────
@@ -238,7 +309,7 @@ export function computeQuote(
       case "dropdown": {
         const optionId = answer?.optionId;
         if (optionId === undefined || optionId === "") {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -247,7 +318,8 @@ export function computeQuote(
           }
           // An optional question left blank is treated exactly like a hidden
           // one: it did not apply, so its variable takes the value the owner
-          // configured for "does not apply".
+          // configured for "does not apply". In preview mode a REQUIRED blank
+          // takes this same path — the visitor simply has not got there yet.
           variables.set(question.variableName, question.hiddenDefault);
           break;
         }
@@ -276,7 +348,7 @@ export function computeQuote(
         const checkedIds = [...new Set(submitted)];
 
         if (checkedIds.length === 0) {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -318,7 +390,7 @@ export function computeQuote(
       case "number": {
         const value = answer?.number;
         if (value === undefined) {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -363,7 +435,7 @@ export function computeQuote(
       case "zip": {
         const zip = answer?.zip;
         if (zip === undefined || zip === "") {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -390,8 +462,11 @@ export function computeQuote(
 
         if (!location) {
           // Only fatal when a distance variable depends on it — without
-          // coordinates there is no distance and therefore no price.
-          if (zipQuestionIdsUsedByDistance.has(question.id)) {
+          // coordinates there is no distance and therefore no price. In
+          // preview mode not even then: the distance falls to its
+          // `hiddenDefault` and the running estimate keeps updating rather
+          // than blanking out on a ZIP the visitor is still typing.
+          if (zipQuestionIdsUsedByDistance.has(question.id) && !lenient) {
             return failure(
               "unknown-zip",
               `We don't recognize the ZIP code ${zip}.`,
@@ -408,13 +483,126 @@ export function computeQuote(
         break;
       }
 
+      // ── Address ─────────────────────────────────────────────────────────
+      // Informational like `zip`, and priced the same way: nothing directly,
+      // but its ZIP half can anchor a distance variable.
+      case "address": {
+        const address = answer?.address;
+        const line1 = address?.line1?.trim() ?? "";
+        const line2 = address?.line2?.trim() ?? "";
+        const city = address?.city?.trim() ?? "";
+        // Upper-cased before the membership test so a hand-built payload (or a
+        // replayed old submission) carrying "mi" is not turned away for a
+        // difference no visitor could see.
+        const state = address?.state?.trim().toUpperCase() ?? "";
+        const zip = address?.zip?.trim() ?? "";
+
+        // `line2` is deliberately not in here — an address with no apartment
+        // number is complete.
+        const requiredParts = [line1, city, state, zip];
+        const filledCount = requiredParts.filter((part) => part !== "").length;
+
+        if (filledCount === 0) {
+          if (question.required && !lenient) {
+            return failure(
+              "missing-required",
+              `"${question.title}" is required.`,
+              question.id,
+            );
+          }
+
+          // Preview only: the live estimate sends an address question's ZIP and
+          // NOTHING ELSE (see `toPreviewWireAnswers` — a tRPC query is a GET, so
+          // the street would ride the URL of an anonymous, uncaptcha'd request
+          // on every keystroke). The ZIP alone is enough to anchor a distance,
+          // so it is geocoded here even though no other part of the address
+          // exists yet — which is also why the running estimate starts moving
+          // as soon as the ZIP is valid rather than when the address is done.
+          //
+          // Deliberately NOT reflected on the snapshot: a zip-only address is
+          // not an answer, and submit mode must keep failing a required address
+          // that arrives this way.
+          if (lenient) {
+            const previewZip = answer?.zip?.trim() ?? "";
+            if (QUOTE_ZIP_RE.test(previewZip)) {
+              const previewLocation = lookupZip(previewZip);
+              if (previewLocation) {
+                zipCoordinates.set(question.id, previewLocation);
+              }
+            }
+          }
+          break;
+        }
+
+        if (filledCount < requiredParts.length) {
+          // A half-filled address is neither an answer nor a blank: geocoding
+          // it would silently price a different place. In preview it is simply
+          // "still typing", and treated as unanswered.
+          if (lenient) break;
+          return failure(
+            "bad-answer",
+            `"${question.title}" is incomplete. Please complete the address or leave it blank.`,
+            question.id,
+          );
+        }
+
+        // Re-checked here even though the wire schema enforces both: this
+        // function is also the path for replaying a stored submission, which
+        // never went through the current wire schema.
+        if (!US_STATE_CODES.has(state)) {
+          return failure(
+            "bad-answer",
+            `"${question.title}" needs a valid US state.`,
+            question.id,
+          );
+        }
+        if (!QUOTE_ZIP_RE.test(zip)) {
+          return failure(
+            "bad-answer",
+            `"${question.title}" must include a 5-digit ZIP code.`,
+            question.id,
+          );
+        }
+
+        snapshot.address = line2
+          ? { line1, line2, city, state, zip }
+          : { line1, city, state, zip };
+        snapshot.zip = zip;
+        // "123 Main St, Apt 4, Saginaw, MI 48601" — one line, because every
+        // consumer of a snapshot (owner inbox, both emails, the review step)
+        // renders `display` as a single string.
+        snapshot.display = [line1, line2, `${city}, ${state} ${zip}`]
+          .filter((part) => part !== "")
+          .join(", ");
+
+        const location = lookupZip(zip);
+        if (!location) {
+          if (zipQuestionIdsUsedByDistance.has(question.id) && !lenient) {
+            return failure(
+              "unknown-zip",
+              `We don't recognize the ZIP code ${zip}.`,
+              question.id,
+            );
+          }
+          break;
+        }
+
+        // The visitor's typed city/state stay on `display`; the resolved pair
+        // is recorded separately, so a mismatch (wrong city for the ZIP) is
+        // visible to the owner rather than quietly overwritten.
+        zipCoordinates.set(question.id, location);
+        snapshot.zipCity = location.city;
+        snapshot.zipState = location.state;
+        break;
+      }
+
       // ── Informational free text ─────────────────────────────────────────
       case "text":
       case "longtext": {
         const raw = answer?.text;
         const text = raw === undefined ? "" : raw.trim();
         if (text.length === 0) {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -432,7 +620,7 @@ export function computeQuote(
       case "date": {
         const date = answer?.date;
         if (date === undefined || date === "") {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -458,6 +646,10 @@ export function computeQuote(
   }
 
   // ── Distance variables ────────────────────────────────────────────────────
+  // EVERY distance is computed, including one the formula never reads. The
+  // narrowing above is only about which unknown ZIPs may fail a submission; the
+  // stored variable snapshot is a record of what the calculator resolved, and
+  // the admin detail page reads it back row by row.
   for (const distance of definition.distances) {
     const from = zipCoordinates.get(distance.fromQuestionId);
     const to = zipCoordinates.get(distance.toQuestionId);
@@ -478,7 +670,11 @@ export function computeQuote(
 
   // ── Price ─────────────────────────────────────────────────────────────────
   const resolvedVariables = Object.fromEntries(variables);
-  const evaluated = evaluateFormula(definition.formula, resolvedVariables);
+  // `evaluateFormula` inlined against the AST parsed at the top of the function
+  // — same two steps, same failure surface, one parse.
+  const evaluated: EvalResult = parsedFormula.ok
+    ? evaluateAst(parsedFormula.ast, resolvedVariables)
+    : { ok: false, error: parsedFormula.error };
 
   if (!evaluated.ok) {
     // Two very different situations arrive through one `ok: false`, and
@@ -502,18 +698,41 @@ export function computeQuote(
     return failure("formula-failed", evaluated.error.message);
   }
 
-  // Clamped at zero: a formula with enough negative-value discount options can
-  // land below zero, and a negative estimate is meaningless to a customer,
-  // would render as "-$120.00", and would corrupt the admin list's revenue
-  // sort and totals. Zero reads as "we need to talk about this one".
-  const rawEstimateCents = Math.max(0, Math.round(evaluated.value * 100));
+  const rounded = Math.round(evaluated.value * 100);
+
+  // Below zero we NULL the estimate. This used to clamp to 0, which is the one
+  // outcome worse than showing "-$120.00": it quotes the customer a free job in
+  // the owner's name, on a form whose whole promise is "this is roughly what it
+  // costs". Nobody configured $0 — enough stacked discount options simply
+  // outran the charges for this one combination of answers — so there is no
+  // number to show, exactly as at the far end of the range (see `over-cap`
+  // below). The lead survives either way, which is the point: the owner reads
+  // the answers and prices it by hand.
+  if (rounded < 0) {
+    return {
+      ok: true,
+      estimateCents: null,
+      estimateFailure: {
+        code: "value-error",
+        message: `Computed estimate ${rounded} is negative — this combination of answers discounts below zero`,
+      },
+      variables: resolvedVariables,
+      answerSnapshots: snapshots,
+    };
+  }
+
+  // `Math.round(-0.4)` is `-0`, and `-0 < 0` is false, so a hair of float dust
+  // below zero lands here rather than in the branch above — correctly: that is
+  // a genuine $0.00, not a discount overrun. Normalized to a plain `0` so no
+  // consumer ever has to think about a signed zero, and because exact zero must
+  // stay a real price all the way through `customerEstimateFrom`.
+  const rawEstimateCents = rounded === 0 ? 0 : rounded;
 
   // Over the cap we NULL the estimate rather than clamping it. Clamping would
   // hand the customer (and the owner's inbox) a confident "$1,000,000.00" that
   // no configured price actually produces — a number the owner would have to
   // un-believe. A blank estimate is honest, keeps the lead, and tells the owner
-  // exactly which submission needs a hand-priced quote. The zero-clamp above is
-  // different on purpose: 0 IS the arithmetic answer there, just floored.
+  // exactly which submission needs a hand-priced quote.
   if (rawEstimateCents > QUOTE_MAX_ESTIMATE_CENTS) {
     return {
       ok: true,

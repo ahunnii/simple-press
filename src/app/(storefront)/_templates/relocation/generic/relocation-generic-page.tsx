@@ -157,21 +157,28 @@ export function RelocationGenericPage({ page }: { page: Page }) {
     // ratio threshold can never be reached by a target that large — the block
     // would stay at `opacity: 0` forever. Any-pixel-visible is the only safe
     // trigger for arbitrary-length content.
-    <RelocationReveal
-      threshold={0}
-      className="w-full min-[1025px]:max-w-[46rem]"
-    >
+    <RelocationReveal threshold={0} className="w-full">
       {page.type === "policy" ? (
-        <p className="mb-8 [font-family:var(--font-relocation-display)] text-[0.75rem] font-bold tracking-[0.1em] text-[var(--relocation-ink)] uppercase opacity-60">
+        <p className="mb-8 min-[1025px]:max-w-[46rem] [font-family:var(--font-relocation-display)] text-[0.75rem] font-bold tracking-[0.1em] text-[var(--relocation-ink)] uppercase opacity-60">
           Last updated · {formatUpdated(page.updatedAt)}
         </p>
       ) : null}
 
+      {/* Content-width contract: every DIRECT CHILD of the prose div below is
+          capped at 46rem on desktop, EXCEPT a child that either carries
+          `sp-quote-breakout` (a full-width quote calculator asking to break
+          out of the article column — see `quote-calculator-block.tsx`) or
+          already has its own `max-w-*` utility (medium/small quote wrappers,
+          `EmbedFrame`), which wins on its own specificity. The `:where()`
+          wrapper around `:not()` is load-bearing: it drops the cap's
+          specificity to zero so a plain `max-w-*` utility class on the child
+          always beats it regardless of source order. */}
       <div ref={contentRef}>
         <TiptapRenderer
           content={page.content as TiptapJSON}
           className={cn(
             "prose w-full max-w-none",
+            "min-[1025px]:[:where(&>:not(.sp-quote-breakout))]:max-w-[46rem]",
             "prose-headings:[font-family:var(--font-relocation-display)] prose-headings:font-bold prose-headings:text-[var(--relocation-charcoal)]",
             "prose-h2:text-[1.75rem] prose-h2:mt-12 prose-h2:mb-4",
             "prose-h3:text-[1.25rem] prose-h3:mt-8 prose-h3:mb-3",
@@ -185,7 +192,9 @@ export function RelocationGenericPage({ page }: { page: Page }) {
         />
       </div>
 
-      <PlatformPolicyNotice slug={page.slug} />
+      <div className="min-[1025px]:max-w-[46rem]">
+        <PlatformPolicyNotice slug={page.slug} />
+      </div>
     </RelocationReveal>
   );
 

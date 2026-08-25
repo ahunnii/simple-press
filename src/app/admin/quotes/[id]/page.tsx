@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import type { QuoteStatusDb } from "~/lib/validators/quote-calculator";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
@@ -42,6 +43,22 @@ export default async function QuoteDetailPage({ params }: PageProps) {
     .catch(rethrowTrpcForErrorBoundary);
 
   if (!submission) notFound();
+
+  // QuickBooks card data — fetched only when the owner-toggleable
+  // `quickbooks` flag is on. The card is an action surface (send deposit /
+  // final invoice), so it follows the flag; the invoice RECORDS themselves
+  // stay reachable on /admin/invoices regardless. For every business with the
+  // flag off this stays `undefined`, so `<QuoteDetail>` renders exactly as
+  // before: no extra query, no extra DOM.
+  const flags = await getBusinessFlags();
+  const quickbooks = flags.isEnabled("quickbooks")
+    ? await Promise.all([
+        api.quickbooks.getConnection(),
+        api.quickbooks.getLeadInvoices({ quoteSubmissionId: id }),
+      ])
+        .then(([connection, invoices]) => ({ connection, invoices }))
+        .catch(rethrowTrpcForErrorBoundary)
+    : undefined;
 
   // `answers` and `formulaSnapshot` are stored as `Json` and were valid
   // against these schemas at write time (`quote-submission.ts`'s `submit`
@@ -87,6 +104,7 @@ export default async function QuoteDetailPage({ params }: PageProps) {
         formulaSnapshot={formulaResult.success ? formulaResult.data : null}
         formulaParseFailed={!formulaResult.success}
         canDelete={canDelete}
+        quickbooks={quickbooks}
       />
     </>
   );

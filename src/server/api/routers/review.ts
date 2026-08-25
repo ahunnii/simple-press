@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { DbClient, TxClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
+import { sendNewReviewNotification } from "~/lib/email/templates";
 import { getClientIpFromHeaders, reviewVoteLimiter } from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
 import {
@@ -380,7 +381,7 @@ export const reviewRouter = createTRPCRouter({
 
       const product = await ctx.db.product.findUnique({
         where: { id: input.productId },
-        select: { businessId: true },
+        select: { businessId: true, name: true },
       });
       if (!product)
         throw new TRPCError({
@@ -432,6 +433,35 @@ export const reviewRouter = createTRPCRouter({
       });
 
       await updateProductStats(ctx.db, input.productId);
+
+      // Owner notification — customer-submitted reviews always land
+      // unapproved (see `isApproved: false` above), so this always fires for
+      // this mutation. `ownerCreate` (default-approved) never calls this.
+      // `sendEmail` never throws, so no try/catch is needed here — a Resend
+      // failure is already captured centrally in `sendEmail` itself and must
+      // not fail the review submission.
+      const business = await ctx.db.business.findUnique({
+        where: { id: product.businessId },
+        select: {
+          name: true,
+          ownerEmail: true,
+          subdomain: true,
+          customDomain: true,
+          domainStatus: true,
+          siteContent: { select: { logoUrl: true } },
+        },
+      });
+      if (business) {
+        await sendNewReviewNotification({
+          reviewerName: review.customerName,
+          productName: product.name,
+          rating: review.rating,
+          reviewTitle: review.title ?? undefined,
+          reviewText: review.comment,
+          business,
+        });
+      }
+
       return review;
     }),
 

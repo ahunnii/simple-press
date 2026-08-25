@@ -112,7 +112,9 @@ export async function consumeOnboardingDraft(
   if (!row) return null;
 
   // Always delete — draft is single-use whether valid or not.
-  await db.verification.delete({ where: { id: row.id } }).catch(() => undefined);
+  await db.verification
+    .delete({ where: { id: row.id } })
+    .catch(() => undefined);
 
   if (row.expiresAt.getTime() < Date.now()) return null;
   const payload = unpack(row.value);

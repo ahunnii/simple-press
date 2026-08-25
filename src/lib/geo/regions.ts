@@ -54,6 +54,32 @@ export const US_STATES: RegionOption[] = [
   { code: "WY", name: "Wyoming" },
 ];
 
+/**
+ * US territories, in the same option shape as `US_STATES`. For the
+ * quote-calculator `address` question ONLY — checkout/shipping/manual-order
+ * forms all go through `getRegionOptions("US")`, which stays on the 50
+ * states + DC list deliberately (shipping zones, tax, and order forms are
+ * not scoped to serve these ZIPs today). See `US_STATES_AND_TERRITORIES`
+ * below for the combined list quote address fields use instead.
+ */
+export const US_TERRITORIES: RegionOption[] = [
+  { code: "AS", name: "American Samoa" },
+  { code: "GU", name: "Guam" },
+  { code: "MP", name: "Northern Mariana Islands" },
+  { code: "PR", name: "Puerto Rico" },
+  { code: "VI", name: "U.S. Virgin Islands" },
+];
+
+/**
+ * `US_STATES` + `US_TERRITORIES`. Quote-calculator address questions only —
+ * checkout/shipping deliberately stays on the 50-states+DC list via
+ * `getRegionOptions("US")` / `US_STATES` directly.
+ */
+export const US_STATES_AND_TERRITORIES: RegionOption[] = [
+  ...US_STATES,
+  ...US_TERRITORIES,
+];
+
 export const CA_PROVINCES: RegionOption[] = [
   { code: "AB", name: "Alberta" },
   { code: "BC", name: "British Columbia" },

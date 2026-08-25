@@ -7,6 +7,7 @@ import {
   AlertCircle,
   ChevronDown,
   GripVertical,
+  MoreHorizontal,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -22,6 +23,16 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   FormControl,
   FormDescription,
@@ -57,6 +68,17 @@ export type ConditionSource = {
   options: { id: string; label: string }[];
 };
 
+/**
+ * The react-hook-form path prefix for one question row.
+ *
+ * Passed in rather than rebuilt from indices here: the row's address is
+ * `definition.screens.<s>.questions.<q>`, and only the screen card knows both
+ * halves. Typed as a template literal so every `${base}.field` below is still a
+ * checked `Path<CalculatorFormValues>` rather than a bare string.
+ */
+export type QuestionFieldPath =
+  `definition.screens.${number}.questions.${number}`;
+
 /** Radix Select rejects an empty-string item value, so "always shown" needs one. */
 const SHOW_IF_NONE = "__always__";
 
@@ -64,38 +86,47 @@ const MAX_OPTIONS = 12;
 
 type Props = {
   form: UseFormReturn<CalculatorFormValues>;
-  index: number;
+  /** `definition.screens.<screenIndex>.questions.<questionIndex>`. */
+  base: QuestionFieldPath;
+  /** Position in VISITOR order across all screens — what the owner is shown. */
+  flatIndex: number;
   /** dnd-kit / React key — the `useFieldArray` row key, NOT `question.id`. */
   sortableId: string;
   /** The live watched value for this row. */
   question: QuestionInput;
   /** Earlier single-answer questions this one may depend on. */
   conditionSources: ConditionSource[];
+  /** Screens this question could move to — never including its own. */
+  screenOptions: { index: number; label: string }[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemove: () => void;
+  onMoveToScreen: (target: number | "new") => void;
 };
 
 export function CalculatorQuestionCard({
   form,
-  index,
+  base,
+  flatIndex,
   sortableId,
   question,
   conditionSources,
+  screenOptions,
   open,
   onOpenChange,
   onRemove,
+  onMoveToScreen,
 }: Props) {
   const {
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
   } = useSortable({ id: sortableId });
 
-  const base = `definition.questions.${index}` as const;
   const meta = QUESTION_TYPE_META[question.type];
 
   // Any resolver error anywhere under this row. Used to flag a COLLAPSED card,
@@ -132,9 +163,13 @@ export function CalculatorQuestionCard({
     >
       <Collapsible open={open} onOpenChange={onOpenChange}>
         <div className="flex items-center gap-2 p-3">
+          {/* Listeners live on the handle alone, never on the card: the card
+              also sits inside a screen that is itself draggable, and a
+              card-wide drag surface would make the two contexts fight. */}
           <button
             type="button"
-            aria-label={`Drag to reorder question ${index + 1}`}
+            ref={setActivatorNodeRef}
+            aria-label={`Drag to reorder question ${flatIndex + 1}`}
             className="focus-visible:ring-ring text-muted-foreground hover:text-foreground flex h-9 w-9 shrink-0 cursor-move items-center justify-center rounded-md focus-visible:ring-2 focus-visible:outline-none"
             {...attributes}
             {...listeners}
@@ -155,7 +190,7 @@ export function CalculatorQuestionCard({
                 )}
               />
               <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-                {index + 1}.
+                {flatIndex + 1}.
               </span>
               <span className="truncate text-sm font-medium">
                 {question.title.trim() || "Untitled question"}
@@ -183,12 +218,45 @@ export function CalculatorQuestionCard({
             </button>
           </CollapsibleTrigger>
 
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="shrink-0"
+                aria-label="More"
+              >
+                <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Move to screen…</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="w-56">
+                  {screenOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.index}
+                      onClick={() => onMoveToScreen(option.index)}
+                    >
+                      <span className="truncate">{option.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                  {screenOptions.length > 0 && <DropdownMenuSeparator />}
+                  <DropdownMenuItem onClick={() => onMoveToScreen("new")}>
+                    New screen
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button
             type="button"
             variant="ghost"
             size="icon"
             className="text-destructive hover:text-destructive/80 shrink-0"
-            aria-label={`Delete question ${index + 1}`}
+            aria-label={`Delete question ${flatIndex + 1}`}
             onClick={onRemove}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -319,7 +387,7 @@ export function CalculatorQuestionCard({
           )}
 
           {isOptionQuestionInput(question) && (
-            <QuestionOptionsEditor form={form} index={index} />
+            <QuestionOptionsEditor form={form} base={base} />
           )}
 
           {question.type === "number" && (
@@ -360,11 +428,13 @@ export function CalculatorQuestionCard({
             </div>
           )}
 
-          {/* Branching. Only offered from the second question onward, and only
-              against earlier single-answer questions — the same rule the
+          {/* Branching. Only offered from the second question onward — counted
+              in VISITOR order, not within the screen, so a question can branch
+              on an earlier answer from the same screen (a live reveal) as well
+              as on one from a screen before it. That is exactly the rule the
               validator enforces, so the menu can never build a condition the
               save would reject. */}
-          {index > 0 && (
+          {flatIndex > 0 && (
             <div className="space-y-2 rounded-lg border p-4">
               <p className="text-sm font-medium">Only show when…</p>
 
@@ -476,12 +546,12 @@ export function CalculatorQuestionCard({
 
 function QuestionOptionsEditor({
   form,
-  index,
+  base,
 }: {
   form: UseFormReturn<CalculatorFormValues>;
-  index: number;
+  base: QuestionFieldPath;
 }) {
-  const name = `definition.questions.${index}.options` as const;
+  const name = `${base}.options` as const;
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,

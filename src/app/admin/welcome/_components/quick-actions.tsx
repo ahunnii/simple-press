@@ -23,7 +23,7 @@ type QuickActionsProps = {
 
 export function QuickActions({ business }: QuickActionsProps) {
   const storefrontUrl =
-    business.customDomain && business.domainStatus === "active"
+    business.customDomain && business.domainStatus === "ACTIVE"
       ? `https://${business.customDomain}`
       : `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 

@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { AlertTriangle } from "lucide-react";
 
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
-import { quoteCalculatorDefinitionSchema } from "~/lib/validators/quote-calculator";
+import { parseStoredQuoteDefinition } from "~/lib/validators/quote-calculator";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
@@ -45,15 +45,19 @@ export default async function EditQuoteCalculatorPage({ params }: PageProps) {
   // The stored `definition` is an untyped JSON column, so it has to be proven
   // before it can seed a typed form.
   //
-  // A failure here is drift — a definition written by an older shape, or edited
-  // in the database — and it gets an error state rather than a best-effort
-  // form. Seeding the builder with the parts that happened to parse would look
-  // like it worked, and the first Save would write that lossy version over the
-  // owner's real one. Refusing to open it keeps the stored definition intact
-  // until a developer can look at it.
-  const parsed = quoteCalculatorDefinitionSchema.safeParse(
-    calculator.definition,
-  );
+  // `parseStoredQuoteDefinition`, NOT the strict schema: a v1 blob (one
+  // question per step, no screens) is migrated to v2 on the way in, so an
+  // existing calculator opens normally and is rewritten as v2 the first time
+  // its owner saves. The strict schema here would show every un-resaved
+  // calculator the "can't be opened" card below.
+  //
+  // A failure at this point is real drift — a definition written by a shape
+  // neither version knows, or edited in the database — and it gets an error
+  // state rather than a best-effort form. Seeding the builder with the parts
+  // that happened to parse would look like it worked, and the first Save would
+  // write that lossy version over the owner's real one. Refusing to open it
+  // keeps the stored definition intact until a developer can look at it.
+  const parsed = parseStoredQuoteDefinition(calculator.definition);
 
   if (!parsed.success) {
     return (

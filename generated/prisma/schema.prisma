@@ -258,6 +258,8 @@ model Business {
   backInStockRequests   BackInStockRequest[]
   quoteCalculators      QuoteCalculator[]
   quoteSubmissions      QuoteSubmission[]
+  quickBooksConnection  QuickBooksConnection?
+  quickBooksInvoices    QuickBooksInvoice[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -1652,6 +1654,10 @@ model QuoteSubmission {
   calculatorId String?
   calculator   QuoteCalculator? @relation(fields: [calculatorId], references: [id], onDelete: SetNull)
 
+  // Invoices issued against this lead through QuickBooks (SetNull on the
+  // invoice side: money records outlive the lead).
+  quickBooksInvoices QuickBooksInvoice[]
+
   // Denormalized for join-free inbox listing (Testimonial precedent).
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -1659,4 +1665,107 @@ model QuoteSubmission {
   @@index([businessId, status, createdAt]) // inbox: status filter + newest-first
   @@index([businessId, createdAt]) // inbox: unfiltered listing
   @@index([calculatorId]) // SetNull fan-out on calculator delete
+}
+
+/// One QuickBooks Online company connection per business (1:1). Updated in
+/// place on reconnect and never deleted by the app, so deposit settings and
+/// the cached QBO reference ids survive a disconnect/reconnect cycle.
+/// Tokens are `/// @encrypted` (prisma-field-encryption) and are nulled on
+/// disconnect. Encrypted columns can never appear in a `where`.
+model QuickBooksConnection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // active | needs_reconnect | disconnected — QBO_CONNECTION_STATUS_VALUES in
+  // src/lib/validators/quickbooks.ts. needs_reconnect = Intuit rejected the
+  // refresh token (rotated away, revoked, or past its ~100-day life).
+  status String @default("active")
+
+  realmId     String // QBO company id, from the OAuth callback query string
+  environment String // sandbox | production — QBO_ENVIRONMENT at connect time
+  companyName String?
+
+  accessToken           String?   @db.Text /// @encrypted
+  refreshToken          String?   @db.Text /// @encrypted
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  lastRefreshAt         DateTime?
+  connectedAt           DateTime  @default(now())
+  disconnectedAt        DateTime?
+
+  // Deposit rule: percent of the quote OR a fixed amount. Prefills the
+  // "Send deposit invoice" dialog; the owner can override per invoice.
+  depositMode       String @default("percent") // percent | fixed
+  depositPercent    Int    @default(25) // 1..100, whole percent
+  depositFixedCents Int    @default(0)
+  defaultDueDays    Int    @default(7)
+
+  // Per-realm QBO reference cache. Reset whenever realmId changes on
+  // reconnect — ids from one company are meaningless in another.
+  incomeAccountId String?
+  depositItemId   String?
+  serviceItemId   String?
+  depositItemName String  @default("Deposit")
+  serviceItemName String  @default("Services")
+
+  lastSyncAt    DateTime?
+  lastSyncError String?   @db.Text
+
+  @@index([status, lastSyncAt]) // cron: active connections, stalest first
+}
+
+/// One row per invoice SimplePress created in QuickBooks: audit trail, the
+/// /admin/invoices list, and the cron sync target. Customer fields are a
+/// snapshot taken at issue time (encrypted like QuoteSubmission's contact
+/// fields). `realmId` is snapshotted per row so invoices from a previous
+/// QBO company are recognizable after a reconnect.
+model QuickBooksInvoice {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // SetNull, not Cascade: invoices are money records and must outlive the
+  // lead they were issued against.
+  quoteSubmissionId String?
+  quoteSubmission   QuoteSubmission? @relation(fields: [quoteSubmissionId], references: [id], onDelete: SetNull)
+
+  kind        String // deposit | final | custom — QBO_INVOICE_KIND_VALUES
+  amountCents Int
+  memo        String? @db.Text
+  description String? // line-item description sent to QBO
+
+  customerName  String /// @encrypted
+  customerEmail String /// @encrypted
+  customerPhone String? /// @encrypted
+
+  // pending | created | sent | paid | overdue | voided | error —
+  // QBO_INVOICE_STATUS_VALUES. `pending` = local row exists, QBO call in
+  // flight; `error` = QBO create/send failed and can be retried.
+  status       String    @default("pending")
+  balanceCents Int?
+  dueDate      DateTime?
+  sentAt       DateTime?
+  paidAt       DateTime?
+
+  realmId       String
+  qboCustomerId String?
+  qboInvoiceId  String?
+  qboDocNumber  String?
+  qboSyncToken  String?
+
+  lastSyncedAt DateTime?
+  lastError    String?   @db.Text // truncated to 500 chars; owner-facing
+
+  @@unique([realmId, qboInvoiceId]) // NULL qboInvoiceId rows never collide (Postgres)
+  @@index([businessId, createdAt]) // /admin/invoices listing
+  @@index([businessId, status, createdAt]) // list status filter
+  @@index([quoteSubmissionId]) // lead card + SetNull fan-out
+  @@index([status, lastSyncedAt]) // cron sweep: open invoices, stalest first
 }

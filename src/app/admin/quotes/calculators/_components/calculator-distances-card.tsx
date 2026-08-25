@@ -1,10 +1,13 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, AlertCircle } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
 
-import type { CalculatorFormValues, QuestionInput } from "./builder-shared";
+import type {
+  CalculatorFormValues,
+  LocationQuestionInput,
+} from "./builder-shared";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -37,15 +40,18 @@ const MAX_DISTANCES = 5;
 
 type Props = {
   form: UseFormReturn<CalculatorFormValues>;
-  /** Every zip-type question, in question order. */
-  zipQuestions: QuestionInput[];
+  /** Every ZIP-code or address question, in visitor order. */
+  locationQuestions: LocationQuestionInput[];
 };
 
 /**
- * Distance variables — a straight-line mileage between the answers to two ZIP
- * questions.
+ * Distance variables — a straight-line mileage between the answers to two
+ * location questions.
  *
- * The card renders only when at least two ZIP questions exist (the caller
+ * Either endpoint may be a ZIP code question or a full address: an address
+ * carries a ZIP, and the ZIP is all the server needs to place it on the map.
+ *
+ * The card renders only when at least two location questions exist (the caller
  * enforces that): a distance needs two endpoints, and offering the panel with
  * one available question would only ever produce a save the validator refuses.
  *
@@ -53,19 +59,19 @@ type Props = {
  * the two ZIPs it already has, which is also why the mileage cannot be
  * previewed here — see the test panel's sample input.
  */
-export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
+export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "definition.distances",
   });
 
-  const zipOptions = zipQuestions.map((question, index) => ({
+  const locationOptions = locationQuestions.map((question, index) => ({
     id: question.id,
-    label: question.title.trim() || `Untitled ZIP question ${index + 1}`,
+    label: question.title.trim() || `Untitled location question ${index + 1}`,
   }));
 
-  const firstZipId = zipOptions[0]?.id ?? "";
-  const secondZipId = zipOptions[1]?.id ?? "";
+  const firstLocationId = locationOptions[0]?.id ?? "";
+  const secondLocationId = locationOptions[1]?.id ?? "";
 
   return (
     <Card>
@@ -74,8 +80,10 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
           <div>
             <CardTitle>Distance variables</CardTitle>
             <CardDescription>
-              Turn a pair of ZIP code answers into a miles number your formula
-              can use. Computed on the server — visitors never see the mileage.
+              Turns two locations into a straight-line (&quot;as the crow
+              flies&quot;) mileage number your formula can use. Straight-line
+              miles run shorter than road miles — pad your per-mile rate to
+              compensate. Computed on the server; visitors never see the mileage.
             </CardDescription>
           </div>
           <Button
@@ -83,7 +91,9 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
             variant="outline"
             size="sm"
             disabled={fields.length >= MAX_DISTANCES}
-            onClick={() => append(makeDistance(firstZipId, secondZipId))}
+            onClick={() =>
+              append(makeDistance(firstLocationId, secondLocationId))
+            }
           >
             <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
             Add distance
@@ -125,7 +135,8 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                           />
                         </FormControl>
                         <FormDescription>
-                          Holds the miles between the two ZIPs below.
+                          Holds the straight-line miles between the two locations
+                          below.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -136,7 +147,7 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                     form={form}
                     name={`${base}.hiddenDefault`}
                     label="Value when unavailable"
-                    description="Used when either ZIP is skipped, branched away, or not in the lookup table."
+                    description="Used when either location is skipped, branched away, or its ZIP is not in the lookup table."
                     placeholder="0"
                   />
                 </div>
@@ -158,11 +169,11 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Pick a ZIP question" />
+                              <SelectValue placeholder="Pick a ZIP code or address question" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {zipOptions.map((option) => (
+                            {locationOptions.map((option) => (
                               <SelectItem key={option.id} value={option.id}>
                                 {option.label}
                               </SelectItem>
@@ -190,11 +201,11 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Pick a ZIP question" />
+                              <SelectValue placeholder="Pick a ZIP code or address question" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {zipOptions.map((option) => (
+                            {locationOptions.map((option) => (
                               <SelectItem key={option.id} value={option.id}>
                                 {option.label}
                               </SelectItem>
@@ -206,6 +217,55 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                     )}
                   />
                 </div>
+
+                {(() => {
+                  // form.watch (not getValues): the endpoint selects render
+                  // through Controllers, so only a subscription re-renders
+                  // this warning when the owner picks a different question.
+                  const fromId = form.watch(`${base}.fromQuestionId`);
+                  const toId = form.watch(`${base}.toQuestionId`);
+
+                  const fromQuestion = fromId
+                    ? locationQuestions.find((q) => q.id === fromId)
+                    : undefined;
+                  const toQuestion = toId
+                    ? locationQuestions.find((q) => q.id === toId)
+                    : undefined;
+
+                  const isFromFragile =
+                    fromQuestion &&
+                    (fromQuestion.required !== true || fromQuestion.showIf);
+                  const isToFragile =
+                    toQuestion &&
+                    (toQuestion.required !== true || toQuestion.showIf);
+
+                  const fragileQuestions = [
+                    ...(isFromFragile ? [{ question: fromQuestion, label: "From" }] : []),
+                    ...(isToFragile ? [{ question: toQuestion, label: "To" }] : []),
+                  ];
+
+                  return fragileQuestions.length > 0 ? (
+                    <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/30 dark:bg-amber-950/20">
+                      {fragileQuestions.map((item) => (
+                        <p
+                          key={item.label}
+                          className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200"
+                        >
+                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                          <span>
+                            <strong>{item.question?.title || "This question"}</strong>{" "}
+                            is optional or shown conditionally. If a visitor skips
+                            it, this distance silently falls back to its
+                            &quot;Value when unavailable&quot; above.
+                            That&apos;s intentional for branched designs — just
+                            make sure your formula still prices sensibly when that
+                            happens.
+                          </span>
+                        </p>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
 
                 <div className="flex justify-end">
                   <Button

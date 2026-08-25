@@ -74,7 +74,9 @@ type DashboardContentProps = {
   conversionCard?: React.ReactNode;
   /**
    * Optional Suspense-wrapped "Search readiness N%" strip (server-rendered).
-   * Renders nothing once the score hits 100%, same as `setupProgress`.
+   * Renders nothing once the score hits 100%, same as `setupProgress`, or when
+   * the owner has turned off the `dashboardSearchReadiness` feature flag (page.tsx
+   * gates it before rendering).
    */
   searchReadiness?: React.ReactNode;
   /** Onboarding progress from /admin/welcome; null when setup is complete. */

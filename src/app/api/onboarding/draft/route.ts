@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import type { OnboardingDraftPayload } from "~/lib/onboarding/draft";
 import {
-  type OnboardingDraftPayload,
   peekOnboardingDraft,
   saveOnboardingDraft,
 } from "~/lib/onboarding/draft";

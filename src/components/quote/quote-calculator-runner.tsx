@@ -17,8 +17,19 @@ import type {
   QuoteContactErrors,
 } from "./quote-answers";
 import type { QuoteSubmitResult } from "./quote-result";
-import type { PublicQuoteCalculatorDefinition } from "~/lib/validators/quote-calculator";
+import type { QuoteStep } from "./quote-steps";
+import type { QuoteDensity, QuoteHeight } from "~/lib/quote/quote-display";
+import type {
+  PublicQuoteCalculatorDefinition,
+  PublicQuoteScreen,
+} from "~/lib/validators/quote-calculator";
+import type { RouterOutputs } from "~/trpc/react";
 import { useRecaptchaV3 } from "~/lib/captcha/use-recaptcha-v3";
+import {
+  quoteDensityClasses,
+  quoteHeightClass,
+} from "~/lib/quote/quote-display";
+import { flattenScreens, visibleScreensFor } from "~/lib/quote/screens";
 import { resolveVisibility } from "~/lib/quote/visibility";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -34,8 +45,23 @@ import {
   validateAnswer,
   validateContact,
 } from "./quote-answers";
-import { QuoteQuestionField } from "./quote-question-field";
+import { QuoteDisplayProvider, useQuoteDensity } from "./quote-display-context";
+import { QuoteLiveEstimatePanel } from "./quote-live-estimate";
 import { QuoteResult } from "./quote-result";
+import { QuoteReviewStep } from "./quote-review-step";
+import { QuoteScreen } from "./quote-screen";
+import {
+  clearQuoteSession,
+  hasQuoteSessionContent,
+  loadQuoteSession,
+  saveQuoteSession,
+} from "./quote-session";
+import {
+  buildSteps,
+  findScreenStepIndex,
+  firstIncompleteStepIndex,
+} from "./quote-steps";
+import { useLiveEstimate } from "./use-live-estimate";
 
 /**
  * reCAPTCHA v3 action asserted server-side by `quoteSubmission.submit`. One
@@ -51,34 +77,86 @@ const RECAPTCHA_ACTION = "quote";
  */
 const AUTO_ADVANCE_MS = 260;
 
+/**
+ * Shown when the visitor edits an answer from the review step and that edit
+ * reveals something else that still has to be filled in. Without it, being
+ * bounced to an unfamiliar screen after pressing "Return to review" reads as
+ * the widget losing their place.
+ */
+const RETURN_TO_REVIEW_NOTE =
+  "One more answer is needed before you can return to review.";
+const INCOMPLETE_BEFORE_SEND_NOTE =
+  "One more answer is needed before you can send this.";
+
+/**
+ * Shown when the SERVER rejected one specific answer at submit — a ZIP that is
+ * not in the lookup table, an option the owner deleted mid-session. The
+ * server's own message says what is wrong; this says why the visitor was moved.
+ */
+const FIX_ANSWER_NOTE =
+  "One answer needs your attention before we can price this.";
+
+/**
+ * The visitor-fixable half of `quoteSubmission.submit`'s discriminated union.
+ *
+ * Read off `RouterOutputs` rather than restated, so the four codes and the
+ * optional `questionId` cannot drift from the server that produces them.
+ */
+type QuoteSubmitFailure = Extract<
+  RouterOutputs["quoteSubmission"]["submit"],
+  { success: false }
+>["error"];
+
+/**
+ * A stable identity for "which step is showing" — the screen id, or the
+ * synthetic step's kind. Used as the focus effect's dependency, so it must be
+ * derived the same way everywhere it is needed (the render path and the
+ * restore effect both call this).
+ */
+function stepKeyOf(step: QuoteStep): string {
+  return step.kind === "screen" ? step.screen.id : step.kind;
+}
+
 export type QuoteCalculatorRunnerProps = {
   calculator: {
     id: string;
     name: string;
     definition: PublicQuoteCalculatorDefinition;
   };
+  /**
+   * Per-embed sizing set on the tiptap node. `width` is applied by
+   * `QuoteCalculatorBlock`'s wrapper, not here — a `max-w-*` on this card
+   * would not centre itself.
+   */
+  height?: QuoteHeight;
+  density?: QuoteDensity;
 };
 
 /**
- * The visitor-facing quote flow: one question per screen, then a contact step,
- * then a thank-you or (if the owner opted in) an estimate.
+ * The visitor-facing quote flow: one step per screen, then a contact step,
+ * then (if the owner opted in) a review step, then a thank-you or an estimate.
  *
  * **Nothing about pricing lives here.** The definition this component receives
  * has already been through `toPublicCalculatorDefinition`, so there are no
  * option values, no `hiddenDefault`s, no distance variables and no formula in
  * the payload. The runner submits option IDs and raw inputs; the server
  * recomputes the price from the stored definition and decides whether the
- * visitor is told the number at all.
+ * visitor is told the number at all — including for the live running estimate,
+ * which is a server round trip precisely so that it can be.
  */
 export function QuoteCalculatorRunner({
   calculator,
+  height,
+  density,
 }: QuoteCalculatorRunnerProps) {
   const { definition } = calculator;
   const uid = useId();
+  const densityClasses = useMemo(() => quoteDensityClasses(density), [density]);
 
   const [answers, setAnswers] = useState<QuoteAnswerMap>({});
   const [stepIndex, setStepIndex] = useState(0);
-  const [stepError, setStepError] = useState<string | null>(null);
+  /** Per-question validation messages for the CURRENT step, keyed by id. */
+  const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
   const [contact, setContact] = useState<QuoteContact>({
     name: "",
     email: "",
@@ -87,33 +165,78 @@ export function QuoteCalculatorRunner({
   const [contactErrors, setContactErrors] = useState<QuoteContactErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<QuoteSubmitResult | null>(null);
+  /** Set while the visitor is out editing one answer from the review step. */
+  const [returnToReview, setReturnToReview] = useState(false);
+  const [reviewNote, setReviewNote] = useState<string | null>(null);
+  const [focusRequest, setFocusRequest] = useState<{
+    questionId: string;
+    nonce: number;
+  } | null>(null);
+  /** "Start over" pressed once; the control has swapped to its confirm state. */
+  const [startOverConfirming, setStartOverConfirming] = useState(false);
 
   const { execute: executeRecaptcha } = useRecaptchaV3();
 
-  // ── Visibility → steps ────────────────────────────────────────────────────
-  // `resolveVisibility` is the SHARED rule, imported rather than reimplemented:
-  // the server uses the same function to decide which answers count and which
-  // variables fall back to their hidden default. A local copy that drifted
-  // would show the visitor a question whose answer the price ignores.
-  const visibleQuestions = useMemo(() => {
-    const visibility = resolveVisibility(definition.questions, (questionId) =>
+  // ── Visibility → screens → steps ──────────────────────────────────────────
+  // `resolveVisibility` and `flattenScreens` are the SHARED rules, imported
+  // rather than reimplemented: the server uses the same two functions to decide
+  // which answers count and which variables fall back to their hidden default.
+  // A local copy that drifted would show the visitor a question whose answer
+  // the price ignores.
+  const flatQuestions = useMemo(
+    () => flattenScreens(definition.screens),
+    [definition.screens],
+  );
+
+  const visibleScreens = useMemo(() => {
+    const visibility = resolveVisibility(flatQuestions, (questionId) =>
       selectedOptionId(answers, questionId),
     );
-    return definition.questions.filter(
-      (question) => visibility.get(question.id) === true,
-    );
-  }, [definition.questions, answers]);
+    return visibleScreensFor(definition.screens, visibility);
+  }, [answers, definition.screens, flatQuestions]);
 
-  const totalSteps = visibleQuestions.length + 1;
+  const visibleQuestions = useMemo(
+    () => flattenScreens(visibleScreens),
+    [visibleScreens],
+  );
+
+  const steps = useMemo(
+    () =>
+      buildSteps({ showReviewStep: definition.showReviewStep }, visibleScreens),
+    [definition.showReviewStep, visibleScreens],
+  );
 
   // Clamped on READ rather than corrected in an effect. Answering a branching
   // question can hide later questions and shrink the step list underneath a
   // visitor who has already walked past them; deriving the index means the
   // shrink is handled in the same render as the answer change, with no
   // intermediate frame pointing at a step that no longer exists.
-  const currentIndex = Math.min(stepIndex, visibleQuestions.length);
-  const isContactStep = currentIndex === visibleQuestions.length;
-  const currentQuestion = isContactStep ? null : visibleQuestions[currentIndex];
+  const currentIndex = Math.min(stepIndex, steps.length - 1);
+  // Memoised so the `useCallback`s below do not see a fresh object every
+  // render. `steps` always ends with at least the contact step, so the
+  // fallback is unreachable — it exists to satisfy `noUncheckedIndexedAccess`.
+  const currentStep = useMemo<QuoteStep>(
+    () => steps[currentIndex] ?? { kind: "contact" },
+    [currentIndex, steps],
+  );
+
+  const contactStepIndex = steps.findIndex((step) => step.kind === "contact");
+  const reviewStepIndex = steps.findIndex((step) => step.kind === "review");
+  const isSubmitStep =
+    currentStep.kind === "review" ||
+    (currentStep.kind === "contact" && reviewStepIndex === -1);
+
+  // ── Live estimate ─────────────────────────────────────────────────────────
+  // `definition.showLiveEstimate` is already the EFFECTIVE value
+  // (`showEstimateToCustomer && showLiveEstimate`) — the projection ANDs them
+  // so this never has to, and the endpoint re-checks both server-side anyway.
+  const { estimate: liveEstimate, isFetching: liveEstimateFetching } =
+    useLiveEstimate({
+      calculatorId: calculator.id,
+      enabled: definition.showLiveEstimate && result === null,
+      visibleQuestions,
+      answers,
+    });
 
   // ── Step transitions ──────────────────────────────────────────────────────
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -125,54 +248,202 @@ export function QuoteCalculatorRunner({
   }, []);
   useEffect(() => clearAdvance, [clearAdvance]);
 
+  const focusNonce = useRef(0);
+  const requestFocus = useCallback((questionId: string) => {
+    focusNonce.current += 1;
+    setFocusRequest({ questionId, nonce: focusNonce.current });
+  }, []);
+
+  /** Validation messages for every question on one screen. */
+  const validateScreen = useCallback(
+    (screen: PublicQuoteScreen): Record<string, string> => {
+      const errors: Record<string, string> = {};
+      for (const question of screen.questions) {
+        const error = validateAnswer(question, answers[question.id]);
+        if (error) errors[question.id] = error;
+      }
+      return errors;
+    },
+    [answers],
+  );
+
   const goNext = useCallback(() => {
     clearAdvance();
-    if (currentQuestion) {
-      const error = validateAnswer(
-        currentQuestion,
-        answers[currentQuestion.id],
-      );
-      if (error) {
-        setStepError(error);
+
+    if (currentStep.kind === "screen") {
+      const errors = validateScreen(currentStep.screen);
+      if (Object.keys(errors).length > 0) {
+        setStepErrors(errors);
+        const firstInvalid = currentStep.screen.questions.find(
+          (question) => errors[question.id] !== undefined,
+        );
+        if (firstInvalid) requestFocus(firstInvalid.id);
         return;
       }
     }
-    setStepError(null);
+
+    if (currentStep.kind === "contact") {
+      // Only reachable when a review step follows — otherwise contact holds the
+      // submit button. Blocking here keeps the review summary from printing a
+      // blank "Your details" block.
+      const errors = validateContact(contact, definition.requirePhone);
+      setContactErrors(errors);
+      if (Object.keys(errors).length > 0) return;
+    }
+
+    setStepErrors({});
+    setSubmitError(null);
+
+    if (returnToReview) {
+      const incomplete = firstIncompleteStepIndex(
+        steps,
+        answers,
+        contact,
+        definition.requirePhone,
+      );
+      if (incomplete !== -1 && incomplete !== currentIndex) {
+        // The edit revealed something new. Route there, say why, and KEEP the
+        // flag so the next Next tries to get back to review again. The
+        // field-level messages are set NOW, not on the next click: on a
+        // grouped screen the banner alone does not say which of several
+        // questions is the one still waiting (mirrors `handleSubmit`).
+        const target = steps[incomplete];
+        if (target?.kind === "screen") {
+          const targetErrors = validateScreen(target.screen);
+          setStepErrors(targetErrors);
+          const firstInvalid = target.screen.questions.find(
+            (question) => targetErrors[question.id] !== undefined,
+          );
+          if (firstInvalid) requestFocus(firstInvalid.id);
+          else setFocusRequest(null);
+        } else {
+          // Contact step: `validateContact` messages render on entry via
+          // `contactErrors`, so only the focus request needs clearing.
+          setContactErrors(validateContact(contact, definition.requirePhone));
+          setFocusRequest(null);
+        }
+        setStepIndex(incomplete);
+        setReviewNote(RETURN_TO_REVIEW_NOTE);
+        return;
+      }
+      if (reviewStepIndex !== -1) {
+        setStepIndex(reviewStepIndex);
+        setReturnToReview(false);
+        setReviewNote(null);
+        setFocusRequest(null);
+        return;
+      }
+    }
+
+    setFocusRequest(null);
     setStepIndex(currentIndex + 1);
-  }, [answers, clearAdvance, currentIndex, currentQuestion]);
+  }, [
+    answers,
+    clearAdvance,
+    contact,
+    currentIndex,
+    currentStep,
+    definition.requirePhone,
+    requestFocus,
+    returnToReview,
+    reviewStepIndex,
+    steps,
+    validateScreen,
+  ]);
 
   const goBack = useCallback(() => {
     clearAdvance();
-    setStepError(null);
+    setStepErrors({});
     setSubmitError(null);
+    setFocusRequest(null);
+    // Back ABANDONS the detour. Whether the visitor got here by editing one
+    // answer from review, or by being routed to a question the server refused,
+    // stepping backwards means they are walking the flow again — leaving a
+    // "Return to review" button and a note about it on screen would promise a
+    // jump the next Next is no longer going to make.
+    setReturnToReview(false);
+    setReviewNote(null);
     setStepIndex(Math.max(0, currentIndex - 1));
   }, [clearAdvance, currentIndex]);
 
+  /** Review-step "Edit" on one question. */
+  const jumpToQuestion = useCallback(
+    (questionId: string) => {
+      clearAdvance();
+      const index = findScreenStepIndex(steps, questionId);
+      if (index === -1) return;
+      setStepErrors({});
+      setSubmitError(null);
+      setReviewNote(null);
+      setReturnToReview(true);
+      setStepIndex(index);
+      requestFocus(questionId);
+    },
+    [clearAdvance, requestFocus, steps],
+  );
+
+  /** Review-step "Edit" on the contact details. */
+  const jumpToContact = useCallback(() => {
+    clearAdvance();
+    if (contactStepIndex === -1) return;
+    setStepErrors({});
+    setSubmitError(null);
+    setReviewNote(null);
+    setReturnToReview(true);
+    setFocusRequest(null);
+    setStepIndex(contactStepIndex);
+  }, [clearAdvance, contactStepIndex]);
+
   // Held in a ref so the auto-advance timeout runs the LATEST `goNext` — the
   // one that has already seen the selection that triggered it, and therefore
-  // the recomputed visible-question list.
+  // the recomputed visible-screen list.
   const goNextRef = useRef(goNext);
+  // Same trick for the guard below: by the time the timeout fires, a same-screen
+  // show-if reveal may have turned this one-question screen into a two-question
+  // screen. Auto-advancing then would carry the visitor straight past a
+  // required question they never saw, into an error on the way back.
+  const singleQuestionScreenRef = useRef(false);
   useEffect(() => {
     goNextRef.current = goNext;
+    singleQuestionScreenRef.current =
+      currentStep.kind === "screen" &&
+      currentStep.screen.questions.length === 1;
   });
 
   const scheduleAdvance = useCallback(() => {
     clearAdvance();
     advanceTimer.current = setTimeout(() => {
       advanceTimer.current = null;
+      if (!singleQuestionScreenRef.current) return;
       goNextRef.current();
     }, AUTO_ADVANCE_MS);
   }, [clearAdvance]);
 
   const setAnswer = useCallback((questionId: string, answer: QuoteAnswer) => {
-    setStepError(null);
+    // Clear only THIS question's message: on a grouped screen, fixing the city
+    // must not wipe the error still sitting under the bedroom count.
+    setStepErrors((previous) => {
+      if (previous[questionId] === undefined) return previous;
+      const next = { ...previous };
+      delete next[questionId];
+      return next;
+    });
     setAnswers((previous) => ({ ...previous, [questionId]: answer }));
   }, []);
 
   // ── Focus + announcement ──────────────────────────────────────────────────
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const stepKey = isContactStep ? "__contact__" : (currentQuestion?.id ?? "");
+  const stepKey = stepKeyOf(currentStep);
   const isFirstRender = useRef(true);
+  /**
+   * The one step key whose arrival must NOT take focus — set by the restore
+   * effect below. A restored draft changes the step index during mount, which
+   * is a step transition as far as the effect below is concerned, and focusing
+   * the heading for it would scroll the page to the widget on load: the exact
+   * thing the `isFirstRender` guard exists to prevent, arriving one render
+   * later where that guard cannot see it.
+   */
+  const skipFocusForStepKey = useRef<string | null>(null);
 
   useEffect(() => {
     // Skip the initial mount: focusing on first paint would yank the page down
@@ -181,16 +452,163 @@ export function QuoteCalculatorRunner({
       isFirstRender.current = false;
       return;
     }
+    // Consumed on the first run after mount whether or not it matches, so a
+    // restore that lands on the step already showing (and therefore never
+    // re-runs this effect) cannot leave the flag armed to swallow a later,
+    // genuine transition.
+    const skipKey = skipFocusForStepKey.current;
+    skipFocusForStepKey.current = null;
+    if (skipKey === stepKey) return;
+    // A pending focus request names a specific control on the incoming screen
+    // and `QuoteScreen` focuses it; child effects run first, so stealing focus
+    // back to the heading here would undo it every time. Every transition that
+    // does NOT target a question clears the request, so this cannot get stuck.
+    if (focusRequest) return;
     headingRef.current?.focus();
-  }, [stepKey]);
+  }, [focusRequest, stepKey]);
+
+  // ── Draft persistence ─────────────────────────────────────────────────────
+  // A quote flow can be fourteen steps long, and a visitor who backgrounds the
+  // tab to look something up must not come back to an empty form. See
+  // `quote-session.ts` for why this is sessionStorage and not localStorage.
+  /** False until the restore effect has run — see the persist effect below. */
+  const hydratedRef = useRef(false);
+
+  // DECLARED BEFORE THE RESTORE EFFECT, and that ordering is load-bearing.
+  // Effects run in declaration order, so on the mount pass this one runs first
+  // and bails on `hydratedRef`; the restore effect then sets state, and this
+  // runs again on the next render with the RESTORED values. Declared the other
+  // way round, the mount pass would write the empty initial state over the very
+  // draft the restore is about to read back.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    // Nothing to keep once the lead is in: the thank-you screen is terminal,
+    // and a draft left behind would repopulate the form on the next visit.
+    if (result !== null) return;
+    if (hasQuoteSessionContent(answers, contact)) {
+      saveQuoteSession(calculator.id, answers, contact);
+    } else {
+      // Emptied back out (Start over, or a lone contact field cleared). The
+      // stored draft mirrors state exactly, so "nothing to keep" means no key
+      // rather than an empty one.
+      clearQuoteSession(calculator.id);
+    }
+  }, [answers, calculator.id, contact, result]);
+
+  useEffect(() => {
+    // Guarded on the same ref the persist effect reads, which makes this
+    // effect run AT MOST ONCE for the lifetime of the component instance.
+    // React StrictMode invokes mount effects twice in development, and by the
+    // second invocation the persist effect above has already run with
+    // `hydratedRef` true and the restored state not yet rendered — so it has
+    // cleared the key. Re-reading it then would find nothing and quietly
+    // "restore" an empty form in dev only.
+    if (hydratedRef.current) return;
+
+    const restored = loadQuoteSession(calculator.id, definition);
+    if (restored) {
+      setAnswers(restored.answers);
+      setContact(restored.contact);
+
+      // The landing step is DERIVED here, never stored. A saved index would be
+      // meaningless the moment the owner adds or reorders a screen, and would
+      // survive as a pointer into a flow that no longer exists. Recomputed from
+      // the restored answers with the same shared helpers the render path uses,
+      // so the two can never disagree about which step comes first.
+      const restoredVisibility = resolveVisibility(
+        flatQuestions,
+        (questionId) => selectedOptionId(restored.answers, questionId),
+      );
+      const restoredSteps = buildSteps(
+        { showReviewStep: definition.showReviewStep },
+        visibleScreensFor(definition.screens, restoredVisibility),
+      );
+      const incomplete = firstIncompleteStepIndex(
+        restoredSteps,
+        restored.answers,
+        restored.contact,
+        definition.requirePhone,
+      );
+      // `-1` means the whole flow is answerable as it stands, so land on the
+      // last step — the one holding the submit button.
+      const landingIndex =
+        incomplete === -1 ? restoredSteps.length - 1 : incomplete;
+      const landingStep = restoredSteps[landingIndex];
+      if (landingStep) skipFocusForStepKey.current = stepKeyOf(landingStep);
+      setStepIndex(landingIndex);
+    }
+    // Set whether or not anything was restored: from here on, state changes are
+    // the visitor's and are worth persisting.
+    hydratedRef.current = true;
+    // Mount only. Re-running on a definition change would drag a visitor
+    // mid-flow back to a derived step; a definition edit lands on a fresh page
+    // load anyway.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Submit ────────────────────────────────────────────────────────────────
+
+  /**
+   * A submission the server refused over ONE answer it can name.
+   *
+   * The four codes that arrive here (`missing-required`, `unknown-option`,
+   * `bad-answer`, `unknown-zip`) are all recoverable by the visitor, and all
+   * carry a message written for them — but only if they can find the field.
+   * Dropping them into the generic banner is what a thrown BAD_REQUEST used to
+   * do, and it stranded people: "We don't recognize the ZIP code 99999." at the
+   * end of a fourteen-step form, with nothing to click.
+   *
+   * So the answer is walked back to instead. The banner is cleared, the message
+   * is re-hung under the question that owns it, and — when the owner enabled a
+   * review step — the primary button becomes "Return to review", so fixing it
+   * is one click back to sending rather than a second walk through the flow.
+   */
+  const handleSubmitIssue = useCallback(
+    (error: QuoteSubmitFailure) => {
+      const index =
+        error.questionId === undefined
+          ? -1
+          : findScreenStepIndex(steps, error.questionId);
+
+      // No question named, or it is not on any step the visitor can currently
+      // reach (a branch changed under them, or the owner deleted it between
+      // the last render and the submit). Nothing to route to — say it plainly
+      // where they are.
+      if (error.questionId === undefined || index === -1) {
+        setSubmitError(error.message);
+        return;
+      }
+
+      setSubmitError(null);
+      setStepErrors({ [error.questionId]: error.message });
+      setStepIndex(index);
+      setReviewNote(FIX_ANSWER_NOTE);
+      if (reviewStepIndex !== -1) setReturnToReview(true);
+      requestFocus(error.questionId);
+    },
+    [requestFocus, reviewStepIndex, steps],
+  );
+
   const submitMutation = api.quoteSubmission.submit.useMutation({
     onSuccess: (data) => {
+      // `success: false` is NOT an error here — it is the server saying the
+      // visitor can fix this themselves. See `handleSubmitIssue`.
+      if (!data.success) {
+        handleSubmitIssue(data.error);
+        return;
+      }
       setSubmitError(null);
+      // The lead is captured; the draft has done its job and must not survive
+      // to repopulate the form on the next visit.
+      clearQuoteSession(calculator.id);
       setResult(data);
     },
     onError: (error) => {
+      // Only THROWN failures land here now: a 429, a captcha rejection, an
+      // unpublished calculator, `formula-failed`. None of them names a question
+      // the visitor could go back and fix — there is nowhere to route them to,
+      // so the banner is the whole response.
+      //
       // Answers and contact details are deliberately left intact so a retry is
       // one click, not a refill. The token is NOT reused — `handleSubmit`
       // mints a fresh one on every attempt (v3 tokens are single-use and the
@@ -205,11 +623,46 @@ export function QuoteCalculatorRunner({
 
   const handleSubmit = useCallback(async () => {
     clearAdvance();
+    setSubmitError(null);
+
+    // Re-validate EVERY visible screen, not just the one on screen. With a
+    // review step the visitor can reach submit without ever having pressed
+    // Next on a screen a late branch change revealed.
+    for (let index = 0; index < steps.length; index++) {
+      const step = steps[index];
+      if (step?.kind !== "screen") continue;
+      const errors = validateScreen(step.screen);
+      if (Object.keys(errors).length === 0) continue;
+
+      setStepErrors(errors);
+      setStepIndex(index);
+      setReviewNote(
+        reviewStepIndex === -1
+          ? INCOMPLETE_BEFORE_SEND_NOTE
+          : RETURN_TO_REVIEW_NOTE,
+      );
+      if (reviewStepIndex !== -1) setReturnToReview(true);
+      const firstInvalid = step.screen.questions.find(
+        (question) => errors[question.id] !== undefined,
+      );
+      if (firstInvalid) requestFocus(firstInvalid.id);
+      else setFocusRequest(null);
+      return;
+    }
+    setStepErrors({});
+
     const errors = validateContact(contact, definition.requirePhone);
     setContactErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    if (Object.keys(errors).length > 0) {
+      if (contactStepIndex !== -1 && contactStepIndex !== currentIndex) {
+        setStepIndex(contactStepIndex);
+        if (reviewStepIndex !== -1) setReturnToReview(true);
+        setFocusRequest(null);
+      }
+      return;
+    }
 
-    setSubmitError(null);
+    setReviewNote(null);
 
     const token = await executeRecaptcha(RECAPTCHA_ACTION);
     const phone = contact.phone.trim();
@@ -231,11 +684,61 @@ export function QuoteCalculatorRunner({
     calculator.id,
     clearAdvance,
     contact,
+    contactStepIndex,
+    currentIndex,
     definition.requirePhone,
     executeRecaptcha,
+    requestFocus,
+    reviewStepIndex,
+    steps,
     submitMutation,
+    validateScreen,
     visibleQuestions,
   ]);
+
+  // ── Start over ────────────────────────────────────────────────────────────
+  // Drafts now survive a reload, which means a visitor can arrive at a form
+  // half-filled by their earlier self — or by whoever used the tab before them.
+  // Without an escape hatch the only way out is clearing site data.
+  const startOverButtonRef = useRef<HTMLButtonElement>(null);
+  const confirmStartOverRef = useRef<HTMLButtonElement>(null);
+  const wasConfirmingStartOver = useRef(false);
+
+  // Focus has to be MOVED by hand here: the control the visitor just activated
+  // is replaced by the confirm pair (and, on confirm, disappears entirely), so
+  // without this the browser drops focus onto the body mid-flow.
+  useEffect(() => {
+    if (startOverConfirming) {
+      confirmStartOverRef.current?.focus();
+    } else if (wasConfirmingStartOver.current) {
+      // Cancel → back to the button they pressed. Confirm → that button is
+      // gone (there is nothing left to discard), so the reset step heading is
+      // the right landing place.
+      (startOverButtonRef.current ?? headingRef.current)?.focus();
+    }
+    wasConfirmingStartOver.current = startOverConfirming;
+  }, [startOverConfirming]);
+
+  const canStartOver =
+    result === null && hasQuoteSessionContent(answers, contact);
+
+  const handleStartOver = useCallback(() => {
+    clearAdvance();
+    setAnswers({});
+    setContact({ name: "", email: "", phone: "" });
+    setStepErrors({});
+    setContactErrors({});
+    setSubmitError(null);
+    setReturnToReview(false);
+    setReviewNote(null);
+    setFocusRequest(null);
+    setStartOverConfirming(false);
+    // Cleared here as well as by the persist effect: the effect will reach the
+    // same conclusion a render later, but a visitor pressing this button is
+    // asking for their details to be gone NOW.
+    clearQuoteSession(calculator.id);
+    setStepIndex(0);
+  }, [calculator.id, clearAdvance]);
 
   // ── Enter to advance ──────────────────────────────────────────────────────
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -246,7 +749,7 @@ export function QuoteCalculatorRunner({
     // Enter themselves and must not also advance the step.
     if (tag === "TEXTAREA" || tag === "BUTTON" || tag === "A") return;
     event.preventDefault();
-    if (isContactStep) {
+    if (isSubmitStep) {
       void handleSubmit();
     } else {
       goNext();
@@ -255,31 +758,30 @@ export function QuoteCalculatorRunner({
 
   // ── Derived ids / labels ──────────────────────────────────────────────────
   const headingId = `${uid}-heading`;
-  const descriptionId = `${uid}-description`;
-  const errorId = `${uid}-error`;
+  const startOverPromptId = `${uid}-start-over-prompt`;
+  const totalSteps = steps.length;
 
-  const describedByParts: string[] = [];
-  if (currentQuestion?.description) describedByParts.push(descriptionId);
-  if (stepError) describedByParts.push(errorId);
-  const describedBy =
-    describedByParts.length > 0 ? describedByParts.join(" ") : undefined;
-
-  const currentAnswer = currentQuestion
-    ? answers[currentQuestion.id]
-    : undefined;
-  const currentAnswered = currentQuestion
-    ? isAnswered(currentQuestion, currentAnswer)
-    : false;
-  const nextLabel =
-    currentQuestion && !currentQuestion.required && !currentAnswered
+  const nextLabel = returnToReview
+    ? "Return to review"
+    : currentStep.kind === "screen" &&
+        currentStep.screen.questions.every(
+          (question) =>
+            !question.required && !isAnswered(question, answers[question.id]),
+        )
       ? "Skip"
       : "Next";
 
   const progressPercent = Math.round(((currentIndex + 1) / totalSteps) * 100);
 
+  const cardClass = cn(
+    "border-input bg-background text-foreground flex flex-col rounded-lg border shadow-xs",
+    densityClasses.card,
+    quoteHeightClass(height),
+  );
+
   if (result) {
     return (
-      <div className="border-input bg-background text-foreground rounded-lg border p-4 shadow-xs sm:p-6">
+      <div className={cn(cardClass, "justify-center")}>
         <QuoteResult
           result={result}
           thankYouMessage={definition.thankYouMessage}
@@ -290,137 +792,193 @@ export function QuoteCalculatorRunner({
   }
 
   return (
-    <div
-      className="border-input bg-background text-foreground rounded-lg border p-4 shadow-xs sm:p-6"
-      onKeyDown={handleKeyDown}
-    >
-      {/* Progress chrome */}
-      <div className="mb-5 space-y-2">
-        <div className="text-muted-foreground flex items-baseline justify-between gap-3 text-xs font-medium">
-          <span>
-            Step {currentIndex + 1} of {totalSteps}
-          </span>
-          <span className="truncate">{calculator.name}</span>
-        </div>
-        <div
-          role="progressbar"
-          aria-valuemin={1}
-          aria-valuemax={totalSteps}
-          aria-valuenow={currentIndex + 1}
-          aria-valuetext={`Step ${currentIndex + 1} of ${totalSteps}`}
-          className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
-        >
-          <div
-            className="bg-primary h-full rounded-full transition-[width] duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Step body */}
-      {currentQuestion ? (
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <h3
-              id={headingId}
-              ref={headingRef}
-              tabIndex={-1}
-              className="text-foreground text-lg font-semibold outline-none sm:text-xl"
-            >
-              {currentQuestion.title}
-              {!currentQuestion.required && (
-                <span className="text-muted-foreground ml-2 text-sm font-normal">
-                  (optional)
-                </span>
-              )}
-            </h3>
-            {currentQuestion.description && (
-              <p id={descriptionId} className="text-muted-foreground text-sm">
-                {currentQuestion.description}
-              </p>
-            )}
+    <QuoteDisplayProvider density={density}>
+      <div className={cardClass} onKeyDown={handleKeyDown}>
+        {/* Progress chrome */}
+        <div className="mb-5 space-y-2">
+          <div className="text-muted-foreground flex items-baseline justify-between gap-3 text-xs font-medium">
+            <span>
+              Step {currentIndex + 1} of {totalSteps}
+            </span>
+            <span className="truncate">{calculator.name}</span>
           </div>
+          <div
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={totalSteps}
+            aria-valuenow={currentIndex + 1}
+            aria-valuetext={`Step ${currentIndex + 1} of ${totalSteps}`}
+            className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
+          >
+            <div
+              className="bg-primary h-full rounded-full transition-[width] duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
 
-          <QuoteQuestionField
-            question={currentQuestion}
-            answer={currentAnswer}
-            onChange={(answer) => setAnswer(currentQuestion.id, answer)}
-            onCommit={
-              currentQuestion.type === "choice" ? scheduleAdvance : undefined
-            }
-            labelledBy={headingId}
-            describedBy={describedBy}
-            invalid={stepError !== null}
-            fieldId={`${uid}-field`}
-          />
+        {/* The note follows the visitor to wherever they were routed. On the
+            review step itself `QuoteReviewStep` renders it, inside its own
+            heading block. */}
+        {reviewNote !== null && currentStep.kind !== "review" && (
+          <p
+            role="alert"
+            className="border-input bg-muted/40 text-foreground mb-4 rounded-md border px-3 py-2 text-sm"
+          >
+            {reviewNote}
+          </p>
+        )}
 
-          {stepError && (
-            <p id={errorId} role="alert" className="text-destructive text-sm">
-              {stepError}
-            </p>
+        {/* Step body. `flex-1` so the nav pins to the bottom of the card when
+            a min-height preset leaves slack. */}
+        <div className="flex-1">
+          {currentStep.kind === "screen" && (
+            <QuoteScreen
+              screen={currentStep.screen}
+              answers={answers}
+              errors={stepErrors}
+              onAnswer={setAnswer}
+              onCommit={scheduleAdvance}
+              headingId={headingId}
+              headingRef={headingRef}
+              uid={uid}
+              focusRequest={focusRequest}
+            />
+          )}
+
+          {currentStep.kind === "contact" && (
+            <ContactStep
+              headingId={headingId}
+              headingRef={headingRef}
+              uid={uid}
+              contact={contact}
+              errors={contactErrors}
+              requirePhone={definition.requirePhone}
+              showRecaptchaDisclosure={reviewStepIndex === -1}
+              onChange={(patch) => {
+                setSubmitError(null);
+                setContact((previous) => ({ ...previous, ...patch }));
+              }}
+            />
+          )}
+
+          {currentStep.kind === "review" && (
+            <QuoteReviewStep
+              screens={visibleScreens}
+              answers={answers}
+              contact={contact}
+              reviewNote={reviewNote}
+              headingId={headingId}
+              headingRef={headingRef}
+              onEditQuestion={jumpToQuestion}
+              onEditContact={jumpToContact}
+              uid={uid}
+            />
           )}
         </div>
-      ) : (
-        <ContactStep
-          headingId={headingId}
-          headingRef={headingRef}
-          uid={uid}
-          contact={contact}
-          errors={contactErrors}
-          requirePhone={definition.requirePhone}
-          onChange={(patch) => {
-            setSubmitError(null);
-            setContact((previous) => ({ ...previous, ...patch }));
-          }}
+
+        {submitError && (
+          <p role="alert" className="text-destructive mt-4 text-sm">
+            {submitError}
+          </p>
+        )}
+
+        <QuoteLiveEstimatePanel
+          estimate={liveEstimate}
+          isFetching={liveEstimateFetching}
+          disclaimer={definition.liveEstimateDisclaimer}
         />
-      )}
 
-      {submitError && (
-        <p role="alert" className="text-destructive mt-4 text-sm">
-          {submitError}
-        </p>
-      )}
-
-      {/* Navigation */}
-      <div className="mt-6 flex items-center justify-between gap-3">
-        {currentIndex > 0 ? (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={goBack}
-            disabled={submitMutation.isPending}
-          >
-            <ArrowLeft aria-hidden="true" />
-            Back
-          </Button>
-        ) : (
-          <span />
-        )}
-
-        {isContactStep ? (
-          <Button
-            type="button"
-            onClick={() => void handleSubmit()}
-            disabled={submitMutation.isPending}
-          >
-            {submitMutation.isPending && (
-              <LoaderCircle className="animate-spin" aria-hidden="true" />
+        {/* Navigation. The left cluster is always rendered, even when empty:
+            it is what holds the primary button against the right edge on step
+            one, and it keeps Back and Start over on one baseline. */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {currentIndex > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={goBack}
+                disabled={submitMutation.isPending}
+              >
+                <ArrowLeft aria-hidden="true" />
+                Back
+              </Button>
             )}
-            {submitMutation.isPending ? "Sending…" : "Get my quote"}
-          </Button>
-        ) : (
-          <Button type="button" onClick={goNext}>
-            {nextLabel}
-          </Button>
-        )}
-      </div>
 
-      {/* Screen-reader step announcement. Focusing the heading names the new
-          question; this names the position in the flow. */}
-      <div aria-live="polite" className="sr-only">
-        {`Step ${currentIndex + 1} of ${totalSteps}`}
+            {/* Deliberately quiet, and deliberately two-step: this throws away
+                everything the visitor has typed, so it must be reachable
+                without being clickable by accident. The confirm swaps in place
+                rather than opening a dialog — a modal over a form embedded in
+                someone's storefront page is far more disruptive than the thing
+                it is guarding. */}
+            {canStartOver &&
+              (startOverConfirming ? (
+                <span className="flex flex-wrap items-center gap-2 text-xs">
+                  <span
+                    id={startOverPromptId}
+                    className="text-muted-foreground"
+                  >
+                    Clear all answers?
+                  </span>
+                  <button
+                    ref={confirmStartOverRef}
+                    type="button"
+                    onClick={handleStartOver}
+                    // Focus lands here the moment the pair appears, so the
+                    // prompt is what a screen reader hears alongside the bare
+                    // word "Confirm".
+                    aria-describedby={startOverPromptId}
+                    className="text-destructive focus-visible:ring-ring rounded-sm font-medium underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStartOverConfirming(false)}
+                    className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  >
+                    Cancel
+                  </button>
+                </span>
+              ) : (
+                <button
+                  ref={startOverButtonRef}
+                  type="button"
+                  onClick={() => setStartOverConfirming(true)}
+                  disabled={submitMutation.isPending}
+                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm text-xs underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50"
+                >
+                  Start over
+                </button>
+              ))}
+          </div>
+
+          {isSubmitStep ? (
+            <Button
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={submitMutation.isPending}
+            >
+              {submitMutation.isPending && (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              )}
+              {submitMutation.isPending ? "Sending…" : "Get my quote"}
+            </Button>
+          ) : (
+            <Button type="button" onClick={goNext}>
+              {nextLabel}
+            </Button>
+          )}
+        </div>
+
+        {/* Screen-reader step announcement. Focusing the heading names the new
+            step; this names the position in the flow. */}
+        <div aria-live="polite" className="sr-only">
+          {`Step ${currentIndex + 1} of ${totalSteps}`}
+        </div>
       </div>
-    </div>
+    </QuoteDisplayProvider>
   );
 }
 
@@ -433,6 +991,7 @@ function ContactStep({
   contact,
   errors,
   requirePhone,
+  showRecaptchaDisclosure,
   onChange,
 }: {
   headingId: string;
@@ -441,20 +1000,27 @@ function ContactStep({
   contact: QuoteContact;
   errors: QuoteContactErrors;
   requirePhone: boolean;
+  /** False when a review step follows — the disclosure belongs on the step
+   *  that holds the submit button, and duplicating it looks like a bug. */
+  showRecaptchaDisclosure: boolean;
   onChange: (patch: Partial<QuoteContact>) => void;
 }) {
+  const density = useQuoteDensity();
   const nameId = `${uid}-contact-name`;
   const emailId = `${uid}-contact-email`;
   const phoneId = `${uid}-contact-phone`;
 
   return (
-    <div className="space-y-4">
+    <div className={density.body}>
       <div className="space-y-1.5">
         <h3
           id={headingId}
           ref={headingRef}
           tabIndex={-1}
-          className="text-foreground text-lg font-semibold outline-none sm:text-xl"
+          className={cn(
+            "text-foreground font-semibold outline-none",
+            density.heading,
+          )}
         >
           Where should we send it?
         </h3>
@@ -463,7 +1029,7 @@ function ContactStep({
         </p>
       </div>
 
-      <div className="grid gap-4 sm:max-w-md">
+      <div className={cn("grid sm:max-w-md", density.fieldGap)}>
         <ContactField
           id={nameId}
           label="Name"
@@ -508,7 +1074,7 @@ function ContactStep({
 
       {/* Required by Google's terms: the v3 badge is hidden platform-wide
           (globals.css), which is only permitted with this disclosure in-flow. */}
-      <RecaptchaDisclosure />
+      {showRecaptchaDisclosure && <RecaptchaDisclosure />}
     </div>
   );
 }

@@ -9,10 +9,16 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
 import { isExternalUrl } from "~/app/admin/_components/nav-secondary";
+
+/** Caps a nav badge count at "99+" so it never blows out the sidebar width. */
+function formatBadgeCount(count: number): string {
+  return count > 99 ? "99+" : String(count);
+}
 
 export function NavMain({
   items,
@@ -22,6 +28,8 @@ export function NavMain({
     title: string;
     url: string;
     icon?: React.ComponentType<any>;
+    /** Optional count badge (e.g. pending reviews). Hidden when 0/undefined. */
+    badge?: number;
   }[];
   label?: string;
 }) {
@@ -61,6 +69,11 @@ export function NavMain({
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
+                {!!item.badge && (
+                  <SidebarMenuBadge>
+                    {formatBadgeCount(item.badge)}
+                  </SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
             );
           })}

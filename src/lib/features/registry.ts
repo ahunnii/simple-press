@@ -217,6 +217,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  dashboardSearchReadiness: {
+    key: "dashboardSearchReadiness",
+    label: "Search readiness on dashboard",
+    description:
+      "Show the search-readiness score strip on your dashboard. The full report stays under Site Setup → SEO & Meta.",
+    category: "marketing",
+    enabledByDefault: true,
+    ownerCanToggle: true,
+  },
   testimonials: {
     key: "testimonials",
     label: "Testimonials",
@@ -274,6 +283,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description:
       "Build multi-step quote calculators visitors fill out to request an estimate",
     category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
+  quickbooks: {
+    key: "quickbooks",
+    label: "QuickBooks Invoicing",
+    description:
+      "Send deposit and final invoices through a connected QuickBooks Online company",
+    category: "ecommerce",
     enabledByDefault: false,
     ownerCanToggle: true,
   },

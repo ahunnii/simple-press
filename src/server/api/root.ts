@@ -28,6 +28,7 @@ import { orderRouter } from "./routers/order";
 import { orderLookupRouter } from "./routers/order-lookup";
 import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
+import { quickbooksRouter } from "./routers/quickbooks";
 import { quoteCalculatorRouter } from "./routers/quote-calculator";
 import { quoteSubmissionRouter } from "./routers/quote-submission";
 import { reviewRouter } from "./routers/review";
@@ -77,6 +78,7 @@ export const appRouter = createTRPCRouter({
 
   platform: platformRouter,
   contact: contactRouter,
+  quickbooks: quickbooksRouter,
   quoteCalculator: quoteCalculatorRouter,
   quoteSubmission: quoteSubmissionRouter,
   shipping: shippingRouter,

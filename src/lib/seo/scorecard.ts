@@ -12,6 +12,8 @@ import {
 } from "~/lib/validators/site-seo";
 import { db } from "~/server/db";
 
+import { seoEditorHref } from "./editor-tabs";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // SEO / AEO / GEO scorecard
 // ─────────────────────────────────────────────────────────────────────────────
@@ -392,7 +394,7 @@ export async function computeSeoScorecard({
       {
         key: "ai-crawlers",
         label: "AI answer engines can read your store",
-        href: "/admin/content/seo",
+        href: seoEditorHref("search"),
         score: binary(business.allowAiCrawlers),
         detail: business.allowAiCrawlers
           ? "ChatGPT, Perplexity and Google AI are allowed"
@@ -417,7 +419,7 @@ export async function computeSeoScorecard({
       {
         key: "meta-title",
         label: "Site meta title",
-        href: "/admin/content/seo",
+        href: seoEditorHref("store"),
         score: metaTitle.score,
         weight: 3,
         detail: metaTitle.detail,
@@ -425,7 +427,7 @@ export async function computeSeoScorecard({
       {
         key: "meta-description",
         label: "Site meta description",
-        href: "/admin/content/seo",
+        href: seoEditorHref("store"),
         score: metaDescription.score,
         weight: 3,
         detail: metaDescription.detail,
@@ -433,7 +435,7 @@ export async function computeSeoScorecard({
       {
         key: "og-image",
         label: "Social share image",
-        href: "/admin/content/seo",
+        href: seoEditorHref("store"),
         score: binary(isNonBlank(siteContent?.ogImage)),
         weight: 2,
         detail: "Shown when someone shares your store link",
@@ -448,7 +450,7 @@ export async function computeSeoScorecard({
       {
         key: "site-verification",
         label: "Search Console ownership verified",
-        href: "/admin/content/seo",
+        href: seoEditorHref("search"),
         // Google only. Bing verification is genuinely optional — grading it
         // would punish an owner who reasonably never bothered with Bing
         // Webmaster Tools.
@@ -500,7 +502,7 @@ export async function computeSeoScorecard({
               ...coverage(pagesWithTitle, applicableRoutes.length, "pages"),
               key: "page-meta-title",
               label: "Pages with a custom title",
-              href: "/admin/content/seo",
+              href: seoEditorHref("pages"),
             },
             {
               ...coverage(
@@ -510,7 +512,7 @@ export async function computeSeoScorecard({
               ),
               key: "page-meta-description",
               label: "Pages with a custom description",
-              href: "/admin/content/seo",
+              href: seoEditorHref("pages"),
               weight: 2,
             },
           ],

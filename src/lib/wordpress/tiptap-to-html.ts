@@ -253,6 +253,10 @@ export function tiptapToHtml(
     }
 
     if (isQuoteCalculatorNode(node)) {
+      // The node's `width`/`height`/`density` display-sizing attrs
+      // (`~/lib/quote/quote-display.ts`) are intentionally ignored here —
+      // the export always emits this static placeholder text, never the
+      // widget itself, so there is nothing for them to size.
       warnings.push(
         "Skipped quote calculator node (interactive widget has no WordPress equivalent)",
       );

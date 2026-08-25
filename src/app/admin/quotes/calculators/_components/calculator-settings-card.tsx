@@ -3,6 +3,7 @@
 import type { UseFormReturn } from "react-hook-form";
 
 import type { CalculatorFormValues } from "./builder-shared";
+import { QUOTE_LIVE_ESTIMATE_DISCLAIMER_DEFAULT } from "~/lib/validators/quote-calculator";
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ type Props = {
   form: UseFormReturn<CalculatorFormValues>;
   showEstimateToCustomer: boolean;
   displayAsRange: boolean;
+  showLiveEstimate: boolean;
 };
 
 /**
@@ -28,13 +30,21 @@ type Props = {
  * meaningless without it: when the estimate stays internal the server never
  * sends a number at all, so padding a range around one would configure nothing.
  * (`toPublicCalculatorDefinition` does not even ship `displayAsRange` to the
- * browser — the server renders the range itself.)
+ * browser — the server renders the range itself.) The running estimate is
+ * nested for the same reason, and the public projection ANDs the two so a
+ * leftover `showLiveEstimate: true` can never leak a price the owner hid.
  */
 export function CalculatorSettingsCard({
   form,
   showEstimateToCustomer,
   displayAsRange,
+  showLiveEstimate,
 }: Props) {
+  // Only for the character counter — `TextareaFormField` renders "0/300"
+  // unless it is told how long the current value is.
+  const liveEstimateDisclaimer =
+    form.watch("definition.liveEstimateDisclaimer") ?? "";
+
   return (
     <Card>
       <CardHeader>
@@ -45,6 +55,13 @@ export function CalculatorSettingsCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        <SwitchFormField
+          form={form}
+          name="definition.showReviewStep"
+          label="Review step"
+          description="Visitors see a summary of their answers with Edit links before sending."
+        />
+
         <SwitchFormField
           form={form}
           name="definition.showEstimateToCustomer"
@@ -68,6 +85,29 @@ export function CalculatorSettingsCard({
                 label="Range padding (%)"
                 description="How far above and below the estimate the range reaches. 1–50."
                 placeholder="10"
+              />
+            )}
+
+            {/* The tradeoff in the description is the owner's to make, and it
+                is stated plainly on purpose: a visitor who can watch the
+                number move can work out what each answer is worth. */}
+            <SwitchFormField
+              form={form}
+              name="definition.showLiveEstimate"
+              label="Show a running estimate while they answer"
+              description="Visitors can flip answers back and forth and watch the number move, which effectively reveals how each answer changes the price. Fine for menu-style pricing; leave off if your price table is sensitive."
+            />
+
+            {showLiveEstimate && (
+              <TextareaFormField
+                form={form}
+                name="definition.liveEstimateDisclaimer"
+                label="Running-estimate disclaimer"
+                description="Shown under the running number. A figure that moves as they answer reads as a firm price unless something says otherwise."
+                placeholder={QUOTE_LIVE_ESTIMATE_DISCLAIMER_DEFAULT}
+                rows={2}
+                maxLength={300}
+                messageLength={liveEstimateDisclaimer.length}
               />
             )}
           </>

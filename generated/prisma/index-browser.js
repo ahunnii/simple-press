@@ -866,6 +866,62 @@ exports.Prisma.QuoteSubmissionScalarFieldEnum = {
   businessId: 'businessId'
 };
 
+exports.Prisma.QuickBooksConnectionScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  status: 'status',
+  realmId: 'realmId',
+  environment: 'environment',
+  companyName: 'companyName',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  accessTokenExpiresAt: 'accessTokenExpiresAt',
+  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
+  lastRefreshAt: 'lastRefreshAt',
+  connectedAt: 'connectedAt',
+  disconnectedAt: 'disconnectedAt',
+  depositMode: 'depositMode',
+  depositPercent: 'depositPercent',
+  depositFixedCents: 'depositFixedCents',
+  defaultDueDays: 'defaultDueDays',
+  incomeAccountId: 'incomeAccountId',
+  depositItemId: 'depositItemId',
+  serviceItemId: 'serviceItemId',
+  depositItemName: 'depositItemName',
+  serviceItemName: 'serviceItemName',
+  lastSyncAt: 'lastSyncAt',
+  lastSyncError: 'lastSyncError'
+};
+
+exports.Prisma.QuickBooksInvoiceScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  quoteSubmissionId: 'quoteSubmissionId',
+  kind: 'kind',
+  amountCents: 'amountCents',
+  memo: 'memo',
+  description: 'description',
+  customerName: 'customerName',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  status: 'status',
+  balanceCents: 'balanceCents',
+  dueDate: 'dueDate',
+  sentAt: 'sentAt',
+  paidAt: 'paidAt',
+  realmId: 'realmId',
+  qboCustomerId: 'qboCustomerId',
+  qboInvoiceId: 'qboInvoiceId',
+  qboDocNumber: 'qboDocNumber',
+  qboSyncToken: 'qboSyncToken',
+  lastSyncedAt: 'lastSyncedAt',
+  lastError: 'lastError'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -957,7 +1013,9 @@ exports.Prisma.ModelName = {
   ShippingRate: 'ShippingRate',
   BackInStockRequest: 'BackInStockRequest',
   QuoteCalculator: 'QuoteCalculator',
-  QuoteSubmission: 'QuoteSubmission'
+  QuoteSubmission: 'QuoteSubmission',
+  QuickBooksConnection: 'QuickBooksConnection',
+  QuickBooksInvoice: 'QuickBooksInvoice'
 };
 
 /**

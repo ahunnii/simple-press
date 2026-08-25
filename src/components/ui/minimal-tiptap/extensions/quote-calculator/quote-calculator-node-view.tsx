@@ -8,8 +8,22 @@ import { NodeViewWrapper } from "@tiptap/react";
 import { Calculator, Loader2, X } from "lucide-react";
 
 import type { QuoteCalculatorOptions } from "./index";
+import {
+  coerceQuoteDensity,
+  coerceQuoteHeight,
+  coerceQuoteLayout,
+  coerceQuoteWidth,
+  QUOTE_DENSITY_PRESETS,
+  QUOTE_DISPLAY_DEFAULTS,
+  QUOTE_HEIGHT_PRESETS,
+  QUOTE_LAYOUT_PRESETS,
+  QUOTE_WIDTH_PRESETS,
+  quoteWidthClass,
+} from "~/lib/quote/quote-display";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -147,6 +161,19 @@ export function QuoteCalculatorNodeView({
   // interactive calculator from this same `calculatorId`.
   const questionCount = calculator?.questionCount ?? 0;
 
+  // Sizing node attrs. Coerced with the same `?? default` fallback the embed
+  // node view uses, so an unset or corrupted attr renders as today's look
+  // rather than an empty/invalid Select value.
+  const width =
+    coerceQuoteWidth(node.attrs.width) ?? QUOTE_DISPLAY_DEFAULTS.width;
+  const height =
+    coerceQuoteHeight(node.attrs.height) ?? QUOTE_DISPLAY_DEFAULTS.height;
+  const density =
+    coerceQuoteDensity(node.attrs.density) ?? QUOTE_DISPLAY_DEFAULTS.density;
+  const layout =
+    coerceQuoteLayout(node.attrs.layout) ?? QUOTE_DISPLAY_DEFAULTS.layout;
+  const widthClass = quoteWidthClass(width);
+
   return (
     <NodeViewWrapper className="quote-calculator-node my-6">
       <div className="group relative">
@@ -172,7 +199,13 @@ export function QuoteCalculatorNodeView({
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
         ) : calculator ? (
-          <div className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-6">
+          <div
+            className={cn(
+              "flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-6",
+              widthClass,
+              widthClass && "mx-auto",
+            )}
+          >
             <div className="shrink-0">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
                 <Calculator className="h-6 w-6 text-blue-600" />
@@ -201,6 +234,110 @@ export function QuoteCalculatorNodeView({
             </Button>
           </div>
         )}
+
+        {/* Display sizing — applied to the storefront widget via node attrs.
+            Updates immediately (no Save button); the width is also mirrored
+            onto the preview card above so the owner sees the relative size
+            without leaving the editor. This static preview card does not
+            attempt to mirror the Layout control's vertical centering — that
+            only makes sense against the real page's viewport height. */}
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="space-y-1">
+            <Label
+              htmlFor="quote-display-width"
+              className="text-sm font-medium"
+            >
+              Width
+            </Label>
+            <Select
+              value={width}
+              onValueChange={(v) => updateAttributes({ width: v })}
+            >
+              <SelectTrigger id="quote-display-width" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTE_WIDTH_PRESETS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label
+              htmlFor="quote-display-height"
+              className="text-sm font-medium"
+            >
+              Height
+            </Label>
+            <Select
+              value={height}
+              onValueChange={(v) => updateAttributes({ height: v })}
+            >
+              <SelectTrigger id="quote-display-height" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTE_HEIGHT_PRESETS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label
+              htmlFor="quote-display-density"
+              className="text-sm font-medium"
+            >
+              Density
+            </Label>
+            <Select
+              value={density}
+              onValueChange={(v) => updateAttributes({ density: v })}
+            >
+              <SelectTrigger id="quote-display-density" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTE_DENSITY_PRESETS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label
+              htmlFor="quote-display-layout"
+              className="text-sm font-medium"
+            >
+              Layout
+            </Label>
+            <Select
+              value={layout}
+              onValueChange={(v) => updateAttributes({ layout: v })}
+            >
+              <SelectTrigger id="quote-display-layout" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTE_LAYOUT_PRESETS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
     </NodeViewWrapper>
   );

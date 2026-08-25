@@ -31,9 +31,7 @@ const SYNC_TTL_MS = 60_000;
  * Refresh custom-domain entries from active businesses.
  * Safe to call frequently — no-ops within the TTL window.
  */
-export async function syncAllowedHostsFromDb(
-  force = false,
-): Promise<string[]> {
+export async function syncAllowedHostsFromDb(force = false): Promise<string[]> {
   const now = Date.now();
   if (!force && now - lastSyncAt < SYNC_TTL_MS) return allowedHosts;
 
