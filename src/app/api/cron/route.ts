@@ -9,6 +9,7 @@
 //   4. backInStock         — email shoppers whose requested product/variant is purchasable again
 //   5. archivePastEvents   — flip isArchived on events whose end (or start) has passed
 //   6. videoSync           — pull YouTube channel/playlist feeds into the Video cache
+//   7. quickbooksInvoiceSync — sync payment status for QuickBooks-issued invoices
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401 — and logs a one-time
@@ -32,6 +33,7 @@ import { archivePastEvents } from "~/lib/events/archive";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
 import { syncVideoSources } from "~/lib/youtube/sync";
 import { db } from "~/server/db";
 
@@ -327,6 +329,18 @@ const JOBS: readonly CronJob[] = [
     key: "videoSync",
     name: "video-sync",
     run: () => syncVideoSources(db),
+  },
+  // QuickBooks invoice sync: refresh payment status (paid / overdue / voided)
+  // for invoices SimplePress issued through a tenant's connected QuickBooks
+  // Online company. Per-business `quickbooks` flag gating, the 30-minute
+  // per-row throttle (QBO_MIN_INVOICE_SYNC_INTERVAL_MS), and per-business
+  // error isolation all live inside `syncQuickBooksInvoices`. Steady state
+  // for every tenant without QuickBooks is a single cheap SELECT returning 0
+  // rows — no network.
+  {
+    key: "quickbooksInvoiceSync",
+    name: "quickbooks-invoice-sync",
+    run: () => syncQuickBooksInvoices(db),
   },
 ];
 

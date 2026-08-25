@@ -12,6 +12,7 @@ import {
   IconDashboard,
   IconDatabaseExport,
   IconDiscount,
+  IconFileInvoice,
   IconFileText,
   IconFolder,
   IconImageInPicture,
@@ -208,6 +209,15 @@ export const NAV_ITEMS: NavItem[] = [
     featureKey: "customerAccounts",
     roles: ["OWNER", "MANAGER", "STAFF"],
     keywords: ["buyers", "shoppers"],
+  },
+  {
+    key: "invoices",
+    title: "Invoices",
+    href: "/admin/invoices",
+    icon: IconFileInvoice,
+    section: "sell",
+    featureKey: "quickbooks",
+    keywords: ["quickbooks", "invoice", "deposit", "bill", "final bill"],
   },
 
   // Catalog
@@ -756,6 +766,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     icon: IconCalculator,
     featureKey: "quoteCalculator",
     keywords: ["estimate", "calculator", "lead", "quote"],
+  },
+  {
+    key: "new-invoice",
+    title: "New invoice",
+    href: "/admin/invoices?new=1",
+    icon: Plus,
+    featureKey: "quickbooks",
+    keywords: ["quickbooks", "invoice", "deposit", "bill", "final bill"],
   },
   {
     key: "setup-guide",

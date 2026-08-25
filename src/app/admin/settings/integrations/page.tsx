@@ -1,4 +1,5 @@
 import { env } from "~/env";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getPaymentsHealth } from "~/lib/stripe/payments-health";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
@@ -15,6 +16,16 @@ export default async function IntegrationsSettingsPage() {
   // nothing.
   const paymentsHealth = await getPaymentsHealth(business);
 
+  // `quickbooks` is a PLATFORM_ADMIN-only flag (see the docblock on
+  // `quickbooksRouter`) — `getConnection` is behind `featureGate("quickbooks")`
+  // server-side, so calling it while the flag is off would throw. Checking the
+  // flag first means every other business simply gets `quickbooks: null` and
+  // the card below never renders — no gated tRPC call, no layout shift.
+  const flags = await getBusinessFlags();
+  const quickbooks = flags.isEnabled("quickbooks")
+    ? await api.quickbooks.getConnection()
+    : null;
+
   return (
     <>
       <TrailHeader
@@ -29,6 +40,7 @@ export default async function IntegrationsSettingsPage() {
         business={business}
         paymentsHealth={paymentsHealth}
         umamiBaseUrl={env.UMAMI_BASE_URL}
+        quickbooks={quickbooks}
       />
     </>
   );

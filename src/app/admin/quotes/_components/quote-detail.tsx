@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { QuoteQuickBooksCardData } from "./quote-quickbooks-card";
 import type {
   QuoteFormulaSnapshot,
   QuoteStatusDb,
@@ -57,6 +58,7 @@ import {
   dismissLoadingToast,
   loadingToast,
 } from "../../_lib/admin-mutation-toast";
+import { QuoteQuickBooksCard } from "./quote-quickbooks-card";
 
 export type QuoteDetailSubmission = {
   id: string;
@@ -86,6 +88,10 @@ type Props = {
   /** Mirrors `quoteSubmission.bulkDelete`'s `ownerOnlyProcedure`, resolved
    *  server-side. False OMITS the Delete menu item rather than disabling it. */
   canDelete: boolean;
+  /** Present ONLY when the `quickbooks` feature flag is on — the server page
+   *  skips both QuickBooks queries otherwise, so `undefined` here means the
+   *  card (and its whole subtree) is never rendered. */
+  quickbooks?: QuoteQuickBooksCardData;
 };
 
 const BASE_PATH = "/admin/quotes";
@@ -97,6 +103,7 @@ export function QuoteDetail({
   formulaSnapshot,
   formulaParseFailed,
   canDelete,
+  quickbooks,
 }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -541,6 +548,14 @@ export function QuoteDetail({
                 </div>
               </CardContent>
             </Card>
+
+            {quickbooks ? (
+              <QuoteQuickBooksCard
+                data={quickbooks}
+                submission={submission}
+                onChanged={afterWrite}
+              />
+            ) : null}
           </div>
         </div>
       </div>

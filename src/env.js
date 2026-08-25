@@ -43,6 +43,12 @@ export const env = createEnv({
     RECAPTCHA_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.5),
 
     SIMPLEPRESS_HASH_SECRET: z.string(),
+    // QuickBooks Online invoicing integration (platform-level Intuit app).
+    // All optional: the feature is platform-admin-gated and degrades to a
+    // "Not configured" card when unset.
+    QBO_CLIENT_ID: z.string().optional(),
+    QBO_CLIENT_SECRET: z.string().optional(),
+    QBO_ENVIRONMENT: z.enum(["sandbox", "production"]).default("sandbox"),
     ARTISANAL_FUTURES_API_URL: z.string().url(),
     // Dedicated bearer credential for outbound calls to Artisanal Futures API
     ARTISANAL_FUTURES_API_TOKEN: z.string().min(1),
@@ -165,6 +171,9 @@ export const env = createEnv({
     RECAPTCHA_MIN_SCORE: process.env.RECAPTCHA_MIN_SCORE,
 
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
+    QBO_CLIENT_ID: process.env.QBO_CLIENT_ID,
+    QBO_CLIENT_SECRET: process.env.QBO_CLIENT_SECRET,
+    QBO_ENVIRONMENT: process.env.QBO_ENVIRONMENT,
     CRON_SECRET: process.env.CRON_SECRET,
     ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
     ARTISANAL_FUTURES_API_TOKEN: process.env.ARTISANAL_FUTURES_API_TOKEN,

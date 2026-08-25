@@ -286,6 +286,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  quickbooks: {
+    key: "quickbooks",
+    label: "QuickBooks Invoicing",
+    description:
+      "Send deposit and final invoices through a connected QuickBooks Online company",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
 };
 
 // Ordered category labels for display
