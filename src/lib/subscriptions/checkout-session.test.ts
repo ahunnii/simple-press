@@ -328,7 +328,7 @@ describe("buildSubscriptionCheckoutParams — automatic tax", () => {
 });
 
 describe("buildSubscriptionCheckoutParams — product snapshot fields", () => {
-  it("no variant: omits `description`, blanks the variant metadata, and leaves `variant=` empty in cancel_url", () => {
+  it("no variant: omits `description`, omits the variant metadata keys, and leaves `variant=` empty in cancel_url", () => {
     const params = buildSubscriptionCheckoutParams(
       makeInput({
         subscription: {
@@ -341,17 +341,20 @@ describe("buildSubscriptionCheckoutParams — product snapshot fields", () => {
 
     // Key must be ABSENT, not `undefined` — see the file docblock.
     expect(productLine(params).productData).not.toHaveProperty("description");
+    // Optional keys are ABSENT, not "" — Stripe never stores an empty-string
+    // metadata value, so "" and absent are the same thing at Stripe; sending
+    // the key at all would just misdescribe what comes back.
     expect(productLine(params).productData?.metadata).toEqual({
       productId: "prod_1",
-      productVariantId: "",
-      variantName: "",
-      sku: "",
       kind: "product",
     });
     expect(params.subscription_data?.description).toBe(
       "Ultra Soft 12-pack × 2, every month",
     );
-    expect(params.subscription_data?.metadata).toMatchObject({ variantId: "" });
+    // Stripe drops empty-string metadata values, so "no variant" must be an
+    // ABSENT key — sending "" would silently strip it at Stripe and the
+    // webhook would then reject every event for this subscription.
+    expect(params.subscription_data?.metadata).not.toHaveProperty("variantId");
     expect(params.cancel_url).toBe(
       "https://shop.example.com/subscribe?product=ultra-soft-12-pack&variant=&interval=month%3A1&qty=2",
     );
@@ -366,7 +369,8 @@ describe("buildSubscriptionCheckoutParams — product snapshot fields", () => {
     for (const value of Object.values(metadata)) {
       expect(typeof value).toBe("string");
     }
-    expect(metadata).toMatchObject({ sku: "" });
+    expect(metadata).not.toHaveProperty("sku");
+    expect(metadata).toMatchObject({ productVariantId: "var_1" });
   });
 
   it("forwards an http(s) image, and drops anything else", () => {

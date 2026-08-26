@@ -18,6 +18,7 @@ import {
   deriveSubscriptionStatus,
   parseSubscriptionMetadata,
   periodFromStripe,
+  subscriptionMetadataSchema,
 } from "./status";
 import {
   getInvoiceMetadata,
@@ -194,36 +195,35 @@ async function respond(
 }
 
 /**
- * Resolve the `{ business, subscription }` pair an event refers to, or `null`.
+ * Load a business and bind it to the event, or `null`.
  *
  * The `event.account === business.stripeAccountId` check is the whole security
  * model for this lane: without it a connected merchant could stamp another
  * tenant's `businessId` onto their own subscription and drive orders, inventory
- * deductions and emails inside a store they don't own. The subscription row is
- * then loaded scoped to that business, so a valid id belonging to a *different*
- * tenant resolves to nothing.
+ * deductions and emails inside a store they don't own. Every tenant resolver —
+ * metadata-based or id-based — goes through here.
  *
  * Never throws and never writes.
  */
-export async function resolveSubscriptionTenant(
+async function loadBoundBusiness(
   dbc: DbClient,
   event: Stripe.Event,
-  ref: SubscriptionRef,
-): Promise<SubscriptionTenant | null> {
+  businessId: string,
+): Promise<SubscriptionTenant["business"] | null> {
   const business = await dbc.business.findUnique({
-    where: { id: ref.businessId },
+    where: { id: businessId },
     select: BUSINESS_SELECT,
   });
 
   if (!business?.stripeAccountId) {
     Sentry.captureMessage(
-      `[Subscription webhook] Business ${ref.businessId} not found or has no connected Stripe account`,
+      `[Subscription webhook] Business ${businessId} not found or has no connected Stripe account`,
       {
         level: "error",
         tags: {
           service: "stripe",
           "subscription.step": "business-not-found",
-          businessId: ref.businessId,
+          businessId,
         },
       },
     );
@@ -232,18 +232,36 @@ export async function resolveSubscriptionTenant(
 
   if (event.account !== business.stripeAccountId) {
     Sentry.captureMessage(
-      `[Subscription webhook] businessId/account mismatch: metadata business ${ref.businessId} does not own connected account ${event.account ?? "(none)"}`,
+      `[Subscription webhook] businessId/account mismatch: business ${businessId} does not own connected account ${event.account ?? "(none)"}`,
       {
         level: "warning",
         tags: {
           service: "stripe",
           "subscription.step": "account-mismatch",
-          businessId: ref.businessId,
+          businessId,
         },
       },
     );
     return null;
   }
+
+  return { ...business, stripeAccountId: business.stripeAccountId };
+}
+
+/**
+ * Resolve the `{ business, subscription }` pair an event's metadata refers to,
+ * or `null`. The subscription row is loaded scoped to the bound business, so a
+ * valid id belonging to a *different* tenant resolves to nothing.
+ *
+ * Never throws and never writes.
+ */
+export async function resolveSubscriptionTenant(
+  dbc: DbClient,
+  event: Stripe.Event,
+  ref: SubscriptionRef,
+): Promise<SubscriptionTenant | null> {
+  const business = await loadBoundBusiness(dbc, event, ref.businessId);
+  if (!business) return null;
 
   const subscription = await dbc.subscription.findFirst({
     where: { id: ref.subscriptionId, businessId: business.id },
@@ -264,10 +282,78 @@ export async function resolveSubscriptionTenant(
     return null;
   }
 
-  return {
-    business: { ...business, stripeAccountId: business.stripeAccountId },
-    subscription,
-  };
+  return { business, subscription };
+}
+
+/**
+ * The Stripe id an event object carries that can stand in for metadata: the
+ * subscription's own id (subscription + invoice events) or the Checkout
+ * Session id (session events, whose row has no `stripeSubscriptionId` yet).
+ * Both columns are `@unique` on `Subscription`.
+ */
+type TenantFallback =
+  | { kind: "stripeSubscriptionId"; id: string }
+  | { kind: "stripeCheckoutSessionId"; id: string };
+
+/**
+ * Resolve the tenant from the object's own Stripe id, or `null`. Same binding
+ * rule as the metadata path — the id only tells us WHICH row; the row's
+ * business still has to own the connected account the event came from.
+ */
+async function resolveSubscriptionTenantByFallback(
+  dbc: DbClient,
+  event: Stripe.Event,
+  fallback: TenantFallback,
+): Promise<SubscriptionTenant | null> {
+  const subscription = await dbc.subscription.findUnique({
+    where:
+      fallback.kind === "stripeSubscriptionId"
+        ? { stripeSubscriptionId: fallback.id }
+        : { stripeCheckoutSessionId: fallback.id },
+  });
+  if (!subscription) return null;
+
+  const business = await loadBoundBusiness(dbc, event, subscription.businessId);
+  if (!business) return null;
+
+  return { business, subscription };
+}
+
+/**
+ * Resolve the tenant for an event: metadata first (the designed path), then
+ * the Stripe id on the object itself.
+ *
+ * Metadata is the intended carrier, but it is the one thing we read off the
+ * raw event payload (see the module comment), and a subscription whose
+ * metadata reaches us unparseable must not silently lose its lifecycle events
+ * — a pause, a dunning failure, Stripe giving up and cancelling. The fallback
+ * makes the handler total for every row SimplePress created; the report says
+ * exactly which keys were unusable so the cause can be found, not guessed.
+ */
+async function resolveTenantForEvent(
+  dbc: DbClient,
+  event: Stripe.Event,
+  params: {
+    objectId: string;
+    metadata: Stripe.Metadata | null | undefined;
+    fallback: TenantFallback | null;
+  },
+): Promise<SubscriptionTenant | null> {
+  const parsed = parseSubscriptionMetadata(params.metadata);
+  if (parsed) return resolveSubscriptionTenant(dbc, event, parsed);
+
+  const tenant = params.fallback
+    ? await resolveSubscriptionTenantByFallback(dbc, event, params.fallback)
+    : null;
+
+  reportUnusableMetadata(event, {
+    objectId: params.objectId,
+    metadata: params.metadata,
+    expectedKeys: SUBSCRIPTION_METADATA_KEYS,
+    fallback: params.fallback,
+    recovered: tenant !== null,
+  });
+  return tenant;
 }
 
 /**
@@ -393,15 +479,116 @@ function readSessionRef(
   return { businessId, subscriptionId };
 }
 
-/** Report metadata we could not use, without leaking the metadata itself. */
-function reportMissingMetadata(event: Stripe.Event, objectId: string): void {
+/**
+ * Session-event twin of `resolveTenantForEvent`: session metadata carries only
+ * `businessId`/`subscriptionId`, and the row is found by
+ * `stripeCheckoutSessionId` when that is unusable (the subscription id is not
+ * on the row until `checkout.session.completed` itself writes it).
+ */
+async function resolveSessionTenant(
+  event: Stripe.Event,
+  session: Stripe.Checkout.Session,
+): Promise<SubscriptionTenant | null> {
+  const ref = readSessionRef(session);
+  if (ref) return resolveSubscriptionTenant(db, event, ref);
+
+  const fallback: TenantFallback = {
+    kind: "stripeCheckoutSessionId",
+    id: session.id,
+  };
+  const tenant = await resolveSubscriptionTenantByFallback(db, event, fallback);
+  reportUnusableMetadata(event, {
+    objectId: session.id,
+    metadata: session.metadata,
+    expectedKeys: SESSION_METADATA_KEYS,
+    fallback,
+    recovered: tenant !== null,
+  });
+  return tenant;
+}
+
+const SUBSCRIPTION_METADATA_KEYS = Object.keys(
+  subscriptionMetadataSchema.shape,
+);
+/**
+ * The keys the schema refuses to do without — derived by asking it, so an
+ * optional/defaulted key (`variantId`, which Stripe never stores when empty)
+ * is never reported as "missing".
+ */
+const REQUIRED_SUBSCRIPTION_METADATA_KEYS = new Set(
+  subscriptionMetadataSchema
+    .safeParse({})
+    .error?.issues.map((issue) => String(issue.path[0])) ?? [],
+);
+const SESSION_METADATA_KEYS = ["businessId", "subscriptionId"];
+
+/**
+ * Report metadata we could not use. Never the values — only which of the
+ * expected keys were present, which zod refinement rejected them, and the
+ * event's own envelope (`api_version` is the webhook ENDPOINT's pinned version,
+ * the one that renders `event.data.object`).
+ *
+ * Two outcomes, two Sentry steps:
+ *  - `metadata-unparseable` (warning): the id fallback found the row and the
+ *    event was processed — a diagnostic, not a loss.
+ *  - `metadata-missing` (warning): nothing bound the event to a row. Either it
+ *    isn't ours (a dashboard-made or `stripe trigger` subscription) or a row
+ *    of ours has lost its Stripe id.
+ */
+function reportUnusableMetadata(
+  event: Stripe.Event,
+  params: {
+    objectId: string;
+    metadata: Stripe.Metadata | null | undefined;
+    expectedKeys: readonly string[];
+    fallback: TenantFallback | null;
+    recovered: boolean;
+  },
+): void {
+  const raw = params.metadata ?? {};
+  const rawKeys = Object.keys(raw);
+  const present = params.expectedKeys.filter((key) => key in raw);
+  const missing = params.expectedKeys.filter(
+    (key) =>
+      !(key in raw) &&
+      (params.expectedKeys !== SUBSCRIPTION_METADATA_KEYS ||
+        REQUIRED_SUBSCRIPTION_METADATA_KEYS.has(key)),
+  );
+  const issues =
+    params.expectedKeys === SUBSCRIPTION_METADATA_KEYS
+      ? (subscriptionMetadataSchema
+          .safeParse(raw)
+          .error?.issues.map(
+            (issue) => `${issue.path.join(".")}: ${issue.message}`,
+          ) ?? [])
+      : [];
+
+  const step = params.recovered ? "metadata-unparseable" : "metadata-missing";
+  const suffix = params.recovered
+    ? `; resolved via ${params.fallback?.kind ?? "?"}`
+    : "";
+
   Sentry.captureMessage(
-    `[Subscription webhook] ${event.type} for ${objectId} carried no usable SimplePress metadata`,
+    `[Subscription webhook] ${event.type} for ${params.objectId} carried no usable SimplePress metadata${suffix}`,
     {
       level: "warning",
       tags: {
         service: "stripe",
-        "subscription.step": "metadata-missing",
+        "subscription.step": step,
+        "subscription.fallback": params.fallback?.kind ?? "none",
+      },
+      extra: {
+        eventId: event.id,
+        apiVersion: event.api_version,
+        account: event.account ?? null,
+        livemode: event.livemode,
+        metadataWasNull: params.metadata == null,
+        metadataKeysPresent: present,
+        metadataKeysMissing: missing,
+        unexpectedKeyCount: rawKeys.length - present.length,
+        issues,
+        fallbackId: params.fallback?.id ?? null,
+        recovered: params.recovered,
       },
     },
   );
@@ -421,15 +608,9 @@ export async function handleSubscriptionCheckoutCompleted(
   return respond(event, "checkout-completed", async (ctx) => {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    const ref = readSessionRef(session);
-    if (!ref) {
-      reportMissingMetadata(event, session.id);
-      return;
-    }
-    ctx.businessId = ref.businessId;
-
-    const tenant = await resolveSubscriptionTenant(db, event, ref);
+    const tenant = await resolveSessionTenant(event, session);
     if (!tenant) return;
+    ctx.businessId = tenant.business.id;
 
     const stripeSubscriptionId = idOf(session.subscription);
     if (!stripeSubscriptionId) {
@@ -440,7 +621,7 @@ export async function handleSubscriptionCheckoutCompleted(
           tags: {
             service: "stripe",
             "subscription.step": "session-without-subscription",
-            businessId: ref.businessId,
+            businessId: tenant.business.id,
           },
         },
       );
@@ -482,12 +663,9 @@ export async function handleSubscriptionCheckoutExpired(
   return respond(event, "checkout-expired", async (ctx) => {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    const ref = readSessionRef(session);
-    if (!ref) return;
-    ctx.businessId = ref.businessId;
-
-    const tenant = await resolveSubscriptionTenant(db, event, ref);
+    const tenant = await resolveSessionTenant(event, session);
     if (!tenant) return;
+    ctx.businessId = tenant.business.id;
 
     const { subscription } = tenant;
     if (
@@ -537,15 +715,16 @@ export async function handleInvoicePaid(
       return;
     }
 
-    const metadata = parseSubscriptionMetadata(getInvoiceMetadata(invoice));
-    if (!metadata) {
-      reportMissingMetadata(event, invoice.id);
-      return;
-    }
-    ctx.businessId = metadata.businessId;
-
-    const tenant = await resolveSubscriptionTenant(db, event, metadata);
+    const invoiceSubscriptionId = getInvoiceSubscriptionId(invoice);
+    const tenant = await resolveTenantForEvent(db, event, {
+      objectId: invoice.id,
+      metadata: getInvoiceMetadata(invoice),
+      fallback: invoiceSubscriptionId
+        ? { kind: "stripeSubscriptionId", id: invoiceSubscriptionId }
+        : null,
+    });
     if (!tenant) return;
+    ctx.businessId = tenant.business.id;
 
     const { business } = tenant;
     let subscription = tenant.subscription;
@@ -631,15 +810,16 @@ export async function handleInvoicePaymentFailed(
       return;
     }
 
-    const metadata = parseSubscriptionMetadata(getInvoiceMetadata(invoice));
-    if (!metadata) {
-      reportMissingMetadata(event, invoice.id);
-      return;
-    }
-    ctx.businessId = metadata.businessId;
-
-    const tenant = await resolveSubscriptionTenant(db, event, metadata);
+    const invoiceSubscriptionId = getInvoiceSubscriptionId(invoice);
+    const tenant = await resolveTenantForEvent(db, event, {
+      objectId: invoice.id,
+      metadata: getInvoiceMetadata(invoice),
+      fallback: invoiceSubscriptionId
+        ? { kind: "stripeSubscriptionId", id: invoiceSubscriptionId }
+        : null,
+    });
     if (!tenant) return;
+    ctx.businessId = tenant.business.id;
 
     const subscription = await db.subscription.update({
       where: { id: tenant.subscription.id },
@@ -687,15 +867,13 @@ export async function handleSubscriptionUpdated(
   return respond(event, "subscription-updated", async (ctx) => {
     const rawSub = event.data.object as Stripe.Subscription;
 
-    const metadata = parseSubscriptionMetadata(rawSub.metadata);
-    if (!metadata) {
-      reportMissingMetadata(event, rawSub.id);
-      return;
-    }
-    ctx.businessId = metadata.businessId;
-
-    const tenant = await resolveSubscriptionTenant(db, event, metadata);
+    const tenant = await resolveTenantForEvent(db, event, {
+      objectId: rawSub.id,
+      metadata: rawSub.metadata,
+      fallback: { kind: "stripeSubscriptionId", id: rawSub.id },
+    });
     if (!tenant) return;
+    ctx.businessId = tenant.business.id;
 
     const stripeSub = await retrieveConnectedSubscription(
       tenant.business.stripeAccountId,
@@ -761,15 +939,13 @@ export async function handleSubscriptionDeleted(
   return respond(event, "subscription-deleted", async (ctx) => {
     const rawSub = event.data.object as Stripe.Subscription;
 
-    const metadata = parseSubscriptionMetadata(rawSub.metadata);
-    if (!metadata) {
-      reportMissingMetadata(event, rawSub.id);
-      return;
-    }
-    ctx.businessId = metadata.businessId;
-
-    const tenant = await resolveSubscriptionTenant(db, event, metadata);
+    const tenant = await resolveTenantForEvent(db, event, {
+      objectId: rawSub.id,
+      metadata: rawSub.metadata,
+      fallback: { kind: "stripeSubscriptionId", id: rawSub.id },
+    });
     if (!tenant) return;
+    ctx.businessId = tenant.business.id;
 
     if (tenant.subscription.status === "cancelled") return;
 

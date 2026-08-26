@@ -131,13 +131,16 @@ export function buildSubscriptionCheckoutParams(
         // both treat a present-but-undefined key differently from an absent one.
         ...(sub.variantName ? { description: sub.variantName } : {}),
         ...(isForwardableImage(imageUrl) ? { images: [imageUrl] } : {}),
-        // Stripe metadata is string-only — an empty string is how "no variant"
-        // round-trips back through the webhook.
+        // Informational only (nothing parses this). Stripe treats an
+        // empty-string metadata value as "unset", so optional keys are
+        // omitted rather than sent as "".
         metadata: {
           productId: sub.productId,
-          productVariantId: sub.productVariantId ?? "",
-          variantName: sub.variantName ?? "",
-          sku: sub.sku ?? "",
+          ...(sub.productVariantId
+            ? { productVariantId: sub.productVariantId }
+            : {}),
+          ...(sub.variantName ? { variantName: sub.variantName } : {}),
+          ...(sub.sku ? { sku: sub.sku } : {}),
           kind: "product",
         },
       },
@@ -190,11 +193,19 @@ export function buildSubscriptionCheckoutParams(
       // Snapshotted onto every invoice event by Stripe
       // (`invoice.parent.subscription_details.metadata`), which is how the
       // webhook resolves the tenant for a renewal months from now.
+      //
+      // `variantId` is OMITTED for a variant-less product, never sent as "":
+      // Stripe reads an empty-string value as "delete this key", so the
+      // subscription would come back without it and — with the key required
+      // — every one of its events would fail `subscriptionMetadataSchema`.
+      // That is exactly what happened on staging (2026-08-26): no Order from
+      // `invoice.paid`, and a "no usable metadata" warning on pause + cancel.
+      // The schema defaults a missing `variantId` to "".
       metadata: {
         businessId: business.id,
         subscriptionId: sub.id,
         productId: sub.productId,
-        variantId: sub.productVariantId ?? "",
+        ...(sub.productVariantId ? { variantId: sub.productVariantId } : {}),
         intervalKey: sub.intervalKey,
         quantity: String(sub.quantity),
         deliveryMethod: sub.deliveryMethod,

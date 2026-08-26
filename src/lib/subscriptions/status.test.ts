@@ -278,6 +278,15 @@ describe("subscriptionMetadataSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts metadata with NO variantId — Stripe never stores an empty-string value", () => {
+    const withoutVariant = Object.fromEntries(
+      Object.entries(validMeta).filter(([key]) => key !== "variantId"),
+    );
+    const result = subscriptionMetadataSchema.safeParse(withoutVariant);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.variantId).toBe("");
+  });
+
   it("allows an empty string variantId", () => {
     expect(
       subscriptionMetadataSchema.safeParse({ ...validMeta, variantId: "" })

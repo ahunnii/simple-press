@@ -192,8 +192,16 @@ export const subscriptionMetadataSchema = z.object({
   businessId: z.string().min(1),
   subscriptionId: z.string().min(1),
   productId: z.string().min(1),
-  /** Empty string when the product has no variants. */
-  variantId: z.string(),
+  /**
+   * ABSENT when the product has no variants — never rely on an empty string
+   * arriving. Stripe treats an empty-string metadata value as "unset this
+   * key" (docs.stripe.com/metadata → "Delete a single key"), so a key sent as
+   * `""` is simply never stored, and the object comes back without it.
+   * Requiring it here made every event for a variant-less product unparseable
+   * (staging, 2026-08-26). Normalised to `""` on parse so consumers keep one
+   * shape.
+   */
+  variantId: z.string().default(""),
   intervalKey: z.string().refine(isSubscriptionIntervalKey, {
     message: "Unknown subscription interval key",
   }),

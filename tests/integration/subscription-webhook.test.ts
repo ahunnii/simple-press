@@ -103,6 +103,7 @@ const sentryMocks = vi.hoisted(() => {
     kind: "message" | "exception";
     payload: unknown;
     tags: Tags;
+    extra?: Record<string, unknown>;
   }> = [];
 
   const mergedTags = (inline?: Tags): Tags =>
@@ -115,6 +116,7 @@ const sentryMocks = vi.hoisted(() => {
       kind: "message",
       payload: message,
       tags: mergedTags(readTags(ctx)),
+      extra: (ctx as { extra?: Record<string, unknown> } | undefined)?.extra,
     });
     return "evt_test";
   });
@@ -323,7 +325,11 @@ async function createSubscriptionRow(
   });
 }
 
-/** Full `subscription_data.metadata` — satisfies `subscriptionMetadataSchema`. */
+/**
+ * `subscription_data.metadata` as Stripe actually returns it for a
+ * variant-less product: NO `variantId` key (Stripe drops empty-string values;
+ * the builder omits the key). Satisfies `subscriptionMetadataSchema`.
+ */
 function subMetadata(
   store: Store,
   subscriptionId: string,
@@ -333,7 +339,6 @@ function subMetadata(
     businessId: store.id,
     subscriptionId,
     productId: productId ?? "prod_unknown",
-    variantId: "",
     intervalKey: "month:1",
     quantity: "2",
     deliveryMethod: "pickup",
@@ -881,6 +886,56 @@ describe("subscription webhook handlers", () => {
       return handleSubscriptionCheckoutCompleted(event);
     }
 
+    it("recovers via stripeCheckoutSessionId when the session metadata is unusable", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, {
+        status: "incomplete",
+        stripeSubscriptionId: null,
+        stripeCustomerId: null,
+      });
+      await db.subscription.update({
+        where: { id: row.id },
+        data: { stripeCheckoutSessionId: "cs_test_nometa" },
+      });
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(
+        makeStripeSubscription({ id: "sub_live_1", customer: "cus_sub_1" }),
+      );
+      const session = makeSubscriptionSession({
+        id: "cs_test_nometa",
+        metadata: {},
+        subscription: "sub_live_1",
+        customer: "cus_live_1",
+      });
+
+      await expectReceived(
+        await handleSubscriptionCheckoutCompleted(
+          makeStripeEvent({
+            type: "checkout.session.completed",
+            object: session,
+            account: ACCOUNT_ID,
+          }),
+        ),
+      );
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.status).toBe("active");
+      expect(after.stripeSubscriptionId).toBe("sub_live_1");
+      const [report] = sentryEventsTagged(
+        "subscription.step",
+        "metadata-unparseable",
+      );
+      expect(report?.tags["subscription.fallback"]).toBe(
+        "stripeCheckoutSessionId",
+      );
+      expect(report?.extra).toMatchObject({
+        recovered: true,
+        metadataKeysMissing: ["businessId", "subscriptionId"],
+        fallbackId: "cs_test_nometa",
+      });
+    });
+
     it("activates the row from the connected account's subscription and emails both parties", async () => {
       const store = await setupStore();
       const customer = await createCustomer(store.id, {
@@ -1363,10 +1418,55 @@ describe("subscription webhook handlers", () => {
       expect(emailMocks.sendEmail).not.toHaveBeenCalled();
     });
 
-    it("answers 200 and creates nothing when the metadata snapshot is missing", async () => {
+    it("recovers via the invoice's subscription id when the metadata snapshot is missing", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store);
+      // Row default `stripeSubscriptionId` is "sub_test_1" — the invoice's
+      // `parent.subscription_details.subscription` — so the id fallback binds
+      // it even though the metadata snapshot is null.
+      const invoice = makeStripeInvoice({ id: "in_nometa", metadata: null });
+      stripeMocks.invoicesRetrieve.mockResolvedValue(invoice);
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(
+        makeStripeSubscription({ metadata: subMetadata(store, row.id, null) }),
+      );
+      const event = makeStripeEvent({
+        type: "invoice.paid",
+        object: invoice,
+        account: ACCOUNT_ID,
+      });
+
+      await expectReceived(await handleInvoicePaid(event));
+
+      const order = await db.order.findUnique({
+        where: { stripeInvoiceId: "in_nometa" },
+      });
+      expect(order?.subscriptionId).toBe(row.id);
+      expect(
+        sentryEventsTagged("subscription.step", "metadata-missing"),
+      ).toHaveLength(0);
+      const [report] = sentryEventsTagged(
+        "subscription.step",
+        "metadata-unparseable",
+      );
+      expect(report?.tags["subscription.fallback"]).toBe(
+        "stripeSubscriptionId",
+      );
+      expect(report?.extra).toMatchObject({
+        recovered: true,
+        metadataWasNull: true,
+        fallbackId: "sub_test_1",
+        apiVersion: "2026-01-28.clover",
+      });
+    });
+
+    it("answers 200 and creates nothing when the metadata is missing AND the subscription id matches no row", async () => {
       const store = await setupStore();
       await createSubscriptionRow(store);
-      const invoice = makeStripeInvoice({ id: "in_nometa", metadata: null });
+      const invoice = makeStripeInvoice({
+        id: "in_nometa_unknown",
+        metadata: null,
+        subscriptionId: "sub_not_ours",
+      });
       stripeMocks.invoicesRetrieve.mockResolvedValue(invoice);
       const event = makeStripeEvent({
         type: "invoice.paid",
@@ -1376,9 +1476,15 @@ describe("subscription webhook handlers", () => {
 
       await expectReceived(await handleInvoicePaid(event));
       expect(await db.order.count()).toBe(0);
-      expect(
-        sentryEventsTagged("subscription.step", "metadata-missing"),
-      ).toHaveLength(1);
+      expect(stripeMocks.subscriptionsRetrieve).not.toHaveBeenCalled();
+      const [report] = sentryEventsTagged(
+        "subscription.step",
+        "metadata-missing",
+      );
+      expect(report?.extra).toMatchObject({
+        recovered: false,
+        fallbackId: "sub_not_ours",
+      });
     });
   });
 
@@ -1538,6 +1644,158 @@ describe("subscription webhook handlers", () => {
         account,
       });
     }
+
+    it("recovers via stripeSubscriptionId when the payload metadata is unusable", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, { status: "active" });
+      // Raw payload: right subscription id, empty metadata — exactly what a
+      // pause looked like on staging when this fallback was added.
+      const paused = makeStripeSubscription({
+        metadata: {},
+        pauseCollection: { behavior: "void", resumes_at: null },
+      });
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(paused);
+      const event = makeStripeEvent({
+        type: "customer.subscription.updated",
+        object: paused,
+        account: ACCOUNT_ID,
+      });
+
+      await expectReceived(await handleSubscriptionUpdated(event));
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.status).toBe("paused");
+      expect(emailCategories()).toEqual(["subscription_updated"]);
+
+      const [report] = sentryEventsTagged(
+        "subscription.step",
+        "metadata-unparseable",
+      );
+      expect(report).toBeDefined();
+      expect(report?.extra).toMatchObject({
+        recovered: true,
+        metadataWasNull: false,
+        metadataKeysPresent: [],
+        fallbackId: "sub_test_1",
+        apiVersion: "2026-01-28.clover",
+        account: ACCOUNT_ID,
+      });
+      // `variantId` is optional (Stripe never stores it when empty) so it is
+      // never reported as missing.
+      expect(report?.extra?.metadataKeysMissing).toEqual([
+        "businessId",
+        "subscriptionId",
+        "productId",
+        "intervalKey",
+        "quantity",
+        "deliveryMethod",
+      ]);
+      expect(
+        sentryEventsTagged("subscription.step", "metadata-missing"),
+      ).toHaveLength(0);
+    });
+
+    it("names the rejected key when metadata is present but malformed", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, { status: "active" });
+      const sub = makeStripeSubscription({
+        metadata: {
+          ...subMetadata(store, row.id, null),
+          intervalKey: "fortnight:1",
+        },
+      });
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(sub);
+
+      await expectReceived(
+        await handleSubscriptionUpdated(
+          makeStripeEvent({
+            type: "customer.subscription.updated",
+            object: sub,
+            account: ACCOUNT_ID,
+          }),
+        ),
+      );
+
+      const [report] = sentryEventsTagged(
+        "subscription.step",
+        "metadata-unparseable",
+      );
+      expect(report?.extra?.metadataKeysMissing).toEqual([]);
+      expect(report?.extra?.issues).toEqual([
+        "intervalKey: Unknown subscription interval key",
+      ]);
+      // Still processed — the row converged on Stripe's state.
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.lastSyncedAt).toBeInstanceOf(Date);
+    });
+
+    it("still rejects an unusable-metadata event from a different connected account", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, { status: "active" });
+      const paused = makeStripeSubscription({
+        metadata: {},
+        pauseCollection: { behavior: "void", resumes_at: null },
+      });
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(paused);
+
+      await expectReceived(
+        await handleSubscriptionUpdated(
+          makeStripeEvent({
+            type: "customer.subscription.updated",
+            object: paused,
+            account: OTHER_ACCOUNT_ID,
+          }),
+        ),
+      );
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.status).toBe("active");
+      expect(stripeMocks.subscriptionsRetrieve).not.toHaveBeenCalled();
+      expect(emailMocks.sendEmail).not.toHaveBeenCalled();
+      expect(
+        sentryEventsTagged("subscription.step", "account-mismatch"),
+      ).toHaveLength(1);
+    });
+
+    it("reports metadata-missing with diagnostics when neither metadata nor the id matches a row", async () => {
+      const store = await setupStore();
+      await createSubscriptionRow(store, { status: "active" });
+      const stray = makeStripeSubscription({
+        id: "sub_dashboard_made",
+        metadata: { businessId: store.id },
+      });
+
+      await expectReceived(
+        await handleSubscriptionUpdated(
+          makeStripeEvent({
+            type: "customer.subscription.updated",
+            object: stray,
+            account: ACCOUNT_ID,
+          }),
+        ),
+      );
+
+      expect(stripeMocks.subscriptionsRetrieve).not.toHaveBeenCalled();
+      const [report] = sentryEventsTagged(
+        "subscription.step",
+        "metadata-missing",
+      );
+      expect(report?.tags["subscription.fallback"]).toBe(
+        "stripeSubscriptionId",
+      );
+      expect(report?.extra).toMatchObject({
+        recovered: false,
+        metadataKeysPresent: ["businessId"],
+        fallbackId: "sub_dashboard_made",
+      });
+      expect(report?.extra?.issues).not.toHaveLength(0);
+    });
 
     it("applies state without emailing when the derived status is unchanged", async () => {
       const store = await setupStore();
