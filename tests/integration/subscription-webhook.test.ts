@@ -1850,47 +1850,104 @@ describe("subscription webhook handlers", () => {
       expect(after.lastSyncedAt).toBeInstanceOf(Date);
     });
 
-    it("emails on active → paused", async () => {
+    it("emails on active → paused, keyed on the event id", async () => {
       const store = await setupStore();
       const row = await createSubscriptionRow(store, { status: "active" });
-
-      await expectReceived(
-        await handleSubscriptionUpdated(
-          updatedEvent(
-            store,
-            row.id,
-            makeStripeSubscription({
-              pauseCollection: { behavior: "void", resumes_at: null },
-            }),
-          ),
-        ),
+      const event = updatedEvent(
+        store,
+        row.id,
+        makeStripeSubscription({
+          pauseCollection: { behavior: "void", resumes_at: null },
+        }),
       );
+
+      await expectReceived(await handleSubscriptionUpdated(event));
 
       const after = await db.subscription.findUniqueOrThrow({
         where: { id: row.id },
       });
       expect(after.status).toBe("paused");
       expect(emailCategories()).toEqual(["subscription_updated"]);
-      expect(emailsWithCategory("subscription_updated")[0]!.to).toBe(
-        "ada@shopper.test",
+      const email = emailsWithCategory("subscription_updated")[0]!;
+      expect(email.to).toBe("ada@shopper.test");
+      // Unique per event, identical across Stripe's redeliveries of it — and
+      // NOT `nextBillingAt`, which a pause leaves untouched (that anchor made
+      // Resend drop every repeat pause within 24h).
+      expect(email.idempotencyKey).toBe(
+        `sub-updated-${row.id}-paused-${event.id}`,
       );
     });
 
-    it("emails on paused → active", async () => {
+    it("emails on paused → active, keyed on the event id", async () => {
       const store = await setupStore();
       const row = await createSubscriptionRow(store, { status: "paused" });
+      const event = updatedEvent(store, row.id, makeStripeSubscription());
 
-      await expectReceived(
-        await handleSubscriptionUpdated(
-          updatedEvent(store, row.id, makeStripeSubscription()),
-        ),
-      );
+      await expectReceived(await handleSubscriptionUpdated(event));
 
       const after = await db.subscription.findUniqueOrThrow({
         where: { id: row.id },
       });
       expect(after.status).toBe("active");
       expect(emailCategories()).toEqual(["subscription_updated"]);
+      expect(
+        emailsWithCategory("subscription_updated")[0]!.idempotencyKey,
+      ).toBe(`sub-updated-${row.id}-resumed-${event.id}`);
+    });
+
+    it("a redelivered event emails once", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, { status: "active" });
+      const event = updatedEvent(
+        store,
+        row.id,
+        makeStripeSubscription({
+          pauseCollection: { behavior: "void", resumes_at: null },
+        }),
+      );
+
+      await expectReceived(await handleSubscriptionUpdated(event));
+      await expectReceived(await handleSubscriptionUpdated(event));
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.status).toBe("paused");
+      expect(emailCategories()).toEqual(["subscription_updated"]);
+    });
+
+    it("stays silent when the row moved under it — the pause action wrote (and emailed) first", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, { status: "active" });
+      const paused = makeStripeSubscription({
+        pauseCollection: { behavior: "void", resumes_at: null },
+        metadata: subMetadata(store, row.id, null),
+      });
+      // The handler has already read the row as `active` by the time it
+      // retrieves from Stripe; the action's own write lands in that window.
+      stripeMocks.subscriptionsRetrieve.mockImplementation(async () => {
+        await db.subscription.update({
+          where: { id: row.id },
+          data: { status: "paused", pauseResumesAt: null },
+        });
+        return paused;
+      });
+      const event = makeStripeEvent({
+        type: "customer.subscription.updated",
+        object: paused,
+        account: ACCOUNT_ID,
+      });
+
+      await expectReceived(await handleSubscriptionUpdated(event));
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      // State still converges from Stripe…
+      expect(after.status).toBe("paused");
+      expect(after.lastSyncedAt).toBeInstanceOf(Date);
+      // …but the transition was not ours to announce.
+      expect(emailMocks.sendEmail).not.toHaveBeenCalled();
     });
 
     it("does NOT email on past_due → active (invoice.paid owns recovery)", async () => {

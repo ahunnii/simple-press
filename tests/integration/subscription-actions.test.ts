@@ -105,6 +105,7 @@ vi.mock("@sentry/nextjs", () => ({
 type EmailCall = {
   to: string | string[];
   tags?: { name: string; value: string }[];
+  idempotencyKey?: string;
 };
 
 function emailCalls(): EmailCall[] {
@@ -121,6 +122,12 @@ function emailCategories(): string[] {
 
 function emailWithCategory(category: string): EmailCall | undefined {
   return emailCalls().find((opts) =>
+    opts.tags?.some((t) => t.name === "category" && t.value === category),
+  );
+}
+
+function emailsWithCategory(category: string): EmailCall[] {
+  return emailCalls().filter((opts) =>
     opts.tags?.some((t) => t.name === "category" && t.value === category),
   );
 }
@@ -679,6 +686,9 @@ describe("resumeSubscription", () => {
     expect(updated.pauseResumesAt).toBeNull();
     // The skipped delivery is back on: the next charge is the boundary again.
     expect(updated.nextBillingAt?.toISOString()).toBe(PERIOD_END.toISOString());
+    // `active` → `active`: the webhook never emails for this shape (it only
+    // reacts to a status change), so the action must — and does.
+    expect(emailCategories()).toEqual(["subscription_updated"]);
   });
 
   it("invalid_state on an active row whose skip window has already elapsed", async () => {
@@ -715,6 +725,97 @@ describe("resumeSubscription", () => {
     );
 
     expect(err).toMatchObject({ code: "not_found" });
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * pause / resume emails — the row decides the sender
+ * ------------------------------------------------------------------ */
+
+/**
+ * Two things can email about a pause or a resume: the action itself, and the
+ * `customer.subscription.updated` webhook Stripe fires for the very same call.
+ * The row's status transition (a compare-and-set on the status the action
+ * read) decides which one does; the Resend idempotency key is only a backstop
+ * for a redelivered event and MUST be unique per transition. It used to be
+ * anchored on `nextBillingAt`, which pause/resume never change, so every
+ * repeat within Resend's 24-hour key window was dropped with
+ * `409 invalid_idempotent_request` — and nothing surfaced it, because
+ * `sendEmail` never throws.
+ */
+describe("pause / resume emails", () => {
+  it("pause → resume → pause emails three times, with three DISTINCT idempotency keys", async () => {
+    const business = await createStore();
+    const row = await createSubscriptionRow(business.id, { status: "active" });
+    const target = { businessId: business.id, subscriptionId: row.id };
+
+    await pauseSubscription(db, target);
+    await resumeSubscription(db, target);
+    await pauseSubscription(db, target);
+
+    const keys = emailsWithCategory("subscription_updated").map(
+      (call) => call.idempotencyKey,
+    );
+    expect(keys).toHaveLength(3);
+    expect(new Set(keys).size).toBe(3);
+    for (const key of keys) {
+      expect(key).toMatch(
+        new RegExp(`^sub-updated-${row.id}-(paused|resumed)-\\d+$`),
+      );
+    }
+    // Nothing about the transition is allowed to be the anchor: both pauses
+    // share the row, the variant AND the (unchanged) next billing date.
+    expect(keys[0]).not.toBe(keys[2]);
+  });
+
+  it("pause stays silent when the webhook applied the transition first (one email, not two)", async () => {
+    const business = await createStore();
+    const row = await createSubscriptionRow(business.id, { status: "active" });
+
+    // The webhook for our own Stripe call lands before our DB write: by the
+    // time `pauseSubscription` writes, the row is already `paused` — and the
+    // webhook, having observed active → paused, has already emailed.
+    stripeMocks.subscriptionsUpdate.mockImplementationOnce(
+      async (id: string) => {
+        await db.subscription.update({
+          where: { id: row.id },
+          data: { status: "paused", pauseResumesAt: null },
+        });
+        return { id, status: "active" };
+      },
+    );
+
+    const updated: Subscription = await pauseSubscription(db, {
+      businessId: business.id,
+      subscriptionId: row.id,
+    });
+
+    expect(updated.status).toBe("paused");
+    expect(emailMocks.sendEmail).not.toHaveBeenCalled();
+    expect(sentryMocks.captureException).not.toHaveBeenCalled();
+  });
+
+  it("resume stays silent when the webhook applied the transition first", async () => {
+    const business = await createStore();
+    const row = await createSubscriptionRow(business.id, { status: "paused" });
+
+    stripeMocks.subscriptionsUpdate.mockImplementationOnce(
+      async (id: string) => {
+        await db.subscription.update({
+          where: { id: row.id },
+          data: { status: "active", pauseResumesAt: null },
+        });
+        return { id, status: "active" };
+      },
+    );
+
+    const updated: Subscription = await resumeSubscription(db, {
+      businessId: business.id,
+      subscriptionId: row.id,
+    });
+
+    expect(updated.status).toBe("active");
+    expect(emailMocks.sendEmail).not.toHaveBeenCalled();
   });
 });
 

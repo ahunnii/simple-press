@@ -167,6 +167,39 @@ async function bestEffort(
 }
 
 /**
+ * Write a status transition only if the row still carries the status the action
+ * read, then reload it. Returns `transitioned: false` when the row moved in the
+ * meantime — in practice the `customer.subscription.updated` webhook for the
+ * Stripe call the action just made, which reached the DB first and, having
+ * observed the transition itself, already sent the customer's email. The action
+ * then keeps the (correct) row and stays quiet, so a pause or resume produces
+ * exactly one email whichever side wins the race.
+ */
+async function transitionIfStatus(
+  db: DbClient,
+  row: Pick<Subscription, "id" | "status">,
+  data: Parameters<DbClient["subscription"]["updateMany"]>[0]["data"],
+): Promise<{ updated: Subscription; transitioned: boolean }> {
+  const { count } = await db.subscription.updateMany({
+    where: { id: row.id, status: row.status },
+    data,
+  });
+  const updated = await db.subscription.findUniqueOrThrow({
+    where: { id: row.id },
+  });
+  return { updated, transitioned: count === 1 };
+}
+
+/**
+ * The idempotency anchor for an email about a transition this action wrote:
+ * `updatedAt` is stamped by that write, so it is unique per transition and
+ * stable for this call — unlike `nextBillingAt`, which pause/resume never move.
+ */
+function transitionKeyOf(row: Pick<Subscription, "updatedAt">): string {
+  return String(row.updatedAt.getTime());
+}
+
+/**
  * Cancel immediately, with no proration or refund — an already-paid delivery
  * still ships (the plan's locked decision).
  *
@@ -272,20 +305,20 @@ export async function pauseSubscription(
     { stripeAccount },
   );
 
-  const updated = await db.subscription.update({
-    where: { id: row.id },
-    data: {
-      status: "paused",
-      // An indefinite pause supersedes any pending skip window.
-      pauseResumesAt: null,
-    },
+  const { updated, transitioned } = await transitionIfStatus(db, row, {
+    status: "paused",
+    // An indefinite pause supersedes any pending skip window.
+    pauseResumesAt: null,
   });
+  // The webhook got there first and has already emailed — see `transitionIfStatus`.
+  if (!transitioned) return updated;
 
   await bestEffort("pause-email", business.id, () =>
     sendSubscriptionUpdatedEmail({
       business,
       subscription: updated,
       variant: "paused",
+      transitionKey: transitionKeyOf(updated),
     }),
   );
 
@@ -338,20 +371,21 @@ export async function resumeSubscription(
     { stripeAccount },
   );
 
-  const updated = await db.subscription.update({
-    where: { id: row.id },
-    data: {
-      status: "active",
-      pauseResumesAt: null,
-      // Undoing a skip puts the delivery at the current period boundary back
-      // on, so `nextBillingAt` returns to it. A plain resume leaves whatever
-      // the row already carried — the next sync/webhook re-derives it from
-      // Stripe anyway.
-      ...(undoSkip && row.currentPeriodEnd
-        ? { nextBillingAt: row.currentPeriodEnd }
-        : {}),
-    },
+  const { updated, transitioned } = await transitionIfStatus(db, row, {
+    status: "active",
+    pauseResumesAt: null,
+    // Undoing a skip puts the delivery at the current period boundary back
+    // on, so `nextBillingAt` returns to it. A plain resume leaves whatever
+    // the row already carried — the next sync/webhook re-derives it from
+    // Stripe anyway.
+    ...(undoSkip && row.currentPeriodEnd
+      ? { nextBillingAt: row.currentPeriodEnd }
+      : {}),
   });
+  // A plain resume the webhook applied first has already been emailed. (An
+  // undo-skip is `active` → `active`, so the CAS always succeeds and the
+  // webhook — which only emails on a status change — leaves it to us.)
+  if (!transitioned) return updated;
 
   // An undo-skip gets its own heading ("Your next delivery is back on");
   // a plain resume keeps the generic "back on" copy.
@@ -361,6 +395,7 @@ export async function resumeSubscription(
       subscription: updated,
       variant: "resumed",
       undoSkip,
+      transitionKey: transitionKeyOf(updated),
     }),
   );
 
@@ -486,6 +521,7 @@ export async function skipNextDelivery(
       business,
       subscription: updated,
       variant: "skipped",
+      transitionKey: transitionKeyOf(updated),
     }),
   );
 

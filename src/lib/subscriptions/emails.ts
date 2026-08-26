@@ -272,10 +272,18 @@ export async function sendSubscriptionCancelledEmails(params: {
 /**
  * "Paused" / "Back on" / "Next delivery skipped" to the customer.
  *
- * The idempotency key is scoped to the transition (`variant` + the billing date
- * that resulted from it) rather than the row: a customer who pauses, resumes
- * and pauses again must get all three emails, but a redelivered webhook for the
- * same transition must not.
+ * WHO sends is decided by the row, not by this key: the manage/admin actions
+ * and `handleSubscriptionUpdated` each compare-and-set the status they read,
+ * and only the side whose write actually moved the row emails. The key is a
+ * backstop for one observation of one transition being submitted twice (a
+ * redelivered Stripe event), so `transitionKey` must be unique to that
+ * observation — the row's `updatedAt` after the action's write, or the Stripe
+ * `event.id` — and NEVER something the transition leaves unchanged.
+ *
+ * It used to be `nextBillingAt`, which pause and resume do not touch, so every
+ * pause of a subscription within one billing period reused the same key and
+ * Resend (24-hour key memory, `409 invalid_idempotent_request` because the
+ * fresh manage token changes the body) silently dropped all but the first.
  */
 export async function sendSubscriptionUpdatedEmail(params: {
   business: SubscriptionEmailBusiness;
@@ -283,13 +291,10 @@ export async function sendSubscriptionUpdatedEmail(params: {
   variant: "paused" | "resumed" | "skipped";
   /** `resumed` only: the customer undid a pending skip rather than lifting a pause. */
   undoSkip?: boolean;
+  /** Unique per observed transition — see the docblock. */
+  transitionKey: string;
 }): Promise<void> {
-  const { business, subscription, variant, undoSkip } = params;
-  const anchor = (
-    subscription.nextBillingAt ??
-    subscription.currentPeriodEnd ??
-    null
-  )?.getTime();
+  const { business, subscription, variant, undoSkip, transitionKey } = params;
 
   await sendSubscriptionUpdated({
     to: subscription.customerEmail,
@@ -303,6 +308,6 @@ export async function sendSubscriptionUpdatedEmail(params: {
     nextBillingAt: subscription.nextBillingAt,
     manageUrl: buildSubscriptionManageUrl(business, subscription),
     business,
-    idempotencyKey: `sub-updated-${subscription.id}-${variant}-${anchor ?? "na"}`,
+    idempotencyKey: `sub-updated-${subscription.id}-${variant}-${transitionKey}`,
   });
 }

@@ -370,23 +370,31 @@ export async function applyStripeSubscriptionState(
   subscription: Pick<Subscription, "id">,
   stripeSub: Stripe.Subscription,
 ): Promise<Subscription> {
-  const status = deriveSubscriptionStatus(stripeSub);
+  return dbc.subscription.update({
+    where: { id: subscription.id },
+    data: stripeSubscriptionStateData(stripeSub),
+  });
+}
+
+/**
+ * The row fields `applyStripeSubscriptionState` writes, as data. Pure, so a
+ * caller that needs to write them conditionally (`handleSubscriptionUpdated`'s
+ * compare-and-set) shares one definition with the unconditional path.
+ */
+export function stripeSubscriptionStateData(stripeSub: Stripe.Subscription) {
   const period = periodFromStripe(stripeSub);
   const stripeCustomerId = idOf(stripeSub.customer);
 
-  return dbc.subscription.update({
-    where: { id: subscription.id },
-    data: {
-      stripeSubscriptionId: stripeSub.id,
-      ...(stripeCustomerId ? { stripeCustomerId } : {}),
-      status,
-      currentPeriodStart: period.currentPeriodStart,
-      currentPeriodEnd: period.currentPeriodEnd,
-      nextBillingAt: period.nextBillingAt,
-      pauseResumesAt: period.pauseResumesAt,
-      lastSyncedAt: new Date(),
-    },
-  });
+  return {
+    stripeSubscriptionId: stripeSub.id,
+    ...(stripeCustomerId ? { stripeCustomerId } : {}),
+    status: deriveSubscriptionStatus(stripeSub),
+    currentPeriodStart: period.currentPeriodStart,
+    currentPeriodEnd: period.currentPeriodEnd,
+    nextBillingAt: period.nextBillingAt,
+    pauseResumesAt: period.pauseResumesAt,
+    lastSyncedAt: new Date(),
+  };
 }
 
 /**
@@ -880,12 +888,24 @@ export async function handleSubscriptionUpdated(
       rawSub.id,
     );
 
+    // Compare-and-set on the status we read: the write only lands if nobody
+    // moved the row between our read and now. When it does not land, the
+    // pause/resume action that made this Stripe change wrote first (and
+    // emailed), or this is a redelivery — either way, converge the fields and
+    // send nothing. This, not the idempotency key, is what keeps a pause to
+    // exactly one email whichever side wins the race.
     const previousStatus = tenant.subscription.status;
-    const subscription = await applyStripeSubscriptionState(
-      db,
-      tenant.subscription,
-      stripeSub,
-    );
+    const { count } = await db.subscription.updateMany({
+      where: { id: tenant.subscription.id, status: previousStatus },
+      data: stripeSubscriptionStateData(stripeSub),
+    });
+    if (count === 0) {
+      await applyStripeSubscriptionState(db, tenant.subscription, stripeSub);
+      return;
+    }
+    const subscription = await db.subscription.findUniqueOrThrow({
+      where: { id: tenant.subscription.id },
+    });
 
     if (subscription.status === previousStatus) return;
 
@@ -905,6 +925,10 @@ export async function handleSubscriptionUpdated(
         business: tenant.business,
         subscription,
         variant,
+        // Stripe redelivers an event under the SAME id, so a retry of this
+        // exact observation dedupes at Resend while a later, real transition
+        // (a new event) never collides with it.
+        transitionKey: event.id,
       });
     } catch (error) {
       Sentry.withScope((scope) => {
