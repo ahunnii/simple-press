@@ -915,6 +915,7 @@ exports.Prisma.QuickBooksInvoiceScalarFieldEnum = {
   customerName: 'customerName',
   customerEmail: 'customerEmail',
   customerPhone: 'customerPhone',
+  billingAddress: 'billingAddress',
   status: 'status',
   balanceCents: 'balanceCents',
   dueDate: 'dueDate',

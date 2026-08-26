@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { CustomerEstimate } from "~/lib/quote/customer-estimate";
+import { zonedCalendarDate } from "~/lib/calendar-date";
 import { checkBusiness } from "~/lib/check-business";
 import { loadZipDataset, lookupZip } from "~/lib/geo/zip-lookup";
 import { customerEstimateFrom } from "~/lib/quote/customer-estimate";
@@ -372,12 +373,14 @@ export const quoteCalculatorRouter = createTRPCRouter({
    * prices anonymously, on request, as often as a visitor changes an answer.
    * Three things keep that acceptable, and all three have to stay:
    *
-   * 1. **Both switches are enforced HERE, server-side.** The public projection
-   *    reports the EFFECTIVE `showLiveEstimate` (`showEstimateToCustomer &&
-   *    showLiveEstimate`), but that is a rendering hint the browser is free to
-   *    lie about. An owner who keeps their pricing internal gets a FORBIDDEN
-   *    from this endpoint regardless of what a hand-written client claims the
-   *    projection said.
+   * 1. **All three switches are enforced HERE, server-side.** The public
+   *    projection reports the EFFECTIVE `showLiveEstimate`
+   *    (`showEstimateToCustomer && showEstimateOnScreen && showLiveEstimate`),
+   *    but that is a rendering hint the browser is free to lie about. An owner
+   *    who keeps their pricing internal — or who keeps it on-screen-silent and
+   *    email-only, which is what `showEstimateOnScreen: false` means — gets a
+   *    FORBIDDEN from this endpoint regardless of what a hand-written client
+   *    claims the projection said.
    * 2. **No captcha, deliberately.** The runner would have to mint a token per
    *    answer change; reCAPTCHA's free quota cannot carry one call per answer,
    *    and a token spent that freely proves very little anyway. The substitute
@@ -390,7 +393,7 @@ export const quoteCalculatorRouter = createTRPCRouter({
    *    `customerEstimateFrom` would print on the thank-you screen, recomputed
    *    from the STORED definition against option IDs and raw values.
    *
-   * The probing tradeoff is real, and the owner opted into it: with both
+   * The probing tradeoff is real, and the owner opted into it: with all three
    * switches on, a visitor can flip one answer back and forth and watch the
    * number move, which effectively discloses what that option is worth. Fine
    * for menu-style pricing, wrong for a sensitive rate table — which is why the
@@ -469,8 +472,18 @@ export const quoteCalculatorRouter = createTRPCRouter({
 
         // The gate — point (1) of the docblock. The projection is the hint;
         // this is the rule.
+        //
+        // All THREE switches, in the same order `toPublicCalculatorDefinition`
+        // ANDs them into the projected `showLiveEstimate`. The middle one is
+        // the one that is easy to forget: `showEstimateOnScreen: false` is the
+        // owner saying "send the figure in the confirmation email and nowhere
+        // else", so a running estimate on the form is precisely the disclosure
+        // they turned off — and a definition can perfectly well carry a stale
+        // `showLiveEstimate: true` underneath it. The projection already hides
+        // the panel from an honest runner; this refuses the hand-rolled call.
         if (
           !definition.showEstimateToCustomer ||
+          !definition.showEstimateOnScreen ||
           !definition.showLiveEstimate
         ) {
           throw new TRPCError({
@@ -486,7 +499,16 @@ export const quoteCalculatorRouter = createTRPCRouter({
           definition,
           input.answers,
           (zip) => dataset.get(zip) ?? null,
-          { mode: "preview" },
+          {
+            mode: "preview",
+            // The STORE's calendar day, not the server's and not the
+            // visitor's — a date question's "today or later" bound has to
+            // agree with what `submit` will enforce a moment later, or the
+            // running estimate goes blank on an answer that submits fine (or,
+            // worse, prices one that will be rejected). Same expression as
+            // `submit`; see the note there.
+            today: zonedCalendarDate(new Date(), business.timeZone),
+          },
         );
 
         // No Sentry here, deliberately. `submit` already pages on definition

@@ -1765,6 +1765,11 @@ model QuickBooksInvoice {
   customerEmail String /// @encrypted
   customerPhone String? /// @encrypted
 
+  // Customer billing address snapshot as JSON {line1,line2?,city,state,zip}
+  // — sent as BillAddr on the QBO customer (create) and invoice. Encrypted
+  // like the other customer fields; never in a `where`.
+  billingAddress String? @db.Text /// @encrypted
+
   // pending | created | sent | paid | overdue | voided | error —
   // QBO_INVOICE_STATUS_VALUES. `pending` = local row exists, QBO call in
   // flight; `error` = QBO create/send failed and can be retried.

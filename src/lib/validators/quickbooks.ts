@@ -230,6 +230,70 @@ export const QBO_MAX_MEMO_LENGTH = 1000;
 export const QBO_MAX_DESCRIPTION_LENGTH = 200;
 export const QBO_MAX_NAME_LENGTH = 100;
 
+// ─── Billing address ────────────────────────────────────────────────────────
+
+/**
+ * The customer's billing address, snapshotted onto the invoice row and sent
+ * to Intuit as `BillAddr` (on the QBO `Customer` at create time, and on the
+ * `Invoice` itself). US-only, matching the quote calculator's `address`
+ * question type — QBO's `CountrySubDivisionCode` is a 2-letter state code and
+ * `PostalCode` a 5- or 9-digit ZIP.
+ *
+ * `state` is upper-cased as part of parsing rather than merely validated:
+ * owners type "mi" as readily as "MI", and QBO rejects the lowercase form.
+ * The check order matters — `.trim().toUpperCase()` run BEFORE `.length(2)`,
+ * because zod applies string checks in the order they're chained, so the
+ * length is measured on the normalized value.
+ *
+ * Lengths mirror Intuit's own `PhysicalAddress` field caps (Line1/Line2 100,
+ * City 255 — clamped to 60 here, which is roomier than any real US city name
+ * and keeps the encrypted JSON blob small).
+ */
+export const quickBooksBillingAddressSchema = z.object({
+  line1: z.string().trim().min(1, "Enter a street address").max(100),
+  line2: z.string().trim().max(100).optional(),
+  city: z.string().trim().min(1, "Enter a city").max(60),
+  state: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .length(2, "Use the 2-letter state code"),
+  zip: z
+    .string()
+    .trim()
+    .regex(/^\d{5}(-\d{4})?$/, "Use a 5-digit ZIP (or ZIP+4)"),
+});
+export type QuickBooksBillingAddress = z.infer<
+  typeof quickBooksBillingAddressSchema
+>;
+
+/**
+ * Reads a `QuickBooksInvoice.billingAddress` column back into a typed address,
+ * or `null` when there is nothing usable there.
+ *
+ * Total by design — it never throws. Three separate things can go wrong on a
+ * read (the column is NULL because the row predates the field; the decrypted
+ * text isn't JSON; the JSON doesn't match the current shape) and none of them
+ * should take down an invoice list or block a re-issue. A `null` here means
+ * "send no `BillAddr`", which is exactly how invoices behaved before the
+ * field existed.
+ */
+export function parseBillingAddressJson(
+  raw: string | null | undefined,
+): QuickBooksBillingAddress | null {
+  if (!raw) return null;
+
+  let decoded: unknown;
+  try {
+    decoded = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  const result = quickBooksBillingAddressSchema.safeParse(decoded);
+  return result.success ? result.data : null;
+}
+
 // ─── Settings ────────────────────────────────────────────────────────────
 
 /**
@@ -253,14 +317,24 @@ export type QuickBooksSettingsInput = z.infer<typeof quickBooksSettingsSchema>;
  * Input to the `quickbooks.createInvoice` mutation. `quoteSubmissionId` is
  * omitted for a `custom` invoice raised by hand from the admin inbox with no
  * originating quote lead.
+ *
+ * `billingAddress` is optional throughout: a lead captured before the quote
+ * calculator had an `address` question — or a `custom` invoice typed straight
+ * into the admin dialog — has no address to snapshot, and that must stay a
+ * perfectly issuable invoice rather than a validation dead end.
  */
 export const quickBooksCreateInvoiceSchema = z.object({
   quoteSubmissionId: z.string().min(1).optional(),
   kind: z.enum(QBO_INVOICE_KIND_VALUES),
-  amountCents: z.number().int().min(1).max(QUOTE_MAX_FINAL_CENTS),
+  amountCents: z
+    .number()
+    .int()
+    .min(1, "Enter an amount of at least $0.01")
+    .max(QUOTE_MAX_FINAL_CENTS),
   customerName: z.string().trim().min(1).max(QBO_MAX_NAME_LENGTH),
   customerEmail: z.string().trim().email().max(254),
   customerPhone: z.string().trim().max(40).optional(),
+  billingAddress: quickBooksBillingAddressSchema.optional(),
   dueDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")

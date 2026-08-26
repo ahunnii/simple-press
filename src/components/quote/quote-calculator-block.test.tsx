@@ -64,6 +64,7 @@ const definition: PublicQuoteCalculatorDefinition = {
   showEstimateToCustomer: false,
   showReviewStep: false,
   showLiveEstimate: false,
+  estimateByEmail: false,
   liveEstimateDisclaimer: "",
   requirePhone: false,
   responseDays: 2,

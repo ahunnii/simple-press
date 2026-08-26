@@ -74,3 +74,49 @@ describe("customerEstimateFrom", () => {
     );
   });
 });
+
+describe("customerEstimateFrom — WHAT, not WHERE", () => {
+  /**
+   * This function answers "what figure does the visitor get?" and nothing
+   * else. WHERE that figure is delivered — thank-you screen, confirmation
+   * email, or both — is `showEstimateOnScreen` / `sendConfirmationEmail`, and
+   * that is the CALLER's decision: the email renderer and the thank-you screen
+   * each decide whether to print the block at all, then ask this for its
+   * contents.
+   *
+   * Folding delivery in here would break the split in the worst direction:
+   * every email-only calculator would silently email "no estimate", which is
+   * the exact configuration whose whole purpose is to email one.
+   */
+  it("takes only the three keys it needs, whatever else the definition carries", () => {
+    const withDeliverySettings = {
+      ...shown,
+      showEstimateOnScreen: false,
+      sendConfirmationEmail: true,
+    };
+
+    expect(customerEstimateFrom(withDeliverySettings, 326460)).toEqual({
+      exactCents: 326460,
+    });
+    // Same answer with delivery flipped the other way — this function cannot
+    // see the difference, and must not.
+    const flippedOnScreen = {
+      ...withDeliverySettings,
+      showEstimateOnScreen: true,
+    };
+    expect(customerEstimateFrom(flippedOnScreen, 326460)).toEqual({
+      exactCents: 326460,
+    });
+  });
+
+  it("still says nothing when the estimate is internal", () => {
+    // `showEstimateToCustomer` is the only switch that silences it.
+    const hiddenButDeliverable = {
+      ...shown,
+      showEstimateToCustomer: false,
+      showEstimateOnScreen: true,
+      sendConfirmationEmail: true,
+    };
+    expect(customerEstimateFrom(hiddenButDeliverable, 326460)).toBeUndefined();
+  });
+});

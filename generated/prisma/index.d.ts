@@ -63911,6 +63911,7 @@ export namespace Prisma {
     customerName: string | null
     customerEmail: string | null
     customerPhone: string | null
+    billingAddress: string | null
     status: string | null
     balanceCents: number | null
     dueDate: Date | null
@@ -63938,6 +63939,7 @@ export namespace Prisma {
     customerName: string | null
     customerEmail: string | null
     customerPhone: string | null
+    billingAddress: string | null
     status: string | null
     balanceCents: number | null
     dueDate: Date | null
@@ -63965,6 +63967,7 @@ export namespace Prisma {
     customerName: number
     customerEmail: number
     customerPhone: number
+    billingAddress: number
     status: number
     balanceCents: number
     dueDate: number
@@ -64004,6 +64007,7 @@ export namespace Prisma {
     customerName?: true
     customerEmail?: true
     customerPhone?: true
+    billingAddress?: true
     status?: true
     balanceCents?: true
     dueDate?: true
@@ -64031,6 +64035,7 @@ export namespace Prisma {
     customerName?: true
     customerEmail?: true
     customerPhone?: true
+    billingAddress?: true
     status?: true
     balanceCents?: true
     dueDate?: true
@@ -64058,6 +64063,7 @@ export namespace Prisma {
     customerName?: true
     customerEmail?: true
     customerPhone?: true
+    billingAddress?: true
     status?: true
     balanceCents?: true
     dueDate?: true
@@ -64172,6 +64178,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone: string | null
+    billingAddress: string | null
     status: string
     balanceCents: number | null
     dueDate: Date | null
@@ -64218,6 +64225,7 @@ export namespace Prisma {
     customerName?: boolean
     customerEmail?: boolean
     customerPhone?: boolean
+    billingAddress?: boolean
     status?: boolean
     balanceCents?: boolean
     dueDate?: boolean
@@ -64247,6 +64255,7 @@ export namespace Prisma {
     customerName?: boolean
     customerEmail?: boolean
     customerPhone?: boolean
+    billingAddress?: boolean
     status?: boolean
     balanceCents?: boolean
     dueDate?: boolean
@@ -64276,6 +64285,7 @@ export namespace Prisma {
     customerName?: boolean
     customerEmail?: boolean
     customerPhone?: boolean
+    billingAddress?: boolean
     status?: boolean
     balanceCents?: boolean
     dueDate?: boolean
@@ -64305,6 +64315,7 @@ export namespace Prisma {
     customerName?: boolean
     customerEmail?: boolean
     customerPhone?: boolean
+    billingAddress?: boolean
     status?: boolean
     balanceCents?: boolean
     dueDate?: boolean
@@ -64319,7 +64330,7 @@ export namespace Prisma {
     lastError?: boolean
   }
 
-  export type QuickBooksInvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "quoteSubmissionId" | "kind" | "amountCents" | "memo" | "description" | "customerName" | "customerEmail" | "customerPhone" | "status" | "balanceCents" | "dueDate" | "sentAt" | "paidAt" | "realmId" | "qboCustomerId" | "qboInvoiceId" | "qboDocNumber" | "qboSyncToken" | "lastSyncedAt" | "lastError", ExtArgs["result"]["quickBooksInvoice"]>
+  export type QuickBooksInvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "quoteSubmissionId" | "kind" | "amountCents" | "memo" | "description" | "customerName" | "customerEmail" | "customerPhone" | "billingAddress" | "status" | "balanceCents" | "dueDate" | "sentAt" | "paidAt" | "realmId" | "qboCustomerId" | "qboInvoiceId" | "qboDocNumber" | "qboSyncToken" | "lastSyncedAt" | "lastError", ExtArgs["result"]["quickBooksInvoice"]>
   export type QuickBooksInvoiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     quoteSubmission?: boolean | QuickBooksInvoice$quoteSubmissionArgs<ExtArgs>
@@ -64361,6 +64372,10 @@ export namespace Prisma {
        * @encrypted
        */
       customerPhone: string | null
+      /**
+       * @encrypted
+       */
+      billingAddress: string | null
       status: string
       balanceCents: number | null
       dueDate: Date | null
@@ -64810,6 +64825,7 @@ export namespace Prisma {
     readonly customerName: FieldRef<"QuickBooksInvoice", 'String'>
     readonly customerEmail: FieldRef<"QuickBooksInvoice", 'String'>
     readonly customerPhone: FieldRef<"QuickBooksInvoice", 'String'>
+    readonly billingAddress: FieldRef<"QuickBooksInvoice", 'String'>
     readonly status: FieldRef<"QuickBooksInvoice", 'String'>
     readonly balanceCents: FieldRef<"QuickBooksInvoice", 'Int'>
     readonly dueDate: FieldRef<"QuickBooksInvoice", 'DateTime'>
@@ -68024,6 +68040,7 @@ export namespace Prisma {
     customerName: 'customerName',
     customerEmail: 'customerEmail',
     customerPhone: 'customerPhone',
+    billingAddress: 'billingAddress',
     status: 'status',
     balanceCents: 'balanceCents',
     dueDate: 'dueDate',
@@ -73226,6 +73243,7 @@ export namespace Prisma {
     customerName?: StringFilter<"QuickBooksInvoice"> | string
     customerEmail?: StringFilter<"QuickBooksInvoice"> | string
     customerPhone?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    billingAddress?: StringNullableFilter<"QuickBooksInvoice"> | string | null
     status?: StringFilter<"QuickBooksInvoice"> | string
     balanceCents?: IntNullableFilter<"QuickBooksInvoice"> | number | null
     dueDate?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
@@ -73255,6 +73273,7 @@ export namespace Prisma {
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerPhone?: SortOrderInput | SortOrder
+    billingAddress?: SortOrderInput | SortOrder
     status?: SortOrder
     balanceCents?: SortOrderInput | SortOrder
     dueDate?: SortOrderInput | SortOrder
@@ -73288,6 +73307,7 @@ export namespace Prisma {
     customerName?: StringFilter<"QuickBooksInvoice"> | string
     customerEmail?: StringFilter<"QuickBooksInvoice"> | string
     customerPhone?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    billingAddress?: StringNullableFilter<"QuickBooksInvoice"> | string | null
     status?: StringFilter<"QuickBooksInvoice"> | string
     balanceCents?: IntNullableFilter<"QuickBooksInvoice"> | number | null
     dueDate?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
@@ -73317,6 +73337,7 @@ export namespace Prisma {
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerPhone?: SortOrderInput | SortOrder
+    billingAddress?: SortOrderInput | SortOrder
     status?: SortOrder
     balanceCents?: SortOrderInput | SortOrder
     dueDate?: SortOrderInput | SortOrder
@@ -73352,6 +73373,7 @@ export namespace Prisma {
     customerName?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
     customerEmail?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
     customerPhone?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
+    billingAddress?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
     status?: StringWithAggregatesFilter<"QuickBooksInvoice"> | string
     balanceCents?: IntNullableWithAggregatesFilter<"QuickBooksInvoice"> | number | null
     dueDate?: DateTimeNullableWithAggregatesFilter<"QuickBooksInvoice"> | Date | string | null
@@ -79348,6 +79370,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -79377,6 +79400,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -79402,6 +79426,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79431,6 +79456,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79458,6 +79484,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -79483,6 +79510,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79510,6 +79538,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -83501,6 +83530,7 @@ export namespace Prisma {
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerPhone?: SortOrder
+    billingAddress?: SortOrder
     status?: SortOrder
     balanceCents?: SortOrder
     dueDate?: SortOrder
@@ -83533,6 +83563,7 @@ export namespace Prisma {
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerPhone?: SortOrder
+    billingAddress?: SortOrder
     status?: SortOrder
     balanceCents?: SortOrder
     dueDate?: SortOrder
@@ -83560,6 +83591,7 @@ export namespace Prisma {
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerPhone?: SortOrder
+    billingAddress?: SortOrder
     status?: SortOrder
     balanceCents?: SortOrder
     dueDate?: SortOrder
@@ -90753,6 +90785,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -90780,6 +90813,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -91978,6 +92012,7 @@ export namespace Prisma {
     customerName?: StringFilter<"QuickBooksInvoice"> | string
     customerEmail?: StringFilter<"QuickBooksInvoice"> | string
     customerPhone?: StringNullableFilter<"QuickBooksInvoice"> | string | null
+    billingAddress?: StringNullableFilter<"QuickBooksInvoice"> | string | null
     status?: StringFilter<"QuickBooksInvoice"> | string
     balanceCents?: IntNullableFilter<"QuickBooksInvoice"> | number | null
     dueDate?: DateTimeNullableFilter<"QuickBooksInvoice"> | Date | string | null
@@ -107327,6 +107362,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -107354,6 +107390,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -110271,6 +110308,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -111697,6 +111735,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -111724,6 +111763,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -111750,6 +111790,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -114791,6 +114832,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     customerPhone?: string | null
+    billingAddress?: string | null
     status?: string
     balanceCents?: number | null
     dueDate?: Date | string | null
@@ -114816,6 +114858,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -114843,6 +114886,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -114869,6 +114913,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    billingAddress?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     balanceCents?: NullableIntFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

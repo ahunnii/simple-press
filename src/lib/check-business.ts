@@ -21,6 +21,16 @@ export const checkBusiness = async () => {
       customDomain: true,
       umamiWebsiteId: true,
       umamiEnabled: true,
+      // Rides along on the tenant lookup every storefront request already
+      // makes, so anything needing the STORE's calendar day — a quote date
+      // question's "today or later" bound, measured in the owner's zone and
+      // not the visitor's — costs no extra query. Purely additive.
+      //
+      // Selected identically by `checkBusinessAnyStatus` below: the two are
+      // used interchangeably (`require-admin-access.ts`,
+      // `get-business-flags.ts`), so a field present in one and absent from
+      // the other is unreadable on the union of their return types.
+      timeZone: true,
     },
   });
   return business;
@@ -64,6 +74,8 @@ export const checkBusinessAnyStatus = async () => {
       customDomain: true,
       umamiWebsiteId: true,
       umamiEnabled: true,
+      // Kept in lockstep with `checkBusiness` — see the note there.
+      timeZone: true,
     },
   });
   return business;

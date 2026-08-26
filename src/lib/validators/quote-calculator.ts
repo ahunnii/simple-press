@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { isRealCalendarDate } from "~/lib/calendar-date";
 import { US_STATES_AND_TERRITORIES } from "~/lib/geo/regions";
 import { parseFormula } from "~/lib/quote/formula";
 import {
@@ -33,7 +34,11 @@ import {
  *    accepts v2 and nothing else — it is what `create`/`update` and the
  *    builder form are typed against. Every path that READS a stored blob must
  *    go through `parseStoredQuoteDefinition`, which migrates v1 first. See the
- *    drift-wall note above `migrateQuoteDefinition`.
+ *    drift-wall note above `migrateQuoteDefinition`. Writes are strict in one
+ *    further sense: they also run `checkQuoteOwnerConfiguration`, a second set
+ *    of rules a stored definition is allowed to violate. Adding a rule to the
+ *    wrong one of those two functions locks owners out of their own
+ *    calculators — the note on that function explains exactly how.
  */
 
 // ─── Variable names ─────────────────────────────────────────────────────────
@@ -280,6 +285,27 @@ export const quoteLongtextQuestionSchema = z.object({
 export const quoteDateQuestionSchema = z.object({
   type: z.literal("date"),
   ...quoteQuestionBaseShape,
+  /**
+   * `"today"` refuses a date in the past. Informational questions do not price
+   * anything, so this is not a security bound — it is the difference between a
+   * lead the owner can act on and one asking for a move-out date last March.
+   *
+   * "Today" is resolved in the BUSINESS's time zone on the server (see
+   * `options.today` in `computeQuote`), not the visitor's: a shopper in Tokyo
+   * filling in a Detroit mover's form must be measured against the mover's
+   * calendar, or a perfectly ordinary "tomorrow" gets rejected as the past.
+   *
+   * `"none"` (the default) keeps the field entirely unbounded, which is what
+   * every calculator built before this option existed had.
+   */
+  minDate: z.enum(["none", "today"]).default("none"),
+  /**
+   * Upper bound as a number of days past today, inclusive — a scheduling
+   * horizon ("we book up to 6 months out"). `null`/absent means no ceiling.
+   * Capped at 730 so the bound stays a business rule rather than a way to
+   * express an arbitrary far-future date.
+   */
+  maxDaysAhead: z.number().int().min(1).max(730).nullable().optional(),
 });
 
 export const quoteQuestionSchema = z.discriminatedUnion("type", [
@@ -368,6 +394,26 @@ export const quoteDistanceVariableSchema = z.object({
   toQuestionId: z.string().min(1),
   /** Used when either endpoint is hidden or left blank. */
   hiddenDefault: z.number().finite().default(0),
+  /**
+   * Straight-line miles × this = the number the formula sees.
+   *
+   * `haversineMiles` measures as the crow flies, and no truck drives that; the
+   * usual planning figure for US road networks is 20–30% further. An owner who
+   * priced per-mile against the raw haversine number has been quietly
+   * undercharging every long job.
+   *
+   * The schema default is `1` — deliberately NOT the realistic 1.25 — because
+   * this field is read into every stored calculator on load, and a default of
+   * 1.25 would silently reprice every existing calculator the first time it
+   * was read. Existing quotes must not move because a column appeared. The
+   * builder writes `1.25` for NEWLY created distances instead (see
+   * `makeDistance` in `builder-shared.ts`), so new calculators get the honest
+   * number and old ones keep theirs until their owner changes it.
+   *
+   * Bounded 1–2: below 1 is a road shorter than the straight line, which does
+   * not exist, and above 2 is a data-entry slip rather than a detour.
+   */
+  roadFactor: z.number().min(1).max(2).default(1),
 });
 
 export type QuoteDistanceVariable = z.infer<typeof quoteDistanceVariableSchema>;
@@ -467,6 +513,22 @@ const quoteCalculatorDefinitionObjectSchema = z.object({
    * and a bare number with no context loses more leads than it wins.
    */
   showEstimateToCustomer: z.boolean().default(false),
+  /**
+   * WHERE the figure appears, once `showEstimateToCustomer` has said it may
+   * appear at all. Two settings rather than one because "show them a price"
+   * and "show them a price *on the screen they are standing on*" are different
+   * decisions: `false` here sends the number ONLY in the confirmation email,
+   * leaving the thank-you screen and the running estimate silent.
+   *
+   * That combination is what a trade with a negotiable rate table actually
+   * wants — the visitor gets their number, but they get it after the lead is
+   * captured, in a message with the owner's framing around it, and they cannot
+   * sit on the form flipping answers to reverse-engineer the price list.
+   *
+   * Defaults `true` so an owner who only ever touches `showEstimateToCustomer`
+   * keeps today's behavior exactly.
+   */
+  showEstimateOnScreen: z.boolean().default(true),
   /** Show "$2,000 – $2,400" instead of a single figure. */
   displayAsRange: z.boolean().default(false),
   rangePaddingPercent: z.number().int().min(1).max(50).default(10),
@@ -497,6 +559,17 @@ const quoteCalculatorDefinitionObjectSchema = z.object({
     .max(300, "Disclaimer must be 300 characters or fewer")
     .default(QUOTE_LIVE_ESTIMATE_DISCLAIMER_DEFAULT),
   requirePhone: z.boolean().default(false),
+  /**
+   * The receipt emailed to the VISITOR ("thanks, we got your request"). The
+   * owner's own new-lead notification is a separate email and is unaffected by
+   * this — a lead never goes unannounced because an owner switched off the
+   * customer-facing copy.
+   *
+   * Load-bearing when `showEstimateOnScreen` is off: that combination puts the
+   * figure in this email and nowhere else, which is why `checkQuoteDefinition`
+   * refuses the three-way contradiction (estimate on, screen off, email off).
+   */
+  sendConfirmationEmail: z.boolean().default(true),
   /** "We'll get back to you within N business days." */
   responseDays: z.number().int().min(1).max(14).default(1),
   thankYouMessage: z
@@ -790,7 +863,116 @@ function checkQuoteDefinition(
 }
 
 /**
+ * Rules a definition must satisfy to be SAVED — but that an ALREADY-SAVED
+ * definition is allowed to violate.
+ *
+ * This split is not stylistic. `checkQuoteDefinition` above answers "can this
+ * be computed?", and every path that reads a stored blob runs it, so a rule
+ * added there retroactively invalidates definitions that were legal when they
+ * were saved. That is not a warning to their owner — it is a lockout:
+ * `getByIdPublic` stops finding the calculator, so the widget vanishes from
+ * the live page, AND the builder's own edit page
+ * (`admin/quotes/calculators/[id]/page.tsx`) reads through the same
+ * `parseStoredQuoteDefinition`, so the owner cannot open it to fix the very
+ * thing that broke it.
+ *
+ * The rules below are all of that second kind: each one is a configuration
+ * the owner almost certainly did not mean, and each one still COMPUTES —
+ * `computeQuote` has a defined, sane behavior for every one of them. So they
+ * are enforced where the owner is standing in front of the form and can act on
+ * the message, and nowhere else.
+ *
+ * The test for "does this belong here or up there?" is simple: if
+ * `computeQuote` would be wrong or would crash, it is a computation-integrity
+ * rule and belongs in `checkQuoteDefinition`. If it merely produces a quote
+ * nobody wanted, it belongs here.
+ */
+function checkQuoteOwnerConfiguration(
+  definition: QuoteCalculatorDefinitionShape,
+  ctx: z.RefinementCtx,
+): void {
+  const { screens, distances } = definition;
+
+  // ── Estimate visibility ────────────────────────────────────────────────
+  // "Show the customer their estimate" + "not on screen" + "no confirmation
+  // email" produces nothing at all: the owner believes they are sharing a
+  // price, and the visitor never sees one anywhere. Every other combination
+  // has a coherent meaning, so this is the single contradiction worth
+  // refusing rather than quietly honoring.
+  if (
+    definition.showEstimateToCustomer &&
+    !definition.showEstimateOnScreen &&
+    !definition.sendConfirmationEmail
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message:
+        "Email-only estimates need the confirmation email — turn it back on, or show the estimate on screen.",
+      path: ["sendConfirmationEmail"],
+    });
+  }
+
+  // ── Number bounds ──────────────────────────────────────────────────────
+  // An inverted range accepts nothing: the storefront input refuses every
+  // value, and the visitor is stuck on a step with no legal answer and no
+  // explanation. Reported against `max`, the field the owner most likely
+  // typed last.
+  const questionById = new Map<string, QuoteQuestion>();
+  screens.forEach((screen, screenIndex) => {
+    screen.questions.forEach((question, questionIndex) => {
+      if (!questionById.has(question.id)) {
+        questionById.set(question.id, question);
+      }
+      if (question.type !== "number") return;
+      if (question.min == null || question.max == null) return;
+      if (question.min > question.max) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Maximum must be at least the minimum.",
+          path: ["screens", screenIndex, "questions", questionIndex, "max"],
+        });
+      }
+    });
+  });
+
+  // ── Distance endpoints must be required ────────────────────────────────
+  // An OPTIONAL endpoint is a distance that collapses to its `hiddenDefault`
+  // the moment a visitor skips the field — and since a distance is usually
+  // the mileage half of the price, the owner gets a lead quoted as if the job
+  // were next door. `computeQuote` is right to fall back rather than fail (a
+  // blank optional question genuinely did not apply), which is exactly why
+  // this cannot be caught at runtime: nothing is broken then, the number is
+  // just wrong. Save time is the only moment the owner can see the choice.
+  distances.forEach((distance, index) => {
+    const endpoints: {
+      key: "fromQuestionId" | "toQuestionId";
+      id: string;
+    }[] = [
+      { key: "fromQuestionId", id: distance.fromQuestionId },
+      { key: "toQuestionId", id: distance.toQuestionId },
+    ];
+
+    for (const endpoint of endpoints) {
+      const target = questionById.get(endpoint.id);
+      // A missing or non-location endpoint is `checkQuoteDefinition`'s to
+      // report; saying it twice would put two messages on one field.
+      if (!target || !isQuoteLocationQuestion(target)) continue;
+      if (target.required === true) continue;
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `"${target.title}" must be a required question to anchor a distance — make it required, or remove this distance.`,
+        path: ["distances", index, endpoint.key],
+      });
+    }
+  });
+}
+
+/**
  * The STRICT schema: v2 only, and the one `create`/`update` accept.
+ *
+ * Runs BOTH refine passes — computation integrity and owner configuration.
+ * The read path (`storedQuoteDefinitionSchema`) deliberately runs only the
+ * first; see the note on `checkQuoteOwnerConfiguration`.
  *
  * Kept as a plain object + `superRefine` (no `preprocess`, no cast) on purpose.
  * It is what the builder's react-hook-form resolver and `CalculatorFormValues =
@@ -799,6 +981,19 @@ function checkQuoteDefinition(
  * field-level type with it.
  */
 export const quoteCalculatorDefinitionSchema =
+  quoteCalculatorDefinitionObjectSchema.superRefine((definition, ctx) => {
+    checkQuoteDefinition(definition, ctx);
+    checkQuoteOwnerConfiguration(definition, ctx);
+  });
+
+/**
+ * The same schema minus the owner-configuration pass — what
+ * `storedQuoteDefinitionSchema` validates against after migration.
+ *
+ * Not exported: "which schema do I read with?" must have exactly one answer,
+ * and it is `parseStoredQuoteDefinition`.
+ */
+const storedQuoteCalculatorDefinitionSchema =
   quoteCalculatorDefinitionObjectSchema.superRefine(checkQuoteDefinition);
 
 export type QuoteCalculatorDefinition = z.infer<
@@ -832,6 +1027,14 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
  * - `showReviewStep: false`, unlike the v2 default of `true` — an existing
  *   calculator must not silently grow a step its owner never chose. New
  *   calculators get the better default; old ones keep their behavior.
+ *
+ * Settings added to v2 AFTER this migration was written are deliberately not
+ * listed here: they take their schema defaults, and every one of those
+ * defaults is chosen to be the no-op (`showEstimateOnScreen: true`,
+ * `sendConfirmationEmail: true`, `roadFactor: 1`, `minDate: "none"`). Adding a
+ * field must never change what a stored calculator quotes, so a new setting
+ * whose default WOULD change behavior belongs in this function with an
+ * explicit v1 value — not in the schema default.
  */
 export function migrateQuoteDefinition(raw: unknown): unknown {
   if (!isPlainRecord(raw)) return raw;
@@ -862,7 +1065,13 @@ export function migrateQuoteDefinition(raw: unknown): unknown {
 }
 
 /**
- * The READ schema: migrate, then validate strictly.
+ * The READ schema: migrate, then validate for computability.
+ *
+ * "Strictly" would be the wrong word: this deliberately skips
+ * `checkQuoteOwnerConfiguration`, so a calculator saved before a new
+ * configuration rule existed still loads, still prices, and can still be
+ * opened in the builder — where that rule then blocks the next save until the
+ * owner fixes it. See the note on that function.
  *
  * **Drift wall.** Every path that loads a definition out of the database has to
  * use this (via `parseStoredQuoteDefinition`) rather than
@@ -877,7 +1086,7 @@ export function migrateQuoteDefinition(raw: unknown): unknown {
  */
 export const storedQuoteDefinitionSchema = z.preprocess(
   migrateQuoteDefinition,
-  quoteCalculatorDefinitionSchema,
+  storedQuoteCalculatorDefinitionSchema,
 ) as unknown as z.ZodType<QuoteCalculatorDefinition, z.ZodTypeDef, unknown>;
 
 /** `safeParse` a stored `QuoteCalculator.definition` blob of any version. */
@@ -904,6 +1113,10 @@ export type PublicQuoteQuestion = {
   min?: number | null;
   max?: number | null;
   unitLabel?: string | null;
+  /** `date` questions only. See `quoteDateQuestionSchema`. */
+  minDate?: "none" | "today";
+  /** `date` questions only. `null` = no ceiling. */
+  maxDaysAhead?: number | null;
 };
 
 export type PublicQuoteScreen = {
@@ -925,12 +1138,24 @@ export type PublicQuoteCalculatorDefinition = {
   showEstimateToCustomer: boolean;
   showReviewStep: boolean;
   /**
-   * The EFFECTIVE value: `showEstimateToCustomer && showLiveEstimate`. The
-   * runner never has to re-AND them, and a definition left with a stale
-   * `showLiveEstimate: true` after the owner hid the estimate cannot leak a
-   * price through the preview endpoint.
+   * The EFFECTIVE value: `showEstimateToCustomer && showEstimateOnScreen &&
+   * showLiveEstimate`. The runner never has to re-AND them, and a definition
+   * left with a stale `showLiveEstimate: true` after the owner hid the
+   * estimate — or moved it to email only — cannot leak a price through the
+   * preview endpoint.
    */
   showLiveEstimate: boolean;
+  /**
+   * "Your estimate is on its way to your inbox." Price-free by construction:
+   * a boolean saying WHERE the number will arrive, never the number.
+   *
+   * `showEstimateToCustomer && !showEstimateOnScreen && sendConfirmationEmail`
+   * — i.e. exactly the email-only configuration. The runner needs it so the
+   * thank-you screen can promise the estimate instead of going silent, which
+   * is the difference between a considered choice and a form that looks
+   * broken.
+   */
+  estimateByEmail: boolean;
   liveEstimateDisclaimer: string;
   requirePhone: boolean;
   responseDays: number;
@@ -970,6 +1195,16 @@ function toPublicQuestion(question: QuoteQuestion): PublicQuoteQuestion {
         min: question.min ?? null,
         max: question.max ?? null,
         unitLabel: question.unitLabel ?? null,
+      };
+    case "date":
+      // Bounds are public on purpose — unlike option values, they reveal
+      // nothing about price, and the storefront input needs them to set
+      // `min`/`max` so the visitor is stopped before submitting rather than
+      // bounced afterwards. The server re-checks both regardless.
+      return {
+        ...base,
+        minDate: question.minDate,
+        maxDaysAhead: question.maxDaysAhead ?? null,
       };
     default:
       return base;
@@ -1013,10 +1248,19 @@ export function toPublicCalculatorDefinition(
       description: screen.description ?? null,
       questions: screen.questions.map(toPublicQuestion),
     })),
+    // NOT projected: `showEstimateOnScreen` and `sendConfirmationEmail`. Both
+    // are folded into the two effective booleans below, so the browser learns
+    // where the number goes without learning the owner's delivery settings.
     showEstimateToCustomer: definition.showEstimateToCustomer,
     showReviewStep: definition.showReviewStep,
     showLiveEstimate:
-      definition.showEstimateToCustomer && definition.showLiveEstimate,
+      definition.showEstimateToCustomer &&
+      definition.showEstimateOnScreen &&
+      definition.showLiveEstimate,
+    estimateByEmail:
+      definition.showEstimateToCustomer &&
+      !definition.showEstimateOnScreen &&
+      definition.sendConfirmationEmail,
     liveEstimateDisclaimer: definition.liveEstimateDisclaimer,
     requirePhone: definition.requirePhone,
     responseDays: definition.responseDays,
@@ -1119,8 +1363,19 @@ export const quoteWireAnswerSchema = z.object({
     .optional(),
   /** text / longtext */
   text: z.string().max(2000).optional(),
-  /** date */
-  date: z.string().regex(QUOTE_DATE_RE, "Enter a valid date").optional(),
+  /**
+   * date
+   *
+   * The regex only proves the SHAPE; `2026-02-30` and `2026-13-45` both match
+   * it. The refine is what proves the day exists, so a bad date is rejected at
+   * the wire rather than stored, displayed back to the owner and compared
+   * against a scheduling bound as if it were real.
+   */
+  date: z
+    .string()
+    .regex(QUOTE_DATE_RE, "Enter a valid date")
+    .refine(isRealCalendarDate, "Enter a valid date")
+    .optional(),
   /** zip */
   zip: z.string().regex(QUOTE_ZIP_RE, "Enter a 5-digit ZIP code").optional(),
   /** address */
@@ -1334,11 +1589,22 @@ export const quoteSetFinalQuoteSchema = z.object({
 
 export const quoteSendFinalQuoteSchema = z.object({
   id: z.string(),
+  /**
+   * `null` = a message-only follow-up: the owner writes back to the lead
+   * ("can you send photos?", "we can't cover that area") without attaching a
+   * figure. Previously every send had to carry a price, so the only way to ask
+   * a question was to invent one — or to leave the thread entirely and email
+   * by hand, off the record the admin page shows.
+   *
+   * When present the bounds are unchanged, and `message` stays required in
+   * both cases: a quote email with no words in it was never wanted either.
+   */
   finalQuoteCents: z
     .number()
     .int()
     .min(0, "The final quote can't be negative")
-    .max(QUOTE_MAX_FINAL_CENTS, "That amount looks too large"),
+    .max(QUOTE_MAX_FINAL_CENTS, "That amount looks too large")
+    .nullable(),
   message: z
     .string()
     .trim()

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { QboQueryResponse } from "~/lib/quickbooks/types";
 import { parseQboFault } from "~/lib/quickbooks/errors";
 import {
+  buildCustomerPayload,
   buildInvoicePayload,
   centsToQboAmount,
   chunk,
@@ -14,6 +15,7 @@ import {
   pickEntity,
   pickQueryRows,
   qboAmountToCents,
+  toQboBillAddr,
   truncateError,
 } from "~/lib/quickbooks/mapping";
 
@@ -105,12 +107,13 @@ describe("computeFinalPrefillCents", () => {
 
 describe("deriveInvoiceStatus", () => {
   const now = new Date("2026-08-24T12:00:00Z");
+  const UTC = { timeZone: "UTC", expectedTotalCents: 10000 } as const;
 
   it("reports voided when TotalAmt drops to 0 against a non-zero expectation", () => {
     expect(
       deriveInvoiceStatus(
         { TotalAmt: 0, Balance: 0 },
-        { now, previous: "created", expectedTotalCents: 10000 },
+        { now, previous: "created", ...UTC },
       ),
     ).toBe("voided");
   });
@@ -119,7 +122,7 @@ describe("deriveInvoiceStatus", () => {
     expect(
       deriveInvoiceStatus(
         { TotalAmt: 100, Balance: 0 },
-        { now, previous: "sent", expectedTotalCents: 10000 },
+        { now, previous: "sent", ...UTC },
       ),
     ).toBe("paid");
   });
@@ -128,7 +131,7 @@ describe("deriveInvoiceStatus", () => {
     expect(
       deriveInvoiceStatus(
         { TotalAmt: 100, Balance: 100, DueDate: "2026-08-23" },
-        { now, previous: "sent", expectedTotalCents: 10000 },
+        { now, previous: "sent", ...UTC },
       ),
     ).toBe("overdue");
   });
@@ -137,7 +140,7 @@ describe("deriveInvoiceStatus", () => {
     expect(
       deriveInvoiceStatus(
         { TotalAmt: 100, Balance: 100, DueDate: "2026-08-24" },
-        { now, previous: "sent", expectedTotalCents: 10000 },
+        { now, previous: "sent", ...UTC },
       ),
     ).toBe("sent"); // unchanged from `previous` — not bumped to "overdue"
   });
@@ -151,7 +154,7 @@ describe("deriveInvoiceStatus", () => {
           DueDate: "2026-09-01",
           EmailStatus: "EmailSent",
         },
-        { now, previous: "created", expectedTotalCents: 10000 },
+        { now, previous: "created", ...UTC },
       ),
     ).toBe("sent");
   });
@@ -160,7 +163,7 @@ describe("deriveInvoiceStatus", () => {
     expect(
       deriveInvoiceStatus(
         { TotalAmt: 100, Balance: 100, DueDate: "2026-09-01" },
-        { now, previous: "overdue", expectedTotalCents: 10000 },
+        { now, previous: "overdue", ...UTC },
       ),
     ).toBe("sent");
   });
@@ -169,9 +172,84 @@ describe("deriveInvoiceStatus", () => {
     expect(
       deriveInvoiceStatus(
         { TotalAmt: 100, Balance: 100, DueDate: "2026-09-01" },
-        { now, previous: "created", expectedTotalCents: 10000 },
+        { now, previous: "created", ...UTC },
       ),
     ).toBe("created");
+  });
+
+  /**
+   * The overdue boundary is the whole reason `timeZone` is on the ctx. QBO's
+   * `DueDate` is a bare calendar date with no zone attached, so "is it late?"
+   * is only answerable against a specific wall calendar — and the sync cron
+   * re-derives this every 15 minutes, so getting the calendar wrong doesn't
+   * misfire once, it misfires for hours. Detroit is UTC-4 in August, which
+   * makes the entire evening (8pm–midnight local) already "tomorrow" in UTC:
+   * the old UTC-date comparison turned every same-day invoice red four hours
+   * early, every single day, for every store west of Greenwich.
+   */
+  it("is NOT overdue at 23:30 on the due date in the business's own zone", () => {
+    // 2026-08-25T03:30Z is 2026-08-24 23:30 in Detroit (EDT, UTC-4) — the
+    // UTC calendar has already rolled over to the 25th, the owner's has not.
+    const lateEvening = new Date("2026-08-25T03:30:00Z");
+
+    expect(
+      deriveInvoiceStatus(
+        { TotalAmt: 100, Balance: 100, DueDate: "2026-08-24" },
+        {
+          now: lateEvening,
+          previous: "sent",
+          expectedTotalCents: 10000,
+          timeZone: "America/Detroit",
+        },
+      ),
+    ).toBe("sent");
+
+    // Same instant, same invoice — a UTC business IS past its due date.
+    expect(
+      deriveInvoiceStatus(
+        { TotalAmt: 100, Balance: 100, DueDate: "2026-08-24" },
+        {
+          now: lateEvening,
+          previous: "sent",
+          expectedTotalCents: 10000,
+          timeZone: "UTC",
+        },
+      ),
+    ).toBe("overdue");
+  });
+
+  it("becomes overdue at 00:30 the next day in the business's own zone", () => {
+    // 2026-08-25T04:30Z is 2026-08-25 00:30 in Detroit — the local calendar
+    // has now rolled over too, so a due date of the 24th is genuinely late.
+    const justAfterMidnight = new Date("2026-08-25T04:30:00Z");
+
+    expect(
+      deriveInvoiceStatus(
+        { TotalAmt: 100, Balance: 100, DueDate: "2026-08-24" },
+        {
+          now: justAfterMidnight,
+          previous: "sent",
+          expectedTotalCents: 10000,
+          timeZone: "America/Detroit",
+        },
+      ),
+    ).toBe("overdue");
+  });
+
+  it("still reports paid, never overdue, past the due date in any zone", () => {
+    // Rule 2 outranks rule 3 — zoning the comparison must not have reordered
+    // them. A paid invoice going red is a support ticket, not a nuance.
+    expect(
+      deriveInvoiceStatus(
+        { TotalAmt: 100, Balance: 0, DueDate: "2026-01-01" },
+        {
+          now,
+          previous: "sent",
+          expectedTotalCents: 10000,
+          timeZone: "America/Detroit",
+        },
+      ),
+    ).toBe("paid");
   });
 });
 
@@ -190,6 +268,80 @@ describe("centsToQboAmount / qboAmountToCents", () => {
 describe("escapeQboQueryValue", () => {
   it("escapes backslashes before quotes, so a trailing backslash can't consume the closing quote", () => {
     expect(escapeQboQueryValue("O'Brien \\ Co")).toBe("O\\'Brien \\\\ Co");
+  });
+});
+
+describe("toQboBillAddr", () => {
+  it("maps state -> CountrySubDivisionCode and zip -> PostalCode, stamping Country", () => {
+    expect(
+      toQboBillAddr({
+        line1: "1200 Woodward Ave",
+        line2: "Suite 400",
+        city: "Detroit",
+        state: "MI",
+        zip: "48226",
+      }),
+    ).toEqual({
+      Line1: "1200 Woodward Ave",
+      Line2: "Suite 400",
+      City: "Detroit",
+      CountrySubDivisionCode: "MI",
+      PostalCode: "48226",
+      Country: "USA",
+    });
+  });
+
+  it("omits Line2 entirely rather than sending an empty one", () => {
+    // QBO echoes back what it's given, so an empty Line2 prints as a blank
+    // line on the invoice the customer actually receives.
+    const addr = toQboBillAddr({
+      line1: "1200 Woodward Ave",
+      city: "Detroit",
+      state: "MI",
+      zip: "48226-1234",
+    });
+
+    expect(addr).not.toHaveProperty("Line2");
+    expect(addr.PostalCode).toBe("48226-1234");
+  });
+});
+
+describe("buildCustomerPayload", () => {
+  const BASE = { name: "Acme Co", email: "billing@acme.example" };
+
+  it("includes BillAddr when an address is given", () => {
+    expect(
+      buildCustomerPayload({
+        ...BASE,
+        phone: "555-0100",
+        billAddr: toQboBillAddr({
+          line1: "1200 Woodward Ave",
+          city: "Detroit",
+          state: "MI",
+          zip: "48226",
+        }),
+      }),
+    ).toEqual({
+      DisplayName: "Acme Co",
+      PrimaryEmailAddr: { Address: "billing@acme.example" },
+      PrimaryPhone: { FreeFormNumber: "555-0100" },
+      BillAddr: {
+        Line1: "1200 Woodward Ave",
+        City: "Detroit",
+        CountrySubDivisionCode: "MI",
+        PostalCode: "48226",
+        Country: "USA",
+      },
+    });
+  });
+
+  it("omits BillAddr when the address is absent or null", () => {
+    // Two spellings of "no address" — an older lead that never captured one
+    // (undefined) and a row whose nullable column read back NULL.
+    expect(buildCustomerPayload(BASE)).not.toHaveProperty("BillAddr");
+    expect(
+      buildCustomerPayload({ ...BASE, billAddr: null }),
+    ).not.toHaveProperty("BillAddr");
   });
 });
 
@@ -259,6 +411,44 @@ describe("buildInvoicePayload", () => {
     expect(payload).not.toHaveProperty("CustomerMemo");
     expect(payload).not.toHaveProperty("AllowOnlineCreditCardPayment");
     expect(payload).not.toHaveProperty("AllowOnlineACHPayment");
+    expect(payload).not.toHaveProperty("BillAddr");
+  });
+
+  it("includes BillAddr when an address is given, and omits it when null", () => {
+    // Per-invoice rather than per-customer: the customer record is written
+    // once at create time and never updated, so a lead that moved between
+    // the deposit and the final invoice is only accurate because of this.
+    const base = {
+      customerId: "42",
+      itemId: "7",
+      amountCents: 5000,
+      description: "Final balance — Acme Co",
+      dueDate: "2026-09-01",
+      email: "owner@example.com",
+      allowOnlinePayment: false,
+    };
+    const billAddr = toQboBillAddr({
+      line1: "1200 Woodward Ave",
+      line2: "Suite 400",
+      city: "Detroit",
+      state: "MI",
+      zip: "48226",
+    });
+
+    expect(buildInvoicePayload({ ...base, billAddr })).toMatchObject({
+      BillAddr: {
+        Line1: "1200 Woodward Ave",
+        Line2: "Suite 400",
+        City: "Detroit",
+        CountrySubDivisionCode: "MI",
+        PostalCode: "48226",
+        Country: "USA",
+      },
+    });
+
+    expect(buildInvoicePayload({ ...base, billAddr: null })).not.toHaveProperty(
+      "BillAddr",
+    );
   });
 });
 

@@ -3,6 +3,7 @@ import type {
   QboDepositMode,
   QboInvoiceKind,
   QboInvoiceStatus,
+  QuickBooksBillingAddress,
 } from "~/lib/validators/quickbooks";
 
 /**
@@ -20,6 +21,24 @@ export type QboRef = {
   name?: string;
 };
 
+/**
+ * Intuit's `PhysicalAddress` shape, as far as this integration writes it.
+ * Every field is optional because QBO reads back only what it has — and
+ * because a partial address is still a legal `BillAddr`. Note the field names
+ * are Intuit's, not a US postal vocabulary: `CountrySubDivisionCode` is the
+ * 2-letter state code and `PostalCode` is the ZIP. Build one with
+ * `toQboBillAddr` (mapping.ts) rather than by hand, so that translation
+ * happens in exactly one place.
+ */
+export type QboAddress = {
+  Line1?: string;
+  Line2?: string;
+  City?: string;
+  CountrySubDivisionCode?: string;
+  PostalCode?: string;
+  Country?: string;
+};
+
 export type QboCustomer = {
   Id: string;
   SyncToken: string;
@@ -27,6 +46,7 @@ export type QboCustomer = {
   Active?: boolean;
   PrimaryEmailAddr?: { Address?: string };
   PrimaryPhone?: { FreeFormNumber?: string };
+  BillAddr?: QboAddress;
 };
 
 export type QboAccount = {
@@ -56,6 +76,7 @@ export type QboInvoice = {
   EmailStatus?: string;
   PrivateNote?: string;
   CustomerRef?: QboRef;
+  BillAddr?: QboAddress;
 };
 
 /** One entry of Intuit's `Fault.Error[]`. */
@@ -126,6 +147,13 @@ export type InvoiceKind = QboInvoiceKind;
 export type InvoiceStatus = QboInvoiceStatus;
 export type ConnectionStatus = QboConnectionStatus;
 export type DepositMode = QboDepositMode;
+
+/**
+ * The SimplePress-side billing address (owned by the validator schema) —
+ * distinct from `QboAddress` above, which is Intuit's wire shape. The two are
+ * bridged by `toQboBillAddr` in mapping.ts and never used interchangeably.
+ */
+export type BillingAddress = QuickBooksBillingAddress;
 
 /** Owner-configured deposit calculation rule — see `computeDepositCents`. */
 export type DepositRule = {

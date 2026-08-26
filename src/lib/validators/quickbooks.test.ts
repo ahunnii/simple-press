@@ -4,8 +4,10 @@ import type { InvoiceSortRow, QboInvoiceSortValue } from "./quickbooks";
 
 import {
   compareInvoiceRows,
+  parseBillingAddressJson,
   QBO_INVOICE_SORT_DEFAULT,
   QBO_INVOICE_SORT_VALUES,
+  quickBooksBillingAddressSchema,
   quickBooksCreateInvoiceSchema,
 } from "./quickbooks";
 
@@ -41,6 +43,186 @@ describe("quickBooksCreateInvoiceSchema dueDate", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+});
+
+describe("quickBooksCreateInvoiceSchema amountCents", () => {
+  it("rejects a $0 invoice with a message an owner can act on", () => {
+    // The default zod message for this is "Number must be greater than or
+    // equal to 1", which reads as nonsense next to a dollar-denominated
+    // input the owner is typing into — the field is cents on the wire but
+    // dollars on screen.
+    const result = quickBooksCreateInvoiceSchema.safeParse({
+      ...BASE_INPUT,
+      amountCents: 0,
+      dueDate: "2026-09-01",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe(
+      "Enter an amount of at least $0.01",
+    );
+  });
+
+  it("accepts a single cent", () => {
+    const result = quickBooksCreateInvoiceSchema.safeParse({
+      ...BASE_INPUT,
+      amountCents: 1,
+      dueDate: "2026-09-01",
+    });
+
+    expect(result.success).toBe(true);
+  });
+});
+
+/**
+ * The billing address is snapshotted onto the invoice row and sent to Intuit
+ * as `BillAddr`. QBO will happily accept a malformed state or ZIP and print
+ * it on the invoice the customer receives, so this schema is the only place
+ * that shape is actually enforced — there is no second check downstream.
+ */
+describe("quickBooksBillingAddressSchema", () => {
+  const VALID = {
+    line1: "1200 Woodward Ave",
+    city: "Detroit",
+    state: "MI",
+    zip: "48226",
+  };
+
+  it("upper-cases the state code, so 'mi' and 'MI' are the same address", () => {
+    // Owners type it either way; QBO only accepts the uppercase form.
+    const result = quickBooksBillingAddressSchema.safeParse({
+      ...VALID,
+      state: " mi ",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.state).toBe("MI");
+  });
+
+  it("rejects a state name spelled out in full", () => {
+    const result = quickBooksBillingAddressSchema.safeParse({
+      ...VALID,
+      state: "Michigan",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts ZIP+4", () => {
+    const result = quickBooksBillingAddressSchema.safeParse({
+      ...VALID,
+      zip: "48226-1234",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.zip).toBe("48226-1234");
+  });
+
+  it("rejects a 4-digit ZIP (a dropped leading zero)", () => {
+    // The failure this guards is a real one: an East-Coast ZIP like 02134
+    // loses its leading zero the moment it round-trips through a number.
+    const result = quickBooksBillingAddressSchema.safeParse({
+      ...VALID,
+      zip: "2134",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a blank street address or city", () => {
+    expect(
+      quickBooksBillingAddressSchema.safeParse({ ...VALID, line1: "   " })
+        .success,
+    ).toBe(false);
+    expect(
+      quickBooksBillingAddressSchema.safeParse({ ...VALID, city: "" }).success,
+    ).toBe(false);
+  });
+
+  it("treats line2 as genuinely optional", () => {
+    const withoutLine2 = quickBooksBillingAddressSchema.safeParse(VALID);
+    expect(withoutLine2.success).toBe(true);
+    expect(withoutLine2.data?.line2).toBeUndefined();
+
+    const withLine2 = quickBooksBillingAddressSchema.safeParse({
+      ...VALID,
+      line2: "Suite 400",
+    });
+    expect(withLine2.data?.line2).toBe("Suite 400");
+  });
+
+  it("is optional on the create-invoice schema", () => {
+    // A `custom` invoice typed straight into the admin dialog, or a lead
+    // captured before the calculator had an address question, has no address
+    // to snapshot — and must still be issuable.
+    expect(
+      quickBooksCreateInvoiceSchema.safeParse({
+        ...BASE_INPUT,
+        dueDate: "2026-09-01",
+      }).success,
+    ).toBe(true);
+
+    const withAddress = quickBooksCreateInvoiceSchema.safeParse({
+      ...BASE_INPUT,
+      dueDate: "2026-09-01",
+      billingAddress: { ...VALID, state: "mi" },
+    });
+    expect(withAddress.success).toBe(true);
+    expect(withAddress.data?.billingAddress?.state).toBe("MI");
+  });
+
+  it("rejects a create-invoice input whose address is present but malformed", () => {
+    // Optional must not mean lenient: an address that IS supplied is held to
+    // the full shape rather than silently dropped.
+    expect(
+      quickBooksCreateInvoiceSchema.safeParse({
+        ...BASE_INPUT,
+        dueDate: "2026-09-01",
+        billingAddress: { ...VALID, zip: "nope" },
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("parseBillingAddressJson", () => {
+  it("round-trips a stored address", () => {
+    const stored = JSON.stringify({
+      line1: "1200 Woodward Ave",
+      line2: "Suite 400",
+      city: "Detroit",
+      state: "MI",
+      zip: "48226",
+    });
+
+    expect(parseBillingAddressJson(stored)).toEqual({
+      line1: "1200 Woodward Ave",
+      line2: "Suite 400",
+      city: "Detroit",
+      state: "MI",
+      zip: "48226",
+    });
+  });
+
+  it("returns null for NULL/empty column values rather than throwing", () => {
+    // Every invoice issued before this column existed reads back NULL.
+    expect(parseBillingAddressJson(null)).toBeNull();
+    expect(parseBillingAddressJson(undefined)).toBeNull();
+    expect(parseBillingAddressJson("")).toBeNull();
+  });
+
+  it("returns null for text that isn't JSON at all", () => {
+    // A decryption that produced garbage must not take down the invoice list.
+    expect(parseBillingAddressJson("{not json")).toBeNull();
+    expect(parseBillingAddressJson("1200 Woodward Ave, Detroit MI")).toBeNull();
+  });
+
+  it("returns null for JSON of the wrong shape", () => {
+    expect(parseBillingAddressJson(JSON.stringify({ city: "Detroit" }))).toBe(
+      null,
+    );
+    expect(parseBillingAddressJson(JSON.stringify(["a", "b"]))).toBeNull();
+    expect(parseBillingAddressJson("null")).toBeNull();
   });
 });
 

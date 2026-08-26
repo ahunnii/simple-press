@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 import type { QboInvoiceKind } from "~/lib/validators/quickbooks";
 import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { dueDateString } from "~/lib/quickbooks/mapping";
+import { cn } from "~/lib/utils";
 import {
   QBO_INVOICE_KIND_LABELS,
   QBO_INVOICE_KIND_VALUES,
@@ -17,6 +19,11 @@ import {
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +67,17 @@ export type InvoiceFormDefaults = {
   description?: string;
   memo?: string;
   dueDate?: string;
+  /** Prefills the "Billing address" section — e.g. the first address answer
+   *  on a quote lead. Omitted entirely (not merely blank) when the caller has
+   *  no address to offer, which is also what leaves the section collapsed by
+   *  default. */
+  billingAddress?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
 };
 
 export type InvoiceFormDialogProps = {
@@ -84,10 +102,25 @@ type FieldErrors = Partial<
     | "customerPhone"
     | "dueDate"
     | "description"
-    | "memo",
+    | "memo"
+    | "billingLine1"
+    | "billingLine2"
+    | "billingCity"
+    | "billingState"
+    | "billingZip",
     string
   >
 >;
+
+/** `FieldErrors` keys the billing-address section owns — used to decide
+ *  whether a validation failure should force the collapsed section open. */
+const BILLING_ERROR_KEYS = [
+  "billingLine1",
+  "billingLine2",
+  "billingCity",
+  "billingState",
+  "billingZip",
+] as const satisfies ReadonlyArray<keyof FieldErrors>;
 
 /**
  * Strips everything a store owner might type or paste into the Amount field
@@ -123,6 +156,11 @@ function buildInitialState(
     memo: defaults.memo ?? "",
     dueDate:
       defaults.dueDate ?? dueDateString(new Date(), defaultDueDays, timeZone),
+    billingLine1: defaults.billingAddress?.line1 ?? "",
+    billingLine2: defaults.billingAddress?.line2 ?? "",
+    billingCity: defaults.billingAddress?.city ?? "",
+    billingState: defaults.billingAddress?.state ?? "",
+    billingZip: defaults.billingAddress?.zip ?? "",
     // Always defaults to checked regardless of `defaults` — `send` isn't part
     // of `InvoiceFormDefaults` (it's a per-submission choice, not a
     // prefillable fact about the invoice), and "email it now" is the
@@ -150,6 +188,13 @@ export function InvoiceFormDialog({
   // Catches issues on fields the form doesn't render inputs for
   // (`quoteSubmissionId`, `send`) plus the mutation's own server error.
   const [formError, setFormError] = useState<string | null>(null);
+  // Starts open only when the caller actually has an address to show —
+  // otherwise the section stays out of the way for the common no-address
+  // case (custom invoices, leads captured before an `address` question
+  // existed).
+  const [billingExpanded, setBillingExpanded] = useState(
+    Boolean(defaults.billingAddress?.line1),
+  );
 
   // Re-seed whenever the dialog transitions closed → open, so reopening with
   // new `defaults` (a different lead, a different kind) never shows stale
@@ -164,6 +209,7 @@ export function InvoiceFormDialog({
       setForm(buildInitialState(defaults, defaultDueDays, timeZone));
       setFieldErrors({});
       setFormError(null);
+      setBillingExpanded(Boolean(defaults.billingAddress?.line1));
     }
   }
 
@@ -226,6 +272,22 @@ export function InvoiceFormDialog({
       return;
     }
 
+    // All-or-nothing at the field-group level, same rule the quote
+    // calculator's own `address` question uses: a blank street address means
+    // "no billing address for this invoice" (the schema's `billingAddress`
+    // is optional throughout), never "half an address" reaching Intuit.
+    const billingLine1Trimmed = form.billingLine1.trim();
+    const billingAddress =
+      billingLine1Trimmed === ""
+        ? undefined
+        : {
+            line1: billingLine1Trimmed,
+            line2: form.billingLine2.trim() || undefined,
+            city: form.billingCity.trim(),
+            state: form.billingState.trim(),
+            zip: form.billingZip.trim(),
+          };
+
     const parsed = quickBooksCreateInvoiceSchema.safeParse({
       quoteSubmissionId,
       kind: form.kind,
@@ -233,6 +295,7 @@ export function InvoiceFormDialog({
       customerName: form.customerName,
       customerEmail: form.customerEmail,
       customerPhone: form.customerPhone.trim() || undefined,
+      billingAddress,
       dueDate: form.dueDate,
       description: form.description.trim() || undefined,
       memo: form.memo.trim() || undefined,
@@ -245,7 +308,20 @@ export function InvoiceFormDialog({
 
       for (const issue of parsed.error.issues) {
         const key = issue.path[0];
-        if (
+        if (key === "billingAddress") {
+          const subKey = issue.path[1];
+          if (subKey === "line1")
+            nextFieldErrors.billingLine1 ??= issue.message;
+          else if (subKey === "line2")
+            nextFieldErrors.billingLine2 ??= issue.message;
+          else if (subKey === "city")
+            nextFieldErrors.billingCity ??= issue.message;
+          else if (subKey === "state")
+            nextFieldErrors.billingState ??= issue.message;
+          else if (subKey === "zip")
+            nextFieldErrors.billingZip ??= issue.message;
+          else nextFormError ??= issue.message;
+        } else if (
           key === "kind" ||
           key === "amountCents" ||
           key === "customerName" ||
@@ -263,6 +339,11 @@ export function InvoiceFormDialog({
 
       setFieldErrors(nextFieldErrors);
       setFormError(nextFormError);
+      // A billing-address error under a collapsed section would otherwise be
+      // invisible — expand it so the owner can actually see what to fix.
+      if (BILLING_ERROR_KEYS.some((key) => nextFieldErrors[key])) {
+        setBillingExpanded(true);
+      }
       return;
     }
 
@@ -491,6 +572,188 @@ export function InvoiceFormDialog({
                 </p>
               )}
             </div>
+
+            <Collapsible
+              open={billingExpanded}
+              onOpenChange={setBillingExpanded}
+              className="border-border rounded-lg border"
+            >
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="focus-visible:ring-ring flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-medium focus-visible:ring-1 focus-visible:outline-none"
+                >
+                  <span>
+                    Billing address{" "}
+                    <span className="text-muted-foreground font-normal">
+                      (optional)
+                    </span>
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "text-muted-foreground h-4 w-4 shrink-0 transition-transform",
+                      billingExpanded && "rotate-180",
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="border-border space-y-4 border-t p-3">
+                <div className="space-y-2">
+                  <Label htmlFor="invoice-billing-line1">Street address</Label>
+                  <Input
+                    id="invoice-billing-line1"
+                    autoComplete="address-line1"
+                    value={form.billingLine1}
+                    onChange={(e) => {
+                      setField({ billingLine1: e.target.value });
+                      clearError("billingLine1");
+                    }}
+                    disabled={isPending}
+                    aria-invalid={!!fieldErrors.billingLine1}
+                    aria-describedby={
+                      fieldErrors.billingLine1
+                        ? "invoice-billing-line1-error"
+                        : undefined
+                    }
+                  />
+                  {fieldErrors.billingLine1 && (
+                    <p
+                      id="invoice-billing-line1-error"
+                      role="alert"
+                      className="text-destructive text-sm"
+                    >
+                      {fieldErrors.billingLine1}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="invoice-billing-line2">
+                    Apt / suite{" "}
+                    <span className="text-muted-foreground font-normal">
+                      (optional)
+                    </span>
+                  </Label>
+                  <Input
+                    id="invoice-billing-line2"
+                    autoComplete="address-line2"
+                    value={form.billingLine2}
+                    onChange={(e) => {
+                      setField({ billingLine2: e.target.value });
+                      clearError("billingLine2");
+                    }}
+                    disabled={isPending}
+                    aria-invalid={!!fieldErrors.billingLine2}
+                    aria-describedby={
+                      fieldErrors.billingLine2
+                        ? "invoice-billing-line2-error"
+                        : undefined
+                    }
+                  />
+                  {fieldErrors.billingLine2 && (
+                    <p
+                      id="invoice-billing-line2-error"
+                      role="alert"
+                      className="text-destructive text-sm"
+                    >
+                      {fieldErrors.billingLine2}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="invoice-billing-city">City</Label>
+                    <Input
+                      id="invoice-billing-city"
+                      autoComplete="address-level2"
+                      value={form.billingCity}
+                      onChange={(e) => {
+                        setField({ billingCity: e.target.value });
+                        clearError("billingCity");
+                      }}
+                      disabled={isPending}
+                      aria-invalid={!!fieldErrors.billingCity}
+                      aria-describedby={
+                        fieldErrors.billingCity
+                          ? "invoice-billing-city-error"
+                          : undefined
+                      }
+                    />
+                    {fieldErrors.billingCity && (
+                      <p
+                        id="invoice-billing-city-error"
+                        role="alert"
+                        className="text-destructive text-sm"
+                      >
+                        {fieldErrors.billingCity}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="invoice-billing-state">State</Label>
+                    <Input
+                      id="invoice-billing-state"
+                      autoComplete="address-level1"
+                      maxLength={2}
+                      placeholder="MI"
+                      value={form.billingState}
+                      onChange={(e) => {
+                        setField({ billingState: e.target.value });
+                        clearError("billingState");
+                      }}
+                      disabled={isPending}
+                      aria-invalid={!!fieldErrors.billingState}
+                      aria-describedby={
+                        fieldErrors.billingState
+                          ? "invoice-billing-state-error"
+                          : undefined
+                      }
+                    />
+                    {fieldErrors.billingState && (
+                      <p
+                        id="invoice-billing-state-error"
+                        role="alert"
+                        className="text-destructive text-sm"
+                      >
+                        {fieldErrors.billingState}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="invoice-billing-zip">ZIP code</Label>
+                  <Input
+                    id="invoice-billing-zip"
+                    autoComplete="postal-code"
+                    value={form.billingZip}
+                    onChange={(e) => {
+                      setField({ billingZip: e.target.value });
+                      clearError("billingZip");
+                    }}
+                    disabled={isPending}
+                    aria-invalid={!!fieldErrors.billingZip}
+                    aria-describedby={
+                      fieldErrors.billingZip
+                        ? "invoice-billing-zip-error"
+                        : undefined
+                    }
+                  />
+                  {fieldErrors.billingZip && (
+                    <p
+                      id="invoice-billing-zip-error"
+                      role="alert"
+                      className="text-destructive text-sm"
+                    >
+                      {fieldErrors.billingZip}
+                    </p>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             <div className="space-y-2">
               <Label htmlFor="invoice-description">

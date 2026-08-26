@@ -15,8 +15,16 @@ type FinalQuoteEmailProps = {
   ownerEmail?: string;
   /** Owner-written message for this send. Plain text; blank lines = paragraphs. */
   message: string;
-  /** The final quoted amount in cents — always exact, never a range. */
-  finalQuoteCents: number;
+  /**
+   * The final quoted amount in cents — always exact, never a range.
+   *
+   * `null` = message-only follow-up. The amount box, the heading and the
+   * preview text all change; the owner's message and the answers recap stay
+   * exactly as they are, because those are what the email is FOR in that case.
+   * A $0 quote is not representable here on purpose — a genuine zero would be
+   * `0`, and it would render as "$0.00" in the box like any other figure.
+   */
+  finalQuoteCents: number | null;
   /** The customer's original request, for context under the quote. */
   answers: QuoteAnswerSummary[];
 };
@@ -27,6 +35,11 @@ type FinalQuoteEmailProps = {
  * confirmation email's "estimate" framing, this is the business's actual
  * quote. Reply-to is the owner, so the conversation continues in ordinary
  * email from here.
+ *
+ * It doubles as the plain reply channel: with `finalQuoteCents: null` the same
+ * layout carries a question or a decline instead of a price, so a lead the
+ * owner needs one more detail about stays in the thread the admin page tracks
+ * rather than disappearing into their personal mail client.
  */
 export default function FinalQuoteEmail({
   customerName,
@@ -45,20 +58,34 @@ export default function FinalQuoteEmail({
     }).format(cents / 100);
   };
 
+  // The heading, the preview text and the amount box all turn on the same
+  // question — does this email contain a price? — and must never disagree. The
+  // box below re-states the check inline rather than reading this flag, purely
+  // so TypeScript narrows `finalQuoteCents` to `number` for `formatPrice`.
+  const hasQuote = finalQuoteCents !== null;
+
   return (
     <EmailLayout
-      previewText={`Your quote from ${businessName}`}
+      previewText={
+        hasQuote
+          ? `Your quote from ${businessName}`
+          : `An update from ${businessName} on your quote request`
+      }
       businessName={businessName}
       logoUrl={businessLogoUrl}
     >
-      <Text style={heading}>Your quote is ready</Text>
+      <Text style={heading}>
+        {hasQuote ? "Your quote is ready" : "An update on your quote request"}
+      </Text>
 
       <Text style={paragraph}>Hi {customerName},</Text>
 
-      <Section style={quoteBox}>
-        <Text style={quoteLabel}>{calculatorName}</Text>
-        <Text style={quoteValue}>{formatPrice(finalQuoteCents)}</Text>
-      </Section>
+      {finalQuoteCents !== null && (
+        <Section style={quoteBox}>
+          <Text style={quoteLabel}>{calculatorName}</Text>
+          <Text style={quoteValue}>{formatPrice(finalQuoteCents)}</Text>
+        </Section>
+      )}
 
       {/* Owner-written message, plain text split on blank lines — the same
           treatment as the marketing broadcast body. */}
@@ -88,8 +115,12 @@ export default function FinalQuoteEmail({
         </Section>
       )}
 
+      {/* "Ready to move forward?" reads as a nudge under a price and as a
+          non-sequitur under "we can't cover that area", so the message-only
+          send drops that half. */}
       <Text style={note}>
-        Questions, or ready to move forward? Reply to this email
+        {hasQuote ? "Questions, or ready to move forward? " : "Questions? "}
+        Reply to this email
         {ownerEmail ? <> or contact {ownerEmail}</> : null} and we&apos;ll take
         it from there.
       </Text>

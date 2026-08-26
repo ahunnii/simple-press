@@ -10,6 +10,7 @@ import {
   coerceQboEnvironment,
   isQuickBooksConfigured,
 } from "~/lib/quickbooks/config";
+import { qboEnvironmentMismatchMessage } from "~/lib/quickbooks/constants";
 import { QboApiError, toTrpcError } from "~/lib/quickbooks/errors";
 import { fetchQboInvoice, sendQboInvoice } from "~/lib/quickbooks/invoices";
 import { issueInvoice } from "~/lib/quickbooks/issue";
@@ -217,14 +218,24 @@ function toInvoiceStatus(status: string): InvoiceStatus {
  *
  * `status !== "active"` is the catch-all arm on purpose: `needs_reconnect` and
  * any future/drifted status both land on "reconnect", never on a silent pass.
+ *
+ * The environment check is the third arm and the least obvious one. Intuit's
+ * sandbox and production realms are disjoint: a connection authorized in one
+ * while the deployment is pointed at the other has a `realmId` that names
+ * nothing on the API it will be sent to, and every invoice id under it is
+ * equally meaningless. Left unchecked that produces a stream of opaque Intuit
+ * faults instead of the one sentence that actually fixes it — reconnect. This
+ * is the single precondition for EVERY write path that reaches Intuit, which is
+ * why `sendInvoice`, `refreshInvoice` and `syncNow` all route through here too
+ * rather than only the two procedures that create invoices.
  */
 async function requireActiveConnection(
   db: DbClient,
   businessId: string,
-): Promise<{ realmId: string }> {
+): Promise<{ realmId: string; environment: QboEnvironment }> {
   const connection = await db.quickBooksConnection.findUnique({
     where: { businessId },
-    select: { status: true, realmId: true },
+    select: { status: true, realmId: true, environment: true },
   });
 
   if (!connection || connection.status === "disconnected") {
@@ -241,7 +252,16 @@ async function requireActiveConnection(
     });
   }
 
-  return { realmId: connection.realmId };
+  const environment = coerceQboEnvironment(connection.environment);
+  const platformEnvironment = coerceQboEnvironment(env.QBO_ENVIRONMENT);
+  if (environment !== platformEnvironment) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: qboEnvironmentMismatchMessage(environment, platformEnvironment),
+    });
+  }
+
+  return { realmId: connection.realmId, environment };
 }
 
 /**
@@ -322,13 +342,27 @@ export const quickbooksRouter = createTRPCRouter({
     // env.js; routed through `coerceQboEnvironment` anyway so this file states
     // the `QboEnvironment` contract itself rather than inheriting it from a
     // .js module's inference. Identical value for both valid inputs.
-    const environment: QboEnvironment = coerceQboEnvironment(
+    const platformEnvironment: QboEnvironment = coerceQboEnvironment(
       env.QBO_ENVIRONMENT,
     );
+
+    // The CONNECTION's own environment, stamped at OAuth time — not the
+    // deployment's. Every id on that row (realm, invoices, cached items) is only
+    // meaningful inside the environment it was authorized in, so "Open in
+    // QuickBooks" links and any other realm-scoped UI must be built from this
+    // value. Falling back to the platform's is only for the never-connected
+    // case, where there is no realm to point anywhere anyway.
+    const environment: QboEnvironment = connection
+      ? coerceQboEnvironment(connection.environment)
+      : platformEnvironment;
 
     return {
       platformConfigured: isQuickBooksConfigured(),
       environment,
+      // The deployment's configured environment, alongside the connection's, so
+      // the UI can show the two disagreeing — the state every write path
+      // refuses with a "reconnect" precondition (`requireActiveConnection`).
+      platformEnvironment,
       timeZone: business.timeZone,
       businessName: business.name,
       // `null` = never connected. The connection row is created at OAuth
@@ -498,6 +532,42 @@ export const quickbooksRouter = createTRPCRouter({
             message: "Quote not found",
           });
         }
+
+        // One final balance per lead. A deposit can legitimately be re-raised
+        // (a first attempt errored, the owner voided one in QuickBooks and
+        // wants another), but a second final invoice bills the customer twice
+        // for the same job — and the prefill that produced it, `finalQuoteCents
+        // − live deposits`, does NOT subtract an earlier final, so a
+        // double-click on the lead page produces two full-balance invoices.
+        //
+        // Excluded statuses are the ones that leave nothing outstanding at
+        // Intuit: `error` and `pending` never reached QuickBooks, and `voided`
+        // was withdrawn there. Anything else — created, sent, overdue, paid —
+        // means a real final invoice is in the customer's hands.
+        //
+        // NOT race-proof: two truly simultaneous requests can both pass this
+        // read, and closing that would take a partial unique index on
+        // `(businessId, quoteSubmissionId)` for `kind = 'final'`. The realistic
+        // failure this guards is a human clicking twice, which the dialog's own
+        // pending state already covers on the way in.
+        if (input.kind === "final") {
+          const existingFinal = await ctx.db.quickBooksInvoice.findFirst({
+            where: {
+              businessId,
+              quoteSubmissionId: input.quoteSubmissionId,
+              kind: "final",
+              status: { notIn: ["error", "voided", "pending"] },
+            },
+            select: { id: true },
+          });
+
+          if (existingFinal) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: "A final invoice has already been sent for this lead.",
+            });
+          }
+        }
       }
 
       const row = await ctx.db.quickBooksInvoice.create({
@@ -515,6 +585,15 @@ export const quickbooksRouter = createTRPCRouter({
           // a duplicate customer in the owner's books.
           customerEmail: input.customerEmail.trim().toLowerCase(),
           customerPhone: input.customerPhone,
+          // Snapshotted as JSON on the row, not read live from the lead: the
+          // address on an invoice is what was billed, and a lead edited (or
+          // deleted — the relation is SetNull) afterwards must not rewrite
+          // history. `issueInvoice` reads it back through
+          // `parseBillingAddressJson`, which tolerates the `null` every row
+          // predating this field carries.
+          billingAddress: input.billingAddress
+            ? JSON.stringify(input.billingAddress)
+            : null,
           status: "pending",
           // The wire format is a bare `YYYY-MM-DD` calendar date, already
           // computed in the STORE's timezone by `dueDateString`. Pinned to
@@ -586,6 +665,8 @@ export const quickbooksRouter = createTRPCRouter({
           message: `A ${row.status} invoice can't be emailed. Only open invoices (created, sent, or overdue) can be re-sent.`,
         });
       }
+
+      await requireActiveConnection(ctx.db, businessId);
 
       try {
         const qbo = await sendQboInvoice(
@@ -674,21 +755,38 @@ export const quickbooksRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const row = await ctx.db.quickBooksInvoice.findFirst({
-        where: { id: input.id, businessId },
-        select: {
-          id: true,
-          status: true,
-          amountCents: true,
-          paidAt: true,
-          qboInvoiceId: true,
-        },
-      });
+      // The business read rides alongside the row for `timeZone` alone —
+      // `deriveInvoiceStatus` decides "overdue" against the store's calendar
+      // day, not the server's, so a Detroit invoice isn't reported late for the
+      // last few hours of every day it isn't.
+      const [row, business] = await Promise.all([
+        ctx.db.quickBooksInvoice.findFirst({
+          where: { id: input.id, businessId },
+          select: {
+            id: true,
+            status: true,
+            amountCents: true,
+            paidAt: true,
+            qboInvoiceId: true,
+          },
+        }),
+        ctx.db.business.findUnique({
+          where: { id: businessId },
+          select: { timeZone: true },
+        }),
+      ]);
 
       if (!row) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Invoice not found",
+        });
+      }
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
         });
       }
 
@@ -699,6 +797,8 @@ export const quickbooksRouter = createTRPCRouter({
             "This invoice hasn't been created in QuickBooks yet, so there's nothing to refresh.",
         });
       }
+
+      await requireActiveConnection(ctx.db, businessId);
 
       const now = new Date();
 
@@ -721,13 +821,17 @@ export const quickbooksRouter = createTRPCRouter({
           now,
           previous: toInvoiceStatus(row.status),
           expectedTotalCents: row.amountCents,
+          timeZone: business.timeZone,
         });
 
         return await ctx.db.quickBooksInvoice.update({
           where: { id: row.id },
           data: {
             status: next,
-            balanceCents: qboAmountToCents(inv.Balance),
+            // `?? undefined` for the same reason as the two conditional fields
+            // below: an omitted `Balance` is "no news", and writing `null`
+            // would blank a balance we already knew.
+            balanceCents: qboAmountToCents(inv.Balance) ?? undefined,
             qboSyncToken: inv.SyncToken,
             // Conditional, not `?? null`: Intuit omits fields it has nothing
             // to report on a given read, and blanking a `DocNumber` we already
@@ -764,6 +868,11 @@ export const quickbooksRouter = createTRPCRouter({
    */
   syncNow: qboGated.mutation(async ({ ctx }) => {
     const { businessId } = ctx;
+
+    // The sweep itself skips a business whose connection isn't usable, which
+    // would answer a human's explicit "Refresh" with a silent `updated: 0`.
+    // Checking first turns that into the sentence that fixes it.
+    await requireActiveConnection(ctx.db, businessId);
 
     try {
       const updated = await syncQuickBooksInvoices(ctx.db, {

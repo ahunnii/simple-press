@@ -61,7 +61,7 @@ export function QuoteReviewStep({
           ref={headingRef}
           tabIndex={-1}
           className={cn(
-            "text-foreground font-semibold outline-none",
+            "text-foreground focus-visible:ring-ring rounded-sm font-semibold focus-visible:ring-2 focus-visible:outline-none",
             density.heading,
           )}
         >

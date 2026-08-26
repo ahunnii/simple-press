@@ -159,209 +159,240 @@ export function QuickBooksSettings({ businessId, data }: Props) {
     }
   };
 
+  // `data.environment` is sourced from the connection ROW (the environment
+  // it was authorized against at OAuth time); `data.platformEnvironment` is
+  // this deployment's own `QBO_ENVIRONMENT`. They can disagree after a
+  // sandbox-authorized connection gets pointed at a production deploy (or
+  // vice versa) — every write call re-checks this server-side and refuses
+  // with `qboEnvironmentMismatchMessage`, so this banner is purely advance
+  // warning, not the enforcement.
+  const environmentMismatch =
+    !!data.connection && data.environment !== data.platformEnvironment;
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpenCheck className="h-4 w-4" />
-              QuickBooks Online
-              {data.environment === "sandbox" && (
-                <Badge variant="outline">Sandbox</Badge>
-              )}
-            </CardTitle>
-            <CardDescription>
-              Send deposit and final invoices from your quote leads through your
-              QuickBooks Online company. Customers pay through QuickBooks&apos;
-              own invoice email.
-            </CardDescription>
-          </div>
-
-          {status === "connected" && (
-            <Badge variant="default" className="gap-1">
-              <CheckCircle className="h-3 w-3" />
-              Connected
-            </Badge>
-          )}
-          {status === "needs_reconnect" && (
-            <Badge variant="destructive" className="gap-1">
-              <AlertTriangle className="h-3 w-3" />
-              Needs reconnect
-            </Badge>
-          )}
-          {status === "not_connected" && (
-            <Badge variant="secondary" className="gap-1">
-              <XCircle className="h-3 w-3" />
-              Not connected
-            </Badge>
-          )}
-          {status === "not_configured" && (
-            <Badge variant="secondary" className="gap-1">
-              Not configured
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {status === "not_configured" && (
-          <>
-            <p className="text-muted-foreground text-sm">
-              QuickBooks isn&apos;t configured on this platform yet. Ask your
-              SimplePress administrator to add the Intuit app credentials.
-            </p>
-            <Button disabled>Connect QuickBooks</Button>
-          </>
-        )}
-
-        {status === "not_connected" && (
-          <>
-            <p className="text-muted-foreground text-sm">
-              Connect the QuickBooks Online company you invoice from.
-              SimplePress will create customers and invoices there; money never
-              passes through SimplePress.
-            </p>
-            <Button onClick={() => void handleConnect()} disabled={connecting}>
-              {connecting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connecting...
-                </>
-              ) : (
-                "Connect QuickBooks"
-              )}
-            </Button>
-          </>
-        )}
-
-        {status === "needs_reconnect" && (
-          <>
-            <Alert variant="destructive" className="border-destructive/50">
-              <AlertTriangle />
-              <AlertTitle>Reconnect QuickBooks</AlertTitle>
-              <AlertDescription>
-                QuickBooks no longer accepts our saved authorization (Intuit
-                connections expire after about 100 days or when access is
-                revoked in QuickBooks). Invoices can&apos;t be sent until you
-                reconnect.
-              </AlertDescription>
-            </Alert>
-
-            {conn && (conn.companyName ?? conn.realmId) ? (
-              <p className="text-muted-foreground text-sm">
-                {conn.companyName ?? "—"}{" "}
-                <span className="font-mono">({conn.realmId})</span>
-              </p>
-            ) : null}
-
-            <Button onClick={() => void handleConnect()} disabled={connecting}>
-              {connecting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Reconnecting...
-                </>
-              ) : (
-                "Reconnect"
-              )}
-            </Button>
-          </>
-        )}
-
-        {status === "connected" && conn && (
-          <>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-sm font-medium">Company</label>
-                <div className="bg-muted mt-1 rounded border p-3 text-sm">
-                  {conn.companyName ?? "—"}
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Company ID</label>
-                <div className="bg-muted mt-1 rounded border p-3 font-mono text-sm">
-                  {conn.realmId}
-                </div>
-              </div>
-            </div>
-
+    <div className="space-y-4">
+      {environmentMismatch && (
+        <Alert variant="destructive" className="border-destructive/50">
+          <AlertTriangle />
+          <AlertTitle>Environment mismatch</AlertTitle>
+          <AlertDescription>
+            Connected in {data.environment} mode but this deployment runs{" "}
+            {data.platformEnvironment} — invoices can&apos;t be sent until you
+            reconnect.
+          </AlertDescription>
+        </Alert>
+      )}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <div>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpenCheck className="h-4 w-4" />
+                QuickBooks Online
+                {data.environment === "sandbox" && (
+                  <Badge variant="outline">Sandbox</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                Send deposit and final invoices from your quote leads through
+                your QuickBooks Online company. Customers pay through
+                QuickBooks&apos; own invoice email.
+              </CardDescription>
+            </div>
+
+            {status === "connected" && (
+              <Badge variant="default" className="gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Connected
+              </Badge>
+            )}
+            {status === "needs_reconnect" && (
+              <Badge variant="destructive" className="gap-1">
+                <AlertTriangle className="h-3 w-3" />
+                Needs reconnect
+              </Badge>
+            )}
+            {status === "not_connected" && (
+              <Badge variant="secondary" className="gap-1">
+                <XCircle className="h-3 w-3" />
+                Not connected
+              </Badge>
+            )}
+            {status === "not_configured" && (
+              <Badge variant="secondary" className="gap-1">
+                Not configured
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {status === "not_configured" && (
+            <>
               <p className="text-muted-foreground text-sm">
-                Connected since {formatDate(conn.connectedAt)}
-                {conn.lastSyncAt
-                  ? ` · Last synced ${formatDate(conn.lastSyncAt)}`
-                  : ""}
+                QuickBooks isn&apos;t configured on this platform yet. Ask your
+                SimplePress administrator to add the Intuit app credentials.
               </p>
-              {conn.lastSyncError && (
-                <p className="text-destructive mt-1 text-xs">
-                  {conn.lastSyncError}
-                </p>
-              )}
-            </div>
+              <Button disabled>Connect QuickBooks</Button>
+            </>
+          )}
 
-            <div className="flex gap-3">
-              <Button variant="outline" size="sm" asChild>
-                <a
-                  href={`${QBO_APP_BASE[data.environment]}/app/homepage`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open QuickBooks
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
+          {status === "not_connected" && (
+            <>
+              <p className="text-muted-foreground text-sm">
+                Connect the QuickBooks Online company you invoice from.
+                SimplePress will create customers and invoices there; money
+                never passes through SimplePress.
+              </p>
+              <Button
+                onClick={() => void handleConnect()}
+                disabled={connecting}
+              >
+                {connecting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  "Connect QuickBooks"
+                )}
               </Button>
+            </>
+          )}
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    disabled={disconnecting}
+          {status === "needs_reconnect" && (
+            <>
+              <Alert variant="destructive" className="border-destructive/50">
+                <AlertTriangle />
+                <AlertTitle>Reconnect QuickBooks</AlertTitle>
+                <AlertDescription>
+                  QuickBooks no longer accepts our saved authorization (Intuit
+                  connections expire after about 100 days or when access is
+                  revoked in QuickBooks). Invoices can&apos;t be sent until you
+                  reconnect.
+                </AlertDescription>
+              </Alert>
+
+              {conn && (conn.companyName ?? conn.realmId) ? (
+                <p className="text-muted-foreground text-sm">
+                  {conn.companyName ?? "—"}{" "}
+                  <span className="font-mono">({conn.realmId})</span>
+                </p>
+              ) : null}
+
+              <Button
+                onClick={() => void handleConnect()}
+                disabled={connecting}
+              >
+                {connecting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Reconnecting...
+                  </>
+                ) : (
+                  "Reconnect"
+                )}
+              </Button>
+            </>
+          )}
+
+          {status === "connected" && conn && (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium">Company</label>
+                  <div className="bg-muted mt-1 rounded border p-3 text-sm">
+                    {conn.companyName ?? "—"}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Company ID</label>
+                  <div className="bg-muted mt-1 rounded border p-3 font-mono text-sm">
+                    {conn.realmId}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground text-sm">
+                  Connected since {formatDate(conn.connectedAt)}
+                  {conn.lastSyncAt
+                    ? ` · Last synced ${formatDate(conn.lastSyncAt)}`
+                    : ""}
+                </p>
+                {conn.lastSyncError && (
+                  <p className="text-destructive mt-1 text-xs">
+                    {conn.lastSyncError}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" asChild>
+                  <a
+                    href={`${QBO_APP_BASE[data.environment]}/app/homepage`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {disconnecting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Disconnecting...
-                      </>
-                    ) : (
-                      "Disconnect"
-                    )}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Disconnect QuickBooks?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Your existing invoices stay in QuickBooks and in
-                      SimplePress; you just won&apos;t be able to send new ones
-                      until you reconnect. Deposit settings are kept.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel disabled={disconnecting}>
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      disabled={disconnecting}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        void handleDisconnect();
-                      }}
-                    >
-                      {disconnecting ? "Disconnecting…" : "Disconnect"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                    Open QuickBooks
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
 
-            <div className="border-t pt-6">
-              <DepositDefaultsForm conn={conn} />
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={disconnecting}
+                    >
+                      {disconnecting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Disconnecting...
+                        </>
+                      ) : (
+                        "Disconnect"
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Disconnect QuickBooks?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Your existing invoices stay in QuickBooks and in
+                        SimplePress; you just won&apos;t be able to send new
+                        ones until you reconnect. Deposit settings are kept.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={disconnecting}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        disabled={disconnecting}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          void handleDisconnect();
+                        }}
+                      >
+                        {disconnecting ? "Disconnecting…" : "Disconnect"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+
+              <div className="border-t pt-6">
+                <DepositDefaultsForm conn={conn} />
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

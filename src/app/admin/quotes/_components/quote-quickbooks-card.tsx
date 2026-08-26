@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 import type { QuoteDetailSubmission } from "./quote-detail";
 import type { InvoiceFormDefaults } from "~/app/admin/invoices/_components/invoice-form-dialog";
+import type { QuoteSubmissionAnswer } from "~/lib/validators/quote-calculator";
 import type { RouterOutputs } from "~/trpc/react";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
@@ -16,6 +18,7 @@ import {
 } from "~/lib/quickbooks/mapping";
 import { cn } from "~/lib/utils";
 import { QBO_INVOICE_KIND_LABELS } from "~/lib/validators/quickbooks";
+import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -27,6 +30,16 @@ import {
 } from "~/components/ui/card";
 import { InvoiceFormDialog } from "~/app/admin/invoices/_components/invoice-form-dialog";
 import { InvoiceStatusBadge } from "~/app/admin/invoices/_components/invoice-status-badge";
+
+import {
+  dismissLoadingToast,
+  loadingToast,
+} from "../../_lib/admin-mutation-toast";
+
+/** Mirrors `invoices-client.tsx`'s `ITEM_NOUN` — kept local rather than
+ *  imported since that file's constant is unexported and this card only
+ *  ever syncs the invoices for one lead. */
+const ITEM_NOUN = { one: "invoice", many: "invoices" } as const;
 
 /**
  * Everything this card needs, resolved server-side in `../[id]/page.tsx` —
@@ -43,6 +56,10 @@ export type QuoteQuickBooksCardData = {
 type Props = {
   data: QuoteQuickBooksCardData;
   submission: QuoteDetailSubmission;
+  /** Definition-ordered snapshot rows — used only to prefill a billing
+   *  address on the invoice dialog from the lead's own `address` answer, if
+   *  it has one. */
+  answers: QuoteSubmissionAnswer[];
   /** The detail page's `afterWrite` — invalidate the tRPC cache + refresh. */
   onChanged: () => void;
 };
@@ -73,9 +90,23 @@ function kindLabel(kind: string): string {
   return labels[kind] ?? kind;
 }
 
-export function QuoteQuickBooksCard({ data, submission, onChanged }: Props) {
+export function QuoteQuickBooksCard({
+  data,
+  submission,
+  answers,
+  onChanged,
+}: Props) {
   const { connection: account, invoices } = data;
   const connection = account.connection;
+
+  // The first non-hidden `address` answer on this lead, if any — prefills
+  // the invoice dialog's "Billing address" section. `!hidden` matters the
+  // same way it does everywhere else on this page: a question skipped by
+  // branching was never actually answered, so its `address` (if the field
+  // even carries a stale one) must not silently become a billing address.
+  const addressDefaults = answers.find(
+    (answer) => answer.type === "address" && !answer.hidden && answer.address,
+  )?.address;
 
   // What a deposit is a percentage OF: the owner's adjustment when one exists,
   // otherwise the calculator's computed estimate.
@@ -116,7 +147,12 @@ export function QuoteQuickBooksCard({ data, submission, onChanged }: Props) {
     defaults: InvoiceFormDefaults;
   }>(() => ({
     open: false,
-    defaults: { kind: "deposit", amountCents: null, ...contactDefaults },
+    defaults: {
+      kind: "deposit",
+      amountCents: null,
+      ...contactDefaults,
+      billingAddress: addressDefaults,
+    },
   }));
 
   const openDialog = (
@@ -125,17 +161,56 @@ export function QuoteQuickBooksCard({ data, submission, onChanged }: Props) {
   ) => {
     setDialog({
       open: true,
-      defaults: { kind, amountCents, ...contactDefaults },
+      defaults: {
+        kind,
+        amountCents,
+        ...contactDefaults,
+        billingAddress: addressDefaults,
+      },
     });
   };
 
-  const depositDisabled = quoteCents == null;
+  // Two separate reasons a deposit can't be raised right now, each with its
+  // own hint: no quote to take a percentage/fixed amount OF, or a quote
+  // exists but the store's deposit rule computes to $0 (a `fixed` rule left
+  // at its schema default, or otherwise misconfigured) — the button being
+  // simply disabled with no explanation would look like a bug rather than a
+  // Settings page the owner hasn't visited yet.
+  const depositDisabled = quoteCents == null || depositPrefill === 0;
   const finalHint =
     submission.finalQuoteCents == null
       ? "Set a final quote first"
       : hasLiveFinal
         ? "Final invoice already sent"
         : null;
+
+  // A live (non-dead) deposit invoice that QBO hasn't marked `paid` yet.
+  // `computeFinalPrefillCents` still counts it against the final balance
+  // (see its own doc comment: sent/created/overdue all count, only
+  // error/voided/pending don't) — this is purely an informational note so
+  // the owner doesn't read "prefill = quote − deposits" as "deposits already
+  // collected".
+  const hasUnpaidLiveDeposit = invoices.some(
+    (invoice) =>
+      invoice.kind === "deposit" &&
+      isLive(invoice) &&
+      invoice.status !== "paid",
+  );
+
+  const syncMutation = api.quickbooks.syncNow.useMutation({
+    onMutate: loadingToast("Syncing…"),
+    onSuccess: (data, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.success(
+        `Synced ${data.updated} ${data.updated === 1 ? ITEM_NOUN.one : ITEM_NOUN.many}`,
+      );
+      onChanged();
+    },
+    onError: (error, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.error(error.message || "Failed to sync invoices");
+    },
+  });
 
   return (
     <Card>
@@ -174,6 +249,20 @@ export function QuoteQuickBooksCard({ data, submission, onChanged }: Props) {
         </CardContent>
       ) : (
         <CardContent className="space-y-4">
+          {invoices.some(isLive) && (
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => syncMutation.mutate()}
+                disabled={syncMutation.isPending}
+              >
+                <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                Refresh statuses
+              </Button>
+            </div>
+          )}
+
           {invoices.length === 0 ? (
             <p className="text-muted-foreground text-sm">
               No invoices yet for this lead.
@@ -258,13 +347,31 @@ export function QuoteQuickBooksCard({ data, submission, onChanged }: Props) {
               </Button>
             </div>
 
-            {depositDisabled && (
-              <p className="text-muted-foreground text-xs">
-                Set a final quote or estimate first
-              </p>
-            )}
+            {depositDisabled &&
+              (quoteCents == null ? (
+                <p className="text-muted-foreground text-xs">
+                  Set a final quote or estimate first
+                </p>
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  Set a deposit rule in{" "}
+                  <Link
+                    href={INTEGRATIONS_HREF}
+                    className="text-foreground font-medium hover:underline"
+                  >
+                    Settings → Integrations
+                  </Link>
+                </p>
+              ))}
             {finalHint && (
               <p className="text-muted-foreground text-xs">{finalHint}</p>
+            )}
+            {hasUnpaidLiveDeposit && (
+              <p className="text-muted-foreground text-xs">
+                The final prefill subtracts a deposit that hasn&apos;t been paid
+                yet — it&apos;s still collectible in QuickBooks, so don&apos;t
+                add it back.
+              </p>
             )}
 
             {quoteCents != null && (

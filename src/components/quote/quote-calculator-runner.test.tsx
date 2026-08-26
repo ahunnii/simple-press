@@ -1,4 +1,10 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -43,6 +49,13 @@ const submitCalls: unknown[] = [];
  * that a REJECTED submission is followed by a successful one.
  */
 const submitQueue: SubmitResponse[] = [];
+/**
+ * THROWN failures for the next N submits — the `onError` half of the real
+ * mutation, distinct from `submitQueue`'s visitor-fixable `success: false`.
+ * Checked first on each `mutate()`, same ordering promise as `submitQueue`.
+ */
+const submitErrorQueue: { message: string; data?: Record<string, unknown> }[] =
+  [];
 const previewInputs: PreviewInput[] = [];
 
 vi.mock("~/trpc/react", () => {
@@ -52,11 +65,21 @@ vi.mock("~/trpc/react", () => {
         useMutation: (opts: {
           onSuccess?: (data: unknown) => void;
           onError?: (error: unknown) => void;
+          onSettled?: () => void;
         }) => ({
           isPending: false,
           mutate: (input: unknown) => {
             submitCalls.push(input);
-            opts.onSuccess?.(submitQueue.shift() ?? SUBMIT_SUCCESS);
+            const thrown = submitErrorQueue.shift();
+            if (thrown) {
+              opts.onError?.(thrown);
+            } else {
+              opts.onSuccess?.(submitQueue.shift() ?? SUBMIT_SUCCESS);
+            }
+            // Mirrors real react-query: fires after EITHER outcome above, and
+            // is what the runner's double-submit guard relies on to release
+            // its lock for the next attempt.
+            opts.onSettled?.();
           },
         }),
       },
@@ -87,8 +110,19 @@ vi.mock("~/trpc/react", () => {
   return { api };
 });
 
+/**
+ * Swappable per-test, so the double-submit test can hold this UNRESOLVED to
+ * simulate the ~15s minting window a real reCAPTCHA v3 call can take, then
+ * resolve it on cue. Reset to the default in `beforeEach` so one test's stall
+ * cannot leak into the next.
+ */
+let recaptchaExecute: (action: string) => Promise<string | null> = () =>
+  Promise.resolve("test-token");
+
 vi.mock("~/lib/captcha/use-recaptcha-v3", () => ({
-  useRecaptchaV3: () => ({ execute: async () => "test-token" }),
+  useRecaptchaV3: () => ({
+    execute: (action: string) => recaptchaExecute(action),
+  }),
   useRecaptchaAutoRefresh: () => undefined,
 }));
 
@@ -162,10 +196,58 @@ const definition: PublicQuoteCalculatorDefinition = {
   showEstimateToCustomer: true,
   showReviewStep: true,
   showLiveEstimate: true,
+  estimateByEmail: false,
   liveEstimateDisclaimer: "Guidance only — final quote confirmed later.",
   requirePhone: false,
   responseDays: 2,
   thankYouMessage: "Thanks! We received your request.",
+};
+
+/**
+ * No review step: `q-move` alone holds the flow, contact holds the submit
+ * button. Used by the "Return to send" (rather than "Return to review")
+ * routing test, where the whole point is that there is no review step to
+ * return to.
+ */
+const NO_REVIEW_DEFINITION: PublicQuoteCalculatorDefinition = {
+  ...definition,
+  screens: [definition.screens[0]!],
+  showReviewStep: false,
+  showLiveEstimate: false,
+};
+
+/** Same shape, but the owner chose "email only" for the estimate. */
+const EMAIL_ONLY_DEFINITION: PublicQuoteCalculatorDefinition = {
+  ...NO_REVIEW_DEFINITION,
+  estimateByEmail: true,
+};
+
+/** A single `dropdown` question — the Enter-inside-a-select test. */
+const DROPDOWN_DEFINITION: PublicQuoteCalculatorDefinition = {
+  ...definition,
+  screens: [
+    {
+      id: "s-dropdown",
+      title: null,
+      description: null,
+      questions: [
+        {
+          id: "q-dropdown",
+          type: "dropdown",
+          title: "Pick one",
+          description: null,
+          required: true,
+          showIf: null,
+          options: [
+            { id: "o-a", label: "Option A", icon: null },
+            { id: "o-b", label: "Option B", icon: null },
+          ],
+        },
+      ],
+    },
+  ],
+  showReviewStep: false,
+  showLiveEstimate: false,
 };
 
 /** The step counter renders twice (visible + sr-only live region); assert via the progressbar. */
@@ -234,7 +316,9 @@ describe("QuoteCalculatorRunner (v2 step model)", () => {
   beforeEach(() => {
     submitCalls.length = 0;
     submitQueue.length = 0;
+    submitErrorQueue.length = 0;
     previewInputs.length = 0;
+    recaptchaExecute = () => Promise.resolve("test-token");
     // MANDATORY: every test here shares calculator id "calc-1", and the runner
     // now writes a draft on every answer change. Without this, one test's
     // answers restore themselves into the next one's first render.
@@ -616,5 +700,174 @@ describe("QuoteCalculatorRunner (v2 step model)", () => {
         "One more answer is needed before you can return to review.",
       ),
     ).not.toBeInTheDocument();
+  });
+
+  it("guards against a second submit while the recaptcha token is still minting", async () => {
+    let resolveRecaptcha: (token: string) => void = () => undefined;
+    recaptchaExecute = () =>
+      new Promise<string>((resolve) => {
+        resolveRecaptcha = resolve;
+      });
+
+    const user = userEvent.setup();
+    seedCompleteSession();
+    await renderRunner();
+    await waitFor(() => expectStep(5, 5));
+
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+
+    // The token has not resolved yet — the button swaps to its pending state,
+    // which is also the state that must survive a second, over-eager attempt.
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Sending…" })).toBeDisabled(),
+    );
+
+    // `fireEvent` bypasses the DOM's native disabled-click suppression that a
+    // real second mouse click would run into — exercising exactly the race
+    // `submitLock` exists for, the same way a fast double-click or a stray
+    // Enter landing before the disabled re-render paints ever could. The Enter
+    // press goes through the step heading, not the button, mirroring a
+    // keyboard user whose focus never left the form.
+    fireEvent.click(screen.getByRole("button", { name: "Sending…" }));
+    fireEvent.keyDown(screen.getByRole("heading", { name: /Review & send/ }), {
+      key: "Enter",
+    });
+    expect(submitCalls).toHaveLength(0);
+
+    resolveRecaptcha("test-token");
+    await waitFor(() => expect(submitCalls).toHaveLength(1));
+
+    // Let any further microtasks run, then confirm the extra attempts were
+    // swallowed rather than merely queued behind the first.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(submitCalls).toHaveLength(1);
+  });
+
+  it('routes a "bad-answer" rejection to "Return to send" and lands on the contact step, with no review step to return to', async () => {
+    const user = userEvent.setup();
+    submitQueue.push({
+      success: false,
+      error: {
+        code: "unknown-option",
+        questionId: "q-move",
+        message: "That option is no longer available.",
+      },
+    });
+    const { QuoteCalculatorRunner } = await import("./quote-calculator-runner");
+    render(
+      <QuoteCalculatorRunner
+        calculator={{
+          id: "calc-no-review",
+          name: "No review",
+          definition: NO_REVIEW_DEFINITION,
+        }}
+      />,
+    );
+
+    expectStep(1, 2);
+    await user.click(screen.getByRole("radio", { name: "Local" }));
+    await waitFor(() => expectStep(2, 2));
+    await user.type(screen.getByLabelText(/^Name/), "Ada Lovelace");
+    await user.type(screen.getByLabelText(/^Email/), "ada@example.com");
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+
+    // Routed back to the offending question with "Return to send" — there is
+    // no review step, so it must not say "Return to review".
+    await waitFor(() => expectStep(1, 2));
+    expect(
+      screen.getByText("That option is no longer available."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Return to send" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Return to review" }),
+    ).not.toBeInTheDocument();
+
+    // Fix it (pick the other option) and let the single-question screen's
+    // auto-advance carry it forward — the exact same `goNext` routing an
+    // explicit "Return to send" click would run.
+    await user.click(screen.getByRole("radio", { name: "Long distance" }));
+
+    // Lands on the contact step — the step that holds the submit button when
+    // there is no review step to hold it instead.
+    await waitFor(() => expectStep(2, 2));
+    expect(
+      screen.getByRole("button", { name: "Get my quote" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a friendly message for a zod validation error instead of the raw payload", async () => {
+    const user = userEvent.setup();
+    seedCompleteSession();
+    submitErrorQueue.push({
+      message: '[{"code":"invalid_type","path":["contactEmail"]}]',
+      data: { zodError: { fieldErrors: { contactEmail: ["Invalid email"] } } },
+    });
+    await renderRunner();
+
+    await waitFor(() => expectStep(5, 5));
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "Something about your answers couldn't be read. Please check them and try again.",
+        ),
+      ).toBeInTheDocument(),
+    );
+    // The raw zod payload never reaches the visitor.
+    expect(screen.queryByText(/invalid_type/)).not.toBeInTheDocument();
+  });
+
+  it('renders the "on its way" line, with no figure, when the owner chose email-only', async () => {
+    const user = userEvent.setup();
+    submitQueue.push({ success: true }); // no `estimate` — email-only
+    const { QuoteCalculatorRunner } = await import("./quote-calculator-runner");
+    render(
+      <QuoteCalculatorRunner
+        calculator={{
+          id: "calc-email-only",
+          name: "Email only",
+          definition: EMAIL_ONLY_DEFINITION,
+        }}
+      />,
+    );
+
+    await user.click(screen.getByRole("radio", { name: "Local" }));
+    await waitFor(() => expectStep(2, 2));
+    await user.type(screen.getByLabelText(/^Name/), "Ada Lovelace");
+    await user.type(screen.getByLabelText(/^Email/), "ada@example.com");
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText("Your estimate is on its way to ada@example.com."),
+      ).toBeInTheDocument(),
+    );
+    // Never a number the server did not send.
+    expect(screen.queryByText(/\$/)).not.toBeInTheDocument();
+  });
+
+  it("does not advance the step when Enter is pressed inside a native select", async () => {
+    const user = userEvent.setup();
+    const { QuoteCalculatorRunner } = await import("./quote-calculator-runner");
+    render(
+      <QuoteCalculatorRunner
+        calculator={{
+          id: "calc-select",
+          name: "Select test",
+          definition: DROPDOWN_DEFINITION,
+        }}
+      />,
+    );
+
+    expectStep(1, 2);
+    const select = screen.getByLabelText("Pick one");
+    await user.selectOptions(select, "o-a");
+    // A native select CONFIRMS its value on Enter without moving focus off
+    // itself; the wrapping form must not also read that as "advance".
+    fireEvent.keyDown(select, { key: "Enter" });
+    expectStep(1, 2);
   });
 });

@@ -1,6 +1,8 @@
 import "server-only";
 
-import type { InvoiceKind } from "~/lib/quickbooks/types";
+import * as Sentry from "@sentry/nextjs";
+
+import type { InvoiceKind, QboAddress } from "~/lib/quickbooks/types";
 import type { DbClient } from "~/server/db";
 import { ensureCustomer } from "~/lib/quickbooks/customers";
 import {
@@ -15,9 +17,13 @@ import {
   defaultLineDescription,
   dueDateString,
   qboAmountToCents,
+  toQboBillAddr,
   truncateError,
 } from "~/lib/quickbooks/mapping";
-import { QBO_INVOICE_KIND_VALUES } from "~/lib/validators/quickbooks";
+import {
+  parseBillingAddressJson,
+  QBO_INVOICE_KIND_VALUES,
+} from "~/lib/validators/quickbooks";
 
 /**
  * The one orchestration that turns a local `QuickBooksInvoice` row into a real
@@ -30,6 +36,17 @@ import { QBO_INVOICE_KIND_VALUES } from "~/lib/validators/quickbooks";
  * that was created but never sent resumes at the send, not at a second create
  * — and the failure path is careful never to erase the evidence of a step that
  * DID succeed (see the catch at the bottom).
+ *
+ * ORDER OF ASSIGNMENT IS THE WHOLE SAFETY PROPERTY.
+ * `qboInvoiceId` / `qboCustomerId` / `currentStatus` are advanced in memory the
+ * INSTANT Intuit confirms the create, BEFORE the row is updated — because the
+ * update is itself a step that can fail. If the local variables only advanced
+ * after a successful write, a failed write would leave the catch below looking
+ * at `qboInvoiceId === null`, mark the row `error`, and offer the owner a Retry
+ * that creates a SECOND invoice at Intuit and emails their customer twice. So
+ * the catch persists the ids it holds rather than trusting that the first
+ * update landed, and only a row with no Intuit invoice at all is ever recorded
+ * as `error`.
  */
 
 type QuickBooksInvoiceRow = Awaited<
@@ -129,6 +146,7 @@ async function createWithRecovery(
     dueDate: string;
     email: string;
     memo: string | null;
+    billAddr: QboAddress | null;
   },
 ) {
   let itemId = args.itemId;
@@ -149,6 +167,7 @@ async function createWithRecovery(
           dueDate: args.dueDate,
           email: args.email,
           memo: args.memo,
+          billAddr: args.billAddr,
           allowOnlinePayment,
         }),
       );
@@ -211,22 +230,37 @@ export async function issueInvoice(
   });
   if (!business) throw new Error("Business not found");
 
-  // Tracked alongside the row because both drive the resume logic below AND
-  // the catch's decision about what to persist — `row` itself is a snapshot
+  // Tracked alongside the row because all three drive the resume logic below
+  // AND the catch's decision about what to persist — `row` itself is a snapshot
   // from before this run and is never mutated.
   let qboInvoiceId = row.qboInvoiceId;
+  let qboCustomerId = row.qboCustomerId;
   let currentStatus = row.status;
+  // Set only when THIS run created the invoice. The catch re-stamps `realmId`
+  // from it rather than from `conn`, so a resumed row that belongs to a
+  // previous QuickBooks company is never relabelled as belonging to the
+  // current one — that relabel would hand the sync engine an id it will query
+  // against the wrong company, find nothing, and mark a real invoice `voided`.
+  let createdInRealmId: string | null = null;
 
   try {
     if (qboInvoiceId === null) {
       const kind = asInvoiceKind(row.kind);
       const itemId = await ensureServiceItemId(db, params.businessId, kind);
 
+      // The address snapshot taken when the invoice was raised. Total on read:
+      // a row from before the column existed, or one holding unparseable
+      // JSON, simply issues without a `BillAddr` — exactly as every invoice
+      // did before the field was added.
+      const billing = parseBillingAddressJson(row.billingAddress);
+      const billAddr = billing ? toQboBillAddr(billing) : null;
+
       const customer = await ensureCustomer(db, params.businessId, {
         name: row.customerName,
         email: row.customerEmail,
         phone: row.customerPhone,
         previousCustomerId: await findSiblingCustomerId(db, row),
+        billAddr,
       });
 
       const invoice = await createWithRecovery(db, params.businessId, {
@@ -245,7 +279,16 @@ export async function issueInvoice(
           : dueDateString(new Date(), conn.defaultDueDays, business.timeZone),
         email: row.customerEmail,
         memo: row.memo,
+        billAddr,
       });
+
+      // BEFORE the write, never after — see the module docblock. From this
+      // line on, an invoice exists at Intuit and every failure path has to
+      // account for it.
+      qboInvoiceId = invoice.Id;
+      qboCustomerId = customer.id;
+      currentStatus = "created";
+      createdInRealmId = conn.realmId;
 
       await db.quickBooksInvoice.update({
         where: { id: row.id },
@@ -264,19 +307,20 @@ export async function issueInvoice(
           lastSyncedAt: new Date(),
         },
       });
-
-      qboInvoiceId = invoice.Id;
-      currentStatus = "created";
     }
 
     // Send when asked, for an invoice that exists at QBO and hasn't been sent.
     // `created` covers both a create that just happened and one from a prior
-    // attempt whose send failed; the `error`-with-an-id case can't be produced
-    // by the catch below (it preserves `created`) but is honoured defensively
-    // so no row can end up holding a QBO invoice it will never email.
+    // attempt whose send failed. The `error`/`pending`-WITH-an-id cases are the
+    // recovery arm: a row can hold a real Intuit invoice while still reading
+    // `pending` (its very first status write failed) or `error` (a legacy row
+    // recorded before the catch below stopped producing that combination), and
+    // in both cases the invoice exists and must still be emailed rather than
+    // re-created.
     const sendable =
       currentStatus === "created" ||
-      (currentStatus === "error" && qboInvoiceId !== null);
+      (qboInvoiceId !== null &&
+        (currentStatus === "error" || currentStatus === "pending"));
 
     if (params.send && qboInvoiceId !== null && sendable) {
       const sent = await sendQboInvoice(
@@ -297,18 +341,31 @@ export async function issueInvoice(
       });
     }
   } catch (err) {
+    const lastError = ownerFacingError(err);
+
     // A create that succeeded is never walked back to `error`: the invoice
-    // EXISTS at QBO and the owner may already have been billed for it, so the
-    // row stays `created` and only records why the send failed. Marking it
+    // EXISTS at QBO and the customer may already have been emailed it, so the
+    // row stays `created` and only records why the rest failed. Marking it
     // `error` would invite a retry that creates a duplicate invoice — the one
     // outcome this whole module is built to prevent.
+    //
+    // The Intuit ids are re-written here rather than assumed: the failure being
+    // recorded may BE the update that was supposed to store them, so this write
+    // is the last chance to get them onto the row. Writing them twice is a
+    // no-op; not writing them once is a duplicate invoice.
     await db.quickBooksInvoice
       .update({
         where: { id: row.id },
         data:
           qboInvoiceId !== null
-            ? { status: "created", lastError: ownerFacingError(err) }
-            : { status: "error", lastError: ownerFacingError(err) },
+            ? {
+                status: "created",
+                qboInvoiceId,
+                qboCustomerId,
+                ...(createdInRealmId ? { realmId: createdInRealmId } : {}),
+                lastError,
+              }
+            : { status: "error", lastError },
       })
       .catch((updateErr: unknown) => {
         // Recording the failure must never replace it — rethrow the original.
@@ -316,6 +373,17 @@ export async function issueInvoice(
           "[quickbooks] could not persist invoice failure state",
           updateErr,
         );
+        // The only path that can strand a real Intuit invoice with no local
+        // id: both writes failed. Nothing else will ever reconcile it, so an
+        // operator needs the pair of ids to repair the row by hand.
+        Sentry.captureException(updateErr, {
+          tags: {
+            service: "quickbooks",
+            "quickbooks.step": "persist-invoice-id",
+            businessId: params.businessId,
+          },
+          extra: { invoiceRowId: row.id, qboInvoiceId },
+        });
       });
 
     throw err;

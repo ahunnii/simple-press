@@ -4,9 +4,11 @@ import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 import { isQuickBooksConfigured } from "~/lib/quickbooks/config";
+import { QBO_REALM_MISMATCH_ERROR } from "~/lib/quickbooks/constants";
 import { redactTokenBearingError } from "~/lib/quickbooks/errors";
 import { exchangeCode, fetchCompanyInfo } from "~/lib/quickbooks/oauth";
 import { verifySignedOAuthState } from "~/lib/stripe/oauth-state";
+import { QBO_OPEN_INVOICE_STATUSES } from "~/lib/validators/quickbooks";
 import { db } from "~/server/db";
 
 /**
@@ -180,6 +182,42 @@ export async function GET(request: NextRequest) {
       // into `message`, so a raw failure here must never reach the outer
       // catch's console.error/Sentry call below.
       throw redactTokenBearingError(err, "callback-upsert");
+    }
+
+    // The one moment an orphaned invoice can be labelled: right here, where the
+    // company demonstrably changed. Their QBO ids belong to the previous realm
+    // and resolve to nothing in the new one, so the sync engine excludes them
+    // from its sweep entirely (see `sync.ts`) — which means nothing else will
+    // ever explain to the owner why those rows stopped updating. They stay in
+    // the admin list, because they are money records; they just say why.
+    //
+    // Only the OPEN statuses are stamped: `paid`/`voided` are terminal and were
+    // never going to be polled again, and `pending`/`error` have no QBO invoice
+    // to be orphaned from — re-issuing one of those against the new company is
+    // a perfectly good outcome.
+    if (realmChanged) {
+      try {
+        await db.quickBooksInvoice.updateMany({
+          where: {
+            businessId,
+            realmId: { not: realmId },
+            status: { in: [...QBO_OPEN_INVOICE_STATUSES] },
+          },
+          data: { lastError: QBO_REALM_MISMATCH_ERROR },
+        });
+      } catch (stampErr) {
+        // Cosmetic bookkeeping — the connection itself is already saved and
+        // working, so this must never turn a successful reconnect into a
+        // "connection_failed" redirect.
+        Sentry.captureException(stampErr, {
+          level: "warning",
+          tags: {
+            service: "quickbooks",
+            "quickbooks.step": "realm-change-stamp",
+            businessId,
+          },
+        });
+      }
     }
 
     console.log(

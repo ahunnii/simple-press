@@ -1046,8 +1046,18 @@ export async function sendFinalQuote(params: {
   to: string;
   customerName: string;
   calculatorName: string;
-  /** Always exact — the owner reviewed it; there is no range framing here. */
-  finalQuoteCents: number;
+  /**
+   * Always exact when present — the owner reviewed it; there is no range
+   * framing here.
+   *
+   * `null` is a MESSAGE-ONLY follow-up, not a $0 quote: the owner is writing
+   * back to ask something ("can you send photos of the stairs?") or to decline
+   * ("we don't cover that area"), and the email drops the amount box entirely
+   * rather than printing a price nobody quoted. The subject changes with it —
+   * "Your quote from X" landing in an inbox with no quote in it is worse than
+   * no email at all.
+   */
+  finalQuoteCents: number | null;
   /** Owner-written message for this send. Plain text. */
   message: string;
   answers: Array<{ title: string; display: string }>;
@@ -1064,7 +1074,14 @@ export async function sendFinalQuote(params: {
 }) {
   const overrides = await getEmailOverrides(params.business.subdomain);
   const override = overrides["final-quote"];
-  const defaultSubject = `Your quote from ${params.business.name}`;
+  // Only the DEFAULT subject splits on the amount. An owner who wrote their own
+  // subject line keeps it in both cases — it is one string on the template's
+  // customization row, they cannot author two, and silently ignoring their
+  // wording on some sends would be the more surprising behavior.
+  const defaultSubject =
+    params.finalQuoteCents === null
+      ? `An update on your quote request — ${params.business.name}`
+      : `Your quote from ${params.business.name}`;
 
   return sendEmail({
     from: EMAIL_FROM.SUPPORT,

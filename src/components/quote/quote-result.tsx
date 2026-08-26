@@ -35,10 +35,27 @@ export function QuoteResult({
   result,
   thankYouMessage,
   responseDays,
+  estimateByEmail,
+  contactEmail,
 }: {
   result: QuoteSubmitResult;
   thankYouMessage: string;
   responseDays: number;
+  /**
+   * `definition.estimateByEmail` — true exactly when the owner chose
+   * "show the estimate to the customer" WITHOUT "show it on screen", and left
+   * the confirmation email on. Price-free by construction (see the type this
+   * is read off in `~/lib/validators/quote-calculator`): it only says WHERE
+   * the number is headed, never what it is.
+   *
+   * A missing `result.estimate` is otherwise ambiguous — it also means "the
+   * owner keeps every estimate internal" or "the formula could not price this
+   * lead" — so this flag is what tells those apart from "the number is real
+   * and already on its way, just not here."
+   */
+  estimateByEmail: boolean;
+  /** The visitor's own submitted email, for the "on its way to…" line. */
+  contactEmail: string;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -68,7 +85,7 @@ export function QuoteResult({
           <h3
             ref={headingRef}
             tabIndex={-1}
-            className="text-muted-foreground text-sm font-medium tracking-wide uppercase outline-none"
+            className="text-muted-foreground focus-visible:ring-ring rounded-sm text-sm font-medium tracking-wide uppercase focus-visible:ring-2 focus-visible:outline-none"
           >
             Your estimated quote
           </h3>
@@ -98,10 +115,22 @@ export function QuoteResult({
           <h3
             ref={headingRef}
             tabIndex={-1}
-            className="text-foreground text-xl font-semibold outline-none"
+            className="text-foreground focus-visible:ring-ring rounded-sm text-xl font-semibold focus-visible:ring-2 focus-visible:outline-none"
           >
             {thankYouMessage}
           </h3>
+          {/* The owner turned the estimate on but kept it off-screen — the
+              server therefore withheld `result.estimate` on purpose, not
+              because it has none to give. Without this line that reads
+              identically to "the owner never priced this at all". Never
+              prints a figure: the price-free `estimateByEmail` flag is all
+              this screen is told, and the number itself only ever reaches the
+              visitor through the confirmation email the server already sent. */}
+          {estimateByEmail && contactEmail !== "" && (
+            <p className="text-foreground max-w-md text-sm font-medium">
+              Your estimate is on its way to {contactEmail}.
+            </p>
+          )}
           <p className="text-muted-foreground max-w-md text-sm">
             {responseLine}
           </p>
