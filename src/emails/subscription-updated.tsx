@@ -10,6 +10,21 @@ type SubscriptionUpdatedEmailProps = {
   variantName?: string | null;
   intervalLabel: string;
   variant: "paused" | "resumed" | "skipped";
+  /**
+   * `variant: "resumed"` covers two different things the customer did, and
+   * nothing on the subscription row distinguishes them after the fact: a
+   * genuine resume from an indefinite pause, and UNDOING a pending skip
+   * (`resumeSubscription` clears the same `pause_collection` either way).
+   * The caller knows which it was, so it says so here. Absent ⇒ the generic
+   * "back on" heading, which is true of both.
+   */
+  undoSkip?: boolean;
+  /**
+   * Accepted but unrendered. It only ever arrives as `pauseResumesAt`, which
+   * an indefinite pause never sets and a skip always does — so the "resume on
+   * or after…" box this used to draw for `variant: "paused"` was unreachable.
+   * Kept in the type so `sendSubscriptionUpdated` can keep passing it.
+   */
   resumesAt?: Date | null;
   nextBillingAt?: Date | null;
   manageUrl: string;
@@ -22,7 +37,7 @@ export default function SubscriptionUpdatedEmail({
   productName,
   variantName,
   variant,
-  resumesAt,
+  undoSkip,
   nextBillingAt,
   manageUrl,
 }: SubscriptionUpdatedEmailProps) {
@@ -45,12 +60,18 @@ export default function SubscriptionUpdatedEmail({
       (variantName ? ` — ${variantName}` : "") +
       " is now paused. We won't charge you or send any deliveries until you resume it.";
   } else if (variant === "resumed") {
-    heading = "Your subscription is back on";
-    message =
-      "Your subscription for " +
-      productName +
-      (variantName ? ` — ${variantName}` : "") +
-      " is back on. ";
+    heading = undoSkip
+      ? "Your next delivery is back on"
+      : "Your subscription is back on";
+    message = undoSkip
+      ? "Your skipped delivery of " +
+        productName +
+        (variantName ? ` — ${variantName}` : "") +
+        " is back on. "
+      : "Your subscription for " +
+        productName +
+        (variantName ? ` — ${variantName}` : "") +
+        " is back on. ";
     if (nextBillingAt) {
       message += `Your next charge will be on ${formatDate(nextBillingAt)}.`;
     }
@@ -78,15 +99,6 @@ export default function SubscriptionUpdatedEmail({
       <Text style={paragraph}>Hi {customerName},</Text>
       <Text style={paragraph}>{message}</Text>
 
-      {variant === "paused" && resumesAt && (
-        <Section style={infoBox}>
-          <Text style={infoBoxText}>
-            Resume on or after {formatDate(resumesAt)}, or resume anytime from
-            your subscription settings.
-          </Text>
-        </Section>
-      )}
-
       {/* CTA Button */}
       <Section style={buttonSection}>
         <Button href={manageUrl} style={button}>
@@ -96,8 +108,7 @@ export default function SubscriptionUpdatedEmail({
 
       {/* Footer text */}
       <Text style={note}>
-        Need to make other changes? You can pause, resume, skip, or cancel
-        anytime from the link above.
+        You can manage or cancel your subscription anytime from the link above.
       </Text>
     </EmailLayout>
   );
@@ -116,21 +127,6 @@ const paragraph = {
   lineHeight: "24px",
   color: "#374151",
   marginBottom: "16px",
-};
-
-const infoBox = {
-  backgroundColor: "#f0f9ff",
-  borderLeft: "4px solid #0284c7",
-  borderRadius: "4px",
-  padding: "16px",
-  marginBottom: "24px",
-};
-
-const infoBoxText = {
-  fontSize: "15px",
-  lineHeight: "24px",
-  color: "#0c4a6e",
-  margin: "0",
 };
 
 const buttonSection = {

@@ -149,6 +149,8 @@ export async function sendNewOrderNotification(params: {
   discount: number;
   total: number;
   deliveryMethod?: "ship" | "pickup";
+  /** Present when this order was created from a paid subscription invoice — lets the owner tell a renewal from a one-off. */
+  subscription?: { intervalLabel: string; adminUrl: string };
   business: {
     name: string;
     siteContent?: {
@@ -161,13 +163,16 @@ export async function sendNewOrderNotification(params: {
   idempotencyKey?: string;
 }) {
   const adminOrderUrl = `${getBusinessUrl(params.business)}/admin/orders/${params.orderId}`;
+  const subject = params.subscription
+    ? `New subscription order #${params.orderNumber} — ${params.business.name}`
+    : `New order #${params.orderNumber} — ${params.business.name}`;
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.customerEmail,
-    subject: `New order #${params.orderNumber} — ${params.business.name}`,
+    subject,
     react: NewOrderNotificationEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
@@ -179,6 +184,7 @@ export async function sendNewOrderNotification(params: {
       discount: params.discount,
       total: params.total,
       deliveryMethod: params.deliveryMethod,
+      subscription: params.subscription,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       adminOrderUrl,
@@ -1327,6 +1333,8 @@ export async function sendSubscriptionUpdated(params: {
   variantName?: string | null;
   intervalLabel: string;
   variant: "paused" | "resumed" | "skipped";
+  /** `resumed` only: the customer undid a pending skip rather than lifting a pause. */
+  undoSkip?: boolean;
   resumesAt?: Date | null;
   nextBillingAt?: Date | null;
   manageUrl: string;
@@ -1349,7 +1357,9 @@ export async function sendSubscriptionUpdated(params: {
   if (params.variant === "paused") {
     defaultSubject = "Your subscription is paused";
   } else if (params.variant === "resumed") {
-    defaultSubject = "Your subscription is back on";
+    defaultSubject = params.undoSkip
+      ? "Your next delivery is back on"
+      : "Your subscription is back on";
   } else {
     defaultSubject = "Your next delivery is skipped";
   }
@@ -1372,6 +1382,7 @@ export async function sendSubscriptionUpdated(params: {
       variantName: params.variantName,
       intervalLabel: params.intervalLabel,
       variant: params.variant,
+      undoSkip: params.undoSkip,
       resumesAt: params.resumesAt ?? undefined,
       nextBillingAt: params.nextBillingAt ?? undefined,
       manageUrl: params.manageUrl,
@@ -1428,9 +1439,9 @@ export async function sendSubscriptionManageLinks(params: {
   });
 }
 
-// Owner Subscription Notification (owner) — for new and cancelled
+// Owner Subscription Notification (owner) — for new, cancelled, and payment_failed
 export async function sendOwnerSubscriptionNotification(params: {
-  kind: "new" | "cancelled";
+  kind: "new" | "cancelled" | "payment_failed";
   customerEmail: string;
   customerName?: string | null;
   productName: string;
@@ -1439,6 +1450,10 @@ export async function sendOwnerSubscriptionNotification(params: {
   intervalLabel: string;
   perDeliveryCents: number;
   adminUrl: string;
+  /** Only meaningful when `kind === "cancelled"`. Raw `Subscription.cancelReason` value. */
+  cancelReason?: string | null;
+  /** Only meaningful when `kind === "payment_failed"`. Stripe's `attempt_count` on the invoice. */
+  attemptCount?: number;
   business: {
     name: string;
     ownerEmail: string;
@@ -1454,11 +1469,15 @@ export async function sendOwnerSubscriptionNotification(params: {
   const category =
     params.kind === "new"
       ? "subscription_owner_new"
-      : "subscription_owner_cancelled";
+      : params.kind === "payment_failed"
+        ? "subscription_owner_payment_failed"
+        : "subscription_owner_cancelled";
   const defaultSubject =
     params.kind === "new"
       ? `New subscription: ${params.productName}`
-      : `Subscription cancelled: ${params.productName}`;
+      : params.kind === "payment_failed"
+        ? "Payment failed for a subscription"
+        : `Subscription cancelled: ${params.productName}`;
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
@@ -1478,6 +1497,8 @@ export async function sendOwnerSubscriptionNotification(params: {
       intervalLabel: params.intervalLabel,
       perDeliveryCents: params.perDeliveryCents,
       adminUrl: params.adminUrl,
+      cancelReason: params.cancelReason,
+      attemptCount: params.attemptCount,
     }),
     tags: [
       { name: "category", value: category },

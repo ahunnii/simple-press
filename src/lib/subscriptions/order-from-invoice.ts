@@ -20,7 +20,11 @@ import {
   sendLowInventoryAlerts,
 } from "~/lib/inventory/order-deduction";
 
-import { buildSubscriptionManageUrl } from "./emails";
+import {
+  buildAdminSubscriptionUrl,
+  buildSubscriptionManageUrl,
+  subscriptionIntervalLabel,
+} from "./emails";
 import { invoiceTaxCents } from "./stripe-invoice";
 
 /**
@@ -451,6 +455,10 @@ export async function processPaidInvoice(
       discount: order.discount,
       total: order.total,
       deliveryMethod: order.deliveryMethod as "ship" | "pickup",
+      subscription: {
+        intervalLabel: subscriptionIntervalLabel(subscription),
+        adminUrl: buildAdminSubscriptionUrl(business, subscription.id),
+      },
       business: {
         name: business.name,
         siteContent: business.siteContent,

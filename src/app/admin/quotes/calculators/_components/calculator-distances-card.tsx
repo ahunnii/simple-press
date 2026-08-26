@@ -1,7 +1,7 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
 
 import type {
@@ -83,7 +83,8 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
               Turns two locations into a straight-line (&quot;as the crow
               flies&quot;) mileage number your formula can use. Straight-line
               miles run shorter than road miles — pad your per-mile rate to
-              compensate. Computed on the server; visitors never see the mileage.
+              compensate. Computed on the server; visitors never see the
+              mileage.
             </CardDescription>
           </div>
           <Button
@@ -135,8 +136,8 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                           />
                         </FormControl>
                         <FormDescription>
-                          Holds the straight-line miles between the two locations
-                          below.
+                          Holds the straight-line miles between the two
+                          locations below.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -240,8 +241,12 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                     (toQuestion.required !== true || toQuestion.showIf);
 
                   const fragileQuestions = [
-                    ...(isFromFragile ? [{ question: fromQuestion, label: "From" }] : []),
-                    ...(isToFragile ? [{ question: toQuestion, label: "To" }] : []),
+                    ...(isFromFragile
+                      ? [{ question: fromQuestion, label: "From" }]
+                      : []),
+                    ...(isToFragile
+                      ? [{ question: toQuestion, label: "To" }]
+                      : []),
                   ];
 
                   return fragileQuestions.length > 0 ? (
@@ -251,15 +256,20 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                           key={item.label}
                           className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200"
                         >
-                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                          <AlertCircle
+                            className="mt-0.5 h-4 w-4 shrink-0"
+                            aria-hidden="true"
+                          />
                           <span>
-                            <strong>{item.question?.title || "This question"}</strong>{" "}
-                            is optional or shown conditionally. If a visitor skips
-                            it, this distance silently falls back to its
+                            <strong>
+                              {item.question?.title || "This question"}
+                            </strong>{" "}
+                            is optional or shown conditionally. If a visitor
+                            skips it, this distance silently falls back to its
                             &quot;Value when unavailable&quot; above.
                             That&apos;s intentional for branched designs — just
-                            make sure your formula still prices sensibly when that
-                            happens.
+                            make sure your formula still prices sensibly when
+                            that happens.
                           </span>
                         </p>
                       ))}

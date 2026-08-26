@@ -266,6 +266,41 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
           }),
       },
       {
+        key: "new-order-owner-subscription",
+        label: "New Order (subscription)",
+        build: () =>
+          NewOrderNotificationEmail({
+            orderNumber: sampleOrder?.orderNumber ?? 1001,
+            customerName: "John Doe",
+            customerEmail: "john@example.com",
+            items: sampleOrder?.items?.map((item) => ({
+              productName: item.productName,
+              variantName: item.variantName,
+              quantity: item.quantity,
+              total: Math.round(item.total),
+            })) ?? [
+              {
+                productName: "Sample Product",
+                variantName: "Medium / Blue",
+                quantity: 2,
+                total: 5998,
+              },
+            ],
+            subtotal: sampleOrder?.subtotal ?? 5998,
+            shipping: sampleOrder?.shipping ?? 500,
+            tax: sampleOrder?.tax ?? 540,
+            discount: sampleOrder?.discount ?? 0,
+            total: sampleOrder?.total ?? 7038,
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            adminOrderUrl: `${businessUrl}/admin/orders/sample`,
+            subscription: {
+              intervalLabel: "Every month",
+              adminUrl: `${businessUrl}/admin/subscriptions/sample`,
+            },
+          }),
+      },
+      {
         key: "order-fulfilled",
         label: "Order Fulfilled (no tracking)",
         overrideId: "order-fulfilled",
@@ -642,6 +677,26 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             quantity: 1,
             intervalLabel: "Every month",
             perDeliveryCents: 3999,
+            cancelReason: "customer",
+            adminUrl: `${businessUrl}/admin/subscriptions/sample`,
+          }),
+      },
+      {
+        key: "subscription-payment-failed-owner",
+        label: "Subscription Payment Failed (owner)",
+        build: () =>
+          OwnerSubscriptionNotificationEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            kind: "payment_failed",
+            customerEmail: "jane@example.com",
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            variantName: "Monthly",
+            quantity: 1,
+            intervalLabel: "Every month",
+            perDeliveryCents: 3999,
+            attemptCount: 2,
             adminUrl: `${businessUrl}/admin/subscriptions/sample`,
           }),
       },

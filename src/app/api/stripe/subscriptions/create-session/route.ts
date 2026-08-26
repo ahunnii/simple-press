@@ -686,11 +686,16 @@ export async function POST(req: Request) {
         sessionId: session.id,
       });
       // Read by `/subscribe/success` to prove the visitor is the one who
-      // started this checkout before any subscription detail is shown.
+      // started this checkout before any subscription detail is shown. Must
+      // be `lax`, not `strict`: the browser lands here via a cross-site
+      // top-level GET redirect from checkout.stripe.com, and `strict` cookies
+      // are never sent on cross-site navigations — the one-time
+      // `pending_session` cookie stays `strict` because it's read via a
+      // same-site client fetch to `/api/stripe/session`, not a redirect.
       response.cookies.set("pending_subscription_session", session.id, {
         path: "/",
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         maxAge: 3600,
       });

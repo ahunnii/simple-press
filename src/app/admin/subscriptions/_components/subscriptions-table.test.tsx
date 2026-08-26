@@ -161,6 +161,14 @@ describe("SubscriptionsTable", () => {
   it("shows a full empty state when the store has no subscriptions at all", () => {
     renderTable({ rows: [], totalCount: 0, totalSubscriptions: 0 });
     expect(screen.getByText("No subscriptions yet")).toBeInTheDocument();
+    // The empty state has to name the prerequisite — nothing can ever appear
+    // here until a product actually offers a subscription.
+    expect(
+      screen.getByText(/enable subscriptions on a product/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /go to products/i }),
+    ).toHaveAttribute("href", "/admin/products");
   });
 
   it("shows a filtered empty state when rows exist but none match", () => {
@@ -183,6 +191,53 @@ describe("SubscriptionsTable", () => {
       screen.getByText("Product subscriptions are turned off"),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /sync now/i })).toBeDisabled();
+  });
+
+  // ── a skip is not a pause ─────────────────────────────────────────────
+  //
+  // `skipNextDelivery` leaves the row ACTIVE with a future `pauseResumesAt`
+  // (Stripe voids one invoice and resumes collecting on its own), so the date
+  // column has to say a delivery was skipped — `status` alone never will.
+
+  it("labels an active row with a pending skip, without flipping its status badge", () => {
+    const row = makeRow({
+      status: "active",
+      // Far future so the fixture can't age into the past.
+      pauseResumesAt: new Date("2099-02-02T00:00:00Z"),
+      nextBillingAt: new Date("2099-03-01T00:00:00Z"),
+    });
+    renderTable({ rows: [row], totalCount: 1, totalSubscriptions: 1 });
+
+    const table = within(screen.getByRole("table"));
+    expect(table.getByText("Next billing · one skipped")).toBeInTheDocument();
+    expect(table.getByText("Active")).toBeInTheDocument();
+    expect(table.queryByText("Paused")).not.toBeInTheDocument();
+  });
+
+  it("uses the plain 'Next billing' label once the skip window has elapsed", () => {
+    const row = makeRow({
+      status: "active",
+      pauseResumesAt: new Date("2020-01-01T00:00:00Z"),
+    });
+    renderTable({ rows: [row], totalCount: 1, totalSubscriptions: 1 });
+
+    const table = within(screen.getByRole("table"));
+    expect(table.getByText("Next billing")).toBeInTheDocument();
+    expect(
+      table.queryByText("Next billing · one skipped"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("still reads 'Resumes' for a genuinely paused row", () => {
+    const row = makeRow({
+      status: "paused",
+      pauseResumesAt: null,
+    });
+    renderTable({ rows: [row], totalCount: 1, totalSubscriptions: 1 });
+
+    const table = within(screen.getByRole("table"));
+    expect(table.getByText("Resumes")).toBeInTheDocument();
+    expect(table.getByText("Indefinitely")).toBeInTheDocument();
   });
 
   it("renders the summary strip counts", () => {

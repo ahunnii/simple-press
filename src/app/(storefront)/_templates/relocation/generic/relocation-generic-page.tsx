@@ -159,7 +159,7 @@ export function RelocationGenericPage({ page }: { page: Page }) {
     // trigger for arbitrary-length content.
     <RelocationReveal threshold={0} className="w-full">
       {page.type === "policy" ? (
-        <p className="mb-8 min-[1025px]:max-w-[46rem] [font-family:var(--font-relocation-display)] text-[0.75rem] font-bold tracking-[0.1em] text-[var(--relocation-ink)] uppercase opacity-60">
+        <p className="mb-8 [font-family:var(--font-relocation-display)] text-[0.75rem] font-bold tracking-[0.1em] text-[var(--relocation-ink)] uppercase opacity-60 min-[1025px]:max-w-[46rem]">
           Last updated · {formatUpdated(page.updatedAt)}
         </p>
       ) : null}

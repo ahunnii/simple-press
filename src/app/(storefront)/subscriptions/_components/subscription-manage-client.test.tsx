@@ -70,6 +70,7 @@ function makeSubscription(
     shippingCents: 500,
     deliveryMethod: "ship",
     perDeliveryCents: 4100,
+    taxAppliedAtCheckout: false,
     shippingAddress: {
       line1: "123 Main St",
       line2: null,
@@ -184,7 +185,7 @@ describe("SubscriptionManageClient", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("hides skip/pause/update-payment when actions are disabled, but keeps cancel", () => {
+  it("hides skip/pause when actions are disabled, but keeps update-payment and cancel", () => {
     renderClient({ actionsEnabled: false });
 
     expect(
@@ -193,14 +194,19 @@ describe("SubscriptionManageClient", () => {
     expect(
       screen.queryByRole("button", { name: /^pause$/i }),
     ).not.toBeInTheDocument();
+    // Updating a card is an exit-from-harm action like cancel: a past-due
+    // customer emailed "update your card" must never land on a page without
+    // the button. Its procedure is ungated server-side too.
     expect(
-      screen.queryByRole("button", { name: /update payment method/i }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: /update payment method/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /cancel subscription/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/some options are temporarily unavailable/i),
+      screen.getByText(
+        /some options are temporarily unavailable — you can still update your card or cancel/i,
+      ),
     ).toBeInTheDocument();
   });
 
@@ -213,7 +219,7 @@ describe("SubscriptionManageClient", () => {
     );
 
     expect(
-      await screen.findByText(/you won't be charged again/i),
+      await screen.findByText(/this takes effect immediately/i),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /yes, cancel/i }));
@@ -276,5 +282,107 @@ describe("SubscriptionManageClient", () => {
     expect(
       screen.getByRole("link", { name: /subscribe again/i }),
     ).toHaveAttribute("href", "/shop");
+  });
+  it("labels the per-delivery total 'before tax' only when the store charges Stripe Tax", () => {
+    const { unmount } = renderClient();
+    expect(screen.getByText("Per-delivery total")).toBeInTheDocument();
+    unmount();
+
+    renderClient({
+      subscription: makeSubscription({ taxAppliedAtCheckout: true }),
+    });
+    expect(
+      screen.getByText("Per-delivery total (before tax)"),
+    ).toBeInTheDocument();
+  });
+
+  it("tells a shipping subscriber their address and rate are locked", () => {
+    renderClient();
+    expect(
+      screen.getByText(/locked for the life of this subscription/i),
+    ).toBeInTheDocument();
+  });
+
+  it("omits the locked-address note for an in-store pickup subscription", () => {
+    renderClient({
+      subscription: makeSubscription({
+        deliveryMethod: "pickup",
+        shippingAddress: null,
+      }),
+    });
+    expect(
+      screen.queryByText(/locked for the life of this subscription/i),
+    ).not.toBeInTheDocument();
+  });
+
+  // ── a skip is not a pause ─────────────────────────────────────────────
+  //
+  // `skipNextDelivery` leaves the row ACTIVE with a future `pauseResumesAt`
+  // (Stripe voids one invoice and resumes collecting on its own). The page
+  // must therefore say "skipped", offer "Undo skip" instead of a second
+  // "Skip", and never show a Resume that would read as un-pausing.
+
+  function skippedSubscription() {
+    return makeSubscription({
+      status: "active",
+      // Well past `Date.now()` so the fixture can't age into the past.
+      pauseResumesAt: new Date("2099-10-01"),
+      nextBillingAt: new Date("2099-10-25"),
+      currentPeriodEnd: new Date("2099-09-25"),
+    });
+  }
+
+  it("says the next delivery is skipped, with the date of the next real charge", () => {
+    renderClient({ subscription: skippedSubscription() });
+
+    expect(screen.getByText(/next delivery skipped/i)).toBeInTheDocument();
+    // Still ACTIVE — a skip is not a pause. Scoped to the status pill so the
+    // word can't be matched from body copy.
+    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.queryByText("Paused")).not.toBeInTheDocument();
+  });
+
+  it("replaces Skip with Undo skip (and offers no Resume) while a skip is pending", async () => {
+    const user = userEvent.setup();
+    renderClient({ subscription: skippedSubscription() });
+
+    expect(
+      screen.queryByRole("button", { name: /skip next delivery/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^resume$/i }),
+    ).not.toBeInTheDocument();
+
+    const undo = screen.getByRole("button", { name: /undo skip/i });
+    await user.click(undo);
+    // Undo is the same procedure as resume — clearing `pause_collection`.
+    expect(resumeMutate).toHaveBeenCalledWith({ token: "tok_abc" });
+  });
+
+  it("explains what Skip and Pause each do", () => {
+    renderClient();
+
+    expect(
+      screen.getByText(/skips one delivery — you won't be charged for it/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/pauses billing and deliveries until you resume/i),
+    ).toBeInTheDocument();
+  });
+
+  it("ignores a pauseResumesAt that has already elapsed", () => {
+    renderClient({
+      subscription: makeSubscription({
+        status: "active",
+        pauseResumesAt: new Date("2020-01-01"),
+      }),
+    });
+
+    expect(
+      screen.queryByText(/next delivery skipped/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /skip next delivery/i }),
+    ).toBeInTheDocument();
   });
 });

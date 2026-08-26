@@ -41,6 +41,19 @@ function nextDateLabel(
       ? `Resumes ${formatDate(subscription.pauseResumesAt)}`
       : "Paused";
   }
+  // A skip leaves the row ACTIVE with a future `pauseResumesAt` (see
+  // `deriveSubscriptionStatus`), and `nextBillingAt` has already moved a
+  // cadence past the skipped boundary — so naming that date without the word
+  // "skipped" would read as the skip having failed.
+  if (
+    subscription.status === "active" &&
+    subscription.pauseResumesAt !== null &&
+    subscription.pauseResumesAt.getTime() > Date.now()
+  ) {
+    return subscription.nextBillingAt
+      ? `Next delivery skipped — next charge ${formatDate(subscription.nextBillingAt)}`
+      : "Next delivery skipped";
+  }
   if (subscription.nextBillingAt) {
     return `Next delivery ${formatDate(subscription.nextBillingAt)}`;
   }
@@ -76,6 +89,16 @@ export function HappyBambooSubscriptionsPage({
               <Button asChild size="lg">
                 <Link href="/shop">Browse Products</Link>
               </Button>
+              {/* Subscribing does not require an account, so "none here" is
+                  not the same as "none at all" — the email lookup is the way
+                  back to a subscription started as a guest. */}
+              <Link
+                href="/subscriptions/manage"
+                className="text-muted-foreground hover:text-foreground mt-6 text-sm underline underline-offset-4 transition-colors"
+              >
+                Subscribed without an account? Look up your subscription by
+                email →
+              </Link>
             </div>
           </FadeIn>
         ) : (

@@ -1,6 +1,23 @@
 import { Button, Section, Text } from "@react-email/components";
 
+import { SUBSCRIPTION_STATUS_LABELS } from "~/lib/validators/subscription";
+
 import { EmailLayout } from "./components/layout";
+
+/**
+ * `link.status` is the raw `Subscription.status` DB value (e.g. `past_due`).
+ * `SUBSCRIPTION_STATUS_LABELS` is a pure lookup table (no server-only deps —
+ * just zod + the cadence catalog), so it's safe to import into this
+ * React Email template. Falls back to the raw value for any status the
+ * lookup doesn't recognize, rather than rendering a blank line.
+ */
+function statusLabel(status: string): string {
+  return (
+    SUBSCRIPTION_STATUS_LABELS[
+      status as keyof typeof SUBSCRIPTION_STATUS_LABELS
+    ] ?? status
+  );
+}
 
 type SubscriptionLink = {
   productName: string;
@@ -42,7 +59,7 @@ export default function SubscriptionManageLinksEmail({
               {link.variantName && ` — ${link.variantName}`}
             </Text>
             <Text style={linkMeta}>
-              {link.intervalLabel} • Status: {link.status}
+              {link.intervalLabel} • Status: {statusLabel(link.status)}
             </Text>
             <Button href={link.manageUrl} style={linkButton}>
               Manage

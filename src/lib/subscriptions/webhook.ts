@@ -52,6 +52,21 @@ import {
  * unified: a Checkout Session carries `session.metadata`, a subscription event
  * carries `subscription.metadata`, and an invoice carries the immutable
  * snapshot at `invoice.parent.subscription_details.metadata`.
+ *
+ * **Retrieve first, gate second.** The object on `event.data.object` is
+ * rendered at the *webhook endpoint's* pinned API version, which has nothing to
+ * do with the version `stripeClient` is pinned to (`2026-01-28.clover`). An
+ * endpoint pinned older than `2025-03-31.basil` sends an invoice with no
+ * `parent` at all (subscription id at `invoice.subscription`, metadata at
+ * `invoice.subscription_details.metadata`) and a subscription whose
+ * `current_period_start`/`_end` sit on the subscription root rather than on
+ * `items.data[0]`. Both shapes read as *empty* through the clover-shaped
+ * accessors — the invoice handlers would return silently with zero telemetry
+ * while the store takes money, and the subscription handlers would write
+ * `Invalid Date`. So every handler that needs more than metadata re-reads its
+ * object through the SDK (scoped to the connected account) and runs all
+ * subsequent gates on THAT object. Only `*.metadata` — flat string map, stable
+ * across every API version — is ever read off the raw payload.
  */
 
 const BUSINESS_SELECT = {
@@ -93,6 +108,63 @@ function idOf(
 ): string | null {
   if (value == null) return null;
   return typeof value === "string" ? value : value.id;
+}
+
+/** Read a subscription from the connected account through the pinned SDK. */
+function retrieveConnectedSubscription(
+  stripeAccountId: string,
+  stripeSubscriptionId: string,
+): Promise<Stripe.Subscription> {
+  return stripeClient.subscriptions.retrieve(
+    stripeSubscriptionId,
+    {},
+    { stripeAccount: stripeAccountId },
+  );
+}
+
+/**
+ * Re-read an invoice through the pinned SDK so its shape is the one
+ * `stripe-invoice.ts` knows how to read, whatever API version the receiving
+ * webhook endpoint is pinned to (see the module doc comment).
+ *
+ * Scoped to `event.account`, i.e. the connected account Stripe itself says
+ * emitted the event — which is why this can safely run *before*
+ * `resolveSubscriptionTenant`. It reads one object out of the account that sent
+ * us the event and writes nothing; the tenant check that actually binds a
+ * business to the event (`event.account === business.stripeAccountId`) is
+ * unchanged and still gates every write. A retrieve failure throws into
+ * `respond()`, which reports it and still answers 200.
+ *
+ * `event.account` is absent only for a platform-account event, which this lane
+ * should never see. Falling back to the raw payload there keeps the handler
+ * total rather than exploding on a `retrieve` with no account.
+ */
+function retrieveInvoiceForEvent(
+  event: Stripe.Event,
+  rawInvoice: Stripe.Invoice,
+  params: Stripe.InvoiceRetrieveParams = {},
+): Promise<Stripe.Invoice> {
+  if (!event.account) return Promise.resolve(rawInvoice);
+  return stripeClient.invoices.retrieve(rawInvoice.id, params, {
+    stripeAccount: event.account,
+  });
+}
+
+/**
+ * A retrieved invoice that isn't a subscription invoice is not an error: a
+ * connected merchant can raise a one-off invoice in their own Stripe dashboard
+ * and it is none of our business. Left as a breadcrumb, not a capture, so it
+ * shows up as context if something *else* is reported for this account.
+ */
+function breadcrumbNonSubscriptionInvoice(
+  event: Stripe.Event,
+  invoice: Stripe.Invoice,
+): void {
+  Sentry.addBreadcrumb({
+    category: "stripe.subscription",
+    level: "info",
+    message: `${event.type} ${invoice.id} is not a subscription invoice — ignored`,
+  });
 }
 
 /**
@@ -376,12 +448,12 @@ export async function handleSubscriptionCheckoutCompleted(
     }
 
     // Read the subscription from the connected account rather than trusting the
-    // session: the session's `customer` can differ from the subscription's, and
-    // the billing period only exists on the subscription.
-    const stripeSub = await stripeClient.subscriptions.retrieve(
+    // session: the session's `customer` can differ from the subscription's, the
+    // billing period only exists on the subscription, and the retrieved copy is
+    // SDK-shaped whatever version the endpoint is pinned to.
+    const stripeSub = await retrieveConnectedSubscription(
+      tenant.business.stripeAccountId,
       stripeSubscriptionId,
-      {},
-      { stripeAccount: tenant.business.stripeAccountId },
     );
 
     await applyStateAndAnnounce(db, {
@@ -431,15 +503,22 @@ export async function handleSubscriptionCheckoutExpired(
  * `invoice.paid` — the money event. Creates the delivery's Order.
  *
  * Order of operations matters:
- *  1. Ignore anything that isn't a subscription invoice (a one-off invoice on
- *     the connected account is none of our business).
- *  2. Resolve the tenant BEFORE any Stripe read, so a spoofed event costs us
- *     nothing.
- *  3. Bail if an Order already exists for this invoice — Stripe redelivers, and
+ *  1. **Re-retrieve the invoice through the pinned SDK before reading a single
+ *     field off it**, with `expand: ["payments"]`. Two problems, one call:
+ *     the event copy is shaped by the *endpoint's* API version, so on a
+ *     pre-`basil` endpoint every clover-shaped accessor below reads as empty
+ *     and this handler would return silently while the store takes money (see
+ *     the module doc comment); and the event copy never carries `payments`,
+ *     without which the order is recorded with no PaymentIntent — which is what
+ *     refunds are issued against.
+ *  2. Ignore anything that isn't a subscription invoice (a one-off invoice on
+ *     the connected account is none of our business) — a breadcrumb, not a
+ *     capture.
+ *  3. Resolve the tenant. This now happens *after* one Stripe read rather than
+ *     before, so a spoofed event costs a single retrieve against the account
+ *     that sent it; it still binds no business and writes nothing.
+ *  4. Bail if an Order already exists for this invoice — Stripe redelivers, and
  *     the cron reconciler replays.
- *  4. Re-retrieve the invoice with `expand: ["payments"]`: the event copy has no
- *     `payments`, and without it the order would be recorded with no
- *     PaymentIntent, which is what refunds are issued against.
  *  5. Refresh subscription state (this also covers the paid-before-completed
  *     ordering race, where the row is still `incomplete`), then create the
  *     order.
@@ -448,8 +527,15 @@ export async function handleInvoicePaid(
   event: Stripe.Event,
 ): Promise<NextResponse> {
   return respond(event, "invoice-paid", async (ctx) => {
-    const invoice = event.data.object as Stripe.Invoice;
-    if (!isSubscriptionInvoice(invoice)) return;
+    const rawInvoice = event.data.object as Stripe.Invoice;
+
+    const invoice = await retrieveInvoiceForEvent(event, rawInvoice, {
+      expand: ["payments"],
+    });
+    if (!isSubscriptionInvoice(invoice)) {
+      breadcrumbNonSubscriptionInvoice(event, invoice);
+      return;
+    }
 
     const metadata = parseSubscriptionMetadata(getInvoiceMetadata(invoice));
     if (!metadata) {
@@ -470,25 +556,16 @@ export async function handleInvoicePaid(
     });
     if (alreadyOrdered) return;
 
-    const fullInvoice = await stripeClient.invoices.retrieve(
-      invoice.id,
-      { expand: ["payments"] },
-      { stripeAccount: business.stripeAccountId },
-    );
-
     // Non-fatal: if Stripe is unreachable for the subscription read we still
     // owe the customer their order, and `sync.ts` will reconcile the row later.
     try {
       const stripeSubscriptionId =
-        getInvoiceSubscriptionId(fullInvoice) ??
-        getInvoiceSubscriptionId(invoice) ??
-        subscription.stripeSubscriptionId;
+        getInvoiceSubscriptionId(invoice) ?? subscription.stripeSubscriptionId;
 
       if (stripeSubscriptionId) {
-        const stripeSub = await stripeClient.subscriptions.retrieve(
+        const stripeSub = await retrieveConnectedSubscription(
+          business.stripeAccountId,
           stripeSubscriptionId,
-          {},
-          { stripeAccount: business.stripeAccountId },
         );
         subscription = await applyStateAndAnnounce(db, {
           business,
@@ -508,8 +585,8 @@ export async function handleInvoicePaid(
     await processPaidInvoice(db, {
       business,
       subscription,
-      invoice: fullInvoice,
-      paymentIntentId: getInvoicePaymentIntentId(fullInvoice),
+      invoice,
+      paymentIntentId: getInvoicePaymentIntentId(invoice),
     });
 
     // A paid invoice clears a dunning state. It never *demotes* a status Stripe
@@ -523,7 +600,7 @@ export async function handleInvoicePaid(
     await db.subscription.update({
       where: { id: subscription.id },
       data: {
-        lastInvoiceId: fullInvoice.id,
+        lastInvoiceId: invoice.id,
         lastPaymentFailedAt: null,
         ...(recovered ? { status: "active" } : {}),
       },
@@ -535,13 +612,24 @@ export async function handleInvoicePaid(
  * `invoice.payment_failed` — the card was declined. Marks the row `past_due`
  * and tells the customer to update their payment method. Stripe keeps its own
  * dunning schedule; every retry raises `attempt_count` and earns its own email.
+ *
+ * Retrieves the invoice first for the same reason `handleInvoicePaid` does —
+ * the event copy's shape depends on the endpoint's API version, and reading the
+ * clover accessors off a pre-`basil` payload silently drops the dunning notice
+ * (see the module doc comment). No `expand` here: nothing but
+ * `attempt_count` and the metadata snapshot is needed, and no order is created.
  */
 export async function handleInvoicePaymentFailed(
   event: Stripe.Event,
 ): Promise<NextResponse> {
   return respond(event, "invoice-payment-failed", async (ctx) => {
-    const invoice = event.data.object as Stripe.Invoice;
-    if (!isSubscriptionInvoice(invoice)) return;
+    const rawInvoice = event.data.object as Stripe.Invoice;
+
+    const invoice = await retrieveInvoiceForEvent(event, rawInvoice);
+    if (!isSubscriptionInvoice(invoice)) {
+      breadcrumbNonSubscriptionInvoice(event, invoice);
+      return;
+    }
 
     const metadata = parseSubscriptionMetadata(getInvoiceMetadata(invoice));
     if (!metadata) {
@@ -585,22 +673,34 @@ export async function handleInvoicePaymentFailed(
  * confirming it is welcome). `past_due → active` is deliberately silent:
  * `invoice.paid` owns the recovery story, and duplicating it here would send
  * two emails for one event.
+ *
+ * Metadata is read off the raw payload (a flat string map is the same on every
+ * API version), but the object handed to `applyStripeSubscriptionState` is
+ * re-retrieved through the SDK: `periodFromStripe` reads
+ * `items.data[0].current_period_start/_end`, which only live there from
+ * `2025-03-31.basil` onwards — a pre-`basil` payload would write `Invalid Date`
+ * into the row (see the module doc comment).
  */
 export async function handleSubscriptionUpdated(
   event: Stripe.Event,
 ): Promise<NextResponse> {
   return respond(event, "subscription-updated", async (ctx) => {
-    const stripeSub = event.data.object as Stripe.Subscription;
+    const rawSub = event.data.object as Stripe.Subscription;
 
-    const metadata = parseSubscriptionMetadata(stripeSub.metadata);
+    const metadata = parseSubscriptionMetadata(rawSub.metadata);
     if (!metadata) {
-      reportMissingMetadata(event, stripeSub.id);
+      reportMissingMetadata(event, rawSub.id);
       return;
     }
     ctx.businessId = metadata.businessId;
 
     const tenant = await resolveSubscriptionTenant(db, event, metadata);
     if (!tenant) return;
+
+    const stripeSub = await retrieveConnectedSubscription(
+      tenant.business.stripeAccountId,
+      rawSub.id,
+    );
 
     const previousStatus = tenant.subscription.status;
     const subscription = await applyStripeSubscriptionState(
@@ -647,17 +747,23 @@ export async function handleSubscriptionUpdated(
  * recorded who did it: our own cancel actions write `"customer"`/`"owner"`
  * before calling Stripe, and this event must not overwrite that attribution.
  * An already-cancelled row is left completely alone so a redelivered event
- * can't re-date the cancellation or re-send the goodbye email.
+ * can't re-date the cancellation or re-send the goodbye email — and that check
+ * runs before the Stripe read, so a redelivery costs nothing.
+ *
+ * Like `handleSubscriptionUpdated`, metadata comes off the raw payload and
+ * `canceled_at` comes off an SDK re-retrieve (a cancelled subscription stays
+ * retrievable indefinitely). Reading a timestamp that a pre-`basil` endpoint
+ * happens to render identically would be luck, not a contract.
  */
 export async function handleSubscriptionDeleted(
   event: Stripe.Event,
 ): Promise<NextResponse> {
   return respond(event, "subscription-deleted", async (ctx) => {
-    const stripeSub = event.data.object as Stripe.Subscription;
+    const rawSub = event.data.object as Stripe.Subscription;
 
-    const metadata = parseSubscriptionMetadata(stripeSub.metadata);
+    const metadata = parseSubscriptionMetadata(rawSub.metadata);
     if (!metadata) {
-      reportMissingMetadata(event, stripeSub.id);
+      reportMissingMetadata(event, rawSub.id);
       return;
     }
     ctx.businessId = metadata.businessId;
@@ -666,6 +772,11 @@ export async function handleSubscriptionDeleted(
     if (!tenant) return;
 
     if (tenant.subscription.status === "cancelled") return;
+
+    const stripeSub = await retrieveConnectedSubscription(
+      tenant.business.stripeAccountId,
+      rawSub.id,
+    );
 
     const cancelledAt =
       tenant.subscription.cancelledAt ??

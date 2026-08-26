@@ -5,7 +5,7 @@ import { EmailLayout } from "./components/layout";
 type OwnerSubscriptionNotificationEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
-  kind: "new" | "cancelled";
+  kind: "new" | "cancelled" | "payment_failed";
   customerEmail: string;
   customerName?: string | null;
   productName: string;
@@ -14,6 +14,19 @@ type OwnerSubscriptionNotificationEmailProps = {
   intervalLabel: string;
   perDeliveryCents: number;
   adminUrl: string;
+  /** Only meaningful when `kind === "cancelled"`. Raw `Subscription.cancelReason` value. */
+  cancelReason?: string | null;
+  /** Only meaningful when `kind === "payment_failed"`. Stripe's `attempt_count` on the invoice. */
+  attemptCount?: number;
+};
+
+/** Human line for the cancellation reason, shown only for known values. */
+const CANCEL_REASON_LABELS: Record<string, string> = {
+  customer: "Cancelled by the customer",
+  owner: "Cancelled from your admin",
+  stripe:
+    "Ended by Stripe (payment failed after retries, or removed in Stripe)",
+  payment_failed: "Payment failed",
 };
 
 export default function OwnerSubscriptionNotificationEmail({
@@ -28,6 +41,8 @@ export default function OwnerSubscriptionNotificationEmail({
   intervalLabel,
   perDeliveryCents,
   adminUrl,
+  cancelReason,
+  attemptCount,
 }: OwnerSubscriptionNotificationEmailProps) {
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -39,15 +54,28 @@ export default function OwnerSubscriptionNotificationEmail({
   const heading =
     kind === "new"
       ? `New subscription: ${productName}`
-      : `Subscription cancelled: ${productName}`;
+      : kind === "payment_failed"
+        ? "Payment failed for a subscription"
+        : `Subscription cancelled: ${productName}`;
 
   const previewText =
-    kind === "new" ? "New subscription received" : "Subscription cancelled";
+    kind === "new"
+      ? "New subscription received"
+      : kind === "payment_failed"
+        ? "Payment failed for a subscription"
+        : "Subscription cancelled";
 
   const bodyMessage =
     kind === "new"
       ? `${customerName ?? customerEmail} just subscribed to ${productName}${variantName ? ` — ${variantName}` : ""}.`
-      : `${customerName ?? customerEmail} has cancelled their ${productName}${variantName ? ` — ${variantName}` : ""} subscription.`;
+      : kind === "payment_failed"
+        ? `A payment failed for ${customerName ?? customerEmail}'s ${productName}${variantName ? ` — ${variantName}` : ""} subscription.`
+        : `${customerName ?? customerEmail} has cancelled their ${productName}${variantName ? ` — ${variantName}` : ""} subscription.`;
+
+  const cancelReasonLabel =
+    kind === "cancelled" && cancelReason
+      ? CANCEL_REASON_LABELS[cancelReason]
+      : undefined;
 
   return (
     <EmailLayout
@@ -58,6 +86,13 @@ export default function OwnerSubscriptionNotificationEmail({
       <Text style={textHeading}>{heading}</Text>
 
       <Text style={paragraph}>{bodyMessage}</Text>
+
+      {kind === "payment_failed" && attemptCount !== undefined && (
+        <Text style={paragraph}>
+          Stripe attempt #{attemptCount} — Stripe will keep retrying per your
+          dunning settings; the customer has been emailed to update their card.
+        </Text>
+      )}
 
       {/* Subscription Details */}
       <Section style={detailsBox}>
@@ -117,6 +152,17 @@ export default function OwnerSubscriptionNotificationEmail({
             <Text style={detailValue}>{formatPrice(perDeliveryCents)}</Text>
           </Column>
         </Row>
+
+        {cancelReasonLabel && (
+          <Row style={detailRow}>
+            <Column>
+              <Text style={detailLabel}>Reason</Text>
+            </Column>
+            <Column style={detailValueCol}>
+              <Text style={detailValue}>{cancelReasonLabel}</Text>
+            </Column>
+          </Row>
+        )}
       </Section>
 
       {/* CTA Button */}
@@ -130,7 +176,9 @@ export default function OwnerSubscriptionNotificationEmail({
       <Text style={note}>
         {kind === "new"
           ? "Congratulations on the new subscription! Manage it from your admin dashboard."
-          : "Review subscription details in your admin dashboard."}
+          : kind === "payment_failed"
+            ? "Review payment failures in your admin dashboard."
+            : "Review subscription details in your admin dashboard."}
       </Text>
     </EmailLayout>
   );

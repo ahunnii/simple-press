@@ -40,6 +40,19 @@ function nextDateLabel(
       ? `Resumes ${formatDate(subscription.pauseResumesAt)}`
       : "Paused";
   }
+  // A skip leaves the row ACTIVE with a future `pauseResumesAt` (see
+  // `deriveSubscriptionStatus`), and `nextBillingAt` has already moved a
+  // cadence past the skipped boundary — so naming that date without the word
+  // "skipped" would read as the skip having failed.
+  if (
+    subscription.status === "active" &&
+    subscription.pauseResumesAt !== null &&
+    subscription.pauseResumesAt.getTime() > Date.now()
+  ) {
+    return subscription.nextBillingAt
+      ? `Next delivery skipped — next charge ${formatDate(subscription.nextBillingAt)}`
+      : "Next delivery skipped";
+  }
   if (subscription.nextBillingAt) {
     return `Next delivery ${formatDate(subscription.nextBillingAt)}`;
   }
@@ -69,6 +82,16 @@ export function DefaultSubscriptionsPage({
             className="mt-8 inline-flex h-10 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-6 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
           >
             Browse products
+          </Link>
+          {/* Subscribing does not require an account, so "none here" is not
+              the same as "none at all" — the email lookup is the way back to
+              a subscription started as a guest. */}
+          <Link
+            href="/subscriptions/manage"
+            className="mt-6 inline-flex items-center gap-2 border-b border-current pb-0.5 text-[13px] text-[#6b6b6b] transition-[gap] hover:gap-3"
+          >
+            Subscribed without an account? Look up your subscription by email{" "}
+            <span aria-hidden="true">→</span>
           </Link>
         </div>
       ) : (

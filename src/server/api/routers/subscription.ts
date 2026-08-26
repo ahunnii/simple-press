@@ -46,13 +46,17 @@ import {
  * a feature flag toggles NEW recurring-billing activity, never the customer's
  * ability to get OUT of one or the owner's ability to see money records.
  *
- *  - Public token-scoped reads/writes (`*ByToken`): `getByToken` and
- *    `cancelByToken` are UNGATED — a flag must never trap a customer in
- *    recurring charges, and the manage page must always be able to show what
- *    a subscription is. `pauseByToken` / `resumeByToken` / `skipNextByToken` /
- *    `createPortalSessionByToken` are gated: they are conveniences, not an
- *    exit, so it's fine for the owner to withhold them the moment they turn
- *    the feature off.
+ *  - Public token-scoped reads/writes (`*ByToken`): `getByToken`,
+ *    `cancelByToken` and `createPortalSessionByToken` are UNGATED — a flag
+ *    must never trap a customer in recurring charges, and the manage page must
+ *    always be able to show what a subscription is. Updating a card belongs
+ *    with cancel rather than with the conveniences: dunning email tells a
+ *    past-due customer to "update your card", and a flag toggled off between
+ *    the send and the click would land them on a page with no way to do it —
+ *    their subscription then dies of a payment failure they tried to fix.
+ *    `pauseByToken` / `resumeByToken` / `skipNextByToken` stay gated: those
+ *    really are conveniences, not an exit or a rescue, so it's fine for the
+ *    owner to withhold them the moment they turn the feature off.
  *  - `requestManageLinks` is ungated for the same "must always be able to
  *    cancel" reason — it is the only way a customer without the original
  *    email can find their manage link again.
@@ -69,7 +73,17 @@ import {
 const subRead = ownerAdminProcedure;
 const subGated = ownerAdminProcedure.use(featureGate("subscriptions"));
 
-/** Consume the shared manage-action rate limit; surfaces as TOO_MANY_REQUESTS. */
+/**
+ * Consume the shared manage-action rate limit; surfaces as TOO_MANY_REQUESTS.
+ *
+ * MUTATIONS ONLY. `getByToken` deliberately does not call this: every mutation
+ * on the manage page `router.refresh()`es on success, which re-runs the page's
+ * read, so charging both would make each click cost two of the twenty
+ * attempts a customer gets in fifteen minutes — a customer who skips, changes
+ * their mind and cancels would be locked out of their own subscription. The
+ * read is a single indexed lookup behind an HMAC-signed token; the write path
+ * is what needs the budget.
+ */
 async function consumeManageLimiter(ctx: { headers: Headers }): Promise<void> {
   try {
     await subscriptionManageLimiter.consume(
@@ -190,7 +204,6 @@ export const subscriptionRouter = createTRPCRouter({
   getByToken: publicProcedure
     .input(manageTokenSchema)
     .query(async ({ ctx, input }) => {
-      await consumeManageLimiter(ctx);
       const { businessId, row } = await loadByToken(ctx.db, input.token);
 
       const recentOrders = await ctx.db.order.findMany({
@@ -209,6 +222,15 @@ export const subscriptionRouter = createTRPCRouter({
           fulfillmentStatus: true,
           total: true,
         },
+      });
+
+      // Deliberate, single-field extension of the allowlist: whether the
+      // store charges Stripe Tax on top of the recurring price. The customer
+      // is told the per-delivery total is "before tax" instead of quoting a
+      // figure their card statement won't match.
+      const taxBusiness = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        select: { stripeAutoTaxEnabled: true },
       });
 
       // Powers the cancelled-state "Subscribe again" link. Scoped to this
@@ -237,6 +259,8 @@ export const subscriptionRouter = createTRPCRouter({
         shippingCents: row.shippingCents,
         deliveryMethod: row.deliveryMethod,
         perDeliveryCents: subscriptionPerDeliveryCents(row),
+        /** True ⇒ Stripe adds tax at renewal, so `perDeliveryCents` is pre-tax. */
+        taxAppliedAtCheckout: taxBusiness?.stripeAutoTaxEnabled ?? false,
         shippingAddress: shippingAddressProjection(row),
         currentPeriodEnd: row.currentPeriodEnd,
         nextBillingAt: row.nextBillingAt,
@@ -332,9 +356,16 @@ export const subscriptionRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  /** "Update payment method" — a Stripe Customer Portal deep link. */
+  /**
+   * "Update payment method" — a Stripe Customer Portal deep link.
+   *
+   * Deliberately NOT feature-gated, for the same reason as `cancelByToken`:
+   * this is the action a past-due customer was emailed to take, and a flag
+   * flipped off in the meantime would strand them on a page that tells them to
+   * fix their card and gives them no way to. Still rate-limited like every
+   * other mutation here.
+   */
   createPortalSessionByToken: publicProcedure
-    .use(featureGate("subscriptions"))
     .input(manageTokenSchema.extend({ returnUrl: z.string().url() }))
     .mutation(async ({ ctx, input }) => {
       await consumeManageLimiter(ctx);

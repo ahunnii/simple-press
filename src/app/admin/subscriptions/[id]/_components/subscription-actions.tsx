@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Pause, Play, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { SUBSCRIPTION_STATUS_LABELS } from "~/lib/validators/subscription";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -19,7 +20,8 @@ import {
 import { Button } from "~/components/ui/button";
 
 /** Mirrors `PAUSABLE_STATUSES` in `~/lib/subscriptions/actions` — a healthy
- *  or dunning subscription can be paused; only "paused" can be resumed. */
+ *  or dunning subscription can be paused. Resume covers two rows there: a
+ *  "paused" one, and an "active" one mid-skip (see `isSkipped` below). */
 const PAUSABLE_STATUSES = new Set(["active", "past_due"]);
 
 const FEATURE_DISABLED_HELP =
@@ -28,18 +30,51 @@ const FEATURE_DISABLED_HELP =
 type Props = {
   subscriptionId: string;
   status: string;
+  /**
+   * The row's `pauseResumesAt`. A skip leaves `status` at `"active"` (Stripe
+   * voids one invoice and resumes collecting on its own — see
+   * `deriveSubscriptionStatus`), so this date is the only thing that tells the
+   * owner a delivery is currently skipped, and the only thing that lets this
+   * component offer the undo.
+   */
+  pauseResumesAt: Date | null;
   featureEnabled: boolean;
 };
+
+/** Human status name for a disabled-button tooltip; never the raw column value. */
+function statusLabel(status: string): string {
+  return (
+    SUBSCRIPTION_STATUS_LABELS[
+      status as keyof typeof SUBSCRIPTION_STATUS_LABELS
+    ] ?? status
+  );
+}
 
 export function SubscriptionActions({
   subscriptionId,
   status,
+  pauseResumesAt,
   featureEnabled,
 }: Props) {
   const router = useRouter();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const afterWrite = () => router.refresh();
+
+  const isCancelled = status === "cancelled";
+  const isPaused = status === "paused";
+  // Mid-skip: active, but with collection paused until a future date.
+  const isSkipped =
+    status === "active" &&
+    pauseResumesAt !== null &&
+    pauseResumesAt.getTime() > Date.now();
+  // `resumeSubscription` clears `pause_collection` either way — undoing a skip
+  // and resuming a pause are the same call, so they share one button and
+  // differ only in what it's called.
+  const showResume = isPaused || isSkipped;
+  const canPause =
+    featureEnabled && !isSkipped && PAUSABLE_STATUSES.has(status);
+  const canResume = featureEnabled && showResume;
 
   const cancelMutation = api.subscription.cancel.useMutation({
     onSuccess: () => {
@@ -64,7 +99,9 @@ export function SubscriptionActions({
 
   const resumeMutation = api.subscription.resume.useMutation({
     onSuccess: () => {
-      toast.success("Subscription resumed");
+      toast.success(
+        isSkipped ? "Next delivery is back on" : "Subscription resumed",
+      );
       afterWrite();
     },
     onError: (error) => {
@@ -72,19 +109,15 @@ export function SubscriptionActions({
     },
   });
 
-  const isCancelled = status === "cancelled";
-  const isPaused = status === "paused";
-  const canPause = featureEnabled && PAUSABLE_STATUSES.has(status);
-  const canResume = featureEnabled && isPaused;
-
   // Neither button is ever both visible AND state-disabled at once — the
-  // toggle below always renders Resume for "paused" (state-enabled whenever
-  // the flag is on) and Pause for everything else, so the only state that can
-  // disable the VISIBLE button is "cancelled"/"incomplete".
+  // toggle below always renders Resume/Undo skip for a paused or skipped row
+  // (state-enabled whenever the flag is on) and Pause for everything else, so
+  // the only state that can disable the VISIBLE button is
+  // "cancelled"/"incomplete".
   const stateDisabledReason =
-    isPaused || PAUSABLE_STATUSES.has(status)
+    showResume || PAUSABLE_STATUSES.has(status)
       ? undefined
-      : `A ${status} subscription can't be paused or resumed`;
+      : `A ${statusLabel(status).toLowerCase()} subscription can't be paused or resumed`;
 
   const pauseResumeTitle = !featureEnabled
     ? FEATURE_DISABLED_HELP
@@ -93,7 +126,7 @@ export function SubscriptionActions({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        {isPaused ? (
+        {showResume ? (
           <Button
             variant="outline"
             size="sm"
@@ -102,7 +135,11 @@ export function SubscriptionActions({
             title={pauseResumeTitle}
           >
             <Play className="mr-2 h-4 w-4" />
-            {resumeMutation.isPending ? "Resuming…" : "Resume"}
+            {resumeMutation.isPending
+              ? "Resuming…"
+              : isSkipped
+                ? "Undo skip"
+                : "Resume"}
           </Button>
         ) : (
           <Button

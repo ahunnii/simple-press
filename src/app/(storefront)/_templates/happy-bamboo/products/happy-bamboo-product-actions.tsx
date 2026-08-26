@@ -154,6 +154,7 @@ export function HappyBambooProductActions({
         product={product}
         selectedVariantId={selectedVariantId}
         quantity={quantity}
+        available={inStock}
         className="mt-4"
       />
     </>

@@ -42,6 +42,14 @@ import {
  *   - session events    → `session.metadata`  ({ businessId, subscriptionId, kind })
  *   - subscription events → `subscription.metadata` (full `subscriptionMetadataSchema`)
  *   - invoice events    → `invoice.parent.subscription_details.metadata`
+ *
+ * RETRIEVE FIRST, GATE SECOND: `event.data.object` is rendered at the receiving
+ * webhook ENDPOINT's pinned API version, not the SDK's, so every handler that
+ * needs more than a flat metadata map re-reads its object through
+ * `stripeClient` before its first gate. The `makePreBasil*` fixtures below
+ * deliver the older shape and prove the handlers still work — on staging that
+ * shape made `invoice.paid` a silent no-op while the cron reconciler (which
+ * always went through the SDK) created the very same orders fine.
  */
 
 /* ------------------------------------------------------------------ *
@@ -118,6 +126,7 @@ const sentryMocks = vi.hoisted(() => {
     });
     return "evt_test";
   });
+  const addBreadcrumb = vi.fn();
   const withScope = vi.fn((cb: (scope: unknown) => unknown) => {
     const tags: Tags = {};
     scopeStack.push(tags);
@@ -143,12 +152,14 @@ const sentryMocks = vi.hoisted(() => {
     captureMessage,
     captureException,
     withScope,
+    addBreadcrumb,
     reset: () => {
       events.length = 0;
       scopeStack.length = 0;
       captureMessage.mockClear();
       captureException.mockClear();
       withScope.mockClear();
+      addBreadcrumb.mockClear();
     },
   };
 });
@@ -156,7 +167,7 @@ vi.mock("@sentry/nextjs", () => ({
   captureMessage: sentryMocks.captureMessage,
   captureException: sentryMocks.captureException,
   withScope: sentryMocks.withScope,
-  addBreadcrumb: vi.fn(),
+  addBreadcrumb: sentryMocks.addBreadcrumb,
   captureCheckIn: vi.fn(),
   setTag: vi.fn(),
   setContext: vi.fn(),
@@ -166,6 +177,13 @@ vi.mock("@sentry/nextjs", () => ({
 
 function sentryEventsTagged(name: string, value: string) {
   return sentryMocks.events.filter((event) => event.tags[name] === value);
+}
+
+/** Breadcrumb messages recorded during the call under test. */
+function breadcrumbMessages(): string[] {
+  return sentryMocks.addBreadcrumb.mock.calls.map(
+    (call) => (call[0] as { message?: string }).message ?? "",
+  );
 }
 
 /* ------------------------------------------------------------------ *
@@ -397,6 +415,47 @@ function makeStripeSubscription(
   } as unknown as Stripe.Subscription;
 }
 
+/**
+ * The SAME subscription as `makeStripeSubscription`, rendered the way an
+ * endpoint pinned BEFORE `2025-03-31.basil` renders it: the billing period sits
+ * on the subscription root, and `items.data[0]` carries no
+ * `current_period_start`/`_end` at all.
+ *
+ * `periodFromStripe` only ever looks at `items.data[0]`, so writing this object
+ * to the row yields `new Date(undefined * 1000)` → `Invalid Date` → a Prisma
+ * throw. Handlers must never pass an event payload there; they re-retrieve.
+ */
+function makePreBasilSubscription(
+  opts: { id?: string; metadata?: Record<string, string> } = {},
+): Stripe.Subscription {
+  return {
+    id: opts.id ?? "sub_test_1",
+    object: "subscription",
+    customer: "cus_test_1",
+    status: "active",
+    pause_collection: null,
+    metadata: opts.metadata ?? {},
+    cancel_at_period_end: false,
+    canceled_at: null,
+    currency: "usd",
+    // Pre-basil location — the accessors never read these.
+    current_period_start: PERIOD_START,
+    current_period_end: PERIOD_END,
+    items: {
+      object: "list",
+      has_more: false,
+      url: "",
+      data: [
+        {
+          id: "si_test_1",
+          object: "subscription_item",
+          quantity: 2,
+        },
+      ],
+    },
+  } as unknown as Stripe.Subscription;
+}
+
 function makeStripeInvoice(
   opts: {
     id?: string;
@@ -476,6 +535,47 @@ function makeStripeInvoice(
               : [],
           },
         }),
+  } as unknown as Stripe.Invoice;
+}
+
+/**
+ * The SAME invoice as `makeStripeInvoice`, rendered the way an endpoint pinned
+ * BEFORE `2025-03-31.basil` renders it — **this is the staging bug in fixture
+ * form**. There is no `parent` key whatsoever: the subscription id is top-level
+ * `subscription`, the metadata snapshot is top-level `subscription_details`,
+ * and the PaymentIntent is top-level `payment_intent` (no `payments` list).
+ *
+ * Every accessor in `stripe-invoice.ts` reads `undefined` off this, so
+ * `isSubscriptionInvoice` answers `false` and a handler that gated on the raw
+ * payload would return before doing anything — no order, no error, no Sentry
+ * event. Stripe delivered the event; the store just never sees the money.
+ */
+function makePreBasilInvoice(opts: {
+  id: string;
+  subscriptionId?: string;
+  metadata: Record<string, string> | null;
+  attemptCount?: number;
+  amountPaid?: number;
+}): Stripe.Invoice {
+  const subtotal = 4320;
+  return {
+    id: opts.id,
+    object: "invoice",
+    currency: "usd",
+    status: "paid",
+    created: Math.floor(new Date("2026-09-01T12:00:00.000Z").getTime() / 1000),
+    number: "SP-0001",
+    hosted_invoice_url: `https://invoice.stripe.test/${opts.id}`,
+    attempt_count: opts.attemptCount ?? 1,
+    subtotal,
+    total: subtotal,
+    amount_due: subtotal,
+    amount_paid: opts.amountPaid ?? subtotal,
+    amount_remaining: subtotal - (opts.amountPaid ?? subtotal),
+    tax: null,
+    subscription: opts.subscriptionId ?? "sub_test_1",
+    subscription_details: { metadata: opts.metadata },
+    payment_intent: "pi_test_inv_1",
   } as unknown as Stripe.Invoice;
 }
 
@@ -722,7 +822,9 @@ describe("subscription webhook handlers", () => {
       const after = await db.subscription.findUniqueOrThrow({
         where: { id: row.id },
       });
-      expect(after.status).toBe("paused");
+      // A bounded `resumes_at` is a SKIP, not a pause: the subscription is
+      // still active, it just misses one delivery (see `deriveSubscriptionStatus`).
+      expect(after.status).toBe("active");
       expect(after.pauseResumesAt).toEqual(new Date(resumesAt * 1000));
       expect(after.nextBillingAt).toEqual(new Date(resumesAt * 1000));
     });
@@ -1007,8 +1109,9 @@ describe("subscription webhook handlers", () => {
     ) {
       const invoiceId = opts.invoiceId ?? "in_test_paid_1";
       const metadata = subMetadata(store, row.id, opts.productId ?? null);
-      // The event copy has no `payments`; the handler must re-retrieve with
-      // `expand: ["payments"]` to reach the PaymentIntent.
+      // The event copy has no `payments`; the handler re-retrieves with
+      // `expand: ["payments"]` — before its first gate — to reach the
+      // PaymentIntent and to get a shape it can actually read.
       const eventInvoice =
         opts.eventInvoice ??
         makeStripeInvoice({ id: invoiceId, metadata, withPayments: false });
@@ -1029,18 +1132,81 @@ describe("subscription webhook handlers", () => {
 
     it("is a no-op for an invoice that is not a subscription invoice", async () => {
       await setupStore();
+      const oneOff = makeStripeInvoice({ id: "in_oneoff", standalone: true });
+      stripeMocks.invoicesRetrieve.mockResolvedValue(oneOff);
       const event = makeStripeEvent({
         type: "invoice.paid",
-        object: makeStripeInvoice({ id: "in_oneoff", standalone: true }),
+        object: oneOff,
         account: ACCOUNT_ID,
       });
 
       await expectReceived(await handleInvoicePaid(event));
 
       expect(await db.order.count()).toBe(0);
-      expect(stripeMocks.invoicesRetrieve).not.toHaveBeenCalled();
+      // The retrieve is the FIRST thing that happens now — the "is this even
+      // ours?" gate can only be trusted on an SDK-shaped object. But an
+      // owner's own one-off invoice is not an error, so it leaves a breadcrumb
+      // rather than a Sentry event.
+      expect(stripeMocks.invoicesRetrieve).toHaveBeenCalledTimes(1);
       expect(stripeMocks.subscriptionsRetrieve).not.toHaveBeenCalled();
       expect(emailMocks.sendEmail).not.toHaveBeenCalled();
+      expect(sentryMocks.events).toHaveLength(0);
+      expect(breadcrumbMessages().join(" ")).toContain("in_oneoff");
+    });
+
+    it("creates the order from a PRE-BASIL event payload (no `parent` key)", async () => {
+      const store = await setupStore();
+      const customer = await createCustomer(store.id, {
+        email: "ada@shopper.test",
+      });
+      const product = await createProduct(store.id, {
+        name: "Twelve-Pack",
+        price: 2400,
+        inventoryQty: 40,
+      });
+      const row = await createSubscriptionRow(store, {
+        customerId: customer.id,
+        productId: product.id,
+        status: "active",
+      });
+      const metadata = subMetadata(store, row.id, product.id);
+
+      // What a webhook endpoint pinned to an older API version actually
+      // delivers. Gating on THIS object drops the event silently — which is
+      // the staging failure this test exists to lock down.
+      const event = makeStripeEvent({
+        type: "invoice.paid",
+        object: makePreBasilInvoice({ id: "in_test_prebasil", metadata }),
+        account: ACCOUNT_ID,
+      });
+      stripeMocks.invoicesRetrieve.mockResolvedValue(
+        makeStripeInvoice({ id: "in_test_prebasil", metadata }),
+      );
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(
+        makeStripeSubscription({ metadata }),
+      );
+
+      await expectReceived(await handleInvoicePaid(event));
+
+      const retrieveArgs = stripeMocks.invoicesRetrieve.mock.calls[0]!;
+      expect(retrieveArgs[0]).toBe("in_test_prebasil");
+      expect(retrieveArgs[1]).toEqual({ expand: ["payments"] });
+      expectScopedToAccount(retrieveArgs, ACCOUNT_ID);
+
+      const orders = await db.order.findMany({
+        where: { businessId: store.id },
+        include: { items: true },
+      });
+      expect(orders).toHaveLength(1);
+      expect(orders[0]!.stripeInvoiceId).toBe("in_test_prebasil");
+      expect(orders[0]!.stripePaymentIntentId).toBe("pi_test_inv_1");
+      expect(orders[0]!.subscriptionId).toBe(row.id);
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.lastInvoiceId).toBe("in_test_prebasil");
+      expect(emailCategories()).toContain("order_confirmation");
     });
 
     it("creates the order and refreshes the row", async () => {
@@ -1185,39 +1351,59 @@ describe("subscription webhook handlers", () => {
       );
 
       expect(await db.order.count()).toBe(0);
-      expect(stripeMocks.invoicesRetrieve).not.toHaveBeenCalled();
+      // "Retrieve first" costs a spoofed event exactly one read — against the
+      // attacker's OWN connected account, the one Stripe says sent the event.
+      // Nothing is written, and no business is ever bound to it.
+      expect(stripeMocks.invoicesRetrieve).toHaveBeenCalledTimes(1);
+      expectScopedToAccount(
+        stripeMocks.invoicesRetrieve.mock.calls[0]!,
+        OTHER_ACCOUNT_ID,
+      );
+      expect(stripeMocks.subscriptionsRetrieve).not.toHaveBeenCalled();
       expect(emailMocks.sendEmail).not.toHaveBeenCalled();
     });
 
     it("answers 200 and creates nothing when the metadata snapshot is missing", async () => {
       const store = await setupStore();
       await createSubscriptionRow(store);
+      const invoice = makeStripeInvoice({ id: "in_nometa", metadata: null });
+      stripeMocks.invoicesRetrieve.mockResolvedValue(invoice);
       const event = makeStripeEvent({
         type: "invoice.paid",
-        object: makeStripeInvoice({ id: "in_nometa", metadata: null }),
+        object: invoice,
         account: ACCOUNT_ID,
       });
 
       await expectReceived(await handleInvoicePaid(event));
       expect(await db.order.count()).toBe(0);
+      expect(
+        sentryEventsTagged("subscription.step", "metadata-missing"),
+      ).toHaveLength(1);
     });
   });
 
   describe("handleInvoicePaymentFailed", () => {
+    /**
+     * Builds the event AND arms `invoices.retrieve` with the same invoice —
+     * the handler re-reads before its first gate, so an un-armed mock would
+     * hand it `undefined`.
+     */
     function failedEvent(
       store: Store,
       rowId: string,
       attemptCount: number,
       invoiceId = "in_test_failed_1",
     ) {
+      const invoice = makeStripeInvoice({
+        id: invoiceId,
+        metadata: subMetadata(store, rowId, null),
+        attemptCount,
+        amountPaid: 0,
+      });
+      stripeMocks.invoicesRetrieve.mockResolvedValue(invoice);
       return makeStripeEvent({
         type: "invoice.payment_failed",
-        object: makeStripeInvoice({
-          id: invoiceId,
-          metadata: subMetadata(store, rowId, null),
-          attemptCount,
-          amountPaid: 0,
-        }),
+        object: invoice,
         account: ACCOUNT_ID,
       });
     }
@@ -1236,10 +1422,17 @@ describe("subscription webhook handlers", () => {
       expect(after.status).toBe("past_due");
       expect(after.lastPaymentFailedAt).toBeInstanceOf(Date);
 
-      expect(emailCategories()).toEqual(["subscription_payment_failed"]);
+      expect(emailCategories()).toEqual([
+        "subscription_payment_failed",
+        "subscription_owner_payment_failed",
+      ]);
       expect(
         emailsWithCategory("subscription_payment_failed")[0]!.idempotencyKey,
       ).toBe("sub-pay-failed-in_test_failed_1-1");
+      expect(
+        emailsWithCategory("subscription_owner_payment_failed")[0]!
+          .idempotencyKey,
+      ).toBe("sub-owner-pay-failed-in_test_failed_1-1");
 
       // Stripe's second dunning attempt is a NEW notification, so it needs a
       // new idempotency key — otherwise Resend silently swallows it.
@@ -1253,16 +1446,60 @@ describe("subscription webhook handlers", () => {
       ]);
     });
 
+    it("marks past_due from a PRE-BASIL event payload (no `parent` key)", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store);
+      const metadata = subMetadata(store, row.id, null);
+
+      const event = makeStripeEvent({
+        type: "invoice.payment_failed",
+        object: makePreBasilInvoice({
+          id: "in_prebasil_failed",
+          metadata,
+          attemptCount: 2,
+          amountPaid: 0,
+        }),
+        account: ACCOUNT_ID,
+      });
+      // The retrieved copy is the only one the accessors can read — including
+      // `attempt_count`, which decides the dunning email's idempotency key.
+      stripeMocks.invoicesRetrieve.mockResolvedValue(
+        makeStripeInvoice({
+          id: "in_prebasil_failed",
+          metadata,
+          attemptCount: 2,
+          amountPaid: 0,
+        }),
+      );
+
+      await expectReceived(await handleInvoicePaymentFailed(event));
+
+      const retrieveArgs = stripeMocks.invoicesRetrieve.mock.calls[0]!;
+      expect(retrieveArgs[0]).toBe("in_prebasil_failed");
+      expectScopedToAccount(retrieveArgs, ACCOUNT_ID);
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.status).toBe("past_due");
+      expect(after.lastPaymentFailedAt).toBeInstanceOf(Date);
+      expect(
+        emailsWithCategory("subscription_payment_failed")[0]!.idempotencyKey,
+      ).toBe("sub-pay-failed-in_prebasil_failed-2");
+    });
+
     it("creates no order and writes nothing for a spoofed account", async () => {
       const store = await setupStore();
       const row = await createSubscriptionRow(store);
+      const invoice = makeStripeInvoice({
+        id: "in_spoof",
+        metadata: subMetadata(store, row.id, null),
+        amountPaid: 0,
+      });
+      stripeMocks.invoicesRetrieve.mockResolvedValue(invoice);
       const event = makeStripeEvent({
         type: "invoice.payment_failed",
-        object: makeStripeInvoice({
-          id: "in_spoof",
-          metadata: subMetadata(store, row.id, null),
-          amountPaid: 0,
-        }),
+        object: invoice,
         account: OTHER_ACCOUNT_ID,
       });
 
@@ -1279,18 +1516,25 @@ describe("subscription webhook handlers", () => {
   });
 
   describe("handleSubscriptionUpdated", () => {
+    /**
+     * Builds the event AND arms `subscriptions.retrieve` with the same
+     * subscription: metadata is read off the raw payload, but the object the
+     * row is written from is always the re-retrieved one.
+     */
     function updatedEvent(
       store: Store,
       rowId: string,
       sub: Stripe.Subscription,
       account: string | null = ACCOUNT_ID,
     ) {
+      const withMetadata = {
+        ...sub,
+        metadata: subMetadata(store, rowId, null),
+      } as unknown as Stripe.Subscription;
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(withMetadata);
       return makeStripeEvent({
         type: "customer.subscription.updated",
-        object: {
-          ...sub,
-          metadata: subMetadata(store, rowId, null),
-        } as unknown as Stripe.Subscription,
+        object: withMetadata,
         account,
       });
     }
@@ -1312,6 +1556,40 @@ describe("subscription webhook handlers", () => {
       expect(after.currentPeriodEnd).toEqual(new Date(PERIOD_END * 1000));
       expect(after.lastSyncedAt).toBeInstanceOf(Date);
       expect(emailMocks.sendEmail).not.toHaveBeenCalled();
+
+      const args = stripeMocks.subscriptionsRetrieve.mock.calls[0]!;
+      expect(args[0]).toBe("sub_test_1");
+      expectScopedToAccount(args, ACCOUNT_ID);
+    });
+
+    it("writes valid period dates from a PRE-BASIL event payload", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, { status: "active" });
+      const metadata = subMetadata(store, row.id, null);
+
+      // Pre-basil: the periods sit on the subscription ROOT, so
+      // `items.data[0].current_period_*` is undefined and writing this object
+      // straight through would store `Invalid Date`.
+      const event = makeStripeEvent({
+        type: "customer.subscription.updated",
+        object: makePreBasilSubscription({ metadata }),
+        account: ACCOUNT_ID,
+      });
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(
+        makeStripeSubscription({ metadata }),
+      );
+
+      await expectReceived(await handleSubscriptionUpdated(event));
+
+      expect(stripeMocks.subscriptionsRetrieve).toHaveBeenCalledTimes(1);
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.status).toBe("active");
+      expect(after.currentPeriodStart).toEqual(new Date(PERIOD_START * 1000));
+      expect(after.currentPeriodEnd).toEqual(new Date(PERIOD_END * 1000));
+      expect(after.nextBillingAt).toEqual(new Date(PERIOD_END * 1000));
+      expect(after.lastSyncedAt).toBeInstanceOf(Date);
     });
 
     it("emails on active → paused", async () => {
@@ -1400,20 +1678,29 @@ describe("subscription webhook handlers", () => {
   });
 
   describe("handleSubscriptionDeleted", () => {
+    const CANCELED_AT = Math.floor(
+      new Date("2026-09-02T00:00:00.000Z").getTime() / 1000,
+    );
+
+    /**
+     * Builds the event AND arms `subscriptions.retrieve`. A cancelled
+     * subscription stays retrievable at Stripe, so `canceled_at` is read from
+     * the re-retrieved copy rather than from the version-dependent payload.
+     */
     function deletedEvent(
       store: Store,
       rowId: string,
       account: string | null = ACCOUNT_ID,
     ) {
+      const sub = makeStripeSubscription({
+        status: "canceled",
+        canceledAt: CANCELED_AT,
+        metadata: subMetadata(store, rowId, null),
+      });
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(sub);
       return makeStripeEvent({
         type: "customer.subscription.deleted",
-        object: makeStripeSubscription({
-          status: "canceled",
-          canceledAt: Math.floor(
-            new Date("2026-09-02T00:00:00.000Z").getTime() / 1000,
-          ),
-          metadata: subMetadata(store, rowId, null),
-        }),
+        object: sub,
         account,
       });
     }
@@ -1426,11 +1713,15 @@ describe("subscription webhook handlers", () => {
         await handleSubscriptionDeleted(deletedEvent(store, row.id)),
       );
 
+      const args = stripeMocks.subscriptionsRetrieve.mock.calls[0]!;
+      expect(args[0]).toBe("sub_test_1");
+      expectScopedToAccount(args, ACCOUNT_ID);
+
       const after = await db.subscription.findUniqueOrThrow({
         where: { id: row.id },
       });
       expect(after.status).toBe("cancelled");
-      expect(after.cancelledAt).toBeInstanceOf(Date);
+      expect(after.cancelledAt).toEqual(new Date(CANCELED_AT * 1000));
       expect(after.cancelReason).toBe("stripe");
 
       expect(emailCategories().sort()).toEqual([
@@ -1460,6 +1751,32 @@ describe("subscription webhook handlers", () => {
       expect(after.cancelReason).toBe("customer");
     });
 
+    it("takes cancelledAt from the retrieved subscription, not the payload", async () => {
+      const store = await setupStore();
+      const row = await createSubscriptionRow(store, { status: "active" });
+
+      // A payload whose `canceled_at` we deliberately cannot trust.
+      const event = makeStripeEvent({
+        type: "customer.subscription.deleted",
+        object: makeStripeSubscription({
+          status: "canceled",
+          canceledAt: null,
+          metadata: subMetadata(store, row.id, null),
+        }),
+        account: ACCOUNT_ID,
+      });
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(
+        makeStripeSubscription({ status: "canceled", canceledAt: CANCELED_AT }),
+      );
+
+      await expectReceived(await handleSubscriptionDeleted(event));
+
+      const after = await db.subscription.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(after.cancelledAt).toEqual(new Date(CANCELED_AT * 1000));
+    });
+
     it("does not re-email an already-cancelled row", async () => {
       const store = await setupStore();
       const row = await createSubscriptionRow(store, {
@@ -1473,6 +1790,9 @@ describe("subscription webhook handlers", () => {
       );
 
       expect(emailMocks.sendEmail).not.toHaveBeenCalled();
+      // The already-cancelled short-circuit runs BEFORE the Stripe read, so a
+      // redelivered cancellation costs nothing.
+      expect(stripeMocks.subscriptionsRetrieve).not.toHaveBeenCalled();
       const after = await db.subscription.findUniqueOrThrow({
         where: { id: row.id },
       });

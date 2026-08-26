@@ -32,13 +32,18 @@ function makeProduct(overrides: Partial<FakeProduct> = {}): FakeProduct {
   } as unknown as FakeProduct;
 }
 
-function renderPanel(overrides: Partial<FakeProduct> = {}) {
+function renderPanel(
+  overrides: Partial<FakeProduct> = {},
+  panelOverrides: Partial<Parameters<typeof SubscribePanel>[0]> = {},
+) {
   return render(
     <SubscribePanel
       product={makeProduct(overrides)}
       selectedVariantId={null}
       quantity={2}
+      available={true}
       className="test-class"
+      {...panelOverrides}
     />,
   );
 }
@@ -65,6 +70,11 @@ describe("SubscribePanel", () => {
 
   it("renders nothing when no cadences are configured", () => {
     const { container } = renderPanel({ subscriptionIntervals: [] });
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders nothing when the current selection is out of stock", () => {
+    const { container } = renderPanel({}, { available: false });
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -106,6 +116,7 @@ describe("SubscribePanel", () => {
         })}
         selectedVariantId="var_abc"
         quantity={3}
+        available={true}
       />,
     );
 
@@ -125,6 +136,7 @@ describe("SubscribePanel", () => {
         product={makeProduct({ subscriptionIntervals: ["month:2", "month:1"] })}
         selectedVariantId={null}
         quantity={1}
+        available={true}
       />,
     );
 

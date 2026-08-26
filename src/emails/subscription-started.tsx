@@ -137,8 +137,8 @@ export default function SubscriptionStartedEmail({
 
       {/* Footer text */}
       <Text style={note}>
-        You can pause, skip a delivery, update your card, or cancel anytime from
-        that link. If you have any questions, please reply to this email.
+        You can manage or cancel your subscription anytime from that link. If
+        you have any questions, please reply to this email.
       </Text>
     </EmailLayout>
   );

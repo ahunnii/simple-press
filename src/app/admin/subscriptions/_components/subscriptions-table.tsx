@@ -92,8 +92,33 @@ type Props = {
   summary: SubscriptionsSummary;
 };
 
+/**
+ * Is this row mid-skip? A skip leaves the subscription ACTIVE — Stripe voids
+ * one invoice and resumes collecting on its own (see `deriveSubscriptionStatus`)
+ * — so `status` alone can't show it. The tell is a FUTURE `pauseResumesAt`,
+ * which an indefinite pause never sets.
+ */
+function isSkipped(row: SubscriptionRow): boolean {
+  return (
+    row.status === "active" &&
+    row.pauseResumesAt !== null &&
+    row.pauseResumesAt.getTime() > Date.now()
+  );
+}
+
 /** The single status-specific date column: what it means shifts with `status`. */
 function nextDateInfo(row: SubscriptionRow): { label: string; value: string } {
+  if (isSkipped(row)) {
+    // `nextBillingAt` has already been walked a whole cadence past the skipped
+    // boundary, so printing it under a bare "Next billing" would hide the fact
+    // that the customer skipped one — the owner would see a delivery gap they
+    // can't explain.
+    return {
+      label: "Next billing · one skipped",
+      value: row.nextBillingAt ? formatDate(row.nextBillingAt) : "—",
+    };
+  }
+
   switch (row.status) {
     case "active":
       return {
@@ -235,7 +260,10 @@ export function SubscriptionsTable({
           description={
             isFiltered
               ? undefined
-              : "Subscriptions appear here once a customer subscribes to a product on your storefront."
+              : // The empty state is where an owner discovers the prerequisite:
+                // nothing can appear here until a product actually offers a
+                // subscription, and that switch lives on the product form.
+                "Subscriptions appear here once a customer subscribes. First, enable subscriptions on a product (Products → edit → Subscriptions)."
           }
           // AdminEmpty renders its own "Try adjusting your search or
           // filters." line when `filtered` — don't say it twice.
@@ -245,7 +273,11 @@ export function SubscriptionsTable({
               <Button variant="outline" asChild>
                 <Link href={BASE_PATH}>Clear filters</Link>
               </Button>
-            ) : undefined
+            ) : (
+              <Button variant="outline" asChild>
+                <Link href="/admin/products">Go to products</Link>
+              </Button>
+            )
           }
         />
       ) : (

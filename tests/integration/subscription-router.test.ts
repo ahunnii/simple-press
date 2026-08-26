@@ -46,7 +46,9 @@ import {
  *    kept via `importOriginal`) so many `it()`s hitting the same in-memory
  *    limiter singleton within one file can't cross-contaminate each other's
  *    quota. One test explicitly makes the lookup limiter reject once to prove
- *    the router surfaces TOO_MANY_REQUESTS.
+ *    the router surfaces TOO_MANY_REQUESTS. The MANAGE limiter belongs to the
+ *    mutations only — `getByToken` must not spend it, since every mutation
+ *    `router.refresh()`es the page and would otherwise cost two of twenty.
  *  - `next/headers` — the `reqHost` hoisted mutable host, same idiom as
  *    `tenant-isolation.test.ts` / `procedure-tiers.test.ts`.
  *
@@ -505,7 +507,13 @@ describe("subscription router (src/server/api/routers/subscription.ts)", () => {
       expect(error.message ?? "").not.toContain("No procedure found");
     });
 
-    it("consumes subscriptionManageLimiter and surfaces TOO_MANY_REQUESTS when it's exceeded", async () => {
+    // The manage-action budget (20 per 15 min) belongs to the MUTATIONS. Every
+    // mutation on the manage page `router.refresh()`es on success, which
+    // re-runs this read — charging both would make each click cost two, and a
+    // customer who skips, changes their mind and cancels would be locked out
+    // of their own subscription. The read is one indexed lookup behind an
+    // HMAC-signed token.
+    it("does NOT consume subscriptionManageLimiter", async () => {
       const { business } = await setupBusiness({ subdomain: "sub-ratelim" });
       const { db } = await import("../helpers/db");
       const row = await createSubscriptionRow(db, business.id);
@@ -515,14 +523,37 @@ describe("subscription router (src/server/api/routers/subscription.ts)", () => {
         subscriptionId: row.id,
         businessId: business.id,
       });
-      rateLimitMocks.manageConsume.mockRejectedValueOnce(
-        new Error("rate limited"),
-      );
       const anon = createTestCaller({});
 
-      await expect(
-        anon.subscription.getByToken({ token }),
-      ).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+      await anon.subscription.getByToken({ token });
+
+      expect(rateLimitMocks.manageConsume).not.toHaveBeenCalled();
+    });
+
+    it("reports whether the store charges Stripe Tax, so the total can be labelled pre-tax", async () => {
+      const { business } = await setupBusiness({ subdomain: "sub-tax" });
+      const { db } = await import("../helpers/db");
+      const row = await createSubscriptionRow(db, business.id);
+      const { createSubscriptionToken } =
+        await import("~/lib/subscriptions/token");
+      const token = createSubscriptionToken({
+        subscriptionId: row.id,
+        businessId: business.id,
+      });
+      const anon = createTestCaller({});
+
+      expect(
+        (await anon.subscription.getByToken({ token })).taxAppliedAtCheckout,
+      ).toBe(false);
+
+      await db.business.update({
+        where: { id: business.id },
+        data: { stripeAutoTaxEnabled: true },
+      });
+
+      expect(
+        (await anon.subscription.getByToken({ token })).taxAppliedAtCheckout,
+      ).toBe(true);
     });
   });
 
@@ -602,9 +633,10 @@ describe("subscription router (src/server/api/routers/subscription.ts)", () => {
     });
   });
 
-  // pause/resume/skip/portal share the same gating + action-mapping shape —
-  // table-driven to keep the four nearly-identical procedures from turning
-  // into 400 lines of copy-paste.
+  // pause/resume/skip share the same gating + action-mapping shape —
+  // table-driven to keep the three nearly-identical procedures from turning
+  // into 300 lines of copy-paste. `createPortalSessionByToken` used to sit in
+  // this table and no longer does: it is ungated, and has its own describe.
   const gatedByTokenCases = [
     {
       procedure: "pauseByToken",
@@ -666,11 +698,49 @@ describe("subscription router (src/server/api/routers/subscription.ts)", () => {
   }
 
   describe("createPortalSessionByToken", () => {
-    it("is FORBIDDEN when the flag is off, and returns { url } once it's on", async () => {
+    // Ungated, like `cancelByToken`. Updating a card is an exit from harm, not
+    // a convenience: the dunning email tells a past-due customer to "update
+    // your card", and a flag flipped off between the send and the click would
+    // land them on a page with no way to do it — their subscription then dies
+    // of a payment failure they were actively trying to fix.
+    it("works even when the subscriptions flag is OFF", async () => {
       const { business } = await setupBusiness({
         subdomain: "sub-portal",
         featureFlags: { subscriptions: false },
       });
+      const { db } = await import("../helpers/db");
+      const row = await createSubscriptionRow(db, business.id, {
+        status: "past_due",
+      });
+      const { createSubscriptionToken } =
+        await import("~/lib/subscriptions/token");
+      const token = createSubscriptionToken({
+        subscriptionId: row.id,
+        businessId: business.id,
+      });
+      const anon = createTestCaller({});
+
+      const result = await anon.subscription.createPortalSessionByToken({
+        token,
+        returnUrl: "https://sub-portal.simplepress.test/subscriptions/x",
+      });
+      expect(result).toEqual({ url: "https://stripe-portal.test/session" });
+      expect(portalMocks.createPaymentMethodUpdateUrl).toHaveBeenCalledTimes(1);
+
+      await db.business.update({
+        where: { id: business.id },
+        data: { featureFlags: { subscriptions: true } },
+      });
+
+      const onResult = await anon.subscription.createPortalSessionByToken({
+        token,
+        returnUrl: "https://sub-portal.simplepress.test/subscriptions/x",
+      });
+      expect(onResult).toEqual({ url: "https://stripe-portal.test/session" });
+    });
+
+    it("still consumes the manage-action rate limit", async () => {
+      const { business } = await setupBusiness({ subdomain: "sub-portal-rl" });
       const { db } = await import("../helpers/db");
       const row = await createSubscriptionRow(db, business.id, {
         status: "active",
@@ -681,26 +751,17 @@ describe("subscription router (src/server/api/routers/subscription.ts)", () => {
         subscriptionId: row.id,
         businessId: business.id,
       });
+      rateLimitMocks.manageConsume.mockRejectedValueOnce(
+        new Error("rate limited"),
+      );
       const anon = createTestCaller({});
 
       await expect(
         anon.subscription.createPortalSessionByToken({
           token,
-          returnUrl: "https://sub-portal.simplepress.test/subscriptions/x",
+          returnUrl: "https://sub-portal-rl.simplepress.test/subscriptions/x",
         }),
-      ).rejects.toMatchObject({ code: "FORBIDDEN" });
-
-      await db.business.update({
-        where: { id: business.id },
-        data: { featureFlags: { subscriptions: true } },
-      });
-
-      const result = await anon.subscription.createPortalSessionByToken({
-        token,
-        returnUrl: "https://sub-portal.simplepress.test/subscriptions/x",
-      });
-      expect(result).toEqual({ url: "https://stripe-portal.test/session" });
-      expect(portalMocks.createPaymentMethodUpdateUrl).toHaveBeenCalledTimes(1);
+      ).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
     });
   });
 

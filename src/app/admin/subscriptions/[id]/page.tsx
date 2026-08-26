@@ -56,6 +56,20 @@ const FULFILLMENT_STATUS_LABELS: Record<string, string> = {
   unfulfilled: "Unfulfilled",
 };
 
+/**
+ * `Subscription.cancelReason` is a raw column value written from four
+ * different places (`CancelReason` in `~/lib/subscriptions/actions`). Shown
+ * verbatim it reads as debug output — worse, "stripe" and "payment_failed" are
+ * the two an owner most needs to understand, and neither explains itself.
+ */
+const CANCEL_REASON_LABELS: Record<string, string> = {
+  customer: "Cancelled by customer",
+  owner: "Cancelled by store",
+  stripe: "Ended by Stripe (payment failed or removed in Stripe)",
+  payment_failed: "Payment failed",
+  checkout_expired: "Checkout was never completed",
+};
+
 export default async function SubscriptionDetailPage({ params }: Props) {
   const { id } = await params;
 
@@ -63,9 +77,12 @@ export default async function SubscriptionDetailPage({ params }: Props) {
   // the Orders-detail convention of every detail page re-checking access.
   await requireAdminAccess();
 
-  const [subscription, flags] = await Promise.all([
+  const [subscription, flags, business] = await Promise.all([
     api.subscription.get({ id }).catch(rethrowTrpcForErrorBoundary),
     getBusinessFlags(),
+    // `stripeAccountId` (for a Connect-correct dashboard deep link) +
+    // `stripeAutoTaxEnabled` (whether the per-delivery figure is pre-tax).
+    api.business.getWithIntegrations().catch(() => null),
   ]);
 
   if (!subscription) notFound();
@@ -75,6 +92,17 @@ export default async function SubscriptionDetailPage({ params }: Props) {
   const perDeliveryCents = perDeliveryCentsFor(subscription);
   const isPickup = subscription.deliveryMethod === "pickup";
   const hasAddress = !isPickup && Boolean(subscription.shipAddress1);
+
+  // A skip leaves the row ACTIVE (Stripe voids one invoice and resumes
+  // collecting by itself — see `deriveSubscriptionStatus`), so `status` alone
+  // never shows it. A future `pauseResumesAt` does; an indefinite pause never
+  // sets one.
+  const skippedUntil =
+    subscription.status === "active" &&
+    subscription.pauseResumesAt &&
+    subscription.pauseResumesAt.getTime() > Date.now()
+      ? subscription.pauseResumesAt
+      : null;
 
   return (
     <>
@@ -106,6 +134,7 @@ export default async function SubscriptionDetailPage({ params }: Props) {
           <SubscriptionActions
             subscriptionId={subscription.id}
             status={subscription.status}
+            pauseResumesAt={subscription.pauseResumesAt}
             featureEnabled={featureEnabled}
           />
         </div>
@@ -149,7 +178,11 @@ export default async function SubscriptionDetailPage({ params }: Props) {
                   }
                 />
                 <Field
-                  label="Per-delivery total"
+                  label={
+                    business?.stripeAutoTaxEnabled
+                      ? "Per-delivery total (before tax)"
+                      : "Per-delivery total"
+                  }
                   value={formatPrice(perDeliveryCents)}
                 />
                 <Field
@@ -162,12 +195,22 @@ export default async function SubscriptionDetailPage({ params }: Props) {
                 />
                 {subscription.status === "active" && (
                   <Field
-                    label="Next billing"
+                    label={
+                      skippedUntil
+                        ? "Next billing · one skipped"
+                        : "Next billing"
+                    }
                     value={
                       subscription.nextBillingAt
                         ? formatDate(subscription.nextBillingAt)
                         : "—"
                     }
+                  />
+                )}
+                {skippedUntil && (
+                  <Field
+                    label="Delivery skipped"
+                    value={`Collection resumes ${formatDate(skippedUntil)}`}
                   />
                 )}
                 {subscription.currentPeriodStart &&
@@ -199,17 +242,30 @@ export default async function SubscriptionDetailPage({ params }: Props) {
                     />
                     <Field
                       label="Cancel reason"
-                      value={subscription.cancelReason}
+                      value={
+                        subscription.cancelReason
+                          ? (CANCEL_REASON_LABELS[subscription.cancelReason] ??
+                            subscription.cancelReason)
+                          : null
+                      }
                     />
                   </>
                 )}
                 {subscription.stripeSubscriptionId && (
-                  <div>
+                  <div className="sm:col-span-2">
                     <p className="text-muted-foreground text-sm">
                       Stripe subscription
                     </p>
                     <a
-                      href={`https://dashboard.stripe.com/subscriptions/${subscription.stripeSubscriptionId}`}
+                      // Connect-scoped path. `dashboard.stripe.com/subscriptions/:id`
+                      // resolves against the PLATFORM account, where this id does
+                      // not exist — the owner lands on a "no such subscription"
+                      // page and concludes their billing is broken.
+                      href={
+                        business?.stripeAccountId
+                          ? `https://dashboard.stripe.com/${business.stripeAccountId}/subscriptions/${subscription.stripeSubscriptionId}`
+                          : `https://dashboard.stripe.com/subscriptions/${subscription.stripeSubscriptionId}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 font-mono text-xs font-medium hover:underline"
@@ -218,6 +274,11 @@ export default async function SubscriptionDetailPage({ params }: Props) {
                       <ExternalLink aria-hidden="true" className="h-3 w-3" />
                       <span className="sr-only">(opens in Stripe)</span>
                     </a>
+                    <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
+                      Edits made directly in Stripe (quantity, price, address)
+                      are not synced back and will produce mismatched renewal
+                      orders. Use Cancel/Pause here instead.
+                    </p>
                   </div>
                 )}
               </CardContent>

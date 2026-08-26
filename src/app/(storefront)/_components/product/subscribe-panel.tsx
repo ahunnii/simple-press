@@ -20,6 +20,15 @@ type Props = {
   product: DefaultProductPageTemplateProps["product"];
   selectedVariantId: string | null;
   quantity: number;
+  /**
+   * Stock availability for the current selection — the same `inStock` value
+   * `useProduct(product)` already computes for the add-to-cart button.
+   * Required so a sold-out product can never show a live Subscribe CTA
+   * alongside its "Out of stock" state: the panel used to render regardless
+   * of stock, letting a shopper fill out the whole `/subscribe` form only to
+   * have `create-session` reject it with "This item is out of stock".
+   */
+  available: boolean;
   className?: string;
 };
 
@@ -30,15 +39,17 @@ type Props = {
  * class, so it looks correct inside any template's chrome.
  *
  * Renders nothing unless the `subscriptions` flag is on, the product has
- * subscriptions enabled with at least one configured cadence, and the product
- * isn't marked "coming soon" — the same eligibility rule the `/subscribe`
- * page and the checkout route enforce server-side. Hiding this panel is a UX
- * courtesy only; every real gate lives server-side.
+ * subscriptions enabled with at least one configured cadence, the product
+ * isn't marked "coming soon", and the current selection is in stock (`available`)
+ * — the same eligibility rule the `/subscribe` page and the checkout route
+ * enforce server-side. Hiding this panel is a UX courtesy only; every real
+ * gate lives server-side.
  */
 export function SubscribePanel({
   product,
   selectedVariantId,
   quantity,
+  available,
   className,
 }: Props) {
   const { isEnabled } = useStorefrontFlags();
@@ -55,7 +66,8 @@ export function SubscribePanel({
     isEnabled("subscriptions") &&
     offer.enabled &&
     !additionalFields.comingSoon &&
-    offer.intervals.length > 0;
+    offer.intervals.length > 0 &&
+    available;
 
   const selectedInterval =
     intervalKey && offer.intervals.includes(intervalKey)
@@ -98,7 +110,7 @@ export function SubscribePanel({
         <p className="text-card-foreground mt-1 text-2xl font-semibold">
           {formatPrice(quote.itemsCents)}{" "}
           <span className="text-muted-foreground text-sm font-normal">
-            per delivery
+            per delivery + shipping
           </span>
         </p>
         {offer.discountPercent > 0 && quote.savingsCents > 0 && (
@@ -142,7 +154,7 @@ export function SubscribePanel({
       )}
 
       <p className="text-muted-foreground text-xs">
-        Shipping calculated at the next step — cancel anytime.
+        Shipping is quoted for your address at the next step. Cancel anytime.
       </p>
 
       <Link

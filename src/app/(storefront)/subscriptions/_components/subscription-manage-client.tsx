@@ -111,6 +111,21 @@ function Section({
   );
 }
 
+/**
+ * Is exactly one upcoming delivery skipped?
+ *
+ * A skip leaves the subscription ACTIVE (Stripe resumes collecting on its own
+ * — see `deriveSubscriptionStatus`), so `status` alone can't show it. The
+ * future `pauseResumesAt` is the tell: an indefinite pause never sets one.
+ */
+function isSkipped(subscription: SubscriptionData): boolean {
+  return (
+    subscription.status === "active" &&
+    subscription.pauseResumesAt !== null &&
+    subscription.pauseResumesAt.getTime() > Date.now()
+  );
+}
+
 /** What to show for "next delivery" given the subscription's current status. */
 function nextDateLine(subscription: SubscriptionData): string | null {
   if (subscription.status === "cancelled") {
@@ -122,6 +137,15 @@ function nextDateLine(subscription: SubscriptionData): string | null {
     return subscription.pauseResumesAt
       ? `Resumes ${formatDate(subscription.pauseResumesAt)}`
       : "Paused until you resume it";
+  }
+  if (isSkipped(subscription)) {
+    // Never "Next delivery <date>" — the customer just asked for the opposite,
+    // and `nextBillingAt` has already moved a full cadence past the skipped
+    // boundary, so naming it without the word "skipped" reads as the skip
+    // having failed.
+    return subscription.nextBillingAt
+      ? `Next delivery skipped — next charge ${formatDate(subscription.nextBillingAt)}`
+      : "Next delivery skipped";
   }
   if (subscription.nextBillingAt) {
     return `Next delivery ${formatDate(subscription.nextBillingAt)}`;
@@ -140,10 +164,12 @@ function nextDateLine(subscription: SubscriptionData): string | null {
  * server page; this component never sees or needs the subscription's real
  * id.
  *
- * Action visibility follows the router's gating exactly: `cancelByToken` is
- * always available (a flag must never trap someone in recurring charges);
- * everything else only renders when `actionsEnabled` is true, since those
- * mutations are feature-gated server-side and would otherwise just fail.
+ * Action visibility follows the router's gating exactly: `cancelByToken` and
+ * `createPortalSessionByToken` are always available (a flag must never trap
+ * someone in recurring charges, nor strand a past-due customer who was emailed
+ * to update their card); skip / pause / resume only render when
+ * `actionsEnabled` is true, since those mutations are feature-gated
+ * server-side and would otherwise just fail.
  */
 export function SubscriptionManageClient({
   token,
@@ -156,6 +182,11 @@ export function SubscriptionManageClient({
   const paymentUpdated = searchParams.get("updated") === "payment";
 
   const [cancelOpen, setCancelOpen] = useState(false);
+
+  const status = subscription.status;
+  // Derived before the mutations because `resumeMutation`'s success toast
+  // reads it — "Next delivery is back on" vs "Subscription resumed".
+  const skipped = isSkipped(subscription);
 
   const skipMutation = api.subscription.skipNextByToken.useMutation({
     onSuccess: () => {
@@ -177,9 +208,13 @@ export function SubscriptionManageClient({
     },
   });
 
+  // Doubles as "Undo skip": clearing `pause_collection` is the same call and
+  // the same procedure either way, so the only difference is what we call it.
   const resumeMutation = api.subscription.resumeByToken.useMutation({
     onSuccess: () => {
-      toast.success("Subscription resumed.");
+      toast.success(
+        skipped ? "Next delivery is back on." : "Subscription resumed.",
+      );
       router.refresh();
     },
     onError: (err) => {
@@ -222,20 +257,26 @@ export function SubscriptionManageClient({
     portalMutation.mutate({ token, returnUrl: returnUrl.toString() });
   }
 
-  const status = subscription.status;
   const isActive = status === "active";
   const isPaused = status === "paused";
   const isPastDue = status === "past_due";
   const isCancelled = status === "cancelled";
 
-  const canSkip = actionsEnabled && isActive;
+  const canSkip = actionsEnabled && isActive && !skipped;
+  const canUndoSkip = actionsEnabled && skipped;
   const canPause = actionsEnabled && (isActive || isPastDue);
   const canResume = actionsEnabled && isPaused;
-  const canUpdatePayment =
-    actionsEnabled && subscription.canUpdatePaymentMethod;
+  // Not gated on `actionsEnabled`: updating a card is the action a past-due
+  // customer was emailed to take, and the procedure behind it is ungated too.
+  const canUpdatePayment = subscription.canUpdatePaymentMethod;
   const canCancel = !isCancelled;
   const hasAnyAction =
-    canSkip || canPause || canResume || canUpdatePayment || canCancel;
+    canSkip ||
+    canUndoSkip ||
+    canPause ||
+    canResume ||
+    canUpdatePayment ||
+    canCancel;
 
   const itemsCents = subscription.unitAmountCents * subscription.quantity;
   const shippingCents =
@@ -313,7 +354,11 @@ export function SubscriptionManageClient({
               </div>
             )}
             <div className="border-border flex justify-between border-t pt-1.5 font-medium">
-              <dt>Per-delivery total</dt>
+              <dt>
+                {subscription.taxAppliedAtCheckout
+                  ? "Per-delivery total (before tax)"
+                  : "Per-delivery total"}
+              </dt>
               <dd>{formatPrice(subscription.perDeliveryCents)}</dd>
             </div>
           </dl>
@@ -334,6 +379,14 @@ export function SubscriptionManageClient({
           ) : (
             <p className="text-muted-foreground text-sm">
               No delivery address on file.
+            </p>
+          )}
+
+          {subscription.deliveryMethod === "ship" && (
+            <p className="text-muted-foreground mt-4 text-[13px] leading-relaxed">
+              Your delivery address and shipping rate are locked for the life of
+              this subscription. Moving? Cancel and resubscribe with the new
+              address.
             </p>
           )}
         </Section>
@@ -368,31 +421,61 @@ export function SubscriptionManageClient({
           <Section title="Actions">
             {!actionsEnabled && (
               <p className="text-muted-foreground mb-4 text-sm">
-                Some options are temporarily unavailable — you can still cancel.
+                Some options are temporarily unavailable — you can still update
+                your card or cancel.
               </p>
             )}
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-start gap-3">
               {canSkip && (
+                <div className="flex max-w-[16rem] flex-col gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isBusy}
+                    aria-describedby="sub-skip-help"
+                    onClick={() => skipMutation.mutate({ token })}
+                  >
+                    Skip next delivery
+                  </Button>
+                  <p
+                    id="sub-skip-help"
+                    className="text-muted-foreground text-xs leading-snug"
+                  >
+                    Skips one delivery — you won&apos;t be charged for it.
+                  </p>
+                </div>
+              )}
+
+              {canUndoSkip && (
                 <Button
                   type="button"
                   variant="outline"
                   disabled={isBusy}
-                  onClick={() => skipMutation.mutate({ token })}
+                  onClick={() => resumeMutation.mutate({ token })}
                 >
-                  Skip next delivery
+                  Undo skip
                 </Button>
               )}
 
               {canPause && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isBusy}
-                  onClick={() => pauseMutation.mutate({ token })}
-                >
-                  Pause
-                </Button>
+                <div className="flex max-w-[16rem] flex-col gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isBusy}
+                    aria-describedby="sub-pause-help"
+                    onClick={() => pauseMutation.mutate({ token })}
+                  >
+                    Pause
+                  </Button>
+                  <p
+                    id="sub-pause-help"
+                    className="text-muted-foreground text-xs leading-snug"
+                  >
+                    Pauses billing and deliveries until you resume.
+                  </p>
+                </div>
               )}
 
               {canResume && (
@@ -456,8 +539,8 @@ export function SubscriptionManageClient({
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel this subscription?</AlertDialogTitle>
             <AlertDialogDescription>
-              You won&apos;t be charged again. Your most recent paid delivery
-              will still ship.
+              This takes effect immediately and no refund is issued. A delivery
+              you&apos;ve already paid for will still ship.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

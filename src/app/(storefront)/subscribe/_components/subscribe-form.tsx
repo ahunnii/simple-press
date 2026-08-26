@@ -83,6 +83,12 @@ type Props = {
   intervalKey: SubscriptionIntervalKey;
   quantity: number;
   merchantPolicies: CheckoutMerchantPolicies;
+  /**
+   * Pre-fills the email field for a signed-in shopper (from
+   * `getSession()` on the server page). Empty string for guests — sign-in is
+   * never required to subscribe, this is a convenience only.
+   */
+  initialEmail?: string;
 };
 
 /**
@@ -100,6 +106,7 @@ export function SubscribeForm({
   intervalKey,
   quantity,
   merchantPolicies,
+  initialEmail = "",
 }: Props) {
   const variant = variantId
     ? product.variants.find((v) => v.id === variantId)
@@ -108,7 +115,7 @@ export function SubscribeForm({
   const offer = getSubscriptionOffer(product, variantId);
   const cadence = getInterval(intervalKey);
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
@@ -531,6 +538,11 @@ export function SubscribeForm({
                   </select>
                 </div>
               </div>
+              <p className="text-muted-foreground text-xs">
+                Your delivery address and the shipping rate quoted here are
+                locked for the life of this subscription. If you move, cancel
+                and resubscribe with the new address.
+              </p>
             </div>
           )}
         </div>
@@ -579,8 +591,18 @@ export function SubscribeForm({
                       : shippingDisplay}
                   </dd>
                 </div>
+                {business.stripeAutoTaxEnabled && (
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Tax</dt>
+                    <dd>Calculated at checkout</dd>
+                  </div>
+                )}
                 <div className="border-border flex justify-between border-t pt-1.5 font-medium">
-                  <dt>Per-delivery total</dt>
+                  <dt>
+                    {business.stripeAutoTaxEnabled
+                      ? "Per-delivery total (before tax)"
+                      : "Per-delivery total"}
+                  </dt>
                   <dd>{formatPrice(quote.perDeliveryCents)}</dd>
                 </div>
                 <div className="flex justify-between">
@@ -592,8 +614,9 @@ export function SubscribeForm({
 
             {quote && (
               <p className="text-muted-foreground mt-3 text-xs">
-                First charge today, then {formatPrice(quote.perDeliveryCents)}{" "}
-                every {cadenceText} until you cancel.
+                {`First charge today, then ${formatPrice(quote.perDeliveryCents)}${
+                  business.stripeAutoTaxEnabled ? " plus tax" : ""
+                } every ${cadenceText} until you cancel.`}
               </p>
             )}
           </div>
@@ -606,7 +629,7 @@ export function SubscribeForm({
 
           <CheckoutTermsNotice
             disclosure={disclosure}
-            leadText="By subscribing you agree to recurring charges as described above, and to"
+            leadText="By subscribing to the recurring charges described above, you agree to"
             className="text-muted-foreground text-xs leading-relaxed"
             linkClassName="underline underline-offset-2"
           />

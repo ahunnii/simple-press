@@ -1,4 +1,11 @@
-import { Button, Column, Row, Section, Text } from "@react-email/components";
+import {
+  Button,
+  Column,
+  Link,
+  Row,
+  Section,
+  Text,
+} from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
 
@@ -23,6 +30,8 @@ type NewOrderNotificationEmailProps = {
   businessLogoUrl?: string;
   adminOrderUrl: string;
   deliveryMethod?: "ship" | "pickup";
+  /** Present when this order was created from a paid subscription invoice. */
+  subscription?: { intervalLabel: string; adminUrl: string };
 };
 
 export default function NewOrderNotificationEmail({
@@ -39,6 +48,7 @@ export default function NewOrderNotificationEmail({
   businessLogoUrl,
   adminOrderUrl,
   deliveryMethod,
+  subscription,
 }: NewOrderNotificationEmailProps) {
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -58,6 +68,17 @@ export default function NewOrderNotificationEmail({
         Order #{orderNumber} was just placed. Review it in your dashboard when
         you&apos;re ready to fulfill.
       </Text>
+
+      {subscription && (
+        <Section style={subscriptionBanner}>
+          <Text style={subscriptionBannerText}>
+            Subscription order — every {subscription.intervalLabel}.{" "}
+            <Link href={subscription.adminUrl} style={subscriptionBannerLink}>
+              View subscription →
+            </Link>
+          </Text>
+        </Section>
+      )}
 
       <Section style={orderBox}>
         <Text style={orderNumberStyle}>Order #{orderNumber}</Text>
@@ -290,4 +311,25 @@ const fulfillmentBadge = {
   padding: "4px 10px",
   marginTop: "8px",
   display: "inline-block" as const,
+};
+
+const subscriptionBanner = {
+  backgroundColor: "#f0f9ff",
+  borderLeft: "4px solid #0284c7",
+  borderRadius: "4px",
+  padding: "12px 16px",
+  marginBottom: "16px",
+};
+
+const subscriptionBannerText = {
+  fontSize: "14px",
+  lineHeight: "20px",
+  color: "#0c4a6e",
+  margin: "0",
+  fontWeight: "600" as const,
+};
+
+const subscriptionBannerLink = {
+  color: "#0284c7",
+  textDecoration: "underline",
 };

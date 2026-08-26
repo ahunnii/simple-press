@@ -179,11 +179,15 @@ export async function sendSubscriptionStartedEmails(params: {
 }
 
 /**
- * "Payment failed, update your card" to the customer.
+ * "Payment failed, update your card" to the customer, then a heads-up to the
+ * owner (who otherwise has no way to know a renewal is failing until they
+ * happen to check Stripe or the customer complains).
  *
  * The idempotency key includes Stripe's `attempt_count`: every dunning retry is
  * a genuinely new notification, and reusing one key across attempts would make
- * Resend silently swallow every message after the first.
+ * Resend silently swallow every message after the first. Same rule for the
+ * owner send — the store's number of failures matters as much as the fact one
+ * happened.
  */
 export async function sendSubscriptionPaymentFailedEmail(params: {
   business: SubscriptionEmailBusiness;
@@ -192,17 +196,35 @@ export async function sendSubscriptionPaymentFailedEmail(params: {
   attemptCount: number;
 }): Promise<void> {
   const { business, subscription, invoiceId, attemptCount } = params;
+  const intervalLabel = subscriptionIntervalLabel(subscription);
+  const perDeliveryCents = subscriptionPerDeliveryCents(subscription);
 
   await sendSubscriptionPaymentFailed({
     to: subscription.customerEmail,
     customerName: subscription.customerName,
     productName: subscription.productName,
-    intervalLabel: subscriptionIntervalLabel(subscription),
-    perDeliveryCents: subscriptionPerDeliveryCents(subscription),
+    intervalLabel,
+    perDeliveryCents,
     manageUrl: buildSubscriptionManageUrl(business, subscription),
     attemptCount,
     business,
     idempotencyKey: `sub-pay-failed-${invoiceId}-${attemptCount}`,
+  });
+
+  // Owner heads-up, sent after the customer email — see the docblock above.
+  await sendOwnerSubscriptionNotification({
+    kind: "payment_failed",
+    customerEmail: subscription.customerEmail,
+    customerName: subscription.customerName,
+    productName: subscription.productName,
+    variantName: subscription.variantName,
+    quantity: subscription.quantity,
+    intervalLabel,
+    perDeliveryCents,
+    attemptCount,
+    adminUrl: buildAdminSubscriptionUrl(business, subscription.id),
+    business,
+    idempotencyKey: `sub-owner-pay-failed-${invoiceId}-${attemptCount}`,
   });
 }
 
@@ -240,6 +262,7 @@ export async function sendSubscriptionCancelledEmails(params: {
     quantity: subscription.quantity,
     intervalLabel,
     perDeliveryCents: subscriptionPerDeliveryCents(subscription),
+    cancelReason: subscription.cancelReason,
     adminUrl: buildAdminSubscriptionUrl(business, subscription.id),
     business,
     idempotencyKey: `sub-owner-cancelled-${subscription.id}`,
@@ -258,8 +281,10 @@ export async function sendSubscriptionUpdatedEmail(params: {
   business: SubscriptionEmailBusiness;
   subscription: Subscription;
   variant: "paused" | "resumed" | "skipped";
+  /** `resumed` only: the customer undid a pending skip rather than lifting a pause. */
+  undoSkip?: boolean;
 }): Promise<void> {
-  const { business, subscription, variant } = params;
+  const { business, subscription, variant, undoSkip } = params;
   const anchor = (
     subscription.nextBillingAt ??
     subscription.currentPeriodEnd ??
@@ -273,6 +298,7 @@ export async function sendSubscriptionUpdatedEmail(params: {
     variantName: subscription.variantName,
     intervalLabel: subscriptionIntervalLabel(subscription),
     variant,
+    undoSkip,
     resumesAt: subscription.pauseResumesAt,
     nextBillingAt: subscription.nextBillingAt,
     manageUrl: buildSubscriptionManageUrl(business, subscription),

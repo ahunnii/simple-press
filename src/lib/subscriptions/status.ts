@@ -22,6 +22,24 @@ export type LocalSubscriptionStatus =
  * `pause_collection`" — a pause/skip leaves `status: "active"` — so
  * `pause_collection` is the deciding factor whenever Stripe reports `active`
  * or `trialing`.
+ *
+ * **A skip is not a pause.** SimplePress writes two different shapes of
+ * `pause_collection`, and `resumes_at` is the only thing that tells them
+ * apart (see `pauseSubscription` / `skipNextDelivery` in `actions.ts`):
+ *
+ * - **no `resumes_at`** — an indefinite pause. Nothing resumes until someone
+ *   asks for it, so the subscription really is `"paused"`.
+ * - **a `resumes_at`** — a *skip*: exactly one invoice is voided and Stripe
+ *   resumes collection on its own. The subscription is still `"active"`; the
+ *   skip window lives in `pauseResumesAt`, and `periodFromStripe` has already
+ *   walked `nextBillingAt` past the skipped boundary, so "active, next charge
+ *   on <date>" is the whole truth.
+ *
+ * Deriving `"paused"` for a skip is what used to make the manage page contradict
+ * the "your next delivery is skipped" email, hide the Skip button, offer a
+ * Resume that silently cancelled the skip, and fire a second "paused" email
+ * from `handleSubscriptionUpdated` (plus a spurious "back on" one when Stripe
+ * cleared the pause at `resumes_at`).
  */
 export function deriveSubscriptionStatus(
   sub: Pick<Stripe.Subscription, "status" | "pause_collection">,
@@ -39,7 +57,8 @@ export function deriveSubscriptionStatus(
       return "paused";
     case "active":
     case "trialing":
-      return sub.pause_collection ? "paused" : "active";
+      if (!sub.pause_collection) return "active";
+      return sub.pause_collection.resumes_at != null ? "active" : "paused";
     default:
       // Exhaustive over Stripe.Subscription.Status; unreachable, but keeps
       // this function total if Stripe ever adds a new status value.

@@ -499,7 +499,7 @@ describe("POST /api/stripe/subscriptions/create-session", () => {
       expect(options).toEqual({ stripeAccount: ACCOUNT_ID });
     });
 
-    it("sets the pending_subscription_session cookie (httpOnly, strict, 1 hour)", async () => {
+    it("sets the pending_subscription_session cookie (httpOnly, lax, 1 hour)", async () => {
       const business = await createSubscriptionStore();
       const { product, variant } = await createSubscribableProduct(business.id);
 
@@ -510,7 +510,11 @@ describe("POST /api/stripe/subscriptions/create-session", () => {
         `pending_subscription_session=${STRIPE_SESSION_ID}`,
       );
       expect(cookie).toMatch(/httponly/i);
-      expect(cookie).toMatch(/samesite=strict/i);
+      // Must be `lax`, not `strict`: the browser lands on `/subscribe/success`
+      // via a cross-site top-level GET redirect from checkout.stripe.com, and
+      // `strict` cookies are never sent on cross-site navigations. See the
+      // comment in create-session/route.ts.
+      expect(cookie).toMatch(/samesite=lax/i);
       expect(cookie).toMatch(/path=\//i);
       expect(cookie).toMatch(/max-age=3600/i);
     });

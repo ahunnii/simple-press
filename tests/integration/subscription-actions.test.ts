@@ -649,6 +649,59 @@ describe("resumeSubscription", () => {
     },
   );
 
+  // A skip leaves the row ACTIVE with a future `pauseResumesAt`, and undoing
+  // it is the same Stripe call as resuming a pause — so `resumeSubscription`
+  // has to accept that one active shape too, or "Undo skip" has nowhere to go.
+  it("undoes a pending skip on an ACTIVE row and restores nextBillingAt to the period end", async () => {
+    const business = await createStore();
+    const row = await createSubscriptionRow(business.id, {
+      status: "active",
+      pauseResumesAt: PERIOD_END_PLUS_BUFFER,
+    });
+    // What `skipNextDelivery` had left behind: a cadence past the boundary.
+    await db.subscription.update({
+      where: { id: row.id },
+      data: { nextBillingAt: new Date("2026-10-15T12:00:00.000Z") },
+    });
+
+    const updated: Subscription = await resumeSubscription(db, {
+      businessId: business.id,
+      subscriptionId: row.id,
+      now: new Date("2026-09-01T00:00:00.000Z"),
+    });
+
+    expect(stripeMocks.subscriptionsUpdate).toHaveBeenCalledWith(
+      "sub_stripe_1",
+      { pause_collection: "" },
+      { stripeAccount: ACCOUNT_ID },
+    );
+    expect(updated.status).toBe("active");
+    expect(updated.pauseResumesAt).toBeNull();
+    // The skipped delivery is back on: the next charge is the boundary again.
+    expect(updated.nextBillingAt?.toISOString()).toBe(PERIOD_END.toISOString());
+  });
+
+  it("invalid_state on an active row whose skip window has already elapsed", async () => {
+    const business = await createStore();
+    const row = await createSubscriptionRow(business.id, {
+      status: "active",
+      pauseResumesAt: PERIOD_END_PLUS_BUFFER,
+    });
+
+    const err = await actionError(() =>
+      resumeSubscription(db, {
+        businessId: business.id,
+        subscriptionId: row.id,
+        // Well past the skip window — Stripe has already resumed collection
+        // by itself, so there is nothing left to undo.
+        now: new Date("2027-01-01T00:00:00.000Z"),
+      }),
+    );
+
+    expect(err).toMatchObject({ code: "invalid_state" });
+    expect(stripeMocks.subscriptionsUpdate).not.toHaveBeenCalled();
+  });
+
   it("not_found across tenants", async () => {
     const storeA = await createStore({ subdomain: "resume-a" });
     const storeB = await createStore({ subdomain: "resume-b" });
@@ -693,7 +746,12 @@ describe("skipNextDelivery", () => {
 
     // Stripe still generates the next invoice, but voids it — so no
     // `invoice.paid`, and therefore no Order and no delivery.
-    expect(updated.status).toBe("paused");
+    //
+    // The row stays ACTIVE: Stripe resumes collecting on its own at
+    // `resumes_at`, nobody has to act, and the customer's email says
+    // "skipped". Writing `paused` here contradicted that email everywhere it
+    // surfaced and made the webhook send two more.
+    expect(updated.status).toBe("active");
     expect(updated.pauseResumesAt?.toISOString()).toBe(
       PERIOD_END_PLUS_BUFFER.toISOString(),
     );
@@ -704,7 +762,7 @@ describe("skipNextDelivery", () => {
     const stored = await db.subscription.findUniqueOrThrow({
       where: { id: row.id },
     });
-    expect(stored.status).toBe("paused");
+    expect(stored.status).toBe("active");
     expect(stored.pauseResumesAt?.toISOString()).toBe(
       PERIOD_END_PLUS_BUFFER.toISOString(),
     );
@@ -726,7 +784,7 @@ describe("skipNextDelivery", () => {
       now: new Date("2026-09-01T00:00:00.000Z"),
     });
 
-    expect(updated.status).toBe("paused");
+    expect(updated.status).toBe("active");
     expect(sentryMocks.captureException).toHaveBeenCalledTimes(1);
     expect(sentryMocks.captureException).toHaveBeenCalledWith(
       expect.any(Error),
@@ -757,6 +815,49 @@ describe("skipNextDelivery", () => {
     expect(updated.nextBillingAt?.toISOString()).toBe(
       "2026-09-29T12:00:00.000Z",
     );
+    expect(updated.pauseResumesAt?.toISOString()).toBe(
+      PERIOD_END_PLUS_BUFFER.toISOString(),
+    );
+  });
+
+  // A second skip would move `resumes_at` to the SAME boundary (it is derived
+  // from `currentPeriodEnd`, which the first skip did not move) while pushing
+  // `nextBillingAt` another cadence out — telling the customer they skipped two
+  // deliveries when Stripe voids exactly one.
+  it("invalid_state on a second skip while one is still pending", async () => {
+    const business = await createStore();
+    const row = await createSubscriptionRow(business.id, {
+      status: "active",
+      pauseResumesAt: PERIOD_END_PLUS_BUFFER,
+    });
+
+    const err = await actionError(() =>
+      skipNextDelivery(db, {
+        businessId: business.id,
+        subscriptionId: row.id,
+        now: new Date("2026-09-01T00:00:00.000Z"),
+      }),
+    );
+
+    expect(err).toMatchObject({ code: "invalid_state" });
+    expect(stripeMocks.subscriptionsUpdate).not.toHaveBeenCalled();
+  });
+
+  it("allows a skip once a previous skip window has elapsed", async () => {
+    const business = await createStore();
+    const row = await createSubscriptionRow(business.id, {
+      status: "active",
+      // An old skip Stripe has long since cleared on its own.
+      pauseResumesAt: new Date("2026-01-01T00:00:00.000Z"),
+    });
+
+    const updated = await skipNextDelivery(db, {
+      businessId: business.id,
+      subscriptionId: row.id,
+      now: new Date("2026-09-01T00:00:00.000Z"),
+    });
+
+    expect(updated.status).toBe("active");
     expect(updated.pauseResumesAt?.toISOString()).toBe(
       PERIOD_END_PLUS_BUFFER.toISOString(),
     );

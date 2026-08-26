@@ -34,7 +34,9 @@ describe("deriveSubscriptionStatus", () => {
     expect(deriveSubscriptionStatus(makeSub("active", null))).toBe("active");
   });
 
-  it("maps 'active' with a pause_collection set to 'paused'", () => {
+  it("maps 'active' with an OPEN-ENDED pause_collection to 'paused'", () => {
+    // No `resumes_at` — `pauseSubscription`'s shape. Nothing resumes on its
+    // own, so this really is a pause.
     expect(
       deriveSubscriptionStatus(
         makeSub("active", { behavior: "void", resumes_at: null }),
@@ -42,7 +44,11 @@ describe("deriveSubscriptionStatus", () => {
     ).toBe("paused");
   });
 
-  it("maps 'active' with a pause_collection that has a future resumes_at to 'paused'", () => {
+  it("maps 'active' with a BOUNDED pause_collection (a skip) to 'active'", () => {
+    // `skipNextDelivery`'s shape: exactly one invoice is voided and Stripe
+    // resumes collection by itself at `resumes_at`. A skip is not a pause —
+    // the subscription stays active and `pauseResumesAt`/`nextBillingAt`
+    // carry the skipped window.
     expect(
       deriveSubscriptionStatus(
         makeSub("active", {
@@ -50,7 +56,36 @@ describe("deriveSubscriptionStatus", () => {
           resumes_at: Math.floor(Date.now() / 1000) + 3600,
         }),
       ),
+    ).toBe("active");
+  });
+
+  it("maps 'trialing' with a bounded pause_collection to 'active' and an open-ended one to 'paused'", () => {
+    expect(
+      deriveSubscriptionStatus(
+        makeSub("trialing", {
+          behavior: "void",
+          resumes_at: Math.floor(Date.now() / 1000) + 3600,
+        }),
+      ),
+    ).toBe("active");
+    expect(
+      deriveSubscriptionStatus(
+        makeSub("trialing", { behavior: "void", resumes_at: null }),
+      ),
     ).toBe("paused");
+  });
+
+  it("a past skip window (resumes_at already elapsed) still derives 'active'", () => {
+    // Stripe clears `pause_collection` itself once `resumes_at` passes, but a
+    // stale object read mid-flight must not flip the row to paused.
+    expect(
+      deriveSubscriptionStatus(
+        makeSub("active", {
+          behavior: "void",
+          resumes_at: Math.floor(Date.now() / 1000) - 3600,
+        }),
+      ),
+    ).toBe("active");
   });
 });
 

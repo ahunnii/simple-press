@@ -141,6 +141,7 @@ export function DefaultProductActions({
         product={product}
         selectedVariantId={selectedVariantId}
         quantity={quantity}
+        available={inStock}
         className="mt-4"
       />
     </>

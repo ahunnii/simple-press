@@ -54,8 +54,7 @@ export default function SubscriptionCancelledEmail({
       <Section style={infoBox}>
         <Text style={infoBoxText}>
           If you&apos;d like to resubscribe to {productName}, just visit our
-          store and select the subscription option again. We&apos;d love to have
-          you back!
+          store to subscribe again. We&apos;d love to have you back!
         </Text>
       </Section>
 

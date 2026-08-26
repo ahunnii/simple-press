@@ -52,6 +52,7 @@ function makeBusiness(overrides: Partial<FakeBusiness> = {}): FakeBusiness {
     pickupInstructions: null,
     businessAddress: "123 Main St, Detroit, MI",
     salesCountries: [],
+    stripeAutoTaxEnabled: false,
     ...overrides,
   } as unknown as FakeBusiness;
 }
@@ -124,6 +125,23 @@ afterEach(() => {
 });
 
 describe("SubscribeForm", () => {
+  it("pre-fills the email field from initialEmail for a signed-in shopper", () => {
+    renderForm({ initialEmail: "shopper@example.com" });
+    expect(screen.getByLabelText(/Email/)).toHaveValue("shopper@example.com");
+  });
+
+  it("leaves the email field blank for a guest with no initialEmail", () => {
+    renderForm();
+    expect(screen.getByLabelText(/Email/)).toHaveValue("");
+  });
+
+  it("shows the address-lock disclosure below the shipping address fields", () => {
+    renderForm();
+    expect(
+      screen.getByText(/locked for the life of this subscription/),
+    ).toBeInTheDocument();
+  });
+
   it("hides the address fields and shows free shipping when pickup is selected", async () => {
     const user = userEvent.setup();
     renderForm({ business: makeBusiness({ offersInStorePickup: true }) });
@@ -142,6 +160,24 @@ describe("SubscribeForm", () => {
     // 500c shipping -> 4100c ($41.00) per delivery.
     expect(screen.getByText("$5.00")).toBeInTheDocument();
     expect(screen.getByText("$41.00")).toBeInTheDocument();
+    expect(screen.getByText("Per-delivery total")).toBeInTheDocument();
+    expect(screen.queryByText("Tax")).not.toBeInTheDocument();
+  });
+
+  it("shows a tax disclosure row and adjusted copy when automatic tax is enabled", () => {
+    shippingQuoteData = { shippingCents: 500 };
+    renderForm({ business: makeBusiness({ stripeAutoTaxEnabled: true }) });
+
+    expect(screen.getByText("Tax")).toBeInTheDocument();
+    expect(screen.getByText("Calculated at checkout")).toBeInTheDocument();
+    expect(
+      screen.getByText("Per-delivery total (before tax)"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "First charge today, then $41.00 plus tax every month until you cancel.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("submits the exact subscription-checkout body shape and redirects to sessionUrl", async () => {

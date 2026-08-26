@@ -1,5 +1,15 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import type {
+  PoolAvailability,
+  ProductAvailability,
+  VariantAvailability,
+} from "~/lib/checkout/types";
+import {
+  checkCartAvailability,
+  computePoolDemand,
+} from "~/lib/checkout/validate-cart";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { isSubscriptionIntervalKey } from "~/lib/subscriptions/intervals";
@@ -8,6 +18,7 @@ import {
   getSubscriptionOffer,
   SubscriptionPricingError,
 } from "~/lib/subscriptions/pricing";
+import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 
 import { SubscribeForm } from "./_components/subscribe-form";
@@ -37,6 +48,41 @@ function SubscribeUnavailable({ businessName }: { businessName: string }) {
           {businessName} hasn&apos;t finished setting up payments yet. Please
           check back soon, or contact the store directly.
         </p>
+      </div>
+    </main>
+  );
+}
+
+/**
+ * Shown when the product/variant this link points at is genuinely out of
+ * stock — checked with the same `checkCartAvailability` helper the checkout
+ * route uses, so a shopper can never fill out the whole form only to have
+ * `create-session` reject it with "This item is out of stock". Owner-fault
+ * unavailability reasons (unpublished, coming-soon, deleted variant, missing
+ * pool) still 404 above — this card is only for ordinary scarcity.
+ */
+function SubscribeUnavailableStock({
+  productName,
+  productSlug,
+}: {
+  productName: string;
+  productSlug: string;
+}) {
+  return (
+    <main className="mx-auto w-full max-w-xl px-6 py-16 sm:py-24">
+      <div className="border-border bg-card rounded-[var(--radius)] border p-8 text-center sm:p-12">
+        <h1 className="text-card-foreground mb-3 text-2xl font-medium tracking-tight">
+          Currently out of stock
+        </h1>
+        <p className="text-muted-foreground mx-auto max-w-md text-sm leading-relaxed">
+          {productName} can&apos;t be subscribed to right now. Check back soon.
+        </p>
+        <Link
+          href={`/shop/${productSlug}`}
+          className="text-primary mt-6 inline-block text-sm font-medium underline underline-offset-2"
+        >
+          Back to product
+        </Link>
       </div>
     </main>
   );
@@ -101,6 +147,100 @@ export default async function SubscribePage({ searchParams }: Props) {
       ? parsedQty
       : 1;
 
+  // Stock check — same `checkCartAvailability` helper the checkout route
+  // uses (see `create-session/route.ts` ~308-403), run here so a sold-out
+  // product renders a friendly card instead of a form that can only fail at
+  // submit. Built from the `product.get` payload already fetched above
+  // rather than a second query; `baseInventoryUnit.reservedQty` isn't
+  // selected by that procedure, so shared-pool stock is treated
+  // conservatively (reservedQty: 0) — the same tradeoff `getCartItemsStatus`
+  // in `product.ts` already makes.
+  const availabilityLine = {
+    productId: product.id,
+    variantId,
+    productName: product.name,
+    variantName: variant?.name ?? null,
+    quantity,
+  };
+  const availabilityVariantMap = new Map<string, VariantAvailability>(
+    variant
+      ? [
+          [
+            variant.id,
+            {
+              price: variant.price,
+              inventoryQty: variant.inventoryQty,
+              reservedQty: variant.reservedQty,
+              product: {
+                price: product.price,
+                published: product.published,
+                trackInventory: product.trackInventory,
+                allowBackorders: product.allowBackorders,
+                additionalFields: product.additionalFields,
+              },
+            },
+          ],
+        ]
+      : [],
+  );
+  const availabilityProductMap = new Map<string, ProductAvailability>([
+    [
+      product.id,
+      {
+        price: product.price,
+        published: product.published,
+        trackInventory: product.trackInventory,
+        allowBackorders: product.allowBackorders,
+        inventoryQty: product.inventoryQty,
+        reservedQty: product.reservedQty,
+        additionalFields: product.additionalFields,
+        baseInventoryUnitId: product.baseInventoryUnitId,
+        baseUnitsConsumed: product.baseUnitsConsumed,
+        _count: { variants: product.variants.length },
+      },
+    ],
+  ]);
+  const availabilityPoolDemand = computePoolDemand(
+    [availabilityLine],
+    availabilityProductMap,
+  );
+  const availabilityPoolMap = new Map<string, PoolAvailability>(
+    product.baseInventoryUnitId && product.baseInventoryUnit
+      ? [
+          [
+            product.baseInventoryUnitId,
+            {
+              inventoryQty: product.baseInventoryUnit.inventoryQty,
+              reservedQty: 0,
+              allowBackorders: product.baseInventoryUnit.allowBackorders,
+            },
+          ],
+        ]
+      : [],
+  );
+  const { unavailableDetails } = checkCartAvailability({
+    items: [availabilityLine],
+    variantMap: availabilityVariantMap,
+    productMap: availabilityProductMap,
+    poolDemand: availabilityPoolDemand,
+    poolMap: availabilityPoolMap,
+  });
+  if (unavailableDetails.length > 0) {
+    // Plain scarcity (including an exhausted shared pool) is the one
+    // shopper-visible reason — everything else (unpublished, coming-soon, a
+    // deleted variant/pool) means this link is stale or the catalog changed
+    // out from under it, which is the same 404 every other validation
+    // failure on this page produces.
+    const reason = unavailableDetails[0]?.reason ?? "out-of-stock";
+    if (reason !== "out-of-stock") notFound();
+    return (
+      <SubscribeUnavailableStock
+        productName={product.name}
+        productSlug={product.slug}
+      />
+    );
+  }
+
   // Confirms the item total (before shipping) clears Stripe's $0.50 minimum —
   // the same check `create-session` performs, run early so a mispriced
   // product 404s here instead of rendering a form that can never submit.
@@ -129,6 +269,10 @@ export default async function SubscribePage({ searchParams }: Props) {
     hasRefundPolicy: policyPages.some((p) => p.slug === "refund-policy"),
   };
 
+  // Pre-fills the email field for a signed-in shopper — never required, a
+  // guest can still fill it in and subscribe.
+  const session = await getSession();
+
   return (
     <SubscribeForm
       business={business}
@@ -137,6 +281,7 @@ export default async function SubscribePage({ searchParams }: Props) {
       intervalKey={intervalKey}
       quantity={quantity}
       merchantPolicies={merchantPolicies}
+      initialEmail={session?.user.email ?? ""}
     />
   );
 }

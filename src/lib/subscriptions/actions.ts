@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import type { SubscriptionEmailBusiness } from "./emails";
 import type { DbClient } from "~/server/db";
 import { stripeClient } from "~/lib/stripe/client";
+import { SUBSCRIPTION_STATUS_LABELS } from "~/lib/validators/subscription";
 
 import {
   sendSubscriptionCancelledEmails,
@@ -71,6 +72,33 @@ export type CancelReason =
 interface ActionTarget {
   businessId: string;
   subscriptionId: string;
+}
+
+/**
+ * The customer-facing name of a row's status, for the message on an
+ * `invalid_state` error. Raw column values (`past_due`, `incomplete`) reach the
+ * storefront manage page verbatim through `mapActionError`, so they go through
+ * the same label map the pills and badges use.
+ */
+function statusLabel(status: string): string {
+  return (
+    SUBSCRIPTION_STATUS_LABELS[
+      status as keyof typeof SUBSCRIPTION_STATUS_LABELS
+    ] ?? status
+  );
+}
+
+/**
+ * Is this row mid-skip? A skip is a BOUNDED `pause_collection` — the row stays
+ * `active` (see `deriveSubscriptionStatus`) and `pauseResumesAt` holds the
+ * moment Stripe resumes collecting. An indefinite pause never sets it, so a
+ * future `pauseResumesAt` on an active row means exactly one thing.
+ */
+function hasPendingSkip(
+  row: Pick<Subscription, "pauseResumesAt">,
+  now: Date = new Date(),
+): boolean {
+  return row.pauseResumesAt !== null && row.pauseResumesAt > now;
 }
 
 /**
@@ -211,6 +239,11 @@ const PAUSABLE_STATUSES = new Set(["active", "past_due"]);
  * Order and no delivery. Stripe's own `status` stays `"active"` throughout —
  * `pause_collection` is the only thing that distinguishes the two, which is
  * why `deriveSubscriptionStatus` reads it.
+ *
+ * Note the deliberate absence of `resumes_at`: an OPEN-ENDED pause is what
+ * makes this a pause rather than a skip. `skipNextDelivery` sets one, and
+ * `deriveSubscriptionStatus` uses exactly that to tell the two apart — never
+ * add a `resumes_at` here.
  */
 export async function pauseSubscription(
   db: DbClient,
@@ -221,7 +254,7 @@ export async function pauseSubscription(
   if (!PAUSABLE_STATUSES.has(row.status)) {
     throw new SubscriptionActionError(
       "invalid_state",
-      `A ${row.status} subscription cannot be paused`,
+      `A ${statusLabel(row.status).toLowerCase()} subscription cannot be paused`,
     );
   }
 
@@ -260,21 +293,34 @@ export async function pauseSubscription(
 }
 
 /**
- * Resume a paused subscription.
+ * Resume a paused subscription — or UNDO a pending skip.
+ *
+ * Both are the same Stripe call, because both are the same Stripe state: a
+ * `pause_collection` that needs clearing. The only difference is which shape
+ * put it there (see `deriveSubscriptionStatus`), so this accepts two rows:
+ *
+ * - `status: "paused"` — an indefinite pause, resumed on request.
+ * - `status: "active"` with a FUTURE `pauseResumesAt` — a skip the customer
+ *   has changed their mind about. Clearing the pause puts the skipped delivery
+ *   back on, so `nextBillingAt` is restored to `currentPeriodEnd` (the
+ *   boundary `skipNextDelivery` had moved it past).
  *
  * Stripe clears `pause_collection` with the EMPTY STRING, not `null` — a null
  * is rejected, and omitting the key leaves the pause in place.
  */
 export async function resumeSubscription(
   db: DbClient,
-  input: ActionTarget,
+  input: ActionTarget & { now?: Date },
 ): Promise<Subscription> {
   const { row, business } = await loadTarget(db, input);
 
-  if (row.status !== "paused") {
+  const now = input.now ?? new Date();
+  const undoSkip = row.status === "active" && hasPendingSkip(row, now);
+
+  if (row.status !== "paused" && !undoSkip) {
     throw new SubscriptionActionError(
       "invalid_state",
-      `A ${row.status} subscription cannot be resumed`,
+      `A ${statusLabel(row.status).toLowerCase()} subscription cannot be resumed`,
     );
   }
 
@@ -294,14 +340,27 @@ export async function resumeSubscription(
 
   const updated = await db.subscription.update({
     where: { id: row.id },
-    data: { status: "active", pauseResumesAt: null },
+    data: {
+      status: "active",
+      pauseResumesAt: null,
+      // Undoing a skip puts the delivery at the current period boundary back
+      // on, so `nextBillingAt` returns to it. A plain resume leaves whatever
+      // the row already carried — the next sync/webhook re-derives it from
+      // Stripe anyway.
+      ...(undoSkip && row.currentPeriodEnd
+        ? { nextBillingAt: row.currentPeriodEnd }
+        : {}),
+    },
   });
 
+  // An undo-skip gets its own heading ("Your next delivery is back on");
+  // a plain resume keeps the generic "back on" copy.
   await bestEffort("resume-email", business.id, () =>
     sendSubscriptionUpdatedEmail({
       business,
       subscription: updated,
       variant: "resumed",
+      undoSkip,
     }),
   );
 
@@ -329,24 +388,30 @@ const SKIP_RESUME_BUFFER_MS = 12 * 60 * 60 * 1000;
 /**
  * Skip exactly one delivery.
  *
- * Implemented as a *bounded* pause: `pause_collection` with a `resumes_at` one
- * hour past the current period end. Stripe still generates the next invoice on
- * schedule and voids it (no `invoice.paid` → no Order → no delivery), then
- * resumes normal collection for the cycle after. The one-hour buffer exists
- * because `resumes_at` set exactly at the period boundary races the invoice
- * Stripe is generating at that same instant.
+ * Implemented as a *bounded* pause: `pause_collection` with a `resumes_at`
+ * `SKIP_RESUME_BUFFER_MS` past the current period end. Stripe still generates
+ * the next invoice on schedule and voids it (no `invoice.paid` → no Order → no
+ * delivery), then resumes normal collection for the cycle after. The buffer
+ * exists because `resumes_at` set exactly at the period boundary races the
+ * invoice Stripe is generating at that same instant.
  *
- * The row's local status becomes `paused` (Stripe's stays `active`, see
- * `pauseSubscription`), and `nextBillingAt` moves out by one cadence so the
- * manage page and the customer's email agree on when the next delivery lands.
+ * **The row stays `active`.** A skip is not a pause: Stripe resumes collecting
+ * by itself at `resumes_at`, nobody has to do anything, and the customer's
+ * email says "skipped". Writing `paused` here (as this used to) contradicted
+ * that email on the manage page, hid the Skip button behind a Resume that
+ * silently cancelled the skip, and made `handleSubscriptionUpdated` fire a
+ * second "paused" email on the way in and a "back on" one on the way out.
+ * `pauseResumesAt` carries the window and `nextBillingAt` moves out by one
+ * cadence, so the manage page, the admin table and the email all agree on when
+ * the next delivery lands.
  */
 export async function skipNextDelivery(
   db: DbClient,
   input: ActionTarget & {
     /**
-     * Reserved so callers (and tests) can pin the clock. The skip window is
+     * Pins the clock for the already-skipped guard below. The skip WINDOW is
      * anchored entirely to `currentPeriodEnd` — Stripe's own boundary — so it
-     * does not enter the arithmetic today.
+     * does not enter that arithmetic.
      */
     now?: Date;
   },
@@ -356,7 +421,18 @@ export async function skipNextDelivery(
   if (row.status !== "active") {
     throw new SubscriptionActionError(
       "invalid_state",
-      `A ${row.status} subscription has no next delivery to skip`,
+      `A ${statusLabel(row.status).toLowerCase()} subscription has no next delivery to skip`,
+    );
+  }
+  // Already mid-skip. Without this, a second click would move `resumes_at` to
+  // the SAME boundary (it is derived from `currentPeriodEnd`, which the first
+  // skip did not move) while pushing `nextBillingAt` another cadence out —
+  // quietly telling the customer they skipped two deliveries when Stripe voids
+  // exactly one.
+  if (hasPendingSkip(row, input.now ?? new Date())) {
+    throw new SubscriptionActionError(
+      "invalid_state",
+      "The next delivery is already skipped",
     );
   }
   if (!row.currentPeriodEnd) {
@@ -394,7 +470,8 @@ export async function skipNextDelivery(
   const updated = await db.subscription.update({
     where: { id: row.id },
     data: {
-      status: "paused",
+      // Stays active — see this function's doc comment.
+      status: "active",
       pauseResumesAt: resumesAt,
       nextBillingAt: addBillingInterval(
         row.currentPeriodEnd,
