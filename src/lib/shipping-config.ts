@@ -153,7 +153,8 @@ const lastFallbackReport = new Map<string, number>();
  */
 export type ZoneWeightFallbackSource =
   | "shipping.quote"
-  | "stripe.create-session";
+  | "stripe.create-session"
+  | "stripe.subscriptions.create-session";
 
 /**
  * Report a zone+weight fallback, throttled per store + source + reason.

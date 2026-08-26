@@ -302,6 +302,22 @@ export type QuickBooksConnection = $Result.DefaultSelection<Prisma.$QuickBooksCo
  * QBO company are recognizable after a reconnect.
  */
 export type QuickBooksInvoice = $Result.DefaultSelection<Prisma.$QuickBooksInvoicePayload>
+/**
+ * Model Subscription
+ * One customer's subscription to a recurring product purchase (Stripe Billing
+ * on the store's connected account, parallel to the one-time checkout lane).
+ * Created `incomplete` by the subscribe checkout-session route and promoted
+ * by the webhook on `checkout.session.completed`. Product/pricing/cadence/
+ * shipping-address are snapshotted at signup and LOCKED for the life of the
+ * subscription — changing any of them is cancel + resubscribe, not an edit,
+ * so renewals always bill exactly what's stored here regardless of later
+ * product-price or address-book changes. Every paid invoice (first +
+ * renewals) creates a normal `Order` keyed on `stripeInvoiceId`, so
+ * fulfillment/inventory/refund/email code is entirely reused. Encrypted
+ * columns (customer + shipping snapshot) can never appear in a `where` —
+ * lookups use the plaintext `customerEmail` + `businessId`.
+ */
+export type Subscription = $Result.DefaultSelection<Prisma.$SubscriptionPayload>
 
 /**
  * Enums
@@ -933,6 +949,16 @@ export class PrismaClient<
     * ```
     */
   get quickBooksInvoice(): Prisma.QuickBooksInvoiceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.subscription`: Exposes CRUD operations for the **Subscription** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Subscriptions
+    * const subscriptions = await prisma.subscription.findMany()
+    * ```
+    */
+  get subscription(): Prisma.SubscriptionDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1420,7 +1446,8 @@ export namespace Prisma {
     QuoteCalculator: 'QuoteCalculator',
     QuoteSubmission: 'QuoteSubmission',
     QuickBooksConnection: 'QuickBooksConnection',
-    QuickBooksInvoice: 'QuickBooksInvoice'
+    QuickBooksInvoice: 'QuickBooksInvoice',
+    Subscription: 'Subscription'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1439,7 +1466,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "subscription"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4921,6 +4948,80 @@ export namespace Prisma {
           }
         }
       }
+      Subscription: {
+        payload: Prisma.$SubscriptionPayload<ExtArgs>
+        fields: Prisma.SubscriptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SubscriptionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SubscriptionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+          }
+          findFirst: {
+            args: Prisma.SubscriptionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SubscriptionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+          }
+          findMany: {
+            args: Prisma.SubscriptionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>[]
+          }
+          create: {
+            args: Prisma.SubscriptionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+          }
+          createMany: {
+            args: Prisma.SubscriptionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SubscriptionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>[]
+          }
+          delete: {
+            args: Prisma.SubscriptionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+          }
+          update: {
+            args: Prisma.SubscriptionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.SubscriptionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SubscriptionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SubscriptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>[]
+          }
+          upsert: {
+            args: Prisma.SubscriptionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+          }
+          aggregate: {
+            args: Prisma.SubscriptionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSubscription>
+          }
+          groupBy: {
+            args: Prisma.SubscriptionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SubscriptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SubscriptionCountArgs<ExtArgs>
+            result: $Utils.Optional<SubscriptionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -5064,6 +5165,7 @@ export namespace Prisma {
     quoteSubmission?: QuoteSubmissionOmit
     quickBooksConnection?: QuickBooksConnectionOmit
     quickBooksInvoice?: QuickBooksInvoiceOmit
+    subscription?: SubscriptionOmit
   }
 
   /* Types for Logging */
@@ -5257,6 +5359,7 @@ export namespace Prisma {
     quoteCalculators: number
     quoteSubmissions: number
     quickBooksInvoices: number
+    subscriptions: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5288,6 +5391,7 @@ export namespace Prisma {
     quoteCalculators?: boolean | BusinessCountOutputTypeCountQuoteCalculatorsArgs
     quoteSubmissions?: boolean | BusinessCountOutputTypeCountQuoteSubmissionsArgs
     quickBooksInvoices?: boolean | BusinessCountOutputTypeCountQuickBooksInvoicesArgs
+    subscriptions?: boolean | BusinessCountOutputTypeCountSubscriptionsArgs
   }
 
   // Custom InputTypes
@@ -5497,6 +5601,13 @@ export namespace Prisma {
     where?: QuickBooksInvoiceWhereInput
   }
 
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SubscriptionWhereInput
+  }
+
 
   /**
    * Count Type ProductCountOutputType
@@ -5509,6 +5620,7 @@ export namespace Prisma {
     orderItems: number
     inventoryHistory: number
     backInStockRequests: number
+    subscriptions: number
     reviews: number
   }
 
@@ -5519,6 +5631,7 @@ export namespace Prisma {
     orderItems?: boolean | ProductCountOutputTypeCountOrderItemsArgs
     inventoryHistory?: boolean | ProductCountOutputTypeCountInventoryHistoryArgs
     backInStockRequests?: boolean | ProductCountOutputTypeCountBackInStockRequestsArgs
+    subscriptions?: boolean | ProductCountOutputTypeCountSubscriptionsArgs
     reviews?: boolean | ProductCountOutputTypeCountReviewsArgs
   }
 
@@ -5578,6 +5691,13 @@ export namespace Prisma {
   /**
    * ProductCountOutputType without action
    */
+  export type ProductCountOutputTypeCountSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SubscriptionWhereInput
+  }
+
+  /**
+   * ProductCountOutputType without action
+   */
   export type ProductCountOutputTypeCountReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProductReviewWhereInput
   }
@@ -5590,11 +5710,13 @@ export namespace Prisma {
   export type ProductVariantCountOutputType = {
     inventoryHistory: number
     orderItems: number
+    subscriptions: number
   }
 
   export type ProductVariantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     inventoryHistory?: boolean | ProductVariantCountOutputTypeCountInventoryHistoryArgs
     orderItems?: boolean | ProductVariantCountOutputTypeCountOrderItemsArgs
+    subscriptions?: boolean | ProductVariantCountOutputTypeCountSubscriptionsArgs
   }
 
   // Custom InputTypes
@@ -5620,6 +5742,13 @@ export namespace Prisma {
    */
   export type ProductVariantCountOutputTypeCountOrderItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderItemWhereInput
+  }
+
+  /**
+   * ProductVariantCountOutputType without action
+   */
+  export type ProductVariantCountOutputTypeCountSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SubscriptionWhereInput
   }
 
 
@@ -5726,6 +5855,7 @@ export namespace Prisma {
     testimonials: number
     testimonialInvites: number
     reviews: number
+    subscriptions: number
   }
 
   export type CustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5734,6 +5864,7 @@ export namespace Prisma {
     testimonials?: boolean | CustomerCountOutputTypeCountTestimonialsArgs
     testimonialInvites?: boolean | CustomerCountOutputTypeCountTestimonialInvitesArgs
     reviews?: boolean | CustomerCountOutputTypeCountReviewsArgs
+    subscriptions?: boolean | CustomerCountOutputTypeCountSubscriptionsArgs
   }
 
   // Custom InputTypes
@@ -5782,6 +5913,13 @@ export namespace Prisma {
     where?: ProductReviewWhereInput
   }
 
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SubscriptionWhereInput
+  }
+
 
   /**
    * Count Type ShippingAddressCountOutputType
@@ -5789,10 +5927,12 @@ export namespace Prisma {
 
   export type ShippingAddressCountOutputType = {
     orders: number
+    subscriptions: number
   }
 
   export type ShippingAddressCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     orders?: boolean | ShippingAddressCountOutputTypeCountOrdersArgs
+    subscriptions?: boolean | ShippingAddressCountOutputTypeCountSubscriptionsArgs
   }
 
   // Custom InputTypes
@@ -5811,6 +5951,13 @@ export namespace Prisma {
    */
   export type ShippingAddressCountOutputTypeCountOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderWhereInput
+  }
+
+  /**
+   * ShippingAddressCountOutputType without action
+   */
+  export type ShippingAddressCountOutputTypeCountSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SubscriptionWhereInput
   }
 
 
@@ -6095,6 +6242,37 @@ export namespace Prisma {
    */
   export type QuoteSubmissionCountOutputTypeCountQuickBooksInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuickBooksInvoiceWhereInput
+  }
+
+
+  /**
+   * Count Type SubscriptionCountOutputType
+   */
+
+  export type SubscriptionCountOutputType = {
+    orders: number
+  }
+
+  export type SubscriptionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    orders?: boolean | SubscriptionCountOutputTypeCountOrdersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * SubscriptionCountOutputType without action
+   */
+  export type SubscriptionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SubscriptionCountOutputType
+     */
+    select?: SubscriptionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SubscriptionCountOutputType without action
+   */
+  export type SubscriptionCountOutputTypeCountOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OrderWhereInput
   }
 
 
@@ -11862,6 +12040,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled: boolean | null
     stripeChargesEnabled: boolean | null
     stripePayoutsEnabled: boolean | null
+    stripePortalConfigurationId: string | null
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
@@ -11904,6 +12083,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled: boolean | null
     stripeChargesEnabled: boolean | null
     stripePayoutsEnabled: boolean | null
+    stripePortalConfigurationId: string | null
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
@@ -11946,6 +12126,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled: number
     stripeChargesEnabled: number
     stripePayoutsEnabled: number
+    stripePortalConfigurationId: number
     testimonialsAutoApprove: number
     maintenanceMode: number
     maintenanceVariant: number
@@ -12008,6 +12189,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: true
     stripeChargesEnabled?: true
     stripePayoutsEnabled?: true
+    stripePortalConfigurationId?: true
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
@@ -12050,6 +12232,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: true
     stripeChargesEnabled?: true
     stripePayoutsEnabled?: true
+    stripePortalConfigurationId?: true
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
@@ -12092,6 +12275,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: true
     stripeChargesEnabled?: true
     stripePayoutsEnabled?: true
+    stripePortalConfigurationId?: true
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
@@ -12225,6 +12409,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled: boolean
     stripeChargesEnabled: boolean
     stripePayoutsEnabled: boolean
+    stripePortalConfigurationId: string | null
     testimonialsAutoApprove: boolean
     maintenanceMode: boolean
     maintenanceVariant: string
@@ -12290,6 +12475,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -12344,6 +12530,7 @@ export namespace Prisma {
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
+    subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -12367,6 +12554,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -12413,6 +12601,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -12459,6 +12648,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -12485,7 +12675,7 @@ export namespace Prisma {
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -12517,6 +12707,7 @@ export namespace Prisma {
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
+    subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -12555,6 +12746,7 @@ export namespace Prisma {
       quoteSubmissions: Prisma.$QuoteSubmissionPayload<ExtArgs>[]
       quickBooksConnection: Prisma.$QuickBooksConnectionPayload<ExtArgs> | null
       quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
+      subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12576,6 +12768,7 @@ export namespace Prisma {
       stripeAutoTaxEnabled: boolean
       stripeChargesEnabled: boolean
       stripePayoutsEnabled: boolean
+      stripePortalConfigurationId: string | null
       testimonialsAutoApprove: boolean
       maintenanceMode: boolean
       maintenanceVariant: string
@@ -13024,6 +13217,7 @@ export namespace Prisma {
     quoteSubmissions<T extends Business$quoteSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quickBooksConnection<T extends Business$quickBooksConnectionArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksConnectionArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     quickBooksInvoices<T extends Business$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    subscriptions<T extends Business$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13072,6 +13266,7 @@ export namespace Prisma {
     readonly stripeAutoTaxEnabled: FieldRef<"Business", 'Boolean'>
     readonly stripeChargesEnabled: FieldRef<"Business", 'Boolean'>
     readonly stripePayoutsEnabled: FieldRef<"Business", 'Boolean'>
+    readonly stripePortalConfigurationId: FieldRef<"Business", 'String'>
     readonly testimonialsAutoApprove: FieldRef<"Business", 'Boolean'>
     readonly maintenanceMode: FieldRef<"Business", 'Boolean'>
     readonly maintenanceVariant: FieldRef<"Business", 'String'>
@@ -14191,6 +14386,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: QuickBooksInvoiceScalarFieldEnum | QuickBooksInvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Business.subscriptions
+   */
+  export type Business$subscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    where?: SubscriptionWhereInput
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    cursor?: SubscriptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
   }
 
   /**
@@ -16741,6 +16960,7 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     cost: number | null
+    subscriptionDiscountPercent: number | null
     inventoryQty: number | null
     reservedQty: number | null
     lowInventoryThreshold: number | null
@@ -16755,6 +16975,7 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     cost: number | null
+    subscriptionDiscountPercent: number | null
     inventoryQty: number | null
     reservedQty: number | null
     lowInventoryThreshold: number | null
@@ -16776,6 +16997,8 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     cost: number | null
+    subscriptionEnabled: boolean | null
+    subscriptionDiscountPercent: number | null
     sku: string | null
     barcode: string | null
     trackInventory: boolean | null
@@ -16813,6 +17036,8 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     cost: number | null
+    subscriptionEnabled: boolean | null
+    subscriptionDiscountPercent: number | null
     sku: string | null
     barcode: string | null
     trackInventory: boolean | null
@@ -16850,6 +17075,9 @@ export namespace Prisma {
     price: number
     compareAtPrice: number
     cost: number
+    subscriptionEnabled: number
+    subscriptionIntervals: number
+    subscriptionDiscountPercent: number
     sku: number
     barcode: number
     trackInventory: number
@@ -16883,6 +17111,7 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     cost?: true
+    subscriptionDiscountPercent?: true
     inventoryQty?: true
     reservedQty?: true
     lowInventoryThreshold?: true
@@ -16897,6 +17126,7 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     cost?: true
+    subscriptionDiscountPercent?: true
     inventoryQty?: true
     reservedQty?: true
     lowInventoryThreshold?: true
@@ -16918,6 +17148,8 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     cost?: true
+    subscriptionEnabled?: true
+    subscriptionDiscountPercent?: true
     sku?: true
     barcode?: true
     trackInventory?: true
@@ -16955,6 +17187,8 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     cost?: true
+    subscriptionEnabled?: true
+    subscriptionDiscountPercent?: true
     sku?: true
     barcode?: true
     trackInventory?: true
@@ -16992,6 +17226,9 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     cost?: true
+    subscriptionEnabled?: true
+    subscriptionIntervals?: true
+    subscriptionDiscountPercent?: true
     sku?: true
     barcode?: true
     trackInventory?: true
@@ -17117,6 +17354,9 @@ export namespace Prisma {
     price: number
     compareAtPrice: number | null
     cost: number | null
+    subscriptionEnabled: boolean
+    subscriptionIntervals: JsonValue | null
+    subscriptionDiscountPercent: number
     sku: string | null
     barcode: string | null
     trackInventory: boolean
@@ -17174,6 +17414,9 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     cost?: boolean
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: boolean
+    subscriptionDiscountPercent?: boolean
     sku?: boolean
     barcode?: boolean
     trackInventory?: boolean
@@ -17207,6 +17450,7 @@ export namespace Prisma {
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
     inventoryHistory?: boolean | Product$inventoryHistoryArgs<ExtArgs>
     backInStockRequests?: boolean | Product$backInStockRequestsArgs<ExtArgs>
+    subscriptions?: boolean | Product$subscriptionsArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
@@ -17222,6 +17466,9 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     cost?: boolean
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: boolean
+    subscriptionDiscountPercent?: boolean
     sku?: boolean
     barcode?: boolean
     trackInventory?: boolean
@@ -17262,6 +17509,9 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     cost?: boolean
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: boolean
+    subscriptionDiscountPercent?: boolean
     sku?: boolean
     barcode?: boolean
     trackInventory?: boolean
@@ -17302,6 +17552,9 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     cost?: boolean
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: boolean
+    subscriptionDiscountPercent?: boolean
     sku?: boolean
     barcode?: boolean
     trackInventory?: boolean
@@ -17329,7 +17582,7 @@ export namespace Prisma {
     additionalFields?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "reservedQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "scheduledPublishAt" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "subscriptionEnabled" | "subscriptionIntervals" | "subscriptionDiscountPercent" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "reservedQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "scheduledPublishAt" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     baseInventoryUnit?: boolean | Product$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -17339,6 +17592,7 @@ export namespace Prisma {
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
     inventoryHistory?: boolean | Product$inventoryHistoryArgs<ExtArgs>
     backInStockRequests?: boolean | Product$backInStockRequestsArgs<ExtArgs>
+    subscriptions?: boolean | Product$subscriptionsArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -17362,6 +17616,7 @@ export namespace Prisma {
       orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
+      subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
       reviews: Prisma.$ProductReviewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -17375,6 +17630,9 @@ export namespace Prisma {
       price: number
       compareAtPrice: number | null
       cost: number | null
+      subscriptionEnabled: boolean
+      subscriptionIntervals: Prisma.JsonValue | null
+      subscriptionDiscountPercent: number
       sku: string | null
       barcode: string | null
       trackInventory: boolean
@@ -17802,6 +18060,7 @@ export namespace Prisma {
     orderItems<T extends Product$orderItemsArgs<ExtArgs> = {}>(args?: Subset<T, Product$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryHistory<T extends Product$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Product$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     backInStockRequests<T extends Product$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Product$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    subscriptions<T extends Product$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Product$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Product$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Product$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -17842,6 +18101,9 @@ export namespace Prisma {
     readonly price: FieldRef<"Product", 'Float'>
     readonly compareAtPrice: FieldRef<"Product", 'Float'>
     readonly cost: FieldRef<"Product", 'Float'>
+    readonly subscriptionEnabled: FieldRef<"Product", 'Boolean'>
+    readonly subscriptionIntervals: FieldRef<"Product", 'Json'>
+    readonly subscriptionDiscountPercent: FieldRef<"Product", 'Int'>
     readonly sku: FieldRef<"Product", 'String'>
     readonly barcode: FieldRef<"Product", 'String'>
     readonly trackInventory: FieldRef<"Product", 'Boolean'>
@@ -18426,6 +18688,30 @@ export namespace Prisma {
   }
 
   /**
+   * Product.subscriptions
+   */
+  export type Product$subscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    where?: SubscriptionWhereInput
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    cursor?: SubscriptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
    * Product.reviews
    */
   export type Product$reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -18741,6 +19027,7 @@ export namespace Prisma {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     inventoryHistory?: boolean | ProductVariant$inventoryHistoryArgs<ExtArgs>
     orderItems?: boolean | ProductVariant$orderItemsArgs<ExtArgs>
+    subscriptions?: boolean | ProductVariant$subscriptionsArgs<ExtArgs>
     _count?: boolean | ProductVariantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["productVariant"]>
 
@@ -18799,6 +19086,7 @@ export namespace Prisma {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     inventoryHistory?: boolean | ProductVariant$inventoryHistoryArgs<ExtArgs>
     orderItems?: boolean | ProductVariant$orderItemsArgs<ExtArgs>
+    subscriptions?: boolean | ProductVariant$subscriptionsArgs<ExtArgs>
     _count?: boolean | ProductVariantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProductVariantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -18814,6 +19102,7 @@ export namespace Prisma {
       product: Prisma.$ProductPayload<ExtArgs>
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
+      subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -19226,6 +19515,7 @@ export namespace Prisma {
     product<T extends ProductDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductDefaultArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     inventoryHistory<T extends ProductVariant$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, ProductVariant$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     orderItems<T extends ProductVariant$orderItemsArgs<ExtArgs> = {}>(args?: Subset<T, ProductVariant$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    subscriptions<T extends ProductVariant$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, ProductVariant$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19709,6 +19999,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: OrderItemScalarFieldEnum | OrderItemScalarFieldEnum[]
+  }
+
+  /**
+   * ProductVariant.subscriptions
+   */
+  export type ProductVariant$subscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    where?: SubscriptionWhereInput
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    cursor?: SubscriptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
   }
 
   /**
@@ -29491,6 +29805,7 @@ export namespace Prisma {
     firstName: string | null
     lastName: string | null
     phone: string | null
+    stripeCustomerId: string | null
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
@@ -29509,6 +29824,7 @@ export namespace Prisma {
     firstName: string | null
     lastName: string | null
     phone: string | null
+    stripeCustomerId: string | null
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
@@ -29527,6 +29843,7 @@ export namespace Prisma {
     firstName: number
     lastName: number
     phone: number
+    stripeCustomerId: number
     acceptsMarketing: number
     totalSpent: number
     orderCount: number
@@ -29557,6 +29874,7 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     phone?: true
+    stripeCustomerId?: true
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
@@ -29575,6 +29893,7 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     phone?: true
+    stripeCustomerId?: true
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
@@ -29593,6 +29912,7 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     phone?: true
+    stripeCustomerId?: true
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
@@ -29698,6 +30018,7 @@ export namespace Prisma {
     firstName: string | null
     lastName: string | null
     phone: string | null
+    stripeCustomerId: string | null
     acceptsMarketing: boolean
     totalSpent: number
     orderCount: number
@@ -29735,6 +30056,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     phone?: boolean
+    stripeCustomerId?: boolean
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
@@ -29750,6 +30072,7 @@ export namespace Prisma {
     testimonials?: boolean | Customer$testimonialsArgs<ExtArgs>
     testimonialInvites?: boolean | Customer$testimonialInvitesArgs<ExtArgs>
     reviews?: boolean | Customer$reviewsArgs<ExtArgs>
+    subscriptions?: boolean | Customer$subscriptionsArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -29761,6 +30084,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     phone?: boolean
+    stripeCustomerId?: boolean
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
@@ -29781,6 +30105,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     phone?: boolean
+    stripeCustomerId?: boolean
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
@@ -29801,6 +30126,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     phone?: boolean
+    stripeCustomerId?: boolean
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
@@ -29811,7 +30137,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "acceptsMarketing" | "totalSpent" | "orderCount" | "deletionRequestedAt" | "anonymizedAt" | "notes" | "userId" | "businessId", ExtArgs["result"]["customer"]>
+  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "stripeCustomerId" | "acceptsMarketing" | "totalSpent" | "orderCount" | "deletionRequestedAt" | "anonymizedAt" | "notes" | "userId" | "businessId", ExtArgs["result"]["customer"]>
   export type CustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -29820,6 +30146,7 @@ export namespace Prisma {
     testimonials?: boolean | Customer$testimonialsArgs<ExtArgs>
     testimonialInvites?: boolean | Customer$testimonialInvitesArgs<ExtArgs>
     reviews?: boolean | Customer$reviewsArgs<ExtArgs>
+    subscriptions?: boolean | Customer$subscriptionsArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -29841,6 +30168,7 @@ export namespace Prisma {
       testimonials: Prisma.$TestimonialPayload<ExtArgs>[]
       testimonialInvites: Prisma.$TestimonialInvitePayload<ExtArgs>[]
       reviews: Prisma.$ProductReviewPayload<ExtArgs>[]
+      subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -29853,6 +30181,7 @@ export namespace Prisma {
        * @encrypted
        */
       phone: string | null
+      stripeCustomerId: string | null
       acceptsMarketing: boolean
       totalSpent: number
       orderCount: number
@@ -30265,6 +30594,7 @@ export namespace Prisma {
     testimonials<T extends Customer$testimonialsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$testimonialsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     testimonialInvites<T extends Customer$testimonialInvitesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$testimonialInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Customer$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    subscriptions<T extends Customer$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -30301,6 +30631,7 @@ export namespace Prisma {
     readonly firstName: FieldRef<"Customer", 'String'>
     readonly lastName: FieldRef<"Customer", 'String'>
     readonly phone: FieldRef<"Customer", 'String'>
+    readonly stripeCustomerId: FieldRef<"Customer", 'String'>
     readonly acceptsMarketing: FieldRef<"Customer", 'Boolean'>
     readonly totalSpent: FieldRef<"Customer", 'Int'>
     readonly orderCount: FieldRef<"Customer", 'Int'>
@@ -30844,6 +31175,30 @@ export namespace Prisma {
   }
 
   /**
+   * Customer.subscriptions
+   */
+  export type Customer$subscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    where?: SubscriptionWhereInput
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    cursor?: SubscriptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
    * Customer without action
    */
   export type CustomerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -31108,6 +31463,7 @@ export namespace Prisma {
     customerId?: boolean
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
     orders?: boolean | ShippingAddress$ordersArgs<ExtArgs>
+    subscriptions?: boolean | ShippingAddress$subscriptionsArgs<ExtArgs>
     _count?: boolean | ShippingAddressCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["shippingAddress"]>
 
@@ -31171,6 +31527,7 @@ export namespace Prisma {
   export type ShippingAddressInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
     orders?: boolean | ShippingAddress$ordersArgs<ExtArgs>
+    subscriptions?: boolean | ShippingAddress$subscriptionsArgs<ExtArgs>
     _count?: boolean | ShippingAddressCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ShippingAddressIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -31185,6 +31542,7 @@ export namespace Prisma {
     objects: {
       customer: Prisma.$CustomerPayload<ExtArgs>
       orders: Prisma.$OrderPayload<ExtArgs>[]
+      subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -31625,6 +31983,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     orders<T extends ShippingAddress$ordersArgs<ExtArgs> = {}>(args?: Subset<T, ShippingAddress$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    subscriptions<T extends ShippingAddress$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, ShippingAddress$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -32089,6 +32448,30 @@ export namespace Prisma {
   }
 
   /**
+   * ShippingAddress.subscriptions
+   */
+  export type ShippingAddress$subscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    where?: SubscriptionWhereInput
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    cursor?: SubscriptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
    * ShippingAddress without action
    */
   export type ShippingAddressDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -32152,6 +32535,8 @@ export namespace Prisma {
     fulfillmentStatus: string | null
     stripeSessionId: string | null
     stripePaymentIntentId: string | null
+    stripeInvoiceId: string | null
+    subscriptionId: string | null
     subtotal: number | null
     tax: number | null
     shipping: number | null
@@ -32187,6 +32572,8 @@ export namespace Prisma {
     fulfillmentStatus: string | null
     stripeSessionId: string | null
     stripePaymentIntentId: string | null
+    stripeInvoiceId: string | null
+    subscriptionId: string | null
     subtotal: number | null
     tax: number | null
     shipping: number | null
@@ -32222,6 +32609,8 @@ export namespace Prisma {
     fulfillmentStatus: number
     stripeSessionId: number
     stripePaymentIntentId: number
+    stripeInvoiceId: number
+    subscriptionId: number
     subtotal: number
     tax: number
     shipping: number
@@ -32279,6 +32668,8 @@ export namespace Prisma {
     fulfillmentStatus?: true
     stripeSessionId?: true
     stripePaymentIntentId?: true
+    stripeInvoiceId?: true
+    subscriptionId?: true
     subtotal?: true
     tax?: true
     shipping?: true
@@ -32314,6 +32705,8 @@ export namespace Prisma {
     fulfillmentStatus?: true
     stripeSessionId?: true
     stripePaymentIntentId?: true
+    stripeInvoiceId?: true
+    subscriptionId?: true
     subtotal?: true
     tax?: true
     shipping?: true
@@ -32349,6 +32742,8 @@ export namespace Prisma {
     fulfillmentStatus?: true
     stripeSessionId?: true
     stripePaymentIntentId?: true
+    stripeInvoiceId?: true
+    subscriptionId?: true
     subtotal?: true
     tax?: true
     shipping?: true
@@ -32471,6 +32866,8 @@ export namespace Prisma {
     fulfillmentStatus: string
     stripeSessionId: string | null
     stripePaymentIntentId: string | null
+    stripeInvoiceId: string | null
+    subscriptionId: string | null
     subtotal: number
     tax: number
     shipping: number
@@ -32525,6 +32922,8 @@ export namespace Prisma {
     fulfillmentStatus?: boolean
     stripeSessionId?: boolean
     stripePaymentIntentId?: boolean
+    stripeInvoiceId?: boolean
+    subscriptionId?: boolean
     subtotal?: boolean
     tax?: boolean
     shipping?: boolean
@@ -32545,6 +32944,7 @@ export namespace Prisma {
     customerId?: boolean
     shippingAddressId?: boolean
     discountCodeId?: boolean
+    subscription?: boolean | Order$subscriptionArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
     shippingAddress?: boolean | Order$shippingAddressArgs<ExtArgs>
@@ -32569,6 +32969,8 @@ export namespace Prisma {
     fulfillmentStatus?: boolean
     stripeSessionId?: boolean
     stripePaymentIntentId?: boolean
+    stripeInvoiceId?: boolean
+    subscriptionId?: boolean
     subtotal?: boolean
     tax?: boolean
     shipping?: boolean
@@ -32589,6 +32991,7 @@ export namespace Prisma {
     customerId?: boolean
     shippingAddressId?: boolean
     discountCodeId?: boolean
+    subscription?: boolean | Order$subscriptionArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
     shippingAddress?: boolean | Order$shippingAddressArgs<ExtArgs>
@@ -32608,6 +33011,8 @@ export namespace Prisma {
     fulfillmentStatus?: boolean
     stripeSessionId?: boolean
     stripePaymentIntentId?: boolean
+    stripeInvoiceId?: boolean
+    subscriptionId?: boolean
     subtotal?: boolean
     tax?: boolean
     shipping?: boolean
@@ -32628,6 +33033,7 @@ export namespace Prisma {
     customerId?: boolean
     shippingAddressId?: boolean
     discountCodeId?: boolean
+    subscription?: boolean | Order$subscriptionArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
     shippingAddress?: boolean | Order$shippingAddressArgs<ExtArgs>
@@ -32647,6 +33053,8 @@ export namespace Prisma {
     fulfillmentStatus?: boolean
     stripeSessionId?: boolean
     stripePaymentIntentId?: boolean
+    stripeInvoiceId?: boolean
+    subscriptionId?: boolean
     subtotal?: boolean
     tax?: boolean
     shipping?: boolean
@@ -32669,8 +33077,9 @@ export namespace Prisma {
     discountCodeId?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "termsAcceptedAt" | "termsVersion" | "merchantTermsUpdatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "deliveryMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "termsAcceptedAt" | "termsVersion" | "merchantTermsUpdatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "stripeInvoiceId" | "subscriptionId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "deliveryMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    subscription?: boolean | Order$subscriptionArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
     shippingAddress?: boolean | Order$shippingAddressArgs<ExtArgs>
@@ -32682,12 +33091,14 @@ export namespace Prisma {
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    subscription?: boolean | Order$subscriptionArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
     shippingAddress?: boolean | Order$shippingAddressArgs<ExtArgs>
     discountCode?: boolean | Order$discountCodeArgs<ExtArgs>
   }
   export type OrderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    subscription?: boolean | Order$subscriptionArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
     shippingAddress?: boolean | Order$shippingAddressArgs<ExtArgs>
@@ -32697,6 +33108,7 @@ export namespace Prisma {
   export type $OrderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Order"
     objects: {
+      subscription: Prisma.$SubscriptionPayload<ExtArgs> | null
       business: Prisma.$BusinessPayload<ExtArgs>
       customer: Prisma.$CustomerPayload<ExtArgs> | null
       shippingAddress: Prisma.$ShippingAddressPayload<ExtArgs> | null
@@ -32719,6 +33131,8 @@ export namespace Prisma {
       fulfillmentStatus: string
       stripeSessionId: string | null
       stripePaymentIntentId: string | null
+      stripeInvoiceId: string | null
+      subscriptionId: string | null
       subtotal: number
       tax: number
       shipping: number
@@ -33142,6 +33556,7 @@ export namespace Prisma {
    */
   export interface Prisma__OrderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    subscription<T extends Order$subscriptionArgs<ExtArgs> = {}>(args?: Subset<T, Order$subscriptionArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     customer<T extends Order$customerArgs<ExtArgs> = {}>(args?: Subset<T, Order$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     shippingAddress<T extends Order$shippingAddressArgs<ExtArgs> = {}>(args?: Subset<T, Order$shippingAddressArgs<ExtArgs>>): Prisma__ShippingAddressClient<$Result.GetResult<Prisma.$ShippingAddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -33191,6 +33606,8 @@ export namespace Prisma {
     readonly fulfillmentStatus: FieldRef<"Order", 'String'>
     readonly stripeSessionId: FieldRef<"Order", 'String'>
     readonly stripePaymentIntentId: FieldRef<"Order", 'String'>
+    readonly stripeInvoiceId: FieldRef<"Order", 'String'>
+    readonly subscriptionId: FieldRef<"Order", 'String'>
     readonly subtotal: FieldRef<"Order", 'Int'>
     readonly tax: FieldRef<"Order", 'Int'>
     readonly shipping: FieldRef<"Order", 'Int'>
@@ -33604,6 +34021,25 @@ export namespace Prisma {
      * Limit how many Orders to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Order.subscription
+   */
+  export type Order$subscriptionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    where?: SubscriptionWhereInput
   }
 
   /**
@@ -64820,6 +65256,1829 @@ export namespace Prisma {
 
 
   /**
+   * Model Subscription
+   */
+
+  export type AggregateSubscription = {
+    _count: SubscriptionCountAggregateOutputType | null
+    _avg: SubscriptionAvgAggregateOutputType | null
+    _sum: SubscriptionSumAggregateOutputType | null
+    _min: SubscriptionMinAggregateOutputType | null
+    _max: SubscriptionMaxAggregateOutputType | null
+  }
+
+  export type SubscriptionAvgAggregateOutputType = {
+    quantity: number | null
+    intervalCount: number | null
+    listPriceCents: number | null
+    discountPercent: number | null
+    unitAmountCents: number | null
+    shippingCents: number | null
+  }
+
+  export type SubscriptionSumAggregateOutputType = {
+    quantity: number | null
+    intervalCount: number | null
+    listPriceCents: number | null
+    discountPercent: number | null
+    unitAmountCents: number | null
+    shippingCents: number | null
+  }
+
+  export type SubscriptionMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    customerEmail: string | null
+    customerName: string | null
+    customerPhone: string | null
+    stripeSubscriptionId: string | null
+    stripeCustomerId: string | null
+    stripeCheckoutSessionId: string | null
+    lastInvoiceId: string | null
+    productId: string | null
+    productVariantId: string | null
+    productName: string | null
+    variantName: string | null
+    sku: string | null
+    quantity: number | null
+    intervalKey: string | null
+    interval: string | null
+    intervalCount: number | null
+    listPriceCents: number | null
+    discountPercent: number | null
+    unitAmountCents: number | null
+    shippingCents: number | null
+    deliveryMethod: string | null
+    shippingAddressId: string | null
+    shipFirstName: string | null
+    shipLastName: string | null
+    shipAddress1: string | null
+    shipAddress2: string | null
+    shipCity: string | null
+    shipProvince: string | null
+    shipZip: string | null
+    shipCountry: string | null
+    status: string | null
+    pauseResumesAt: Date | null
+    currentPeriodStart: Date | null
+    currentPeriodEnd: Date | null
+    nextBillingAt: Date | null
+    cancelledAt: Date | null
+    cancelReason: string | null
+    lastPaymentFailedAt: Date | null
+    lastSyncedAt: Date | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
+  }
+
+  export type SubscriptionMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    customerEmail: string | null
+    customerName: string | null
+    customerPhone: string | null
+    stripeSubscriptionId: string | null
+    stripeCustomerId: string | null
+    stripeCheckoutSessionId: string | null
+    lastInvoiceId: string | null
+    productId: string | null
+    productVariantId: string | null
+    productName: string | null
+    variantName: string | null
+    sku: string | null
+    quantity: number | null
+    intervalKey: string | null
+    interval: string | null
+    intervalCount: number | null
+    listPriceCents: number | null
+    discountPercent: number | null
+    unitAmountCents: number | null
+    shippingCents: number | null
+    deliveryMethod: string | null
+    shippingAddressId: string | null
+    shipFirstName: string | null
+    shipLastName: string | null
+    shipAddress1: string | null
+    shipAddress2: string | null
+    shipCity: string | null
+    shipProvince: string | null
+    shipZip: string | null
+    shipCountry: string | null
+    status: string | null
+    pauseResumesAt: Date | null
+    currentPeriodStart: Date | null
+    currentPeriodEnd: Date | null
+    nextBillingAt: Date | null
+    cancelledAt: Date | null
+    cancelReason: string | null
+    lastPaymentFailedAt: Date | null
+    lastSyncedAt: Date | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
+  }
+
+  export type SubscriptionCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    customerId: number
+    customerEmail: number
+    customerName: number
+    customerPhone: number
+    stripeSubscriptionId: number
+    stripeCustomerId: number
+    stripeCheckoutSessionId: number
+    lastInvoiceId: number
+    productId: number
+    productVariantId: number
+    productName: number
+    variantName: number
+    sku: number
+    quantity: number
+    intervalKey: number
+    interval: number
+    intervalCount: number
+    listPriceCents: number
+    discountPercent: number
+    unitAmountCents: number
+    shippingCents: number
+    deliveryMethod: number
+    shippingAddressId: number
+    shipFirstName: number
+    shipLastName: number
+    shipAddress1: number
+    shipAddress2: number
+    shipCity: number
+    shipProvince: number
+    shipZip: number
+    shipCountry: number
+    status: number
+    pauseResumesAt: number
+    currentPeriodStart: number
+    currentPeriodEnd: number
+    nextBillingAt: number
+    cancelledAt: number
+    cancelReason: number
+    lastPaymentFailedAt: number
+    lastSyncedAt: number
+    termsAcceptedAt: number
+    termsVersion: number
+    merchantTermsUpdatedAt: number
+    _all: number
+  }
+
+
+  export type SubscriptionAvgAggregateInputType = {
+    quantity?: true
+    intervalCount?: true
+    listPriceCents?: true
+    discountPercent?: true
+    unitAmountCents?: true
+    shippingCents?: true
+  }
+
+  export type SubscriptionSumAggregateInputType = {
+    quantity?: true
+    intervalCount?: true
+    listPriceCents?: true
+    discountPercent?: true
+    unitAmountCents?: true
+    shippingCents?: true
+  }
+
+  export type SubscriptionMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    customerEmail?: true
+    customerName?: true
+    customerPhone?: true
+    stripeSubscriptionId?: true
+    stripeCustomerId?: true
+    stripeCheckoutSessionId?: true
+    lastInvoiceId?: true
+    productId?: true
+    productVariantId?: true
+    productName?: true
+    variantName?: true
+    sku?: true
+    quantity?: true
+    intervalKey?: true
+    interval?: true
+    intervalCount?: true
+    listPriceCents?: true
+    discountPercent?: true
+    unitAmountCents?: true
+    shippingCents?: true
+    deliveryMethod?: true
+    shippingAddressId?: true
+    shipFirstName?: true
+    shipLastName?: true
+    shipAddress1?: true
+    shipAddress2?: true
+    shipCity?: true
+    shipProvince?: true
+    shipZip?: true
+    shipCountry?: true
+    status?: true
+    pauseResumesAt?: true
+    currentPeriodStart?: true
+    currentPeriodEnd?: true
+    nextBillingAt?: true
+    cancelledAt?: true
+    cancelReason?: true
+    lastPaymentFailedAt?: true
+    lastSyncedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
+  }
+
+  export type SubscriptionMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    customerEmail?: true
+    customerName?: true
+    customerPhone?: true
+    stripeSubscriptionId?: true
+    stripeCustomerId?: true
+    stripeCheckoutSessionId?: true
+    lastInvoiceId?: true
+    productId?: true
+    productVariantId?: true
+    productName?: true
+    variantName?: true
+    sku?: true
+    quantity?: true
+    intervalKey?: true
+    interval?: true
+    intervalCount?: true
+    listPriceCents?: true
+    discountPercent?: true
+    unitAmountCents?: true
+    shippingCents?: true
+    deliveryMethod?: true
+    shippingAddressId?: true
+    shipFirstName?: true
+    shipLastName?: true
+    shipAddress1?: true
+    shipAddress2?: true
+    shipCity?: true
+    shipProvince?: true
+    shipZip?: true
+    shipCountry?: true
+    status?: true
+    pauseResumesAt?: true
+    currentPeriodStart?: true
+    currentPeriodEnd?: true
+    nextBillingAt?: true
+    cancelledAt?: true
+    cancelReason?: true
+    lastPaymentFailedAt?: true
+    lastSyncedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
+  }
+
+  export type SubscriptionCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    customerEmail?: true
+    customerName?: true
+    customerPhone?: true
+    stripeSubscriptionId?: true
+    stripeCustomerId?: true
+    stripeCheckoutSessionId?: true
+    lastInvoiceId?: true
+    productId?: true
+    productVariantId?: true
+    productName?: true
+    variantName?: true
+    sku?: true
+    quantity?: true
+    intervalKey?: true
+    interval?: true
+    intervalCount?: true
+    listPriceCents?: true
+    discountPercent?: true
+    unitAmountCents?: true
+    shippingCents?: true
+    deliveryMethod?: true
+    shippingAddressId?: true
+    shipFirstName?: true
+    shipLastName?: true
+    shipAddress1?: true
+    shipAddress2?: true
+    shipCity?: true
+    shipProvince?: true
+    shipZip?: true
+    shipCountry?: true
+    status?: true
+    pauseResumesAt?: true
+    currentPeriodStart?: true
+    currentPeriodEnd?: true
+    nextBillingAt?: true
+    cancelledAt?: true
+    cancelReason?: true
+    lastPaymentFailedAt?: true
+    lastSyncedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
+    _all?: true
+  }
+
+  export type SubscriptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Subscription to aggregate.
+     */
+    where?: SubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Subscriptions to fetch.
+     */
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Subscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Subscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Subscriptions
+    **/
+    _count?: true | SubscriptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SubscriptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SubscriptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SubscriptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SubscriptionMaxAggregateInputType
+  }
+
+  export type GetSubscriptionAggregateType<T extends SubscriptionAggregateArgs> = {
+        [P in keyof T & keyof AggregateSubscription]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSubscription[P]>
+      : GetScalarType<T[P], AggregateSubscription[P]>
+  }
+
+
+
+
+  export type SubscriptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SubscriptionWhereInput
+    orderBy?: SubscriptionOrderByWithAggregationInput | SubscriptionOrderByWithAggregationInput[]
+    by: SubscriptionScalarFieldEnum[] | SubscriptionScalarFieldEnum
+    having?: SubscriptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SubscriptionCountAggregateInputType | true
+    _avg?: SubscriptionAvgAggregateInputType
+    _sum?: SubscriptionSumAggregateInputType
+    _min?: SubscriptionMinAggregateInputType
+    _max?: SubscriptionMaxAggregateInputType
+  }
+
+  export type SubscriptionGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    customerId: string | null
+    customerEmail: string
+    customerName: string | null
+    customerPhone: string | null
+    stripeSubscriptionId: string | null
+    stripeCustomerId: string | null
+    stripeCheckoutSessionId: string | null
+    lastInvoiceId: string | null
+    productId: string | null
+    productVariantId: string | null
+    productName: string
+    variantName: string | null
+    sku: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent: number
+    unitAmountCents: number
+    shippingCents: number
+    deliveryMethod: string
+    shippingAddressId: string | null
+    shipFirstName: string | null
+    shipLastName: string | null
+    shipAddress1: string | null
+    shipAddress2: string | null
+    shipCity: string | null
+    shipProvince: string | null
+    shipZip: string | null
+    shipCountry: string | null
+    status: string
+    pauseResumesAt: Date | null
+    currentPeriodStart: Date | null
+    currentPeriodEnd: Date | null
+    nextBillingAt: Date | null
+    cancelledAt: Date | null
+    cancelReason: string | null
+    lastPaymentFailedAt: Date | null
+    lastSyncedAt: Date | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
+    _count: SubscriptionCountAggregateOutputType | null
+    _avg: SubscriptionAvgAggregateOutputType | null
+    _sum: SubscriptionSumAggregateOutputType | null
+    _min: SubscriptionMinAggregateOutputType | null
+    _max: SubscriptionMaxAggregateOutputType | null
+  }
+
+  type GetSubscriptionGroupByPayload<T extends SubscriptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SubscriptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SubscriptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SubscriptionGroupByOutputType[P]>
+            : GetScalarType<T[P], SubscriptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SubscriptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    customerEmail?: boolean
+    customerName?: boolean
+    customerPhone?: boolean
+    stripeSubscriptionId?: boolean
+    stripeCustomerId?: boolean
+    stripeCheckoutSessionId?: boolean
+    lastInvoiceId?: boolean
+    productId?: boolean
+    productVariantId?: boolean
+    productName?: boolean
+    variantName?: boolean
+    sku?: boolean
+    quantity?: boolean
+    intervalKey?: boolean
+    interval?: boolean
+    intervalCount?: boolean
+    listPriceCents?: boolean
+    discountPercent?: boolean
+    unitAmountCents?: boolean
+    shippingCents?: boolean
+    deliveryMethod?: boolean
+    shippingAddressId?: boolean
+    shipFirstName?: boolean
+    shipLastName?: boolean
+    shipAddress1?: boolean
+    shipAddress2?: boolean
+    shipCity?: boolean
+    shipProvince?: boolean
+    shipZip?: boolean
+    shipCountry?: boolean
+    status?: boolean
+    pauseResumesAt?: boolean
+    currentPeriodStart?: boolean
+    currentPeriodEnd?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    cancelReason?: boolean
+    lastPaymentFailedAt?: boolean
+    lastSyncedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Subscription$customerArgs<ExtArgs>
+    product?: boolean | Subscription$productArgs<ExtArgs>
+    productVariant?: boolean | Subscription$productVariantArgs<ExtArgs>
+    shippingAddress?: boolean | Subscription$shippingAddressArgs<ExtArgs>
+    orders?: boolean | Subscription$ordersArgs<ExtArgs>
+    _count?: boolean | SubscriptionCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["subscription"]>
+
+  export type SubscriptionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    customerEmail?: boolean
+    customerName?: boolean
+    customerPhone?: boolean
+    stripeSubscriptionId?: boolean
+    stripeCustomerId?: boolean
+    stripeCheckoutSessionId?: boolean
+    lastInvoiceId?: boolean
+    productId?: boolean
+    productVariantId?: boolean
+    productName?: boolean
+    variantName?: boolean
+    sku?: boolean
+    quantity?: boolean
+    intervalKey?: boolean
+    interval?: boolean
+    intervalCount?: boolean
+    listPriceCents?: boolean
+    discountPercent?: boolean
+    unitAmountCents?: boolean
+    shippingCents?: boolean
+    deliveryMethod?: boolean
+    shippingAddressId?: boolean
+    shipFirstName?: boolean
+    shipLastName?: boolean
+    shipAddress1?: boolean
+    shipAddress2?: boolean
+    shipCity?: boolean
+    shipProvince?: boolean
+    shipZip?: boolean
+    shipCountry?: boolean
+    status?: boolean
+    pauseResumesAt?: boolean
+    currentPeriodStart?: boolean
+    currentPeriodEnd?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    cancelReason?: boolean
+    lastPaymentFailedAt?: boolean
+    lastSyncedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Subscription$customerArgs<ExtArgs>
+    product?: boolean | Subscription$productArgs<ExtArgs>
+    productVariant?: boolean | Subscription$productVariantArgs<ExtArgs>
+    shippingAddress?: boolean | Subscription$shippingAddressArgs<ExtArgs>
+  }, ExtArgs["result"]["subscription"]>
+
+  export type SubscriptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    customerEmail?: boolean
+    customerName?: boolean
+    customerPhone?: boolean
+    stripeSubscriptionId?: boolean
+    stripeCustomerId?: boolean
+    stripeCheckoutSessionId?: boolean
+    lastInvoiceId?: boolean
+    productId?: boolean
+    productVariantId?: boolean
+    productName?: boolean
+    variantName?: boolean
+    sku?: boolean
+    quantity?: boolean
+    intervalKey?: boolean
+    interval?: boolean
+    intervalCount?: boolean
+    listPriceCents?: boolean
+    discountPercent?: boolean
+    unitAmountCents?: boolean
+    shippingCents?: boolean
+    deliveryMethod?: boolean
+    shippingAddressId?: boolean
+    shipFirstName?: boolean
+    shipLastName?: boolean
+    shipAddress1?: boolean
+    shipAddress2?: boolean
+    shipCity?: boolean
+    shipProvince?: boolean
+    shipZip?: boolean
+    shipCountry?: boolean
+    status?: boolean
+    pauseResumesAt?: boolean
+    currentPeriodStart?: boolean
+    currentPeriodEnd?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    cancelReason?: boolean
+    lastPaymentFailedAt?: boolean
+    lastSyncedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Subscription$customerArgs<ExtArgs>
+    product?: boolean | Subscription$productArgs<ExtArgs>
+    productVariant?: boolean | Subscription$productVariantArgs<ExtArgs>
+    shippingAddress?: boolean | Subscription$shippingAddressArgs<ExtArgs>
+  }, ExtArgs["result"]["subscription"]>
+
+  export type SubscriptionSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    customerEmail?: boolean
+    customerName?: boolean
+    customerPhone?: boolean
+    stripeSubscriptionId?: boolean
+    stripeCustomerId?: boolean
+    stripeCheckoutSessionId?: boolean
+    lastInvoiceId?: boolean
+    productId?: boolean
+    productVariantId?: boolean
+    productName?: boolean
+    variantName?: boolean
+    sku?: boolean
+    quantity?: boolean
+    intervalKey?: boolean
+    interval?: boolean
+    intervalCount?: boolean
+    listPriceCents?: boolean
+    discountPercent?: boolean
+    unitAmountCents?: boolean
+    shippingCents?: boolean
+    deliveryMethod?: boolean
+    shippingAddressId?: boolean
+    shipFirstName?: boolean
+    shipLastName?: boolean
+    shipAddress1?: boolean
+    shipAddress2?: boolean
+    shipCity?: boolean
+    shipProvince?: boolean
+    shipZip?: boolean
+    shipCountry?: boolean
+    status?: boolean
+    pauseResumesAt?: boolean
+    currentPeriodStart?: boolean
+    currentPeriodEnd?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    cancelReason?: boolean
+    lastPaymentFailedAt?: boolean
+    lastSyncedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
+  }
+
+  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "customerEmail" | "customerName" | "customerPhone" | "stripeSubscriptionId" | "stripeCustomerId" | "stripeCheckoutSessionId" | "lastInvoiceId" | "productId" | "productVariantId" | "productName" | "variantName" | "sku" | "quantity" | "intervalKey" | "interval" | "intervalCount" | "listPriceCents" | "discountPercent" | "unitAmountCents" | "shippingCents" | "deliveryMethod" | "shippingAddressId" | "shipFirstName" | "shipLastName" | "shipAddress1" | "shipAddress2" | "shipCity" | "shipProvince" | "shipZip" | "shipCountry" | "status" | "pauseResumesAt" | "currentPeriodStart" | "currentPeriodEnd" | "nextBillingAt" | "cancelledAt" | "cancelReason" | "lastPaymentFailedAt" | "lastSyncedAt" | "termsAcceptedAt" | "termsVersion" | "merchantTermsUpdatedAt", ExtArgs["result"]["subscription"]>
+  export type SubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Subscription$customerArgs<ExtArgs>
+    product?: boolean | Subscription$productArgs<ExtArgs>
+    productVariant?: boolean | Subscription$productVariantArgs<ExtArgs>
+    shippingAddress?: boolean | Subscription$shippingAddressArgs<ExtArgs>
+    orders?: boolean | Subscription$ordersArgs<ExtArgs>
+    _count?: boolean | SubscriptionCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type SubscriptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Subscription$customerArgs<ExtArgs>
+    product?: boolean | Subscription$productArgs<ExtArgs>
+    productVariant?: boolean | Subscription$productVariantArgs<ExtArgs>
+    shippingAddress?: boolean | Subscription$shippingAddressArgs<ExtArgs>
+  }
+  export type SubscriptionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Subscription$customerArgs<ExtArgs>
+    product?: boolean | Subscription$productArgs<ExtArgs>
+    productVariant?: boolean | Subscription$productVariantArgs<ExtArgs>
+    shippingAddress?: boolean | Subscription$shippingAddressArgs<ExtArgs>
+  }
+
+  export type $SubscriptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Subscription"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs> | null
+      product: Prisma.$ProductPayload<ExtArgs> | null
+      productVariant: Prisma.$ProductVariantPayload<ExtArgs> | null
+      shippingAddress: Prisma.$ShippingAddressPayload<ExtArgs> | null
+      orders: Prisma.$OrderPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      customerId: string | null
+      customerEmail: string
+      /**
+       * @encrypted
+       */
+      customerName: string | null
+      /**
+       * @encrypted
+       */
+      customerPhone: string | null
+      stripeSubscriptionId: string | null
+      stripeCustomerId: string | null
+      stripeCheckoutSessionId: string | null
+      lastInvoiceId: string | null
+      productId: string | null
+      productVariantId: string | null
+      productName: string
+      variantName: string | null
+      sku: string | null
+      quantity: number
+      intervalKey: string
+      interval: string
+      intervalCount: number
+      listPriceCents: number
+      discountPercent: number
+      unitAmountCents: number
+      shippingCents: number
+      deliveryMethod: string
+      shippingAddressId: string | null
+      /**
+       * @encrypted
+       */
+      shipFirstName: string | null
+      /**
+       * @encrypted
+       */
+      shipLastName: string | null
+      /**
+       * @encrypted
+       */
+      shipAddress1: string | null
+      /**
+       * @encrypted
+       */
+      shipAddress2: string | null
+      /**
+       * @encrypted
+       */
+      shipCity: string | null
+      /**
+       * @encrypted
+       */
+      shipProvince: string | null
+      /**
+       * @encrypted
+       */
+      shipZip: string | null
+      shipCountry: string | null
+      status: string
+      pauseResumesAt: Date | null
+      currentPeriodStart: Date | null
+      currentPeriodEnd: Date | null
+      nextBillingAt: Date | null
+      cancelledAt: Date | null
+      cancelReason: string | null
+      lastPaymentFailedAt: Date | null
+      lastSyncedAt: Date | null
+      termsAcceptedAt: Date | null
+      termsVersion: string | null
+      merchantTermsUpdatedAt: Date | null
+    }, ExtArgs["result"]["subscription"]>
+    composites: {}
+  }
+
+  type SubscriptionGetPayload<S extends boolean | null | undefined | SubscriptionDefaultArgs> = $Result.GetResult<Prisma.$SubscriptionPayload, S>
+
+  type SubscriptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SubscriptionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SubscriptionCountAggregateInputType | true
+    }
+
+  export interface SubscriptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Subscription'], meta: { name: 'Subscription' } }
+    /**
+     * Find zero or one Subscription that matches the filter.
+     * @param {SubscriptionFindUniqueArgs} args - Arguments to find a Subscription
+     * @example
+     * // Get one Subscription
+     * const subscription = await prisma.subscription.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SubscriptionFindUniqueArgs>(args: SelectSubset<T, SubscriptionFindUniqueArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Subscription that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SubscriptionFindUniqueOrThrowArgs} args - Arguments to find a Subscription
+     * @example
+     * // Get one Subscription
+     * const subscription = await prisma.subscription.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SubscriptionFindUniqueOrThrowArgs>(args: SelectSubset<T, SubscriptionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Subscription that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SubscriptionFindFirstArgs} args - Arguments to find a Subscription
+     * @example
+     * // Get one Subscription
+     * const subscription = await prisma.subscription.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SubscriptionFindFirstArgs>(args?: SelectSubset<T, SubscriptionFindFirstArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Subscription that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SubscriptionFindFirstOrThrowArgs} args - Arguments to find a Subscription
+     * @example
+     * // Get one Subscription
+     * const subscription = await prisma.subscription.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SubscriptionFindFirstOrThrowArgs>(args?: SelectSubset<T, SubscriptionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Subscriptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SubscriptionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Subscriptions
+     * const subscriptions = await prisma.subscription.findMany()
+     * 
+     * // Get first 10 Subscriptions
+     * const subscriptions = await prisma.subscription.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const subscriptionWithIdOnly = await prisma.subscription.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SubscriptionFindManyArgs>(args?: SelectSubset<T, SubscriptionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Subscription.
+     * @param {SubscriptionCreateArgs} args - Arguments to create a Subscription.
+     * @example
+     * // Create one Subscription
+     * const Subscription = await prisma.subscription.create({
+     *   data: {
+     *     // ... data to create a Subscription
+     *   }
+     * })
+     * 
+     */
+    create<T extends SubscriptionCreateArgs>(args: SelectSubset<T, SubscriptionCreateArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Subscriptions.
+     * @param {SubscriptionCreateManyArgs} args - Arguments to create many Subscriptions.
+     * @example
+     * // Create many Subscriptions
+     * const subscription = await prisma.subscription.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SubscriptionCreateManyArgs>(args?: SelectSubset<T, SubscriptionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Subscriptions and returns the data saved in the database.
+     * @param {SubscriptionCreateManyAndReturnArgs} args - Arguments to create many Subscriptions.
+     * @example
+     * // Create many Subscriptions
+     * const subscription = await prisma.subscription.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Subscriptions and only return the `id`
+     * const subscriptionWithIdOnly = await prisma.subscription.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SubscriptionCreateManyAndReturnArgs>(args?: SelectSubset<T, SubscriptionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Subscription.
+     * @param {SubscriptionDeleteArgs} args - Arguments to delete one Subscription.
+     * @example
+     * // Delete one Subscription
+     * const Subscription = await prisma.subscription.delete({
+     *   where: {
+     *     // ... filter to delete one Subscription
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SubscriptionDeleteArgs>(args: SelectSubset<T, SubscriptionDeleteArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Subscription.
+     * @param {SubscriptionUpdateArgs} args - Arguments to update one Subscription.
+     * @example
+     * // Update one Subscription
+     * const subscription = await prisma.subscription.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SubscriptionUpdateArgs>(args: SelectSubset<T, SubscriptionUpdateArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Subscriptions.
+     * @param {SubscriptionDeleteManyArgs} args - Arguments to filter Subscriptions to delete.
+     * @example
+     * // Delete a few Subscriptions
+     * const { count } = await prisma.subscription.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SubscriptionDeleteManyArgs>(args?: SelectSubset<T, SubscriptionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Subscriptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SubscriptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Subscriptions
+     * const subscription = await prisma.subscription.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SubscriptionUpdateManyArgs>(args: SelectSubset<T, SubscriptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Subscriptions and returns the data updated in the database.
+     * @param {SubscriptionUpdateManyAndReturnArgs} args - Arguments to update many Subscriptions.
+     * @example
+     * // Update many Subscriptions
+     * const subscription = await prisma.subscription.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Subscriptions and only return the `id`
+     * const subscriptionWithIdOnly = await prisma.subscription.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SubscriptionUpdateManyAndReturnArgs>(args: SelectSubset<T, SubscriptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Subscription.
+     * @param {SubscriptionUpsertArgs} args - Arguments to update or create a Subscription.
+     * @example
+     * // Update or create a Subscription
+     * const subscription = await prisma.subscription.upsert({
+     *   create: {
+     *     // ... data to create a Subscription
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Subscription we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SubscriptionUpsertArgs>(args: SelectSubset<T, SubscriptionUpsertArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Subscriptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SubscriptionCountArgs} args - Arguments to filter Subscriptions to count.
+     * @example
+     * // Count the number of Subscriptions
+     * const count = await prisma.subscription.count({
+     *   where: {
+     *     // ... the filter for the Subscriptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends SubscriptionCountArgs>(
+      args?: Subset<T, SubscriptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SubscriptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Subscription.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SubscriptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SubscriptionAggregateArgs>(args: Subset<T, SubscriptionAggregateArgs>): Prisma.PrismaPromise<GetSubscriptionAggregateType<T>>
+
+    /**
+     * Group by Subscription.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SubscriptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SubscriptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SubscriptionGroupByArgs['orderBy'] }
+        : { orderBy?: SubscriptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SubscriptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSubscriptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Subscription model
+   */
+  readonly fields: SubscriptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Subscription.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SubscriptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends Subscription$customerArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    product<T extends Subscription$productArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$productArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    productVariant<T extends Subscription$productVariantArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$productVariantArgs<ExtArgs>>): Prisma__ProductVariantClient<$Result.GetResult<Prisma.$ProductVariantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    shippingAddress<T extends Subscription$shippingAddressArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$shippingAddressArgs<ExtArgs>>): Prisma__ShippingAddressClient<$Result.GetResult<Prisma.$ShippingAddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    orders<T extends Subscription$ordersArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Subscription model
+   */
+  interface SubscriptionFieldRefs {
+    readonly id: FieldRef<"Subscription", 'String'>
+    readonly createdAt: FieldRef<"Subscription", 'DateTime'>
+    readonly updatedAt: FieldRef<"Subscription", 'DateTime'>
+    readonly businessId: FieldRef<"Subscription", 'String'>
+    readonly customerId: FieldRef<"Subscription", 'String'>
+    readonly customerEmail: FieldRef<"Subscription", 'String'>
+    readonly customerName: FieldRef<"Subscription", 'String'>
+    readonly customerPhone: FieldRef<"Subscription", 'String'>
+    readonly stripeSubscriptionId: FieldRef<"Subscription", 'String'>
+    readonly stripeCustomerId: FieldRef<"Subscription", 'String'>
+    readonly stripeCheckoutSessionId: FieldRef<"Subscription", 'String'>
+    readonly lastInvoiceId: FieldRef<"Subscription", 'String'>
+    readonly productId: FieldRef<"Subscription", 'String'>
+    readonly productVariantId: FieldRef<"Subscription", 'String'>
+    readonly productName: FieldRef<"Subscription", 'String'>
+    readonly variantName: FieldRef<"Subscription", 'String'>
+    readonly sku: FieldRef<"Subscription", 'String'>
+    readonly quantity: FieldRef<"Subscription", 'Int'>
+    readonly intervalKey: FieldRef<"Subscription", 'String'>
+    readonly interval: FieldRef<"Subscription", 'String'>
+    readonly intervalCount: FieldRef<"Subscription", 'Int'>
+    readonly listPriceCents: FieldRef<"Subscription", 'Int'>
+    readonly discountPercent: FieldRef<"Subscription", 'Int'>
+    readonly unitAmountCents: FieldRef<"Subscription", 'Int'>
+    readonly shippingCents: FieldRef<"Subscription", 'Int'>
+    readonly deliveryMethod: FieldRef<"Subscription", 'String'>
+    readonly shippingAddressId: FieldRef<"Subscription", 'String'>
+    readonly shipFirstName: FieldRef<"Subscription", 'String'>
+    readonly shipLastName: FieldRef<"Subscription", 'String'>
+    readonly shipAddress1: FieldRef<"Subscription", 'String'>
+    readonly shipAddress2: FieldRef<"Subscription", 'String'>
+    readonly shipCity: FieldRef<"Subscription", 'String'>
+    readonly shipProvince: FieldRef<"Subscription", 'String'>
+    readonly shipZip: FieldRef<"Subscription", 'String'>
+    readonly shipCountry: FieldRef<"Subscription", 'String'>
+    readonly status: FieldRef<"Subscription", 'String'>
+    readonly pauseResumesAt: FieldRef<"Subscription", 'DateTime'>
+    readonly currentPeriodStart: FieldRef<"Subscription", 'DateTime'>
+    readonly currentPeriodEnd: FieldRef<"Subscription", 'DateTime'>
+    readonly nextBillingAt: FieldRef<"Subscription", 'DateTime'>
+    readonly cancelledAt: FieldRef<"Subscription", 'DateTime'>
+    readonly cancelReason: FieldRef<"Subscription", 'String'>
+    readonly lastPaymentFailedAt: FieldRef<"Subscription", 'DateTime'>
+    readonly lastSyncedAt: FieldRef<"Subscription", 'DateTime'>
+    readonly termsAcceptedAt: FieldRef<"Subscription", 'DateTime'>
+    readonly termsVersion: FieldRef<"Subscription", 'String'>
+    readonly merchantTermsUpdatedAt: FieldRef<"Subscription", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Subscription findUnique
+   */
+  export type SubscriptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Subscription to fetch.
+     */
+    where: SubscriptionWhereUniqueInput
+  }
+
+  /**
+   * Subscription findUniqueOrThrow
+   */
+  export type SubscriptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Subscription to fetch.
+     */
+    where: SubscriptionWhereUniqueInput
+  }
+
+  /**
+   * Subscription findFirst
+   */
+  export type SubscriptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Subscription to fetch.
+     */
+    where?: SubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Subscriptions to fetch.
+     */
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Subscriptions.
+     */
+    cursor?: SubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Subscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Subscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Subscriptions.
+     */
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * Subscription findFirstOrThrow
+   */
+  export type SubscriptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Subscription to fetch.
+     */
+    where?: SubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Subscriptions to fetch.
+     */
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Subscriptions.
+     */
+    cursor?: SubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Subscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Subscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Subscriptions.
+     */
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * Subscription findMany
+   */
+  export type SubscriptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Subscriptions to fetch.
+     */
+    where?: SubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Subscriptions to fetch.
+     */
+    orderBy?: SubscriptionOrderByWithRelationInput | SubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Subscriptions.
+     */
+    cursor?: SubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Subscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Subscriptions.
+     */
+    skip?: number
+    distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * Subscription create
+   */
+  export type SubscriptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Subscription.
+     */
+    data: XOR<SubscriptionCreateInput, SubscriptionUncheckedCreateInput>
+  }
+
+  /**
+   * Subscription createMany
+   */
+  export type SubscriptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Subscriptions.
+     */
+    data: SubscriptionCreateManyInput | SubscriptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Subscription createManyAndReturn
+   */
+  export type SubscriptionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * The data used to create many Subscriptions.
+     */
+    data: SubscriptionCreateManyInput | SubscriptionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Subscription update
+   */
+  export type SubscriptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Subscription.
+     */
+    data: XOR<SubscriptionUpdateInput, SubscriptionUncheckedUpdateInput>
+    /**
+     * Choose, which Subscription to update.
+     */
+    where: SubscriptionWhereUniqueInput
+  }
+
+  /**
+   * Subscription updateMany
+   */
+  export type SubscriptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Subscriptions.
+     */
+    data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyInput>
+    /**
+     * Filter which Subscriptions to update
+     */
+    where?: SubscriptionWhereInput
+    /**
+     * Limit how many Subscriptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Subscription updateManyAndReturn
+   */
+  export type SubscriptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * The data used to update Subscriptions.
+     */
+    data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyInput>
+    /**
+     * Filter which Subscriptions to update
+     */
+    where?: SubscriptionWhereInput
+    /**
+     * Limit how many Subscriptions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Subscription upsert
+   */
+  export type SubscriptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Subscription to update in case it exists.
+     */
+    where: SubscriptionWhereUniqueInput
+    /**
+     * In case the Subscription found by the `where` argument doesn't exist, create a new Subscription with this data.
+     */
+    create: XOR<SubscriptionCreateInput, SubscriptionUncheckedCreateInput>
+    /**
+     * In case the Subscription was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SubscriptionUpdateInput, SubscriptionUncheckedUpdateInput>
+  }
+
+  /**
+   * Subscription delete
+   */
+  export type SubscriptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter which Subscription to delete.
+     */
+    where: SubscriptionWhereUniqueInput
+  }
+
+  /**
+   * Subscription deleteMany
+   */
+  export type SubscriptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Subscriptions to delete
+     */
+    where?: SubscriptionWhereInput
+    /**
+     * Limit how many Subscriptions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Subscription.customer
+   */
+  export type Subscription$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Customer
+     */
+    omit?: CustomerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
+  }
+
+  /**
+   * Subscription.product
+   */
+  export type Subscription$productArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Product
+     */
+    select?: ProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Product
+     */
+    omit?: ProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductInclude<ExtArgs> | null
+    where?: ProductWhereInput
+  }
+
+  /**
+   * Subscription.productVariant
+   */
+  export type Subscription$productVariantArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductVariant
+     */
+    select?: ProductVariantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductVariant
+     */
+    omit?: ProductVariantOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductVariantInclude<ExtArgs> | null
+    where?: ProductVariantWhereInput
+  }
+
+  /**
+   * Subscription.shippingAddress
+   */
+  export type Subscription$shippingAddressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShippingAddress
+     */
+    select?: ShippingAddressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShippingAddress
+     */
+    omit?: ShippingAddressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShippingAddressInclude<ExtArgs> | null
+    where?: ShippingAddressWhereInput
+  }
+
+  /**
+   * Subscription.orders
+   */
+  export type Subscription$ordersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Order
+     */
+    select?: OrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Order
+     */
+    omit?: OrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderInclude<ExtArgs> | null
+    where?: OrderWhereInput
+    orderBy?: OrderOrderByWithRelationInput | OrderOrderByWithRelationInput[]
+    cursor?: OrderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OrderScalarFieldEnum | OrderScalarFieldEnum[]
+  }
+
+  /**
+   * Subscription without action
+   */
+  export type SubscriptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subscription
+     */
+    select?: SubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Subscription
+     */
+    omit?: SubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubscriptionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -64931,6 +67190,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
     stripeChargesEnabled: 'stripeChargesEnabled',
     stripePayoutsEnabled: 'stripePayoutsEnabled',
+    stripePortalConfigurationId: 'stripePortalConfigurationId',
     testimonialsAutoApprove: 'testimonialsAutoApprove',
     maintenanceMode: 'maintenanceMode',
     maintenanceVariant: 'maintenanceVariant',
@@ -65024,6 +67284,9 @@ export namespace Prisma {
     price: 'price',
     compareAtPrice: 'compareAtPrice',
     cost: 'cost',
+    subscriptionEnabled: 'subscriptionEnabled',
+    subscriptionIntervals: 'subscriptionIntervals',
+    subscriptionDiscountPercent: 'subscriptionDiscountPercent',
     sku: 'sku',
     barcode: 'barcode',
     trackInventory: 'trackInventory',
@@ -65235,6 +67498,7 @@ export namespace Prisma {
     firstName: 'firstName',
     lastName: 'lastName',
     phone: 'phone',
+    stripeCustomerId: 'stripeCustomerId',
     acceptsMarketing: 'acceptsMarketing',
     totalSpent: 'totalSpent',
     orderCount: 'orderCount',
@@ -65282,6 +67546,8 @@ export namespace Prisma {
     fulfillmentStatus: 'fulfillmentStatus',
     stripeSessionId: 'stripeSessionId',
     stripePaymentIntentId: 'stripePaymentIntentId',
+    stripeInvoiceId: 'stripeInvoiceId',
+    subscriptionId: 'subscriptionId',
     subtotal: 'subtotal',
     tax: 'tax',
     shipping: 'shipping',
@@ -65773,6 +68039,59 @@ export namespace Prisma {
   };
 
   export type QuickBooksInvoiceScalarFieldEnum = (typeof QuickBooksInvoiceScalarFieldEnum)[keyof typeof QuickBooksInvoiceScalarFieldEnum]
+
+
+  export const SubscriptionScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    customerId: 'customerId',
+    customerEmail: 'customerEmail',
+    customerName: 'customerName',
+    customerPhone: 'customerPhone',
+    stripeSubscriptionId: 'stripeSubscriptionId',
+    stripeCustomerId: 'stripeCustomerId',
+    stripeCheckoutSessionId: 'stripeCheckoutSessionId',
+    lastInvoiceId: 'lastInvoiceId',
+    productId: 'productId',
+    productVariantId: 'productVariantId',
+    productName: 'productName',
+    variantName: 'variantName',
+    sku: 'sku',
+    quantity: 'quantity',
+    intervalKey: 'intervalKey',
+    interval: 'interval',
+    intervalCount: 'intervalCount',
+    listPriceCents: 'listPriceCents',
+    discountPercent: 'discountPercent',
+    unitAmountCents: 'unitAmountCents',
+    shippingCents: 'shippingCents',
+    deliveryMethod: 'deliveryMethod',
+    shippingAddressId: 'shippingAddressId',
+    shipFirstName: 'shipFirstName',
+    shipLastName: 'shipLastName',
+    shipAddress1: 'shipAddress1',
+    shipAddress2: 'shipAddress2',
+    shipCity: 'shipCity',
+    shipProvince: 'shipProvince',
+    shipZip: 'shipZip',
+    shipCountry: 'shipCountry',
+    status: 'status',
+    pauseResumesAt: 'pauseResumesAt',
+    currentPeriodStart: 'currentPeriodStart',
+    currentPeriodEnd: 'currentPeriodEnd',
+    nextBillingAt: 'nextBillingAt',
+    cancelledAt: 'cancelledAt',
+    cancelReason: 'cancelReason',
+    lastPaymentFailedAt: 'lastPaymentFailedAt',
+    lastSyncedAt: 'lastSyncedAt',
+    termsAcceptedAt: 'termsAcceptedAt',
+    termsVersion: 'termsVersion',
+    merchantTermsUpdatedAt: 'merchantTermsUpdatedAt'
+  };
+
+  export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -66382,6 +68701,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     stripeChargesEnabled?: BoolFilter<"Business"> | boolean
     stripePayoutsEnabled?: BoolFilter<"Business"> | boolean
+    stripePortalConfigurationId?: StringNullableFilter<"Business"> | string | null
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     maintenanceMode?: BoolFilter<"Business"> | boolean
     maintenanceVariant?: StringFilter<"Business"> | string
@@ -66436,6 +68756,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -66458,6 +68779,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
     stripePayoutsEnabled?: SortOrder
+    stripePortalConfigurationId?: SortOrderInput | SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -66512,6 +68834,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionOrderByRelationAggregateInput
     quickBooksConnection?: QuickBooksConnectionOrderByWithRelationInput
     quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
+    subscriptions?: SubscriptionOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -66537,6 +68860,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     stripeChargesEnabled?: BoolFilter<"Business"> | boolean
     stripePayoutsEnabled?: BoolFilter<"Business"> | boolean
+    stripePortalConfigurationId?: StringNullableFilter<"Business"> | string | null
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     maintenanceMode?: BoolFilter<"Business"> | boolean
     maintenanceVariant?: StringFilter<"Business"> | string
@@ -66591,6 +68915,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -66613,6 +68938,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
     stripePayoutsEnabled?: SortOrder
+    stripePortalConfigurationId?: SortOrderInput | SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -66667,6 +68993,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     stripeChargesEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     stripePayoutsEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
+    stripePortalConfigurationId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     testimonialsAutoApprove?: BoolWithAggregatesFilter<"Business"> | boolean
     maintenanceMode?: BoolWithAggregatesFilter<"Business"> | boolean
     maintenanceVariant?: StringWithAggregatesFilter<"Business"> | string
@@ -66974,6 +69301,9 @@ export namespace Prisma {
     price?: FloatFilter<"Product"> | number
     compareAtPrice?: FloatNullableFilter<"Product"> | number | null
     cost?: FloatNullableFilter<"Product"> | number | null
+    subscriptionEnabled?: BoolFilter<"Product"> | boolean
+    subscriptionIntervals?: JsonNullableFilter<"Product">
+    subscriptionDiscountPercent?: IntFilter<"Product"> | number
     sku?: StringNullableFilter<"Product"> | string | null
     barcode?: StringNullableFilter<"Product"> | string | null
     trackInventory?: BoolFilter<"Product"> | boolean
@@ -67007,6 +69337,7 @@ export namespace Prisma {
     orderItems?: OrderItemListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
     reviews?: ProductReviewListRelationFilter
   }
 
@@ -67021,6 +69352,9 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrderInput | SortOrder
     cost?: SortOrderInput | SortOrder
+    subscriptionEnabled?: SortOrder
+    subscriptionIntervals?: SortOrderInput | SortOrder
+    subscriptionDiscountPercent?: SortOrder
     sku?: SortOrderInput | SortOrder
     barcode?: SortOrderInput | SortOrder
     trackInventory?: SortOrder
@@ -67054,6 +69388,7 @@ export namespace Prisma {
     orderItems?: OrderItemOrderByRelationAggregateInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
+    subscriptions?: SubscriptionOrderByRelationAggregateInput
     reviews?: ProductReviewOrderByRelationAggregateInput
   }
 
@@ -67072,6 +69407,9 @@ export namespace Prisma {
     price?: FloatFilter<"Product"> | number
     compareAtPrice?: FloatNullableFilter<"Product"> | number | null
     cost?: FloatNullableFilter<"Product"> | number | null
+    subscriptionEnabled?: BoolFilter<"Product"> | boolean
+    subscriptionIntervals?: JsonNullableFilter<"Product">
+    subscriptionDiscountPercent?: IntFilter<"Product"> | number
     sku?: StringNullableFilter<"Product"> | string | null
     barcode?: StringNullableFilter<"Product"> | string | null
     trackInventory?: BoolFilter<"Product"> | boolean
@@ -67105,6 +69443,7 @@ export namespace Prisma {
     orderItems?: OrderItemListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
     reviews?: ProductReviewListRelationFilter
   }, "id" | "businessId_slug">
 
@@ -67119,6 +69458,9 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrderInput | SortOrder
     cost?: SortOrderInput | SortOrder
+    subscriptionEnabled?: SortOrder
+    subscriptionIntervals?: SortOrderInput | SortOrder
+    subscriptionDiscountPercent?: SortOrder
     sku?: SortOrderInput | SortOrder
     barcode?: SortOrderInput | SortOrder
     trackInventory?: SortOrder
@@ -67165,6 +69507,9 @@ export namespace Prisma {
     price?: FloatWithAggregatesFilter<"Product"> | number
     compareAtPrice?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     cost?: FloatNullableWithAggregatesFilter<"Product"> | number | null
+    subscriptionEnabled?: BoolWithAggregatesFilter<"Product"> | boolean
+    subscriptionIntervals?: JsonNullableWithAggregatesFilter<"Product">
+    subscriptionDiscountPercent?: IntWithAggregatesFilter<"Product"> | number
     sku?: StringNullableWithAggregatesFilter<"Product"> | string | null
     barcode?: StringNullableWithAggregatesFilter<"Product"> | string | null
     trackInventory?: BoolWithAggregatesFilter<"Product"> | boolean
@@ -67212,6 +69557,7 @@ export namespace Prisma {
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     inventoryHistory?: InventoryHistoryListRelationFilter
     orderItems?: OrderItemListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }
 
   export type ProductVariantOrderByWithRelationInput = {
@@ -67231,6 +69577,7 @@ export namespace Prisma {
     product?: ProductOrderByWithRelationInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     orderItems?: OrderItemOrderByRelationAggregateInput
+    subscriptions?: SubscriptionOrderByRelationAggregateInput
   }
 
   export type ProductVariantWhereUniqueInput = Prisma.AtLeast<{
@@ -67253,6 +69600,7 @@ export namespace Prisma {
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     inventoryHistory?: InventoryHistoryListRelationFilter
     orderItems?: OrderItemListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }, "id">
 
   export type ProductVariantOrderByWithAggregationInput = {
@@ -68113,6 +70461,7 @@ export namespace Prisma {
     firstName?: StringNullableFilter<"Customer"> | string | null
     lastName?: StringNullableFilter<"Customer"> | string | null
     phone?: StringNullableFilter<"Customer"> | string | null
+    stripeCustomerId?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
@@ -68128,6 +70477,7 @@ export namespace Prisma {
     testimonials?: TestimonialListRelationFilter
     testimonialInvites?: TestimonialInviteListRelationFilter
     reviews?: ProductReviewListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }
 
   export type CustomerOrderByWithRelationInput = {
@@ -68138,6 +70488,7 @@ export namespace Prisma {
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
+    stripeCustomerId?: SortOrderInput | SortOrder
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
@@ -68153,6 +70504,7 @@ export namespace Prisma {
     testimonials?: TestimonialOrderByRelationAggregateInput
     testimonialInvites?: TestimonialInviteOrderByRelationAggregateInput
     reviews?: ProductReviewOrderByRelationAggregateInput
+    subscriptions?: SubscriptionOrderByRelationAggregateInput
   }
 
   export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -68167,6 +70519,7 @@ export namespace Prisma {
     firstName?: StringNullableFilter<"Customer"> | string | null
     lastName?: StringNullableFilter<"Customer"> | string | null
     phone?: StringNullableFilter<"Customer"> | string | null
+    stripeCustomerId?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
@@ -68182,6 +70535,7 @@ export namespace Prisma {
     testimonials?: TestimonialListRelationFilter
     testimonialInvites?: TestimonialInviteListRelationFilter
     reviews?: ProductReviewListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }, "id" | "businessId_email">
 
   export type CustomerOrderByWithAggregationInput = {
@@ -68192,6 +70546,7 @@ export namespace Prisma {
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
+    stripeCustomerId?: SortOrderInput | SortOrder
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
@@ -68218,6 +70573,7 @@ export namespace Prisma {
     firstName?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     lastName?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     phone?: StringNullableWithAggregatesFilter<"Customer"> | string | null
+    stripeCustomerId?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     acceptsMarketing?: BoolWithAggregatesFilter<"Customer"> | boolean
     totalSpent?: IntWithAggregatesFilter<"Customer"> | number
     orderCount?: IntWithAggregatesFilter<"Customer"> | number
@@ -68249,6 +70605,7 @@ export namespace Prisma {
     customerId?: StringFilter<"ShippingAddress"> | string
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     orders?: OrderListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }
 
   export type ShippingAddressOrderByWithRelationInput = {
@@ -68269,6 +70626,7 @@ export namespace Prisma {
     customerId?: SortOrder
     customer?: CustomerOrderByWithRelationInput
     orders?: OrderOrderByRelationAggregateInput
+    subscriptions?: SubscriptionOrderByRelationAggregateInput
   }
 
   export type ShippingAddressWhereUniqueInput = Prisma.AtLeast<{
@@ -68292,6 +70650,7 @@ export namespace Prisma {
     customerId?: StringFilter<"ShippingAddress"> | string
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     orders?: OrderListRelationFilter
+    subscriptions?: SubscriptionListRelationFilter
   }, "id">
 
   export type ShippingAddressOrderByWithAggregationInput = {
@@ -68352,6 +70711,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFilter<"Order"> | string
     stripeSessionId?: StringNullableFilter<"Order"> | string | null
     stripePaymentIntentId?: StringNullableFilter<"Order"> | string | null
+    stripeInvoiceId?: StringNullableFilter<"Order"> | string | null
+    subscriptionId?: StringNullableFilter<"Order"> | string | null
     subtotal?: IntFilter<"Order"> | number
     tax?: IntFilter<"Order"> | number
     shipping?: IntFilter<"Order"> | number
@@ -68372,6 +70733,7 @@ export namespace Prisma {
     customerId?: StringNullableFilter<"Order"> | string | null
     shippingAddressId?: StringNullableFilter<"Order"> | string | null
     discountCodeId?: StringNullableFilter<"Order"> | string | null
+    subscription?: XOR<SubscriptionNullableScalarRelationFilter, SubscriptionWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     shippingAddress?: XOR<ShippingAddressNullableScalarRelationFilter, ShippingAddressWhereInput> | null
@@ -68395,6 +70757,8 @@ export namespace Prisma {
     fulfillmentStatus?: SortOrder
     stripeSessionId?: SortOrderInput | SortOrder
     stripePaymentIntentId?: SortOrderInput | SortOrder
+    stripeInvoiceId?: SortOrderInput | SortOrder
+    subscriptionId?: SortOrderInput | SortOrder
     subtotal?: SortOrder
     tax?: SortOrder
     shipping?: SortOrder
@@ -68415,6 +70779,7 @@ export namespace Prisma {
     customerId?: SortOrderInput | SortOrder
     shippingAddressId?: SortOrderInput | SortOrder
     discountCodeId?: SortOrderInput | SortOrder
+    subscription?: SubscriptionOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
     shippingAddress?: ShippingAddressOrderByWithRelationInput
@@ -68428,6 +70793,7 @@ export namespace Prisma {
   export type OrderWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     stripeSessionId?: string
+    stripeInvoiceId?: string
     businessId_orderNumber?: OrderBusinessIdOrderNumberCompoundUniqueInput
     AND?: OrderWhereInput | OrderWhereInput[]
     OR?: OrderWhereInput[]
@@ -68442,6 +70808,7 @@ export namespace Prisma {
     paymentStatus?: StringFilter<"Order"> | string
     fulfillmentStatus?: StringFilter<"Order"> | string
     stripePaymentIntentId?: StringNullableFilter<"Order"> | string | null
+    subscriptionId?: StringNullableFilter<"Order"> | string | null
     subtotal?: IntFilter<"Order"> | number
     tax?: IntFilter<"Order"> | number
     shipping?: IntFilter<"Order"> | number
@@ -68462,6 +70829,7 @@ export namespace Prisma {
     customerId?: StringNullableFilter<"Order"> | string | null
     shippingAddressId?: StringNullableFilter<"Order"> | string | null
     discountCodeId?: StringNullableFilter<"Order"> | string | null
+    subscription?: XOR<SubscriptionNullableScalarRelationFilter, SubscriptionWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     shippingAddress?: XOR<ShippingAddressNullableScalarRelationFilter, ShippingAddressWhereInput> | null
@@ -68470,7 +70838,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryListRelationFilter
     reviews?: ProductReviewListRelationFilter
     shipments?: OrderShipmentListRelationFilter
-  }, "id" | "stripeSessionId" | "businessId_orderNumber">
+  }, "id" | "stripeSessionId" | "stripeInvoiceId" | "businessId_orderNumber">
 
   export type OrderOrderByWithAggregationInput = {
     id?: SortOrder
@@ -68485,6 +70853,8 @@ export namespace Prisma {
     fulfillmentStatus?: SortOrder
     stripeSessionId?: SortOrderInput | SortOrder
     stripePaymentIntentId?: SortOrderInput | SortOrder
+    stripeInvoiceId?: SortOrderInput | SortOrder
+    subscriptionId?: SortOrderInput | SortOrder
     subtotal?: SortOrder
     tax?: SortOrder
     shipping?: SortOrder
@@ -68528,6 +70898,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringWithAggregatesFilter<"Order"> | string
     stripeSessionId?: StringNullableWithAggregatesFilter<"Order"> | string | null
     stripePaymentIntentId?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    stripeInvoiceId?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    subscriptionId?: StringNullableWithAggregatesFilter<"Order"> | string | null
     subtotal?: IntWithAggregatesFilter<"Order"> | number
     tax?: IntWithAggregatesFilter<"Order"> | number
     shipping?: IntWithAggregatesFilter<"Order"> | number
@@ -70994,6 +73366,288 @@ export namespace Prisma {
     lastError?: StringNullableWithAggregatesFilter<"QuickBooksInvoice"> | string | null
   }
 
+  export type SubscriptionWhereInput = {
+    AND?: SubscriptionWhereInput | SubscriptionWhereInput[]
+    OR?: SubscriptionWhereInput[]
+    NOT?: SubscriptionWhereInput | SubscriptionWhereInput[]
+    id?: StringFilter<"Subscription"> | string
+    createdAt?: DateTimeFilter<"Subscription"> | Date | string
+    updatedAt?: DateTimeFilter<"Subscription"> | Date | string
+    businessId?: StringFilter<"Subscription"> | string
+    customerId?: StringNullableFilter<"Subscription"> | string | null
+    customerEmail?: StringFilter<"Subscription"> | string
+    customerName?: StringNullableFilter<"Subscription"> | string | null
+    customerPhone?: StringNullableFilter<"Subscription"> | string | null
+    stripeSubscriptionId?: StringNullableFilter<"Subscription"> | string | null
+    stripeCustomerId?: StringNullableFilter<"Subscription"> | string | null
+    stripeCheckoutSessionId?: StringNullableFilter<"Subscription"> | string | null
+    lastInvoiceId?: StringNullableFilter<"Subscription"> | string | null
+    productId?: StringNullableFilter<"Subscription"> | string | null
+    productVariantId?: StringNullableFilter<"Subscription"> | string | null
+    productName?: StringFilter<"Subscription"> | string
+    variantName?: StringNullableFilter<"Subscription"> | string | null
+    sku?: StringNullableFilter<"Subscription"> | string | null
+    quantity?: IntFilter<"Subscription"> | number
+    intervalKey?: StringFilter<"Subscription"> | string
+    interval?: StringFilter<"Subscription"> | string
+    intervalCount?: IntFilter<"Subscription"> | number
+    listPriceCents?: IntFilter<"Subscription"> | number
+    discountPercent?: IntFilter<"Subscription"> | number
+    unitAmountCents?: IntFilter<"Subscription"> | number
+    shippingCents?: IntFilter<"Subscription"> | number
+    deliveryMethod?: StringFilter<"Subscription"> | string
+    shippingAddressId?: StringNullableFilter<"Subscription"> | string | null
+    shipFirstName?: StringNullableFilter<"Subscription"> | string | null
+    shipLastName?: StringNullableFilter<"Subscription"> | string | null
+    shipAddress1?: StringNullableFilter<"Subscription"> | string | null
+    shipAddress2?: StringNullableFilter<"Subscription"> | string | null
+    shipCity?: StringNullableFilter<"Subscription"> | string | null
+    shipProvince?: StringNullableFilter<"Subscription"> | string | null
+    shipZip?: StringNullableFilter<"Subscription"> | string | null
+    shipCountry?: StringNullableFilter<"Subscription"> | string | null
+    status?: StringFilter<"Subscription"> | string
+    pauseResumesAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    currentPeriodStart?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    currentPeriodEnd?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    nextBillingAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    cancelledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    cancelReason?: StringNullableFilter<"Subscription"> | string | null
+    lastPaymentFailedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    lastSyncedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    termsAcceptedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Subscription"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+    product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
+    productVariant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
+    shippingAddress?: XOR<ShippingAddressNullableScalarRelationFilter, ShippingAddressWhereInput> | null
+    orders?: OrderListRelationFilter
+  }
+
+  export type SubscriptionOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    customerEmail?: SortOrder
+    customerName?: SortOrderInput | SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    stripeSubscriptionId?: SortOrderInput | SortOrder
+    stripeCustomerId?: SortOrderInput | SortOrder
+    stripeCheckoutSessionId?: SortOrderInput | SortOrder
+    lastInvoiceId?: SortOrderInput | SortOrder
+    productId?: SortOrderInput | SortOrder
+    productVariantId?: SortOrderInput | SortOrder
+    productName?: SortOrder
+    variantName?: SortOrderInput | SortOrder
+    sku?: SortOrderInput | SortOrder
+    quantity?: SortOrder
+    intervalKey?: SortOrder
+    interval?: SortOrder
+    intervalCount?: SortOrder
+    listPriceCents?: SortOrder
+    discountPercent?: SortOrder
+    unitAmountCents?: SortOrder
+    shippingCents?: SortOrder
+    deliveryMethod?: SortOrder
+    shippingAddressId?: SortOrderInput | SortOrder
+    shipFirstName?: SortOrderInput | SortOrder
+    shipLastName?: SortOrderInput | SortOrder
+    shipAddress1?: SortOrderInput | SortOrder
+    shipAddress2?: SortOrderInput | SortOrder
+    shipCity?: SortOrderInput | SortOrder
+    shipProvince?: SortOrderInput | SortOrder
+    shipZip?: SortOrderInput | SortOrder
+    shipCountry?: SortOrderInput | SortOrder
+    status?: SortOrder
+    pauseResumesAt?: SortOrderInput | SortOrder
+    currentPeriodStart?: SortOrderInput | SortOrder
+    currentPeriodEnd?: SortOrderInput | SortOrder
+    nextBillingAt?: SortOrderInput | SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    cancelReason?: SortOrderInput | SortOrder
+    lastPaymentFailedAt?: SortOrderInput | SortOrder
+    lastSyncedAt?: SortOrderInput | SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
+    merchantTermsUpdatedAt?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
+    product?: ProductOrderByWithRelationInput
+    productVariant?: ProductVariantOrderByWithRelationInput
+    shippingAddress?: ShippingAddressOrderByWithRelationInput
+    orders?: OrderOrderByRelationAggregateInput
+  }
+
+  export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    stripeSubscriptionId?: string
+    stripeCheckoutSessionId?: string
+    AND?: SubscriptionWhereInput | SubscriptionWhereInput[]
+    OR?: SubscriptionWhereInput[]
+    NOT?: SubscriptionWhereInput | SubscriptionWhereInput[]
+    createdAt?: DateTimeFilter<"Subscription"> | Date | string
+    updatedAt?: DateTimeFilter<"Subscription"> | Date | string
+    businessId?: StringFilter<"Subscription"> | string
+    customerId?: StringNullableFilter<"Subscription"> | string | null
+    customerEmail?: StringFilter<"Subscription"> | string
+    customerName?: StringNullableFilter<"Subscription"> | string | null
+    customerPhone?: StringNullableFilter<"Subscription"> | string | null
+    stripeCustomerId?: StringNullableFilter<"Subscription"> | string | null
+    lastInvoiceId?: StringNullableFilter<"Subscription"> | string | null
+    productId?: StringNullableFilter<"Subscription"> | string | null
+    productVariantId?: StringNullableFilter<"Subscription"> | string | null
+    productName?: StringFilter<"Subscription"> | string
+    variantName?: StringNullableFilter<"Subscription"> | string | null
+    sku?: StringNullableFilter<"Subscription"> | string | null
+    quantity?: IntFilter<"Subscription"> | number
+    intervalKey?: StringFilter<"Subscription"> | string
+    interval?: StringFilter<"Subscription"> | string
+    intervalCount?: IntFilter<"Subscription"> | number
+    listPriceCents?: IntFilter<"Subscription"> | number
+    discountPercent?: IntFilter<"Subscription"> | number
+    unitAmountCents?: IntFilter<"Subscription"> | number
+    shippingCents?: IntFilter<"Subscription"> | number
+    deliveryMethod?: StringFilter<"Subscription"> | string
+    shippingAddressId?: StringNullableFilter<"Subscription"> | string | null
+    shipFirstName?: StringNullableFilter<"Subscription"> | string | null
+    shipLastName?: StringNullableFilter<"Subscription"> | string | null
+    shipAddress1?: StringNullableFilter<"Subscription"> | string | null
+    shipAddress2?: StringNullableFilter<"Subscription"> | string | null
+    shipCity?: StringNullableFilter<"Subscription"> | string | null
+    shipProvince?: StringNullableFilter<"Subscription"> | string | null
+    shipZip?: StringNullableFilter<"Subscription"> | string | null
+    shipCountry?: StringNullableFilter<"Subscription"> | string | null
+    status?: StringFilter<"Subscription"> | string
+    pauseResumesAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    currentPeriodStart?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    currentPeriodEnd?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    nextBillingAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    cancelledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    cancelReason?: StringNullableFilter<"Subscription"> | string | null
+    lastPaymentFailedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    lastSyncedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    termsAcceptedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Subscription"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+    product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
+    productVariant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
+    shippingAddress?: XOR<ShippingAddressNullableScalarRelationFilter, ShippingAddressWhereInput> | null
+    orders?: OrderListRelationFilter
+  }, "id" | "stripeSubscriptionId" | "stripeCheckoutSessionId">
+
+  export type SubscriptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    customerEmail?: SortOrder
+    customerName?: SortOrderInput | SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    stripeSubscriptionId?: SortOrderInput | SortOrder
+    stripeCustomerId?: SortOrderInput | SortOrder
+    stripeCheckoutSessionId?: SortOrderInput | SortOrder
+    lastInvoiceId?: SortOrderInput | SortOrder
+    productId?: SortOrderInput | SortOrder
+    productVariantId?: SortOrderInput | SortOrder
+    productName?: SortOrder
+    variantName?: SortOrderInput | SortOrder
+    sku?: SortOrderInput | SortOrder
+    quantity?: SortOrder
+    intervalKey?: SortOrder
+    interval?: SortOrder
+    intervalCount?: SortOrder
+    listPriceCents?: SortOrder
+    discountPercent?: SortOrder
+    unitAmountCents?: SortOrder
+    shippingCents?: SortOrder
+    deliveryMethod?: SortOrder
+    shippingAddressId?: SortOrderInput | SortOrder
+    shipFirstName?: SortOrderInput | SortOrder
+    shipLastName?: SortOrderInput | SortOrder
+    shipAddress1?: SortOrderInput | SortOrder
+    shipAddress2?: SortOrderInput | SortOrder
+    shipCity?: SortOrderInput | SortOrder
+    shipProvince?: SortOrderInput | SortOrder
+    shipZip?: SortOrderInput | SortOrder
+    shipCountry?: SortOrderInput | SortOrder
+    status?: SortOrder
+    pauseResumesAt?: SortOrderInput | SortOrder
+    currentPeriodStart?: SortOrderInput | SortOrder
+    currentPeriodEnd?: SortOrderInput | SortOrder
+    nextBillingAt?: SortOrderInput | SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    cancelReason?: SortOrderInput | SortOrder
+    lastPaymentFailedAt?: SortOrderInput | SortOrder
+    lastSyncedAt?: SortOrderInput | SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
+    merchantTermsUpdatedAt?: SortOrderInput | SortOrder
+    _count?: SubscriptionCountOrderByAggregateInput
+    _avg?: SubscriptionAvgOrderByAggregateInput
+    _max?: SubscriptionMaxOrderByAggregateInput
+    _min?: SubscriptionMinOrderByAggregateInput
+    _sum?: SubscriptionSumOrderByAggregateInput
+  }
+
+  export type SubscriptionScalarWhereWithAggregatesInput = {
+    AND?: SubscriptionScalarWhereWithAggregatesInput | SubscriptionScalarWhereWithAggregatesInput[]
+    OR?: SubscriptionScalarWhereWithAggregatesInput[]
+    NOT?: SubscriptionScalarWhereWithAggregatesInput | SubscriptionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Subscription"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
+    businessId?: StringWithAggregatesFilter<"Subscription"> | string
+    customerId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    customerEmail?: StringWithAggregatesFilter<"Subscription"> | string
+    customerName?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    customerPhone?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    stripeSubscriptionId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    stripeCustomerId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    stripeCheckoutSessionId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    lastInvoiceId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    productId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    productVariantId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    productName?: StringWithAggregatesFilter<"Subscription"> | string
+    variantName?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    sku?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    quantity?: IntWithAggregatesFilter<"Subscription"> | number
+    intervalKey?: StringWithAggregatesFilter<"Subscription"> | string
+    interval?: StringWithAggregatesFilter<"Subscription"> | string
+    intervalCount?: IntWithAggregatesFilter<"Subscription"> | number
+    listPriceCents?: IntWithAggregatesFilter<"Subscription"> | number
+    discountPercent?: IntWithAggregatesFilter<"Subscription"> | number
+    unitAmountCents?: IntWithAggregatesFilter<"Subscription"> | number
+    shippingCents?: IntWithAggregatesFilter<"Subscription"> | number
+    deliveryMethod?: StringWithAggregatesFilter<"Subscription"> | string
+    shippingAddressId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipFirstName?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipLastName?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipAddress1?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipAddress2?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipCity?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipProvince?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipZip?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    shipCountry?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    status?: StringWithAggregatesFilter<"Subscription"> | string
+    pauseResumesAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    currentPeriodStart?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    currentPeriodEnd?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    nextBillingAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    cancelledAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    cancelReason?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    lastPaymentFailedAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    lastSyncedAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    termsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    termsVersion?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -71479,6 +74133,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -71533,6 +74188,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -71555,6 +74211,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -71609,6 +74266,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -71631,6 +74289,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -71685,6 +74344,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -71707,6 +74367,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -71761,6 +74422,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -71783,6 +74445,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -71829,6 +74492,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -71875,6 +74539,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -72239,6 +74904,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -72270,6 +74938,7 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -72284,6 +74953,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -72315,6 +74987,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -72329,6 +75002,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -72360,6 +75036,7 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -72374,6 +75051,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -72405,6 +75085,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -72419,6 +75100,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -72457,6 +75141,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -72493,6 +75180,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -72536,6 +75226,7 @@ export namespace Prisma {
     product: ProductCreateNestedOneWithoutVariantsInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantUncheckedCreateInput = {
@@ -72554,6 +75245,7 @@ export namespace Prisma {
     productId: string
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantUpdateInput = {
@@ -72572,6 +75264,7 @@ export namespace Prisma {
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateInput = {
@@ -72590,6 +75283,7 @@ export namespace Prisma {
     productId?: StringFieldUpdateOperationsInput | string
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
   }
 
   export type ProductVariantCreateManyInput = {
@@ -73558,6 +76252,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -73571,6 +76266,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateInput = {
@@ -73581,6 +76277,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -73594,6 +76291,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUpdateInput = {
@@ -73604,6 +76302,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -73617,6 +76316,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateInput = {
@@ -73627,6 +76327,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -73640,6 +76341,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateManyInput = {
@@ -73650,6 +76352,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -73668,6 +76371,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -73684,6 +76388,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -73711,6 +76416,7 @@ export namespace Prisma {
     isDefault?: boolean
     customer: CustomerCreateNestedOneWithoutShippingAddressesInput
     orders?: OrderCreateNestedManyWithoutShippingAddressInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutShippingAddressInput
   }
 
   export type ShippingAddressUncheckedCreateInput = {
@@ -73730,6 +76436,7 @@ export namespace Prisma {
     isDefault?: boolean
     customerId: string
     orders?: OrderUncheckedCreateNestedManyWithoutShippingAddressInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutShippingAddressInput
   }
 
   export type ShippingAddressUpdateInput = {
@@ -73749,6 +76456,7 @@ export namespace Prisma {
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     customer?: CustomerUpdateOneRequiredWithoutShippingAddressesNestedInput
     orders?: OrderUpdateManyWithoutShippingAddressNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutShippingAddressNestedInput
   }
 
   export type ShippingAddressUncheckedUpdateInput = {
@@ -73768,6 +76476,7 @@ export namespace Prisma {
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     customerId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutShippingAddressNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutShippingAddressNestedInput
   }
 
   export type ShippingAddressCreateManyInput = {
@@ -73836,6 +76545,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -73852,6 +76562,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
@@ -73875,6 +76586,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -73914,6 +76627,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -73930,6 +76644,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
@@ -73953,6 +76668,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -73992,6 +76709,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -74027,6 +76746,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -74058,6 +76778,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -76802,6 +79524,355 @@ export namespace Prisma {
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type SubscriptionCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutSubscriptionsInput
+    customer?: CustomerCreateNestedOneWithoutSubscriptionsInput
+    product?: ProductCreateNestedOneWithoutSubscriptionsInput
+    productVariant?: ProductVariantCreateNestedOneWithoutSubscriptionsInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutSubscriptionsInput
+    orders?: OrderCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orders?: OrderUncheckedCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput
+    customer?: CustomerUpdateOneWithoutSubscriptionsNestedInput
+    product?: ProductUpdateOneWithoutSubscriptionsNestedInput
+    productVariant?: ProductVariantUpdateOneWithoutSubscriptionsNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutSubscriptionsNestedInput
+    orders?: OrderUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orders?: OrderUncheckedUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+  }
+
+  export type SubscriptionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SubscriptionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -77475,6 +80546,12 @@ export namespace Prisma {
     none?: QuickBooksInvoiceWhereInput
   }
 
+  export type SubscriptionListRelationFilter = {
+    every?: SubscriptionWhereInput
+    some?: SubscriptionWhereInput
+    none?: SubscriptionWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -77567,6 +80644,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type SubscriptionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BusinessCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -77587,6 +80668,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
     stripePayoutsEnabled?: SortOrder
+    stripePortalConfigurationId?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -77640,6 +80722,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
     stripePayoutsEnabled?: SortOrder
+    stripePortalConfigurationId?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -77682,6 +80765,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
     stripePayoutsEnabled?: SortOrder
+    stripePortalConfigurationId?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -78033,6 +81117,9 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     cost?: SortOrder
+    subscriptionEnabled?: SortOrder
+    subscriptionIntervals?: SortOrder
+    subscriptionDiscountPercent?: SortOrder
     sku?: SortOrder
     barcode?: SortOrder
     trackInventory?: SortOrder
@@ -78064,6 +81151,7 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     cost?: SortOrder
+    subscriptionDiscountPercent?: SortOrder
     inventoryQty?: SortOrder
     reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
@@ -78085,6 +81173,8 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     cost?: SortOrder
+    subscriptionEnabled?: SortOrder
+    subscriptionDiscountPercent?: SortOrder
     sku?: SortOrder
     barcode?: SortOrder
     trackInventory?: SortOrder
@@ -78122,6 +81212,8 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     cost?: SortOrder
+    subscriptionEnabled?: SortOrder
+    subscriptionDiscountPercent?: SortOrder
     sku?: SortOrder
     barcode?: SortOrder
     trackInventory?: SortOrder
@@ -78152,6 +81244,7 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     cost?: SortOrder
+    subscriptionDiscountPercent?: SortOrder
     inventoryQty?: SortOrder
     reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
@@ -78778,6 +81871,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     phone?: SortOrder
+    stripeCustomerId?: SortOrder
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
@@ -78801,6 +81895,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     phone?: SortOrder
+    stripeCustomerId?: SortOrder
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
@@ -78819,6 +81914,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     phone?: SortOrder
+    stripeCustomerId?: SortOrder
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
@@ -78893,6 +81989,11 @@ export namespace Prisma {
     customerId?: SortOrder
   }
 
+  export type SubscriptionNullableScalarRelationFilter = {
+    is?: SubscriptionWhereInput | null
+    isNot?: SubscriptionWhereInput | null
+  }
+
   export type CustomerNullableScalarRelationFilter = {
     is?: CustomerWhereInput | null
     isNot?: CustomerWhereInput | null
@@ -78936,6 +82037,8 @@ export namespace Prisma {
     fulfillmentStatus?: SortOrder
     stripeSessionId?: SortOrder
     stripePaymentIntentId?: SortOrder
+    stripeInvoiceId?: SortOrder
+    subscriptionId?: SortOrder
     subtotal?: SortOrder
     tax?: SortOrder
     shipping?: SortOrder
@@ -78981,6 +82084,8 @@ export namespace Prisma {
     fulfillmentStatus?: SortOrder
     stripeSessionId?: SortOrder
     stripePaymentIntentId?: SortOrder
+    stripeInvoiceId?: SortOrder
+    subscriptionId?: SortOrder
     subtotal?: SortOrder
     tax?: SortOrder
     shipping?: SortOrder
@@ -79016,6 +82121,8 @@ export namespace Prisma {
     fulfillmentStatus?: SortOrder
     stripeSessionId?: SortOrder
     stripePaymentIntentId?: SortOrder
+    stripeInvoiceId?: SortOrder
+    subscriptionId?: SortOrder
     subtotal?: SortOrder
     tax?: SortOrder
     shipping?: SortOrder
@@ -80472,6 +83579,174 @@ export namespace Prisma {
     balanceCents?: SortOrder
   }
 
+  export type SubscriptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    customerEmail?: SortOrder
+    customerName?: SortOrder
+    customerPhone?: SortOrder
+    stripeSubscriptionId?: SortOrder
+    stripeCustomerId?: SortOrder
+    stripeCheckoutSessionId?: SortOrder
+    lastInvoiceId?: SortOrder
+    productId?: SortOrder
+    productVariantId?: SortOrder
+    productName?: SortOrder
+    variantName?: SortOrder
+    sku?: SortOrder
+    quantity?: SortOrder
+    intervalKey?: SortOrder
+    interval?: SortOrder
+    intervalCount?: SortOrder
+    listPriceCents?: SortOrder
+    discountPercent?: SortOrder
+    unitAmountCents?: SortOrder
+    shippingCents?: SortOrder
+    deliveryMethod?: SortOrder
+    shippingAddressId?: SortOrder
+    shipFirstName?: SortOrder
+    shipLastName?: SortOrder
+    shipAddress1?: SortOrder
+    shipAddress2?: SortOrder
+    shipCity?: SortOrder
+    shipProvince?: SortOrder
+    shipZip?: SortOrder
+    shipCountry?: SortOrder
+    status?: SortOrder
+    pauseResumesAt?: SortOrder
+    currentPeriodStart?: SortOrder
+    currentPeriodEnd?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrder
+    cancelReason?: SortOrder
+    lastPaymentFailedAt?: SortOrder
+    lastSyncedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
+  }
+
+  export type SubscriptionAvgOrderByAggregateInput = {
+    quantity?: SortOrder
+    intervalCount?: SortOrder
+    listPriceCents?: SortOrder
+    discountPercent?: SortOrder
+    unitAmountCents?: SortOrder
+    shippingCents?: SortOrder
+  }
+
+  export type SubscriptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    customerEmail?: SortOrder
+    customerName?: SortOrder
+    customerPhone?: SortOrder
+    stripeSubscriptionId?: SortOrder
+    stripeCustomerId?: SortOrder
+    stripeCheckoutSessionId?: SortOrder
+    lastInvoiceId?: SortOrder
+    productId?: SortOrder
+    productVariantId?: SortOrder
+    productName?: SortOrder
+    variantName?: SortOrder
+    sku?: SortOrder
+    quantity?: SortOrder
+    intervalKey?: SortOrder
+    interval?: SortOrder
+    intervalCount?: SortOrder
+    listPriceCents?: SortOrder
+    discountPercent?: SortOrder
+    unitAmountCents?: SortOrder
+    shippingCents?: SortOrder
+    deliveryMethod?: SortOrder
+    shippingAddressId?: SortOrder
+    shipFirstName?: SortOrder
+    shipLastName?: SortOrder
+    shipAddress1?: SortOrder
+    shipAddress2?: SortOrder
+    shipCity?: SortOrder
+    shipProvince?: SortOrder
+    shipZip?: SortOrder
+    shipCountry?: SortOrder
+    status?: SortOrder
+    pauseResumesAt?: SortOrder
+    currentPeriodStart?: SortOrder
+    currentPeriodEnd?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrder
+    cancelReason?: SortOrder
+    lastPaymentFailedAt?: SortOrder
+    lastSyncedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
+  }
+
+  export type SubscriptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    customerEmail?: SortOrder
+    customerName?: SortOrder
+    customerPhone?: SortOrder
+    stripeSubscriptionId?: SortOrder
+    stripeCustomerId?: SortOrder
+    stripeCheckoutSessionId?: SortOrder
+    lastInvoiceId?: SortOrder
+    productId?: SortOrder
+    productVariantId?: SortOrder
+    productName?: SortOrder
+    variantName?: SortOrder
+    sku?: SortOrder
+    quantity?: SortOrder
+    intervalKey?: SortOrder
+    interval?: SortOrder
+    intervalCount?: SortOrder
+    listPriceCents?: SortOrder
+    discountPercent?: SortOrder
+    unitAmountCents?: SortOrder
+    shippingCents?: SortOrder
+    deliveryMethod?: SortOrder
+    shippingAddressId?: SortOrder
+    shipFirstName?: SortOrder
+    shipLastName?: SortOrder
+    shipAddress1?: SortOrder
+    shipAddress2?: SortOrder
+    shipCity?: SortOrder
+    shipProvince?: SortOrder
+    shipZip?: SortOrder
+    shipCountry?: SortOrder
+    status?: SortOrder
+    pauseResumesAt?: SortOrder
+    currentPeriodStart?: SortOrder
+    currentPeriodEnd?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrder
+    cancelReason?: SortOrder
+    lastPaymentFailedAt?: SortOrder
+    lastSyncedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
+  }
+
+  export type SubscriptionSumOrderByAggregateInput = {
+    quantity?: SortOrder
+    intervalCount?: SortOrder
+    listPriceCents?: SortOrder
+    discountPercent?: SortOrder
+    unitAmountCents?: SortOrder
+    shippingCents?: SortOrder
+  }
+
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -81062,6 +84337,13 @@ export namespace Prisma {
     connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
   }
 
+  export type SubscriptionCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<SubscriptionCreateWithoutBusinessInput, SubscriptionUncheckedCreateWithoutBusinessInput> | SubscriptionCreateWithoutBusinessInput[] | SubscriptionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutBusinessInput | SubscriptionCreateOrConnectWithoutBusinessInput[]
+    createMany?: SubscriptionCreateManyBusinessInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -81268,6 +84550,13 @@ export namespace Prisma {
     connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutBusinessInput | QuickBooksInvoiceCreateOrConnectWithoutBusinessInput[]
     createMany?: QuickBooksInvoiceCreateManyBusinessInputEnvelope
     connect?: QuickBooksInvoiceWhereUniqueInput | QuickBooksInvoiceWhereUniqueInput[]
+  }
+
+  export type SubscriptionUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<SubscriptionCreateWithoutBusinessInput, SubscriptionUncheckedCreateWithoutBusinessInput> | SubscriptionCreateWithoutBusinessInput[] | SubscriptionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutBusinessInput | SubscriptionCreateOrConnectWithoutBusinessInput[]
+    createMany?: SubscriptionCreateManyBusinessInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -81707,6 +84996,20 @@ export namespace Prisma {
     deleteMany?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
   }
 
+  export type SubscriptionUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutBusinessInput, SubscriptionUncheckedCreateWithoutBusinessInput> | SubscriptionCreateWithoutBusinessInput[] | SubscriptionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutBusinessInput | SubscriptionCreateOrConnectWithoutBusinessInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutBusinessInput | SubscriptionUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: SubscriptionCreateManyBusinessInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutBusinessInput | SubscriptionUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutBusinessInput | SubscriptionUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -82119,6 +85422,20 @@ export namespace Prisma {
     deleteMany?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
   }
 
+  export type SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutBusinessInput, SubscriptionUncheckedCreateWithoutBusinessInput> | SubscriptionCreateWithoutBusinessInput[] | SubscriptionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutBusinessInput | SubscriptionCreateOrConnectWithoutBusinessInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutBusinessInput | SubscriptionUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: SubscriptionCreateManyBusinessInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutBusinessInput | SubscriptionUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutBusinessInput | SubscriptionUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
     create?: XOR<BusinessCreateWithoutSiteContentInput, BusinessUncheckedCreateWithoutSiteContentInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutSiteContentInput
@@ -82209,6 +85526,13 @@ export namespace Prisma {
     connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
   }
 
+  export type SubscriptionCreateNestedManyWithoutProductInput = {
+    create?: XOR<SubscriptionCreateWithoutProductInput, SubscriptionUncheckedCreateWithoutProductInput> | SubscriptionCreateWithoutProductInput[] | SubscriptionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductInput | SubscriptionCreateOrConnectWithoutProductInput[]
+    createMany?: SubscriptionCreateManyProductInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
   export type ProductReviewCreateNestedManyWithoutProductInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -82256,6 +85580,13 @@ export namespace Prisma {
     connectOrCreate?: BackInStockRequestCreateOrConnectWithoutProductInput | BackInStockRequestCreateOrConnectWithoutProductInput[]
     createMany?: BackInStockRequestCreateManyProductInputEnvelope
     connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+  }
+
+  export type SubscriptionUncheckedCreateNestedManyWithoutProductInput = {
+    create?: XOR<SubscriptionCreateWithoutProductInput, SubscriptionUncheckedCreateWithoutProductInput> | SubscriptionCreateWithoutProductInput[] | SubscriptionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductInput | SubscriptionCreateOrConnectWithoutProductInput[]
+    createMany?: SubscriptionCreateManyProductInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
   export type ProductReviewUncheckedCreateNestedManyWithoutProductInput = {
@@ -82375,6 +85706,20 @@ export namespace Prisma {
     deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
   }
 
+  export type SubscriptionUpdateManyWithoutProductNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutProductInput, SubscriptionUncheckedCreateWithoutProductInput> | SubscriptionCreateWithoutProductInput[] | SubscriptionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductInput | SubscriptionCreateOrConnectWithoutProductInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutProductInput | SubscriptionUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: SubscriptionCreateManyProductInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutProductInput | SubscriptionUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutProductInput | SubscriptionUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type ProductReviewUpdateManyWithoutProductNestedInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -82473,6 +85818,20 @@ export namespace Prisma {
     deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
   }
 
+  export type SubscriptionUncheckedUpdateManyWithoutProductNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutProductInput, SubscriptionUncheckedCreateWithoutProductInput> | SubscriptionCreateWithoutProductInput[] | SubscriptionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductInput | SubscriptionCreateOrConnectWithoutProductInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutProductInput | SubscriptionUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: SubscriptionCreateManyProductInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutProductInput | SubscriptionUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutProductInput | SubscriptionUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type ProductReviewUncheckedUpdateManyWithoutProductNestedInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -82507,6 +85866,13 @@ export namespace Prisma {
     connect?: OrderItemWhereUniqueInput | OrderItemWhereUniqueInput[]
   }
 
+  export type SubscriptionCreateNestedManyWithoutProductVariantInput = {
+    create?: XOR<SubscriptionCreateWithoutProductVariantInput, SubscriptionUncheckedCreateWithoutProductVariantInput> | SubscriptionCreateWithoutProductVariantInput[] | SubscriptionUncheckedCreateWithoutProductVariantInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductVariantInput | SubscriptionCreateOrConnectWithoutProductVariantInput[]
+    createMany?: SubscriptionCreateManyProductVariantInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
   export type InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput = {
     create?: XOR<InventoryHistoryCreateWithoutVariantInput, InventoryHistoryUncheckedCreateWithoutVariantInput> | InventoryHistoryCreateWithoutVariantInput[] | InventoryHistoryUncheckedCreateWithoutVariantInput[]
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutVariantInput | InventoryHistoryCreateOrConnectWithoutVariantInput[]
@@ -82519,6 +85885,13 @@ export namespace Prisma {
     connectOrCreate?: OrderItemCreateOrConnectWithoutProductVariantInput | OrderItemCreateOrConnectWithoutProductVariantInput[]
     createMany?: OrderItemCreateManyProductVariantInputEnvelope
     connect?: OrderItemWhereUniqueInput | OrderItemWhereUniqueInput[]
+  }
+
+  export type SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput = {
+    create?: XOR<SubscriptionCreateWithoutProductVariantInput, SubscriptionUncheckedCreateWithoutProductVariantInput> | SubscriptionCreateWithoutProductVariantInput[] | SubscriptionUncheckedCreateWithoutProductVariantInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductVariantInput | SubscriptionCreateOrConnectWithoutProductVariantInput[]
+    createMany?: SubscriptionCreateManyProductVariantInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
   export type ProductUpdateOneRequiredWithoutVariantsNestedInput = {
@@ -82557,6 +85930,20 @@ export namespace Prisma {
     deleteMany?: OrderItemScalarWhereInput | OrderItemScalarWhereInput[]
   }
 
+  export type SubscriptionUpdateManyWithoutProductVariantNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutProductVariantInput, SubscriptionUncheckedCreateWithoutProductVariantInput> | SubscriptionCreateWithoutProductVariantInput[] | SubscriptionUncheckedCreateWithoutProductVariantInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductVariantInput | SubscriptionCreateOrConnectWithoutProductVariantInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutProductVariantInput | SubscriptionUpsertWithWhereUniqueWithoutProductVariantInput[]
+    createMany?: SubscriptionCreateManyProductVariantInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutProductVariantInput | SubscriptionUpdateWithWhereUniqueWithoutProductVariantInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutProductVariantInput | SubscriptionUpdateManyWithWhereWithoutProductVariantInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput = {
     create?: XOR<InventoryHistoryCreateWithoutVariantInput, InventoryHistoryUncheckedCreateWithoutVariantInput> | InventoryHistoryCreateWithoutVariantInput[] | InventoryHistoryUncheckedCreateWithoutVariantInput[]
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutVariantInput | InventoryHistoryCreateOrConnectWithoutVariantInput[]
@@ -82583,6 +85970,20 @@ export namespace Prisma {
     update?: OrderItemUpdateWithWhereUniqueWithoutProductVariantInput | OrderItemUpdateWithWhereUniqueWithoutProductVariantInput[]
     updateMany?: OrderItemUpdateManyWithWhereWithoutProductVariantInput | OrderItemUpdateManyWithWhereWithoutProductVariantInput[]
     deleteMany?: OrderItemScalarWhereInput | OrderItemScalarWhereInput[]
+  }
+
+  export type SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutProductVariantInput, SubscriptionUncheckedCreateWithoutProductVariantInput> | SubscriptionCreateWithoutProductVariantInput[] | SubscriptionUncheckedCreateWithoutProductVariantInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutProductVariantInput | SubscriptionCreateOrConnectWithoutProductVariantInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutProductVariantInput | SubscriptionUpsertWithWhereUniqueWithoutProductVariantInput[]
+    createMany?: SubscriptionCreateManyProductVariantInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutProductVariantInput | SubscriptionUpdateWithWhereUniqueWithoutProductVariantInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutProductVariantInput | SubscriptionUpdateManyWithWhereWithoutProductVariantInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutCollectionsInput = {
@@ -82918,6 +86319,13 @@ export namespace Prisma {
     connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
   }
 
+  export type SubscriptionCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<SubscriptionCreateWithoutCustomerInput, SubscriptionUncheckedCreateWithoutCustomerInput> | SubscriptionCreateWithoutCustomerInput[] | SubscriptionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutCustomerInput | SubscriptionCreateOrConnectWithoutCustomerInput[]
+    createMany?: SubscriptionCreateManyCustomerInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
   export type OrderUncheckedCreateNestedManyWithoutCustomerInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -82951,6 +86359,13 @@ export namespace Prisma {
     connectOrCreate?: ProductReviewCreateOrConnectWithoutCustomerInput | ProductReviewCreateOrConnectWithoutCustomerInput[]
     createMany?: ProductReviewCreateManyCustomerInputEnvelope
     connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+  }
+
+  export type SubscriptionUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<SubscriptionCreateWithoutCustomerInput, SubscriptionUncheckedCreateWithoutCustomerInput> | SubscriptionCreateWithoutCustomerInput[] | SubscriptionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutCustomerInput | SubscriptionCreateOrConnectWithoutCustomerInput[]
+    createMany?: SubscriptionCreateManyCustomerInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
   export type UserUpdateOneWithoutCustomersNestedInput = {
@@ -83041,6 +86456,20 @@ export namespace Prisma {
     deleteMany?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
   }
 
+  export type SubscriptionUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutCustomerInput, SubscriptionUncheckedCreateWithoutCustomerInput> | SubscriptionCreateWithoutCustomerInput[] | SubscriptionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutCustomerInput | SubscriptionCreateOrConnectWithoutCustomerInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutCustomerInput | SubscriptionUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: SubscriptionCreateManyCustomerInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutCustomerInput | SubscriptionUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutCustomerInput | SubscriptionUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type OrderUncheckedUpdateManyWithoutCustomerNestedInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -83111,6 +86540,20 @@ export namespace Prisma {
     deleteMany?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
   }
 
+  export type SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutCustomerInput, SubscriptionUncheckedCreateWithoutCustomerInput> | SubscriptionCreateWithoutCustomerInput[] | SubscriptionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutCustomerInput | SubscriptionCreateOrConnectWithoutCustomerInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutCustomerInput | SubscriptionUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: SubscriptionCreateManyCustomerInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutCustomerInput | SubscriptionUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutCustomerInput | SubscriptionUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type CustomerCreateNestedOneWithoutShippingAddressesInput = {
     create?: XOR<CustomerCreateWithoutShippingAddressesInput, CustomerUncheckedCreateWithoutShippingAddressesInput>
     connectOrCreate?: CustomerCreateOrConnectWithoutShippingAddressesInput
@@ -83124,11 +86567,25 @@ export namespace Prisma {
     connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
   }
 
+  export type SubscriptionCreateNestedManyWithoutShippingAddressInput = {
+    create?: XOR<SubscriptionCreateWithoutShippingAddressInput, SubscriptionUncheckedCreateWithoutShippingAddressInput> | SubscriptionCreateWithoutShippingAddressInput[] | SubscriptionUncheckedCreateWithoutShippingAddressInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutShippingAddressInput | SubscriptionCreateOrConnectWithoutShippingAddressInput[]
+    createMany?: SubscriptionCreateManyShippingAddressInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
   export type OrderUncheckedCreateNestedManyWithoutShippingAddressInput = {
     create?: XOR<OrderCreateWithoutShippingAddressInput, OrderUncheckedCreateWithoutShippingAddressInput> | OrderCreateWithoutShippingAddressInput[] | OrderUncheckedCreateWithoutShippingAddressInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutShippingAddressInput | OrderCreateOrConnectWithoutShippingAddressInput[]
     createMany?: OrderCreateManyShippingAddressInputEnvelope
     connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
+  export type SubscriptionUncheckedCreateNestedManyWithoutShippingAddressInput = {
+    create?: XOR<SubscriptionCreateWithoutShippingAddressInput, SubscriptionUncheckedCreateWithoutShippingAddressInput> | SubscriptionCreateWithoutShippingAddressInput[] | SubscriptionUncheckedCreateWithoutShippingAddressInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutShippingAddressInput | SubscriptionCreateOrConnectWithoutShippingAddressInput[]
+    createMany?: SubscriptionCreateManyShippingAddressInputEnvelope
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
   export type CustomerUpdateOneRequiredWithoutShippingAddressesNestedInput = {
@@ -83153,6 +86610,20 @@ export namespace Prisma {
     deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
   }
 
+  export type SubscriptionUpdateManyWithoutShippingAddressNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutShippingAddressInput, SubscriptionUncheckedCreateWithoutShippingAddressInput> | SubscriptionCreateWithoutShippingAddressInput[] | SubscriptionUncheckedCreateWithoutShippingAddressInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutShippingAddressInput | SubscriptionCreateOrConnectWithoutShippingAddressInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutShippingAddressInput | SubscriptionUpsertWithWhereUniqueWithoutShippingAddressInput[]
+    createMany?: SubscriptionCreateManyShippingAddressInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutShippingAddressInput | SubscriptionUpdateWithWhereUniqueWithoutShippingAddressInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutShippingAddressInput | SubscriptionUpdateManyWithWhereWithoutShippingAddressInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
   export type OrderUncheckedUpdateManyWithoutShippingAddressNestedInput = {
     create?: XOR<OrderCreateWithoutShippingAddressInput, OrderUncheckedCreateWithoutShippingAddressInput> | OrderCreateWithoutShippingAddressInput[] | OrderUncheckedCreateWithoutShippingAddressInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutShippingAddressInput | OrderCreateOrConnectWithoutShippingAddressInput[]
@@ -83165,6 +86636,26 @@ export namespace Prisma {
     update?: OrderUpdateWithWhereUniqueWithoutShippingAddressInput | OrderUpdateWithWhereUniqueWithoutShippingAddressInput[]
     updateMany?: OrderUpdateManyWithWhereWithoutShippingAddressInput | OrderUpdateManyWithWhereWithoutShippingAddressInput[]
     deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
+  export type SubscriptionUncheckedUpdateManyWithoutShippingAddressNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutShippingAddressInput, SubscriptionUncheckedCreateWithoutShippingAddressInput> | SubscriptionCreateWithoutShippingAddressInput[] | SubscriptionUncheckedCreateWithoutShippingAddressInput[]
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutShippingAddressInput | SubscriptionCreateOrConnectWithoutShippingAddressInput[]
+    upsert?: SubscriptionUpsertWithWhereUniqueWithoutShippingAddressInput | SubscriptionUpsertWithWhereUniqueWithoutShippingAddressInput[]
+    createMany?: SubscriptionCreateManyShippingAddressInputEnvelope
+    set?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    disconnect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    delete?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+    update?: SubscriptionUpdateWithWhereUniqueWithoutShippingAddressInput | SubscriptionUpdateWithWhereUniqueWithoutShippingAddressInput[]
+    updateMany?: SubscriptionUpdateManyWithWhereWithoutShippingAddressInput | SubscriptionUpdateManyWithWhereWithoutShippingAddressInput[]
+    deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
+  export type SubscriptionCreateNestedOneWithoutOrdersInput = {
+    create?: XOR<SubscriptionCreateWithoutOrdersInput, SubscriptionUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutOrdersInput
+    connect?: SubscriptionWhereUniqueInput
   }
 
   export type BusinessCreateNestedOneWithoutOrdersInput = {
@@ -83245,6 +86736,16 @@ export namespace Prisma {
     connectOrCreate?: OrderShipmentCreateOrConnectWithoutOrderInput | OrderShipmentCreateOrConnectWithoutOrderInput[]
     createMany?: OrderShipmentCreateManyOrderInputEnvelope
     connect?: OrderShipmentWhereUniqueInput | OrderShipmentWhereUniqueInput[]
+  }
+
+  export type SubscriptionUpdateOneWithoutOrdersNestedInput = {
+    create?: XOR<SubscriptionCreateWithoutOrdersInput, SubscriptionUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: SubscriptionCreateOrConnectWithoutOrdersInput
+    upsert?: SubscriptionUpsertWithoutOrdersInput
+    disconnect?: SubscriptionWhereInput | boolean
+    delete?: SubscriptionWhereInput | boolean
+    connect?: SubscriptionWhereUniqueInput
+    update?: XOR<XOR<SubscriptionUpdateToOneWithWhereWithoutOrdersInput, SubscriptionUpdateWithoutOrdersInput>, SubscriptionUncheckedUpdateWithoutOrdersInput>
   }
 
   export type BusinessUpdateOneRequiredWithoutOrdersNestedInput = {
@@ -84352,6 +87853,126 @@ export namespace Prisma {
     update?: XOR<XOR<QuoteSubmissionUpdateToOneWithWhereWithoutQuickBooksInvoicesInput, QuoteSubmissionUpdateWithoutQuickBooksInvoicesInput>, QuoteSubmissionUncheckedUpdateWithoutQuickBooksInvoicesInput>
   }
 
+  export type BusinessCreateNestedOneWithoutSubscriptionsInput = {
+    create?: XOR<BusinessCreateWithoutSubscriptionsInput, BusinessUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutSubscriptionsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerCreateNestedOneWithoutSubscriptionsInput = {
+    create?: XOR<CustomerCreateWithoutSubscriptionsInput, CustomerUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutSubscriptionsInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type ProductCreateNestedOneWithoutSubscriptionsInput = {
+    create?: XOR<ProductCreateWithoutSubscriptionsInput, ProductUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutSubscriptionsInput
+    connect?: ProductWhereUniqueInput
+  }
+
+  export type ProductVariantCreateNestedOneWithoutSubscriptionsInput = {
+    create?: XOR<ProductVariantCreateWithoutSubscriptionsInput, ProductVariantUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: ProductVariantCreateOrConnectWithoutSubscriptionsInput
+    connect?: ProductVariantWhereUniqueInput
+  }
+
+  export type ShippingAddressCreateNestedOneWithoutSubscriptionsInput = {
+    create?: XOR<ShippingAddressCreateWithoutSubscriptionsInput, ShippingAddressUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: ShippingAddressCreateOrConnectWithoutSubscriptionsInput
+    connect?: ShippingAddressWhereUniqueInput
+  }
+
+  export type OrderCreateNestedManyWithoutSubscriptionInput = {
+    create?: XOR<OrderCreateWithoutSubscriptionInput, OrderUncheckedCreateWithoutSubscriptionInput> | OrderCreateWithoutSubscriptionInput[] | OrderUncheckedCreateWithoutSubscriptionInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutSubscriptionInput | OrderCreateOrConnectWithoutSubscriptionInput[]
+    createMany?: OrderCreateManySubscriptionInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
+  export type OrderUncheckedCreateNestedManyWithoutSubscriptionInput = {
+    create?: XOR<OrderCreateWithoutSubscriptionInput, OrderUncheckedCreateWithoutSubscriptionInput> | OrderCreateWithoutSubscriptionInput[] | OrderUncheckedCreateWithoutSubscriptionInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutSubscriptionInput | OrderCreateOrConnectWithoutSubscriptionInput[]
+    createMany?: OrderCreateManySubscriptionInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput = {
+    create?: XOR<BusinessCreateWithoutSubscriptionsInput, BusinessUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutSubscriptionsInput
+    upsert?: BusinessUpsertWithoutSubscriptionsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutSubscriptionsInput, BusinessUpdateWithoutSubscriptionsInput>, BusinessUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type CustomerUpdateOneWithoutSubscriptionsNestedInput = {
+    create?: XOR<CustomerCreateWithoutSubscriptionsInput, CustomerUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutSubscriptionsInput
+    upsert?: CustomerUpsertWithoutSubscriptionsInput
+    disconnect?: CustomerWhereInput | boolean
+    delete?: CustomerWhereInput | boolean
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutSubscriptionsInput, CustomerUpdateWithoutSubscriptionsInput>, CustomerUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type ProductUpdateOneWithoutSubscriptionsNestedInput = {
+    create?: XOR<ProductCreateWithoutSubscriptionsInput, ProductUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutSubscriptionsInput
+    upsert?: ProductUpsertWithoutSubscriptionsInput
+    disconnect?: ProductWhereInput | boolean
+    delete?: ProductWhereInput | boolean
+    connect?: ProductWhereUniqueInput
+    update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutSubscriptionsInput, ProductUpdateWithoutSubscriptionsInput>, ProductUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type ProductVariantUpdateOneWithoutSubscriptionsNestedInput = {
+    create?: XOR<ProductVariantCreateWithoutSubscriptionsInput, ProductVariantUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: ProductVariantCreateOrConnectWithoutSubscriptionsInput
+    upsert?: ProductVariantUpsertWithoutSubscriptionsInput
+    disconnect?: ProductVariantWhereInput | boolean
+    delete?: ProductVariantWhereInput | boolean
+    connect?: ProductVariantWhereUniqueInput
+    update?: XOR<XOR<ProductVariantUpdateToOneWithWhereWithoutSubscriptionsInput, ProductVariantUpdateWithoutSubscriptionsInput>, ProductVariantUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type ShippingAddressUpdateOneWithoutSubscriptionsNestedInput = {
+    create?: XOR<ShippingAddressCreateWithoutSubscriptionsInput, ShippingAddressUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: ShippingAddressCreateOrConnectWithoutSubscriptionsInput
+    upsert?: ShippingAddressUpsertWithoutSubscriptionsInput
+    disconnect?: ShippingAddressWhereInput | boolean
+    delete?: ShippingAddressWhereInput | boolean
+    connect?: ShippingAddressWhereUniqueInput
+    update?: XOR<XOR<ShippingAddressUpdateToOneWithWhereWithoutSubscriptionsInput, ShippingAddressUpdateWithoutSubscriptionsInput>, ShippingAddressUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type OrderUpdateManyWithoutSubscriptionNestedInput = {
+    create?: XOR<OrderCreateWithoutSubscriptionInput, OrderUncheckedCreateWithoutSubscriptionInput> | OrderCreateWithoutSubscriptionInput[] | OrderUncheckedCreateWithoutSubscriptionInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutSubscriptionInput | OrderCreateOrConnectWithoutSubscriptionInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutSubscriptionInput | OrderUpsertWithWhereUniqueWithoutSubscriptionInput[]
+    createMany?: OrderCreateManySubscriptionInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutSubscriptionInput | OrderUpdateWithWhereUniqueWithoutSubscriptionInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutSubscriptionInput | OrderUpdateManyWithWhereWithoutSubscriptionInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
+  export type OrderUncheckedUpdateManyWithoutSubscriptionNestedInput = {
+    create?: XOR<OrderCreateWithoutSubscriptionInput, OrderUncheckedCreateWithoutSubscriptionInput> | OrderCreateWithoutSubscriptionInput[] | OrderUncheckedCreateWithoutSubscriptionInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutSubscriptionInput | OrderCreateOrConnectWithoutSubscriptionInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutSubscriptionInput | OrderUpsertWithWhereUniqueWithoutSubscriptionInput[]
+    createMany?: OrderCreateManySubscriptionInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutSubscriptionInput | OrderUpdateWithWhereUniqueWithoutSubscriptionInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutSubscriptionInput | OrderUpdateManyWithWhereWithoutSubscriptionInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -84796,6 +88417,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -84808,6 +88430,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutUserInput = {
@@ -84818,6 +88441,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -84830,6 +88454,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutUserInput = {
@@ -85079,6 +88704,7 @@ export namespace Prisma {
     firstName?: StringNullableFilter<"Customer"> | string | null
     lastName?: StringNullableFilter<"Customer"> | string | null
     phone?: StringNullableFilter<"Customer"> | string | null
+    stripeCustomerId?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
@@ -85253,6 +88879,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -85306,6 +88933,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -85328,6 +88956,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -85381,6 +89010,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -85468,6 +89098,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -85521,6 +89152,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -85543,6 +89175,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -85596,6 +89229,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -85793,6 +89427,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -85823,6 +89460,7 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -85837,6 +89475,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -85867,6 +89508,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -85985,6 +89627,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -86001,6 +89644,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
     discountCode?: DiscountCodeCreateNestedOneWithoutOrdersInput
@@ -86023,6 +89667,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -86066,6 +89712,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -86078,6 +89725,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBusinessInput = {
@@ -86088,6 +89736,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -86100,6 +89749,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBusinessInput = {
@@ -87154,6 +90804,116 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SubscriptionCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    customer?: CustomerCreateNestedOneWithoutSubscriptionsInput
+    product?: ProductCreateNestedOneWithoutSubscriptionsInput
+    productVariant?: ProductVariantCreateNestedOneWithoutSubscriptionsInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutSubscriptionsInput
+    orders?: OrderCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orders?: OrderUncheckedCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionCreateOrConnectWithoutBusinessInput = {
+    where: SubscriptionWhereUniqueInput
+    create: XOR<SubscriptionCreateWithoutBusinessInput, SubscriptionUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type SubscriptionCreateManyBusinessInputEnvelope = {
+    data: SubscriptionCreateManyBusinessInput | SubscriptionCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -87184,6 +90944,9 @@ export namespace Prisma {
     price?: FloatFilter<"Product"> | number
     compareAtPrice?: FloatNullableFilter<"Product"> | number | null
     cost?: FloatNullableFilter<"Product"> | number | null
+    subscriptionEnabled?: BoolFilter<"Product"> | boolean
+    subscriptionIntervals?: JsonNullableFilter<"Product">
+    subscriptionDiscountPercent?: IntFilter<"Product"> | number
     sku?: StringNullableFilter<"Product"> | string | null
     barcode?: StringNullableFilter<"Product"> | string | null
     trackInventory?: BoolFilter<"Product"> | boolean
@@ -87317,6 +91080,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFilter<"Order"> | string
     stripeSessionId?: StringNullableFilter<"Order"> | string | null
     stripePaymentIntentId?: StringNullableFilter<"Order"> | string | null
+    stripeInvoiceId?: StringNullableFilter<"Order"> | string | null
+    subscriptionId?: StringNullableFilter<"Order"> | string | null
     subtotal?: IntFilter<"Order"> | number
     tax?: IntFilter<"Order"> | number
     shipping?: IntFilter<"Order"> | number
@@ -88227,6 +91992,75 @@ export namespace Prisma {
     lastError?: StringNullableFilter<"QuickBooksInvoice"> | string | null
   }
 
+  export type SubscriptionUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: SubscriptionWhereUniqueInput
+    update: XOR<SubscriptionUpdateWithoutBusinessInput, SubscriptionUncheckedUpdateWithoutBusinessInput>
+    create: XOR<SubscriptionCreateWithoutBusinessInput, SubscriptionUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type SubscriptionUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: SubscriptionWhereUniqueInput
+    data: XOR<SubscriptionUpdateWithoutBusinessInput, SubscriptionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type SubscriptionUpdateManyWithWhereWithoutBusinessInput = {
+    where: SubscriptionScalarWhereInput
+    data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type SubscriptionScalarWhereInput = {
+    AND?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+    OR?: SubscriptionScalarWhereInput[]
+    NOT?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+    id?: StringFilter<"Subscription"> | string
+    createdAt?: DateTimeFilter<"Subscription"> | Date | string
+    updatedAt?: DateTimeFilter<"Subscription"> | Date | string
+    businessId?: StringFilter<"Subscription"> | string
+    customerId?: StringNullableFilter<"Subscription"> | string | null
+    customerEmail?: StringFilter<"Subscription"> | string
+    customerName?: StringNullableFilter<"Subscription"> | string | null
+    customerPhone?: StringNullableFilter<"Subscription"> | string | null
+    stripeSubscriptionId?: StringNullableFilter<"Subscription"> | string | null
+    stripeCustomerId?: StringNullableFilter<"Subscription"> | string | null
+    stripeCheckoutSessionId?: StringNullableFilter<"Subscription"> | string | null
+    lastInvoiceId?: StringNullableFilter<"Subscription"> | string | null
+    productId?: StringNullableFilter<"Subscription"> | string | null
+    productVariantId?: StringNullableFilter<"Subscription"> | string | null
+    productName?: StringFilter<"Subscription"> | string
+    variantName?: StringNullableFilter<"Subscription"> | string | null
+    sku?: StringNullableFilter<"Subscription"> | string | null
+    quantity?: IntFilter<"Subscription"> | number
+    intervalKey?: StringFilter<"Subscription"> | string
+    interval?: StringFilter<"Subscription"> | string
+    intervalCount?: IntFilter<"Subscription"> | number
+    listPriceCents?: IntFilter<"Subscription"> | number
+    discountPercent?: IntFilter<"Subscription"> | number
+    unitAmountCents?: IntFilter<"Subscription"> | number
+    shippingCents?: IntFilter<"Subscription"> | number
+    deliveryMethod?: StringFilter<"Subscription"> | string
+    shippingAddressId?: StringNullableFilter<"Subscription"> | string | null
+    shipFirstName?: StringNullableFilter<"Subscription"> | string | null
+    shipLastName?: StringNullableFilter<"Subscription"> | string | null
+    shipAddress1?: StringNullableFilter<"Subscription"> | string | null
+    shipAddress2?: StringNullableFilter<"Subscription"> | string | null
+    shipCity?: StringNullableFilter<"Subscription"> | string | null
+    shipProvince?: StringNullableFilter<"Subscription"> | string | null
+    shipZip?: StringNullableFilter<"Subscription"> | string | null
+    shipCountry?: StringNullableFilter<"Subscription"> | string | null
+    status?: StringFilter<"Subscription"> | string
+    pauseResumesAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    currentPeriodStart?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    currentPeriodEnd?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    nextBillingAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    cancelledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    cancelReason?: StringNullableFilter<"Subscription"> | string | null
+    lastPaymentFailedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    lastSyncedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    termsAcceptedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Subscription"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -88247,6 +92081,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -88300,6 +92135,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -88322,6 +92158,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -88375,6 +92212,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -88413,6 +92251,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -88466,6 +92305,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -88488,6 +92328,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -88541,6 +92382,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -88563,6 +92405,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -88616,6 +92459,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -88638,6 +92482,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -88691,6 +92536,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -88729,6 +92575,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -88782,6 +92629,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -88804,6 +92652,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -88857,6 +92706,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -88916,6 +92766,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -88969,6 +92820,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -88991,6 +92843,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -89044,6 +92897,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -89098,6 +92952,7 @@ export namespace Prisma {
     imageUrl?: string | null
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantUncheckedCreateWithoutProductInput = {
@@ -89115,6 +92970,7 @@ export namespace Prisma {
     imageUrl?: string | null
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantCreateOrConnectWithoutProductInput = {
@@ -89253,6 +93109,116 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SubscriptionCreateWithoutProductInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutSubscriptionsInput
+    customer?: CustomerCreateNestedOneWithoutSubscriptionsInput
+    productVariant?: ProductVariantCreateNestedOneWithoutSubscriptionsInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutSubscriptionsInput
+    orders?: OrderCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionUncheckedCreateWithoutProductInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orders?: OrderUncheckedCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionCreateOrConnectWithoutProductInput = {
+    where: SubscriptionWhereUniqueInput
+    create: XOR<SubscriptionCreateWithoutProductInput, SubscriptionUncheckedCreateWithoutProductInput>
+  }
+
+  export type SubscriptionCreateManyProductInputEnvelope = {
+    data: SubscriptionCreateManyProductInput | SubscriptionCreateManyProductInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductReviewCreateWithoutProductInput = {
     id?: string
     createdAt?: Date | string
@@ -89385,6 +93351,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -89438,6 +93405,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -89460,6 +93428,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -89513,6 +93482,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -89657,6 +93627,22 @@ export namespace Prisma {
     data: XOR<BackInStockRequestUpdateManyMutationInput, BackInStockRequestUncheckedUpdateManyWithoutProductInput>
   }
 
+  export type SubscriptionUpsertWithWhereUniqueWithoutProductInput = {
+    where: SubscriptionWhereUniqueInput
+    update: XOR<SubscriptionUpdateWithoutProductInput, SubscriptionUncheckedUpdateWithoutProductInput>
+    create: XOR<SubscriptionCreateWithoutProductInput, SubscriptionUncheckedCreateWithoutProductInput>
+  }
+
+  export type SubscriptionUpdateWithWhereUniqueWithoutProductInput = {
+    where: SubscriptionWhereUniqueInput
+    data: XOR<SubscriptionUpdateWithoutProductInput, SubscriptionUncheckedUpdateWithoutProductInput>
+  }
+
+  export type SubscriptionUpdateManyWithWhereWithoutProductInput = {
+    where: SubscriptionScalarWhereInput
+    data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutProductInput>
+  }
+
   export type ProductReviewUpsertWithWhereUniqueWithoutProductInput = {
     where: ProductReviewWhereUniqueInput
     update: XOR<ProductReviewUpdateWithoutProductInput, ProductReviewUncheckedUpdateWithoutProductInput>
@@ -89711,6 +93697,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -89741,6 +93730,7 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -89755,6 +93745,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -89785,6 +93778,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -89869,6 +93863,116 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SubscriptionCreateWithoutProductVariantInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutSubscriptionsInput
+    customer?: CustomerCreateNestedOneWithoutSubscriptionsInput
+    product?: ProductCreateNestedOneWithoutSubscriptionsInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutSubscriptionsInput
+    orders?: OrderCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionUncheckedCreateWithoutProductVariantInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orders?: OrderUncheckedCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionCreateOrConnectWithoutProductVariantInput = {
+    where: SubscriptionWhereUniqueInput
+    create: XOR<SubscriptionCreateWithoutProductVariantInput, SubscriptionUncheckedCreateWithoutProductVariantInput>
+  }
+
+  export type SubscriptionCreateManyProductVariantInputEnvelope = {
+    data: SubscriptionCreateManyProductVariantInput | SubscriptionCreateManyProductVariantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithoutVariantsInput = {
     update: XOR<ProductUpdateWithoutVariantsInput, ProductUncheckedUpdateWithoutVariantsInput>
     create: XOR<ProductCreateWithoutVariantsInput, ProductUncheckedCreateWithoutVariantsInput>
@@ -89891,6 +93995,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -89921,6 +94028,7 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -89935,6 +94043,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -89965,6 +94076,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -90000,6 +94112,22 @@ export namespace Prisma {
     data: XOR<OrderItemUpdateManyMutationInput, OrderItemUncheckedUpdateManyWithoutProductVariantInput>
   }
 
+  export type SubscriptionUpsertWithWhereUniqueWithoutProductVariantInput = {
+    where: SubscriptionWhereUniqueInput
+    update: XOR<SubscriptionUpdateWithoutProductVariantInput, SubscriptionUncheckedUpdateWithoutProductVariantInput>
+    create: XOR<SubscriptionCreateWithoutProductVariantInput, SubscriptionUncheckedCreateWithoutProductVariantInput>
+  }
+
+  export type SubscriptionUpdateWithWhereUniqueWithoutProductVariantInput = {
+    where: SubscriptionWhereUniqueInput
+    data: XOR<SubscriptionUpdateWithoutProductVariantInput, SubscriptionUncheckedUpdateWithoutProductVariantInput>
+  }
+
+  export type SubscriptionUpdateManyWithWhereWithoutProductVariantInput = {
+    where: SubscriptionScalarWhereInput
+    data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutProductVariantInput>
+  }
+
   export type BusinessCreateWithoutCollectionsInput = {
     id?: string
     createdAt?: Date | string
@@ -90020,6 +94148,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -90073,6 +94202,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -90095,6 +94225,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -90148,6 +94279,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -90208,6 +94340,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -90261,6 +94394,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -90283,6 +94417,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -90336,6 +94471,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -90404,6 +94540,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -90434,6 +94573,7 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -90448,6 +94588,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -90478,6 +94621,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -90553,6 +94697,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -90583,6 +94730,7 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -90597,6 +94745,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -90627,6 +94778,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -90650,6 +94802,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -90703,6 +94856,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -90725,6 +94879,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -90778,6 +94933,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -90868,6 +95024,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -90921,6 +95078,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -90943,6 +95101,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -90996,6 +95155,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -91151,6 +95311,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -91204,6 +95365,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEventsInput = {
@@ -91226,6 +95388,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -91279,6 +95442,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEventsInput = {
@@ -91317,6 +95481,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -91370,6 +95535,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEventsInput = {
@@ -91392,6 +95558,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -91445,6 +95612,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutVideoSourcesInput = {
@@ -91467,6 +95635,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -91520,6 +95689,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
@@ -91542,6 +95712,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -91595,6 +95766,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
@@ -91679,6 +95851,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -91732,6 +95905,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
@@ -91754,6 +95928,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -91807,6 +95982,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
@@ -91878,6 +96054,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -91931,6 +96108,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideosInput = {
@@ -91953,6 +96131,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -92006,6 +96185,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideosInput = {
@@ -92083,6 +96263,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -92136,6 +96317,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideosInput = {
@@ -92158,6 +96340,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -92211,6 +96394,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductCreateWithoutImagesInput = {
@@ -92224,6 +96408,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -92254,6 +96441,7 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -92268,6 +96456,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -92298,6 +96489,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -92326,6 +96518,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -92379,6 +96572,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -92401,6 +96595,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -92454,6 +96649,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -92483,6 +96679,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -92513,6 +96712,7 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -92527,6 +96727,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -92557,6 +96760,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -92591,6 +96795,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -92644,6 +96849,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -92666,6 +96872,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -92719,6 +96926,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -92784,6 +96992,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -92837,6 +97046,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -92859,6 +97069,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -92912,6 +97123,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -92932,6 +97144,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -92948,6 +97161,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
     discountCode?: DiscountCodeCreateNestedOneWithoutOrdersInput
@@ -92970,6 +97184,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -93021,6 +97237,7 @@ export namespace Prisma {
     phone?: string | null
     isDefault?: boolean
     orders?: OrderCreateNestedManyWithoutShippingAddressInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutShippingAddressInput
   }
 
   export type ShippingAddressUncheckedCreateWithoutCustomerInput = {
@@ -93039,6 +97256,7 @@ export namespace Prisma {
     phone?: string | null
     isDefault?: boolean
     orders?: OrderUncheckedCreateNestedManyWithoutShippingAddressInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutShippingAddressInput
   }
 
   export type ShippingAddressCreateOrConnectWithoutCustomerInput = {
@@ -93189,6 +97407,116 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SubscriptionCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutSubscriptionsInput
+    product?: ProductCreateNestedOneWithoutSubscriptionsInput
+    productVariant?: ProductVariantCreateNestedOneWithoutSubscriptionsInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutSubscriptionsInput
+    orders?: OrderCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orders?: OrderUncheckedCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionCreateOrConnectWithoutCustomerInput = {
+    where: SubscriptionWhereUniqueInput
+    create: XOR<SubscriptionCreateWithoutCustomerInput, SubscriptionUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type SubscriptionCreateManyCustomerInputEnvelope = {
+    data: SubscriptionCreateManyCustomerInput | SubscriptionCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutCustomersInput = {
     update: XOR<UserUpdateWithoutCustomersInput, UserUncheckedUpdateWithoutCustomersInput>
     create: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
@@ -93269,6 +97597,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -93322,6 +97651,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -93344,6 +97674,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -93397,6 +97728,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -93500,6 +97832,22 @@ export namespace Prisma {
     data: XOR<ProductReviewUpdateManyMutationInput, ProductReviewUncheckedUpdateManyWithoutCustomerInput>
   }
 
+  export type SubscriptionUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: SubscriptionWhereUniqueInput
+    update: XOR<SubscriptionUpdateWithoutCustomerInput, SubscriptionUncheckedUpdateWithoutCustomerInput>
+    create: XOR<SubscriptionCreateWithoutCustomerInput, SubscriptionUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type SubscriptionUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: SubscriptionWhereUniqueInput
+    data: XOR<SubscriptionUpdateWithoutCustomerInput, SubscriptionUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type SubscriptionUpdateManyWithWhereWithoutCustomerInput = {
+    where: SubscriptionScalarWhereInput
+    data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type CustomerCreateWithoutShippingAddressesInput = {
     id?: string
     createdAt?: Date | string
@@ -93508,6 +97856,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -93520,6 +97869,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutShippingAddressesInput = {
@@ -93530,6 +97880,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -93542,6 +97893,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutShippingAddressesInput = {
@@ -93562,6 +97914,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -93578,6 +97931,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     discountCode?: DiscountCodeCreateNestedOneWithoutOrdersInput
@@ -93600,6 +97954,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -93635,6 +97991,116 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SubscriptionCreateWithoutShippingAddressInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutSubscriptionsInput
+    customer?: CustomerCreateNestedOneWithoutSubscriptionsInput
+    product?: ProductCreateNestedOneWithoutSubscriptionsInput
+    productVariant?: ProductVariantCreateNestedOneWithoutSubscriptionsInput
+    orders?: OrderCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionUncheckedCreateWithoutShippingAddressInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orders?: OrderUncheckedCreateNestedManyWithoutSubscriptionInput
+  }
+
+  export type SubscriptionCreateOrConnectWithoutShippingAddressInput = {
+    where: SubscriptionWhereUniqueInput
+    create: XOR<SubscriptionCreateWithoutShippingAddressInput, SubscriptionUncheckedCreateWithoutShippingAddressInput>
+  }
+
+  export type SubscriptionCreateManyShippingAddressInputEnvelope = {
+    data: SubscriptionCreateManyShippingAddressInput | SubscriptionCreateManyShippingAddressInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CustomerUpsertWithoutShippingAddressesInput = {
     update: XOR<CustomerUpdateWithoutShippingAddressesInput, CustomerUncheckedUpdateWithoutShippingAddressesInput>
     create: XOR<CustomerCreateWithoutShippingAddressesInput, CustomerUncheckedCreateWithoutShippingAddressesInput>
@@ -93654,6 +98120,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -93666,6 +98133,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutShippingAddressesInput = {
@@ -93676,6 +98144,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -93688,6 +98157,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutShippingAddressInput = {
@@ -93704,6 +98174,127 @@ export namespace Prisma {
   export type OrderUpdateManyWithWhereWithoutShippingAddressInput = {
     where: OrderScalarWhereInput
     data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutShippingAddressInput>
+  }
+
+  export type SubscriptionUpsertWithWhereUniqueWithoutShippingAddressInput = {
+    where: SubscriptionWhereUniqueInput
+    update: XOR<SubscriptionUpdateWithoutShippingAddressInput, SubscriptionUncheckedUpdateWithoutShippingAddressInput>
+    create: XOR<SubscriptionCreateWithoutShippingAddressInput, SubscriptionUncheckedCreateWithoutShippingAddressInput>
+  }
+
+  export type SubscriptionUpdateWithWhereUniqueWithoutShippingAddressInput = {
+    where: SubscriptionWhereUniqueInput
+    data: XOR<SubscriptionUpdateWithoutShippingAddressInput, SubscriptionUncheckedUpdateWithoutShippingAddressInput>
+  }
+
+  export type SubscriptionUpdateManyWithWhereWithoutShippingAddressInput = {
+    where: SubscriptionScalarWhereInput
+    data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutShippingAddressInput>
+  }
+
+  export type SubscriptionCreateWithoutOrdersInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutSubscriptionsInput
+    customer?: CustomerCreateNestedOneWithoutSubscriptionsInput
+    product?: ProductCreateNestedOneWithoutSubscriptionsInput
+    productVariant?: ProductVariantCreateNestedOneWithoutSubscriptionsInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutSubscriptionsInput
+  }
+
+  export type SubscriptionUncheckedCreateWithoutOrdersInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+  }
+
+  export type SubscriptionCreateOrConnectWithoutOrdersInput = {
+    where: SubscriptionWhereUniqueInput
+    create: XOR<SubscriptionCreateWithoutOrdersInput, SubscriptionUncheckedCreateWithoutOrdersInput>
   }
 
   export type BusinessCreateWithoutOrdersInput = {
@@ -93726,6 +98317,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -93779,6 +98371,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -93801,6 +98394,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -93854,6 +98448,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -93869,6 +98464,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -93881,6 +98477,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutOrdersInput = {
@@ -93891,6 +98488,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -93903,6 +98501,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutOrdersInput = {
@@ -93926,6 +98525,7 @@ export namespace Prisma {
     phone?: string | null
     isDefault?: boolean
     customer: CustomerCreateNestedOneWithoutShippingAddressesInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutShippingAddressInput
   }
 
   export type ShippingAddressUncheckedCreateWithoutOrdersInput = {
@@ -93944,6 +98544,7 @@ export namespace Prisma {
     phone?: string | null
     isDefault?: boolean
     customerId: string
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutShippingAddressInput
   }
 
   export type ShippingAddressCreateOrConnectWithoutOrdersInput = {
@@ -94156,6 +98757,117 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SubscriptionUpsertWithoutOrdersInput = {
+    update: XOR<SubscriptionUpdateWithoutOrdersInput, SubscriptionUncheckedUpdateWithoutOrdersInput>
+    create: XOR<SubscriptionCreateWithoutOrdersInput, SubscriptionUncheckedCreateWithoutOrdersInput>
+    where?: SubscriptionWhereInput
+  }
+
+  export type SubscriptionUpdateToOneWithWhereWithoutOrdersInput = {
+    where?: SubscriptionWhereInput
+    data: XOR<SubscriptionUpdateWithoutOrdersInput, SubscriptionUncheckedUpdateWithoutOrdersInput>
+  }
+
+  export type SubscriptionUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput
+    customer?: CustomerUpdateOneWithoutSubscriptionsNestedInput
+    product?: ProductUpdateOneWithoutSubscriptionsNestedInput
+    productVariant?: ProductVariantUpdateOneWithoutSubscriptionsNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutSubscriptionsNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type BusinessUpsertWithoutOrdersInput = {
     update: XOR<BusinessUpdateWithoutOrdersInput, BusinessUncheckedUpdateWithoutOrdersInput>
     create: XOR<BusinessCreateWithoutOrdersInput, BusinessUncheckedCreateWithoutOrdersInput>
@@ -94187,6 +98899,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -94240,6 +98953,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -94262,6 +98976,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -94315,6 +99030,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -94336,6 +99052,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -94348,6 +99065,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutOrdersInput = {
@@ -94358,6 +99076,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -94370,6 +99089,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ShippingAddressUpsertWithoutOrdersInput = {
@@ -94399,6 +99119,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     customer?: CustomerUpdateOneRequiredWithoutShippingAddressesNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutShippingAddressNestedInput
   }
 
   export type ShippingAddressUncheckedUpdateWithoutOrdersInput = {
@@ -94417,6 +99138,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     customerId?: StringFieldUpdateOperationsInput | string
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutShippingAddressNestedInput
   }
 
   export type DiscountCodeUpsertWithoutOrdersInput = {
@@ -94557,6 +99279,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -94573,6 +99296,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
@@ -94595,6 +99319,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -94649,6 +99375,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -94665,6 +99392,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
@@ -94687,6 +99415,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -94723,6 +99453,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -94753,6 +99486,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -94767,6 +99501,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -94797,6 +99534,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -94820,6 +99558,7 @@ export namespace Prisma {
     imageUrl?: string | null
     product: ProductCreateNestedOneWithoutVariantsInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantUncheckedCreateWithoutOrderItemsInput = {
@@ -94837,6 +99576,7 @@ export namespace Prisma {
     imageUrl?: string | null
     productId: string
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantCreateOrConnectWithoutOrderItemsInput = {
@@ -94857,6 +99597,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -94873,6 +99614,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
@@ -94895,6 +99637,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -94947,6 +99691,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -94977,6 +99724,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -94991,6 +99739,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -95021,6 +99772,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -95050,6 +99802,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateWithoutOrderItemsInput = {
@@ -95067,6 +99820,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: StringFieldUpdateOperationsInput | string
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
   }
 
   export type OrderUpsertWithoutItemsInput = {
@@ -95093,6 +99847,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -95109,6 +99864,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
@@ -95131,6 +99887,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -95176,6 +99934,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -95229,6 +99988,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -95251,6 +100011,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -95304,6 +100065,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -95324,6 +100086,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -95340,6 +100103,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
@@ -95362,6 +100126,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -95428,6 +100194,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -95481,6 +100248,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -95503,6 +100271,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -95556,6 +100325,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -95589,6 +100359,7 @@ export namespace Prisma {
     imageUrl?: string | null
     product: ProductCreateNestedOneWithoutVariantsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantUncheckedCreateWithoutInventoryHistoryInput = {
@@ -95606,6 +100377,7 @@ export namespace Prisma {
     imageUrl?: string | null
     productId: string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
   }
 
   export type ProductVariantCreateOrConnectWithoutInventoryHistoryInput = {
@@ -95624,6 +100396,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -95654,6 +100429,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -95668,6 +100444,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -95698,6 +100477,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -95763,6 +100543,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -95816,6 +100597,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -95838,6 +100620,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -95891,6 +100674,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -95911,6 +100695,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -95927,6 +100712,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
@@ -95949,6 +100735,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -96048,6 +100836,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -96065,6 +100854,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: StringFieldUpdateOperationsInput | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
   }
 
   export type ProductUpsertWithoutInventoryHistoryInput = {
@@ -96089,6 +100879,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -96119,6 +100912,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -96133,6 +100927,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -96163,6 +100960,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -96240,6 +101038,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -96293,6 +101092,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -96315,6 +101115,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -96368,6 +101169,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -96394,6 +101196,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -96410,6 +101213,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
@@ -96432,6 +101236,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -96526,6 +101332,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -96579,6 +101386,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -96601,6 +101409,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -96654,6 +101463,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -96672,6 +101482,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -96702,6 +101515,7 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -96716,6 +101530,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -96746,6 +101563,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -96830,6 +101648,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -96883,6 +101702,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -96905,6 +101725,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -96958,6 +101779,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -97012,6 +101834,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -97065,6 +101888,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -97087,6 +101911,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -97140,6 +101965,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -97178,6 +102004,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -97231,6 +102058,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -97253,6 +102081,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -97306,6 +102135,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -97328,6 +102158,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -97381,6 +102212,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -97403,6 +102235,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -97456,6 +102289,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -97494,6 +102328,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -97547,6 +102382,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -97569,6 +102405,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -97622,6 +102459,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutEditorNotesInput = {
@@ -97644,6 +102482,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -97697,6 +102536,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEditorNotesInput = {
@@ -97719,6 +102559,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -97772,6 +102613,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEditorNotesInput = {
@@ -97853,6 +102695,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -97906,6 +102749,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
@@ -97928,6 +102772,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -97981,6 +102826,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutEditorNotesInput = {
@@ -98052,6 +102898,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -98105,6 +102952,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -98127,6 +102975,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -98180,6 +103029,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -98218,6 +103068,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -98271,6 +103122,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -98293,6 +103145,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -98346,6 +103199,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -98368,6 +103222,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -98421,6 +103276,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -98443,6 +103299,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -98496,6 +103353,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -98566,6 +103424,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -98619,6 +103478,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -98641,6 +103501,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -98694,6 +103555,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -98831,6 +103693,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -98884,6 +103747,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -98906,6 +103770,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -98959,6 +103824,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -98974,6 +103840,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -98986,6 +103853,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutTestimonialsInput = {
@@ -98996,6 +103864,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -99008,6 +103877,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutTestimonialsInput = {
@@ -99046,6 +103916,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -99099,6 +103970,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -99121,6 +103993,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -99174,6 +104047,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -99195,6 +104069,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -99207,6 +104082,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutTestimonialsInput = {
@@ -99217,6 +104093,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -99229,6 +104106,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type BusinessCreateWithoutTestimonialInvitesInput = {
@@ -99251,6 +104129,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -99304,6 +104183,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -99326,6 +104206,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -99379,6 +104260,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -99394,6 +104276,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -99406,6 +104289,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -99416,6 +104300,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -99428,6 +104313,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -99466,6 +104352,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -99519,6 +104406,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -99541,6 +104429,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -99594,6 +104483,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -99615,6 +104505,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -99627,6 +104518,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -99637,6 +104529,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -99649,6 +104542,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ProductCreateWithoutReviewsInput = {
@@ -99662,6 +104556,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -99693,6 +104590,7 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutReviewsInput = {
@@ -99706,6 +104604,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -99737,6 +104638,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutReviewsInput = {
@@ -99752,6 +104654,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -99764,6 +104667,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutReviewsInput = {
@@ -99774,6 +104678,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -99786,6 +104691,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutReviewsInput = {
@@ -99806,6 +104712,7 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -99822,6 +104729,7 @@ export namespace Prisma {
     refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
     business: BusinessCreateNestedOneWithoutOrdersInput
     customer?: CustomerCreateNestedOneWithoutOrdersInput
     shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
@@ -99844,6 +104752,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -99922,6 +104832,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -99953,6 +104866,7 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutReviewsInput = {
@@ -99966,6 +104880,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -99997,6 +104914,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type CustomerUpsertWithoutReviewsInput = {
@@ -100018,6 +104936,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -100030,6 +104949,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutReviewsInput = {
@@ -100040,6 +104960,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -100052,6 +104973,7 @@ export namespace Prisma {
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithoutReviewsInput = {
@@ -100078,6 +105000,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -100094,6 +105017,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
@@ -100116,6 +105040,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -100301,6 +105227,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -100354,6 +105281,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -100376,6 +105304,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -100429,6 +105358,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -100510,6 +105440,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -100563,6 +105494,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -100585,6 +105517,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -100638,6 +105571,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -100709,6 +105643,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -100762,6 +105697,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -100784,6 +105720,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -100837,6 +105774,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -100875,6 +105813,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -100928,6 +105867,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -100950,6 +105890,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -101003,6 +105944,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutZonesInput = {
@@ -101025,6 +105967,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -101078,6 +106021,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -101100,6 +106044,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -101153,6 +106098,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -101213,6 +106159,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -101266,6 +106213,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -101288,6 +106236,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -101341,6 +106290,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -101428,6 +106378,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -101458,6 +106411,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -101472,6 +106426,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -101502,6 +106459,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -101530,6 +106488,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -101583,6 +106542,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -101605,6 +106565,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -101658,6 +106619,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -101687,6 +106649,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -101717,6 +106682,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -101731,6 +106697,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -101761,6 +106730,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -101795,6 +106765,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -101848,6 +106819,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -101870,6 +106842,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -101923,6 +106896,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuoteCalculatorsInput = {
@@ -101945,6 +106919,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -101998,6 +106973,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteCalculatorsInput = {
@@ -102020,6 +106996,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -102073,6 +107050,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteCalculatorsInput = {
@@ -102163,6 +107141,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -102216,6 +107195,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteCalculatorsInput = {
@@ -102238,6 +107218,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -102291,6 +107272,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput = {
@@ -102416,6 +107398,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -102469,6 +107452,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteSubmissionsInput = {
@@ -102491,6 +107475,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -102544,6 +107529,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteSubmissionsInput = {
@@ -102629,6 +107615,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -102682,6 +107669,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteSubmissionsInput = {
@@ -102704,6 +107692,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -102757,6 +107746,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksConnectionInput = {
@@ -102779,6 +107769,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -102832,6 +107823,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksConnectionInput = {
@@ -102854,6 +107846,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -102907,6 +107900,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksConnectionInput = {
@@ -102945,6 +107939,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -102998,6 +107993,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksConnectionInput = {
@@ -103020,6 +108016,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -103073,6 +108070,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksInvoicesInput = {
@@ -103095,6 +108093,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -103148,6 +108147,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksInvoicesInput = {
@@ -103170,6 +108170,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
     stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -103223,6 +108224,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksInvoicesInput = {
@@ -103308,6 +108310,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -103361,6 +108364,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput = {
@@ -103383,6 +108387,7 @@ export namespace Prisma {
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -103436,6 +108441,7 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithoutQuickBooksInvoicesInput = {
@@ -103491,6 +108497,936 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type BusinessCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutSubscriptionsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutSubscriptionsInput, BusinessUncheckedCreateWithoutSubscriptionsInput>
+  }
+
+  export type CustomerCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    user?: UserCreateNestedOneWithoutCustomersInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    orders?: OrderCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    userId?: string | null
+    businessId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutSubscriptionsInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutSubscriptionsInput, CustomerUncheckedCreateWithoutSubscriptionsInput>
+  }
+
+  export type ProductCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutProductsInput
+    business: BusinessCreateNestedOneWithoutProductsInput
+    images?: ImageCreateNestedManyWithoutProductInput
+    variants?: ProductVariantCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    reviews?: ProductReviewCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseInventoryUnitId?: string | null
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    businessId: string
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedCreateNestedManyWithoutProductInput
+    variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutSubscriptionsInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutSubscriptionsInput, ProductUncheckedCreateWithoutSubscriptionsInput>
+  }
+
+  export type ProductVariantCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    sku?: string | null
+    barcode?: string | null
+    price?: number | null
+    compareAtPrice?: number | null
+    inventoryQty?: number
+    reservedQty?: number
+    options: JsonNullValueInput | InputJsonValue
+    imageUrl?: string | null
+    product: ProductCreateNestedOneWithoutVariantsInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
+  }
+
+  export type ProductVariantUncheckedCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    sku?: string | null
+    barcode?: string | null
+    price?: number | null
+    compareAtPrice?: number | null
+    inventoryQty?: number
+    reservedQty?: number
+    options: JsonNullValueInput | InputJsonValue
+    imageUrl?: string | null
+    productId: string
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
+  }
+
+  export type ProductVariantCreateOrConnectWithoutSubscriptionsInput = {
+    where: ProductVariantWhereUniqueInput
+    create: XOR<ProductVariantCreateWithoutSubscriptionsInput, ProductVariantUncheckedCreateWithoutSubscriptionsInput>
+  }
+
+  export type ShippingAddressCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    firstName: string
+    lastName: string
+    company?: string | null
+    address1: string
+    address2?: string | null
+    city: string
+    province?: string | null
+    country: string
+    zip: string
+    phone?: string | null
+    isDefault?: boolean
+    customer: CustomerCreateNestedOneWithoutShippingAddressesInput
+    orders?: OrderCreateNestedManyWithoutShippingAddressInput
+  }
+
+  export type ShippingAddressUncheckedCreateWithoutSubscriptionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    firstName: string
+    lastName: string
+    company?: string | null
+    address1: string
+    address2?: string | null
+    city: string
+    province?: string | null
+    country: string
+    zip: string
+    phone?: string | null
+    isDefault?: boolean
+    customerId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutShippingAddressInput
+  }
+
+  export type ShippingAddressCreateOrConnectWithoutSubscriptionsInput = {
+    where: ShippingAddressWhereUniqueInput
+    create: XOR<ShippingAddressCreateWithoutSubscriptionsInput, ShippingAddressUncheckedCreateWithoutSubscriptionsInput>
+  }
+
+  export type OrderCreateWithoutSubscriptionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orderNumber: number
+    status?: string
+    paymentStatus?: string
+    fulfillmentStatus?: string
+    stripeSessionId?: string | null
+    stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subtotal: number
+    tax?: number
+    shipping?: number
+    discount?: number
+    total: number
+    customerEmail: string
+    customerName?: string | null
+    customerFirstName?: string | null
+    customerLastName?: string | null
+    customerPhone?: string | null
+    paymentMethod?: string
+    deliveryMethod?: string
+    refundReason?: string | null
+    refundAmountCents?: number | null
+    customerNote?: string | null
+    internalNote?: string | null
+    business: BusinessCreateNestedOneWithoutOrdersInput
+    customer?: CustomerCreateNestedOneWithoutOrdersInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
+    discountCode?: DiscountCodeCreateNestedOneWithoutOrdersInput
+    items?: OrderItemCreateNestedManyWithoutOrderInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
+    reviews?: ProductReviewCreateNestedManyWithoutOrderInput
+    shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderUncheckedCreateWithoutSubscriptionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orderNumber: number
+    status?: string
+    paymentStatus?: string
+    fulfillmentStatus?: string
+    stripeSessionId?: string | null
+    stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subtotal: number
+    tax?: number
+    shipping?: number
+    discount?: number
+    total: number
+    customerEmail: string
+    customerName?: string | null
+    customerFirstName?: string | null
+    customerLastName?: string | null
+    customerPhone?: string | null
+    paymentMethod?: string
+    deliveryMethod?: string
+    refundReason?: string | null
+    refundAmountCents?: number | null
+    customerNote?: string | null
+    internalNote?: string | null
+    businessId: string
+    customerId?: string | null
+    shippingAddressId?: string | null
+    discountCodeId?: string | null
+    items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
+    shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderCreateOrConnectWithoutSubscriptionInput = {
+    where: OrderWhereUniqueInput
+    create: XOR<OrderCreateWithoutSubscriptionInput, OrderUncheckedCreateWithoutSubscriptionInput>
+  }
+
+  export type OrderCreateManySubscriptionInputEnvelope = {
+    data: OrderCreateManySubscriptionInput | OrderCreateManySubscriptionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutSubscriptionsInput = {
+    update: XOR<BusinessUpdateWithoutSubscriptionsInput, BusinessUncheckedUpdateWithoutSubscriptionsInput>
+    create: XOR<BusinessCreateWithoutSubscriptionsInput, BusinessUncheckedCreateWithoutSubscriptionsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutSubscriptionsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutSubscriptionsInput, BusinessUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type BusinessUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type CustomerUpsertWithoutSubscriptionsInput = {
+    update: XOR<CustomerUpdateWithoutSubscriptionsInput, CustomerUncheckedUpdateWithoutSubscriptionsInput>
+    create: XOR<CustomerCreateWithoutSubscriptionsInput, CustomerUncheckedCreateWithoutSubscriptionsInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutSubscriptionsInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutSubscriptionsInput, CustomerUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type CustomerUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutCustomersNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    orders?: OrderUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type ProductUpsertWithoutSubscriptionsInput = {
+    update: XOR<ProductUpdateWithoutSubscriptionsInput, ProductUncheckedUpdateWithoutSubscriptionsInput>
+    create: XOR<ProductCreateWithoutSubscriptionsInput, ProductUncheckedCreateWithoutSubscriptionsInput>
+    where?: ProductWhereInput
+  }
+
+  export type ProductUpdateToOneWithWhereWithoutSubscriptionsInput = {
+    where?: ProductWhereInput
+    data: XOR<ProductUpdateWithoutSubscriptionsInput, ProductUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type ProductUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutProductsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
+    images?: ImageUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    reviews?: ProductReviewUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseInventoryUnitId?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductVariantUpsertWithoutSubscriptionsInput = {
+    update: XOR<ProductVariantUpdateWithoutSubscriptionsInput, ProductVariantUncheckedUpdateWithoutSubscriptionsInput>
+    create: XOR<ProductVariantCreateWithoutSubscriptionsInput, ProductVariantUncheckedCreateWithoutSubscriptionsInput>
+    where?: ProductVariantWhereInput
+  }
+
+  export type ProductVariantUpdateToOneWithWhereWithoutSubscriptionsInput = {
+    where?: ProductVariantWhereInput
+    data: XOR<ProductVariantUpdateWithoutSubscriptionsInput, ProductVariantUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type ProductVariantUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    options?: JsonNullValueInput | InputJsonValue
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
+  }
+
+  export type ProductVariantUncheckedUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    options?: JsonNullValueInput | InputJsonValue
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: StringFieldUpdateOperationsInput | string
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
+  }
+
+  export type ShippingAddressUpsertWithoutSubscriptionsInput = {
+    update: XOR<ShippingAddressUpdateWithoutSubscriptionsInput, ShippingAddressUncheckedUpdateWithoutSubscriptionsInput>
+    create: XOR<ShippingAddressCreateWithoutSubscriptionsInput, ShippingAddressUncheckedCreateWithoutSubscriptionsInput>
+    where?: ShippingAddressWhereInput
+  }
+
+  export type ShippingAddressUpdateToOneWithWhereWithoutSubscriptionsInput = {
+    where?: ShippingAddressWhereInput
+    data: XOR<ShippingAddressUpdateWithoutSubscriptionsInput, ShippingAddressUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type ShippingAddressUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    company?: NullableStringFieldUpdateOperationsInput | string | null
+    address1?: StringFieldUpdateOperationsInput | string
+    address2?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: StringFieldUpdateOperationsInput | string
+    zip?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    customer?: CustomerUpdateOneRequiredWithoutShippingAddressesNestedInput
+    orders?: OrderUpdateManyWithoutShippingAddressNestedInput
+  }
+
+  export type ShippingAddressUncheckedUpdateWithoutSubscriptionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    company?: NullableStringFieldUpdateOperationsInput | string | null
+    address1?: StringFieldUpdateOperationsInput | string
+    address2?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: StringFieldUpdateOperationsInput | string
+    zip?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    customerId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutShippingAddressNestedInput
+  }
+
+  export type OrderUpsertWithWhereUniqueWithoutSubscriptionInput = {
+    where: OrderWhereUniqueInput
+    update: XOR<OrderUpdateWithoutSubscriptionInput, OrderUncheckedUpdateWithoutSubscriptionInput>
+    create: XOR<OrderCreateWithoutSubscriptionInput, OrderUncheckedCreateWithoutSubscriptionInput>
+  }
+
+  export type OrderUpdateWithWhereUniqueWithoutSubscriptionInput = {
+    where: OrderWhereUniqueInput
+    data: XOR<OrderUpdateWithoutSubscriptionInput, OrderUncheckedUpdateWithoutSubscriptionInput>
+  }
+
+  export type OrderUpdateManyWithWhereWithoutSubscriptionInput = {
+    where: OrderScalarWhereInput
+    data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutSubscriptionInput>
+  }
+
   export type SessionCreateManyUserInput = {
     id?: string
     expiresAt: Date | string
@@ -103537,6 +109473,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -103709,6 +109646,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -103721,6 +109659,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutUserInput = {
@@ -103731,6 +109670,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -103743,6 +109683,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutUserInput = {
@@ -103753,6 +109694,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -103896,6 +109838,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -103969,6 +109914,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -103998,6 +109945,7 @@ export namespace Prisma {
     firstName?: string | null
     lastName?: string | null
     phone?: string | null
+    stripeCustomerId?: string | null
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
@@ -104337,6 +110285,55 @@ export namespace Prisma {
     lastError?: string | null
   }
 
+  export type SubscriptionCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+  }
+
   export type ProductUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -104348,6 +110345,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -104378,6 +110378,7 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -104392,6 +110393,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -104422,6 +110426,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -104436,6 +110441,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -104581,6 +110589,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -104597,6 +110606,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
     discountCode?: DiscountCodeUpdateOneWithoutOrdersNestedInput
@@ -104619,6 +110629,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -104657,6 +110669,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -104686,6 +110700,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -104698,6 +110713,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBusinessInput = {
@@ -104708,6 +110724,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -104720,6 +110737,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutBusinessInput = {
@@ -104730,6 +110748,7 @@ export namespace Prisma {
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
@@ -105745,6 +111764,155 @@ export namespace Prisma {
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type SubscriptionUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customer?: CustomerUpdateOneWithoutSubscriptionsNestedInput
+    product?: ProductUpdateOneWithoutSubscriptionsNestedInput
+    productVariant?: ProductVariantUpdateOneWithoutSubscriptionsNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutSubscriptionsNestedInput
+    orders?: OrderUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orders?: OrderUncheckedUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type ImageCreateManyProductInput = {
     id?: string
     createdAt?: Date | string
@@ -105812,6 +111980,55 @@ export namespace Prisma {
     variantId?: string | null
     notifiedAt?: Date | string | null
     businessId: string
+  }
+
+  export type SubscriptionCreateManyProductInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
   }
 
   export type ProductReviewCreateManyProductInput = {
@@ -105885,6 +112102,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateWithoutProductInput = {
@@ -105902,6 +112120,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateManyWithoutProductInput = {
@@ -106048,6 +112267,155 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type SubscriptionUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput
+    customer?: CustomerUpdateOneWithoutSubscriptionsNestedInput
+    productVariant?: ProductVariantUpdateOneWithoutSubscriptionsNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutSubscriptionsNestedInput
+    orders?: OrderUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orders?: OrderUncheckedUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateManyWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type ProductReviewUpdateWithoutProductInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106147,6 +112515,55 @@ export namespace Prisma {
     orderId: string
   }
 
+  export type SubscriptionCreateManyProductVariantInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+  }
+
   export type InventoryHistoryUpdateWithoutVariantInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106229,6 +112646,155 @@ export namespace Prisma {
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type SubscriptionUpdateWithoutProductVariantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput
+    customer?: CustomerUpdateOneWithoutSubscriptionsNestedInput
+    product?: ProductUpdateOneWithoutSubscriptionsNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutSubscriptionsNestedInput
+    orders?: OrderUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateWithoutProductVariantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orders?: OrderUncheckedUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateManyWithoutProductVariantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type CollectionProductCreateManyCollectionInput = {
@@ -106424,6 +112990,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -106515,6 +113083,55 @@ export namespace Prisma {
     orderId?: string | null
   }
 
+  export type SubscriptionCreateManyCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shippingAddressId?: string | null
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+  }
+
   export type OrderUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106528,6 +113145,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -106544,6 +113162,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
     discountCode?: DiscountCodeUpdateOneWithoutOrdersNestedInput
@@ -106566,6 +113185,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -106604,6 +113225,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -106641,6 +113264,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     orders?: OrderUpdateManyWithoutShippingAddressNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutShippingAddressNestedInput
   }
 
   export type ShippingAddressUncheckedUpdateWithoutCustomerInput = {
@@ -106659,6 +113283,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     orders?: OrderUncheckedUpdateManyWithoutShippingAddressNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutShippingAddressNestedInput
   }
 
   export type ShippingAddressUncheckedUpdateManyWithoutCustomerInput = {
@@ -106839,6 +113464,155 @@ export namespace Prisma {
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type SubscriptionUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput
+    product?: ProductUpdateOneWithoutSubscriptionsNestedInput
+    productVariant?: ProductVariantUpdateOneWithoutSubscriptionsNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutSubscriptionsNestedInput
+    orders?: OrderUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orders?: OrderUncheckedUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type OrderCreateManyShippingAddressInput = {
     id?: string
     createdAt?: Date | string
@@ -106852,6 +113626,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -106873,6 +113649,55 @@ export namespace Prisma {
     discountCodeId?: string | null
   }
 
+  export type SubscriptionCreateManyShippingAddressInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    customerEmail: string
+    customerName?: string | null
+    customerPhone?: string | null
+    stripeSubscriptionId?: string | null
+    stripeCustomerId?: string | null
+    stripeCheckoutSessionId?: string | null
+    lastInvoiceId?: string | null
+    productId?: string | null
+    productVariantId?: string | null
+    productName: string
+    variantName?: string | null
+    sku?: string | null
+    quantity: number
+    intervalKey: string
+    interval: string
+    intervalCount: number
+    listPriceCents: number
+    discountPercent?: number
+    unitAmountCents: number
+    shippingCents?: number
+    deliveryMethod?: string
+    shipFirstName?: string | null
+    shipLastName?: string | null
+    shipAddress1?: string | null
+    shipAddress2?: string | null
+    shipCity?: string | null
+    shipProvince?: string | null
+    shipZip?: string | null
+    shipCountry?: string | null
+    status?: string
+    pauseResumesAt?: Date | string | null
+    currentPeriodStart?: Date | string | null
+    currentPeriodEnd?: Date | string | null
+    nextBillingAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    lastPaymentFailedAt?: Date | string | null
+    lastSyncedAt?: Date | string | null
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+  }
+
   export type OrderUpdateWithoutShippingAddressInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106886,6 +113711,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -106902,6 +113728,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     discountCode?: DiscountCodeUpdateOneWithoutOrdersNestedInput
@@ -106924,6 +113751,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -106962,6 +113791,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -106981,6 +113812,155 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type SubscriptionUpdateWithoutShippingAddressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput
+    customer?: CustomerUpdateOneWithoutSubscriptionsNestedInput
+    product?: ProductUpdateOneWithoutSubscriptionsNestedInput
+    productVariant?: ProductVariantUpdateOneWithoutSubscriptionsNestedInput
+    orders?: OrderUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateWithoutShippingAddressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orders?: OrderUncheckedUpdateManyWithoutSubscriptionNestedInput
+  }
+
+  export type SubscriptionUncheckedUpdateManyWithoutShippingAddressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productName?: StringFieldUpdateOperationsInput | string
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    intervalKey?: StringFieldUpdateOperationsInput | string
+    interval?: StringFieldUpdateOperationsInput | string
+    intervalCount?: IntFieldUpdateOperationsInput | number
+    listPriceCents?: IntFieldUpdateOperationsInput | number
+    discountPercent?: IntFieldUpdateOperationsInput | number
+    unitAmountCents?: IntFieldUpdateOperationsInput | number
+    shippingCents?: IntFieldUpdateOperationsInput | number
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    shipFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress1?: NullableStringFieldUpdateOperationsInput | string | null
+    shipAddress2?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCity?: NullableStringFieldUpdateOperationsInput | string | null
+    shipProvince?: NullableStringFieldUpdateOperationsInput | string | null
+    shipZip?: NullableStringFieldUpdateOperationsInput | string | null
+    shipCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    pauseResumesAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextBillingAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    lastPaymentFailedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type OrderItemCreateManyOrderInput = {
@@ -107242,6 +114222,8 @@ export namespace Prisma {
     fulfillmentStatus?: string
     stripeSessionId?: string | null
     stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
     subtotal: number
     tax?: number
     shipping?: number
@@ -107276,6 +114258,7 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -107292,6 +114275,7 @@ export namespace Prisma {
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
     shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
@@ -107314,6 +114298,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -107352,6 +114338,8 @@ export namespace Prisma {
     fulfillmentStatus?: StringFieldUpdateOperationsInput | string
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
     tax?: IntFieldUpdateOperationsInput | number
     shipping?: IntFieldUpdateOperationsInput | number
@@ -107384,6 +114372,9 @@ export namespace Prisma {
     price: number
     compareAtPrice?: number | null
     cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
     sku?: string | null
     barcode?: string | null
     trackInventory?: boolean
@@ -107436,6 +114427,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -107466,6 +114460,7 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -107480,6 +114475,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -107510,6 +114508,7 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -107524,6 +114523,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
@@ -107879,6 +114881,158 @@ export namespace Prisma {
     qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type OrderCreateManySubscriptionInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orderNumber: number
+    status?: string
+    paymentStatus?: string
+    fulfillmentStatus?: string
+    stripeSessionId?: string | null
+    stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subtotal: number
+    tax?: number
+    shipping?: number
+    discount?: number
+    total: number
+    customerEmail: string
+    customerName?: string | null
+    customerFirstName?: string | null
+    customerLastName?: string | null
+    customerPhone?: string | null
+    paymentMethod?: string
+    deliveryMethod?: string
+    refundReason?: string | null
+    refundAmountCents?: number | null
+    customerNote?: string | null
+    internalNote?: string | null
+    businessId: string
+    customerId?: string | null
+    shippingAddressId?: string | null
+    discountCodeId?: string | null
+  }
+
+  export type OrderUpdateWithoutSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orderNumber?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: StringFieldUpdateOperationsInput | string
+    fulfillmentStatus?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotal?: IntFieldUpdateOperationsInput | number
+    tax?: IntFieldUpdateOperationsInput | number
+    shipping?: IntFieldUpdateOperationsInput | number
+    discount?: IntFieldUpdateOperationsInput | number
+    total?: IntFieldUpdateOperationsInput | number
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
+    customerNote?: NullableStringFieldUpdateOperationsInput | string | null
+    internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
+    customer?: CustomerUpdateOneWithoutOrdersNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
+    discountCode?: DiscountCodeUpdateOneWithoutOrdersNestedInput
+    items?: OrderItemUpdateManyWithoutOrderNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
+    reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
+    shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateWithoutSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orderNumber?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: StringFieldUpdateOperationsInput | string
+    fulfillmentStatus?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotal?: IntFieldUpdateOperationsInput | number
+    tax?: IntFieldUpdateOperationsInput | number
+    shipping?: IntFieldUpdateOperationsInput | number
+    discount?: IntFieldUpdateOperationsInput | number
+    total?: IntFieldUpdateOperationsInput | number
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
+    customerNote?: NullableStringFieldUpdateOperationsInput | string | null
+    internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
+    shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateManyWithoutSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orderNumber?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: StringFieldUpdateOperationsInput | string
+    fulfillmentStatus?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotal?: IntFieldUpdateOperationsInput | number
+    tax?: IntFieldUpdateOperationsInput | number
+    shipping?: IntFieldUpdateOperationsInput | number
+    discount?: IntFieldUpdateOperationsInput | number
+    total?: IntFieldUpdateOperationsInput | number
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
+    customerNote?: NullableStringFieldUpdateOperationsInput | string | null
+    internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

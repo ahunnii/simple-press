@@ -361,6 +361,86 @@ export function stubStripe(page: Page, stub: StripeStub) {
 }
 
 /**
+ * Fill the Subscribe checkout-prep form
+ * (`src/app/(storefront)/subscribe/_components/subscribe-form.tsx`, served at
+ * `/subscribe`). Unlike the per-template cart/checkout forms `fillCheckout`
+ * targets, this is a single shared component with its own fixed ids
+ * (`#subscribe-email`, `#subscribe-name`, ...) that don't line up with
+ * `fillCheckout`'s `#email`/`#name`/... selectors or its
+ * `autocomplete="shipping ..."` fallbacks (this form uses bare
+ * `autocomplete="address-line1"` etc, without the "shipping " prefix) — so a
+ * dedicated helper is simpler than stretching `fillCheckout`'s fallback
+ * chain to cover a second, unrelated form. State is a native `<select
+ * id="subscribe-state">` (unconditionally, no per-template Radix/native
+ * split to handle here), and there is no in-store-pickup toggle on the
+ * seeded e2e stores, so this form never renders a delivery-method radio
+ * group for `fillSubscribeForm` to worry about.
+ */
+export async function fillSubscribeForm(
+  page: Page,
+  info: CheckoutInfo,
+): Promise<void> {
+  await page.locator("#subscribe-email").fill(info.email);
+  await page.locator("#subscribe-name").fill(info.name);
+  await page.locator("#subscribe-phone").fill(info.phone);
+  await page.locator("#subscribe-address1").fill(info.line1);
+  await page.locator("#subscribe-city").fill(info.city);
+  await page.locator("#subscribe-state").selectOption(info.state);
+  await page.locator("#subscribe-postal").fill(info.postal);
+}
+
+export type StripeSubscriptionStub = {
+  sessionId: string;
+  customerEmail: string;
+};
+
+/**
+ * Stub `POST /api/stripe/subscriptions/create-session` — the Subscribe
+ * lane's money endpoint. A parallel of `stubStripe` above for the
+ * *separate* subscription checkout route (the plan is explicit the two
+ * lanes never share code): `stubStripe`'s glob is
+ * `**\/api/stripe/create-session`, which does NOT match
+ * `.../subscriptions/create-session`, so the two stubs can coexist on the
+ * same `page` without either shadowing the other — do not widen either glob.
+ *
+ * Returns a *relative* sessionUrl pointing at `/subscribe/success`, so the
+ * app's `window.location.href = sessionUrl` redirect navigates in-app
+ * (exercising the real redirect + success render). Because this never sets
+ * the real `pending_subscription_session` cookie the live route sets, the
+ * success page always renders its generic "Thanks!" card (see
+ * `/subscribe/success/page.tsx`), never the cookie-gated subscription-detail
+ * card — that path needs a real DB row + cookie, out of scope for a stubbed
+ * spec.
+ */
+export function stubStripeSubscription(
+  page: Page,
+  stub: StripeSubscriptionStub,
+) {
+  let capturedBody: unknown = null;
+
+  void page.route(
+    "**/api/stripe/subscriptions/create-session",
+    async (route) => {
+      capturedBody = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          sessionUrl: `/subscribe/success?session_id=${stub.sessionId}`,
+          sessionId: stub.sessionId,
+        }),
+      });
+    },
+  );
+
+  return {
+    get createSessionBody() {
+      return capturedBody;
+    },
+  };
+}
+
+/**
  * Drive a real credentialed sign-in through the actual UI: fill email/password
  * by their accessible label (stable across any auth-UI-library swap) and
  * submit. No captcha-solving step is needed: better-auth's `captcha()` plugin

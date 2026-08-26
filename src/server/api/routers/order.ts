@@ -900,6 +900,12 @@ export const orderRouter = createTRPCRouter({
             },
             orderBy: { createdAt: "asc" },
           },
+          // Additive: lets the detail page show a "Subscription" badge
+          // linking to /admin/subscriptions/<id> when this order was billed
+          // from one. id + intervalKey only — nothing sensitive, and
+          // `redactOrderForStaff` below spreads the row through unchanged so
+          // STAFF sees it too (same as every other non-redacted field).
+          subscription: { select: { id: true, intervalKey: true } },
         },
       });
 

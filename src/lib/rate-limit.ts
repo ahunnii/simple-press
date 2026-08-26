@@ -176,6 +176,27 @@ export const externalTokenLimiter = makeLazy({
   keyPrefix: "rl:external-token",
 });
 
+// 10 subscription checkout attempts per 15 minutes per IP
+export const subscriptionCheckoutLimiter = makeLazy({
+  points: 10,
+  duration: 900,
+  keyPrefix: "rl:subscription-checkout",
+});
+
+// 5 subscription manage-link lookups per 15 minutes per IP+host
+export const subscriptionLookupLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:subscription-lookup",
+});
+
+// 20 subscription management actions (cancel/pause/resume/skip) per 15 minutes per IP+host
+export const subscriptionManageLimiter = makeLazy({
+  points: 20,
+  duration: 900,
+  keyPrefix: "rl:subscription-manage",
+});
+
 /**
  * Extract a best-effort client IP from request headers.
  *

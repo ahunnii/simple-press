@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { DefaultVariantSelector } from "./default-variant-selector";
 
@@ -21,6 +22,7 @@ export function DefaultProductActions({
     quantity,
     additionalFields,
     setSelectedVariantId,
+    selectedVariantId,
     justAdded,
   } = useProduct(product);
 
@@ -135,6 +137,12 @@ export function DefaultProductActions({
           )}
         </div>
       )}
+      <SubscribePanel
+        product={product}
+        selectedVariantId={selectedVariantId}
+        quantity={quantity}
+        className="mt-4"
+      />
     </>
   );
 }

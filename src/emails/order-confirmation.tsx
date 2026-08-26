@@ -38,6 +38,8 @@ type OrderConfirmationEmailProps = {
   orderStatusUrl?: string;
   /** Optional owner-customized intro paragraph, shown under the heading. */
   introText?: string;
+  /** When provided, a "Manage your subscription" link is shown in the email. */
+  subscriptionManageUrl?: string;
 };
 
 export default function OrderConfirmationEmail({
@@ -59,6 +61,7 @@ export default function OrderConfirmationEmail({
   businessUrl,
   trackingUrl,
   orderStatusUrl,
+  subscriptionManageUrl,
 }: OrderConfirmationEmailProps) {
   const isPickup = deliveryMethod === "pickup";
   const formatPrice = (cents: number) => {
@@ -227,6 +230,18 @@ export default function OrderConfirmationEmail({
         )}
       </Section>
 
+      {/* Subscription Management Section */}
+      {subscriptionManageUrl && (
+        <Section style={subscriptionSection}>
+          <Text style={subscriptionNote}>
+            This order is part of your subscription.{" "}
+            <a href={subscriptionManageUrl} style={statusLink}>
+              Manage your subscription
+            </a>
+          </Text>
+        </Section>
+      )}
+
       {/* Footer Note */}
       <Text style={note}>
         {isPickup
@@ -381,6 +396,20 @@ const button = {
   textAlign: "center" as const,
   display: "inline-block",
   padding: "12px 32px",
+};
+
+const subscriptionSection = {
+  marginBottom: "24px",
+  padding: "12px 16px",
+  backgroundColor: "#f0f9ff",
+  borderRadius: "6px",
+};
+
+const subscriptionNote = {
+  fontSize: "14px",
+  lineHeight: "20px",
+  color: "#0c4a6e",
+  margin: "0",
 };
 
 const note = {

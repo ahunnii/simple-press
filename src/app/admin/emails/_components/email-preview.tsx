@@ -16,8 +16,14 @@ import OrderReadyForPickupEmail from "~/emails/order-ready-for-pickup";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
+import OwnerSubscriptionNotificationEmail from "~/emails/owner-subscription-notification";
 import QuoteConfirmationEmail from "~/emails/quote-confirmation";
 import ResetPasswordEmail from "~/emails/reset-password";
+import SubscriptionCancelledEmail from "~/emails/subscription-cancelled";
+import SubscriptionManageLinksEmail from "~/emails/subscription-manage-links";
+import SubscriptionPaymentFailedEmail from "~/emails/subscription-payment-failed";
+import SubscriptionStartedEmail from "~/emails/subscription-started";
+import SubscriptionUpdatedEmail from "~/emails/subscription-updated";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import VerifyEmail from "~/emails/verify-email";
 import { toast } from "sonner";
@@ -486,6 +492,157 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             businessName: business.name,
             businessLogoUrl: logoUrl,
             adminQuoteUrl: `${businessUrl}/admin/quotes/sample`,
+          }),
+      },
+      {
+        key: "subscription-started",
+        label: "Subscription Started",
+        overrideId: "subscription-started",
+        build: (_introText) =>
+          SubscriptionStartedEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            variantName: "Monthly",
+            quantity: 1,
+            intervalLabel: "Every month",
+            perDeliveryCents: 3999,
+            nextBillingAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            deliveryMethod: "ship",
+            shippingAddressLines: [
+              "Jane Smith",
+              "123 Main St",
+              "Detroit, MI 48201",
+            ],
+            manageUrl: `${businessUrl}/subscriptions/manage?token=sample`,
+          }),
+      },
+      {
+        key: "subscription-payment-failed",
+        label: "Subscription Payment Failed",
+        overrideId: "subscription-payment-failed",
+        build: (_introText) =>
+          SubscriptionPaymentFailedEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            intervalLabel: "Every month",
+            perDeliveryCents: 3999,
+            manageUrl: `${businessUrl}/subscriptions/manage?token=sample`,
+            attemptCount: 1,
+          }),
+      },
+      {
+        key: "subscription-cancelled",
+        label: "Subscription Cancelled",
+        overrideId: "subscription-cancelled",
+        build: (_introText) =>
+          SubscriptionCancelledEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            variantName: "Monthly",
+            intervalLabel: "Every month",
+            cancelledAt: new Date(),
+            manageUrl: `${businessUrl}/subscriptions/manage?token=sample`,
+          }),
+      },
+      {
+        key: "subscription-updated-paused",
+        label: "Subscription Updated (Paused)",
+        overrideId: "subscription-updated",
+        build: (_introText) =>
+          SubscriptionUpdatedEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            variantName: "Monthly",
+            intervalLabel: "Every month",
+            variant: "paused",
+            resumesAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+            manageUrl: `${businessUrl}/subscriptions/manage?token=sample`,
+          }),
+      },
+      {
+        key: "subscription-updated-resumed",
+        label: "Subscription Updated (Resumed)",
+        overrideId: "subscription-updated",
+        build: (_introText) =>
+          SubscriptionUpdatedEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            variantName: "Monthly",
+            intervalLabel: "Every month",
+            variant: "resumed",
+            nextBillingAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            manageUrl: `${businessUrl}/subscriptions/manage?token=sample`,
+          }),
+      },
+      {
+        key: "subscription-manage-links",
+        label: "Subscription Manage Links",
+        build: () =>
+          SubscriptionManageLinksEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            links: [
+              {
+                productName: "Premium Coffee Pack",
+                variantName: "Monthly",
+                intervalLabel: "Every month",
+                status: "Active",
+                manageUrl: `${businessUrl}/subscriptions/manage?token=sample1`,
+              },
+              {
+                productName: "Tea Selection",
+                variantName: null,
+                intervalLabel: "Every 3 months",
+                status: "Paused",
+                manageUrl: `${businessUrl}/subscriptions/manage?token=sample2`,
+              },
+            ],
+          }),
+      },
+      {
+        key: "subscription-new-owner",
+        label: "New Subscription (owner)",
+        build: () =>
+          OwnerSubscriptionNotificationEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            kind: "new",
+            customerEmail: "jane@example.com",
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            variantName: "Monthly",
+            quantity: 1,
+            intervalLabel: "Every month",
+            perDeliveryCents: 3999,
+            adminUrl: `${businessUrl}/admin/subscriptions/sample`,
+          }),
+      },
+      {
+        key: "subscription-cancelled-owner",
+        label: "Subscription Cancelled (owner)",
+        build: () =>
+          OwnerSubscriptionNotificationEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            kind: "cancelled",
+            customerEmail: "jane@example.com",
+            customerName: "Jane Smith",
+            productName: "Premium Coffee Pack",
+            variantName: "Monthly",
+            quantity: 1,
+            intervalLabel: "Every month",
+            perDeliveryCents: 3999,
+            adminUrl: `${businessUrl}/admin/subscriptions/sample`,
           }),
       },
     ];

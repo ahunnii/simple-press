@@ -26,6 +26,17 @@ export type SeedTenant = {
   productSlug: string;
   productName: string;
   price: number;
+  /**
+   * A second, subscription-enabled product on the same tenant, present only
+   * for the templates seed.ts turns the `subscriptions` flag on for
+   * (`default`, `happy-bamboo`) — kept separate from the always-present
+   * plain product above so specs can assert "no panel" on one product and
+   * "panel + form" on the other, on the same tenant, without needing a
+   * dedicated third business.
+   */
+  subscriptionProductId?: string;
+  subscriptionProductSlug?: string;
+  subscriptionProductName?: string;
 };
 
 export const SEED_FILE = join(

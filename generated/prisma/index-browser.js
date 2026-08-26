@@ -204,6 +204,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
   stripeChargesEnabled: 'stripeChargesEnabled',
   stripePayoutsEnabled: 'stripePayoutsEnabled',
+  stripePortalConfigurationId: 'stripePortalConfigurationId',
   testimonialsAutoApprove: 'testimonialsAutoApprove',
   maintenanceMode: 'maintenanceMode',
   maintenanceVariant: 'maintenanceVariant',
@@ -288,6 +289,9 @@ exports.Prisma.ProductScalarFieldEnum = {
   price: 'price',
   compareAtPrice: 'compareAtPrice',
   cost: 'cost',
+  subscriptionEnabled: 'subscriptionEnabled',
+  subscriptionIntervals: 'subscriptionIntervals',
+  subscriptionDiscountPercent: 'subscriptionDiscountPercent',
   sku: 'sku',
   barcode: 'barcode',
   trackInventory: 'trackInventory',
@@ -469,6 +473,7 @@ exports.Prisma.CustomerScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   phone: 'phone',
+  stripeCustomerId: 'stripeCustomerId',
   acceptsMarketing: 'acceptsMarketing',
   totalSpent: 'totalSpent',
   orderCount: 'orderCount',
@@ -510,6 +515,8 @@ exports.Prisma.OrderScalarFieldEnum = {
   fulfillmentStatus: 'fulfillmentStatus',
   stripeSessionId: 'stripeSessionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
+  stripeInvoiceId: 'stripeInvoiceId',
+  subscriptionId: 'subscriptionId',
   subtotal: 'subtotal',
   tax: 'tax',
   shipping: 'shipping',
@@ -922,6 +929,56 @@ exports.Prisma.QuickBooksInvoiceScalarFieldEnum = {
   lastError: 'lastError'
 };
 
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  customerEmail: 'customerEmail',
+  customerName: 'customerName',
+  customerPhone: 'customerPhone',
+  stripeSubscriptionId: 'stripeSubscriptionId',
+  stripeCustomerId: 'stripeCustomerId',
+  stripeCheckoutSessionId: 'stripeCheckoutSessionId',
+  lastInvoiceId: 'lastInvoiceId',
+  productId: 'productId',
+  productVariantId: 'productVariantId',
+  productName: 'productName',
+  variantName: 'variantName',
+  sku: 'sku',
+  quantity: 'quantity',
+  intervalKey: 'intervalKey',
+  interval: 'interval',
+  intervalCount: 'intervalCount',
+  listPriceCents: 'listPriceCents',
+  discountPercent: 'discountPercent',
+  unitAmountCents: 'unitAmountCents',
+  shippingCents: 'shippingCents',
+  deliveryMethod: 'deliveryMethod',
+  shippingAddressId: 'shippingAddressId',
+  shipFirstName: 'shipFirstName',
+  shipLastName: 'shipLastName',
+  shipAddress1: 'shipAddress1',
+  shipAddress2: 'shipAddress2',
+  shipCity: 'shipCity',
+  shipProvince: 'shipProvince',
+  shipZip: 'shipZip',
+  shipCountry: 'shipCountry',
+  status: 'status',
+  pauseResumesAt: 'pauseResumesAt',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  nextBillingAt: 'nextBillingAt',
+  cancelledAt: 'cancelledAt',
+  cancelReason: 'cancelReason',
+  lastPaymentFailedAt: 'lastPaymentFailedAt',
+  lastSyncedAt: 'lastSyncedAt',
+  termsAcceptedAt: 'termsAcceptedAt',
+  termsVersion: 'termsVersion',
+  merchantTermsUpdatedAt: 'merchantTermsUpdatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1015,7 +1072,8 @@ exports.Prisma.ModelName = {
   QuoteCalculator: 'QuoteCalculator',
   QuoteSubmission: 'QuoteSubmission',
   QuickBooksConnection: 'QuickBooksConnection',
-  QuickBooksInvoice: 'QuickBooksInvoice'
+  QuickBooksInvoice: 'QuickBooksInvoice',
+  Subscription: 'Subscription'
 };
 
 /**

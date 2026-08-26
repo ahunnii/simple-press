@@ -529,9 +529,21 @@ export const productRouter = createTRPCRouter({
         cost,
         sku,
         featured,
+        subscriptionEnabled,
+        subscriptionIntervals,
+        subscriptionDiscountPercent,
       } = input;
 
       const { businessId } = ctx;
+
+      // Same rule `update` enforces below: a product can't be switched on for
+      // subscriptions with no cadence a customer could actually pick.
+      if (subscriptionEnabled && subscriptionIntervals.length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Choose at least one subscription cadence",
+        });
+      }
 
       // Verify a client-supplied inventory pool belongs to THIS business before
       // linking it — otherwise a product could be tied to (and later deduct
@@ -595,6 +607,12 @@ export const productRouter = createTRPCRouter({
           cost: cost ?? null,
           sku: sku ?? null,
           featured,
+          subscriptionEnabled,
+          // Written explicitly — the column has no `@default` (unlike
+          // `subscriptionEnabled`/`subscriptionDiscountPercent`), so omitting
+          // this would store `null` instead of `[]`.
+          subscriptionIntervals: subscriptionIntervals as Prisma.InputJsonValue,
+          subscriptionDiscountPercent,
           businessId,
           variants: {
             create: variants.map((v) => ({
@@ -647,7 +665,20 @@ export const productRouter = createTRPCRouter({
         cost,
         sku,
         featured,
+        subscriptionEnabled,
+        subscriptionIntervals,
+        subscriptionDiscountPercent,
       } = input;
+
+      // A product can't be switched on for subscriptions with no cadence a
+      // customer could actually pick. Checked before any write so a rejected
+      // update never partially applies.
+      if (subscriptionEnabled && subscriptionIntervals.length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Choose at least one subscription cadence",
+        });
+      }
 
       // Verify a client-supplied inventory pool belongs to THIS business before
       // linking it — otherwise a product could be tied to (and later deduct
@@ -749,6 +780,9 @@ export const productRouter = createTRPCRouter({
           cost: cost ?? null,
           sku: sku ?? null,
           featured,
+          subscriptionEnabled,
+          subscriptionIntervals: subscriptionIntervals as Prisma.InputJsonValue,
+          subscriptionDiscountPercent,
           // Reset alert flags when inventory is manually increased above threshold/zero
           ...(inventoryIncreased && inventoryQty > 0
             ? { outOfStockAlertSent: false }

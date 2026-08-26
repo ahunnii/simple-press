@@ -141,6 +141,14 @@ export default async function OrderDetailPage({ params }: Props) {
             )}
 
             {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
+
+            {order.subscription && (
+              <Badge variant="outline" asChild>
+                <Link href={`/admin/subscriptions/${order.subscription.id}`}>
+                  Subscription
+                </Link>
+              </Badge>
+            )}
           </div>
         </div>
 

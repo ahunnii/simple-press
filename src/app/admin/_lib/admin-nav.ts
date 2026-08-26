@@ -23,6 +23,7 @@ import {
   IconPackages,
   IconPhoto,
   IconReceiptTax,
+  IconRepeat,
   IconReportMoney,
   IconShoppingCart,
   IconSparkles,
@@ -218,6 +219,21 @@ export const NAV_ITEMS: NavItem[] = [
     section: "sell",
     featureKey: "quickbooks",
     keywords: ["quickbooks", "invoice", "deposit", "bill", "final bill"],
+  },
+  {
+    key: "subscriptions",
+    title: "Subscriptions",
+    href: "/admin/subscriptions",
+    icon: IconRepeat,
+    section: "sell",
+    featureKey: "subscriptions",
+    keywords: [
+      "recurring",
+      "subscribe",
+      "auto-ship",
+      "billing",
+      "subscription",
+    ],
   },
 
   // Catalog
