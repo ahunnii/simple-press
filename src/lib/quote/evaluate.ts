@@ -5,6 +5,7 @@ import type {
   QuoteSubmissionAnswer,
   QuoteWireAnswer,
 } from "~/lib/validators/quote-calculator";
+import { addCalendarDays, isRealCalendarDate } from "~/lib/calendar-date";
 import { haversineMiles } from "~/lib/geo/haversine";
 import { evaluateAst, parseFormula } from "~/lib/quote/formula";
 import { flattenScreens } from "~/lib/quote/screens";
@@ -196,6 +197,25 @@ export type QuoteComputationMode = "submit" | "preview";
 export type QuoteComputationOptions = {
   /** Defaults to `"submit"`. See the "Two modes" note at the top of the file. */
   mode?: QuoteComputationMode;
+  /**
+   * Today's calendar date (`YYYY-MM-DD`) in the BUSINESS's time zone, used to
+   * enforce a date question's `minDate` / `maxDaysAhead`.
+   *
+   * Injected rather than read from the clock for the same reason `lookupZip`
+   * is: this module stays pure and deterministic, so a stored submission
+   * recomputes to the same answer forever and the tests are not time bombs.
+   *
+   * The business's zone, never the visitor's and never the server's: a
+   * "must be today or later" rule measured in UTC rejects a perfectly valid
+   * "today" for every owner west of Greenwich during their evening.
+   *
+   * Omitted ⇒ date bounds are NOT enforced. Every production caller passes it
+   * (`submit`, `previewEstimate`, the admin test panel); the escape hatch
+   * exists so a caller with no tenant context — a unit test, a future
+   * replay/diagnostic tool — degrades to "accept any real date" rather than
+   * silently comparing against the wrong day.
+   */
+  today?: string;
 };
 
 export function computeQuote(
@@ -210,6 +230,9 @@ export function computeQuote(
    * preview wire sends — and nothing else.
    */
   const lenient = options?.mode === "preview";
+
+  /** See `QuoteComputationOptions.today` — `undefined` disables date bounds. */
+  const today = options?.today;
 
   // Parsed ONCE, here, because two separate things need it: deciding which
   // distances can fail a submission over an unknown ZIP (just below), and
@@ -636,6 +659,37 @@ export function computeQuote(
             question.id,
           );
         }
+        // The regex proves the shape; this proves the day exists. `2026-02-30`
+        // passes the first and fails here.
+        if (!isRealCalendarDate(date)) {
+          return failure("bad-answer", "Enter a valid date", question.id);
+        }
+        // Bounds are checked in BOTH modes, unlike a missing required answer:
+        // a date outside the owner's window is a bad payload, not an
+        // incomplete one, and letting preview accept what submit will reject
+        // shows the visitor a live estimate for a job that cannot be booked.
+        //
+        // Compared as strings: ISO `YYYY-MM-DD` sorts lexicographically in
+        // calendar order, so no Date object (and no time zone) is involved.
+        if (today !== undefined) {
+          if (question.minDate === "today" && date < today) {
+            return failure(
+              "bad-answer",
+              `"${question.title}" must be today or later.`,
+              question.id,
+            );
+          }
+          if (
+            question.maxDaysAhead != null &&
+            date > addCalendarDays(today, question.maxDaysAhead)
+          ) {
+            return failure(
+              "bad-answer",
+              `"${question.title}" must be within ${question.maxDaysAhead} days.`,
+              question.id,
+            );
+          }
+        }
         snapshot.date = date;
         snapshot.display = date;
         break;
@@ -661,10 +715,16 @@ export function computeQuote(
       continue;
     }
 
-    // Rounded to one decimal so the stored variable snapshot is stable and
-    // readable — an owner reading "69.1 miles" back off a quote should see the
-    // same number that went into the formula, not 69.09324...
-    const miles = Math.round(haversineMiles(from, to) * 10) / 10;
+    // Straight-line miles scaled by the owner's road factor (1 = raw
+    // haversine, the pre-existing behavior and the schema default), THEN
+    // rounded to one decimal — rounding first and scaling after would leave
+    // the formula reading a number nobody ever sees.
+    //
+    // One decimal so the stored variable snapshot is stable and readable — an
+    // owner reading "86.4 miles" back off a quote should see the same number
+    // that went into the formula, not 86.36648...
+    const miles =
+      Math.round(haversineMiles(from, to) * distance.roadFactor * 10) / 10;
     variables.set(distance.variableName, miles);
   }
 
@@ -698,7 +758,36 @@ export function computeQuote(
     return failure("formula-failed", evaluated.error.message);
   }
 
-  const rounded = Math.round(evaluated.value * 100);
+  const finalized = finalizeEstimateCents(evaluated.value);
+
+  return {
+    ok: true,
+    estimateCents: finalized.estimateCents,
+    ...(finalized.failure ? { estimateFailure: finalized.failure } : {}),
+    variables: resolvedVariables,
+    answerSnapshots: snapshots,
+  };
+}
+
+/**
+ * Turns a formula's dollar value into the integer cents that get stored — or
+ * into `null` plus the reason there is no storable number.
+ *
+ * Extracted so there is exactly ONE implementation of the money endgame.
+ * `computeQuote` calls it, and so does anything else that has to turn a raw
+ * formula value into the same figure (a re-price, a what-if panel). Two copies
+ * of this arithmetic is how a preview and a submission end up disagreeing
+ * about the same answers, and the number the visitor was shown stops matching
+ * the number in the owner's inbox.
+ *
+ * A `failure` is never an error: the caller still has a valid submission and
+ * still captures the lead. It only explains a blank estimate.
+ */
+export function finalizeEstimateCents(value: number): {
+  estimateCents: number | null;
+  failure?: QuoteEstimateFailure;
+} {
+  const rounded = Math.round(value * 100);
 
   // Below zero we NULL the estimate. This used to clamp to 0, which is the one
   // outcome worse than showing "-$120.00": it quotes the customer a free job in
@@ -710,14 +799,11 @@ export function computeQuote(
   // the answers and prices it by hand.
   if (rounded < 0) {
     return {
-      ok: true,
       estimateCents: null,
-      estimateFailure: {
+      failure: {
         code: "value-error",
         message: `Computed estimate ${rounded} is negative — this combination of answers discounts below zero`,
       },
-      variables: resolvedVariables,
-      answerSnapshots: snapshots,
     };
   }
 
@@ -735,21 +821,13 @@ export function computeQuote(
   // exactly which submission needs a hand-priced quote.
   if (rawEstimateCents > QUOTE_MAX_ESTIMATE_CENTS) {
     return {
-      ok: true,
       estimateCents: null,
-      estimateFailure: {
+      failure: {
         code: "over-cap",
         message: `Computed estimate ${rawEstimateCents} exceeds the ${QUOTE_MAX_ESTIMATE_CENTS} cent cap`,
       },
-      variables: resolvedVariables,
-      answerSnapshots: snapshots,
     };
   }
 
-  return {
-    ok: true,
-    estimateCents: rawEstimateCents,
-    variables: resolvedVariables,
-    answerSnapshots: snapshots,
-  };
+  return { estimateCents: rawEstimateCents };
 }

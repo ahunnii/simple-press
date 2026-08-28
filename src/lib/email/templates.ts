@@ -19,10 +19,16 @@ import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import OrderStatusLinkEmail from "~/emails/order-status-link";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
+import OwnerSubscriptionNotificationEmail from "~/emails/owner-subscription-notification";
 import PaymentsDisabledEmail from "~/emails/payments-disabled";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
 import QuoteConfirmationEmail from "~/emails/quote-confirmation";
+import SubscriptionCancelledEmail from "~/emails/subscription-cancelled";
+import SubscriptionManageLinksEmail from "~/emails/subscription-manage-links";
+import SubscriptionPaymentFailedEmail from "~/emails/subscription-payment-failed";
+import SubscriptionStartedEmail from "~/emails/subscription-started";
+import SubscriptionUpdatedEmail from "~/emails/subscription-updated";
 import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 
@@ -72,6 +78,8 @@ export async function sendOrderConfirmation(params: {
   };
   /** When provided, a signed "View order status" link is included in the email. */
   orderId?: string;
+  /** When provided, a "Manage your subscription" link is shown in the email. */
+  subscriptionManageUrl?: string;
   idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
@@ -112,6 +120,7 @@ export async function sendOrderConfirmation(params: {
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
       orderStatusUrl,
+      subscriptionManageUrl: params.subscriptionManageUrl,
     }),
     tags: [
       { name: "category", value: "order_confirmation" },
@@ -140,6 +149,8 @@ export async function sendNewOrderNotification(params: {
   discount: number;
   total: number;
   deliveryMethod?: "ship" | "pickup";
+  /** Present when this order was created from a paid subscription invoice — lets the owner tell a renewal from a one-off. */
+  subscription?: { intervalLabel: string; adminUrl: string };
   business: {
     name: string;
     siteContent?: {
@@ -152,13 +163,16 @@ export async function sendNewOrderNotification(params: {
   idempotencyKey?: string;
 }) {
   const adminOrderUrl = `${getBusinessUrl(params.business)}/admin/orders/${params.orderId}`;
+  const subject = params.subscription
+    ? `New subscription order #${params.orderNumber} — ${params.business.name}`
+    : `New order #${params.orderNumber} — ${params.business.name}`;
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.customerEmail,
-    subject: `New order #${params.orderNumber} — ${params.business.name}`,
+    subject,
     react: NewOrderNotificationEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
@@ -170,6 +184,7 @@ export async function sendNewOrderNotification(params: {
       discount: params.discount,
       total: params.total,
       deliveryMethod: params.deliveryMethod,
+      subscription: params.subscription,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       adminOrderUrl,
@@ -1031,8 +1046,18 @@ export async function sendFinalQuote(params: {
   to: string;
   customerName: string;
   calculatorName: string;
-  /** Always exact — the owner reviewed it; there is no range framing here. */
-  finalQuoteCents: number;
+  /**
+   * Always exact when present — the owner reviewed it; there is no range
+   * framing here.
+   *
+   * `null` is a MESSAGE-ONLY follow-up, not a $0 quote: the owner is writing
+   * back to ask something ("can you send photos of the stairs?") or to decline
+   * ("we don't cover that area"), and the email drops the amount box entirely
+   * rather than printing a price nobody quoted. The subject changes with it —
+   * "Your quote from X" landing in an inbox with no quote in it is worse than
+   * no email at all.
+   */
+  finalQuoteCents: number | null;
   /** Owner-written message for this send. Plain text. */
   message: string;
   answers: Array<{ title: string; display: string }>;
@@ -1049,7 +1074,14 @@ export async function sendFinalQuote(params: {
 }) {
   const overrides = await getEmailOverrides(params.business.subdomain);
   const override = overrides["final-quote"];
-  const defaultSubject = `Your quote from ${params.business.name}`;
+  // Only the DEFAULT subject splits on the amount. An owner who wrote their own
+  // subject line keeps it in both cases — it is one string on the template's
+  // customization row, they cannot author two, and silently ignoring their
+  // wording on some sends would be the more surprising behavior.
+  const defaultSubject =
+    params.finalQuoteCents === null
+      ? `An update on your quote request — ${params.business.name}`
+      : `Your quote from ${params.business.name}`;
 
   return sendEmail({
     from: EMAIL_FROM.SUPPORT,
@@ -1122,5 +1154,373 @@ export async function sendNewReviewNotification(params: {
       { name: "category", value: "new_review" },
       { name: "business", value: params.business.subdomain },
     ],
+  });
+}
+
+/**
+ * How a subscription email addresses the customer.
+ *
+ * `Subscription.customerName` is the name they typed on the Subscribe form
+ * (encrypted at rest, so it is passed in rather than looked up here). Falling
+ * back to the email's local-part greets a real person as "Hi jane.smith1987"
+ * — acceptable only when no name was ever captured.
+ */
+function customerGreetingName(params: {
+  to: string;
+  customerName?: string | null;
+}): string {
+  const name = params.customerName?.trim();
+  if (name) return name;
+  return params.to.split("@")[0] ?? params.to;
+}
+
+// Subscription Started (customer)
+export async function sendSubscriptionStarted(params: {
+  to: string;
+  /** The customer's own name, when the subscription row has one. */
+  customerName?: string | null;
+  productName: string;
+  variantName?: string | null;
+  quantity: number;
+  intervalLabel: string;
+  perDeliveryCents: number;
+  nextBillingAt?: Date | null;
+  deliveryMethod: "ship" | "pickup";
+  shippingAddressLines?: string[];
+  manageUrl: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["subscription-started"];
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : `Your ${params.productName} subscription is confirmed`,
+    react: SubscriptionStartedEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      customerName: customerGreetingName(params),
+      productName: params.productName,
+      variantName: params.variantName,
+      quantity: params.quantity,
+      intervalLabel: params.intervalLabel,
+      perDeliveryCents: params.perDeliveryCents,
+      nextBillingAt: params.nextBillingAt ?? undefined,
+      deliveryMethod: params.deliveryMethod,
+      shippingAddressLines: params.shippingAddressLines,
+      manageUrl: params.manageUrl,
+    }),
+    tags: [
+      { name: "category", value: "subscription_started" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Subscription Payment Failed (customer)
+export async function sendSubscriptionPaymentFailed(params: {
+  to: string;
+  /** The customer's own name, when the subscription row has one. */
+  customerName?: string | null;
+  productName: string;
+  intervalLabel: string;
+  perDeliveryCents: number;
+  manageUrl: string;
+  attemptCount?: number;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["subscription-payment-failed"];
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : `Action needed: payment for your ${params.productName} subscription`,
+    react: SubscriptionPaymentFailedEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      customerName: customerGreetingName(params),
+      productName: params.productName,
+      intervalLabel: params.intervalLabel,
+      perDeliveryCents: params.perDeliveryCents,
+      manageUrl: params.manageUrl,
+      attemptCount: params.attemptCount,
+    }),
+    tags: [
+      { name: "category", value: "subscription_payment_failed" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Subscription Cancelled (customer)
+export async function sendSubscriptionCancelled(params: {
+  to: string;
+  /** The customer's own name, when the subscription row has one. */
+  customerName?: string | null;
+  productName: string;
+  variantName?: string | null;
+  intervalLabel: string;
+  cancelledAt: Date;
+  manageUrl?: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["subscription-cancelled"];
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : `Your ${params.productName} subscription has been cancelled`,
+    react: SubscriptionCancelledEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      customerName: customerGreetingName(params),
+      productName: params.productName,
+      variantName: params.variantName,
+      intervalLabel: params.intervalLabel,
+      cancelledAt: params.cancelledAt,
+      manageUrl: params.manageUrl,
+    }),
+    tags: [
+      { name: "category", value: "subscription_cancelled" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Subscription Updated (customer) — for pause/resume/skip
+export async function sendSubscriptionUpdated(params: {
+  to: string;
+  /** The customer's own name, when the subscription row has one. */
+  customerName?: string | null;
+  productName: string;
+  variantName?: string | null;
+  intervalLabel: string;
+  variant: "paused" | "resumed" | "skipped";
+  /** `resumed` only: the customer undid a pending skip rather than lifting a pause. */
+  undoSkip?: boolean;
+  resumesAt?: Date | null;
+  nextBillingAt?: Date | null;
+  manageUrl: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["subscription-updated"];
+
+  let defaultSubject: string;
+  if (params.variant === "paused") {
+    defaultSubject = "Your subscription is paused";
+  } else if (params.variant === "resumed") {
+    defaultSubject = params.undoSkip
+      ? "Your next delivery is back on"
+      : "Your subscription is back on";
+  } else {
+    defaultSubject = "Your next delivery is skipped";
+  }
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : defaultSubject,
+    react: SubscriptionUpdatedEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      customerName: customerGreetingName(params),
+      productName: params.productName,
+      variantName: params.variantName,
+      intervalLabel: params.intervalLabel,
+      variant: params.variant,
+      undoSkip: params.undoSkip,
+      resumesAt: params.resumesAt ?? undefined,
+      nextBillingAt: params.nextBillingAt ?? undefined,
+      manageUrl: params.manageUrl,
+    }),
+    tags: [
+      { name: "category", value: "subscription_updated" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Subscription Manage Links (customer) — for lookup
+export async function sendSubscriptionManageLinks(params: {
+  to: string;
+  links: Array<{
+    productName: string;
+    variantName?: string | null;
+    intervalLabel: string;
+    status: string;
+    manageUrl: string;
+  }>;
+  business: {
+    name: string;
+    // Required so `replyTo` reaches the merchant: the template tells the
+    // customer to reply to this email, and without it replies land on the
+    // platform's `orders@` address where nobody is watching for them.
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `Manage your ${params.business.name} subscriptions`,
+    react: SubscriptionManageLinksEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      links: params.links,
+    }),
+    tags: [
+      { name: "category", value: "subscription_manage_link" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Owner Subscription Notification (owner) — for new, cancelled, and payment_failed
+export async function sendOwnerSubscriptionNotification(params: {
+  kind: "new" | "cancelled" | "payment_failed";
+  customerEmail: string;
+  customerName?: string | null;
+  productName: string;
+  variantName?: string | null;
+  quantity: number;
+  intervalLabel: string;
+  perDeliveryCents: number;
+  adminUrl: string;
+  /** Only meaningful when `kind === "cancelled"`. Raw `Subscription.cancelReason` value. */
+  cancelReason?: string | null;
+  /** Only meaningful when `kind === "payment_failed"`. Stripe's `attempt_count` on the invoice. */
+  attemptCount?: number;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const category =
+    params.kind === "new"
+      ? "subscription_owner_new"
+      : params.kind === "payment_failed"
+        ? "subscription_owner_payment_failed"
+        : "subscription_owner_cancelled";
+  const defaultSubject =
+    params.kind === "new"
+      ? `New subscription: ${params.productName}`
+      : params.kind === "payment_failed"
+        ? "Payment failed for a subscription"
+        : `Subscription cancelled: ${params.productName}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    replyTo: params.customerEmail,
+    subject: defaultSubject,
+    react: OwnerSubscriptionNotificationEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      kind: params.kind,
+      customerEmail: params.customerEmail,
+      customerName: params.customerName,
+      productName: params.productName,
+      variantName: params.variantName,
+      quantity: params.quantity,
+      intervalLabel: params.intervalLabel,
+      perDeliveryCents: params.perDeliveryCents,
+      adminUrl: params.adminUrl,
+      cancelReason: params.cancelReason,
+      attemptCount: params.attemptCount,
+    }),
+    tags: [
+      { name: "category", value: category },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
   });
 }

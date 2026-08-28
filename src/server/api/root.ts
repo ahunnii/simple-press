@@ -35,6 +35,7 @@ import { reviewRouter } from "./routers/review";
 import { searchRouter } from "./routers/search";
 import { serviceRouter } from "./routers/service";
 import { shippingRouter } from "./routers/shipping";
+import { subscriptionRouter } from "./routers/subscription";
 import { teamRouter } from "./routers/team";
 import { testimonialRouter } from "./routers/testimonials";
 import { uploadRouter } from "./routers/upload";
@@ -82,6 +83,7 @@ export const appRouter = createTRPCRouter({
   quoteCalculator: quoteCalculatorRouter,
   quoteSubmission: quoteSubmissionRouter,
   shipping: shippingRouter,
+  subscription: subscriptionRouter,
 
   external: externalRouter,
   faq: faqRouter,

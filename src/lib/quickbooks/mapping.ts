@@ -1,10 +1,13 @@
 import type {
+  BillingAddress,
   DepositRule,
   InvoiceKind,
   InvoiceStatus,
+  QboAddress,
   QboInvoice,
   QboQueryResponse,
 } from "~/lib/quickbooks/types";
+import { addCalendarDays, zonedCalendarDate } from "~/lib/calendar-date";
 import { QBO_MAX_ERROR_LENGTH } from "~/lib/quickbooks/constants";
 
 /**
@@ -94,8 +97,14 @@ export function computeFinalPrefillCents(
  *    zero against a positive expectation is the signal.
  * 2. `Balance <= 0` → `paid`. Takes priority over the overdue check below —
  *    a paid invoice is never reported overdue even if `DueDate` has passed.
- * 3. `DueDate` present and strictly before today (UTC calendar date) →
- *    `overdue`.
+ * 3. `DueDate` present and strictly before today **in the business's own
+ *    `timeZone`** → `overdue`. The zone is load-bearing, not decoration: QBO
+ *    stores `DueDate` as a bare calendar date with no zone, and the sync cron
+ *    runs every 15 minutes, so comparing it against the UTC date marks an
+ *    invoice due today as overdue for the whole evening west of UTC (7pm in
+ *    Detroit is already tomorrow in UTC). The owner would watch a same-day
+ *    invoice go red hours before it was actually late, and the customer's
+ *    reminder email would say so.
  * 4. Previously `created` and QBO reports `EmailStatus === "EmailSent"` →
  *    `sent`.
  * 5. Previously `overdue` but rule 3 no longer applies (e.g. the owner
@@ -111,7 +120,13 @@ export function computeFinalPrefillCents(
  */
 export function deriveInvoiceStatus(
   qbo: Pick<QboInvoice, "TotalAmt" | "Balance" | "DueDate" | "EmailStatus">,
-  ctx: { now: Date; previous: InvoiceStatus; expectedTotalCents: number },
+  ctx: {
+    now: Date;
+    previous: InvoiceStatus;
+    expectedTotalCents: number;
+    /** The business's IANA zone (`Business.timeZone`) — see rule 3. */
+    timeZone: string;
+  },
 ): InvoiceStatus {
   if (
     typeof qbo.TotalAmt === "number" &&
@@ -125,11 +140,13 @@ export function deriveInvoiceStatus(
     return "paid";
   }
 
-  const todayUtc = ctx.now.toISOString().slice(0, 10);
+  // String comparison is correct here and not a shortcut: both sides are
+  // zero-padded `YYYY-MM-DD`, whose lexical order IS chronological order.
+  const today = zonedCalendarDate(ctx.now, ctx.timeZone);
   const isOverdue =
     typeof qbo.DueDate === "string" &&
     qbo.DueDate.length > 0 &&
-    qbo.DueDate < todayUtc;
+    qbo.DueDate < today;
   if (isOverdue) {
     return "overdue";
   }
@@ -183,16 +200,50 @@ export function escapeQboQueryValue(value: string): string {
 
 // ─── Request body builders ──────────────────────────────────────────────
 
-/** Request body for creating/updating a QBO `Customer`. */
+/**
+ * Translates a SimplePress billing address into Intuit's `PhysicalAddress`
+ * shape — the ONE place the field-name mapping lives (`state` →
+ * `CountrySubDivisionCode`, `zip` → `PostalCode`).
+ *
+ * `Line2` is omitted rather than sent empty: QBO echoes back whatever it was
+ * given, so an empty `Line2` becomes a blank line on the printed invoice the
+ * customer receives. `Country` is hardcoded `"USA"` because
+ * `quickBooksBillingAddressSchema` is US-only (2-letter state, 5/9-digit ZIP)
+ * — widening the schema to other countries means revisiting this line, not
+ * just the validator.
+ */
+export function toQboBillAddr(address: BillingAddress): QboAddress {
+  return {
+    Line1: address.line1,
+    ...(address.line2 ? { Line2: address.line2 } : {}),
+    City: address.city,
+    CountrySubDivisionCode: address.state,
+    PostalCode: address.zip,
+    Country: "USA",
+  };
+}
+
+/**
+ * Request body for creating/updating a QBO `Customer`.
+ *
+ * `billAddr` is only meaningful on CREATE. QBO customer updates are
+ * full-object sparse-or-not writes that require a `SyncToken`, and this
+ * integration never issues one — the address a customer was created with is
+ * theirs until the owner edits it inside QuickBooks, which SimplePress must
+ * not silently overwrite from a stale lead. The per-invoice `BillAddr` (see
+ * `buildInvoicePayload`) is what keeps a later invoice accurate.
+ */
 export function buildCustomerPayload(input: {
   name: string;
   email: string;
   phone?: string | null;
+  billAddr?: QboAddress | null;
 }): object {
   return {
     DisplayName: input.name,
     PrimaryEmailAddr: { Address: input.email },
     ...(input.phone ? { PrimaryPhone: { FreeFormNumber: input.phone } } : {}),
+    ...(input.billAddr ? { BillAddr: input.billAddr } : {}),
   };
 }
 
@@ -210,9 +261,14 @@ export function buildServiceItemPayload(
 
 /**
  * Request body for creating a QBO `Invoice` — a single service line for the
- * full amount. `memo` and online-payment flags are only included when
- * applicable, since QBO treats an absent key differently from an empty one
- * for some of these fields.
+ * full amount. `memo`, `billAddr`, and the online-payment flags are only
+ * included when applicable, since QBO treats an absent key differently from
+ * an empty one for some of these fields.
+ *
+ * When `billAddr` is omitted QBO falls back to the customer record's own
+ * address, which is the correct behaviour — an invoice with no snapshot
+ * should look exactly like every invoice issued before this field existed,
+ * not like one addressed to nowhere.
  */
 export function buildInvoicePayload(input: {
   customerId: string;
@@ -223,6 +279,7 @@ export function buildInvoicePayload(input: {
   email: string;
   memo?: string | null;
   allowOnlinePayment: boolean;
+  billAddr?: QboAddress | null;
 }): object {
   const amt = centsToQboAmount(input.amountCents);
 
@@ -242,6 +299,7 @@ export function buildInvoicePayload(input: {
     ],
     DueDate: input.dueDate,
     BillEmail: { Address: input.email },
+    ...(input.billAddr ? { BillAddr: input.billAddr } : {}),
     ...(input.memo ? { CustomerMemo: { value: input.memo } } : {}),
     ...(input.allowOnlinePayment
       ? { AllowOnlineCreditCardPayment: true, AllowOnlineACHPayment: true }
@@ -271,48 +329,37 @@ export function defaultLineDescription(
  * `timeZone`, formatted `YYYY-MM-DD`.
  *
  * This is calendar-domain arithmetic, not instant arithmetic: `now` is first
- * resolved to a zone-local Y/M/D triple, and `dueDays` is added to `day`
- * directly (day/month/year rollover is handled by `Date.UTC`'s normalization
- * — no clock, no offset, no DST anywhere in that step). Because no instant
- * (millisecond) arithmetic happens after zoning, a DST transition between
- * `now` and the due date can NEVER shift the result by a day — a due date
- * requested the evening before a spring-forward is still exactly one
- * calendar day later, not two. (An earlier version of this function added
- * `dueDays * 86_400_000` ms to the instant BEFORE formatting, which broke
- * exactly this case — see `mapping.test.ts` for the regression.)
+ * resolved to a zone-local calendar date, and `dueDays` is then added to that
+ * date on a DST-free scratch calendar. Because no instant (millisecond)
+ * arithmetic happens after zoning, a DST transition between `now` and the due
+ * date can NEVER shift the result by a day — a due date requested the evening
+ * before a spring-forward is still exactly one calendar day later, not two.
+ * (An earlier version added `dueDays * 86_400_000` ms to the instant BEFORE
+ * formatting, which broke exactly this case — see `mapping.test.ts` for the
+ * regression.) Both steps now live in `~/lib/calendar-date`, so this rule has
+ * one implementation shared with `deriveInvoiceStatus` above and the quote
+ * validators, rather than a copy per caller that can drift.
  *
- * The zone-local Y/M/D is never the UTC calendar date's — the two can differ
+ * The zone-local date is never the UTC calendar date's — the two can differ
  * by a full day near midnight UTC (e.g. 2026-06-01T03:30Z is still
- * 2026-05-31 in `America/Detroit`). `en-CA` is used purely as a formatting
- * trick to extract that triple — that locale's date format IS `YYYY-MM-DD`,
- * so slicing the formatted string is enough; no `Intl.DateTimeFormatPart`
- * reassembly needed. `Date.UTC` in the second step is just a neutral,
- * DST-free scratch calendar for the `day + dueDays` addition — it does not
- * reinterpret the zoned Y/M/D as a UTC instant, and its result is read back
- * out with UTC getters (`toISOString().slice(0, 10)`), never zoned again.
+ * 2026-05-31 in `America/Detroit`).
  *
- * Throws `RangeError` for an invalid IANA `timeZone` — that's `Intl`'s own
- * behavior, not caught here, since a bad timezone string is a configuration
- * bug that should fail loudly.
+ * Throws `RangeError` for an invalid IANA `timeZone`. That is a DELIBERATE
+ * divergence from `zonedCalendarDate`, which swallows the error and falls
+ * back to UTC because it runs inside request-path validation where a tenant's
+ * typo must not 500 a submission. Here the stake is different: a due date is
+ * written onto a money record and mailed to a customer, so silently pricing
+ * it off the wrong calendar is worse than failing loudly at the one moment a
+ * bad `Business.timeZone` is still fixable. The probe below is what preserves
+ * that — `Intl.DateTimeFormat` validates the zone name at construction.
  */
 export function dueDateString(
   now: Date,
   dueDays: number,
   timeZone: string,
 ): string {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const zoned = formatter.format(now); // "YYYY-MM-DD" in `timeZone`
-  const year = Number(zoned.slice(0, 4));
-  const month = Number(zoned.slice(5, 7));
-  const day = Number(zoned.slice(8, 10));
-
-  const target = new Date(Date.UTC(year, month - 1, day + dueDays));
-  return target.toISOString().slice(0, 10);
+  Intl.DateTimeFormat("en-CA", { timeZone }); // throws RangeError on a bad zone
+  return addCalendarDays(zonedCalendarDate(now, timeZone), dueDays);
 }
 
 // ─── Misc ───────────────────────────────────────────────────────────────

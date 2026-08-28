@@ -1,6 +1,6 @@
 "use client";
 
-import type { FieldErrors, Path } from "react-hook-form";
+import type { FieldErrors, Path, Resolver } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,6 +28,7 @@ import type { ImageUploaderHandle } from "./image-uploader";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { parseProductIntervals } from "~/lib/subscriptions/intervals";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema, variantSchema } from "~/lib/validators/product";
@@ -106,12 +107,16 @@ import {
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
 import { ProductFeaturesField } from "./product-features-field";
+import { ProductSubscriptionCard } from "./product-subscription-card";
 import { VariantManager } from "./variant-manager";
 
 type Props = {
   product?: RouterOutputs["product"]["secureGet"];
   galleriesEnabled?: boolean;
   collectionsEnabled?: boolean;
+  /** `subscriptions` feature flag, resolved server-side — gates whether the
+   *  Subscriptions card renders at all (see `ProductSubscriptionCard`). */
+  subscriptionsEnabled?: boolean;
   allCollections?: RouterOutputs["collections"]["getAll"];
   pools?: RouterOutputs["baseInventoryUnit"]["list"];
 };
@@ -207,6 +212,9 @@ function getNewProductDefaults(): ProductFormSchema {
     ogImage: undefined,
     weight: undefined,
     weightUnit: "lb",
+    subscriptionEnabled: false,
+    subscriptionIntervals: [],
+    subscriptionDiscountPercent: 0,
   };
 }
 
@@ -214,6 +222,7 @@ export function ProductForm({
   product,
   galleriesEnabled,
   collectionsEnabled,
+  subscriptionsEnabled,
   allCollections = [],
   pools = [],
 }: Props) {
@@ -282,7 +291,19 @@ export function ProductForm({
 
   // Initialize form with react-hook-form
   const form = useForm<ProductFormSchema>({
-    resolver: zodResolver(productFormSchema),
+    // `zodResolver`'s generics infer from the schema's INPUT type
+    // (`z.input`), where `.default()`-bearing fields (the three
+    // `productSubscriptionFieldsSchema` fields, merged into
+    // `productFormObjectSchema` via `.extend()`) are optional; `useForm`'s
+    // own generic here is `ProductFormSchema` (`z.infer`/`z.output`), where a
+    // defaulted field is always present. That divergence — not a real runtime
+    // difference, since RHF always resolves `defaultValues` before validating
+    // — is exactly what `zodResolver` was already generic enough to model
+    // (see its `Input`/`Output` type params), so this cast just tells
+    // `useForm` to trust the output side rather than fighting the resolver's
+    // own type inference across every downstream `form.control`/`form.watch`
+    // call in this file.
+    resolver: zodResolver(productFormSchema) as Resolver<ProductFormSchema>,
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
@@ -318,6 +339,11 @@ export function ProductForm({
       ogImage: product?.ogImage ?? undefined,
       weight: product?.weight ?? undefined,
       weightUnit: (product?.weightUnit as "lb" | "kg" | undefined) ?? "lb",
+      subscriptionEnabled: product?.subscriptionEnabled ?? false,
+      subscriptionIntervals: parseProductIntervals(
+        product?.subscriptionIntervals,
+      ),
+      subscriptionDiscountPercent: product?.subscriptionDiscountPercent ?? 0,
     },
   });
 
@@ -683,6 +709,9 @@ export function ProductForm({
           ogImage: resolvedOgImage ?? null,
           weight: data.weight ?? null,
           weightUnit: data.weightUnit ?? "lb",
+          subscriptionEnabled: data.subscriptionEnabled,
+          subscriptionIntervals: data.subscriptionIntervals,
+          subscriptionDiscountPercent: data.subscriptionDiscountPercent,
         });
       } catch {
         // onError on the mutation itself already toasted + mapped field
@@ -771,6 +800,9 @@ export function ProductForm({
           ogImage: resolvedOgImage ?? null,
           weight: data.weight ?? null,
           weightUnit: data.weightUnit ?? "lb",
+          subscriptionEnabled: data.subscriptionEnabled,
+          subscriptionIntervals: data.subscriptionIntervals,
+          subscriptionDiscountPercent: data.subscriptionDiscountPercent,
         });
       } catch {
         // onError on the mutation itself already toasted + mapped field
@@ -1339,6 +1371,13 @@ export function ProductForm({
                         />
                       </CardContent>
                     </Card>
+
+                    {/* Subscriptions — only when the owner has the flag on
+                        (resolved server-side, threaded through as a prop). */}
+                    {subscriptionsEnabled && (
+                      <ProductSubscriptionCard form={form} />
+                    )}
+
                     {/* Shipping weight */}
                     <Card>
                       <CardHeader>

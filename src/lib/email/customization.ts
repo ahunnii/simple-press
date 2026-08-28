@@ -106,6 +106,36 @@ export const CUSTOMIZABLE_EMAILS = [
     defaultSubject: "Your quote from {businessName}",
     supportsIntro: false,
   },
+  {
+    id: "subscription-started",
+    label: "Subscription Started",
+    description: "Sent to a customer right after they successfully subscribe.",
+    defaultSubject: "Your {businessName} subscription is confirmed",
+    supportsIntro: false,
+  },
+  {
+    id: "subscription-payment-failed",
+    label: "Subscription Payment Failed",
+    description:
+      "Sent when a subscription payment fails and we ask the customer to update their card.",
+    defaultSubject: "Action needed: payment for your subscription",
+    supportsIntro: false,
+  },
+  {
+    id: "subscription-cancelled",
+    label: "Subscription Cancelled",
+    description: "Sent when a subscription is cancelled.",
+    defaultSubject: "Your subscription has been cancelled",
+    supportsIntro: false,
+  },
+  {
+    id: "subscription-updated",
+    label: "Subscription Updated",
+    description:
+      "Sent when a subscription is paused, resumed, or a delivery is skipped.",
+    defaultSubject: "Your subscription status has changed",
+    supportsIntro: false,
+  },
 ] as const satisfies readonly CustomizableEmail[];
 
 export type CustomizableEmailId = (typeof CUSTOMIZABLE_EMAILS)[number]["id"];

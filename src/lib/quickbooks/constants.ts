@@ -80,3 +80,34 @@ export const QBO_REQUEST_TIMEOUT_MS = 10_000;
 
 /** Refresh the access token this many ms before its reported expiry, to avoid racing a request against expiry. */
 export const QBO_ACCESS_TOKEN_SKEW_MS = 60_000;
+
+/**
+ * Stamped on `QuickBooksInvoice.lastError` for rows whose `realmId` no longer
+ * matches the connected company. Owner-facing — it appears verbatim in the
+ * admin invoice list.
+ *
+ * Lives here rather than in `sync.ts` because two very different callers write
+ * it: the sync engine (defensively, for a row that somehow still qualifies)
+ * and the OAuth callback (the moment the company actually changes). A shared
+ * literal is what keeps the admin list from showing two wordings for one
+ * condition.
+ */
+export const QBO_REALM_MISMATCH_ERROR =
+  "Belongs to a previous QuickBooks company";
+
+/**
+ * The owner-facing explanation for a connection made against a DIFFERENT
+ * Intuit environment than this deployment is configured for.
+ *
+ * Sandbox and production realms are disjoint, so a sandbox connection's realm
+ * id and invoice ids mean nothing to the production API (and vice versa) —
+ * every call would fail, or worse, resolve against the wrong company's books.
+ * The only fix is a reconnect, so the message says so. Shared verbatim by the
+ * tRPC router's precondition check and the sync engine's per-business skip.
+ */
+export function qboEnvironmentMismatchMessage(
+  connectionEnvironment: QboEnvironment,
+  platformEnvironment: QboEnvironment,
+): string {
+  return `This QuickBooks connection was made in ${connectionEnvironment} mode, but this deployment is configured for ${platformEnvironment}. Reconnect QuickBooks in Settings → Integrations.`;
+}

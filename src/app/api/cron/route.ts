@@ -34,6 +34,7 @@ import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
+import { syncSubscriptions } from "~/lib/subscriptions/sync";
 import { syncVideoSources } from "~/lib/youtube/sync";
 import { db } from "~/server/db";
 
@@ -341,6 +342,16 @@ const JOBS: readonly CronJob[] = [
     key: "quickbooksInvoiceSync",
     name: "quickbooks-invoice-sync",
     run: () => syncQuickBooksInvoices(db),
+  },
+  // Subscription reconciliation: re-derive each due Subscription row's state
+  // from Stripe and self-heal any invoice.paid webhook that never landed.
+  // NOT gated on the `subscriptions` flag — see syncSubscriptions' docblock.
+  // Steady state for a tenant with no subscriptions is a single cheap
+  // SELECT returning 0 rows.
+  {
+    key: "subscriptionSync",
+    name: "subscription-sync",
+    run: () => syncSubscriptions(db),
   },
 ];
 

@@ -1,6 +1,10 @@
 import "server-only";
 
-import type { QboCustomer, QboEntityResponse } from "~/lib/quickbooks/types";
+import type {
+  QboAddress,
+  QboCustomer,
+  QboEntityResponse,
+} from "~/lib/quickbooks/types";
 import type { DbClient } from "~/server/db";
 import { qboQuery, qboRequest } from "~/lib/quickbooks/client";
 import { QboApiError } from "~/lib/quickbooks/errors";
@@ -82,6 +86,13 @@ async function findActiveCustomerByName(
  * `"Jane Smith (jane@example.com)"` — which is also looked up before being
  * created, so a retry of a previously-disambiguated customer reuses it instead
  * of failing `6240` a second time and dead-ending.
+ *
+ * `billAddr` reaches step 3 and nowhere else. A customer that already exists in
+ * the owner's books keeps the address it has: QBO customer updates are
+ * full-object writes gated on a `SyncToken`, and quietly rewriting a record the
+ * owner may have corrected inside QuickBooks — from a lead's snapshot that
+ * could be months old — is not this function's call to make. The per-invoice
+ * `BillAddr` is what keeps each individual invoice accurate.
  */
 export async function ensureCustomer(
   db: DbClient,
@@ -91,6 +102,7 @@ export async function ensureCustomer(
     email: string;
     phone?: string | null;
     previousCustomerId?: string | null;
+    billAddr?: QboAddress | null;
   },
 ): Promise<{ id: string }> {
   // 1. Reuse a previously-resolved customer, if it still exists and is active.
@@ -143,7 +155,12 @@ export async function ensureCustomer(
 async function createCustomer(
   db: DbClient,
   businessId: string,
-  input: { name: string; email: string; phone?: string | null },
+  input: {
+    name: string;
+    email: string;
+    phone?: string | null;
+    billAddr?: QboAddress | null;
+  },
   displayName: string,
 ): Promise<string> {
   const body = await qboRequest<QboEntityResponse<QboCustomer>>(
@@ -156,6 +173,7 @@ async function createCustomer(
         name: displayName,
         email: input.email,
         phone: input.phone,
+        billAddr: input.billAddr,
       }),
     },
   );

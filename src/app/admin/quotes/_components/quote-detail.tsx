@@ -20,6 +20,7 @@ import {
 } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import {
+  QUOTE_MAX_FINAL_CENTS,
   QUOTE_STATUS_LABELS,
   QUOTE_STATUS_VALUES_DB,
 } from "~/lib/validators/quote-calculator";
@@ -112,21 +113,36 @@ export function QuoteDetail({
   const [sendOpen, setSendOpen] = useState(false);
 
   // Dollars-string draft for the final amount, seeded from the saved
-  // adjustment (or the computed estimate when none exists yet). Message is
-  // seeded from the last-sent message so a resend starts from what the
-  // customer already saw.
+  // adjustment (or the computed estimate when none exists yet). When the
+  // calculator hid the estimate from the visitor, an unset adjustment seeds
+  // BLANK rather than falling back to the hidden estimate — an owner working
+  // from a hidden-estimate lead must type a number on purpose, not inherit
+  // one they never showed anyone. Message is seeded from the last-sent
+  // message so a resend starts from what the customer already saw.
   const [amountInput, setAmountInput] = useState(() =>
     centsToDollarsString(
-      submission.finalQuoteCents ?? submission.estimateCents,
+      submission.showEstimateToCustomer
+        ? (submission.finalQuoteCents ?? submission.estimateCents)
+        : submission.finalQuoteCents,
     ),
   );
   const [message, setMessage] = useState(submission.sentMessage ?? "");
 
   const amountTrimmed = amountInput.trim();
   const amountNumber = Number.parseFloat(amountTrimmed);
+  // A blank amount is valid — it means "message-only", not "invalid". Above
+  // the cap is invalid with its own hint (see the input's error text below).
+  const amountCentsParsed =
+    amountTrimmed === "" ? null : dollarsToCents(amountTrimmed);
+  const amountTooLarge =
+    amountCentsParsed != null && amountCentsParsed > QUOTE_MAX_FINAL_CENTS;
   const amountValid =
-    amountTrimmed !== "" && Number.isFinite(amountNumber) && amountNumber >= 0;
-  const amountCents = amountValid ? dollarsToCents(amountTrimmed) : null;
+    amountTrimmed === "" ||
+    (Number.isFinite(amountNumber) &&
+      amountNumber >= 0 &&
+      amountCentsParsed != null &&
+      !amountTooLarge);
+  const amountCents = amountValid ? amountCentsParsed : null;
   const canSend = amountValid && message.trim() !== "";
 
   const afterWrite = () => {
@@ -207,7 +223,9 @@ export function QuoteDetail({
       onSuccess: (_data, variables, context) => {
         dismissLoadingToast(context);
         toast.success(
-          `Quote of ${formatPrice(variables.finalQuoteCents)} sent to ${submission.contactEmail}`,
+          variables.finalQuoteCents != null
+            ? `Quote of ${formatPrice(variables.finalQuoteCents)} sent to ${submission.contactEmail}`
+            : `Update sent to ${submission.contactEmail}`,
         );
         setSendOpen(false);
         afterWrite();
@@ -229,10 +247,15 @@ export function QuoteDetail({
   };
 
   const handleSend = () => {
-    if (amountCents == null) return;
+    // Guards against a double-click firing a second send while the first is
+    // still in flight, and against a stale open dialog getting confirmed
+    // after the amount was edited back into an invalid state.
+    if (!canSend || sendFinalQuoteMutation.isPending) return;
     sendFinalQuoteMutation.mutate({
       id: submission.id,
-      finalQuoteCents: amountCents,
+      // A cleared input is a message-only send, same "blank = null" mapping
+      // `handleSaveAmount` already uses.
+      finalQuoteCents: amountTrimmed === "" ? null : amountCents,
       message: message.trim(),
     });
   };
@@ -245,6 +268,13 @@ export function QuoteDetail({
     submission.estimateCents != null
       ? formatPrice(submission.estimateCents)
       : "—";
+
+  const sendButtonLabel =
+    amountTrimmed === ""
+      ? "Send update"
+      : submission.quoteSentAt
+        ? "Resend quote"
+        : "Send quote";
 
   return (
     <>
@@ -492,16 +522,42 @@ export function QuoteDetail({
                   </div>
                   {amountTrimmed !== "" && !amountValid && (
                     <p className="text-destructive text-xs">
-                      Enter a valid amount.
+                      {amountTooLarge
+                        ? `Max ${formatPrice(QUOTE_MAX_FINAL_CENTS)}`
+                        : "Enter a valid amount."}
                     </p>
                   )}
-                  {submission.finalQuoteCents != null &&
+                  {!submission.showEstimateToCustomer &&
                     submission.estimateCents != null &&
-                    submission.finalQuoteCents !== submission.estimateCents && (
-                      <p className="text-muted-foreground text-xs">
-                        Adjusted from the computed estimate.
-                      </p>
+                    amountCents !== submission.estimateCents && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-0 text-xs font-normal"
+                        onClick={() =>
+                          setAmountInput(
+                            centsToDollarsString(submission.estimateCents),
+                          )
+                        }
+                      >
+                        Use computed estimate{" "}
+                        {formatPrice(submission.estimateCents)}
+                      </Button>
                     )}
+                  {submission.finalQuoteCents != null &&
+                    (submission.estimateCents == null ? (
+                      <p className="text-muted-foreground text-xs">
+                        Set by hand — no computed estimate.
+                      </p>
+                    ) : (
+                      submission.finalQuoteCents !==
+                        submission.estimateCents && (
+                        <p className="text-muted-foreground text-xs">
+                          Adjusted from the computed estimate.
+                        </p>
+                      )
+                    ))}
                 </div>
 
                 <div className="space-y-2">
@@ -520,10 +576,10 @@ export function QuoteDetail({
 
                 {submission.quoteSentAt && (
                   <p className="text-muted-foreground text-sm">
-                    Sent {formatDate(submission.quoteSentAt)}
+                    Sent {formatDate(submission.quoteSentAt)} —{" "}
                     {submission.sentQuoteCents != null
-                      ? ` — ${formatPrice(submission.sentQuoteCents)}`
-                      : ""}
+                      ? formatPrice(submission.sentQuoteCents)
+                      : "message only"}
                   </p>
                 )}
 
@@ -533,7 +589,7 @@ export function QuoteDetail({
                     disabled={!canSend || sendFinalQuoteMutation.isPending}
                   >
                     <Send className="mr-2 h-4 w-4" />
-                    {submission.quoteSentAt ? "Resend quote" : "Send quote"}
+                    {sendButtonLabel}
                   </Button>
                   <Button
                     variant="outline"
@@ -553,6 +609,7 @@ export function QuoteDetail({
               <QuoteQuickBooksCard
                 data={quickbooks}
                 submission={submission}
+                answers={answers}
                 onChanged={afterWrite}
               />
             ) : null}
@@ -567,11 +624,26 @@ export function QuoteDetail({
               Send this quote to {submission.contactEmail}?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              The customer will receive an email with your message and a quote
-              of {amountCents != null ? formatPrice(amountCents) : "—"}. Replies
-              go to your business email.
+              {amountCents != null ? (
+                <>
+                  The customer will receive an email with your message and a
+                  quote of {formatPrice(amountCents)}. Replies go to your
+                  business email.
+                </>
+              ) : (
+                <>
+                  The customer will receive an email with your message and no
+                  price. Replies go to your business email.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {!submission.showEstimateToCustomer && amountCents != null && (
+            <p className="text-destructive text-sm">
+              This visitor was not shown an estimate — this figure will be the
+              first price they see.
+            </p>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={sendFinalQuoteMutation.isPending}>
               Cancel
@@ -580,7 +652,7 @@ export function QuoteDetail({
               onClick={handleSend}
               disabled={sendFinalQuoteMutation.isPending}
             >
-              {sendFinalQuoteMutation.isPending ? "Sending…" : "Send quote"}
+              {sendFinalQuoteMutation.isPending ? "Sending…" : sendButtonLabel}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

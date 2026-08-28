@@ -39,6 +39,7 @@ export default async function EditProductPage({ params }: Props) {
         product={product}
         galleriesEnabled={flags.isEnabled("galleries")}
         collectionsEnabled={flags.isEnabled("collections")}
+        subscriptionsEnabled={flags.isEnabled("subscriptions")}
         allCollections={allCollections}
         pools={pools}
       />

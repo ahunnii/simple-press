@@ -1,7 +1,7 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
 
 import type {
@@ -80,10 +80,11 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
           <div>
             <CardTitle>Distance variables</CardTitle>
             <CardDescription>
-              Turns two locations into a straight-line (&quot;as the crow
-              flies&quot;) mileage number your formula can use. Straight-line
-              miles run shorter than road miles — pad your per-mile rate to
-              compensate. Computed on the server; visitors never see the mileage.
+              Turns two locations into a mileage number your formula can use:
+              the straight-line (&quot;as the crow flies&quot;) distance between
+              them, multiplied by the road factor below to approximate how far a
+              truck would actually drive. Computed on the server; visitors never
+              see the mileage.
             </CardDescription>
           </div>
           <Button
@@ -115,7 +116,7 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                 key={field.id}
                 className="bg-muted/40 space-y-3 rounded-lg border p-3"
               >
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <FormField
                     control={form.control}
                     name={`${base}.variableName`}
@@ -135,8 +136,8 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                           />
                         </FormControl>
                         <FormDescription>
-                          Holds the straight-line miles between the two locations
-                          below.
+                          Holds the road-adjusted miles between the two
+                          locations below.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -149,6 +150,16 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                     label="Value when unavailable"
                     description="Used when either location is skipped, branched away, or its ZIP is not in the lookup table."
                     placeholder="0"
+                  />
+
+                  <BuilderNumberField
+                    form={form}
+                    name={`${base}.roadFactor`}
+                    label="Road factor"
+                    description="Straight-line miles between the two locations × this factor is what your formula sees. Roads are rarely straight: 1.2–1.3 is typical for regional moves, closer to 1.1 on interstates."
+                    placeholder="1.25"
+                    min={1}
+                    max={2}
                   />
                 </div>
 
@@ -232,39 +243,87 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                     ? locationQuestions.find((q) => q.id === toId)
                     : undefined;
 
-                  const isFromFragile =
-                    fromQuestion &&
-                    (fromQuestion.required !== true || fromQuestion.showIf);
-                  const isToFragile =
-                    toQuestion &&
-                    (toQuestion.required !== true || toQuestion.showIf);
-
-                  const fragileQuestions = [
-                    ...(isFromFragile ? [{ question: fromQuestion, label: "From" }] : []),
-                    ...(isToFragile ? [{ question: toQuestion, label: "To" }] : []),
+                  const endpoints = [
+                    { question: fromQuestion, label: "From" },
+                    { question: toQuestion, label: "To" },
                   ];
 
-                  return fragileQuestions.length > 0 ? (
-                    <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/30 dark:bg-amber-950/20">
-                      {fragileQuestions.map((item) => (
-                        <p
-                          key={item.label}
-                          className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200"
-                        >
-                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                          <span>
-                            <strong>{item.question?.title || "This question"}</strong>{" "}
-                            is optional or shown conditionally. If a visitor skips
-                            it, this distance silently falls back to its
-                            &quot;Value when unavailable&quot; above.
-                            That&apos;s intentional for branched designs — just
-                            make sure your formula still prices sensibly when that
-                            happens.
-                          </span>
-                        </p>
-                      ))}
-                    </div>
-                  ) : null;
+                  // Optional endpoints are what `checkQuoteOwnerConfiguration`
+                  // actually refuses to save — this mirrors that error rather
+                  // than merely warning about it, so the owner sees the same
+                  // message here that a failed save would show them.
+                  const optionalQuestions = endpoints.filter((item) => {
+                    const target = item.question;
+                    return target !== undefined && target.required !== true;
+                  });
+                  // Conditional-but-required endpoints save fine — the server
+                  // has a defined fallback for them — so this stays an
+                  // informational heads-up rather than an error.
+                  const conditionalQuestions = endpoints.filter((item) => {
+                    const target = item.question;
+                    return target?.required === true && Boolean(target.showIf);
+                  });
+
+                  return (
+                    <>
+                      {optionalQuestions.length > 0 && (
+                        <div className="border-destructive/30 bg-destructive/5 space-y-2 rounded-md border p-3">
+                          {optionalQuestions.map((item) => (
+                            <p
+                              key={item.label}
+                              className="text-destructive flex items-start gap-2 text-sm"
+                            >
+                              <AlertCircle
+                                className="mt-0.5 h-4 w-4 shrink-0"
+                                aria-hidden="true"
+                              />
+                              <span>
+                                <strong>
+                                  {
+                                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string must also collapse to the fallback, not just null/undefined
+                                    item.question?.title || "This question"
+                                  }
+                                </strong>{" "}
+                                is optional. Distances need both ends answered —
+                                make it required or this calculator can&apos;t
+                                be saved.
+                              </span>
+                            </p>
+                          ))}
+                        </div>
+                      )}
+
+                      {conditionalQuestions.length > 0 && (
+                        <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/30 dark:bg-amber-950/20">
+                          {conditionalQuestions.map((item) => (
+                            <p
+                              key={item.label}
+                              className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200"
+                            >
+                              <AlertCircle
+                                className="mt-0.5 h-4 w-4 shrink-0"
+                                aria-hidden="true"
+                              />
+                              <span>
+                                <strong>
+                                  {
+                                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string must also collapse to the fallback, not just null/undefined
+                                    item.question?.title || "This question"
+                                  }
+                                </strong>{" "}
+                                is shown conditionally. If a visitor never
+                                reaches it, this distance silently falls back to
+                                its &quot;Value when unavailable&quot; above.
+                                That&apos;s intentional for branched designs —
+                                just make sure your formula still prices
+                                sensibly when that happens.
+                              </span>
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
                 })()}
 
                 <div className="flex justify-end">

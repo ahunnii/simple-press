@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { QuoteStatusDb } from "~/lib/validators/quote-calculator";
+import { zonedCalendarDate } from "~/lib/calendar-date";
 import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
 import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
 import { checkBusiness } from "~/lib/check-business";
@@ -42,6 +43,16 @@ const GENERIC_FAILURE_MESSAGE =
 
 /** Hard ceiling on the rows `list` ships to the admin inbox. See the comment there. */
 const QUOTE_INBOX_MAX_ROWS = 1000;
+
+/**
+ * How long an identical `sendFinalQuote` is treated as the same send.
+ *
+ * Wide enough to absorb a double-click or a client retry across a slow Resend
+ * round trip, narrow enough that a deliberate "did you get this?" re-send of
+ * the same message later in the day still goes out. See the guard itself for
+ * why this is a local window and NOT a Resend idempotency key.
+ */
+const DUPLICATE_SEND_WINDOW_MS = 10_000;
 
 export const quoteSubmissionRouter = createTRPCRouter({
   // ─── Public: storefront submit ──────────────────────────────────────────────
@@ -199,6 +210,19 @@ export const quoteSubmissionRouter = createTRPCRouter({
         definition,
         input.answers,
         (zip) => dataset.get(zip) ?? null,
+        {
+          mode: "submit",
+          // The STORE's calendar day, not the server's. A date question's
+          // "today or later" / "at most N days ahead" bounds are about the
+          // owner's schedule, so they have to be measured on the owner's wall
+          // calendar: at 02:00 UTC a Detroit business is still on yesterday,
+          // and a UTC-measured bound would reject a visitor asking for a move
+          // on a day that is, for the people doing the moving, still tomorrow.
+          // Passing `today` is also what ENABLES the bounds at all —
+          // `computeQuote` skips them entirely when it is undefined, so this
+          // argument is not optional in production, it is the feature.
+          today: zonedCalendarDate(new Date(), business.timeZone),
+        },
       );
 
       if (!result.ok) {
@@ -331,16 +355,19 @@ export const quoteSubmissionRouter = createTRPCRouter({
         )
         .map((row) => ({ title: row.title, display: row.display }));
 
-      // The single source of truth for what the customer is told the price is —
-      // shared by the confirmation email and the mutation's return value, so
-      // the two can never disagree, and shared (via
-      // `src/lib/quote/customer-estimate.ts`) with
+      // The single source of truth for WHAT FIGURE the customer is told, when
+      // they are told one at all — shared by the confirmation email and the
+      // mutation's return value, so the two can never quote different numbers,
+      // and shared (via `src/lib/quote/customer-estimate.ts`) with
       // `quoteCalculator.previewEstimate`, so the live running estimate a
       // visitor watched cannot land on a different figure than the thank-you
       // screen they end up on. `undefined` when the owner keeps the estimate
-      // internal, and equally when there is no estimate to tell them about: the
-      // thank-you screen and the confirmation email then simply omit pricing,
-      // exactly as they do for a calculator with `showEstimateToCustomer` off.
+      // internal, and equally when there is no estimate to tell them about.
+      //
+      // It answers WHAT, never WHERE. `customerEstimateFrom` deliberately does
+      // not know about `showEstimateOnScreen` — the screen/email split is
+      // applied by the two call sites below, and only there: the email sends
+      // this as-is, the return value re-checks the screen switch.
       const customerEstimate = customerEstimateFrom(definition, estimateCents);
 
       // 9. Emails ─────────────────────────────────────────────────────────────
@@ -355,8 +382,21 @@ export const quoteSubmissionRouter = createTRPCRouter({
       //
       // Checked instead of caught. The lead is already saved and must stay
       // saved, so a failed email is still non-fatal — it just gets recorded.
+      //
+      // Both sends below carry an idempotency key anchored on the submission's
+      // cuid, which is safe here in the way that a subscription's was not. The
+      // hazard with Resend's 24 h key memory is a REPEATED transition reusing a
+      // key that did not change with it — that is what silently dropped the
+      // pause/resume emails (see the subscriptions note in CLAUDE.md). Neither
+      // condition exists on this path: the id is minted by the `create` a few
+      // lines up, so it is unique per lead and can never collide across
+      // tenants, and a row is emailed exactly once and never re-sent, so there
+      // is no second transition to swallow. What the key DOES buy is the
+      // retry case — a tRPC retry or a double-fired mutation that gets past
+      // the limiter cannot put two copies of the same lead in an inbox.
       const ownerEmailResult = await sendNewQuoteNotification({
         submissionId: submission.id,
+        idempotencyKey: `quote-owner-${submission.id}`,
         calculatorName: calculator.name,
         contactName,
         contactEmail,
@@ -398,34 +438,60 @@ export const quoteSubmissionRouter = createTRPCRouter({
         });
       }
 
-      const customerEmailResult = await sendQuoteConfirmation({
-        to: contactEmail,
-        customerName: contactName,
-        calculatorName: calculator.name,
-        responseDays: definition.responseDays,
-        answers: visibleRows,
-        // Omitted entirely unless the owner turned the estimate on — the
-        // email is not allowed to reveal more than the thank-you screen.
-        ...(customerEstimate ? { estimate: customerEstimate } : {}),
-        business: {
-          name: businessData.name,
-          ownerEmail: businessData.ownerEmail,
-          supportEmail: businessData.supportEmail,
-          siteContent: businessData.siteContent,
-          subdomain: businessData.subdomain,
-        },
-      });
-
-      if (!customerEmailResult.success) {
-        // Same split as above: `sendEmail` owns the exception (email.type:
-        // "quote_confirmation"), this owns the context. The visitor still gets
-        // the thank-you screen — they simply have no receipt in their inbox.
-        console.error("[Quotes] Failed to send customer confirmation email");
-        Sentry.captureMessage("Quote customer confirmation email failed", {
-          level: "warning",
-          tags: { feature: "quote", step: "email-customer" },
-          extra: { submissionId: submission.id },
+      // The VISITOR's receipt is optional; the owner's notification above is
+      // not. An owner who switches `sendConfirmationEmail` off is choosing not
+      // to auto-reply to their leads (they want the first message to be their
+      // own), and that choice must never quietly cost them the lead alert.
+      //
+      // Note the interaction with `showEstimateOnScreen`: with the estimate on
+      // and the screen off, THIS email is the only place the visitor ever sees
+      // the figure — which is why `checkQuoteOwnerConfiguration` refuses the
+      // three-way contradiction (estimate on, screen off, email off) when the
+      // owner SAVES, rather than letting a definition reach this branch with a
+      // number and nowhere to put it. That check is on the write schema only
+      // (the stored-read schema deliberately skips the owner-configuration
+      // pass), so this branch still behaves sanely on a hypothetical drifted
+      // blob: no receipt, no figure, lead intact.
+      if (definition.sendConfirmationEmail) {
+        const customerEmailResult = await sendQuoteConfirmation({
+          to: contactEmail,
+          customerName: contactName,
+          calculatorName: calculator.name,
+          responseDays: definition.responseDays,
+          answers: visibleRows,
+          // Omitted entirely unless the owner turned the estimate on. Note
+          // that this is NOT the same test as the thank-you screen's: the
+          // email may legitimately carry the figure when the screen does not
+          // (`showEstimateOnScreen: false`), which is the entire point of that
+          // switch. `customerEstimate` is the on/off decision
+          // (`showEstimateToCustomer` + "is there a number"); the screen's
+          // extra condition is applied at the return value below and nowhere
+          // else.
+          ...(customerEstimate ? { estimate: customerEstimate } : {}),
+          // Per-row cuid — see the note above the owner send.
+          idempotencyKey: `quote-confirm-${submission.id}`,
+          business: {
+            name: businessData.name,
+            ownerEmail: businessData.ownerEmail,
+            supportEmail: businessData.supportEmail,
+            siteContent: businessData.siteContent,
+            subdomain: businessData.subdomain,
+          },
         });
+
+        if (!customerEmailResult.success) {
+          // Same split as above: `sendEmail` owns the exception (email.type:
+          // "quote_confirmation"), this owns the context. The visitor still
+          // gets the thank-you screen — they simply have no receipt in their
+          // inbox. Worth an owner's attention either way, and worth rather
+          // more when the receipt was the only place the estimate lived.
+          console.error("[Quotes] Failed to send customer confirmation email");
+          Sentry.captureMessage("Quote customer confirmation email failed", {
+            level: "warning",
+            tags: { feature: "quote", step: "email-customer" },
+            extra: { submissionId: submission.id },
+          });
+        }
       }
 
       // 10. Discord ───────────────────────────────────────────────────────────
@@ -449,10 +515,21 @@ export const quoteSubmissionRouter = createTRPCRouter({
       );
 
       // 11. Response ──────────────────────────────────────────────────────────
-      // The estimate is spread in only when `showEstimateToCustomer` is on, so
-      // the client is never handed a number it is not allowed to display.
-      // Withholding it in the UI while shipping it over the wire would put the
-      // owner's price one devtools tab away.
+      // THIS IS THE THANK-YOU SCREEN. Whatever ships from here is what the
+      // runner renders, so the screen switch is enforced here — the estimate
+      // is spread in only when `showEstimateToCustomer` AND
+      // `showEstimateOnScreen` are both on, and the client is never handed a
+      // number it is not allowed to display. Withholding it in the UI while
+      // shipping it over the wire would put the owner's price one devtools tab
+      // away, which is exactly the disclosure `showEstimateOnScreen: false`
+      // exists to prevent.
+      //
+      // The confirmation email above is deliberately NOT symmetric with this.
+      // With the estimate on and the screen off, the visitor's inbox carries
+      // the figure and this response does not: they get their number after the
+      // lead is captured, in a message with the owner's framing around it,
+      // instead of being able to sit on the form flipping answers. Do not
+      // "fix" the asymmetry by making the two share one condition.
       //
       // `success: true as const` is what makes this and the visitor-fixable
       // `success: false` return above one DISCRIMINATED UNION on the wire. The
@@ -461,7 +538,9 @@ export const quoteSubmissionRouter = createTRPCRouter({
       // `error` entirely.
       return {
         success: true as const,
-        ...(customerEstimate ? { estimate: customerEstimate } : {}),
+        ...(customerEstimate && definition.showEstimateOnScreen
+          ? { estimate: customerEstimate }
+          : {}),
       };
     }),
 
@@ -596,6 +675,13 @@ export const quoteSubmissionRouter = createTRPCRouter({
   // IS the point here — a delivery failure fails the mutation, and the sent-*
   // snapshot fields are only written after the send succeeds so "Sent" in the
   // UI never lies.
+  //
+  // `finalQuoteCents: null` is a MESSAGE-ONLY follow-up ("can you send
+  // photos?", "we don't cover that area"), not a $0 quote. It emails the
+  // owner's words with no amount box, records the send, and — critically —
+  // leaves `finalQuoteCents` alone: an owner who already adjusted the figure
+  // and then asks a clarifying question must not have that adjustment wiped by
+  // the question. See the note on the update below.
   sendFinalQuote: ownerAdminProcedure
     .input(quoteSendFinalQuoteSchema)
     .mutation(async ({ ctx, input }) => {
@@ -610,6 +696,10 @@ export const quoteSubmissionRouter = createTRPCRouter({
           calculatorName: true,
           status: true,
           answers: true,
+          // Read for the duplicate-send guard below, not for the email.
+          quoteSentAt: true,
+          sentQuoteCents: true,
+          sentMessage: true,
         },
       });
 
@@ -617,6 +707,46 @@ export const quoteSubmissionRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Quote not found",
+        });
+      }
+
+      // ── Duplicate-send guard ────────────────────────────────────────────
+      // A double-click on "Send quote", or a tRPC retry after a slow Resend
+      // round trip, otherwise puts two identical emails in a customer's inbox
+      // — the one failure mode an owner cannot undo. If the last send was
+      // within 10 seconds AND carried byte-identical content, this call is
+      // treated as the same send: no second email, and the row comes back in
+      // the same shape a real send returns, so the UI still lands on "Sent".
+      //
+      // Ten seconds, not longer: a deliberate re-send of the same message an
+      // hour later ("did you get this?") is a legitimate thing to do and must
+      // still go out.
+      //
+      // Compared in JS, after the read, because it HAS to be: `sentMessage` is
+      // an `/// @encrypted` column, so it can never appear in a `where` — the
+      // ciphertext is not deterministic and the database has no plaintext to
+      // match against.
+      //
+      // And note what this guard is NOT: a Resend `idempotencyKey`. Resend
+      // remembers a key for 24 hours and silently drops the second send under
+      // it, so keying this on the row id would turn every legitimate follow-up
+      // inside a day into a no-op that still reports success — the exact
+      // failure that ate the subscription pause/resume emails (CLAUDE.md,
+      // 2026-08-26). The window is short and local on purpose.
+      const lastSentAt = submission.quoteSentAt;
+      const isDuplicateSend =
+        lastSentAt !== null &&
+        Date.now() - lastSentAt.getTime() < DUPLICATE_SEND_WINDOW_MS &&
+        submission.sentQuoteCents === input.finalQuoteCents &&
+        submission.sentMessage === input.message;
+
+      if (isDuplicateSend) {
+        // Re-read rather than returning the partial `select` above: callers
+        // (the detail page's optimistic update) are typed against the FULL row
+        // this mutation returns on the send path, and a narrower object here
+        // would be a different shape on the wire for the same procedure.
+        return ctx.db.quoteSubmission.findUniqueOrThrow({
+          where: { id: input.id, businessId },
         });
       }
 
@@ -646,8 +776,9 @@ export const quoteSubmissionRouter = createTRPCRouter({
         .safeParse(submission.answers);
       // Same two exclusions as the confirmation email on the submit path: no
       // branched-away rows, and no "Question —" rows for optional questions the
-      // customer skipped. This email quotes a price back to that same customer,
-      // so it must not read as if we lost half their answers.
+      // customer skipped. This email writes back to that same customer — with
+      // a price, or with a question about one — so it must not read as if we
+      // lost half their answers.
       const visibleAnswers = parsedAnswers.success
         ? parsedAnswers.data
             .filter(
@@ -674,20 +805,30 @@ export const quoteSubmissionRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
-            "The quote email could not be sent. Nothing was saved — please try again.",
+            "The email could not be sent. Nothing was saved — please try again.",
         });
       }
 
       return ctx.db.quoteSubmission.update({
         where: { id: input.id },
         data: {
-          finalQuoteCents: input.finalQuoteCents,
+          // Only a PRICED send moves the saved figure. On a message-only
+          // follow-up (`finalQuoteCents: null`) this key is omitted entirely
+          // rather than written as null: the owner may have adjusted the
+          // amount minutes ago, and asking the customer a question about it
+          // must not erase the adjustment. `sentQuoteCents` below still
+          // records null, because "what did this particular email carry?" is
+          // a different question from "what is this lead quoted at?".
+          ...(input.finalQuoteCents !== null
+            ? { finalQuoteCents: input.finalQuoteCents }
+            : {}),
           quoteSentAt: new Date(),
           sentQuoteCents: input.finalQuoteCents,
           sentMessage: input.message,
           // Sending the quote IS the first contact — advance a fresh lead so
           // the inbox reflects reality without a second manual step. Anything
-          // past NEW (already contacted, won, lost) is left alone.
+          // past NEW (already contacted, won, lost) is left alone. True of a
+          // message-only follow-up too: it is still the owner making contact.
           ...(submission.status === "NEW" ? { status: "CONTACTED" } : {}),
         },
       });

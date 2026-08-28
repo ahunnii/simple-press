@@ -295,6 +295,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  subscriptions: {
+    key: "subscriptions",
+    label: "Product Subscriptions",
+    description:
+      "Let customers subscribe to a product on a recurring schedule (weekly to every 3 months), billed through your connected Stripe account. Customers manage or cancel from a link in their emails. Turn it on per product under Products → edit → Subscriptions. If you later turn this off, existing subscriptions keep billing and renewals still create orders; customers can always cancel or update their card.",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    dependsOn: ["products", "payments"],
+  },
 };
 
 // Ordered category labels for display

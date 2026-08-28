@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 
 import type { QuoteAnswer } from "./quote-answers";
 import type { PublicQuoteQuestion } from "~/lib/validators/quote-calculator";
+import { addCalendarDays, localCalendarDate } from "~/lib/calendar-date";
 import { getQuoteIcon } from "~/lib/quote/quote-icons";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
@@ -308,6 +309,12 @@ function NumberField({
         id={fieldId}
         type="number"
         inputMode="decimal"
+        // Otherwise the browser's native step defaults to `1`, and the
+        // constraint-validation API flags a perfectly valid decimal answer
+        // (2.5 hours, 1.75 miles) as `:invalid` — which is what feeds the
+        // capture-phase `invalid` watchdog documented in CLAUDE.md and can
+        // silently cancel a submit before React ever sees it.
+        step="any"
         value={raw}
         min={question.min ?? undefined}
         max={question.max ?? undefined}
@@ -427,11 +434,23 @@ function DateField({
   fieldId,
 }: QuoteFieldProps) {
   const raw = answer?.kind === "value" ? answer.raw : "";
+  // Computed fresh per render rather than hoisted to module scope: it has to
+  // reflect the VISITOR's local day (the date input's native picker is a
+  // browser affordance, not a server round trip), and a component that stays
+  // mounted across midnight must not keep offering yesterday.
+  const today = localCalendarDate();
+  const min = question.minDate === "today" ? today : undefined;
+  const max =
+    question.maxDaysAhead != null
+      ? addCalendarDays(today, question.maxDaysAhead)
+      : undefined;
   return (
     <Input
       id={fieldId}
       type="date"
       value={raw}
+      min={min}
+      max={max}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       aria-invalid={invalid}

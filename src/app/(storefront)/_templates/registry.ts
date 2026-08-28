@@ -84,6 +84,7 @@ import { DefaultAddressBookFallback } from "./default/account/default-address-bo
 import { DefaultOrderDetailPage } from "./default/account/default-order-detail-page";
 import { DefaultOrdersPage } from "./default/account/default-orders-page";
 import { DefaultPreferencesFallback } from "./default/account/default-preferences-fallback";
+import { DefaultSubscriptionsPage } from "./default/account/default-subscriptions-page";
 import { DefaultBlogPage } from "./default/blog/default-blog-page";
 import { DefaultBlogPostPage } from "./default/blog/default-blog-post-page";
 import { DefaultCartPage } from "./default/cart-checkout/default-cart-page";
@@ -135,6 +136,7 @@ import { HappyBambooAddressBookPage } from "./happy-bamboo/account/happy-bamboo-
 import { HappyBambooOrderDetailPage } from "./happy-bamboo/account/happy-bamboo-order-detail-page";
 import { HappyBambooOrdersPage } from "./happy-bamboo/account/happy-bamboo-orders-page";
 import { HappyBambooPreferencesPage } from "./happy-bamboo/account/happy-bamboo-preferences-page";
+import { HappyBambooSubscriptionsPage } from "./happy-bamboo/account/happy-bamboo-subscriptions-page";
 import { HappyBambooBlogPage } from "./happy-bamboo/blog/happy-bamboo-blog-page";
 import { HappyBambooBlogPostPage } from "./happy-bamboo/blog/happy-bamboo-blog-post-page";
 import { HappyBambooCartPage } from "./happy-bamboo/cart-checkout/happy-bamboo-cart-page";
@@ -350,6 +352,7 @@ export type TemplateComponentSet = {
   OrderDetailPage: AnyComponent;
   OrdersPage: AnyComponent;
   PreferencesPage: AnyComponent;
+  SubscriptionsPage: AnyComponent;
   // Optional — only some templates implement this
   ServicesPage?: AnyComponent;
   ServicesIndexPage?: AnyComponent;
@@ -385,6 +388,7 @@ const defaultEntry: TemplateComponentSet = {
   OrderDetailPage: DefaultOrderDetailPage,
   OrdersPage: DefaultOrdersPage,
   PreferencesPage: DefaultPreferencesFallback,
+  SubscriptionsPage: DefaultSubscriptionsPage,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
   VideosPage: DefaultVideosPage,
@@ -484,6 +488,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: HappyBambooOrderDetailPage,
     OrdersPage: HappyBambooOrdersPage,
     PreferencesPage: HappyBambooPreferencesPage,
+    SubscriptionsPage: HappyBambooSubscriptionsPage,
   },
 
   modern: {

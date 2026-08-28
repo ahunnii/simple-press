@@ -83,11 +83,29 @@ export function HappyBambooProductCard({
             aria-label={`View ${product.name}`}
             tabIndex={-1}
           >
+            {/* Ambient backdrop — same recipe as ProductGalleryHorizontal's
+                mainImageFit="contain" (product-gallery-horizontal.tsx): a
+                tiny, blurred, scaled-up copy of the photo fills the letterbox
+                so empty space reads as a glow instead of a flat bg-secondary
+                fill. scale-150 (not the gallery's 125): CSS blur() fades to
+                transparent at the element's own edges (~40px halo for
+                blur-2xl) and this frame is only ~160–210px on its short side,
+                so 25% overscan is needed to push the halo outside the
+                overflow-hidden frame. Static — the hover zoom below is on the
+                foreground only, so it can't fight this transform. */}
+            <Image
+              src={productImage}
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="128px"
+              className="scale-150 object-cover opacity-90 blur-2xl saturate-125"
+            />
             <Image
               src={productImage}
               alt={product.name ?? "Product"}
               fill
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="object-contain transition-transform duration-500 ease-out group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, 208px"
             />
             {productStatus.comingSoon && (

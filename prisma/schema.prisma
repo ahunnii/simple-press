@@ -182,10 +182,11 @@ model Business {
   businessAddress String?
 
   // Integrations
-  stripeAccountId      String? @unique
-  stripeAutoTaxEnabled Boolean @default(false)
-  stripeChargesEnabled Boolean @default(false) // synced from account.updated webhook
-  stripePayoutsEnabled Boolean @default(false) // synced from account.updated webhook
+  stripeAccountId             String? @unique
+  stripeAutoTaxEnabled        Boolean @default(false)
+  stripeChargesEnabled        Boolean @default(false) // synced from account.updated webhook
+  stripePayoutsEnabled        Boolean @default(false) // synced from account.updated webhook
+  stripePortalConfigurationId String? // cached Stripe Customer Portal configuration on the connected account
 
   // Testimonials
   testimonialsAutoApprove Boolean @default(false) // when true, customer submissions are auto-approved
@@ -260,6 +261,7 @@ model Business {
   quoteSubmissions      QuoteSubmission[]
   quickBooksConnection  QuickBooksConnection?
   quickBooksInvoices    QuickBooksInvoice[]
+  subscriptions         Subscription[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -379,6 +381,11 @@ model Product {
   compareAtPrice Float? // Original price for "sale" display
   cost           Float? // Cost to business (for profit tracking)
 
+  // Subscriptions ("subscribe & save" — Stripe Billing on the connected account)
+  subscriptionEnabled         Boolean @default(false)
+  subscriptionIntervals       Json? // string[] of interval keys, see src/lib/subscriptions/intervals.ts
+  subscriptionDiscountPercent Int     @default(0)
+
   // Inventory
   sku                   String?
   barcode               String?
@@ -422,6 +429,7 @@ model Product {
   orderItems          OrderItem[]
   inventoryHistory    InventoryHistory[]
   backInStockRequests BackInStockRequest[]
+  subscriptions       Subscription[]
 
   // Computed fields (can be calculated on demand)
   averageRating Float?
@@ -467,6 +475,7 @@ model ProductVariant {
   product          Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
   inventoryHistory InventoryHistory[]
   orderItems       OrderItem[]
+  subscriptions    Subscription[]
 
   @@index([productId])
 }
@@ -802,6 +811,9 @@ model Customer {
   lastName  String?
   phone     String? /// @encrypted
 
+  // Stripe
+  stripeCustomerId String? // per-business Stripe Customer on the connected account
+
   // Marketing
   acceptsMarketing Boolean @default(false)
 
@@ -829,6 +841,7 @@ model Customer {
   testimonials       Testimonial[]
   testimonialInvites TestimonialInvite[]
   reviews            ProductReview[]
+  subscriptions      Subscription[]
 
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
@@ -856,7 +869,8 @@ model ShippingAddress {
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-  orders Order[]
+  orders        Order[]
+  subscriptions Subscription[]
 
   @@index([customerId])
 }
@@ -891,6 +905,11 @@ model Order {
   // Stripe
   stripeSessionId       String? @unique
   stripePaymentIntentId String?
+  stripeInvoiceId       String? @unique // set for subscription-billed orders only; stripeSessionId stays null for these
+
+  // Subscription (set only when this order was created from a paid subscription invoice)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
   // Pricing (in cents)
   subtotal Int
@@ -947,6 +966,7 @@ model Order {
   @@index([shippingAddressId])
   @@index([discountCodeId])
   @@index([stripePaymentIntentId])
+  @@index([subscriptionId])
 }
 
 model OrderShipment {
@@ -1597,7 +1617,7 @@ model QuoteCalculator {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name      String
+  name       String
   // Versioned definition blob: questions, options, show-if conditions, distance
   // variables, formula, and display settings. Shape + refinements:
   // `quoteCalculatorDefinitionSchema` in src/lib/validators/quote-calculator.ts
@@ -1629,24 +1649,24 @@ model QuoteSubmission {
   // hidden, ...answer fields, display}] — `quoteSubmissionAnswerSchema`.
   // Labels are denormalized so the inbox renders after the calculator is
   // edited or deleted.
-  answers Json
+  answers                Json
   // Exact server-computed estimate in cents; always owner-visible. IMMUTABLE —
   // owner adjustments go on `finalQuoteCents` so the computed record survives.
-  estimateCents Int?
+  estimateCents          Int?
   // { formula, variables } captured at submit time — `quoteFormulaSnapshotSchema`.
   // Lets the owner audit how the number was produced.
-  formulaSnapshot Json
+  formulaSnapshot        Json
   // Owner-adjusted authoritative amount in cents (null = not adjusted yet).
   // This — not estimateCents — is what a future invoice/deposit bills against.
-  finalQuoteCents Int?
+  finalQuoteCents        Int?
   // Last final-quote email sent to the customer: when, for how much, with what
   // message. Audit snapshot — finalQuoteCents may be edited again afterwards.
-  quoteSentAt    DateTime?
-  sentQuoteCents Int?
-  sentMessage    String? /// @encrypted
+  quoteSentAt            DateTime?
+  sentQuoteCents         Int?
+  sentMessage            String? /// @encrypted
   // Calculator identity/settings snapshotted at submit time (survive deletion).
   calculatorName         String
-  showEstimateToCustomer Boolean @default(false)
+  showEstimateToCustomer Boolean   @default(false)
 
   // SetNull, not Cascade: submissions are business records (a lead pipeline)
   // and must outlive the calculator that produced them; everything the inbox
@@ -1745,6 +1765,11 @@ model QuickBooksInvoice {
   customerEmail String /// @encrypted
   customerPhone String? /// @encrypted
 
+  // Customer billing address snapshot as JSON {line1,line2?,city,state,zip}
+  // — sent as BillAddr on the QBO customer (create) and invoice. Encrypted
+  // like the other customer fields; never in a `where`.
+  billingAddress String? @db.Text /// @encrypted
+
   // pending | created | sent | paid | overdue | voided | error —
   // QBO_INVOICE_STATUS_VALUES. `pending` = local row exists, QBO call in
   // flight; `error` = QBO create/send failed and can be retried.
@@ -1768,4 +1793,105 @@ model QuickBooksInvoice {
   @@index([businessId, status, createdAt]) // list status filter
   @@index([quoteSubmissionId]) // lead card + SetNull fan-out
   @@index([status, lastSyncedAt]) // cron sweep: open invoices, stalest first
+}
+
+/// One customer's subscription to a recurring product purchase (Stripe Billing
+/// on the store's connected account, parallel to the one-time checkout lane).
+/// Created `incomplete` by the subscribe checkout-session route and promoted
+/// by the webhook on `checkout.session.completed`. Product/pricing/cadence/
+/// shipping-address are snapshotted at signup and LOCKED for the life of the
+/// subscription — changing any of them is cancel + resubscribe, not an edit,
+/// so renewals always bill exactly what's stored here regardless of later
+/// product-price or address-book changes. Every paid invoice (first +
+/// renewals) creates a normal `Order` keyed on `stripeInvoiceId`, so
+/// fulfillment/inventory/refund/email code is entirely reused. Encrypted
+/// columns (customer + shipping snapshot) can never appear in a `where` —
+/// lookups use the plaintext `customerEmail` + `businessId`.
+model Subscription {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // SetNull, not Cascade: a subscription (and the orders it produced) is a
+  // money record and must outlive the Customer row if that's ever deleted.
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  // Customer snapshot. customerEmail stays PLAINTEXT for lookup (manage-link
+  // request + admin list), matching Order.customerEmail's precedent.
+  customerEmail String
+  customerName  String? /// @encrypted
+  customerPhone String? /// @encrypted
+
+  // Stripe. stripeCustomerId is the Stripe Customer on the connected account
+  // (Customer.stripeCustomerId mirrors it once persisted). stripeSubscriptionId
+  // and lastInvoiceId are unknown until the webhook fills them in.
+  stripeSubscriptionId    String? @unique
+  stripeCustomerId        String?
+  stripeCheckoutSessionId String? @unique
+  lastInvoiceId           String?
+
+  // Product snapshot (SetNull: a subscription outlives a deleted product/variant).
+  productId        String?
+  product          Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productVariantId String?
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
+  productName      String
+  variantName      String?
+  sku              String?
+  quantity         Int
+
+  // Cadence + locked pricing (cents). Renewals bill exactly these numbers —
+  // an existing subscriber keeps their locked price even if the product's
+  // price or subscribe-and-save % changes later.
+  intervalKey     String // week:1 | week:2 | month:1 | month:2 | month:3 — SUBSCRIPTION_INTERVAL_KEYS in src/lib/subscriptions/intervals.ts
+  interval        String // week | month — Stripe recurring.interval
+  intervalCount   Int // Stripe recurring.interval_count
+  listPriceCents  Int
+  discountPercent Int    @default(0)
+  unitAmountCents Int
+  shippingCents   Int    @default(0)
+  deliveryMethod  String @default("ship") // ship | pickup
+
+  // Locked shipping address (SetNull: the address-book entry may be edited or
+  // deleted later without touching what a live subscription bills/ships to).
+  // Encrypted snapshot fields stay null for deliveryMethod = "pickup".
+  shippingAddressId String?
+  shippingAddress   ShippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  shipFirstName     String? /// @encrypted
+  shipLastName      String? /// @encrypted
+  shipAddress1      String? /// @encrypted
+  shipAddress2      String? /// @encrypted
+  shipCity          String? /// @encrypted
+  shipProvince      String? /// @encrypted
+  shipZip           String? /// @encrypted
+  shipCountry       String?
+
+  // Lifecycle
+  status              String    @default("incomplete") // incomplete | active | past_due | paused | cancelled
+  pauseResumesAt      DateTime?
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  nextBillingAt       DateTime?
+  cancelledAt         DateTime?
+  cancelReason        String? // customer | owner | stripe | payment_failed | checkout_expired
+  lastPaymentFailedAt DateTime?
+  lastSyncedAt        DateTime?
+
+  // Acceptance of the MERCHANT's terms at signup — same rationale as Order's
+  // identically-named fields.
+  termsAcceptedAt        DateTime?
+  termsVersion           String?
+  merchantTermsUpdatedAt DateTime?
+
+  orders Order[]
+
+  @@index([businessId, status]) // admin list + cron scope
+  @@index([businessId, customerEmail]) // manage-link lookup (requestManageLinks)
+  @@index([customerId]) // SetNull fan-out + account page (getMine)
+  @@index([status, lastSyncedAt]) // cron sweep: open subscriptions, stalest first
+  @@index([productId]) // SetNull fan-out
 }

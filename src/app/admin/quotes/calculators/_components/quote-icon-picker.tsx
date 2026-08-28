@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { Ban, ChevronDown } from "lucide-react";
 
-import { getQuoteIcon, QUOTE_ICON_NAMES } from "~/lib/quote/quote-icons";
+import {
+  getQuoteIcon,
+  getQuoteIconLabel,
+  QUOTE_ICON_PICKER_NAMES,
+} from "~/lib/quote/quote-icons";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -24,11 +28,11 @@ type Props = {
 /**
  * Icon chooser for a priced option.
  *
- * Deliberately a fixed grid of the 26 curated names rather than a search over
- * all of Lucide: the storefront renders these as large choice-card glyphs, and
- * the curated set is the one that has been checked to read at that size. An
- * icon is optional everywhere — "no icon" is the first cell, not a clear button
- * hidden elsewhere.
+ * Deliberately a fixed grid of moving-focused curated icons rather than a
+ * search over all of Lucide: the storefront renders these as large choice-card
+ * glyphs, and the curated set is the one that has been checked to read at that
+ * size. An icon is optional everywhere — "no icon" is the first cell, not a
+ * clear button hidden elsewhere.
  */
 export function QuoteIconPicker({ value, onChange, label, disabled }: Props) {
   const [open, setOpen] = useState(false);
@@ -44,7 +48,9 @@ export function QuoteIconPicker({ value, onChange, label, disabled }: Props) {
           size="icon"
           disabled={disabled}
           aria-label={
-            SelectedIcon ? `${label}: ${value}` : `${label}: none selected`
+            SelectedIcon && value
+              ? `${label}: ${getQuoteIconLabel(value)}`
+              : `${label}: none selected`
           }
         >
           {SelectedIcon ? (
@@ -58,12 +64,12 @@ export function QuoteIconPicker({ value, onChange, label, disabled }: Props) {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="w-64 p-3">
+      <PopoverContent align="start" className="w-80 p-3">
         <p className="text-muted-foreground mb-2 text-xs">
           Shown on the choice card next to the option label.
         </p>
 
-        <div className="grid grid-cols-6 gap-1">
+        <div className="grid grid-cols-7 gap-1">
           <button
             type="button"
             aria-label="No icon"
@@ -80,19 +86,21 @@ export function QuoteIconPicker({ value, onChange, label, disabled }: Props) {
             <Ban className="text-muted-foreground h-4 w-4" aria-hidden="true" />
           </button>
 
-          {QUOTE_ICON_NAMES.map((name) => {
+          {QUOTE_ICON_PICKER_NAMES.map((name) => {
             // `getQuoteIcon` is total over this list, but it returns
             // `LucideIcon | null` for callers passing stored strings — narrow
             // rather than assert.
             const Icon = getQuoteIcon(name);
             if (!Icon) return null;
             const selected = value === name;
+            const iconLabel = getQuoteIconLabel(name);
 
             return (
               <button
                 key={name}
                 type="button"
-                aria-label={name}
+                aria-label={iconLabel}
+                title={iconLabel}
                 aria-pressed={selected}
                 onClick={() => {
                   onChange(name);

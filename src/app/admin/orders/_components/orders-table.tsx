@@ -98,6 +98,7 @@ function OrderFlagBadges({ order }: { order: OrderRow }) {
       {order.deliveryMethod === "pickup" && (
         <Badge variant="warning">Pickup</Badge>
       )}
+      {order.subscriptionId && <Badge variant="secondary">Subscription</Badge>}
       {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
     </>
   );

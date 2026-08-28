@@ -5,9 +5,18 @@ import type {
   QuoteCalculatorDefinition,
   QuoteWireAnswer,
 } from "~/lib/validators/quote-calculator";
-import { parseStoredQuoteDefinition } from "~/lib/validators/quote-calculator";
+import {
+  addCalendarDays,
+  isRealCalendarDate,
+  localCalendarDate,
+  zonedCalendarDate,
+} from "~/lib/calendar-date";
+import {
+  parseStoredQuoteDefinition,
+  QUOTE_MAX_FINAL_CENTS,
+} from "~/lib/validators/quote-calculator";
 
-import { computeQuote } from "./evaluate";
+import { computeQuote, finalizeEstimateCents } from "./evaluate";
 
 /**
  * `computeQuote` is the server-side price. Everything here is written from the
@@ -1600,5 +1609,359 @@ describe("computeQuote — preview mode", () => {
     // q_type is unanswered, so q_storage is not visible and its smuggled
     // answer is discarded exactly as it is on the submit path.
     expect(result.variables.storage_months).toBe(99);
+  });
+});
+
+// ─── Calendar-date helpers ──────────────────────────────────────────────────
+
+/**
+ * `~/lib/calendar-date` is tiny, importless and shared by the quote engine,
+ * the QuickBooks mapper and browser form code — so it has no test file of its
+ * own and is pinned here, next to its most safety-critical consumer (the date
+ * bounds below).
+ *
+ * Every case is a DST or rollover trap. A `YYYY-MM-DD` string is a day on a
+ * wall calendar, not an instant, and the entire module exists because JS's
+ * Date happily conflates the two.
+ */
+describe("calendar-date", () => {
+  it("accepts real dates and rejects well-shaped impossible ones", () => {
+    expect(isRealCalendarDate("2026-08-26")).toBe(true);
+    expect(isRealCalendarDate("2024-02-29")).toBe(true); // leap year
+    expect(isRealCalendarDate("2000-02-29")).toBe(true); // /400 leap year
+    expect(isRealCalendarDate("2026-02-29")).toBe(false); // not a leap year
+    expect(isRealCalendarDate("1900-02-29")).toBe(false); // /100 not a leap year
+    expect(isRealCalendarDate("2026-02-30")).toBe(false);
+    expect(isRealCalendarDate("2026-13-45")).toBe(false);
+    expect(isRealCalendarDate("2026-00-10")).toBe(false);
+    expect(isRealCalendarDate("2026-04-31")).toBe(false);
+  });
+
+  it("rejects anything that is not exactly YYYY-MM-DD", () => {
+    for (const junk of [
+      "",
+      "2026-8-26",
+      "26-08-26",
+      "2026/08/26",
+      "2026-08-26T00:00:00Z",
+      " 2026-08-26",
+    ]) {
+      expect(isRealCalendarDate(junk)).toBe(false);
+    }
+  });
+
+  it("reads the zoned calendar date, not the UTC one, near midnight", () => {
+    // 03:30 UTC is still the previous evening in Detroit. A bound measured in
+    // UTC would reject a shopper's perfectly valid "today" all evening.
+    const nearMidnight = new Date("2026-06-01T03:30:00Z");
+    expect(zonedCalendarDate(nearMidnight, "America/Detroit")).toBe(
+      "2026-05-31",
+    );
+    expect(zonedCalendarDate(nearMidnight, "UTC")).toBe("2026-06-01");
+    // And the other direction: Tokyo is already tomorrow.
+    expect(zonedCalendarDate(nearMidnight, "Asia/Tokyo")).toBe("2026-06-01");
+    expect(
+      zonedCalendarDate(new Date("2026-05-31T20:00:00Z"), "Asia/Tokyo"),
+    ).toBe("2026-06-01");
+  });
+
+  it("falls back to UTC for a time zone it cannot read", () => {
+    // A typo in `Business.timeZone` must not 500 an anonymous submission.
+    expect(
+      zonedCalendarDate(new Date("2026-06-01T12:00:00Z"), "Mars/Olympus"),
+    ).toBe("2026-06-01");
+  });
+
+  it("adds whole calendar days across a DST transition", () => {
+    // US spring-forward 2026-03-08 (23-hour local day) and fall-back
+    // 2026-11-01 (25-hour local day). Both must move exactly one day.
+    expect(addCalendarDays("2026-03-07", 1)).toBe("2026-03-08");
+    expect(addCalendarDays("2026-03-08", 1)).toBe("2026-03-09");
+    expect(addCalendarDays("2026-10-31", 2)).toBe("2026-11-02");
+    expect(addCalendarDays("2026-03-01", 30)).toBe("2026-03-31");
+  });
+
+  it("rolls over months, years and leap days", () => {
+    expect(addCalendarDays("2026-01-31", 1)).toBe("2026-02-01");
+    expect(addCalendarDays("2026-12-31", 1)).toBe("2027-01-01");
+    expect(addCalendarDays("2024-02-28", 1)).toBe("2024-02-29");
+    expect(addCalendarDays("2026-02-28", 1)).toBe("2026-03-01");
+    expect(addCalendarDays("2026-01-01", -1)).toBe("2025-12-31");
+    expect(addCalendarDays("2026-08-26", 0)).toBe("2026-08-26");
+  });
+
+  it("returns a malformed input untouched rather than inventing a date", () => {
+    expect(addCalendarDays("not-a-date", 5)).toBe("not-a-date");
+  });
+
+  it("formats the local calendar date with no UTC drift", () => {
+    // Whatever zone the runner is in, the local Y-M-D must match the local
+    // getters — the naive `toISOString().slice(0, 10)` is what this rules out.
+    const now = new Date(2026, 0, 5, 23, 30);
+    expect(localCalendarDate(now)).toBe("2026-01-05");
+    expect(localCalendarDate(new Date(2026, 11, 31, 23, 59))).toBe(
+      "2026-12-31",
+    );
+  });
+});
+
+// ─── Road factor ────────────────────────────────────────────────────────────
+
+describe("computeQuote — distance road factor", () => {
+  function moversWithFactor(roadFactor: number | undefined) {
+    return defineCalculator({
+      version: 1,
+      questions: [
+        { id: "q_from", type: "zip", title: "Moving from" },
+        { id: "q_to", type: "zip", title: "Moving to" },
+      ],
+      distances: [
+        {
+          id: "d_move",
+          variableName: "distance",
+          fromQuestionId: "q_from",
+          toQuestionId: "q_to",
+          hiddenDefault: 25,
+          ...(roadFactor === undefined ? {} : { roadFactor }),
+        },
+      ],
+      formula: "distance * 100",
+    });
+  }
+
+  const ENDPOINTS: QuoteWireAnswer[] = [
+    { questionId: "q_from", zip: "48601" },
+    { questionId: "q_to", zip: "48602" },
+  ];
+
+  it("leaves stored calculators on raw straight-line miles", () => {
+    // The schema default is 1, NOT the realistic 1.25, precisely so that a
+    // calculator saved before this field existed keeps quoting what it quoted.
+    const result = computeQuote(
+      moversWithFactor(undefined),
+      ENDPOINTS,
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.variables.distance).toBe(69.1);
+  });
+
+  it("scales before rounding, so the formula reads the number that is stored", () => {
+    // 69.0932… × 1.3 = 89.821… → 89.8. Rounding first (69.1 × 1.3 = 89.83)
+    // would leave the formula reading a figure the snapshot never shows.
+    const result = computeQuote(moversWithFactor(1.3), ENDPOINTS, lookupZip);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.variables.distance).toBe(89.8);
+    expect(result.estimateCents).toBe(898000);
+  });
+
+  it("does not scale the hiddenDefault", () => {
+    // The fallback is a mileage the owner typed in directly — it is already
+    // the road figure they meant, not something to inflate again.
+    const result = computeQuote(
+      moversWithFactor(1.25),
+      [{ questionId: "q_from", zip: "48601" }],
+      lookupZip,
+      { mode: "preview" },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.variables.distance).toBe(25);
+  });
+});
+
+// ─── Date bounds ────────────────────────────────────────────────────────────
+
+describe("computeQuote — date bounds", () => {
+  const TODAY = "2026-08-26";
+
+  function calculatorWithDate(bounds: Record<string, unknown>) {
+    return defineCalculator({
+      version: 1,
+      questions: [
+        {
+          id: "q_size",
+          type: "number",
+          title: "Square feet",
+          variableName: "sqft",
+        },
+        {
+          id: "q_when",
+          type: "date",
+          title: "Preferred date",
+          ...bounds,
+        },
+      ],
+      distances: [],
+      formula: "sqft * 2",
+    });
+  }
+
+  function answersFor(date: string): QuoteWireAnswer[] {
+    return [
+      { questionId: "q_size", number: 100 },
+      { questionId: "q_when", date },
+    ];
+  }
+
+  const MIN_TODAY = calculatorWithDate({ minDate: "today" });
+  const HORIZON = calculatorWithDate({ maxDaysAhead: 30 });
+  const UNBOUNDED = calculatorWithDate({});
+
+  it("rejects a date before today, in the business's own calendar", () => {
+    const result = computeQuote(
+      MIN_TODAY,
+      answersFor("2026-08-25"),
+      lookupZip,
+      {
+        today: TODAY,
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("bad-answer");
+    expect(result.error.questionId).toBe("q_when");
+    expect(result.error.message).toBe(
+      '"Preferred date" must be today or later.',
+    );
+  });
+
+  it("accepts today itself, and anything after it", () => {
+    for (const date of [TODAY, "2026-08-27", "2027-01-01"]) {
+      expect(
+        computeQuote(MIN_TODAY, answersFor(date), lookupZip, { today: TODAY })
+          .ok,
+      ).toBe(true);
+    }
+  });
+
+  it("treats maxDaysAhead as inclusive", () => {
+    // today + 30 = 2026-09-25 is the last bookable day; 09-26 is one too far.
+    expect(
+      computeQuote(HORIZON, answersFor("2026-09-25"), lookupZip, {
+        today: TODAY,
+      }).ok,
+    ).toBe(true);
+
+    const tooFar = computeQuote(HORIZON, answersFor("2026-09-26"), lookupZip, {
+      today: TODAY,
+    });
+    expect(tooFar.ok).toBe(false);
+    if (tooFar.ok) return;
+    expect(tooFar.error.code).toBe("bad-answer");
+    expect(tooFar.error.message).toBe(
+      '"Preferred date" must be within 30 days.',
+    );
+  });
+
+  it("does not enforce bounds when `today` is not supplied", () => {
+    // The escape hatch for a caller with no tenant context: degrade to
+    // "accept any real date" rather than compare against the wrong day.
+    expect(
+      computeQuote(MIN_TODAY, answersFor("1999-01-01"), lookupZip).ok,
+    ).toBe(true);
+    expect(computeQuote(HORIZON, answersFor("2099-01-01"), lookupZip).ok).toBe(
+      true,
+    );
+  });
+
+  it("enforces bounds in preview mode too", () => {
+    // A date outside the window is a bad payload, not an incomplete one.
+    // Showing a live estimate for a job that cannot be booked is worse than
+    // showing none.
+    const result = computeQuote(
+      MIN_TODAY,
+      answersFor("2026-08-25"),
+      lookupZip,
+      {
+        mode: "preview",
+        today: TODAY,
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("bad-answer");
+  });
+
+  it("rejects an impossible date whatever the bounds say", () => {
+    for (const date of ["2026-13-45", "2026-02-30"]) {
+      for (const options of [{ today: TODAY }, undefined]) {
+        const result = computeQuote(
+          UNBOUNDED,
+          answersFor(date),
+          lookupZip,
+          options,
+        );
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error.code).toBe("bad-answer");
+        expect(result.error.questionId).toBe("q_when");
+      }
+    }
+  });
+
+  it("leaves a blank optional date alone", () => {
+    // A bound is not a way to make an optional question required.
+    const optional = calculatorWithDate({
+      minDate: "today",
+      required: false,
+    });
+    const result = computeQuote(
+      optional,
+      [{ questionId: "q_size", number: 100 }],
+      lookupZip,
+      { today: TODAY },
+    );
+    expect(result.ok).toBe(true);
+  });
+});
+
+// ─── finalizeEstimateCents ──────────────────────────────────────────────────
+
+describe("finalizeEstimateCents", () => {
+  /**
+   * The money endgame, extracted so `computeQuote` and any future re-pricing
+   * caller cannot drift apart. A `failure` here is never an error — the lead
+   * is still captured; it only explains a blank estimate.
+   */
+  it("converts dollars to whole cents", () => {
+    expect(finalizeEstimateCents(3264.6)).toEqual({ estimateCents: 326460 });
+    expect(finalizeEstimateCents(0.005)).toEqual({ estimateCents: 1 });
+  });
+
+  it("nulls a below-zero total rather than quoting a free job", () => {
+    const result = finalizeEstimateCents(-1.2);
+    expect(result.estimateCents).toBeNull();
+    expect(result.failure?.code).toBe("value-error");
+    expect(result.failure?.message).toContain("negative");
+  });
+
+  it("normalises float dust just below zero to a real $0.00", () => {
+    // `Math.round(-0.4)` is `-0`, and `-0 < 0` is false — so this is a genuine
+    // zero price, not a discount overrun. It must come out as a plain `0`,
+    // since `Object.is(-0, 0)` is false and `customerEstimateFrom` treats
+    // exact zero as a price to show.
+    const result = finalizeEstimateCents(-0.004);
+    expect(result.estimateCents).toBe(0);
+    expect(Object.is(result.estimateCents, -0)).toBe(false);
+    expect(result.failure).toBeUndefined();
+  });
+
+  it("keeps an exact zero as a price", () => {
+    expect(finalizeEstimateCents(0)).toEqual({ estimateCents: 0 });
+  });
+
+  it("nulls anything past the cap rather than clamping to it", () => {
+    // Clamping would print a confident "$1,000,000.00" that no configured
+    // price produces. `QUOTE_MAX_FINAL_CENTS` is also the int4 guard on
+    // `QuoteSubmission.estimateCents`.
+    const atCap = finalizeEstimateCents(QUOTE_MAX_FINAL_CENTS / 100);
+    expect(atCap.estimateCents).toBe(QUOTE_MAX_FINAL_CENTS);
+
+    const overCap = finalizeEstimateCents(QUOTE_MAX_FINAL_CENTS / 100 + 1);
+    expect(overCap.estimateCents).toBeNull();
+    expect(overCap.failure?.code).toBe("over-cap");
   });
 });

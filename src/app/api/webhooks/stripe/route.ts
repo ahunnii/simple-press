@@ -29,6 +29,15 @@ import { deductPoolInventory } from "~/lib/inventory";
 import { releaseReservation } from "~/lib/inventory/reservation";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
 import { stripeClient } from "~/lib/stripe/client";
+import {
+  handleInvoicePaid,
+  handleInvoicePaymentFailed,
+  handleInvoiceVoided,
+  handleSubscriptionCheckoutCompleted,
+  handleSubscriptionCheckoutExpired,
+  handleSubscriptionDeleted,
+  handleSubscriptionUpdated,
+} from "~/lib/subscriptions/webhook";
 import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";
 
@@ -72,6 +81,13 @@ export async function POST(req: NextRequest) {
     // Handle checkout.session.completed
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
+
+      // Subscription sessions are a parallel lane, not a branch inside this one:
+      // they create no order here (`invoice.paid` does, once per paid invoice) and
+      // hold no inventory reservation, and the one-time idempotency guard keyed on
+      // `stripeSessionId` must never see them.
+      if (session.mode === "subscription")
+        return handleSubscriptionCheckoutCompleted(event);
 
       try {
         // Get business ID from metadata
@@ -1014,6 +1030,12 @@ export async function POST(req: NextRequest) {
     // held stock is returned to available. Idempotent: no-op if already released.
     if (event.type === "checkout.session.expired") {
       const expiredSession = event.data.object;
+
+      // Parallel lane again: an abandoned subscribe session holds no reservation,
+      // and the abandoned-checkout email must never fire for it.
+      if (expiredSession.mode === "subscription")
+        return handleSubscriptionCheckoutExpired(event);
+
       try {
         const reservationId = expiredSession.metadata?.reservationId;
         const reservation = await db.inventoryReservation.findFirst({
@@ -1378,6 +1400,21 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({ received: true });
     }
+
+    // Subscription lifecycle — see src/lib/subscriptions/webhook.ts; every
+    // handler re-verifies event.account against the tenant.
+    if (event.type === "invoice.paid") return handleInvoicePaid(event);
+
+    if (event.type === "invoice.payment_failed")
+      return handleInvoicePaymentFailed(event);
+
+    if (event.type === "invoice.voided") return handleInvoiceVoided(event);
+
+    if (event.type === "customer.subscription.updated")
+      return handleSubscriptionUpdated(event);
+
+    if (event.type === "customer.subscription.deleted")
+      return handleSubscriptionDeleted(event);
 
     // Unknown event type
     return NextResponse.json({ received: true });

@@ -3,6 +3,11 @@ import type {
   QuoteWireAnswer,
 } from "~/lib/validators/quote-calculator";
 import {
+  addCalendarDays,
+  isRealCalendarDate,
+  localCalendarDate,
+} from "~/lib/calendar-date";
+import {
   QUOTE_DATE_RE,
   QUOTE_ZIP_RE,
   US_STATE_CODES,
@@ -181,8 +186,34 @@ export function validateAnswer(
       if (!QUOTE_ZIP_RE.test(parts.zip)) return "Enter a 5-digit ZIP code.";
       return null;
     }
-    case "date":
-      return QUOTE_DATE_RE.test(raw) ? null : "Enter a valid date.";
+    case "date": {
+      // Shape AND existence: `QUOTE_DATE_RE` alone accepts `2026-13-45` — the
+      // browser's own `<input type="date">` never emits that, but a restored
+      // draft or a hand-crafted value could still reach here.
+      if (!QUOTE_DATE_RE.test(raw) || !isRealCalendarDate(raw)) {
+        return "Enter a valid date.";
+      }
+      // Bounds are compared as ISO `YYYY-MM-DD` strings, which sort
+      // lexicographically the same as chronologically — no `Date` parsing
+      // needed, and therefore no timezone to get wrong on this side.
+      //
+      // This is the VISITOR's local today (`localCalendarDate`), advisory
+      // only — the server re-checks against the BUSINESS time zone in
+      // `Business.timeZone`. Near midnight the two can legitimately disagree
+      // by a day; when they do, the server's `bad-answer` response routes the
+      // visitor straight back to this field with its own message, so a
+      // mismatch here is a rare extra round trip, not a stuck form.
+      if (question.minDate === "today" && raw < localCalendarDate()) {
+        return "Pick today or a later date.";
+      }
+      if (
+        question.maxDaysAhead != null &&
+        raw > addCalendarDays(localCalendarDate(), question.maxDaysAhead)
+      ) {
+        return `Pick a date within ${question.maxDaysAhead} days.`;
+      }
+      return null;
+    }
     case "text":
     case "longtext":
       // Mirrors `quoteWireAnswerSchema.text`'s 2000-char cap so an over-long

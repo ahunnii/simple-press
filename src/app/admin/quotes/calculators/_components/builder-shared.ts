@@ -101,7 +101,7 @@ export const QUESTION_TYPE_META: Record<
   },
   date: {
     label: "Date",
-    hint: "A calendar date for context. Never affects the price.",
+    hint: "A calendar date for context — can be limited to today or later. Never affects the price.",
   },
 };
 
@@ -214,7 +214,7 @@ export function makeQuestion(type: QuoteQuestionType): QuestionInput {
     case "longtext":
       return { ...base, type: "longtext" };
     case "date":
-      return { ...base, type: "date" };
+      return { ...base, type: "date", minDate: "none", maxDaysAhead: null };
   }
 }
 
@@ -249,6 +249,13 @@ export function makeDistance(
     fromQuestionId,
     toQuestionId,
     hiddenDefault: 0,
+    // 1.25, deliberately NOT the schema default (1): the schema default has to
+    // be a no-op so every already-stored distance keeps repricing exactly as
+    // it always has, but a NEW distance has no stored quotes to disturb, so it
+    // starts from an honest road figure instead of a straight-line one nobody
+    // would actually price a job against. See the schema's own note on
+    // `roadFactor` for the full reasoning.
+    roadFactor: 1.25,
   };
 }
 
@@ -260,6 +267,12 @@ export function makeEmptyDefinition(): CalculatorDefinitionInput {
     distances: [],
     formula: "",
     showEstimateToCustomer: false,
+    // Both booleans below are written explicitly to their schema defaults
+    // (`true`) rather than left `undefined` — the form must hold a real value
+    // from first render, and matching the schema default means a brand-new
+    // calculator behaves identically whether or not the owner ever touches
+    // these switches.
+    showEstimateOnScreen: true,
     displayAsRange: false,
     rangePaddingPercent: 10,
     // ON for new calculators, unlike the v1 migration which writes `false` —
@@ -268,6 +281,7 @@ export function makeEmptyDefinition(): CalculatorDefinitionInput {
     showLiveEstimate: false,
     liveEstimateDisclaimer: QUOTE_LIVE_ESTIMATE_DISCLAIMER_DEFAULT,
     requirePhone: false,
+    sendConfirmationEmail: true,
     responseDays: 1,
     thankYouMessage: "Thanks! We received your request.",
   };
@@ -304,22 +318,10 @@ export function collectVariableNames(
 // ─── Money ──────────────────────────────────────────────────────────────────
 
 /**
- * Formula value (DOLLARS) → stored estimate (CENTS), byte-for-byte the same
- * expression `computeQuote` uses. Kept in sync deliberately: the test panel's
- * whole job is to show the owner the number a real submission would produce,
- * and a preview that rounds differently is worse than no preview.
- *
- * Note the clamp — a formula with enough negative-value discount options can
- * land below zero, and the server stores 0 rather than a negative estimate.
- */
-export function estimateCentsFromFormulaValue(value: number): number {
-  return Math.max(0, Math.round(value * 100));
-}
-
-/**
  * The raw formula result, shown next to the estimate so an owner can see what
- * the arithmetic produced before the clamp/round. NOT currency-formatted, and
- * never fed to `formatPrice` — that helper takes cents, and this is dollars.
+ * the arithmetic produced before `finalizeEstimateCents` rounds it (and, at
+ * the extremes, nulls it out). NOT currency-formatted, and never fed to
+ * `formatPrice` — that helper takes cents, and this is dollars.
  */
 export function formatFormulaValue(value: number): string {
   return new Intl.NumberFormat("en-US", {

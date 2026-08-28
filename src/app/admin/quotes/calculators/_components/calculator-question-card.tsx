@@ -387,7 +387,14 @@ export function CalculatorQuestionCard({
           )}
 
           {isOptionQuestionInput(question) && (
-            <QuestionOptionsEditor form={form} base={base} />
+            <QuestionOptionsEditor
+              form={form}
+              base={base}
+              // A native <select> can't render an icon next to an option —
+              // offering the picker for a dropdown question is a control the
+              // owner can fill in that then does nothing.
+              showIcons={question.type !== "dropdown"}
+            />
           )}
 
           {question.type === "number" && (
@@ -424,6 +431,50 @@ export function CalculatorQuestionCard({
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+            </div>
+          )}
+
+          {question.type === "date" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name={`${base}.minDate`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Earliest allowed date</FormLabel>
+                    <Select
+                      value={field.value ?? "none"}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Any date</SelectItem>
+                        <SelectItem value="today">Today or later</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Measured against today in your business&apos;s time zone,
+                      not the visitor&apos;s.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <BuilderNumberField
+                form={form}
+                name={`${base}.maxDaysAhead`}
+                label="At most this many days ahead"
+                description="A scheduling horizon, counted from today. Leave blank for no limit."
+                placeholder="No limit"
+                emptyAs="null"
+                min={1}
+                max={730}
               />
             </div>
           )}
@@ -547,9 +598,12 @@ export function CalculatorQuestionCard({
 function QuestionOptionsEditor({
   form,
   base,
+  showIcons,
 }: {
   form: UseFormReturn<CalculatorFormValues>;
   base: QuestionFieldPath;
+  /** A native `<select>` (dropdown) can't render an option's icon. */
+  showIcons: boolean;
 }) {
   const name = `${base}.options` as const;
 
@@ -610,31 +664,33 @@ function QuestionOptionsEditor({
             className="min-w-0 flex-1"
           />
 
-          <FormField
-            control={form.control}
-            name={`${name}.${optionIndex}.icon`}
-            render={({ field: iconField }) => (
-              <FormItem className="shrink-0">
-                <FormLabel className="text-muted-foreground text-xs">
-                  Icon
-                </FormLabel>
-                <FormControl>
-                  <div>
-                    <QuoteIconPicker
-                      value={
-                        typeof iconField.value === "string"
-                          ? iconField.value
-                          : null
-                      }
-                      onChange={iconField.onChange}
-                      label={`Icon for option ${optionIndex + 1}`}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {showIcons && (
+            <FormField
+              control={form.control}
+              name={`${name}.${optionIndex}.icon`}
+              render={({ field: iconField }) => (
+                <FormItem className="shrink-0">
+                  <FormLabel className="text-muted-foreground text-xs">
+                    Icon
+                  </FormLabel>
+                  <FormControl>
+                    <div>
+                      <QuoteIconPicker
+                        value={
+                          typeof iconField.value === "string"
+                            ? iconField.value
+                            : null
+                        }
+                        onChange={iconField.onChange}
+                        label={`Icon for option ${optionIndex + 1}`}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <Button
             type="button"

@@ -4,6 +4,7 @@ import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
 } from "~/lib/validators/admin-table";
+import { productSubscriptionFieldsSchema } from "~/lib/validators/subscription";
 
 const productFeatureSchema = z.object({
   icon: z.string(),
@@ -150,6 +151,11 @@ const productFormObjectSchema = z.object({
     .optional()
     .nullable(),
   weightUnit: z.enum(["lb", "kg"]).optional(),
+  // Merged in (not spread inline) so `productSubscriptionFieldsSchema`
+  // (`~/lib/validators/subscription`) stays the single source of truth for
+  // these three fields — the product form, `productCreateSchema`, and
+  // `productUpdateSchema` below all inherit them from this one `.extend()`.
+  ...productSubscriptionFieldsSchema.shape,
 });
 
 export const productFormSchema = productFormObjectSchema.refine(

@@ -6,6 +6,7 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { HappyBambooVariantSelector } from "./happy-bamboo-variant-selector";
 
@@ -24,6 +25,7 @@ export function HappyBambooProductActions({
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    selectedVariantId,
     justAdded,
     remainingStock,
     isInventoryTracked,
@@ -148,6 +150,13 @@ export function HappyBambooProductActions({
           )}
         </>
       )}
+      <SubscribePanel
+        product={product}
+        selectedVariantId={selectedVariantId}
+        quantity={quantity}
+        available={inStock}
+        className="mt-4"
+      />
     </>
   );
 }

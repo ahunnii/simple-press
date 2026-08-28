@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { QuoteAnswer, QuoteAnswerMap } from "./quote-answers";
 import type { PublicQuoteQuestion } from "~/lib/validators/quote-calculator";
+import { addCalendarDays, localCalendarDate } from "~/lib/calendar-date";
 
 import {
   answerDisplay,
@@ -124,6 +125,68 @@ describe("address answers", () => {
     expect(answerDisplay(required, address({ ...COMPLETE, line2: "" }))).toBe(
       "123 Main St, Saginaw, MI 48601",
     );
+  });
+});
+
+describe("date answers", () => {
+  // Derived from the SAME helper `validateAnswer` uses, rather than a fixed
+  // literal — a hardcoded "today" would start silently failing the moment the
+  // test suite outlived it, and the point of these bounds is that they track
+  // whenever the test happens to run.
+  const today = localCalendarDate();
+  const yesterday = addCalendarDays(today, -1);
+
+  it("rejects a string that is not even shaped like a date", () => {
+    const q = question({ id: "when", type: "date" });
+    expect(validateAnswer(q, { kind: "value", raw: "09/01/2026" })).toBe(
+      "Enter a valid date.",
+    );
+  });
+
+  it("rejects a calendar date that does not exist", () => {
+    const q = question({ id: "when", type: "date" });
+    // Shaped correctly (regex passes) but month 13 and Feb 30 do not exist —
+    // this is the case a shape-only check would have let through.
+    expect(validateAnswer(q, { kind: "value", raw: "2026-13-01" })).toBe(
+      "Enter a valid date.",
+    );
+    expect(validateAnswer(q, { kind: "value", raw: "2026-02-30" })).toBe(
+      "Enter a valid date.",
+    );
+  });
+
+  it("rejects yesterday when minDate is 'today'", () => {
+    const q = question({ id: "when", type: "date", minDate: "today" });
+    expect(validateAnswer(q, { kind: "value", raw: yesterday })).toBe(
+      "Pick today or a later date.",
+    );
+  });
+
+  it("accepts today when minDate is 'today'", () => {
+    const q = question({ id: "when", type: "date", minDate: "today" });
+    expect(validateAnswer(q, { kind: "value", raw: today })).toBeNull();
+  });
+
+  it("allows a past date when minDate is 'none' (the default)", () => {
+    const q = question({ id: "when", type: "date" });
+    expect(validateAnswer(q, { kind: "value", raw: yesterday })).toBeNull();
+  });
+
+  it("enforces the maxDaysAhead boundary, inclusive", () => {
+    const q = question({ id: "when", type: "date", maxDaysAhead: 5 });
+    expect(
+      validateAnswer(q, { kind: "value", raw: addCalendarDays(today, 5) }),
+    ).toBeNull();
+    expect(
+      validateAnswer(q, { kind: "value", raw: addCalendarDays(today, 6) }),
+    ).toBe("Pick a date within 5 days.");
+  });
+
+  it("has no ceiling when maxDaysAhead is null", () => {
+    const q = question({ id: "when", type: "date", maxDaysAhead: null });
+    expect(
+      validateAnswer(q, { kind: "value", raw: addCalendarDays(today, 400) }),
+    ).toBeNull();
   });
 });
 

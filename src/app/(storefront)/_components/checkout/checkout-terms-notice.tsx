@@ -23,6 +23,7 @@ type Props = {
   style?: CSSProperties;
   linkClassName?: string;
   linkStyle?: CSSProperties;
+  leadText?: string;
 };
 
 /**
@@ -42,12 +43,13 @@ export function CheckoutTermsNotice({
   style,
   linkClassName,
   linkStyle,
+  leadText = "By placing your order you agree to",
 }: Props) {
   const { merchantName, merchantLinks, platformHref } = disclosure;
 
   return (
     <p className={className} style={style}>
-      By placing your order you agree to{" "}
+      {leadText}{" "}
       {merchantLinks.length > 0 && (
         <>
           {merchantName}&apos;s{" "}

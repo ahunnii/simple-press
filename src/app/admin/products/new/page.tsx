@@ -26,6 +26,7 @@ export default async function NewProductPage() {
       <ProductForm
         galleriesEnabled={flags.isEnabled("galleries")}
         collectionsEnabled={flags.isEnabled("collections")}
+        subscriptionsEnabled={flags.isEnabled("subscriptions")}
         allCollections={allCollections}
         pools={pools}
       />

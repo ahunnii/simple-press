@@ -154,6 +154,8 @@ export function CalculatorBuilder({ calculator }: Props) {
   const watchedFormula = form.watch("definition.formula") ?? "";
   const showEstimateToCustomer =
     form.watch("definition.showEstimateToCustomer") ?? false;
+  const showEstimateOnScreen =
+    form.watch("definition.showEstimateOnScreen") ?? true;
   const displayAsRange = form.watch("definition.displayAsRange") ?? false;
   const showLiveEstimate = form.watch("definition.showLiveEstimate") ?? false;
   const rangePaddingPercent =
@@ -690,6 +692,7 @@ export function CalculatorBuilder({ calculator }: Props) {
                 distances={watchedDistances}
                 formula={watchedFormula}
                 showEstimateToCustomer={showEstimateToCustomer}
+                showEstimateOnScreen={showEstimateOnScreen}
                 displayAsRange={displayAsRange}
                 rangePaddingPercent={rangePaddingPercent}
                 thankYouMessage={thankYouMessage}
@@ -698,6 +701,7 @@ export function CalculatorBuilder({ calculator }: Props) {
               <CalculatorSettingsCard
                 form={form}
                 showEstimateToCustomer={showEstimateToCustomer}
+                showEstimateOnScreen={showEstimateOnScreen}
                 displayAsRange={displayAsRange}
                 showLiveEstimate={showLiveEstimate}
               />

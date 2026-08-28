@@ -6,6 +6,7 @@ import { RotateCcw } from "lucide-react";
 import type { DistanceInput, QuestionInput } from "./builder-shared";
 import { formatPrice } from "~/lib/prices";
 import { customerEstimateFrom } from "~/lib/quote/customer-estimate";
+import { finalizeEstimateCents } from "~/lib/quote/evaluate";
 import { evaluateFormula } from "~/lib/quote/formula";
 import { resolveVisibility } from "~/lib/quote/visibility";
 import { cn } from "~/lib/utils";
@@ -28,11 +29,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-import {
-  estimateCentsFromFormulaValue,
-  formatFormulaValue,
-  isVariableQuestionInput,
-} from "./builder-shared";
+import { formatFormulaValue, isVariableQuestionInput } from "./builder-shared";
 
 type Props = {
   /**
@@ -45,6 +42,8 @@ type Props = {
   distances: DistanceInput[];
   formula: string;
   showEstimateToCustomer: boolean;
+  /** Off = the figure only ever reaches the visitor by email, never on screen. */
+  showEstimateOnScreen: boolean;
   displayAsRange: boolean;
   rangePaddingPercent: number;
   thankYouMessage: string;
@@ -87,6 +86,7 @@ export function CalculatorTestPanel({
   distances,
   formula,
   showEstimateToCustomer,
+  showEstimateOnScreen,
   displayAsRange,
   rangePaddingPercent,
   thankYouMessage,
@@ -186,10 +186,12 @@ export function CalculatorTestPanel({
   const evaluated =
     trimmedFormula === "" ? null : evaluateFormula(trimmedFormula, variables);
 
-  const estimateCents =
-    evaluated?.ok === true
-      ? estimateCentsFromFormulaValue(evaluated.value)
-      : null;
+  // The SAME function `computeQuote` calls for a real submission — round →
+  // negative→null → -0→0 → over-cap→null — so a preview that shows a number
+  // never disagrees with what a real lead would store.
+  const finalized =
+    evaluated?.ok === true ? finalizeEstimateCents(evaluated.value) : null;
+  const estimateCents = finalized?.estimateCents ?? null;
 
   // The same helper the `submit` mutation and the live-estimate endpoint use,
   // so "what the visitor sees" here is literally what they would be shown.
@@ -398,9 +400,18 @@ export function CalculatorTestPanel({
                 <p className="text-muted-foreground text-xs">
                   Estimate stored on the lead
                 </p>
-                <p className="text-2xl font-semibold tabular-nums">
-                  {formatPrice(estimateCents ?? 0)}
-                </p>
+                {estimateCents !== null ? (
+                  <p className="text-2xl font-semibold tabular-nums">
+                    {formatPrice(estimateCents)}
+                  </p>
+                ) : (
+                  <p className="text-destructive text-sm">
+                    {`No estimate would be stored — ${
+                      finalized?.failure?.message ??
+                      "this combination of answers has no valid price."
+                    } The lead is still captured for you to price by hand.`}
+                  </p>
+                )}
                 <p className="text-muted-foreground text-xs">
                   Formula result: {formatFormulaValue(evaluated.value)}
                 </p>
@@ -410,7 +421,29 @@ export function CalculatorTestPanel({
                 <p className="text-muted-foreground text-xs">
                   What the visitor sees
                 </p>
-                {!customerEstimate ? (
+                {showEstimateToCustomer && !showEstimateOnScreen ? (
+                  // Email-only estimate: the thank-you screen stays generic,
+                  // and the figure (if any) appears only in the confirmation
+                  // email — same split `customerEstimateFrom` computes for
+                  // the real `submit` mutation.
+                  <div className="space-y-1">
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">On screen: </span>
+                      {thankYouMessage.trim() ||
+                        "Thanks! We received your request."}
+                    </p>
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">By email: </span>
+                      {!customerEstimate
+                        ? "no estimate — priced by hand"
+                        : "exactCents" in customerEstimate
+                          ? formatPrice(customerEstimate.exactCents)
+                          : `${formatPrice(customerEstimate.lowCents)} – ${formatPrice(
+                              customerEstimate.highCents,
+                            )}`}
+                    </p>
+                  </div>
+                ) : !customerEstimate ? (
                   <p className="text-sm">
                     {thankYouMessage.trim() ||
                       "Thanks! We received your request."}

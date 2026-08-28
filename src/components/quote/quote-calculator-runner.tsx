@@ -165,8 +165,12 @@ export function QuoteCalculatorRunner({
   const [contactErrors, setContactErrors] = useState<QuoteContactErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<QuoteSubmitResult | null>(null);
-  /** Set while the visitor is out editing one answer from the review step. */
-  const [returnToReview, setReturnToReview] = useState(false);
+  /**
+   * Set while the visitor is out editing one answer and heading back to the
+   * step that sends the form — the review step when the owner turned it on,
+   * the contact step otherwise (it holds the submit button in that case).
+   */
+  const [returnToSend, setReturnToSend] = useState(false);
   const [reviewNote, setReviewNote] = useState<string | null>(null);
   const [focusRequest, setFocusRequest] = useState<{
     questionId: string;
@@ -294,7 +298,7 @@ export function QuoteCalculatorRunner({
     setStepErrors({});
     setSubmitError(null);
 
-    if (returnToReview) {
+    if (returnToSend) {
       const incomplete = firstIncompleteStepIndex(
         steps,
         answers,
@@ -303,7 +307,7 @@ export function QuoteCalculatorRunner({
       );
       if (incomplete !== -1 && incomplete !== currentIndex) {
         // The edit revealed something new. Route there, say why, and KEEP the
-        // flag so the next Next tries to get back to review again. The
+        // flag so the next Next tries to get back to send again. The
         // field-level messages are set NOW, not on the next click: on a
         // grouped screen the banner alone does not say which of several
         // questions is the one still waiting (mirrors `handleSubmit`).
@@ -323,12 +327,21 @@ export function QuoteCalculatorRunner({
           setFocusRequest(null);
         }
         setStepIndex(incomplete);
-        setReviewNote(RETURN_TO_REVIEW_NOTE);
+        setReviewNote(
+          reviewStepIndex === -1
+            ? INCOMPLETE_BEFORE_SEND_NOTE
+            : RETURN_TO_REVIEW_NOTE,
+        );
         return;
       }
-      if (reviewStepIndex !== -1) {
-        setStepIndex(reviewStepIndex);
-        setReturnToReview(false);
+      // With a review step, "send" means landing back on review. Without one,
+      // the contact step IS the step that holds the submit button, so that is
+      // where "send" lands instead.
+      const sendTarget =
+        reviewStepIndex !== -1 ? reviewStepIndex : contactStepIndex;
+      if (sendTarget !== -1) {
+        setStepIndex(sendTarget);
+        setReturnToSend(false);
         setReviewNote(null);
         setFocusRequest(null);
         return;
@@ -341,11 +354,12 @@ export function QuoteCalculatorRunner({
     answers,
     clearAdvance,
     contact,
+    contactStepIndex,
     currentIndex,
     currentStep,
     definition.requirePhone,
     requestFocus,
-    returnToReview,
+    returnToSend,
     reviewStepIndex,
     steps,
     validateScreen,
@@ -359,9 +373,9 @@ export function QuoteCalculatorRunner({
     // Back ABANDONS the detour. Whether the visitor got here by editing one
     // answer from review, or by being routed to a question the server refused,
     // stepping backwards means they are walking the flow again — leaving a
-    // "Return to review" button and a note about it on screen would promise a
-    // jump the next Next is no longer going to make.
-    setReturnToReview(false);
+    // "Return to review"/"Return to send" button and a note about it on
+    // screen would promise a jump the next Next is no longer going to make.
+    setReturnToSend(false);
     setReviewNote(null);
     setStepIndex(Math.max(0, currentIndex - 1));
   }, [clearAdvance, currentIndex]);
@@ -375,7 +389,7 @@ export function QuoteCalculatorRunner({
       setStepErrors({});
       setSubmitError(null);
       setReviewNote(null);
-      setReturnToReview(true);
+      setReturnToSend(true);
       setStepIndex(index);
       requestFocus(questionId);
     },
@@ -389,7 +403,7 @@ export function QuoteCalculatorRunner({
     setStepErrors({});
     setSubmitError(null);
     setReviewNote(null);
-    setReturnToReview(true);
+    setReturnToSend(true);
     setFocusRequest(null);
     setStepIndex(contactStepIndex);
   }, [clearAdvance, contactStepIndex]);
@@ -559,9 +573,9 @@ export function QuoteCalculatorRunner({
    * end of a fourteen-step form, with nothing to click.
    *
    * So the answer is walked back to instead. The banner is cleared, the message
-   * is re-hung under the question that owns it, and — when the owner enabled a
-   * review step — the primary button becomes "Return to review", so fixing it
-   * is one click back to sending rather than a second walk through the flow.
+   * is re-hung under the question that owns it, and the primary button becomes
+   * "Return to review" (or, with no review step, "Return to send"), so fixing
+   * it is one click back to sending rather than a second walk through the flow.
    */
   const handleSubmitIssue = useCallback(
     (error: QuoteSubmitFailure) => {
@@ -583,11 +597,24 @@ export function QuoteCalculatorRunner({
       setStepErrors({ [error.questionId]: error.message });
       setStepIndex(index);
       setReviewNote(FIX_ANSWER_NOTE);
-      if (reviewStepIndex !== -1) setReturnToReview(true);
+      setReturnToSend(true);
       requestFocus(error.questionId);
     },
-    [requestFocus, reviewStepIndex, steps],
+    [requestFocus, steps],
   );
+
+  /**
+   * Guards `handleSubmit` against re-entry from a second click or Enter press
+   * while a recaptcha token mint (up to ~15s) or the mutation itself is still
+   * in flight. `isPending` alone is not enough: it only flips true once
+   * `mutate()` is actually called, leaving the whole `await executeRecaptcha`
+   * window unguarded — this ref closes that window. A ref rather than state
+   * because it must be readable synchronously at the top of `handleSubmit`,
+   * before any `await`, with no risk of reading a stale render's value.
+   */
+  const submitLock = useRef(false);
+  /** True only for the recaptcha-mint window — see `submitLock` above. */
+  const [minting, setMinting] = useState(false);
 
   const submitMutation = api.quoteSubmission.submit.useMutation({
     onSuccess: (data) => {
@@ -616,8 +643,18 @@ export function QuoteCalculatorRunner({
       setSubmitError(
         error.data?.code === "TOO_MANY_REQUESTS"
           ? "Too many requests — please wait a moment and try again."
-          : error.message,
+          : error.data?.zodError
+            ? "Something about your answers couldn't be read. Please check them and try again."
+            : error.message,
       );
+    },
+    // Releases the lock on EVERY outcome — success, the visitor-fixable
+    // `success: false` branch (still a settled mutation), and a thrown error
+    // alike. The `executeRecaptcha` failure path below releases it separately,
+    // since that window closes before `mutate()` — and therefore `onSettled` —
+    // ever runs.
+    onSettled: () => {
+      submitLock.current = false;
     },
   });
 
@@ -641,7 +678,7 @@ export function QuoteCalculatorRunner({
           ? INCOMPLETE_BEFORE_SEND_NOTE
           : RETURN_TO_REVIEW_NOTE,
       );
-      if (reviewStepIndex !== -1) setReturnToReview(true);
+      setReturnToSend(true);
       const firstInvalid = step.screen.questions.find(
         (question) => errors[question.id] !== undefined,
       );
@@ -656,7 +693,7 @@ export function QuoteCalculatorRunner({
     if (Object.keys(errors).length > 0) {
       if (contactStepIndex !== -1 && contactStepIndex !== currentIndex) {
         setStepIndex(contactStepIndex);
-        if (reviewStepIndex !== -1) setReturnToReview(true);
+        setReturnToSend(true);
         setFocusRequest(null);
       }
       return;
@@ -664,7 +701,25 @@ export function QuoteCalculatorRunner({
 
     setReviewNote(null);
 
-    const token = await executeRecaptcha(RECAPTCHA_ACTION);
+    // Closes the window a second click/Enter could re-enter: `isPending` alone
+    // does not cover the time this `await` spends minting a token (up to
+    // ~15s), so a synchronous ref check has to gate it instead of state, which
+    // would not be readable in time by a second call landing before this
+    // component re-renders.
+    if (submitLock.current || submitMutation.isPending) return;
+    submitLock.current = true;
+    setMinting(true);
+    let token: string | null;
+    try {
+      token = await executeRecaptcha(RECAPTCHA_ACTION);
+    } catch (error) {
+      // The mutation never gets called, so `onSettled` never runs to release
+      // the lock — this is the only path that has to do it itself.
+      submitLock.current = false;
+      throw error;
+    } finally {
+      setMinting(false);
+    }
     const phone = contact.phone.trim();
 
     submitMutation.mutate({
@@ -729,7 +784,7 @@ export function QuoteCalculatorRunner({
     setStepErrors({});
     setContactErrors({});
     setSubmitError(null);
-    setReturnToReview(false);
+    setReturnToSend(false);
     setReviewNote(null);
     setFocusRequest(null);
     setStartOverConfirming(false);
@@ -746,10 +801,23 @@ export function QuoteCalculatorRunner({
     const target = event.target as HTMLElement | null;
     const tag = target?.tagName;
     // Textareas keep Enter for newlines; buttons and links already activate on
-    // Enter themselves and must not also advance the step.
-    if (tag === "TEXTAREA" || tag === "BUTTON" || tag === "A") return;
+    // Enter themselves; a native select CONFIRMS an option on Enter without
+    // moving focus off itself — all three must not also advance the step.
+    if (
+      tag === "TEXTAREA" ||
+      tag === "BUTTON" ||
+      tag === "A" ||
+      tag === "SELECT"
+    ) {
+      return;
+    }
     event.preventDefault();
     if (isSubmitStep) {
+      // Mirrors the button's own `disabled`: a second Enter while the token is
+      // minting or the mutation is in flight must not re-enter `handleSubmit`.
+      // `handleSubmit`'s own `submitLock` check makes this belt-and-suspenders,
+      // but failing fast here also skips the (harmless) re-validation pass.
+      if (minting || submitMutation.isPending) return;
       void handleSubmit();
     } else {
       goNext();
@@ -761,8 +829,10 @@ export function QuoteCalculatorRunner({
   const startOverPromptId = `${uid}-start-over-prompt`;
   const totalSteps = steps.length;
 
-  const nextLabel = returnToReview
-    ? "Return to review"
+  const nextLabel = returnToSend
+    ? reviewStepIndex !== -1
+      ? "Return to review"
+      : "Return to send"
     : currentStep.kind === "screen" &&
         currentStep.screen.questions.every(
           (question) =>
@@ -786,6 +856,8 @@ export function QuoteCalculatorRunner({
           result={result}
           thankYouMessage={definition.thankYouMessage}
           responseDays={definition.responseDays}
+          estimateByEmail={definition.estimateByEmail}
+          contactEmail={contact.email.trim()}
         />
       </div>
     );
@@ -804,6 +876,7 @@ export function QuoteCalculatorRunner({
           </div>
           <div
             role="progressbar"
+            aria-label="Quote form progress"
             aria-valuemin={1}
             aria-valuemax={totalSteps}
             aria-valuenow={currentIndex + 1}
@@ -958,12 +1031,14 @@ export function QuoteCalculatorRunner({
             <Button
               type="button"
               onClick={() => void handleSubmit()}
-              disabled={submitMutation.isPending}
+              disabled={minting || submitMutation.isPending}
             >
-              {submitMutation.isPending && (
+              {(minting || submitMutation.isPending) && (
                 <LoaderCircle className="animate-spin" aria-hidden="true" />
               )}
-              {submitMutation.isPending ? "Sending…" : "Get my quote"}
+              {minting || submitMutation.isPending
+                ? "Sending…"
+                : "Get my quote"}
             </Button>
           ) : (
             <Button type="button" onClick={goNext}>
@@ -1018,7 +1093,7 @@ function ContactStep({
           ref={headingRef}
           tabIndex={-1}
           className={cn(
-            "text-foreground font-semibold outline-none",
+            "text-foreground focus-visible:ring-ring rounded-sm font-semibold focus-visible:ring-2 focus-visible:outline-none",
             density.heading,
           )}
         >

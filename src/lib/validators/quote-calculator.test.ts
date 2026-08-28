@@ -13,6 +13,7 @@ import {
   QUOTE_STATUS_VALUES_DB,
   quoteCalculatorDefinitionSchema,
   quotePreviewEstimateSchema,
+  quoteSendFinalQuoteSchema,
   quoteSubmitSchema,
   toPublicCalculatorDefinition,
 } from "./quote-calculator";
@@ -714,6 +715,7 @@ describe("toPublicCalculatorDefinition", () => {
 
   it("keeps only the presentation settings the runner needs", () => {
     expect(Object.keys(publicDefinition).sort()).toEqual([
+      "estimateByEmail",
       "liveEstimateDisclaimer",
       "requirePhone",
       "responseDays",
@@ -1094,5 +1096,372 @@ describe("admin filter/sort tuples", () => {
       "all",
       ...QUOTE_STATUS_VALUES_DB,
     ]);
+  });
+});
+
+// ─── Estimate delivery, road factor, date bounds ────────────────────────────
+
+describe("definition defaults added after v2 shipped", () => {
+  /**
+   * Every one of these defaults has to be the NO-OP, because they are applied
+   * on READ: a stored calculator is re-parsed on every load, so a default that
+   * changed behavior would silently reprice or re-route calculators whose
+   * owners never touched a setting. This test is the guard on that.
+   */
+  it("defaults to today's behavior for a definition that sets none of them", () => {
+    const parsed = quoteCalculatorDefinitionSchema.parse(baseDefinition());
+    expect(parsed.showEstimateOnScreen).toBe(true);
+    expect(parsed.sendConfirmationEmail).toBe(true);
+    expect(parsed.distances[0]?.roadFactor).toBe(1);
+  });
+
+  it("defaults date questions to unbounded", () => {
+    const raw = baseDefinition();
+    raw.screens[0]!.questions.push({
+      id: "q_when",
+      type: "date",
+      title: "Preferred date",
+    });
+    const parsed = quoteCalculatorDefinitionSchema.parse(raw);
+    const question = parsed.screens[0]?.questions[2];
+    expect(question?.type).toBe("date");
+    if (question?.type !== "date") return;
+    expect(question.minDate).toBe("none");
+    expect(question.maxDaysAhead ?? null).toBeNull();
+  });
+
+  it("applies the same no-op defaults when migrating a v1 blob", () => {
+    // A v1 calculator has none of these keys and must come out quoting
+    // exactly what it quoted yesterday.
+    const parsed = parseStoredQuoteDefinition({
+      version: 1,
+      questions: [
+        { id: "q_from", type: "zip", title: "From" },
+        { id: "q_to", type: "zip", title: "To" },
+      ],
+      distances: [
+        {
+          id: "d",
+          variableName: "miles",
+          fromQuestionId: "q_from",
+          toQuestionId: "q_to",
+        },
+      ],
+      formula: "miles * 4",
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.showEstimateOnScreen).toBe(true);
+    expect(parsed.data.sendConfirmationEmail).toBe(true);
+    expect(parsed.data.distances[0]?.roadFactor).toBe(1);
+  });
+
+  it("bounds roadFactor to a plausible detour", () => {
+    for (const roadFactor of [0.9, 2.1]) {
+      const raw = baseDefinition();
+      raw.distances[0] = { ...raw.distances[0]!, roadFactor };
+      expect(quoteCalculatorDefinitionSchema.safeParse(raw).success).toBe(
+        false,
+      );
+    }
+    const raw = baseDefinition();
+    raw.distances[0] = { ...raw.distances[0]!, roadFactor: 1.25 };
+    expect(
+      quoteCalculatorDefinitionSchema.parse(raw).distances[0]?.roadFactor,
+    ).toBe(1.25);
+  });
+
+  it("bounds maxDaysAhead to a scheduling horizon", () => {
+    for (const maxDaysAhead of [0, 731, 1.5]) {
+      const raw = baseDefinition();
+      raw.screens[0]!.questions.push({
+        id: "q_when",
+        type: "date",
+        title: "Preferred date",
+        maxDaysAhead,
+      });
+      expect(quoteCalculatorDefinitionSchema.safeParse(raw).success).toBe(
+        false,
+      );
+    }
+  });
+});
+
+describe("owner-configuration rules (save time only)", () => {
+  /**
+   * The split these tests pin: each rule here rejects a SAVE, and each one is
+   * deliberately absent from the read path, because applying it there would
+   * make an already-stored calculator unloadable — including in the builder
+   * page the owner would have to open to fix it.
+   */
+  it("refuses an estimate with nowhere to go", () => {
+    const issues = issuesFor({
+      ...baseDefinition(),
+      showEstimateToCustomer: true,
+      showEstimateOnScreen: false,
+      sendConfirmationEmail: false,
+    });
+    expect(paths(issues)).toContain("sendConfirmationEmail");
+    expect(issues[0]?.message).toContain("Email-only estimates");
+  });
+
+  it("accepts email-only delivery when the confirmation email is on", () => {
+    const parsed = quoteCalculatorDefinitionSchema.safeParse({
+      ...baseDefinition(),
+      showEstimateToCustomer: true,
+      showEstimateOnScreen: false,
+      sendConfirmationEmail: true,
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it("leaves the contradiction alone when the estimate is internal", () => {
+    // Nothing is being promised to the visitor, so nothing is being withheld.
+    const parsed = quoteCalculatorDefinitionSchema.safeParse({
+      ...baseDefinition(),
+      showEstimateToCustomer: false,
+      showEstimateOnScreen: false,
+      sendConfirmationEmail: false,
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it("refuses an optional question as a distance endpoint", () => {
+    const raw = baseDefinition();
+    patchQuestion(raw, 1, 0, { required: false });
+    const issues = issuesFor(raw);
+    expect(paths(issues)).toContain("distances.0.fromQuestionId");
+    expect(issues[0]?.message).toContain("must be a required question");
+  });
+
+  it("reports each optional endpoint against its own field", () => {
+    const raw = baseDefinition();
+    patchQuestion(raw, 1, 0, { required: false });
+    patchQuestion(raw, 2, 0, { required: false });
+    expect(paths(issuesFor(raw))).toEqual([
+      "distances.0.fromQuestionId",
+      "distances.0.toQuestionId",
+    ]);
+  });
+
+  it("does not double up on an endpoint that is not a location question", () => {
+    // "Not a ZIP question" and "not required" would otherwise both fire on the
+    // same field, and the second message is noise once the first is true.
+    const raw = baseDefinition();
+    raw.distances[0] = {
+      ...raw.distances[0]!,
+      fromQuestionId: "q_bedrooms",
+    };
+    const endpointPaths = paths(issuesFor(raw)).filter(
+      (path) => path === "distances.0.fromQuestionId",
+    );
+    expect(endpointPaths).toHaveLength(1);
+  });
+
+  it("refuses an inverted number range, against `max`", () => {
+    const raw = baseDefinition();
+    patchQuestion(raw, 0, 1, { min: 10, max: 2 });
+    const issues = issuesFor(raw);
+    expect(paths(issues)).toEqual(["screens.0.questions.1.max"]);
+    expect(issues[0]?.message).toBe("Maximum must be at least the minimum.");
+  });
+
+  it("allows a single-value range and a one-sided bound", () => {
+    for (const patch of [
+      { min: 5, max: 5 },
+      { min: 5, max: null },
+      { min: null, max: 5 },
+    ]) {
+      const raw = baseDefinition();
+      patchQuestion(raw, 0, 1, patch);
+      expect(quoteCalculatorDefinitionSchema.safeParse(raw).success).toBe(true);
+    }
+  });
+
+  it("still loads a stored calculator that breaks these rules", () => {
+    // The whole point of the split. This blob would be refused on save; it
+    // must still parse on read, or the owner is locked out of the calculator
+    // AND out of the builder page that could fix it.
+    const raw = baseDefinition();
+    patchQuestion(raw, 1, 0, { required: false });
+    patchQuestion(raw, 0, 1, { min: 10, max: 2 });
+    expect(quoteCalculatorDefinitionSchema.safeParse(raw).success).toBe(false);
+    expect(parseStoredQuoteDefinition(raw).success).toBe(true);
+  });
+});
+
+// ─── Public projection: estimate delivery + date bounds ─────────────────────
+
+describe("toPublicCalculatorDefinition — estimate delivery", () => {
+  function project(settings: Record<string, unknown>) {
+    const raw = baseDefinition();
+    raw.screens[0]!.questions.push({
+      id: "q_when",
+      type: "date",
+      title: "Preferred date",
+      minDate: "today",
+      maxDaysAhead: 90,
+    });
+    return toPublicCalculatorDefinition(
+      quoteCalculatorDefinitionSchema.parse({ ...raw, ...settings }),
+    );
+  }
+
+  it("never exposes where the owner sends the estimate", () => {
+    const projected = project({
+      showEstimateToCustomer: true,
+      showEstimateOnScreen: false,
+      sendConfirmationEmail: true,
+    });
+    expect(projected).not.toHaveProperty("showEstimateOnScreen");
+    expect(projected).not.toHaveProperty("sendConfirmationEmail");
+    expect(JSON.stringify(projected)).not.toContain("sendConfirmationEmail");
+  });
+
+  it("ANDs the live estimate through both visibility switches", () => {
+    // A stale `showLiveEstimate: true` must not survive the owner moving the
+    // estimate to email only — `previewEstimate` gates on this projection.
+    expect(
+      project({
+        showEstimateToCustomer: true,
+        showEstimateOnScreen: true,
+        showLiveEstimate: true,
+      }).showLiveEstimate,
+    ).toBe(true);
+
+    expect(
+      project({
+        showEstimateToCustomer: true,
+        showEstimateOnScreen: false,
+        showLiveEstimate: true,
+      }).showLiveEstimate,
+    ).toBe(false);
+
+    expect(
+      project({
+        showEstimateToCustomer: false,
+        showEstimateOnScreen: true,
+        showLiveEstimate: true,
+      }).showLiveEstimate,
+    ).toBe(false);
+  });
+
+  it("sets estimateByEmail only for the email-only configuration", () => {
+    expect(
+      project({
+        showEstimateToCustomer: true,
+        showEstimateOnScreen: false,
+        sendConfirmationEmail: true,
+      }).estimateByEmail,
+    ).toBe(true);
+
+    // On screen — the thank-you page shows the figure itself.
+    expect(
+      project({
+        showEstimateToCustomer: true,
+        showEstimateOnScreen: true,
+        sendConfirmationEmail: true,
+      }).estimateByEmail,
+    ).toBe(false);
+
+    // Estimate internal — there is no number to promise anywhere.
+    expect(
+      project({
+        showEstimateToCustomer: false,
+        showEstimateOnScreen: false,
+        sendConfirmationEmail: true,
+      }).estimateByEmail,
+    ).toBe(false);
+  });
+
+  it("carries date bounds onto the public question", () => {
+    const projected = project({});
+    const question = projected.screens[0]?.questions[2];
+    expect(question?.minDate).toBe("today");
+    expect(question?.maxDaysAhead).toBe(90);
+  });
+
+  it("carries a null ceiling for an unbounded date question", () => {
+    const raw = baseDefinition();
+    raw.screens[0]!.questions.push({
+      id: "q_when",
+      type: "date",
+      title: "Preferred date",
+    });
+    const projected = toPublicCalculatorDefinition(
+      quoteCalculatorDefinitionSchema.parse(raw),
+    );
+    const question = projected.screens[0]?.questions[2];
+    expect(question?.minDate).toBe("none");
+    expect(question?.maxDaysAhead).toBeNull();
+  });
+});
+
+// ─── Wire answers: real dates ───────────────────────────────────────────────
+
+describe("quoteWireAnswerSchema — date", () => {
+  function submitWith(date: string) {
+    return quoteSubmitSchema.safeParse({
+      calculatorId: "calc_1",
+      answers: [{ questionId: "q_when", date }],
+      contactName: "Ada",
+      contactEmail: "ada@example.com",
+      captchaToken: "t",
+    });
+  }
+
+  it("accepts a real calendar date, leap day included", () => {
+    expect(submitWith("2026-08-26").success).toBe(true);
+    expect(submitWith("2024-02-29").success).toBe(true);
+  });
+
+  it("rejects a well-shaped date that does not exist", () => {
+    // The regex alone passes all of these — the refine is what stops them
+    // being stored, displayed back to the owner and compared to a bound.
+    for (const date of [
+      "2026-02-30",
+      "2026-13-45",
+      "2026-00-10",
+      "2025-02-29",
+    ]) {
+      expect(submitWith(date).success).toBe(false);
+    }
+  });
+});
+
+// ─── Final quote ────────────────────────────────────────────────────────────
+
+describe("quoteSendFinalQuoteSchema", () => {
+  it("accepts a null amount for a message-only follow-up", () => {
+    const parsed = quoteSendFinalQuoteSchema.safeParse({
+      id: "q_1",
+      finalQuoteCents: null,
+      message: "Could you send a photo of the driveway?",
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.finalQuoteCents).toBeNull();
+  });
+
+  it("still bounds the amount when one is given", () => {
+    for (const finalQuoteCents of [-1, 100_000_001, 1.5]) {
+      expect(
+        quoteSendFinalQuoteSchema.safeParse({
+          id: "q_1",
+          finalQuoteCents,
+          message: "Here is your quote.",
+        }).success,
+      ).toBe(false);
+    }
+  });
+
+  it("still requires a message", () => {
+    expect(
+      quoteSendFinalQuoteSchema.safeParse({
+        id: "q_1",
+        finalQuoteCents: null,
+        message: "   ",
+      }).success,
+    ).toBe(false);
   });
 });

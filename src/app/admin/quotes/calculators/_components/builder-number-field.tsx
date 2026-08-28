@@ -30,6 +30,15 @@ type Props<TFieldValues extends FieldValues> = {
   emptyAs?: "null" | "undefined";
   className?: string;
   disabled?: boolean;
+  /**
+   * Forwarded straight to the `<input type="number">`'s `min`/`max` — the
+   * browser's own spinner/validation bounds, purely a UX affordance. The real
+   * bound is still whatever the Zod schema enforces server-side; these do not
+   * clamp `onChange` and a value outside them still reaches `field.onChange`
+   * for the resolver to catch.
+   */
+  min?: number;
+  max?: number;
 };
 
 /**
@@ -56,6 +65,8 @@ export function BuilderNumberField<TFieldValues extends FieldValues>({
   emptyAs = "undefined",
   className,
   disabled,
+  min,
+  max,
 }: Props<TFieldValues>) {
   const [draft, setDraft] = useState<string | null>(null);
 
@@ -79,6 +90,8 @@ export function BuilderNumberField<TFieldValues extends FieldValues>({
                 type="number"
                 step="any"
                 inputMode="decimal"
+                min={min}
+                max={max}
                 disabled={disabled}
                 placeholder={placeholder}
                 name={field.name}

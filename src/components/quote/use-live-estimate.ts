@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
 import type { QuoteAnswerMap } from "./quote-answers";
@@ -73,20 +73,51 @@ export function useLiveEstimate({
     [debouncedKey],
   );
 
-  const { data, isFetching } = api.quoteCalculator.previewEstimate.useQuery(
-    { calculatorId, answers: debouncedWire },
-    {
-      enabled: enabled && debouncedWire.length > 0,
-      // `keepPreviousData` so the panel shows the last figure while the next
-      // one is in flight instead of blinking empty on every answer change.
-      placeholderData: keepPreviousData,
-      staleTime: 60_000,
-      // No retry: a FORBIDDEN (owner turned the estimate off mid-session) or a
-      // 429 is not going to succeed on a second attempt, and retrying spends
-      // the same limiter budget that produced the 429.
-      retry: false,
-    },
-  );
+  // Separate from `enabled` (the prop): also folds in "nothing priced has
+  // been answered yet". Both the query's `enabled` option and the "should the
+  // strip disappear" decision below have to agree on this, or the two could
+  // draw different conclusions from the same debounce tick.
+  const queryEnabled = enabled && debouncedWire.length > 0;
 
-  return { estimate: data?.estimate ?? null, isFetching };
+  const { data, isFetching, isError } =
+    api.quoteCalculator.previewEstimate.useQuery(
+      { calculatorId, answers: debouncedWire },
+      {
+        enabled: queryEnabled,
+        // `keepPreviousData` so the panel shows the last figure while the next
+        // one is in flight instead of blinking empty on every answer change.
+        placeholderData: keepPreviousData,
+        staleTime: 60_000,
+        // No retry: a FORBIDDEN (owner turned the estimate off mid-session) or a
+        // 429 is not going to succeed on a second attempt, and retrying spends
+        // the same limiter budget that produced the 429.
+        retry: false,
+      },
+    );
+
+  // `keepPreviousData` only bridges a REFETCH — the moment the request
+  // actually fails, react-query drops `data` back to `undefined`, and without
+  // this the strip would blink away on a single dropped request (a 429, a
+  // blip) rather than holding the last figure the visitor already saw. Set
+  // from an effect rather than during render so it only ever captures a
+  // response that arrived, never a stale value smuggled in via `enabled`
+  // dropping — see the `!queryEnabled` guard below, which is the one place
+  // that decides the strip disappears rather than this ref.
+  const lastGoodEstimateRef = useRef<CustomerEstimate | null>(null);
+  useEffect(() => {
+    if (data) {
+      lastGoodEstimateRef.current = data.estimate ?? null;
+    }
+  }, [data]);
+
+  const estimate = !queryEnabled
+    ? // Nothing priced is currently answered (or the owner-level flag is
+      // off) — the strip must disappear, even if a good estimate is sitting
+      // in the ref from an answer the visitor has since cleared.
+      null
+    : isError
+      ? lastGoodEstimateRef.current
+      : (data?.estimate ?? null);
+
+  return { estimate, isFetching };
 }

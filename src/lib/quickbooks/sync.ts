@@ -26,10 +26,17 @@
  * ────────────────────────────────────────────────────────────────────────────
  * The cron endpoint ticks every ~15 minutes and every tenant on the platform
  * shares it, but almost none of them have QuickBooks connected. So the very
- * first thing this does is one indexed SELECT
- * (`@@index([status, lastSyncedAt])`) for open invoices due for a poll; an
- * empty result returns immediately, before loading a single business row or
- * opening a single socket. That is the path virtually every tick takes.
+ * first thing this does is one tiny SELECT over `QuickBooksConnection` —
+ * a table with one row per CONNECTED business, i.e. empty or near-empty on a
+ * platform where nobody uses the integration. No active connection means there
+ * is nothing any invoice row could be polled against, so the run returns
+ * immediately, before the invoice table is touched, a business row is loaded,
+ * or a socket is opened. That is the path virtually every tick takes.
+ *
+ * Reading connections FIRST also pays for itself when there ARE connections:
+ * their `(businessId, realmId)` pairs go into the invoice query's `where`, so
+ * rows belonging to a previous QuickBooks company are excluded in SQL rather
+ * than fetched and then filtered out in memory — see REALM MISMATCH below.
  *
  * When rows do come back, `QBO_MIN_INVOICE_SYNC_INTERVAL_MS` (30 min) is what
  * keeps a busy store from re-polling the same open invoice on every 15-minute
@@ -65,18 +72,36 @@
  * meaningful inside the realm that issued it, so querying company B for an id
  * from company A returns nothing — which, without this check, would look
  * exactly like "the invoice was deleted" and silently mark a real, possibly
- * paid, invoice as voided. Those rows are instead excluded from the query and
- * stamped once with an explanatory `lastError`: they stay visible in the admin
- * list (they are money records) but stop being re-selected every tick forever.
+ * paid, invoice as voided.
+ *
+ * Those rows never enter this sweep: the invoice query matches on
+ * `(businessId, realmId)` pairs taken from the live connections, so a row from
+ * a previous company is not selected at all. It is labelled for the owner once,
+ * at the moment the company actually changes, by the OAuth callback. The
+ * in-function realm check below is kept as a defensive no-op — a second reader
+ * of a rule this destructive to get wrong is worth its four lines.
+ *
+ * ────────────────────────────────────────────────────────────────────────────
+ * ENVIRONMENT MISMATCH
+ * ────────────────────────────────────────────────────────────────────────────
+ * Sandbox and production realms are disjoint. A connection made against one
+ * environment while the deployment is configured for the other can only produce
+ * failures (or, far worse, resolve an id inside the wrong company), so such a
+ * business is skipped with an owner-facing `lastSyncError` and no network call
+ * at all. It is not a Sentry event: the fix is a reconnect by the owner, and
+ * the condition would re-fire on every tick until they do it.
  */
 import * as Sentry from "@sentry/nextjs";
 
 import type { InvoiceStatus, QboInvoice } from "~/lib/quickbooks/types";
 import type { DbClient } from "~/server/db";
+import { env } from "~/env";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { coerceQboEnvironment } from "~/lib/quickbooks/config";
 import {
   QBO_MIN_INVOICE_SYNC_INTERVAL_MS,
   QBO_SYNC_BATCH,
+  qboEnvironmentMismatchMessage,
 } from "~/lib/quickbooks/constants";
 import { QboNeedsReconnectError } from "~/lib/quickbooks/errors";
 import { queryQboInvoices } from "~/lib/quickbooks/invoices";
@@ -86,12 +111,6 @@ import {
   truncateError,
 } from "~/lib/quickbooks/mapping";
 import { QBO_OPEN_INVOICE_STATUSES } from "~/lib/validators/quickbooks";
-
-/**
- * Stamped on rows whose `realmId` no longer matches the connected company.
- * Owner-facing — it appears verbatim in the admin invoice list.
- */
-const REALM_MISMATCH_ERROR = "Belongs to a previous QuickBooks company";
 
 /** Stamped on a row QuickBooks no longer returns (deleted at Intuit's side). */
 const NOT_FOUND_ERROR = "Not found in QuickBooks";
@@ -117,7 +136,18 @@ type OpenInvoiceRow = {
   paidAt: Date | null;
 };
 
-type SyncableConnection = { status: string; realmId: string };
+/** The connection columns the sweep reads — never a token. */
+const CONNECTION_SELECT = {
+  businessId: true,
+  realmId: true,
+  environment: true,
+} as const;
+
+type SyncableConnection = {
+  businessId: string;
+  realmId: string;
+  environment: string;
+};
 
 export type SyncQuickBooksOptions = {
   /** Max invoice rows one run will process. Defaults to `QBO_SYNC_BATCH`. */
@@ -165,25 +195,21 @@ async function syncBusinessInvoices(
   args: {
     businessId: string;
     connection: SyncableConnection;
+    /** The business's IANA zone — `deriveInvoiceStatus` reads "today" in it. */
+    timeZone: string;
     rows: readonly OpenInvoiceRow[];
     now: Date;
     onUpdate: () => void;
   },
 ): Promise<void> {
-  const { businessId, connection, rows, now, onUpdate } = args;
+  const { businessId, connection, timeZone, rows, now, onUpdate } = args;
 
-  // Rows issued against a company this business is no longer connected to.
-  // Stamped once so they stop re-qualifying for the sweep, then dropped from
-  // the query — see the module docblock.
-  const staleRealmIds = rows
-    .filter((row) => row.realmId !== connection.realmId)
-    .map((row) => row.id);
-  if (staleRealmIds.length > 0) {
-    await db.quickBooksInvoice.updateMany({
-      where: { id: { in: staleRealmIds } },
-      data: { lastSyncedAt: now, lastError: REALM_MISMATCH_ERROR },
-    });
-  }
+  // Defensive no-op: the caller's query already matched on
+  // `(businessId, realmId)`, so nothing here should belong to a previous
+  // company. Kept because the cost of this rule failing silently — querying the
+  // new company for the old company's id and reading the empty answer as "the
+  // owner deleted it" — is a real, possibly paid, invoice marked `voided`.
+  // Rows from a previous realm are labelled by the OAuth callback, not here.
 
   // `qboInvoiceId` is non-null by the query's `where`, but Prisma still types
   // it nullable; narrowing here (rather than asserting) keeps the id a plain
@@ -227,13 +253,20 @@ async function syncBusinessInvoices(
       now,
       previous: row.status as InvoiceStatus,
       expectedTotalCents: row.amountCents,
+      // "Overdue" is a calendar judgement, and the calendar that matters is the
+      // owner's. A UTC "today" marks a Detroit invoice late for the last 4–5
+      // hours of every day it isn't.
+      timeZone,
     });
 
     await db.quickBooksInvoice.update({
       where: { id: row.id },
       data: {
         status: next,
-        balanceCents: qboAmountToCents(qbo.Balance),
+        // `?? undefined`, like the sibling fields below: QBO omitting `Balance`
+        // means "no news". Writing `null` would blank a balance we already knew
+        // and make the admin list show nothing owed on an unpaid invoice.
+        balanceCents: qboAmountToCents(qbo.Balance) ?? undefined,
         qboSyncToken: qbo.SyncToken,
         // `undefined` (not `null`) throughout: QBO omitting a field means "no
         // news", not "cleared". Writing null would erase a doc number or due
@@ -255,11 +288,9 @@ async function syncBusinessInvoices(
  * Sweep open QuickBooks invoices and refresh their status from Intuit.
  *
  * Returns the number of invoice rows whose status was synced against QBO.
- * Realm-mismatch rows are stamped but not counted — that write is bookkeeping
- * to stop them re-qualifying, not a status the sweep actually learned.
  *
  * See the module docblock for the steady-state cost, the throttle, per-business
- * isolation, and the realm-mismatch rule.
+ * isolation, and the realm/environment mismatch rules.
  */
 export async function syncQuickBooksInvoices(
   db: DbClient,
@@ -268,6 +299,27 @@ export async function syncQuickBooksInvoices(
   const now = opts.now ?? new Date();
   const take = opts.take ?? QBO_SYNC_BATCH;
   const cutoff = new Date(now.getTime() - QBO_MIN_INVOICE_SYNC_INTERVAL_MS);
+  const platformEnvironment = coerceQboEnvironment(env.QBO_ENVIRONMENT);
+
+  // One small SELECT over a table with a row per CONNECTED business — see the
+  // module docblock. `needs_reconnect`/`disconnected` are excluded here rather
+  // than skipped later: there is no usable token, so their rows must not be
+  // fetched, stamped, or polled at all.
+  const connections: SyncableConnection[] =
+    await db.quickBooksConnection.findMany({
+      where: {
+        status: "active",
+        ...(opts.businessId ? { businessId: opts.businessId } : {}),
+      },
+      select: CONNECTION_SELECT,
+    });
+  // The steady state on a platform where nobody uses QuickBooks: one query,
+  // zero rows, done — the invoice table is never touched.
+  if (connections.length === 0) return 0;
+
+  const connectionByBusiness = new Map(
+    connections.map((connection) => [connection.businessId, connection]),
+  );
 
   const rows: OpenInvoiceRow[] = await db.quickBooksInvoice.findMany({
     where: {
@@ -276,17 +328,35 @@ export async function syncQuickBooksInvoices(
       status: { in: [...QBO_OPEN_INVOICE_STATUSES] },
       qboInvoiceId: { not: null },
       ...(opts.businessId ? { businessId: opts.businessId } : {}),
+      // Both halves of the pair matter: `businessId` scopes the sweep to
+      // businesses that still have a live connection, and `realmId` drops rows
+      // issued against a company the owner has since disconnected from. The
+      // pair is what makes a realm mismatch unrepresentable in the result set
+      // rather than something the loop has to remember to filter.
+      OR: connections.map((connection) => ({
+        businessId: connection.businessId,
+        realmId: connection.realmId,
+      })),
+      // Nested under `AND` because `OR` above is already spoken for and Prisma
+      // takes one `OR` key per level. The clause is unchanged: never synced, or
+      // not synced since the throttle cutoff.
       ...(opts.ignoreInterval
         ? {}
-        : { OR: [{ lastSyncedAt: null }, { lastSyncedAt: { lt: cutoff } }] }),
+        : {
+            AND: [
+              {
+                OR: [{ lastSyncedAt: null }, { lastSyncedAt: { lt: cutoff } }],
+              },
+            ],
+          }),
     },
     // Stalest first; never-synced rows sort ahead of everything.
     orderBy: [{ lastSyncedAt: { sort: "asc", nulls: "first" } }],
     take,
     select: INVOICE_SELECT,
   });
-  // The overwhelmingly common case: nobody has an invoice due for a poll. Bail
-  // before loading businesses or touching the network.
+  // Nobody has an invoice due for a poll. Bail before loading businesses or
+  // touching the network.
   if (rows.length === 0) return 0;
 
   const byBusiness = groupByBusiness(rows);
@@ -294,13 +364,10 @@ export async function syncQuickBooksInvoices(
   // Cron requests arrive on the platform host, so the host-based `featureGate`
   // tRPC middleware can't resolve a business here — resolve each business's
   // flags directly instead, same as the `videoSync` and `backInStock` jobs.
+  // `timeZone` rides along for `deriveInvoiceStatus`'s overdue judgement.
   const businesses = await db.business.findMany({
     where: { id: { in: [...byBusiness.keys()] } },
-    select: {
-      id: true,
-      featureFlags: true,
-      quickBooksConnection: { select: { status: true, realmId: true } },
-    },
+    select: { id: true, featureFlags: true, timeZone: true },
   });
   const businessById = new Map(businesses.map((b) => [b.id, b]));
 
@@ -315,16 +382,37 @@ export async function syncQuickBooksInvoices(
     // rather than sitting out a 30-minute interval they never used.
     if (!resolveFlags(business.featureFlags).isEnabled("quickbooks")) continue;
 
-    // No connection row, or `needs_reconnect`/`disconnected`: there is no
-    // usable token, so a poll would only produce a guaranteed failure per tick.
-    // The owner already sees the reconnect prompt in the admin UI.
-    const connection = business.quickBooksConnection;
-    if (connection?.status !== "active") continue;
+    const connection = connectionByBusiness.get(businessId);
+    if (!connection) continue;
+
+    // Sandbox connection on a production deployment (or the reverse). Every
+    // call would fail against a realm that doesn't exist there, so the owner is
+    // told once per tick on their own connection row and no request is made.
+    const connectionEnvironment = coerceQboEnvironment(connection.environment);
+    if (connectionEnvironment !== platformEnvironment) {
+      try {
+        await db.quickBooksConnection.update({
+          where: { businessId },
+          // No `lastSyncAt` and no invoice-row stamp: nothing was synced, and
+          // the rows must retry immediately once the owner reconnects.
+          data: {
+            lastSyncError: qboEnvironmentMismatchMessage(
+              connectionEnvironment,
+              platformEnvironment,
+            ),
+          },
+        });
+      } catch {
+        // Best-effort bookkeeping, exactly like the failure path below.
+      }
+      continue;
+    }
 
     try {
       await syncBusinessInvoices(db, {
         businessId,
         connection,
+        timeZone: business.timeZone,
         rows: invoiceRows,
         now,
         onUpdate: () => {
