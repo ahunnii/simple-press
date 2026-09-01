@@ -5,7 +5,7 @@ const blogPageData: TemplateField[] = [
   {
     key: "bamboo.blog.listing-title",
     label: "Blog listing title",
-    description: "Main heading on the blog index page",
+    description: "Main heading in the sage hero band on the blog index page",
     type: "text",
     page: "blog",
     group: "blog.listing",
@@ -22,19 +22,20 @@ const blogPageData: TemplateField[] = [
     group: "blog.listing",
     gridColumn: "col-span-full",
     defaultValue:
-      "Tips on sustainable living, product care, and what is new at the shop.",
+      "Notes on tree-free living, caring for your everyday essentials, and what is new from Detroit.",
     placeholder:
-      "Tips on sustainable living, product care, and what is new at the shop.",
+      "Notes on tree-free living, caring for your everyday essentials, and what is new from Detroit.",
   },
   {
     key: "bamboo.blog.listing-image",
     label: "Blog listing image",
-    description: "Hero image beside the blog listing title",
+    description:
+      "Optional photo tucked into the blog hero as a tilted photo card. Leave blank to show the illustrated bamboo scene on its own.",
     type: "image",
     page: "blog",
     group: "blog.listing",
     gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    defaultValue: "",
   },
   {
     key: "bamboo.blog.post-cta-heading",
@@ -90,14 +91,16 @@ export const bambooBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.listing",
     title: "Blog Post Listings Hero",
-    description: "Blog index page hero (title, intro, image)",
+    description:
+      "Blog index sage hero band — title, intro, and an optional photo card",
     icon: "📝",
     columns: 2,
   },
   {
     id: "blog.post",
     title: "Blog Post Call to Action",
-    description: "Call-to-action shown at the end of every blog article",
+    description:
+      "Sage call-to-action band at the end of every blog article. Hideable.",
     icon: "✨",
     columns: 2,
   },

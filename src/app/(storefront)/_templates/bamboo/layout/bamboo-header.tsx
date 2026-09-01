@@ -1,51 +1,57 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Heart, Menu, ShoppingBag } from "lucide-react";
+import { ChevronDown, Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
-import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
-import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
+import { BambooGlyph } from "../shared/bamboo-glyph";
 import { BambooMobileNav } from "./bamboo-mobile-nav";
 
-type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = {
+export type NavChild = { label: string; href: string; external?: boolean };
+export type NavLink = {
   label: string;
   href: string;
   external?: boolean;
   children?: NavChild[];
 };
 
-const NAV_LINKS: NavLink[] = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-];
-
-export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
+export function BambooHeader({
+  business,
+  initialSession,
+}: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();
-  const { data: session, isPending } = useHydratedSession();
+  const { data: session, isPending } = useHydratedSession(initialSession);
   const { isEnabled } = useStorefrontFlags();
 
+  const [stuck, setStuck] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const triggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+  const burgerRef = useRef<HTMLButtonElement>(null);
 
-  // Close desktop dropdown on Escape, returning focus to trigger
+  // Transparent-over-sage at the top of the page; gains the paper scrim +
+  // blur + shadow once the page scrolls (see `--bamboo-header-offset` and the
+  // hero pull-under convention in the F1 build report).
+  useEffect(() => {
+    const onScroll = () => setStuck(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close desktop dropdown on Escape, returning focus to its trigger
   useEffect(() => {
     if (openDropdown === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -59,79 +65,89 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [openDropdown]);
 
-  const links =
-    (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
+  // Escape closes the mobile panel and returns focus to the burger
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        burgerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
 
-  const authActions = (
-    <>
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/auth/sign-in">Log in</Link>
-      </Button>
-    </>
-  );
+  // Close everything on route change
+  useEffect(() => {
+    setMobileOpen(false);
+    setOpenDropdown(null);
+  }, [pathname]);
 
-  const userMenu = session?.user && (
-    <UserButton
-      size="icon"
-      className="border-primary border"
-      avatarClassName="size-10"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        !!session?.session?.membershipId
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
-    />
-  );
+  const DEFAULT_NAV_LINKS: NavLink[] = [
+    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
+    { href: "/about", label: "About" },
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Insights" }] : []),
+    { href: "/contact", label: "Contact" },
+  ];
+
+  // `??`, never `||`: an owner who saves an empty nav list means "no custom
+  // nav", which `||` would silently overwrite with the shipped default.
+  const customNav = business?.siteContent?.navigationItems as
+    | NavLink[]
+    | undefined;
+  const links = customNav ?? DEFAULT_NAV_LINKS;
+
+  const isActive = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(href + "/");
+
+  const showAdminLink =
+    session?.user?.platformRole === "PLATFORM_ADMIN" ||
+    !!session?.session?.membershipId;
+
+  const businessName = business?.name ?? "Business";
 
   return (
-    <header className="border-border/60 bg-background/95 sticky top-0 z-50 border-b backdrop-blur-sm">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          {business.siteContent?.logoUrl ? (
-            <div className="relative aspect-square h-20 w-full rounded-sm">
-              <Image
-                src={business.siteContent.logoUrl}
-                alt={resolveLogoAlt(
-                  business.siteContent?.logoAltText,
-                  business.name,
-                )}
-                sizes="(max-width: 768px) 100vw, 55px"
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : (
-            <span className="text-primary font-heading text-xl font-bold tracking-tight">
-              {business.name ?? "Business"}
-            </span>
-          )}
+    <header
+      className="sticky top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-300"
+      style={{
+        background: stuck
+          ? "color-mix(in srgb, var(--bamboo-paper) 92%, transparent)"
+          : "transparent",
+        backdropFilter: stuck ? "blur(9px)" : "none",
+        boxShadow: stuck
+          ? "0 10px 30px -26px color-mix(in srgb, var(--bamboo-ink) 75%, transparent)"
+          : "none",
+      }}
+    >
+      <div className="mx-auto flex max-w-[1200px] items-center gap-6 px-6 py-[18px]">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-[11px] text-[var(--bamboo-pine)]"
+          aria-label={`${businessName} — home`}
+        >
+          {/* Brand role is ALWAYS the wreath mark (decisions log: wreath
+              everywhere; the uploaded logo image is not used in chrome). */}
+          <BambooGlyph id="s-wreath" className="h-9 w-auto shrink-0" />
+          <b className="font-heading text-[1.28rem] leading-none font-bold tracking-[-0.02em]">
+            {businessName}
+          </b>
         </Link>
 
         <nav
-          className="hidden items-center gap-8 md:flex"
-          aria-label="Main navigation"
+          className="ml-auto hidden items-center gap-[30px] min-[901px]:flex"
+          aria-label="Primary"
         >
           {links.map((link, i) =>
             link.children?.length ? (
               <div
                 key={link.href + link.label}
-                className="relative"
+                className="relative flex items-center"
                 onMouseEnter={() => setOpenDropdown(i)}
                 onMouseLeave={() => setOpenDropdown(null)}
                 onBlur={(e) => {
-                  // Close when focus leaves the wrapper entirely
                   if (
                     !e.currentTarget.contains(e.relatedTarget as Node | null)
                   ) {
@@ -146,14 +162,16 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                     else triggerRefs.current.delete(i);
                   }}
                   aria-haspopup="true"
-                  aria-expanded={openDropdown === i ? "true" : "false"}
+                  aria-expanded={openDropdown === i}
                   aria-controls={`bamboo-nav-dropdown-${i}`}
                   onClick={() => setOpenDropdown(openDropdown === i ? null : i)}
+                  data-current={
+                    link.children.some((c) => isActive(c.href))
+                      ? "true"
+                      : undefined
+                  }
                   className={cn(
-                    "flex cursor-pointer items-center gap-1 border-none bg-transparent p-0 text-sm font-medium transition-colors",
-                    link.children.some((c) => pathname === c.href)
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-primary",
+                    "bamboo-nav-link flex cursor-pointer items-center gap-1 border-none bg-transparent p-0",
                   )}
                 >
                   {link.label}
@@ -169,9 +187,9 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                 {openDropdown === i && (
                   <div
                     id={`bamboo-nav-dropdown-${i}`}
-                    className="absolute top-full left-0 z-10 pt-2"
+                    className="absolute top-full left-0 z-10 pt-3"
                   >
-                    <div className="bg-background border-border/60 min-w-[160px] overflow-hidden rounded-(--radius) border shadow-sm">
+                    <div className="bamboo-nav-dropdown">
                       {link.children.map((child) => (
                         <Link
                           key={child.href}
@@ -181,15 +199,13 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                             child.external ? "noopener noreferrer" : undefined
                           }
                           aria-current={
-                            pathname === child.href ? "page" : undefined
+                            isActive(child.href) ? "page" : undefined
+                          }
+                          data-current={
+                            isActive(child.href) ? "true" : undefined
                           }
                           onClick={() => setOpenDropdown(null)}
-                          className={cn(
-                            "block px-4 py-2.5 text-sm transition-colors",
-                            pathname === child.href
-                              ? "text-primary bg-secondary"
-                              : "text-muted-foreground hover:text-primary hover:bg-secondary",
-                          )}
+                          className="bamboo-nav-dropdown-link"
                         >
                           {child.label}
                           {child.external && (
@@ -207,12 +223,9 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                 href={link.href}
                 target={link.external ? "_blank" : undefined}
                 rel={link.external ? "noopener noreferrer" : undefined}
-                aria-current={pathname === link.href ? "page" : undefined}
-                className={`hover:text-primary text-sm font-medium transition-colors ${
-                  pathname === link.href
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                }`}
+                aria-current={isActive(link.href) ? "page" : undefined}
+                data-current={isActive(link.href) ? "true" : undefined}
+                className="bamboo-nav-link"
               >
                 {link.label}
                 {link.external && (
@@ -223,67 +236,114 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
           )}
         </nav>
 
-        <div className="flex items-center gap-2">
-          {isEnabled("customerAccounts") && (
-            <>
-              {isPending ? (
-                <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-              ) : session?.user ? (
-                userMenu
-              ) : (
-                authActions
-              )}
-            </>
-          )}
-          {isEnabled("wishlist") && (
-            <Button variant="ghost" size="icon" asChild>
+        <div className="ml-auto flex items-center gap-2 min-[901px]:ml-0">
+          {isEnabled("customerAccounts") &&
+            (isPending ? (
+              <div className="size-11 animate-pulse rounded-full bg-[var(--bamboo-sage)]" />
+            ) : session?.user ? (
+              <UserButton
+                size="icon"
+                className="bamboo-icon-btn"
+                avatarClassName="size-6"
+                links={[
+                  {
+                    icon: <IconPackage className="h-4 w-4" />,
+                    label: "Orders",
+                    href: "/account/orders",
+                  },
+                  ...(showAdminLink
+                    ? [
+                        {
+                          icon: <IconLayoutDashboard className="h-4 w-4" />,
+                          label: "Admin",
+                          href: "/admin",
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            ) : (
               <Link
-                href="/wishlist"
-                aria-label={`Wishlist with ${wishlistCount} items`}
+                href="/auth/sign-in"
+                aria-label="Sign in to your account"
+                className="bamboo-icon-btn"
               >
-                <span className="relative" aria-hidden="true">
-                  <Heart className="size-5" />
-                  {wishlistCount > 0 && (
-                    <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full text-[10px] font-bold">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </span>
+                <User
+                  className="h-[18px] w-[18px]"
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                />
               </Link>
-            </Button>
-          )}
-          <Button variant="ghost" size="icon" asChild>
-            <Link
-              href="/cart"
-              aria-label={`Shopping cart with ${itemCount} items`}
-            >
-              <span className="relative" aria-hidden="true">
-                <ShoppingBag className="size-5" />
-                {itemCount > 0 && (
-                  <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full text-[10px] font-bold">
-                    {itemCount}
-                  </span>
-                )}
-              </span>
-            </Link>
-          </Button>
+            ))}
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
+          {isEnabled("wishlist") && (
+            <Link
+              href="/wishlist"
+              aria-label={
+                wishlistCount > 0
+                  ? `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                  : "Wishlist"
+              }
+              className="bamboo-icon-btn"
+            >
+              <Heart
+                className="h-[18px] w-[18px]"
+                strokeWidth={1.8}
+                aria-hidden="true"
+              />
+              {wishlistCount > 0 && (
+                <span aria-hidden="true" className="bamboo-icon-badge">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+          )}
+
+          <Link
+            href="/cart"
+            aria-label={
+              itemCount > 0
+                ? `Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                : "Cart"
+            }
+            className="bamboo-icon-btn"
           >
-            <Menu className="size-5" aria-hidden="true" />
-          </Button>
+            <ShoppingBag
+              className="h-[18px] w-[18px]"
+              strokeWidth={1.8}
+              aria-hidden="true"
+            />
+            {itemCount > 0 && (
+              <span aria-hidden="true" className="bamboo-icon-badge">
+                {itemCount}
+              </span>
+            )}
+          </Link>
+
+          <button
+            ref={burgerRef}
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="bamboo-mobile-nav"
+            className={cn("bamboo-icon-btn", "min-[901px]:hidden")}
+          >
+            <Menu
+              className="h-[18px] w-[18px]"
+              strokeWidth={1.8}
+              aria-hidden="true"
+            />
+          </button>
         </div>
       </div>
 
       <BambooMobileNav
+        id="bamboo-mobile-nav"
         open={mobileOpen}
-        onOpenChange={setMobileOpen}
-        business={business}
+        onClose={() => setMobileOpen(false)}
+        links={links}
+        isActive={isActive}
       />
     </header>
   );

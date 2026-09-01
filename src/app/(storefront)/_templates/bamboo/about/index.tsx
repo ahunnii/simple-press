@@ -1,11 +1,10 @@
 import {
   Building2,
-  Droplets,
+  Feather,
   Heart,
   Leaf,
   ShieldCheck,
   Sprout,
-  TreePine,
   Truck,
   Users,
 } from "lucide-react";
@@ -16,19 +15,12 @@ import type {
   TemplateFieldGroup,
 } from "~/lib/template-fields";
 
-///ABOUT PAGE
+/// ABOUT PAGE — "Illustrated & Alive" redesign (docs/templates/bamboo/design.md).
+/// Group ids are kept stable from the pre-redesign page so saved owner content
+/// survives. `bamboo.about.hero-tagline` is DROPPED (see aboutHeroData below) —
+/// its default rendered the excluded "Detroit's Foremost Stationery Store"
+/// leftover line, and the new hero has no eyebrow/kicker slot at all.
 const aboutHeroData: TemplateField[] = [
-  {
-    key: "bamboo.about.hero-tagline",
-    label: "About Hero Tagline",
-    description: "Tagline for the about page, above the title.",
-    type: "text",
-    page: "about",
-    group: "about.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Detroit's Foremost Stationery Store",
-    placeholder: "Detroit's Foremost Stationery Store",
-  },
   {
     key: "bamboo.about.hero-heading",
     label: "About Hero Heading",
@@ -47,18 +39,19 @@ const aboutHeroData: TemplateField[] = [
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
-    defaultValue: `We're a Detroit-based household paper products company built on a simple belief: the everyday essentials in your home should be better -- better for your family, better for the planet, and delivered with the care you deserve.`,
-    placeholder: `We're a Detroit-based household paper products company...`,
+    defaultValue: `Finally Results is an eco-conscious company focused on producing sustainable, biodegradable and affordable household essentials. Our first launch — bamboo toilet tissue — offers a soft, chemical-free, hypoallergenic alternative to traditional toilet paper: sustainable, fast growing, renewable, septic safe and plumbing friendly.`,
+    placeholder: `Finally Results is an eco-conscious company focused on producing sustainable...`,
   },
   {
     key: "bamboo.about.hero-image",
-    label: "About Hero Image",
-    description: "Image for the about page",
+    label: "About Hero Photo",
+    description:
+      "Optional — layers as a small tilted photo card into the corner of the Detroit skyline illustration. Leave blank to show the illustration alone.",
     type: "image",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    defaultValue: "",
   },
 ];
 
@@ -77,7 +70,7 @@ const aboutMissionData: TemplateField[] = [
   {
     key: "bamboo.about.mission-image",
     label: "Why We Started Image",
-    description: "Image for the Why We Started section",
+    description: "Photo shown in a tilted photo-frame beside the founder story",
     type: "image",
     page: "about",
     group: "about.mission",
@@ -87,17 +80,41 @@ const aboutMissionData: TemplateField[] = [
   {
     key: "bamboo.about.mission-paragraph",
     label: "Why We Started Text",
-    description: "Text for the Why We Started section",
+    description:
+      "The founder story. Both paragraphs render together, separated by a blank line.",
     type: "textarea",
     page: "about",
     group: "about.mission",
     gridColumn: "col-span-full",
-    placeholder: `We started our business with a simple belief...`,
-    defaultValue: `We started Finally Results LLC with a question that wouldn't go away: why do the most basic products in our homes have to be the most wasteful? Traditional toilet paper relies on virgin wood pulp from forests that take decades to regrow. We knew there had to be a better way.
-  
-  Bamboo was our answer. As one of the fastest-growing plants on Earth, it can be harvested repeatedly without replanting. It's naturally antibacterial, incredibly soft, and requires no pesticides. When we discovered how remarkable this material was, we built our entire company around it.
-  
-  Today, every product we make is 100% bamboo, tree-free, septic-safe, and hypoallergenic -- delivering superior absorbency in recycled, plastic-free packaging.`,
+    placeholder: `Finally Results LLC was founded from a desire to create a healthier, more sustainable everyday product...`,
+    defaultValue: `Finally Results LLC was founded from a desire to create a healthier, more sustainable everyday product while building a business that creates lasting economic opportunities. I recognized that toilet tissue is a household essential used every day, yet many traditional products contribute to deforestation and contain unnecessary chemicals. I wanted to offer families a better alternative through bamboo toilet tissue that is soft, durable, biodegradable, septic safe, and made from a rapidly renewable resource.
+
+My vision extends beyond selling a product. I founded Finally Results LLC to create jobs, support local communities, encourage environmentally responsible purchasing, and build generational wealth through entrepreneurship. Every package we sell represents our commitment to quality, sustainability, and making eco-friendly products more accessible to everyday families.`,
+  },
+];
+
+const aboutDetroitData: TemplateField[] = [
+  {
+    key: "bamboo.about.detroit-heading",
+    label: "Detroit Section Heading",
+    description: "Rooted in Detroit heading",
+    type: "text",
+    page: "about",
+    group: "about.detroit",
+    defaultValue: "Rooted in Detroit",
+    placeholder: "Rooted in Detroit",
+  },
+  {
+    key: "bamboo.about.detroit-body",
+    label: "Detroit Section Body",
+    description: "Detroit roots paragraph",
+    type: "textarea",
+    page: "about",
+    group: "about.detroit",
+    gridColumn: "col-span-full",
+    placeholder: `Detroit is a city that understands transformation...`,
+    defaultValue:
+      "Detroit is a city that understands transformation. From the automotive revolution to its current renaissance in art, technology, and small business, this city teaches you that great things are built through perseverance and purpose. We chose to build Finally Results here because Detroit embodies everything our brand stands for: quality craftsmanship, community, and the belief that you can always do better.",
   },
 ];
 
@@ -113,12 +130,11 @@ const aboutValuesData: TemplateField[] = [
     placeholder: "What We Stand For",
     gridColumn: "col-span-full",
   },
-
   {
     key: "bamboo.about.values-list",
     label: "Values List",
     description:
-      "Cards for the Values section (icon, title, and description per item).",
+      "Leaf-bulleted list beside the illustrated vignette (title and description per item; up to 3).",
     type: "list",
     page: "about",
     group: "about.values",
@@ -128,13 +144,14 @@ const aboutValuesData: TemplateField[] = [
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description:
+          "Stored for compatibility; the list renders a leaf mark instead.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Value heading",
       },
       {
         key: "description",
@@ -144,44 +161,7 @@ const aboutValuesData: TemplateField[] = [
       },
     ],
     minItems: 0,
-    maxItems: 4,
-  },
-];
-
-const aboutSupplierData: TemplateField[] = [
-  {
-    key: "bamboo.about.supplier-heading",
-    label: "Supplier Heading",
-    description: "Heading for the Supplier section",
-    type: "text",
-    page: "about",
-    group: "about.supplier",
-    defaultValue: "More Than a Supplier",
-    placeholder: "More Than a Supplier",
-    gridColumn: "col-span-full",
-  },
-  {
-    key: "bamboo.about.supplier-text",
-    label: "Supplier Text",
-    description: "Text for the Supplier section",
-    type: "textarea",
-    page: "about",
-    gridColumn: "col-span-full",
-    group: "about.supplier",
-    defaultValue: `At Finally Results LLC, our commitment extends beyond transactions. We take pride in providing top-notch household paper products that cater to a wide spectrum of needs -- from individual households to restaurants, hotels, schools, gas stations, local stores, and businesses of all sizes.
-  
-  We operate with the ethos of respecting every customer, valuing the relationships we build, and contributing to the collective well-being of the communities we serve. Located in the heart of Detroit, we extend our warmest welcome to you -- every customer is a member of our extended family.`,
-    placeholder: "Here, our commitment extends beyond transactions...",
-  },
-  {
-    key: "bamboo.about.supplier-image",
-    label: "Supplier Image",
-    description: "Image for the Supplier section",
-    type: "image",
-    page: "about",
-    group: "about.supplier",
-    gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    maxItems: 3,
   },
 ];
 
@@ -197,7 +177,6 @@ const aboutWhyBambooData: TemplateField[] = [
     placeholder: "Why Bamboo?",
     gridColumn: "col-span-full",
   },
-
   {
     key: "bamboo.about.why-bamboo-intro",
     label: "Why Bamboo Intro",
@@ -206,11 +185,11 @@ const aboutWhyBambooData: TemplateField[] = [
     page: "about",
     group: "about.whyBamboo",
     gridColumn: "col-span-full",
-    placeholder: "Bamboo is nature's most remarkable renewable resource...",
+    placeholder:
+      "Bamboo Toilet Tissue is a sustainable alternative to traditional toilet tissue made from bamboo grass...",
     defaultValue:
-      "Bamboo is nature's most remarkable renewable resource. Here is why we chose it as the foundation for everything we make.",
+      "Bamboo Toilet Tissue is a sustainable alternative to traditional toilet tissue made from bamboo grass. Bamboo is fast growing with several benefits:",
   },
-
   {
     key: "bamboo.about.why-bamboo-facts-list",
     label: "Why Bamboo Facts List",
@@ -245,22 +224,103 @@ const aboutWhyBambooData: TemplateField[] = [
   },
 ];
 
+/// Made hideable per the "Illustrated & Alive" redesign — the new mockup folds
+/// most of this content into the Values band, so a store using that exact
+/// layout can hide this band without losing the field/data underneath it.
+const aboutSupplierData: TemplateField[] = [
+  {
+    key: "bamboo.about.supplier-heading",
+    label: "Supplier Heading",
+    description: "Heading for the More Than a Supplier prose band",
+    type: "text",
+    page: "about",
+    group: "about.supplier",
+    defaultValue: "More Than a Supplier",
+    placeholder: "More Than a Supplier",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "bamboo.about.supplier-text",
+    label: "Supplier Text",
+    description: "Text for the Supplier section",
+    type: "textarea",
+    page: "about",
+    gridColumn: "col-span-full",
+    group: "about.supplier",
+    defaultValue: `At Finally Results LLC, our commitment extends beyond transactions. We take pride in providing top-notch household paper products that cater to a wide spectrum of needs -- from individual households to restaurants, hotels, schools, gas stations, local stores, and businesses of all sizes.
+
+We operate with the ethos of respecting every customer, valuing the relationships we build, and contributing to the collective well-being of the communities we serve. Located in the heart of Detroit, we extend our warmest welcome to you -- every customer is a member of our extended family.`,
+    placeholder: "Here, our commitment extends beyond transactions...",
+  },
+  {
+    key: "bamboo.about.supplier-image",
+    label: "Supplier Image (unused)",
+    description:
+      "Kept for saved-data compatibility. The redesigned Supplier section is a text-only prose band and does not render an image.",
+    type: "image",
+    page: "about",
+    group: "about.supplier",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+];
+
+/// NEW group — "Our Label", hideable. Purely factual: the wreath and verse are
+/// literally printed on every pack. No new claims.
+const aboutLabelData: TemplateField[] = [
+  {
+    key: "bamboo.about.label-heading",
+    label: "Label Section Heading",
+    description: "Heading for the Our Label section",
+    type: "text",
+    page: "about",
+    group: "about.label",
+    defaultValue: "Our Label",
+    placeholder: "Our Label",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "bamboo.about.label-body",
+    label: "Label Section Body",
+    description: "Factual description of what's printed on the label",
+    type: "textarea",
+    page: "about",
+    group: "about.label",
+    gridColumn: "col-span-full",
+    placeholder:
+      "Every pack carries our label — a script wordmark, a bamboo wreath...",
+    defaultValue:
+      "Every pack carries our label — a script wordmark, a bamboo wreath drawn around the words Bamboo Toilet Tissue, and Hebrews 11:1–6 set in the margin. It's printed on every 4-pack, and it's where every illustration on this site comes from.",
+  },
+  {
+    key: "bamboo.about.label-image",
+    label: "Label Photo",
+    description:
+      "Photo of the printed label. Leave blank to show the wreath mark instead.",
+    type: "image",
+    page: "about",
+    group: "about.label",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+];
+
 const aboutNationwideData: TemplateField[] = [
   {
     key: "bamboo.about.nationwide-heading",
     label: "Nationwide Distribution Heading",
-    description: "Heading for the Nationwide Distribution section",
+    description: "Heading for the reach band",
     type: "text",
     page: "about",
     group: "about.nationwide",
     gridColumn: "col-span-full",
-    defaultValue: "Nationwide Reach, Personal Touch",
-    placeholder: "Nationwide Reach, Personal Touch",
+    defaultValue: "From Detroit to Your Door",
+    placeholder: "From Detroit to Your Door",
   },
   {
     key: "bamboo.about.nationwide-text",
     label: "Nationwide Distribution Text",
-    description: "Text for the Nationwide Distribution section",
+    description: "Intro text above the three reach stations",
     type: "textarea",
     page: "about",
     group: "about.nationwide",
@@ -270,20 +330,20 @@ const aboutNationwideData: TemplateField[] = [
   },
   {
     key: "bamboo.about.nationwide-image",
-    label: "Nationwide Distribution Image",
-    description: "Image for the Nationwide Distribution section",
+    label: "Nationwide Distribution Image (unused)",
+    description:
+      "Kept for saved-data compatibility. The redesigned reach band uses fixed illustrated discs instead of a photo.",
     type: "image",
     page: "about",
     group: "about.nationwide",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
   },
-
   {
     key: "bamboo.about.nationwide-facts-list",
     label: "Nationwide Distribution Facts List",
     description:
-      "Cards for the Nationwide Distribution section (icon, title, and description per item).",
+      "The three reach stations (title and description per item). Each renders under a fixed illustrated disc (truck / storefront / shield), in order.",
     type: "list",
     page: "about",
     group: "about.nationwide",
@@ -293,13 +353,14 @@ const aboutNationwideData: TemplateField[] = [
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description:
+          "Stored for compatibility; the station renders a fixed illustrated disc instead.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Station heading",
       },
       {
         key: "description",
@@ -309,32 +370,7 @@ const aboutNationwideData: TemplateField[] = [
       },
     ],
     minItems: 0,
-    maxItems: 4,
-  },
-];
-
-const aboutDetroitData: TemplateField[] = [
-  {
-    key: "bamboo.about.detroit-heading",
-    label: "Detroit Section Heading",
-    description: "Rooted in Detroit heading",
-    type: "text",
-    page: "about",
-    group: "about.detroit",
-    defaultValue: "Rooted in Detroit",
-    placeholder: "Rooted in Detroit",
-  },
-  {
-    key: "bamboo.about.detroit-body",
-    label: "Detroit Section Body",
-    description: "Detroit roots paragraph",
-    type: "textarea",
-    page: "about",
-    group: "about.detroit",
-    gridColumn: "col-span-full",
-    placeholder: `Detroit is a city that understands transformation...`,
-    defaultValue:
-      "Detroit is a city that understands transformation. From the automotive revolution to its current renaissance in art, technology, and small business, this city teaches you that great things are built through perseverance and purpose. We chose to build Finally Results here because Detroit embodies everything our brand stands for: quality craftsmanship, community, and the belief that you can always do better.",
+    maxItems: 3,
   },
 ];
 
@@ -383,7 +419,6 @@ const aboutCTAData: TemplateField[] = [
     defaultValue: "/shop",
     placeholder: "/shop",
   },
-
   {
     key: "bamboo.about.cta-secondary-button-text",
     label: "CTA Secondary Button Text",
@@ -410,14 +445,19 @@ const aboutCTAData: TemplateField[] = [
   },
 ];
 
+// Visual order on the redesigned page: hero, mission, detroit, values,
+// whyBamboo, supplier, label, nationwide, cta. (Field array order doesn't
+// have to match render order, but keeping it aligned makes the file easier
+// to scan against the page component.)
 export const aboutBambooData = [
   ...aboutHeroData,
   ...aboutMissionData,
-  ...aboutValuesData,
-  ...aboutSupplierData,
-  ...aboutWhyBambooData,
-  ...aboutNationwideData,
   ...aboutDetroitData,
+  ...aboutValuesData,
+  ...aboutWhyBambooData,
+  ...aboutSupplierData,
+  ...aboutLabelData,
+  ...aboutNationwideData,
   ...aboutCTAData,
 ];
 
@@ -431,23 +471,23 @@ export const bambooAboutFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "about.mission",
-    title: "Our Mission",
-    description: "Mission section heading and paragraphs",
+    title: "Why We Started",
+    description: "Founder story heading, photo, and paragraphs",
     icon: "🎯",
+    columns: 2,
+  },
+  {
+    id: "about.detroit",
+    title: "Rooted in Detroit",
+    description: "Detroit roots section",
+    icon: "🏙️",
     columns: 2,
   },
   {
     id: "about.values",
     title: "What We Stand For",
-    description: "Values section with three value cards",
+    description: "Leaf-bulleted values list beside the illustrated vignette",
     icon: "❤️",
-    columns: 2,
-  },
-  {
-    id: "about.supplier",
-    title: "Supplier",
-    description: "Supplier section heading and text",
-    icon: "🏪",
     columns: 2,
   },
   {
@@ -458,17 +498,24 @@ export const bambooAboutFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
-    id: "about.nationwide",
-    title: "Nationwide Distribution",
-    description: "Nationwide distribution section",
-    icon: "🗺️",
+    id: "about.supplier",
+    title: "Supplier",
+    description: "More Than a Supplier prose band (hideable)",
+    icon: "🏪",
     columns: 2,
   },
   {
-    id: "about.detroit",
-    title: "Rooted in Detroit",
-    description: "Detroit roots section",
-    icon: "🏙️",
+    id: "about.label",
+    title: "Our Label",
+    description: "The printed label — photo and factual description",
+    icon: "🏷️",
+    columns: 2,
+  },
+  {
+    id: "about.nationwide",
+    title: "Nationwide Distribution",
+    description: "From Detroit to Your Door reach band",
+    icon: "🗺️",
     columns: 2,
   },
   {
@@ -521,23 +568,24 @@ export const DEFAULT_BAMBOO_NATIONWIDE_FACTS: GenericIconRow[] = [
       "Our dedicated Detroit-based team provides responsive, knowledgeable support for every order and inquiry.",
   },
 ];
+
 export const DEFAULT_BAMBOO_WHY_BAMBOO_FACTS: GenericIconRow[] = [
   {
     icon: Sprout,
-    title: "Rapid Growth",
+    title: "Fast-Growing & Renewable",
     description:
-      "Bamboo grows up to 35 inches per day and reaches maturity in 3-5 years, compared to 20-50 years for hardwood trees.",
+      "Bamboo is one of the fastest-growing plants on Earth, growing back in 3 to 6 years from the same root once harvested — no replanting required.",
   },
   {
-    icon: TreePine,
-    title: "No Replanting Needed",
+    icon: Leaf,
+    title: "Eco-Friendly",
     description:
-      "Bamboo regenerates from its own root system after harvest, which means the soil stays intact and carbon continues to be sequestered.",
+      "Because bamboo regrows from its existing root system, it causes far less damage and erosion to the ecosystem, and it sequesters large amounts of carbon.",
   },
   {
-    icon: Droplets,
-    title: "Water Efficient",
+    icon: Feather,
+    title: "Soft, Strong & Gentle",
     description:
-      "Bamboo requires significantly less water than traditional tree farming and thrives without pesticides or fertilizers.",
+      "Bamboo makes paper goods that are soft yet strong and gentle on the skin — a sustainable alternative to traditional toilet paper without compromise.",
   },
 ];

@@ -1,18 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
 
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
-import { Button } from "~/components/ui/button";
-import {
-  FadeIn,
-  PageTransition,
-  StaggerContainer,
-  StaggerItem,
-} from "~/components/page-animations";
+import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 
+import { BambooGlyph } from "../shared/bamboo-glyph";
+import { BambooReveal, BambooRevealGroup } from "../shared/bamboo-reveal";
 import { BambooCartItem } from "./bamboo-cart-item";
 import { BambooCartSummary } from "./bamboo-cart-summary";
 
@@ -30,73 +25,110 @@ type Props = {
 };
 
 export function BambooCartContents({ business }: Props) {
-  const { items } = useCart();
+  const { items, isHydrated } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
+
+  // Hydration guard — cart state loads from localStorage client-side, so the
+  // very first render never knows the real item count. Render a neutral,
+  // motionless placeholder until then rather than flashing empty→filled (or
+  // filled→empty) on every load. `animate-pulse` is caught by the global
+  // `.bamboo` reduced-motion rule (globals.css ~line 219), so no extra work
+  // is needed for that.
+  if (!isHydrated) {
+    return (
+      <section
+        aria-hidden="true"
+        className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20"
+      >
+        <div className="mb-10 h-11 w-56 animate-pulse rounded-xl bg-[var(--bamboo-sage)]" />
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <div className="flex flex-1 flex-col gap-4">
+            {[0, 1].map((i) => (
+              <div
+                key={i}
+                className="h-28 animate-pulse rounded-[20px] bg-[var(--bamboo-roll)] ring-2 ring-[var(--bamboo-outline)]"
+              />
+            ))}
+          </div>
+          <div className="w-full shrink-0 lg:w-80">
+            <div className="h-64 animate-pulse rounded-[20px] bg-[var(--bamboo-roll)] ring-2 ring-[var(--bamboo-outline)]" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (items.length === 0) {
     return (
-      <PageTransition>
-        <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8">
-          <FadeIn direction="up">
-            <div className="bg-secondary mx-auto flex size-20 items-center justify-center rounded-full">
-              <ShoppingBag
-                className="text-muted-foreground size-8"
-                aria-hidden="true"
-              />
-            </div>
-            <h1 className="text-foreground font-heading mt-6 text-2xl font-bold">
-              Your cart is empty
-            </h1>
-            <p className="text-muted-foreground mx-auto mt-2 max-w-md">
-              Looks like you have not added anything to your cart yet. Explore
-              our collection of premium products.
-            </p>
-            <Button className="mt-8" size="lg" asChild>
-              <Link href="/shop">Continue Shopping</Link>
-            </Button>
-          </FadeIn>
-        </section>
-      </PageTransition>
+      <section className="mx-auto flex max-w-3xl flex-col items-center px-4 py-20 text-center lg:px-8 lg:py-28">
+        <BambooReveal>
+          {/* Illustrated roll — the empty cart's one decorative moment. */}
+          <div className="relative mx-auto mb-8 w-[142px]">
+            <BambooGlyph id="s-roll-front" className="w-full" />
+            <span
+              className="bamboo-shd"
+              style={{ "--sw": "78%", "--sh": "12%" } as React.CSSProperties}
+            />
+          </div>
+          <h1 className="font-heading text-[clamp(2rem,4vw,2.9rem)] leading-[1.08] font-bold tracking-tight text-[var(--bamboo-pine)]">
+            Your cart is empty
+          </h1>
+          <p className="mx-auto mt-4 max-w-md text-[1.05rem] leading-relaxed text-[var(--bamboo-ink-soft)]">
+            Nothing in it yet. Everything we make is luxuriously soft, tree-free
+            bamboo paper, crafted in Detroit, Michigan.
+          </p>
+          <Link
+            href="/shop"
+            className={cn("bamboo-btn", "bamboo-btn-primary", "mt-9")}
+          >
+            Continue Shopping
+          </Link>
+        </BambooReveal>
+      </section>
     );
   }
 
   return (
-    <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-        <FadeIn direction="up">
-          <h1 className="text-foreground font-heading mb-8 text-3xl font-bold tracking-tight md:text-4xl">
+    <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
+      <BambooReveal>
+        <div className="mb-10 flex items-end gap-4">
+          <h1 className="font-heading text-[clamp(2.1rem,4.4vw,3.2rem)] leading-[1.06] font-bold tracking-tight text-[var(--bamboo-pine)]">
             Your Cart
           </h1>
-        </FadeIn>
-        <div className="flex flex-col gap-8 lg:flex-row">
-          <StaggerContainer
-            className="flex flex-1 flex-col gap-4"
-            staggerDelay={0.08}
-          >
-            {items.map((item) => (
-              <StaggerItem key={item.productId}>
-                <BambooCartItem item={item} />
-              </StaggerItem>
-            ))}
-            <StaggerItem>
-              <div className="mt-2">
-                <Button variant="outline" asChild>
-                  <Link href="/shop">Continue Shopping</Link>
-                </Button>
-              </div>
-            </StaggerItem>
-          </StaggerContainer>
-          <FadeIn
-            direction="left"
-            delay={0.2}
-            className="w-full shrink-0 lg:w-80"
-          >
-            <div className="sticky top-20">
-              <BambooCartSummary shippingConfig={shippingConfig} />
-            </div>
-          </FadeIn>
+          <BambooGlyph
+            id="s-sprig"
+            className="mb-2 hidden w-[58px] shrink-0 sm:block"
+          />
         </div>
-      </section>
-    </PageTransition>
+      </BambooReveal>
+
+      <div className="flex flex-col gap-8 lg:flex-row">
+        <BambooRevealGroup className="flex flex-1 flex-col gap-4">
+          {items.map((item, i) => (
+            <div
+              key={item.productId}
+              className="bamboo-reveal-item"
+              style={{ "--i": i } as React.CSSProperties}
+            >
+              <BambooCartItem item={item} />
+            </div>
+          ))}
+          <div
+            className="bamboo-reveal-item mt-2"
+            style={{ "--i": items.length } as React.CSSProperties}
+          >
+            <Link href="/shop" className={cn("bamboo-btn", "bamboo-btn-ghost")}>
+              Continue Shopping
+            </Link>
+          </div>
+        </BambooRevealGroup>
+
+        <div className="w-full shrink-0 lg:w-80">
+          <div className="sticky top-24">
+            <BambooCartSummary shippingConfig={shippingConfig} />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

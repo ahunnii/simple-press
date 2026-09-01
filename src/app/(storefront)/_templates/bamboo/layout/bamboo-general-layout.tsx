@@ -1,28 +1,42 @@
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
+import { cn } from "~/lib/utils";
 
+import { BambooSprite } from "../shared/bamboo-sprite";
 import { BambooFooter } from "./bamboo-footer";
 import { BambooHeader } from "./bamboo-header";
 import { BambooRouteAnnouncer } from "./bamboo-route-announcer";
 
-const _inter = Inter({ subsets: ["latin"] });
-const _plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"] });
+const display = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bamboo-display",
+});
+
+const body = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-bamboo-body",
+});
+
 export function BambooLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
   return (
     <div
-      className={`${_inter.className} ${_plusJakartaSans.className} bamboo flex min-h-screen flex-col`}
+      className={cn(
+        display.variable,
+        body.variable,
+        "bamboo flex min-h-screen flex-col",
+      )}
     >
+      <BambooSprite />
+
       {/* Skip navigation — first focusable element on every page */}
-      <a
-        href="#bamboo-main-content"
-        className="bamboo-skip-link focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-9999 focus:rounded focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:outline-none"
-      >
+      <a href="#bamboo-main-content" className="bamboo-skip-link">
         Skip to main content
       </a>
+
       <BambooRouteAnnouncer />
       <BambooHeader business={business} />
       <main

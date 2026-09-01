@@ -1,42 +1,90 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { FadeIn, PageTransition } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+
+import { BambooEdge } from "./shared/bamboo-edge";
+import { BambooGlyph } from "./shared/bamboo-glyph";
+import { BambooReveal } from "./shared/bamboo-reveal";
 
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 };
+
 export function BambooGenericPage({ page }: Props) {
   return (
-    <PageTransition>
-      <section className="bg-secondary">
-        <div className="mx-auto flex max-w-7xl flex-col-reverse items-center gap-8 px-4 py-16 md:flex-row md:py-24 lg:px-8">
-          <FadeIn
-            direction="right"
-            className="flex flex-1 flex-col items-start gap-6"
+    <>
+      {/* Short sage band — CMS pages and policies get the quietest hero in
+          the system: title, excerpt, one drifting leaf, nothing else. */}
+      <section
+        className="relative flex items-center overflow-hidden"
+        style={{
+          background: "var(--bamboo-sage)",
+          marginTop: "calc(var(--bamboo-header-offset) * -1)",
+          minHeight: "min(30vh, 340px)",
+          paddingTop:
+            "calc(var(--bamboo-header-offset) + clamp(30px, 3.6vw, 52px))",
+          paddingBottom: "clamp(40px, 4.6vw, 68px)",
+        }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden="true"
+        >
+          <span
+            className="bamboo-drift"
+            style={
+              {
+                "--l": "76%",
+                "--t": "2%",
+                "--w": "26px",
+                "--dur": "18s",
+                "--dl": "-6s",
+                "--dx": "-84px",
+                "--dy": "300px",
+                "--dr": "-160deg",
+              } as React.CSSProperties
+            }
           >
-            <h1 className="text-foreground font-heading text-4xl leading-tight font-bold tracking-tight md:text-5xl">
-              <span className="text-balance">{page.title}</span>
-            </h1>
-            <p className="text-muted-foreground max-w-lg text-lg leading-relaxed">
+            <BambooGlyph id="s-leaf" />
+          </span>
+        </div>
+
+        <div className="relative mx-auto w-full max-w-[1200px] px-6">
+          <h1 className="font-heading max-w-[18ch] text-[clamp(2.1rem,4vw,3.2rem)] leading-[1.08] font-bold tracking-[-0.026em] text-balance text-[var(--bamboo-pine)]">
+            {page.title}
+          </h1>
+          {page.excerpt ? (
+            <p className="mt-4 max-w-[48ch] text-[1.06rem] leading-[1.6] text-[var(--bamboo-ink)]">
               {page.excerpt}
             </p>
-          </FadeIn>
+          ) : null}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
-        <FadeIn direction="up">
-          <div className="mx-auto max-w-4xl">
+      <BambooEdge
+        from="sage"
+        to="paper"
+        variant="b"
+        leaves={[
+          { id: "s-leaf-d", l: "21%", t: "8%", w: "26px", r: "-22deg" },
+          { id: "s-leaf-l", l: "74%", t: "4%", w: "23px", r: "10deg" },
+        ]}
+      />
+
+      <section className="pt-[clamp(30px,3.6vw,54px)] pb-[clamp(56px,6vw,96px)]">
+        <div className="mx-auto w-full max-w-[1200px] px-6">
+          <BambooReveal className="mx-auto max-w-[760px]">
             <TiptapRenderer
               content={page.content as TiptapJSON}
-              className="prose prose-lg prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-primary prose-pre:bg-secondary prose-pre:border prose-pre:border-border prose-li:text-foreground/80 prose-blockquote:text-foreground/70 prose-blockquote:border-primary/40 max-w-none"
+              className="bamboo-prose"
             />
             <PlatformPolicyNotice slug={page.slug} />
-          </div>
-        </FadeIn>
+          </BambooReveal>
+        </div>
       </section>
-    </PageTransition>
+
+      <BambooEdge from="paper" to="pine" variant="c" />
+    </>
   );
 }

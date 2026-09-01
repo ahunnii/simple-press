@@ -89,42 +89,117 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ── Bamboo — "Illustrated & Alive" design tokens. ───────────────────────────
+   Scoped to .bamboo so they never bleed into other templates. Two tiers:
+   Layer A = brand surface tokens (text/backgrounds/buttons, always consumed
+   via var(--bamboo-*)); Layer A2 = --bamboo-ill-* illustration sub-palette,
+   used ONLY as SVG fills inside shared/bamboo-sprite.tsx, never for text or
+   surfaces. Layer B bridges Layer A onto the shadcn variables so pre-redesign
+   page components (replaced template-wave by template-wave) keep rendering
+   correctly until they're rebuilt. Authority: docs/templates/bamboo/design.md */
+
 .bamboo {
-  --background: oklch(0.98 0.005 90);
-  --foreground: oklch(0.2 0.02 50);
-  --card: oklch(0.99 0.003 90);
-  --card-foreground: oklch(0.2 0.02 50);
-  --popover: oklch(0.99 0.003 90);
-  --popover-foreground: oklch(0.2 0.02 50);
-  --primary: oklch(0.35 0.08 160);
-  --primary-foreground: oklch(0.97 0.01 90);
-  --secondary: oklch(0.92 0.03 85);
-  --secondary-foreground: oklch(0.25 0.02 50);
-  --muted: oklch(0.94 0.02 140);
-  --muted-foreground: oklch(0.45 0.03 50);
-  --accent: oklch(0.78 0.1 85);
-  --accent-foreground: oklch(0.2 0.02 50);
-  --destructive: oklch(0.55 0.15 30);
-  --destructive-foreground: oklch(0.97 0.01 90);
-  --border: oklch(0.9 0.02 90);
-  --input: oklch(0.9 0.02 90);
-  --ring: oklch(0.45 0.08 160);
-  --chart-1: oklch(0.35 0.08 160);
-  --chart-2: oklch(0.78 0.1 85);
-  --chart-3: oklch(0.55 0.06 160);
-  --chart-4: oklch(0.65 0.08 85);
-  --chart-5: oklch(0.45 0.06 140);
-  --radius: 0.5rem;
-  --sidebar: oklch(0.97 0.005 90);
-  --sidebar-foreground: oklch(0.2 0.02 50);
-  --sidebar-primary: oklch(0.35 0.08 160);
-  --sidebar-primary-foreground: oklch(0.97 0.01 90);
-  --sidebar-accent: oklch(0.92 0.03 85);
-  --sidebar-accent-foreground: oklch(0.25 0.02 50);
-  --sidebar-border: oklch(0.9 0.02 90);
-  --sidebar-ring: oklch(0.45 0.08 160);
-  --font-sans: "Inter", "Inter Fallback";
-  --font-heading: "Plus Jakarta Sans", "Inter Fallback";
+  /* Layer A — brand tokens */
+  --bamboo-sage: #cfe0b4;
+  --bamboo-sage-deep: #b7cf96;
+  --bamboo-pine: #2c5234;
+  --bamboo-pine-dark: #22412a;
+  --bamboo-paper: #fbf9f2;
+  --bamboo-roll: #ffffff;
+  --bamboo-terracotta: #c4633c;
+  /* Derived AA accent for SMALL text on paper (terracotta itself measures
+     3.836:1 on paper — ok at >=18px bold, fails for small text). Verified
+     with a WCAG 2.1 relative-luminance node script: contrast(#9C4B2A,
+     #FBF9F2) = 5.772:1 against --bamboo-paper — comfortably clears the
+     4.5:1 AA floor. */
+  --bamboo-terracotta-deep: #9c4b2a;
+  --bamboo-core-tan: #b98a5a;
+  --bamboo-ink: #233324;
+  --bamboo-ink-soft: #41573f;
+  --bamboo-muted: #5a6b57;
+  --bamboo-cream: #f2efe4;
+  --bamboo-outline: #e3e1d4;
+
+  /* Layer A2 — illustration sub-palette (SVG fills only; shared/bamboo-sprite.tsx) */
+  --bamboo-ill-leaf-mid: #5e9c50;
+  --bamboo-ill-leaf-dark: #3f7a3e;
+  --bamboo-ill-leaf-light: #79b163;
+  --bamboo-ill-leaf-pale: #c2d89a;
+  --bamboo-ill-stem: #7c9b4c;
+  --bamboo-ill-moss: #9cbb6c;
+  --bamboo-ill-culm: #d3b375;
+  --bamboo-ill-culm-deep: #ae8a50;
+  --bamboo-ill-culm-hi: #e8d3a2;
+  --bamboo-ill-pot: #c97b4f;
+  --bamboo-ill-pot-deep: #b4653c;
+  --bamboo-ill-soil: #5c4632;
+  --bamboo-ill-tube: #d9c29a;
+  --bamboo-ill-tube-deep: #8a6f4a;
+  --bamboo-ill-tube-shadow: #6e573a;
+  --bamboo-ill-roll-shade: #ecebe3;
+  --bamboo-ill-wrap-sheen: #f0efe7;
+  --bamboo-ill-wreath-base: #fbfaf4;
+  --bamboo-ill-badge: #35603c;
+  /* Ground-contact shadow as an RGB triplet (not a color) so each caller picks
+     its own alpha: rgb(var(--bamboo-ill-ground-shadow-rgb) / .34). */
+  --bamboo-ill-ground-shadow-rgb: 47 77 45;
+
+  /* Shape, shadow, motion, rhythm */
+  --radius: 0.75rem;
+  --bamboo-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --bamboo-soft: 0 18px 40px -24px color-mix(in srgb, var(--bamboo-ink) 42%, transparent);
+  --bamboo-soft-lg: 0 30px 64px -32px color-mix(in srgb, var(--bamboo-ink) 50%, transparent);
+  --bamboo-sp: clamp(76px, 8vw, 132px);
+  /* Approx rendered header height (logo + vertical padding). Homepage-only
+     full-bleed heroes pull up under the transparent header by this amount —
+     see bamboo-header.tsx and the F1 build report for the exact convention. */
+  --bamboo-header-offset: 82px;
+
+  /* Fonts — mapped to the next/font variables loaded in bamboo-general-layout.tsx */
+  --font-sans:
+    var(--font-bamboo-body), "DM Sans", "Helvetica Neue", Helvetica, Arial,
+    system-ui, sans-serif;
+  --font-heading:
+    var(--font-bamboo-display), "Bricolage Grotesque", "Trebuchet MS",
+    "Segoe UI", system-ui, sans-serif;
+
+  /* Layer B — shadcn bridge, kept live so old page components (replaced
+     wave-by-wave) stay correctly themed until they're rebuilt. */
+  --background: var(--bamboo-paper);
+  --foreground: var(--bamboo-ink);
+  --card: var(--bamboo-roll);
+  --card-foreground: var(--bamboo-ink);
+  --popover: var(--bamboo-roll);
+  --popover-foreground: var(--bamboo-ink);
+  --primary: var(--bamboo-pine);
+  --primary-foreground: var(--bamboo-cream);
+  --secondary: var(--bamboo-sage);
+  --secondary-foreground: var(--bamboo-pine);
+  --muted: color-mix(in srgb, var(--bamboo-sage) 35%, var(--bamboo-paper));
+  --muted-foreground: var(--bamboo-muted);
+  --accent: var(--bamboo-sage-deep);
+  --accent-foreground: var(--bamboo-pine);
+  --destructive: oklch(0.55 0.18 25);
+  --destructive-foreground: var(--bamboo-cream);
+  --border: var(--bamboo-outline);
+  --input: var(--bamboo-outline);
+  --ring: var(--bamboo-pine);
+  --chart-1: var(--bamboo-pine);
+  --chart-2: var(--bamboo-terracotta-deep);
+  --chart-3: var(--bamboo-sage-deep);
+  --chart-4: var(--bamboo-core-tan);
+  --chart-5: var(--bamboo-ink-soft);
+  --sidebar: var(--bamboo-paper);
+  --sidebar-foreground: var(--bamboo-ink);
+  --sidebar-primary: var(--bamboo-pine);
+  --sidebar-primary-foreground: var(--bamboo-cream);
+  --sidebar-accent: var(--bamboo-sage);
+  --sidebar-accent-foreground: var(--bamboo-pine);
+  --sidebar-border: var(--bamboo-outline);
+  --sidebar-ring: var(--bamboo-pine);
+
+  background: var(--bamboo-paper);
+  color: var(--bamboo-ink);
 }
 
 /* ─── Bamboo template — accessibility enhancements ──────────────────────────
@@ -132,8 +207,13 @@
    prefers-reduced-motion support (WCAG 2.3.3 / best practice at AA).         */
 
 .bamboo *:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: 2px solid var(--bamboo-pine);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.bamboo .on-pine *:focus-visible {
+  outline-color: var(--bamboo-cream);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -147,7 +227,10 @@
   }
 }
 
-/* ── Variant selector buttons (N-5) ── */
+/* ── Variant selector buttons (N-5) — shared with happy-bamboo, which also
+   uses the `.bamboo-variant-btn` class on its variant selector. Keep these
+   two rules functionally byte-identical for .happy-bamboo: do not rename,
+   delete, or restyle them. ── */
 .bamboo .bamboo-variant-btn[aria-disabled="true"],
 .happy-bamboo .bamboo-variant-btn[aria-disabled="true"] {
   opacity: 0.5;
@@ -158,6 +241,1462 @@
 .happy-bamboo .bamboo-variant-btn:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+/* ── Skip link ── */
+.bamboo .bamboo-skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 120;
+  background: var(--bamboo-pine);
+  color: var(--bamboo-cream);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: top 0.2s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-skip-link:focus {
+  top: 14px;
+}
+
+/* The skip link's only jump target — without this, activating it scrolls
+   #bamboo-main-content flush to the viewport top while the sticky header
+   (`--bamboo-header-offset`) still renders over the first ~82px of it. */
+.bamboo #bamboo-main-content {
+  scroll-margin-top: var(--bamboo-header-offset, 82px);
+}
+
+/* ── Ambient motion keyframes — namespaced because keyframe names are global ── */
+@keyframes bamboo-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bamboo-sway {
+  from {
+    transform: rotate(var(--a1, -1.4deg));
+  }
+  to {
+    transform: rotate(var(--a2, 1.4deg));
+  }
+}
+
+@keyframes bamboo-bob {
+  from {
+    transform: translateY(calc(var(--amp, 5px) * -1))
+      rotate(calc(var(--rot, 0deg) * -1));
+  }
+  to {
+    transform: translateY(var(--amp, 5px)) rotate(var(--rot, 0deg));
+  }
+}
+
+/* Leaves fade fully in and fully out inside their own travel, so they never
+   pop in or out against a container edge. */
+@keyframes bamboo-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.92;
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--dx, 60px) * 0.38),
+        calc(var(--dy, 460px) * 0.5),
+        0
+      )
+      rotate(calc(var(--dr, 140deg) * 0.45));
+  }
+  72% {
+    opacity: 0.92;
+  }
+  93% {
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(var(--dx, 60px), var(--dy, 460px), 0)
+      rotate(var(--dr, 140deg));
+    opacity: 0;
+  }
+}
+
+@keyframes bamboo-cue {
+  0% {
+    transform: translate(-50%, -52px) rotate(-10deg);
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-42%, 26px) rotate(24deg);
+    opacity: 0;
+  }
+}
+
+@keyframes bamboo-foot-leaf {
+  from {
+    transform: translateX(-8vw) rotate(0deg);
+  }
+  to {
+    transform: translateX(104vw) rotate(220deg);
+  }
+}
+
+@keyframes bamboo-pin-drop {
+  0% {
+    transform: translateY(-64px) scale(0.7);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(6px) scale(1.06);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-8px) scale(0.98);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ── Reveal system — armed only once useBambooReveal adds `.bamboo-js` to the
+   scope root. Without JS the class is never set, so `.bamboo-reveal` content
+   stays fully visible (progressive enhancement, no blank sections). ──
+   F2 W2.5: the HIDDEN (`:not(.in)`) state now carries opacity/transform, and
+   the revealed state pins nothing. Previously `.in` set `transform: none` at
+   a specificity (0,4,0 for the group form) that out-specified
+   `.bamboo .bamboo-card:hover` (0,3,0), silently killing hover tilt on any
+   element that was both a reveal target and a `.bamboo-card`. Now that no
+   rule here touches `transform` once `.in` is present, hover wins on its
+   own merits. Transition + `--rd`/`--i` stagger behavior is unchanged. */
+.bamboo-js .bamboo-reveal {
+  transition:
+    opacity 0.7s var(--bamboo-ease),
+    transform 0.7s var(--bamboo-ease);
+  transition-delay: var(--rd, 0ms);
+}
+
+.bamboo-js .bamboo-reveal:not(.in) {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.bamboo-js .bamboo-reveal-group .bamboo-reveal-item {
+  transition:
+    opacity 0.7s var(--bamboo-ease),
+    transform 0.7s var(--bamboo-ease);
+}
+
+.bamboo-js .bamboo-reveal-group:not(.in) .bamboo-reveal-item {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.bamboo-js .bamboo-reveal-group.in .bamboo-reveal-item {
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+/* ── Torn-leaf section divider (shared/bamboo-edge.tsx) ── */
+.bamboo .bamboo-edge {
+  display: block;
+  line-height: 0;
+  position: relative;
+  height: clamp(34px, 3.9vw, 62px);
+  margin-block: -2px;
+}
+
+.bamboo .bamboo-edge svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bamboo .bamboo-edge-leaves {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bamboo .bamboo-edge-leaves span {
+  position: absolute;
+  left: var(--l);
+  top: var(--t, 20%);
+  width: var(--w, 26px);
+  transform: rotate(var(--r, 0deg));
+}
+
+.bamboo .bamboo-edge-leaves svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ── Hero still-life scene primitives (the composition itself is the
+   homepage agent's job next wave — these are the shared mechanics) ── */
+.bamboo .bamboo-el {
+  position: absolute;
+  left: var(--l, 50%);
+  top: var(--t, auto);
+  width: var(--w, 120px);
+  display: block;
+  animation: bamboo-pop-in 0.72s var(--bamboo-ease) both var(--d, 0s);
+}
+
+.bamboo .bamboo-el--b {
+  top: auto;
+  bottom: var(--b, 0);
+}
+
+.bamboo .bamboo-el svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bamboo .bamboo-el .bamboo-sway {
+  display: block;
+  transform-origin: 50% 100%;
+  animation: bamboo-sway var(--dur, 8s) ease-in-out infinite alternate;
+  animation-delay: var(--dl, 0s);
+}
+
+.bamboo .bamboo-el .bamboo-bob {
+  display: block;
+  transform-origin: 50% 50%;
+  animation: bamboo-bob var(--dur, 5.4s) ease-in-out infinite alternate;
+  animation-delay: var(--dl, 0s);
+}
+
+.bamboo .bamboo-el .bamboo-tilt {
+  display: block;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--rz, 0deg));
+}
+
+/* Contact shadow — every still-life element gets one so nothing floats. */
+.bamboo .bamboo-shd {
+  position: absolute;
+  left: 50%;
+  bottom: var(--sb, -5%);
+  width: var(--sw, 86%);
+  height: var(--sh, 13%);
+  transform: translateX(calc(-50% + var(--sx, 0px)));
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--bamboo-ill-ground-shadow-rgb) / 0.34),
+    rgb(var(--bamboo-ill-ground-shadow-rgb) / 0.13) 58%,
+    rgb(var(--bamboo-ill-ground-shadow-rgb) / 0)
+  );
+  pointer-events: none;
+}
+
+.bamboo .bamboo-drift {
+  position: absolute;
+  left: var(--l, 50%);
+  top: var(--t, 10%);
+  width: var(--w, 30px);
+  opacity: 0.9;
+  animation: bamboo-drift var(--dur, 15s) linear infinite;
+  animation-delay: var(--dl, 0s);
+}
+
+.bamboo .bamboo-drift svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Scene-class visibility utilities — `.bamboo-el`/`.bamboo-drift` above set
+   `display: block` unlayered, which out-specifies Tailwind's layered
+   `hidden`/responsive-hidden utilities, so pages can't mobile-hide a
+   decorative scene element with a plain `hidden md:block`. These two
+   `.bamboo`-scoped utilities give pages an explicit, always-winning escape
+   hatch instead. ── */
+@media (max-width: 900px) {
+  .bamboo .bamboo-m-hide {
+    display: none !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .bamboo .bamboo-d-hide {
+    display: none !important;
+  }
+}
+
+/* ── Scene mobile var overrides — semantic marker classes for the per-element
+   ambient custom properties (`--w`/`--l`/`--b`/`--t`/`--dx`/`--dy`) that need
+   a DIFFERENT value at ≤900px than their inline-`style` base. Page components
+   set the base vars via inline `style` (works everywhere) and add one of
+   these classes only on the elements the mockup itself re-scopes for mobile;
+   `!important` here is what actually wins over the inline value at this
+   breakpoint — mirrors the mockup's own `@media (max-width:900px)` class
+   rules verbatim (mockup-b.elided.html CSS ~line 393-403 for the homepage
+   hero; the shop/product/about/contact mockups repeat the same pattern under
+   their own page-scoped class names, ported 1:1 below with a `bamboo-`
+   prefix). Never build these overrides as runtime-composed Tailwind
+   arbitrary-property classes — Tailwind cannot see class strings assembled
+   at runtime, so it emits no CSS for them at all. ── */
+@media (max-width: 900px) {
+  /* Homepage hero (`homepage/sections/bamboo-home-hero.tsx`) — mockup
+     `.h-stalk-r` / `.c-pack` / `.c-roll-b` / `.c-pot` / `.drift.d1-3`. */
+  .bamboo .bamboo-h-stalk-r {
+    --w: 158px !important;
+    --l: 76% !important;
+    --b: -206px !important;
+  }
+  .bamboo .bamboo-c-pack {
+    --w: 55% !important;
+    --l: 0% !important;
+    --b: 4% !important;
+  }
+  .bamboo .bamboo-c-roll-b {
+    --w: 24% !important;
+    --l: 58% !important;
+    --b: 8% !important;
+  }
+  .bamboo .bamboo-c-pot {
+    --w: 22% !important;
+    --l: 69% !important;
+    --b: 6% !important;
+  }
+  .bamboo .bamboo-d1 {
+    --l: 78% !important;
+    --t: 8% !important;
+    --dy: 400px !important;
+  }
+  .bamboo .bamboo-d2 {
+    --l: 86% !important;
+    --t: 4% !important;
+    --dy: 420px !important;
+  }
+  .bamboo .bamboo-d3 {
+    --l: 14% !important;
+    --t: 24% !important;
+    --dy: 330px !important;
+    --dx: 60px !important;
+  }
+
+  /* Shop hero shelf (`shop/bamboo-shop-page.tsx`) — mockup
+     `.hero-band .drift.sd1`. */
+  .bamboo .bamboo-shop-drift-1 {
+    --l: 74% !important;
+    --t: 6% !important;
+    --dy: 250px !important;
+    --dx: 60px !important;
+  }
+
+  /* Product page reassurance band (`products/bamboo-product-page.tsx`) —
+     mockup `.sp-stalk` / `.sp-leaf-a` / `.sp-leaf-b`. */
+  .bamboo .bamboo-pdp-stalk {
+    --w: 132px !important;
+    --l: 78% !important;
+    --b: -128px !important;
+  }
+  .bamboo .bamboo-pdp-leaf-a {
+    --l: 84% !important;
+    --t: 1% !important;
+    --dx: -44px !important;
+    --dy: 230px !important;
+  }
+  .bamboo .bamboo-pdp-leaf-b {
+    --l: 93% !important;
+    --t: 6% !important;
+    --dx: -52px !important;
+    --dy: 210px !important;
+  }
+
+  /* About page hero (`about/bamboo-about-page.tsx`) — mockup `.ad1` / `.ad2`. */
+  .bamboo .bamboo-about-d1 {
+    --l: 36% !important;
+    --t: 6% !important;
+    --dy: 300px !important;
+  }
+  .bamboo .bamboo-about-d2 {
+    --l: 60% !important;
+    --t: 3% !important;
+    --dy: 320px !important;
+  }
+
+  /* Contact page hero (`contact/bamboo-contact-page.tsx`) — mockup
+     `.p-hero .el`. */
+  .bamboo .bamboo-contact-pot {
+    --w: 104px !important;
+    --l: 80% !important;
+    --b: -14px !important;
+  }
+}
+
+/* ── Buttons ── */
+.bamboo .bamboo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: 0.005em;
+  padding: 0.86rem 1.5rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  transition:
+    transform 0.28s var(--bamboo-ease),
+    background-color 0.28s,
+    box-shadow 0.28s,
+    border-color 0.28s,
+    color 0.28s;
+}
+
+.bamboo .bamboo-btn-primary {
+  background: var(--bamboo-pine);
+  color: var(--bamboo-cream);
+  box-shadow: 0 12px 26px -16px color-mix(in srgb, var(--bamboo-pine) 90%, transparent);
+}
+
+.bamboo .bamboo-btn-primary:hover {
+  background: var(--bamboo-pine-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 32px -16px color-mix(in srgb, var(--bamboo-pine) 95%, transparent);
+}
+
+.bamboo .bamboo-btn-ghost {
+  border-color: var(--bamboo-pine);
+  color: var(--bamboo-pine);
+  background: transparent;
+}
+
+.bamboo .bamboo-btn-ghost:hover {
+  background: color-mix(in srgb, var(--bamboo-pine) 9%, transparent);
+  transform: translateY(-2px);
+}
+
+.bamboo .bamboo-btn::after {
+  content: "";
+  position: absolute;
+  left: 1.5rem;
+  right: calc(100% - 1.5rem);
+  bottom: 0.55rem;
+  height: 2px;
+  background: var(--bamboo-terracotta);
+  border-radius: 2px;
+  opacity: 0;
+  transition:
+    right 0.4s var(--bamboo-ease),
+    opacity 0.25s;
+}
+
+.bamboo .bamboo-btn:hover::after,
+.bamboo .bamboo-btn:focus-visible::after {
+  right: 1.5rem;
+  opacity: 1;
+}
+
+/* ── Swipe links (inline text links + footer nav) ── */
+.bamboo .bamboo-swipe {
+  position: relative;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.bamboo .bamboo-swipe::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -4px;
+  height: 2px;
+  background: var(--bamboo-terracotta);
+  border-radius: 2px;
+  transition: right 0.38s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-swipe:hover::after,
+.bamboo .bamboo-swipe:focus-visible::after {
+  right: 0;
+}
+
+.bamboo .on-pine .bamboo-swipe::after {
+  background: var(--bamboo-sage-deep);
+}
+
+/* ── Header nav links — terracotta hover swipe; permanent pine underline on
+   the active page (data-current="true", set from usePathname). ── */
+.bamboo .bamboo-nav-link {
+  position: relative;
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--bamboo-pine);
+}
+
+.bamboo .bamboo-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -4px;
+  height: 2px;
+  background: var(--bamboo-terracotta);
+  border-radius: 2px;
+  transition:
+    right 0.38s var(--bamboo-ease),
+    background-color 0.2s;
+}
+
+.bamboo .bamboo-nav-link:hover::after,
+.bamboo .bamboo-nav-link:focus-visible::after {
+  right: 0;
+}
+
+.bamboo .bamboo-nav-link[data-current="true"] {
+  font-weight: 600;
+}
+
+.bamboo .bamboo-nav-link[data-current="true"]::after {
+  right: 0;
+  background: var(--bamboo-pine);
+}
+
+/* ── Chip / pill controls (shop toolbar, product variant picker) ── */
+.bamboo .bamboo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.05rem;
+  border-radius: 999px;
+  border: 2px solid var(--bamboo-outline);
+  background: var(--bamboo-roll);
+  color: var(--bamboo-ink-soft);
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    border-color 0.25s,
+    color 0.25s,
+    transform 0.25s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-chip:hover {
+  border-color: var(--bamboo-sage-deep);
+  transform: translateY(-1px);
+}
+
+.bamboo .bamboo-chip[aria-pressed="true"],
+.bamboo .bamboo-chip[data-active="true"] {
+  background: var(--bamboo-pine);
+  border-color: var(--bamboo-pine);
+  color: var(--bamboo-cream);
+}
+
+.bamboo .bamboo-pill-radio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.25rem;
+  padding: 0.62rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid var(--bamboo-outline);
+  background: var(--bamboo-roll);
+  color: var(--bamboo-ink);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    color 0.2s,
+    transform 0.2s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-pill-radio:hover {
+  border-color: var(--bamboo-sage-deep);
+}
+
+.bamboo .bamboo-pill-radio[data-state="checked"],
+.bamboo .bamboo-pill-radio[aria-checked="true"] {
+  background: var(--bamboo-pine);
+  border-color: var(--bamboo-pine);
+  color: var(--bamboo-cream);
+}
+
+.bamboo .bamboo-pill-radio[data-disabled="true"],
+.bamboo .bamboo-pill-radio[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  color: var(--bamboo-muted);
+}
+
+/* ── Torn-paper card shell (contact form / info panels) ── */
+.bamboo .bamboo-torn-card {
+  position: relative;
+  background: var(--bamboo-roll);
+  border-radius: 20px;
+  padding: 32px 28px 28px;
+  box-shadow: var(--bamboo-soft);
+}
+
+.bamboo .bamboo-torn-card::before {
+  content: "";
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  top: 16px;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bamboo-core-tan) 55%, transparent) 0 7px,
+    transparent 7px 15px
+  );
+  border-radius: 2px;
+}
+
+/* ── Speech-bubble testimonials ── */
+.bamboo .bamboo-bubble {
+  position: relative;
+  background: var(--bamboo-roll);
+  border-radius: 22px;
+  padding: 30px 28px 26px;
+  box-shadow: var(--bamboo-soft);
+  transition:
+    transform 0.4s var(--bamboo-ease),
+    box-shadow 0.4s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-bubble::after {
+  content: "";
+  position: absolute;
+  left: 38px;
+  bottom: -13px;
+  width: 26px;
+  height: 26px;
+  background: var(--bamboo-roll);
+  clip-path: polygon(0 0, 100% 0, 8% 100%);
+}
+
+.bamboo .bamboo-bubble[data-rotate="left"] {
+  transform: rotate(-1deg);
+}
+
+.bamboo .bamboo-bubble[data-rotate="right"] {
+  transform: rotate(1deg);
+}
+
+.bamboo .bamboo-bubble:hover {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: var(--bamboo-soft-lg);
+}
+
+/* ── Why-bamboo self-drawing timeline ── */
+.bamboo .bamboo-timeline {
+  position: relative;
+  margin-top: 60px;
+}
+
+.bamboo .bamboo-tl-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 140px;
+  pointer-events: none;
+}
+
+.bamboo .bamboo-tl-line svg {
+  display: block;
+  width: 100%;
+  height: 140px;
+}
+
+.bamboo .bamboo-tl-line.bamboo-tl-v {
+  display: none;
+}
+
+.bamboo .bamboo-tl-path {
+  stroke-dasharray: var(--len, 1200);
+  stroke-dashoffset: var(--len, 1200);
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.bamboo .bamboo-timeline.drawn .bamboo-tl-path {
+  stroke-dashoffset: 0;
+}
+
+.bamboo .bamboo-tl-node,
+.bamboo .bamboo-tl-sprig {
+  opacity: 0;
+}
+
+.bamboo .bamboo-timeline.drawn .bamboo-tl-node,
+.bamboo .bamboo-timeline.drawn .bamboo-tl-sprig {
+  animation: bamboo-pop-in 0.5s var(--bamboo-ease) both var(--nd, 0.6s);
+}
+
+.bamboo .bamboo-tl-stations {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 34px;
+}
+
+.bamboo .bamboo-station {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s var(--bamboo-ease),
+    transform 0.6s var(--bamboo-ease);
+  transition-delay: var(--sd, 0s);
+}
+
+.bamboo .bamboo-timeline.drawn .bamboo-station {
+  opacity: 1;
+  transform: none;
+}
+
+.bamboo .bamboo-disc {
+  width: var(--dw, 132px);
+  height: var(--dw, 132px);
+  border-radius: 50%;
+  background: var(--bamboo-paper);
+  border: 3px solid var(--bamboo-sage-deep);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--bamboo-ink) 60%, transparent);
+}
+
+.bamboo .bamboo-disc svg {
+  width: 66%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .bamboo .bamboo-tl-line.bamboo-tl-h {
+    display: none;
+  }
+
+  .bamboo .bamboo-tl-line.bamboo-tl-v {
+    display: block;
+    position: absolute;
+    left: 18px;
+    top: 26px;
+    bottom: 40px;
+    right: auto;
+    width: 40px;
+    height: auto;
+  }
+
+  .bamboo .bamboo-tl-line.bamboo-tl-v svg {
+    height: 100%;
+    width: 40px;
+  }
+
+  .bamboo .bamboo-tl-stations {
+    grid-template-columns: 1fr;
+    gap: 42px;
+  }
+
+  .bamboo .bamboo-station {
+    text-align: left;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .bamboo .bamboo-disc {
+    --dw: 76px !important;
+    flex: none;
+    border-width: 2px;
+  }
+}
+
+/* ── Blog / generic rich text ── */
+.bamboo .bamboo-prose {
+  color: var(--bamboo-ink);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 68ch;
+}
+
+.bamboo .bamboo-prose h2 {
+  font-family: var(--font-bamboo-display), var(--font-heading);
+  color: var(--bamboo-pine);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  margin-top: 2.4em;
+  margin-bottom: 0.5em;
+}
+
+.bamboo .bamboo-prose h3 {
+  font-family: var(--font-bamboo-display), var(--font-heading);
+  color: var(--bamboo-pine);
+  font-size: 1.3rem;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+
+.bamboo .bamboo-prose p {
+  margin-top: 1.2em;
+}
+
+.bamboo .bamboo-prose ul,
+.bamboo .bamboo-prose ol {
+  margin-top: 1.2em;
+  padding-left: 1.4em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.bamboo .bamboo-prose li::marker {
+  color: var(--bamboo-terracotta-deep);
+}
+
+.bamboo .bamboo-prose a {
+  color: var(--bamboo-terracotta-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bamboo .bamboo-prose a:hover {
+  color: var(--bamboo-pine);
+}
+
+.bamboo .bamboo-prose strong {
+  color: var(--bamboo-pine);
+  font-weight: 600;
+}
+
+.bamboo .bamboo-prose blockquote {
+  margin: 2em 0;
+  padding: 1.5em 1.75em;
+  background: var(--bamboo-sage);
+  border-radius: 18px;
+  font-style: italic;
+  color: var(--bamboo-ink-soft);
+}
+
+.bamboo .bamboo-prose img {
+  border-radius: 16px;
+  margin: 2em 0;
+  width: 100%;
+}
+
+/* ── Contact form ── */
+.bamboo .bamboo-contact-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--bamboo-ink-soft);
+}
+
+.bamboo .bamboo-contact-form input,
+.bamboo .bamboo-contact-form textarea,
+.bamboo .bamboo-contact-form select {
+  width: 100%;
+  background: var(--bamboo-paper);
+  border: 2px solid var(--bamboo-sage-deep);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.98rem;
+  color: var(--bamboo-ink);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.bamboo .bamboo-contact-form input::placeholder,
+.bamboo .bamboo-contact-form textarea::placeholder {
+  color: var(--bamboo-muted);
+}
+
+.bamboo .bamboo-contact-form input:focus-visible,
+.bamboo .bamboo-contact-form textarea:focus-visible,
+.bamboo .bamboo-contact-form select:focus-visible {
+  outline: none;
+  border-color: var(--bamboo-pine);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bamboo-pine) 18%, transparent);
+}
+
+/* ── Quantity stepper ── */
+.bamboo .bamboo-qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--bamboo-outline);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bamboo .bamboo-qty-stepper button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--bamboo-pine);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bamboo .bamboo-qty-stepper button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--bamboo-pine) 9%, transparent);
+}
+
+.bamboo .bamboo-qty-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bamboo .bamboo-qty-stepper output,
+.bamboo .bamboo-qty-stepper span {
+  min-width: 2.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--bamboo-ink);
+}
+
+/* ── Tilted photo card (location lifestyle photo, about mission/label) ── */
+.bamboo .bamboo-photo-card {
+  position: relative;
+  display: block;
+  background: var(--bamboo-roll);
+  border-radius: 14px;
+  padding: 20px 14px 14px;
+  box-shadow: var(--bamboo-soft-lg);
+}
+
+.bamboo .bamboo-photo-card::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 13px;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bamboo-core-tan) 55%, transparent) 0 7px,
+    transparent 7px 15px
+  );
+  border-radius: 2px;
+}
+
+.bamboo .bamboo-photo-card::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -12px;
+  height: 20px;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--bamboo-ink) 34%, transparent),
+    color-mix(in srgb, var(--bamboo-ink) 12%, transparent) 60%,
+    transparent
+  );
+}
+
+.bamboo .bamboo-photo-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.bamboo .bamboo-photo-card figcaption {
+  margin: 14px 0 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bamboo-pine);
+  text-align: right;
+}
+
+.bamboo .bamboo-photo-badge {
+  position: absolute;
+  top: -18px;
+  right: -16px;
+  width: 46px;
+  transform: rotate(8deg);
+  filter: drop-shadow(0 8px 12px color-mix(in srgb, var(--bamboo-ink) 40%, transparent));
+}
+
+/* ── Footer scattered illustration strip + drifting leaf ── */
+.bamboo .bamboo-foot-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 104px;
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+.bamboo .bamboo-foot-strip svg {
+  display: block;
+  width: 100%;
+  height: 104px;
+}
+
+.bamboo .bamboo-foot-leaf {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  width: 34px;
+  opacity: 0.3;
+  animation: bamboo-foot-leaf 40s linear infinite;
+}
+
+/* ── Mobile nav — paper slide-down panel under the sticky header ── */
+.bamboo .bamboo-mobile-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: var(--bamboo-paper);
+  box-shadow: 0 22px 40px -28px color-mix(in srgb, var(--bamboo-ink) 80%, transparent);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.38s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-mobile-nav[data-open="true"] {
+  max-height: 360px;
+}
+
+.bamboo .bamboo-mobile-nav-link {
+  display: block;
+  padding: 14px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--bamboo-pine) 12%, transparent);
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: var(--bamboo-pine);
+}
+
+.bamboo .bamboo-mobile-nav-sublink {
+  display: block;
+  padding: 10px 4px;
+  font-size: 0.98rem;
+  color: var(--bamboo-ink-soft);
+}
+
+/* ── Header icon buttons (cart / account / wishlist / burger) — the mockup's
+   `.cart`/`.burger` treatment, shared so every icon button reads as one
+   family. ── */
+.bamboo .bamboo-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--bamboo-pine) 28%, transparent);
+  color: var(--bamboo-pine);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    border-color 0.25s,
+    transform 0.25s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-icon-btn:hover {
+  background: color-mix(in srgb, var(--bamboo-pine) 10%, transparent);
+  border-color: var(--bamboo-pine);
+  transform: translateY(-2px);
+}
+
+.bamboo .bamboo-icon-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--bamboo-terracotta-deep);
+  color: var(--bamboo-cream);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* ── Desktop nav dropdown panel (nav items with children) ── */
+.bamboo .bamboo-nav-dropdown {
+  min-width: 180px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 1px solid var(--bamboo-outline);
+  background: var(--bamboo-roll);
+  padding-block: 6px;
+  box-shadow: var(--bamboo-soft);
+}
+
+.bamboo .bamboo-nav-dropdown-link {
+  display: block;
+  padding: 10px 18px;
+  font-size: 0.92rem;
+  color: var(--bamboo-ink-soft);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.bamboo .bamboo-nav-dropdown-link:hover,
+.bamboo .bamboo-nav-dropdown-link:focus-visible {
+  background: color-mix(in srgb, var(--bamboo-sage) 45%, transparent);
+  color: var(--bamboo-pine);
+}
+
+.bamboo .bamboo-nav-dropdown-link[data-current="true"] {
+  background: var(--bamboo-sage);
+  color: var(--bamboo-pine);
+  font-weight: 600;
+}
+
+/* ── Footer text tints ── */
+.bamboo .bamboo-foot-heading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--bamboo-cream) 70%, transparent);
+}
+
+.bamboo .bamboo-foot-tagline {
+  margin-top: 16px;
+  max-width: 34ch;
+  font-size: 0.98rem;
+  color: color-mix(in srgb, var(--bamboo-cream) 78%, transparent);
+}
+
+.bamboo .bamboo-foot-bottom {
+  position: relative;
+  margin-top: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--bamboo-cream) 18%, transparent);
+  padding-top: 24px;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--bamboo-cream) 72%, transparent);
+}
+
+/* ── Card system (featured products, shop grid, collections) — ported from
+   the mockup's `.card`/`.blob`/`.sprout` rules (mockup-b.elided.html lines
+   ~202-256). Real-product photo cards only — the mockup's illustrated
+   `.art` sample cards are NOT ported (design.md: catalog stays DB-driven,
+   those were mockup filler). ── */
+.bamboo .bamboo-card {
+  position: relative;
+  background: var(--bamboo-roll);
+  border-radius: 20px;
+  padding: 22px 22px 26px;
+  box-shadow: var(--bamboo-soft);
+  transition:
+    transform 0.4s var(--bamboo-ease),
+    box-shadow 0.4s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-card::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 13px;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bamboo-core-tan) 55%, transparent) 0 7px,
+    transparent 7px 15px
+  );
+  border-radius: 2px;
+}
+
+.bamboo .bamboo-card:hover {
+  transform: rotate(-1.5deg) translateY(-8px);
+  box-shadow: var(--bamboo-soft-lg);
+}
+
+/* Per-position hover-tilt variance, wrapper-tolerant: `.bamboo-card` may
+   itself be the grid's nth child (no wrapper — e.g. blog post cards, which
+   combine `.bamboo-card` and `.bamboo-reveal-item` on one element) or may sit
+   one level down inside a `.bamboo-reveal-item`/other wrapper div that is the
+   grid's actual nth child (e.g. collection/featured-product cards). Both
+   selector forms below target "the card that is (or is inside) the grid's
+   nth child", cycling every 3 items so the variance repeats down a long grid
+   instead of only ever touching cards #2/#3 literally. Same rotation values
+   as the mockup: −1.5° / +1.2° / −0.9°. */
+.bamboo :nth-child(3n + 2).bamboo-card:hover,
+.bamboo :nth-child(3n + 2) > .bamboo-card:hover {
+  transform: rotate(1.2deg) translateY(-8px);
+}
+
+.bamboo :nth-child(3n).bamboo-card:hover,
+.bamboo :nth-child(3n) > .bamboo-card:hover {
+  transform: rotate(-0.9deg) translateY(-8px);
+}
+
+.bamboo .bamboo-card-art {
+  position: relative;
+  height: 258px;
+  display: grid;
+  place-items: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 620px) {
+  .bamboo .bamboo-card-art {
+    height: 212px;
+  }
+}
+
+/* Each card's blob is its own shape, tint and angle — the row must not read
+   stamped. Set --bc/--br/--bw/--bh/--brad per card (the mockup varies them
+   by nth-child; page agents may instead vary them per product id). */
+.bamboo .bamboo-blob {
+  position: absolute;
+  width: var(--bw, 78%);
+  height: var(--bh, 78%);
+  background: var(--bc, var(--bamboo-sage));
+  border-radius: var(--brad, 58% 42% 47% 53% / 45% 52% 48% 55%);
+  transform: rotate(var(--br, -6deg));
+  transition: transform 0.45s var(--bamboo-ease);
+}
+
+.bamboo .bamboo-card:hover .bamboo-blob {
+  transform: rotate(var(--br, -6deg)) scale(1.09);
+}
+
+/* Default nth-child blob personalities, matching the mockup's 3-up featured
+   grid exactly (card 3's tint is a 55/45 sage/sage-deep blend via
+   color-mix, not a new hue) — override with inline --bc/--br/--bw/--bh/--brad
+   vars on any card that needs its own personality instead. */
+.bamboo .bamboo-card:nth-child(1) .bamboo-blob {
+  --bc: var(--bamboo-sage);
+  --br: -13deg;
+  --bw: 80%;
+  --bh: 76%;
+  --brad: 58% 42% 47% 53% / 45% 52% 48% 55%;
+}
+
+.bamboo .bamboo-card:nth-child(2) .bamboo-blob {
+  --bc: var(--bamboo-sage-deep);
+  --br: 9deg;
+  --bw: 74%;
+  --bh: 81%;
+  --brad: 44% 56% 62% 38% / 53% 42% 58% 47%;
+}
+
+.bamboo .bamboo-card:nth-child(3) .bamboo-blob {
+  --bc: color-mix(in srgb, var(--bamboo-sage) 55%, var(--bamboo-sage-deep) 45%);
+  --br: -3deg;
+  --bw: 79%;
+  --bh: 73%;
+  --brad: 64% 36% 39% 61% / 37% 59% 41% 63%;
+}
+
+/* Real-product photo card, in the same photo-frame language as
+   `.bamboo-photo-card` (Location band). */
+.bamboo .bamboo-card-photo {
+  position: relative;
+  width: var(--aw, 74%);
+  background: var(--bamboo-roll);
+  border-radius: 14px;
+  padding: 16px 12px 12px;
+  box-shadow: 0 16px 32px -18px color-mix(in srgb, var(--bamboo-ink) 46%, transparent);
+  transform: rotate(-3deg);
+}
+
+.bamboo .bamboo-card-photo::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 10px;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bamboo-core-tan) 55%, transparent) 0 7px,
+    transparent 7px 15px
+  );
+  border-radius: 2px;
+}
+
+.bamboo .bamboo-card-photo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  aspect-ratio: 1200 / 1011;
+  object-fit: cover;
+  object-position: 50% 42%;
+}
+
+.bamboo .bamboo-sprout {
+  position: absolute;
+  top: -4px;
+  right: 10px;
+  width: 58px;
+  opacity: 0;
+  transform-origin: 80% 100%;
+  transform: scale(0.25) rotate(-26deg);
+  transition:
+    transform 0.5s cubic-bezier(0.2, 1.35, 0.4, 1),
+    opacity 0.35s;
+}
+
+.bamboo .bamboo-card:hover .bamboo-sprout,
+.bamboo .bamboo-card:focus-within .bamboo-sprout {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+}
+
+/* The whole real-product card is one link; the card's title element carries
+   the accessible name. */
+.bamboo .bamboo-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.bamboo .bamboo-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+}
+
+.bamboo .bamboo-price {
+  margin-top: 8px;
+  font-family: var(--font-bamboo-display), var(--font-heading);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--bamboo-ink);
+}
+
+.bamboo .bamboo-card-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bamboo .bamboo-foot-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+/* ── Map treatment (Location band, Contact page) — ported from the mockup's
+   `.map`/`.pin`/`.chip` rules (mockup-b.elided.html lines ~309-326). The
+   photo-card tucked over the map reuses `.bamboo-photo-card` above. ── */
+.bamboo .bamboo-map {
+  position: relative;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: var(--bamboo-soft-lg);
+}
+
+@media (max-width: 620px) {
+  .bamboo .bamboo-map {
+    border-radius: 20px;
+  }
+}
+
+.bamboo .bamboo-map > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bamboo .bamboo-pin {
+  position: absolute;
+  left: 50%;
+  top: 27%;
+  width: 56px;
+  margin-left: -28px;
+  transform-origin: 50% 100%;
+}
+
+.bamboo .bamboo-reveal.in .bamboo-pin {
+  animation: bamboo-pin-drop 1s cubic-bezier(0.2, 1.3, 0.4, 1) both 0.25s;
+}
+
+.bamboo .bamboo-map-chip {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  background: var(--bamboo-paper);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: var(--bamboo-soft);
+  max-width: 78%;
+}
+
+.bamboo .bamboo-map-chip b {
+  display: block;
+  font-family: var(--font-bamboo-display), var(--font-heading);
+  font-weight: 700;
+  color: var(--bamboo-pine);
+  font-size: 1.02rem;
+}
+
+.bamboo .bamboo-map-chip span {
+  font-size: 0.9rem;
+  color: var(--bamboo-ink-soft);
+}
+
+/* ── Reduced motion — kills every bamboo animation/transition and forces
+   reveal / timeline / pin end states (mirrors the mockup's static mode). ── */
+@media (prefers-reduced-motion: reduce) {
+  .bamboo-js .bamboo-reveal,
+  .bamboo-js .bamboo-reveal-group .bamboo-reveal-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .bamboo .bamboo-station {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .bamboo .bamboo-tl-node,
+  .bamboo .bamboo-tl-sprig {
+    opacity: 1 !important;
+  }
+
+  .bamboo .bamboo-tl-path {
+    stroke-dashoffset: 0 !important;
+  }
+
+  .bamboo .bamboo-pin {
+    opacity: 1 !important;
+  }
 }
 
 .happy-bamboo {

@@ -1,16 +1,16 @@
 "use client";
 
 import { SecuritySettingsCards } from "~/components/account/security-settings-cards";
-import { PageTransition } from "~/components/page-animations";
 
 import { BambooAccountLayout } from "./bamboo-account-layout";
 
+/** See `bamboo-account-settings-page.tsx` — same bridge-token contract. */
 export function BambooAccountSecurityPage() {
   return (
-    <PageTransition>
-      <BambooAccountLayout heading="Security">
+    <BambooAccountLayout heading="Security">
+      <div className="flex flex-col gap-6">
         <SecuritySettingsCards />
-      </BambooAccountLayout>
-    </PageTransition>
+      </div>
+    </BambooAccountLayout>
   );
 }

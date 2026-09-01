@@ -27,6 +27,7 @@ import { BambooBlogPage } from "./bamboo/blog/bamboo-blog-page";
 import { BambooBlogPostPage } from "./bamboo/blog/bamboo-blog-post-page";
 import { BambooCartPage } from "./bamboo/cart-checkout/bamboo-cart-page";
 import { BambooCheckoutPage } from "./bamboo/cart-checkout/bamboo-checkout-page";
+import { BambooCheckoutUnavailable } from "./bamboo/cart-checkout/bamboo-checkout-unavailable";
 import { BambooOrderSuccessPage } from "./bamboo/cart-checkout/bamboo-order-success-page";
 import { BambooCollectionPage } from "./bamboo/collections/bamboo-collection-page";
 import { BambooCollectionsPage } from "./bamboo/collections/bamboo-collections-page";
@@ -405,6 +406,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: BambooBlogPostPage,
     CartPage: BambooCartPage,
     CheckoutPage: BambooCheckoutPage,
+    CheckoutUnavailable: BambooCheckoutUnavailable,
     OrderSuccessPage: BambooOrderSuccessPage,
     CollectionPage: BambooCollectionPage,
     CollectionsPage: BambooCollectionsPage,

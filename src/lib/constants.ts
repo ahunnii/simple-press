@@ -34,7 +34,7 @@ export const TEMPLATES = [
     id: TEMPLATE_IDS.BAMBOO,
     name: "Bamboo",
     description:
-      "Warm, nature-inspired storefront with a hero image, featured products, and trust-badge sections for eco-friendly brands",
+      "Warm illustrated storefront where the brand's own artwork comes alive — ambient motion, torn-paper edges, and hand-drawn product scenes for eco-friendly brands",
     previewImage: "/templates/bamboo-preview.png",
   },
   {

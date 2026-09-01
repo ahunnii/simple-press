@@ -25,6 +25,7 @@ import {
 } from "./collections";
 import { bambooContactData, bambooContactFieldGroups } from "./contact";
 import { bambooHomepageFieldGroups, homepageBambooData } from "./homepage";
+import { bambooLayoutData, bambooLayoutFieldGroups } from "./layout";
 import { bambooProductsData, bambooProductsFieldGroups } from "./shop";
 import {
   bambooTestimonialsData,
@@ -74,6 +75,7 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...bambooTestimonialsFieldGroups,
   ...bambooCollectionsFieldGroups,
   ...bambooProductsFieldGroups,
+  ...bambooLayoutFieldGroups,
 ];
 
 export const bambooData = {
@@ -85,6 +87,7 @@ export const bambooData = {
     ...bambooTestimonialsData,
     ...bambooCollectionsData,
     ...bambooProductsData,
+    ...bambooLayoutData,
     ...globalLocationData,
   ],
 };
