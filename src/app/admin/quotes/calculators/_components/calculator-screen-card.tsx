@@ -63,9 +63,15 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 
-import { QUESTION_TYPE_META, QUESTION_TYPE_ORDER } from "./builder-shared";
+import {
+  commonTabIds,
+  QUESTION_TYPE_META,
+  QUESTION_TYPE_ORDER,
+} from "./builder-shared";
 import { CalculatorQuestionCard } from "./calculator-question-card";
 
 type Props = {
@@ -82,12 +88,20 @@ type Props = {
   /** Total across all screens — the 30-question ceiling is global. */
   totalQuestionCount: number;
   conditionSourcesFor: (flatIndex: number) => ConditionSource[];
+  /** Every tab the calculator has. Empty when tabs are off — the "Show this screen on" control renders nothing in that case. */
+  tabs: { id: string; label: string }[];
+  /** Sets every question on THIS screen to the same tab membership. `[]` means every tab. */
+  onSetScreenTabIds: (tabIds: string[]) => void;
   openQuestionIds: string[];
   onOpenChange: (questionId: string, open: boolean) => void;
   onRemoveScreen: () => void;
   onAddQuestion: (type: QuoteQuestionType) => void;
   onRemoveQuestion: (questionIndex: number) => void;
   onMoveQuestion: (questionIndex: number, target: number | "new") => void;
+  onChangeQuestionType: (
+    questionIndex: number,
+    nextType: QuoteQuestionType,
+  ) => void;
 };
 
 /**
@@ -119,12 +133,15 @@ export function CalculatorScreenCard({
   screenOptions,
   totalQuestionCount,
   conditionSourcesFor,
+  tabs,
+  onSetScreenTabIds,
   openQuestionIds,
   onOpenChange,
   onRemoveScreen,
   onAddQuestion,
   onRemoveQuestion,
   onMoveQuestion,
+  onChangeQuestionType,
 }: Props) {
   const {
     attributes,
@@ -294,6 +311,58 @@ export function CalculatorScreenCard({
             />
           </div>
 
+          {tabs.length > 0 &&
+            (() => {
+              // Whole-screen control: an owner thinks in steps ("this screen is
+              // Commercial-only"), not per question. `commonTabIds` is the
+              // membership every question on this screen currently shares, or
+              // `"mixed"` when they disagree — which the control must show
+              // rather than silently picking one question's list and
+              // overwriting the rest on the next click.
+              const shared = commonTabIds(screen.questions);
+              const pressed = shared === "mixed" ? [] : shared;
+              const helperText =
+                shared === "mixed"
+                  ? "Mixed — questions on this screen differ; pick tabs here to set them all."
+                  : pressed.length === 0
+                    ? "All tabs"
+                    : null;
+
+              return (
+                <div className="space-y-1.5">
+                  <Label>Show this screen on</Label>
+                  <ToggleGroup
+                    type="multiple"
+                    variant="outline"
+                    value={pressed}
+                    onValueChange={(values) =>
+                      // Selecting every tab is the same as selecting none — both
+                      // mean "every tab" — so it is written as `[]`, the value
+                      // `tabApplies` and the schema already treat that way.
+                      onSetScreenTabIds(
+                        values.length >= tabs.length ? [] : values,
+                      )
+                    }
+                  >
+                    {tabs.map((tab) => (
+                      <ToggleGroupItem
+                        key={tab.id}
+                        value={tab.id}
+                        aria-label={tab.label}
+                      >
+                        {tab.label}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                  {helperText !== null && (
+                    <p className="text-muted-foreground text-xs">
+                      {helperText}
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
           <DndContext
             id={dndContextId}
             sensors={sensors}
@@ -324,11 +393,15 @@ export function CalculatorScreenCard({
                       screenOptions={screenOptions.filter(
                         (option) => option.index !== screenIndex,
                       )}
+                      tabs={tabs}
                       open={openQuestionIds.includes(question.id)}
                       onOpenChange={(next) => onOpenChange(question.id, next)}
                       onRemove={() => onRemoveQuestion(questionIndex)}
                       onMoveToScreen={(target) =>
                         onMoveQuestion(questionIndex, target)
+                      }
+                      onChangeType={(nextType) =>
+                        onChangeQuestionType(questionIndex, nextType)
                       }
                     />
                   );

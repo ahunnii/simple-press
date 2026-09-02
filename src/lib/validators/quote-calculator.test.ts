@@ -9,11 +9,14 @@ import {
   QUOTE_MAX_ANSWER_NUMBER,
   QUOTE_MAX_QUESTIONS,
   QUOTE_MAX_QUESTIONS_PER_SCREEN,
+  QUOTE_MAX_TABS,
   QUOTE_STATUS_FILTER_VALUES,
   QUOTE_STATUS_VALUES_DB,
   quoteCalculatorDefinitionSchema,
+  quoteFormulaSnapshotSchema,
   quotePreviewEstimateSchema,
   quoteSendFinalQuoteSchema,
+  quoteSubmissionAnswerSchema,
   quoteSubmitSchema,
   toPublicCalculatorDefinition,
 } from "./quote-calculator";
@@ -723,6 +726,8 @@ describe("toPublicCalculatorDefinition", () => {
       "showEstimateToCustomer",
       "showLiveEstimate",
       "showReviewStep",
+      "tabs",
+      "tabsPrompt",
       "thankYouMessage",
     ]);
     expect(publicDefinition.showEstimateToCustomer).toBe(true);
@@ -804,6 +809,7 @@ describe("toPublicCalculatorDefinition", () => {
       "options",
       "required",
       "showIf",
+      "tabIds",
       "title",
       "type",
     ]);
@@ -820,6 +826,7 @@ describe("toPublicCalculatorDefinition", () => {
       "min",
       "required",
       "showIf",
+      "tabIds",
       "title",
       "type",
       "unitLabel",
@@ -830,6 +837,7 @@ describe("toPublicCalculatorDefinition", () => {
       "id",
       "required",
       "showIf",
+      "tabIds",
       "title",
       "type",
     ]);
@@ -852,6 +860,7 @@ describe("toPublicCalculatorDefinition", () => {
       "id",
       "required",
       "showIf",
+      "tabIds",
       "title",
       "type",
     ]);
@@ -965,6 +974,24 @@ describe("quoteSubmitSchema — visitor-supplied bounds", () => {
     ).toBe(false);
   });
 
+  it("accepts an optional tabId and bounds it like every other id", () => {
+    // Absent for a calculator with no switcher; present, non-empty and
+    // bounded for one that has tabs. The server still resolves it against the
+    // stored definition — an unknown id never selects a formula.
+    expect(quoteSubmitSchema.safeParse(submission()).success).toBe(true);
+    expect(
+      quoteSubmitSchema.safeParse(submission({ tabId: "t_com" })).success,
+    ).toBe(true);
+    expect(quoteSubmitSchema.safeParse(submission({ tabId: "" })).success).toBe(
+      false,
+    );
+    expect(
+      quoteSubmitSchema.safeParse(
+        submission({ tabId: "x".repeat(QUOTE_ID_MAX_LENGTH + 1) }),
+      ).success,
+    ).toBe(false);
+  });
+
   it("accepts ids at exactly the cap, so real cuids are never turned away", () => {
     const atCap = "c".repeat(QUOTE_ID_MAX_LENGTH);
     const result = quoteSubmitSchema.safeParse(
@@ -1067,6 +1094,27 @@ describe("quotePreviewEstimateSchema", () => {
     ]);
   });
 
+  it("carries the tab the visitor is standing on", () => {
+    // Picked, not omitted: a running estimate priced against the root formula
+    // while the visitor sits on a tab that overrides it shows a number from
+    // the wrong half of the business, all the way to the last screen.
+    const parsed = quotePreviewEstimateSchema.safeParse({
+      calculatorId: "calc_1",
+      tabId: "t_com",
+      answers: [{ questionId: "q_1", number: 3 }],
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.tabId).toBe("t_com");
+    expect(
+      quotePreviewEstimateSchema.safeParse({
+        calculatorId: "calc_1",
+        tabId: "",
+        answers: [],
+      }).success,
+    ).toBe(false);
+  });
+
   it("inherits the submit path's bounds verbatim", () => {
     // Derived with `.pick()` rather than restated, so an endpoint hit on every
     // answer change cannot be looser than the one hit once per lead.
@@ -1113,6 +1161,38 @@ describe("definition defaults added after v2 shipped", () => {
     expect(parsed.showEstimateOnScreen).toBe(true);
     expect(parsed.sendConfirmationEmail).toBe(true);
     expect(parsed.distances[0]?.roadFactor).toBe(1);
+  });
+
+  it("defaults a definition with no tabs to no switcher at all", () => {
+    // Tabs are a fork in the flow. A stored calculator that predates them has
+    // no `tabs`, no `tabsPrompt` and no `tabIds` anywhere, and must come out
+    // asking every question exactly as it did before the field existed — an
+    // empty `tabIds` means "every tab", which for a calculator with none means
+    // "always shown".
+    const parsed = quoteCalculatorDefinitionSchema.parse(baseDefinition());
+    expect(parsed.tabs).toEqual([]);
+    expect(parsed.tabsPrompt).toBe("");
+    for (const screen of parsed.screens) {
+      for (const question of screen.questions) {
+        expect(question.tabIds).toEqual([]);
+      }
+    }
+  });
+
+  it("applies the tab defaults to a migrated v1 blob too", () => {
+    const parsed = parseStoredQuoteDefinition({
+      version: 1,
+      questions: [
+        { id: "q_size", type: "number", title: "Sq ft", variableName: "sqft" },
+      ],
+      distances: [],
+      formula: "sqft * 2",
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.tabs).toEqual([]);
+    expect(parsed.data.tabsPrompt).toBe("");
+    expect(parsed.data.screens[0]?.questions[0]?.tabIds).toEqual([]);
   });
 
   it("defaults date questions to unbounded", () => {
@@ -1184,6 +1264,139 @@ describe("definition defaults added after v2 shipped", () => {
         false,
       );
     }
+  });
+});
+
+// ─── Tabs ───────────────────────────────────────────────────────────────────
+
+type RawTab = Record<string, unknown>;
+
+/**
+ * The base fixture plus a Commercial/Residential switcher.
+ *
+ * Labels avoid every word the projection tests scan the serialized output for
+ * ("formula", "miles", "distances", "1.5"), because the same fixture is
+ * projected further down and a canary that matches a tab LABEL would pass for
+ * the wrong reason.
+ */
+function tabbedDefinition(tabs?: RawTab[]) {
+  return {
+    ...baseDefinition(),
+    tabsPrompt: "What kind of job is this?",
+    tabs: tabs ?? [
+      { id: "t_res", label: "Residential" },
+      { id: "t_com", label: "Commercial" },
+    ],
+  };
+}
+
+describe("quoteCalculatorDefinitionSchema — tabs (read AND write)", () => {
+  /**
+   * Every rule in this block runs on both schemas, because breaking one leaves
+   * a definition that cannot be PRICED: `computeQuote` would have to guess
+   * which of two same-id tabs the visitor meant, or evaluate an override that
+   * names a variable no question defines. That is the same class as the root
+   * formula's own rules, so it is enforced on read as well as on save.
+   */
+  it("accepts a two-tab calculator and defaults each tab's formula to null", () => {
+    const parsed = quoteCalculatorDefinitionSchema.parse(tabbedDefinition());
+    expect(parsed.tabs.map((tab) => tab.id)).toEqual(["t_res", "t_com"]);
+    expect(parsed.tabsPrompt).toBe("What kind of job is this?");
+    // No override written = price this tab with the shared root formula.
+    expect(parsed.tabs[0]?.formula).toBeNull();
+    expect(parsed.tabs[1]?.formula).toBeNull();
+  });
+
+  it("accepts a per-tab formula override", () => {
+    const parsed = quoteCalculatorDefinitionSchema.parse(
+      tabbedDefinition([
+        { id: "t_res", label: "Residential" },
+        { id: "t_com", label: "Commercial", formula: "bedrooms * 900" },
+      ]),
+    );
+    expect(parsed.tabs[1]?.formula).toBe("bedrooms * 900");
+  });
+
+  it("normalizes a blank override to null on both schemas", () => {
+    // An owner who opened the override box and typed nothing has not written
+    // an override — and a stored `""` would price that tab at nothing.
+    for (const formula of ["", "   "]) {
+      const raw = tabbedDefinition([
+        { id: "t_res", label: "Residential", formula },
+        { id: "t_com", label: "Commercial", formula: null },
+      ]);
+
+      const written = quoteCalculatorDefinitionSchema.safeParse(raw);
+      expect(written.success).toBe(true);
+      if (written.success) expect(written.data.tabs[0]?.formula).toBeNull();
+
+      const read = parseStoredQuoteDefinition(raw);
+      expect(read.success).toBe(true);
+      if (read.success) expect(read.data.tabs[0]?.formula).toBeNull();
+    }
+  });
+
+  it("rejects duplicate tab ids on both schemas, at the second tab", () => {
+    // Both `question.tabIds` and the submitted `tabId` address a tab by bare
+    // id, and a tab may override the formula — so an ambiguous id is an
+    // ambiguous PRICE, not just an ambiguous label.
+    const raw = tabbedDefinition([
+      { id: "t_res", label: "Residential" },
+      { id: "t_res", label: "Commercial" },
+    ]);
+    expect(paths(issuesFor(raw))).toContain("tabs.1.id");
+    expect(parseStoredQuoteDefinition(raw).success).toBe(false);
+  });
+
+  it("rejects an override naming a variable nothing declares, on both schemas", () => {
+    const raw = tabbedDefinition([
+      { id: "t_res", label: "Residential" },
+      { id: "t_com", label: "Commercial", formula: "crew_hours * 120" },
+    ]);
+    const issues = issuesFor(raw);
+    expect(paths(issues)).toContain("tabs.1.formula");
+    expect(issues[0]?.message).toContain('Unknown variable "crew_hours"');
+    expect(parseStoredQuoteDefinition(raw).success).toBe(false);
+  });
+
+  it("rejects an override that does not parse, at the tab's own field", () => {
+    const raw = tabbedDefinition([
+      { id: "t_res", label: "Residential" },
+      { id: "t_com", label: "Commercial", formula: "bedrooms * * 2" },
+    ]);
+    expect(paths(issuesFor(raw))).toContain("tabs.1.formula");
+    expect(parseStoredQuoteDefinition(raw).success).toBe(false);
+  });
+
+  it("still reports a broken override when the shared formula is broken too", () => {
+    // The root-formula check returns early on a syntax error; an owner
+    // mid-edit there must still see what is wrong with their tabs.
+    const issues = issuesFor({
+      ...tabbedDefinition([
+        { id: "t_res", label: "Residential" },
+        { id: "t_com", label: "Commercial", formula: "nope * 2" },
+      ]),
+      formula: "500 * * 2",
+    });
+    expect(paths(issues)).toContain("tabs.1.formula");
+    expect(paths(issues)).toContain("formula");
+  });
+
+  it("caps the tab list", () => {
+    const tooMany = Array.from({ length: QUOTE_MAX_TABS + 1 }, (_, i) => ({
+      id: `t_${i}`,
+      label: `Tab ${i}`,
+    }));
+    expect(paths(issuesFor(tabbedDefinition(tooMany)))).toContain("tabs");
+  });
+
+  it("keeps questions on the tabs they name", () => {
+    const raw = tabbedDefinition();
+    patchQuestion(raw, 0, 0, { tabIds: ["t_com"] });
+    const parsed = quoteCalculatorDefinitionSchema.parse(raw);
+    expect(parsed.screens[0]?.questions[0]?.tabIds).toEqual(["t_com"]);
+    // Untouched questions stay on every tab.
+    expect(parsed.screens[0]?.questions[1]?.tabIds).toEqual([]);
   });
 });
 
@@ -1276,6 +1489,40 @@ describe("owner-configuration rules (save time only)", () => {
       patchQuestion(raw, 0, 1, patch);
       expect(quoteCalculatorDefinitionSchema.safeParse(raw).success).toBe(true);
     }
+  });
+
+  it("refuses a lone tab — a switcher with no alternative", () => {
+    const raw = tabbedDefinition([{ id: "t_res", label: "Residential" }]);
+    const issues = issuesFor(raw);
+    expect(paths(issues)).toContain("tabs");
+    expect(issues[0]?.message).toContain("Add a second tab");
+    // …and still loads: one tab prices perfectly well, it just reads oddly.
+    expect(parseStoredQuoteDefinition(raw).success).toBe(true);
+  });
+
+  it("refuses a question limited to a tab that no longer exists", () => {
+    const raw = tabbedDefinition();
+    patchQuestion(raw, 0, 0, { tabIds: ["t_deleted"] });
+    const issues = issuesFor(raw);
+    expect(paths(issues)).toContain("screens.0.questions.0.tabIds");
+    expect(issues[0]?.message).toContain("no longer exists");
+    // A stale id computes: the question matches no selected tab, stays hidden,
+    // and its variable falls to `hiddenDefault` — the same defined behavior an
+    // unmet show-if already has. Wrong, but not broken, so the read path keeps
+    // the calculator (and the builder page that can fix it) open.
+    expect(parseStoredQuoteDefinition(raw).success).toBe(true);
+  });
+
+  it("refuses two tabs the visitor cannot tell apart", () => {
+    const raw = tabbedDefinition([
+      { id: "t_res", label: "Residential" },
+      { id: "t_res2", label: "  residential  " },
+    ]);
+    const issues = issuesFor(raw);
+    // Compared case-insensitively after the schema's trim: two buttons reading
+    // the same word are a coin flip for the visitor.
+    expect(paths(issues)).toContain("tabs.1.label");
+    expect(parseStoredQuoteDefinition(raw).success).toBe(true);
   });
 
   it("still loads a stored calculator that breaks these rules", () => {
@@ -1397,6 +1644,52 @@ describe("toPublicCalculatorDefinition — estimate delivery", () => {
   });
 });
 
+// ─── Public projection: tabs ────────────────────────────────────────────────
+
+describe("toPublicCalculatorDefinition — tabs", () => {
+  const raw = tabbedDefinition([
+    { id: "t_res", label: "Residential", description: "Homes and apartments" },
+    { id: "t_com", label: "Commercial", formula: "bedrooms * 900" },
+  ]);
+  patchQuestion(raw, 0, 0, { tabIds: ["t_com"] });
+  const projected = toPublicCalculatorDefinition(
+    quoteCalculatorDefinitionSchema.parse(raw),
+  );
+  const json = JSON.stringify(projected);
+
+  it("never serializes a per-tab formula override", () => {
+    // The whole point of `PublicQuoteTab` having no `formula` key at all: a
+    // tab's override is the pricing model for half the business, and a `null`
+    // placeholder would break this assertion while leaking nothing — leaving
+    // the guard useless on the day a real string lands there.
+    expect(json).not.toContain("formula");
+    expect(json).not.toContain("900");
+  });
+
+  it("carries id, label and description — and nothing else", () => {
+    expect(projected.tabsPrompt).toBe("What kind of job is this?");
+    expect(projected.tabs).toHaveLength(2);
+    expect(Object.keys(projected.tabs[0] ?? {}).sort()).toEqual([
+      "description",
+      "id",
+      "label",
+    ]);
+    expect(projected.tabs[0]).toEqual({
+      id: "t_res",
+      label: "Residential",
+      description: "Homes and apartments",
+    });
+    // An absent description normalizes to null rather than disappearing.
+    expect(projected.tabs[1]?.description).toBeNull();
+  });
+
+  it("carries each question's tabIds so the runner can branch", () => {
+    expect(projected.screens[0]?.questions[0]?.tabIds).toEqual(["t_com"]);
+    // Empty = every tab, which is what an untouched question means.
+    expect(projected.screens[0]?.questions[1]?.tabIds).toEqual([]);
+  });
+});
+
 // ─── Wire answers: real dates ───────────────────────────────────────────────
 
 describe("quoteWireAnswerSchema — date", () => {
@@ -1426,6 +1719,85 @@ describe("quoteWireAnswerSchema — date", () => {
     ]) {
       expect(submitWith(date).success).toBe(false);
     }
+  });
+});
+
+// ─── Stored submission snapshot ─────────────────────────────────────────────
+
+/**
+ * Both of these are read back out of JSON columns written months ago. Every
+ * field tabs added has to be OPTIONAL for the same reason: the parse in
+ * `admin/quotes/[id]/page.tsx` is all-or-nothing, so one required key turns
+ * every pre-tabs lead into a blank answer list.
+ */
+describe("quoteFormulaSnapshotSchema", () => {
+  const base = { formula: "bedrooms * 350", variables: { bedrooms: 3 } };
+
+  it("accepts a snapshot with no tab — every row stored before tabs existed", () => {
+    const parsed = quoteFormulaSnapshotSchema.safeParse(base);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.tab).toBeUndefined();
+  });
+
+  it("accepts the tab the quote was priced against", () => {
+    // Label as well as id: the tab may be renamed or deleted before the owner
+    // reads the lead, and a bare cuid answers nothing.
+    const parsed = quoteFormulaSnapshotSchema.safeParse({
+      ...base,
+      tab: { id: "t_com", label: "Commercial" },
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.tab).toEqual({ id: "t_com", label: "Commercial" });
+  });
+
+  it("rejects a tab with no id", () => {
+    expect(
+      quoteFormulaSnapshotSchema.safeParse({
+        ...base,
+        tab: { id: "", label: "Commercial" },
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("quoteSubmissionAnswerSchema — hiddenReason", () => {
+  const base = {
+    questionId: "q_stairs",
+    type: "choice" as const,
+    title: "Stairs?",
+    hidden: true,
+    display: "—",
+  };
+
+  it("accepts a hidden row with no reason", () => {
+    const parsed = quoteSubmissionAnswerSchema.safeParse(base);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.hiddenReason).toBeUndefined();
+  });
+
+  it("accepts either reason a row can be hidden", () => {
+    // "They answered no to stairs" and "this is only asked of commercial
+    // jobs" look identical on the row itself, and the owner needs to tell
+    // them apart.
+    for (const hiddenReason of ["branch", "tab"] as const) {
+      const parsed = quoteSubmissionAnswerSchema.safeParse({
+        ...base,
+        hiddenReason,
+      });
+      expect(parsed.success).toBe(true);
+      if (!parsed.success) continue;
+      expect(parsed.data.hiddenReason).toBe(hiddenReason);
+    }
+  });
+
+  it("rejects a reason outside the vocabulary", () => {
+    expect(
+      quoteSubmissionAnswerSchema.safeParse({ ...base, hiddenReason: "other" })
+        .success,
+    ).toBe(false);
   });
 });
 

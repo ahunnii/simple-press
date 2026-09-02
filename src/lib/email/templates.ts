@@ -997,8 +997,6 @@ export async function sendNewQuoteNotification(params: {
   /** Null when the formula could not be evaluated for this submission. */
   estimateCents: number | null;
   answers: Array<{ title: string; display: string; hidden: boolean }>;
-  formula: string;
-  variables: Record<string, number>;
   business: {
     name: string;
     ownerEmail: string;
@@ -1026,8 +1024,6 @@ export async function sendNewQuoteNotification(params: {
       contactPhone: params.contactPhone ?? undefined,
       estimateCents: params.estimateCents,
       answers: params.answers,
-      formula: params.formula,
-      variables: params.variables,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       adminQuoteUrl,

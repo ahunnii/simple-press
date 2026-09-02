@@ -1918,6 +1918,488 @@ describe("computeQuote — date bounds", () => {
   });
 });
 
+// ─── Tabs ───────────────────────────────────────────────────────────────────
+
+/**
+ * A calculator that forks at the top: "Commercial" prices per crew, and
+ * "Residential" per bedroom off the shared root formula.
+ *
+ * Three properties are wired in deliberately so the tests below can see them
+ * separately:
+ *
+ * - the ROOT formula names `crew` as well as `bedrooms`, so an answer smuggled
+ *   in for the other tab's question would visibly move the residential price
+ *   if it were not discarded;
+ * - the commercial tab OVERRIDES the formula, the residential one leaves it
+ *   `null` and takes the root — the two halves of the `tab.formula ??
+ *   definition.formula` rule; and
+ * - `q_freight` is tab-restricted AND behind a show-if, so "which reason is
+ *   recorded when both would hide it?" has an answer to assert.
+ */
+const TABBED = defineCalculator({
+  version: 2,
+  screens: [
+    {
+      id: "s_main",
+      title: "Your move",
+      questions: [
+        {
+          id: "q_size",
+          type: "number",
+          title: "How many square feet?",
+          variableName: "sqft",
+          min: 0,
+          max: 100000,
+        },
+        {
+          id: "q_crew",
+          type: "choice",
+          title: "How big a crew?",
+          tabIds: ["commercial"],
+          variableName: "crew",
+          hiddenDefault: 2,
+          options: [
+            { id: "small", label: "Two movers", value: 2 },
+            { id: "large", label: "Six movers", value: 6 },
+          ],
+        },
+        {
+          id: "q_freight",
+          type: "choice",
+          title: "Freight elevator?",
+          tabIds: ["commercial"],
+          showIf: { questionId: "q_crew", optionId: "large" },
+          required: false,
+          variableName: "freight",
+          hiddenDefault: 0,
+          options: [
+            { id: "no", label: "No elevator", value: 0 },
+            { id: "yes", label: "Freight elevator", value: 50 },
+          ],
+        },
+        {
+          id: "q_bedrooms",
+          type: "number",
+          title: "How many bedrooms?",
+          tabIds: ["residential"],
+          variableName: "bedrooms",
+          hiddenDefault: 1,
+          min: 0,
+          max: 10,
+        },
+      ],
+    },
+  ],
+  distances: [],
+  tabs: [
+    {
+      id: "commercial",
+      label: "Commercial",
+      formula: "sqft * 2 + crew * 100 + freight",
+    },
+    { id: "residential", label: "Residential", formula: null },
+  ],
+  tabsPrompt: "What kind of move is this?",
+  formula: "sqft + bedrooms * 350 + crew * 100",
+});
+
+const COMMERCIAL = { tabId: "commercial" } as const;
+const RESIDENTIAL = { tabId: "residential" } as const;
+
+describe("computeQuote — tabs", () => {
+  it("refuses a submission that names no tab", () => {
+    // There is no safe default. Guessing the first tab prices a commercial job
+    // at residential rates and tells nobody; dropping to "no tab" quotes the
+    // visitor for a form they did not fill in.
+    const result = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_crew", optionId: "large" },
+      ],
+      lookupZip,
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("unknown-tab");
+    expect(result.error.message).toBe("Choose an option to continue");
+    // The fork is not a question, so there is nothing to route the visitor
+    // back to by id — the runner sends them to the switcher.
+    expect(result.error.questionId).toBeUndefined();
+  });
+
+  it("refuses a tab id that matches no tab", () => {
+    // A tab deleted between page load and submit reads exactly like a crafted
+    // id, and both must be refused rather than silently priced by the root
+    // formula with every tab-restricted question dropped.
+    const result = computeQuote(
+      TABBED,
+      [{ questionId: "q_size", number: 100 }],
+      lookupZip,
+      { tabId: "storage" },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("unknown-tab");
+    expect(result.error.message).toBe("Choose an option to continue");
+  });
+
+  it("prices with the active tab's formula override", () => {
+    const result = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_crew", optionId: "large" },
+        { questionId: "q_freight", optionId: "yes" },
+      ],
+      lookupZip,
+      COMMERCIAL,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // 100*2 + 6*100 + 50 = 850, from the TAB's formula — the root formula
+    // would have said 100 + 1*350 + 600 = 1050.
+    expect(result.estimateCents).toBe(85000);
+    expect(result.formula).toBe("sqft * 2 + crew * 100 + freight");
+    expect(result.tab).toEqual({ id: "commercial", label: "Commercial" });
+  });
+
+  it("prices with the root formula when the tab overrides nothing", () => {
+    const result = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_bedrooms", number: 3 },
+      ],
+      lookupZip,
+      RESIDENTIAL,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // 100 + 3*350 + 2*100 = 1350 — `crew` is the commercial-only question's
+    // hiddenDefault, which is exactly what `hiddenDefault` is for.
+    expect(result.estimateCents).toBe(135000);
+    expect(result.formula).toBe(TABBED.formula);
+    expect(result.tab).toEqual({ id: "residential", label: "Residential" });
+  });
+
+  it("discards an answer smuggled in for the other tab's question", () => {
+    // The anti-tamper property, extended to tabs. `crew` is priced by the ROOT
+    // formula, so a crafted payload that got `q_crew` counted on the
+    // residential tab would move the price by $400 — it must come out
+    // identical to the submission that never sent it.
+    const clean = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_bedrooms", number: 3 },
+      ],
+      lookupZip,
+      RESIDENTIAL,
+    );
+    const smuggled = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_bedrooms", number: 3 },
+        { questionId: "q_crew", optionId: "large" },
+      ],
+      lookupZip,
+      RESIDENTIAL,
+    );
+    expect(clean.ok).toBe(true);
+    expect(smuggled.ok).toBe(true);
+    if (!clean.ok || !smuggled.ok) return;
+    expect(smuggled.variables.crew).toBe(2);
+    expect(smuggled.estimateCents).toBe(clean.estimateCents);
+  });
+
+  it("never fails a required question the active tab does not ask", () => {
+    // `q_bedrooms` is required, and the commercial submission below says
+    // nothing about it. A tab-hidden question is hidden, full stop — the same
+    // as one behind an unmet show-if.
+    const result = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_crew", optionId: "small" },
+      ],
+      lookupZip,
+      COMMERCIAL,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.variables.bedrooms).toBe(1);
+  });
+
+  it("records WHY each hidden row is hidden", () => {
+    const result = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_bedrooms", number: 3 },
+      ],
+      lookupZip,
+      RESIDENTIAL,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const reasons = Object.fromEntries(
+      result.answerSnapshots.map((row) => [row.questionId, row.hiddenReason]),
+    );
+    expect(reasons).toEqual({
+      q_size: undefined,
+      // Both are hidden by the TAB — `q_freight`'s show-if is unmet too, but
+      // the tab is the reason the visitor was never near it, and that is the
+      // one the owner needs six months later.
+      q_crew: "tab",
+      q_freight: "tab",
+      q_bedrooms: undefined,
+    });
+  });
+
+  it("says 'branch' for a show-if hidden on the tab that DOES ask it", () => {
+    const result = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_crew", optionId: "small" },
+      ],
+      lookupZip,
+      COMMERCIAL,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const freight = result.answerSnapshots.find(
+      (row) => row.questionId === "q_freight",
+    );
+    expect(freight).toMatchObject({ hidden: true, hiddenReason: "branch" });
+    const bedrooms = result.answerSnapshots.find(
+      (row) => row.questionId === "q_bedrooms",
+    );
+    expect(bedrooms).toMatchObject({ hidden: true, hiddenReason: "tab" });
+  });
+
+  it("leaves the hiddenReason KEY off a visible row entirely", () => {
+    // Not cosmetic: snapshot rows are stored verbatim, and every row written
+    // before tabs existed has no such key. A visible row must stay
+    // byte-identical to what it was.
+    const result = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_bedrooms", number: 3 },
+      ],
+      lookupZip,
+      RESIDENTIAL,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    for (const row of result.answerSnapshots.filter((r) => !r.hidden)) {
+      expect(Object.hasOwn(row, "hiddenReason")).toBe(false);
+    }
+    for (const row of result.answerSnapshots.filter((r) => r.hidden)) {
+      expect(Object.hasOwn(row, "hiddenReason")).toBe(true);
+    }
+  });
+});
+
+describe("computeQuote — tabs in preview mode", () => {
+  it("prices with the root formula and unrestricted questions only", () => {
+    // Lenient for the same reason a missing required answer is: the running
+    // estimate exists to update mid-flow, and blanking it out because the
+    // visitor has not clicked a tab yet is worse than a conservative number.
+    const preview = computeQuote(
+      TABBED,
+      [{ questionId: "q_size", number: 100 }],
+      lookupZip,
+      PREVIEW,
+    );
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.tab).toBeNull();
+    expect(preview.formula).toBe(TABBED.formula);
+    // Every tab-restricted question took its hiddenDefault: 100 + 1*350 +
+    // 2*100 = 650.
+    expect(preview.variables).toEqual({
+      sqft: 100,
+      bedrooms: 1,
+      crew: 2,
+      freight: 0,
+    });
+    expect(preview.estimateCents).toBe(65000);
+  });
+
+  it("marks every tab-restricted row hidden with reason 'tab'", () => {
+    const preview = computeQuote(
+      TABBED,
+      [{ questionId: "q_size", number: 100 }],
+      lookupZip,
+      PREVIEW,
+    );
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    const hidden = preview.answerSnapshots.filter((row) => row.hidden);
+    expect(hidden.map((row) => row.questionId)).toEqual([
+      "q_crew",
+      "q_freight",
+      "q_bedrooms",
+    ]);
+    expect(hidden.every((row) => row.hiddenReason === "tab")).toBe(true);
+  });
+
+  it("uses the tab's override once the visitor has picked one", () => {
+    const preview = computeQuote(
+      TABBED,
+      [
+        { questionId: "q_size", number: 100 },
+        { questionId: "q_crew", optionId: "large" },
+      ],
+      lookupZip,
+      { ...PREVIEW, ...COMMERCIAL },
+    );
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.tab).toEqual({ id: "commercial", label: "Commercial" });
+    // 100*2 + 6*100 + 0 = 800; `freight` is revealed but unanswered, so it
+    // takes its hiddenDefault exactly as an optional blank does.
+    expect(preview.estimateCents).toBe(80000);
+  });
+
+  it("ignores an unknown tab id rather than refusing", () => {
+    const preview = computeQuote(
+      TABBED,
+      [{ questionId: "q_size", number: 100 }],
+      lookupZip,
+      { ...PREVIEW, tabId: "storage" },
+    );
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.tab).toBeNull();
+    expect(preview.formula).toBe(TABBED.formula);
+  });
+});
+
+describe("computeQuote — tabs and ZIP narrowing", () => {
+  /**
+   * The distance row is declared once and priced by ONE of the two tabs. Which
+   * makes the point: "does an unrecognized ZIP fail this submission?" is a
+   * question about the ACTIVE formula, not the root one — a calculator whose
+   * flat-rate tab never reads the mileage must not turn a visitor away over a
+   * ZIP that changes no number on the tab they are standing on.
+   */
+  const TABBED_DISTANCE = defineCalculator({
+    version: 2,
+    screens: [
+      {
+        id: "s_main",
+        questions: [
+          {
+            id: "q_size",
+            type: "number",
+            title: "Square feet",
+            variableName: "sqft",
+          },
+          { id: "q_from", type: "zip", title: "Moving from", required: false },
+          { id: "q_to", type: "zip", title: "Moving to", required: false },
+        ],
+      },
+    ],
+    distances: [
+      {
+        id: "d_move",
+        variableName: "distance",
+        fromQuestionId: "q_from",
+        toQuestionId: "q_to",
+        hiddenDefault: 25,
+      },
+    ],
+    tabs: [
+      { id: "mileage", label: "By the mile", formula: null },
+      { id: "flat", label: "Flat rate", formula: "sqft * 2" },
+    ],
+    tabsPrompt: "",
+    formula: "sqft * 2 + distance * 4",
+  });
+
+  /** `q_from` is answered with a ZIP the table does not know. */
+  const UNKNOWN_ENDPOINT: QuoteWireAnswer[] = [
+    { questionId: "q_size", number: 100 },
+    { questionId: "q_from", zip: "99999" },
+    { questionId: "q_to", zip: "48602" },
+  ];
+
+  it("fails on an unknown endpoint ZIP when the ACTIVE formula reads the distance", () => {
+    const result = computeQuote(TABBED_DISTANCE, UNKNOWN_ENDPOINT, lookupZip, {
+      tabId: "mileage",
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("unknown-zip");
+    expect(result.error.questionId).toBe("q_from");
+  });
+
+  it("tolerates that same ZIP on a tab whose override never reads it", () => {
+    // Same definition, same answers, same distance row — only the tab differs.
+    const result = computeQuote(TABBED_DISTANCE, UNKNOWN_ENDPOINT, lookupZip, {
+      tabId: "flat",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.formula).toBe("sqft * 2");
+    // The variable still resolves — the snapshot is a record of what the
+    // calculator computed — it just changes no number here.
+    expect(result.variables.distance).toBe(25);
+    expect(result.estimateCents).toBe(20000);
+  });
+});
+
+describe("computeQuote — a calculator with no tabs", () => {
+  it("reports tab: null and the root formula", () => {
+    const result = computeQuote(MOVERS, MOVERS_ANSWERS, lookupZip);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.tab).toBeNull();
+    expect(result.formula).toBe(MOVERS.formula);
+  });
+
+  it("ignores a stray tabId outright rather than failing on it", () => {
+    // An older embed, or a hand-built payload. A tab-less calculator has no
+    // fork to resolve, so there is nothing for a stray id to be wrong about —
+    // and letting it reach the lookup would be a way to break a calculator
+    // that has no tabs at all.
+    const withStray = computeQuote(MOVERS, MOVERS_ANSWERS, lookupZip, {
+      tabId: "commercial",
+    });
+    const without = computeQuote(MOVERS, MOVERS_ANSWERS, lookupZip);
+    expect(withStray.ok).toBe(true);
+    expect(without.ok).toBe(true);
+    if (!withStray.ok || !without.ok) return;
+    expect(withStray.estimateCents).toBe(without.estimateCents);
+    expect(withStray.tab).toBeNull();
+    expect(withStray.formula).toBe(MOVERS.formula);
+  });
+
+  it("still records 'branch' as the reason for a show-if hidden row", () => {
+    // The pre-tabs hidden row, now carrying a reason. `"branch"` is the only
+    // one reachable without tabs, and it must not become `"tab"` just because
+    // the field exists.
+    const result = computeQuote(
+      TWO_SCREENS,
+      [{ questionId: "q_type", optionId: "local" }],
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const hidden = result.answerSnapshots.filter((row) => row.hidden);
+    expect(hidden.map((row) => row.questionId)).toEqual([
+      "q_storage",
+      "q_rush",
+    ]);
+    expect(hidden.every((row) => row.hiddenReason === "branch")).toBe(true);
+  });
+});
+
 // ─── finalizeEstimateCents ──────────────────────────────────────────────────
 
 describe("finalizeEstimateCents", () => {

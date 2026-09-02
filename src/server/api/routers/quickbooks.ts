@@ -16,6 +16,7 @@ import { fetchQboInvoice, sendQboInvoice } from "~/lib/quickbooks/invoices";
 import { issueInvoice } from "~/lib/quickbooks/issue";
 import {
   deriveInvoiceStatus,
+  QBO_DEAD_INVOICE_STATUSES,
   qboAmountToCents,
 } from "~/lib/quickbooks/mapping";
 import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
@@ -203,6 +204,23 @@ export const QBO_INVOICE_LIST_MAX_ROWS = 1000;
 function toInvoiceStatus(status: string): InvoiceStatus {
   const values: readonly string[] = QBO_INVOICE_STATUS_VALUES;
   return values.includes(status) ? (status as InvoiceStatus) : "created";
+}
+
+/**
+ * Cents → `$1,234.56`, for the one place a rejection message has to quote
+ * money back to the owner (the deposit ceiling in `createInvoice`).
+ *
+ * Deliberately not `Intl.NumberFormat` with a locale drawn from the request:
+ * these strings land in a `TRPCError.message` that the admin UI renders
+ * verbatim, and every amount in this integration is USD cents by definition
+ * (`amountCents`, `finalQuoteCents`, `qboAmountToCents`), so a locale-swapped
+ * separator would only make two numbers on the same screen disagree.
+ */
+function usd(cents: number): string {
+  return `$${(cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 /**
@@ -521,9 +539,13 @@ export const quickbooksRouter = createTRPCRouter({
       // Same reasoning as `getLeadInvoices`: prove the lead is ours before
       // stamping its id onto a money record.
       if (input.quoteSubmissionId) {
+        // `finalQuoteCents` and `estimateCents` come along for the deposit
+        // ceiling below — the same two numbers the lead card's deposit presets
+        // are computed from, read here so the server's view of what this job
+        // is worth is the one the guard enforces, not the client's.
         const submission = await ctx.db.quoteSubmission.findFirst({
           where: { id: input.quoteSubmissionId, businessId },
-          select: { id: true },
+          select: { id: true, finalQuoteCents: true, estimateCents: true },
         });
 
         if (!submission) {
@@ -565,6 +587,63 @@ export const quickbooksRouter = createTRPCRouter({
             throw new TRPCError({
               code: "PRECONDITION_FAILED",
               message: "A final invoice has already been sent for this lead.",
+            });
+          }
+        }
+
+        // Deposits, in total, can never exceed the job they're a deposit
+        // against. The lead card now offers 25/50/75/Custom presets and shows
+        // the remaining balance, but the amount still arrives here as a bare
+        // `amountCents` the client chose, so the ceiling has to be re-derived
+        // server-side or a hand-typed Custom figure (or a stale dialog opened
+        // before an earlier deposit was raised) walks straight past it.
+        //
+        // The ceiling is `finalQuoteCents` and ONLY `finalQuoteCents` — the
+        // number the owner affirmed as the price of this job. When it is null
+        // this guard does nothing, deliberately, even though `estimateCents`
+        // is right there on the row: a computed estimate is the calculator's
+        // opinion, not a quote anyone has agreed to, and an owner who takes a
+        // $500 deposit on a job the calculator guessed at $300 is doing
+        // something legitimate that a hard block would simply forbid. The
+        // dialog handles that case with an amber note instead. Same reasoning
+        // for a lead with no priced estimate at all: nothing to measure
+        // against, so nothing to refuse.
+        //
+        // Live deposits are the ones that reached QuickBooks —
+        // `QBO_DEAD_INVOICE_STATUSES` (error/voided/pending) is the SAME set
+        // `computeFinalPrefillCents` subtracts, on purpose: the balance the
+        // lead card shows as remaining and the balance this guard enforces
+        // must be the same arithmetic, or the owner is refused an amount the
+        // UI just told them was available.
+        //
+        // NOT race-proof, for exactly the reason the final guard above isn't:
+        // two simultaneous requests can both pass this read before either
+        // writes, and closing that would take a DB-level constraint. The
+        // realistic failure is a human clicking twice, which the dialog's
+        // pending state already covers on the way in.
+        const ceilingCents = submission.finalQuoteCents;
+
+        if (input.kind === "deposit" && ceilingCents !== null) {
+          const liveDeposits = await ctx.db.quickBooksInvoice.findMany({
+            where: {
+              businessId,
+              quoteSubmissionId: input.quoteSubmissionId,
+              kind: "deposit",
+              status: { notIn: [...QBO_DEAD_INVOICE_STATUSES] },
+            },
+            select: { amountCents: true },
+          });
+
+          const alreadyInvoicedCents = liveDeposits.reduce(
+            (total, deposit) => total + deposit.amountCents,
+            0,
+          );
+          const proposedTotalCents = alreadyInvoicedCents + input.amountCents;
+
+          if (proposedTotalCents > ceilingCents) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: `Deposits can't exceed the final quote: ${usd(alreadyInvoicedCents)} is already invoiced, so a ${usd(input.amountCents)} deposit would bill ${usd(proposedTotalCents)} against a ${usd(ceilingCents)} quote.`,
             });
           }
         }

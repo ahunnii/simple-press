@@ -28,6 +28,8 @@ type Props = {
   formula: string;
   /** Every variable name the questions and distances currently declare. */
   availableVariables: string[];
+  /** Whether this calculator has a tab switcher — see `CalculatorTabsCard`. */
+  hasTabs: boolean;
 };
 
 /**
@@ -43,6 +45,7 @@ export function CalculatorFormulaCard({
   form,
   formula,
   availableVariables,
+  hasTabs,
 }: Props) {
   const trimmed = formula.trim();
 
@@ -79,6 +82,12 @@ export function CalculatorFormulaCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {hasTabs && (
+          <p className="text-muted-foreground text-sm">
+            Tabs can override this formula — see the Tabs card.
+          </p>
+        )}
+
         <FormField
           control={form.control}
           name="definition.formula"

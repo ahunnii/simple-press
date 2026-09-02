@@ -181,6 +181,90 @@ const quoteShowIfField = z.preprocess((value) => {
   QuoteShowIf | null
 >;
 
+// ─── Tabs ───────────────────────────────────────────────────────────────────
+
+/**
+ * Ceiling on tabs per calculator.
+ *
+ * Tabs are a top-level FORK in the flow — "Commercial" vs "Residential" for a
+ * mover — not a category menu. Six is already more forks than a visitor will
+ * read across before giving up, and the cap doubles as the bound on a
+ * question's `tabIds` array so neither list can be used to inflate a payload.
+ */
+export const QUOTE_MAX_TABS = 6;
+
+/**
+ * A tab's optional formula override.
+ *
+ * `null` means "use the root formula" — the overwhelmingly common case, since
+ * most calculators fork on which QUESTIONS are asked rather than on how the
+ * answers are priced. An override exists for the trade whose two sides are
+ * genuinely different businesses (a commercial job billed per crew-hour, a
+ * residential one per bedroom) and would otherwise need two calculators and
+ * two embeds.
+ *
+ * "No override" reaches this field the same several ways "no condition"
+ * reaches `quoteShowIfField`: react-hook-form materializes the registered path,
+ * so a tab whose owner never opened the override box arrives as `""` or a
+ * whitespace-only string rather than as an absent key. Every one of those
+ * degenerate shapes has to normalize to `null`, because the alternative is a
+ * save that fails on `min(1)` for a field the owner never typed in — or, worse,
+ * a stored `""` that reads as "override with the empty formula" and prices
+ * every quote on that tab at nothing.
+ */
+const quoteTabFormulaField = z.preprocess(
+  (value) => {
+    if (value === null || value === undefined) return null;
+    if (typeof value === "string" && value.trim() === "") return null;
+    return value;
+  },
+  z
+    .string()
+    .trim()
+    .min(1, "A pricing formula is required")
+    .max(
+      QUOTE_FORMULA_MAX_LENGTH,
+      `Formula must be ${QUOTE_FORMULA_MAX_LENGTH} characters or fewer`,
+    )
+    .nullable()
+    .default(null),
+  // Same trade `quoteShowIfField` makes: `z.preprocess` types its input as
+  // `unknown`, which would bleed into the builder form's field types. The
+  // runtime behavior is unchanged — output is formula-or-null, and the input
+  // side keeps `undefined` so the key stays optional on a freshly built tab.
+) as unknown as z.ZodType<
+  string | null,
+  z.ZodTypeDef,
+  string | null | undefined
+>;
+
+/**
+ * One tab: a labelled entry point that decides which questions the visitor is
+ * asked and, optionally, which formula prices their answers.
+ *
+ * Kept out of `screens` for the same reason `distances` is — a tab is not a
+ * step. The visitor picks one before the flow starts and it colors every screen
+ * after it.
+ */
+export const quoteTabSchema = z.object({
+  id: z.string().min(1),
+  label: z
+    .string()
+    .trim()
+    .min(1, "Tab label is required")
+    .max(40, "Tab label must be 40 characters or fewer"),
+  description: z
+    .string()
+    .trim()
+    .max(160, "Tab description must be 160 characters or fewer")
+    .optional()
+    .nullable(),
+  /** `null` = price this tab with the calculator's shared root formula. */
+  formula: quoteTabFormulaField,
+});
+
+export type QuoteTab = z.infer<typeof quoteTabSchema>;
+
 // ─── Question ───────────────────────────────────────────────────────────────
 
 const quoteQuestionBaseShape = {
@@ -198,6 +282,21 @@ const quoteQuestionBaseShape = {
     .nullable(),
   required: z.boolean().default(true),
   showIf: quoteShowIfField.optional(),
+  /**
+   * Which tabs this question belongs to. **Empty means every tab** — including
+   * the no-tabs case, which is why the default is `[]` and why that default is
+   * a no-op on read: a calculator built before tabs existed has no `tabIds`
+   * anywhere and must keep asking every one of its questions.
+   *
+   * Listed on the QUESTION rather than the tab owning a list of question ids
+   * because a question belongs to exactly one screen already; a second
+   * ownership list would be a third place the same relationship is written
+   * down, and the three would drift the first time a question was deleted.
+   */
+  tabIds: z
+    .array(z.string().min(1))
+    .max(QUOTE_MAX_TABS, `A question can list at most ${QUOTE_MAX_TABS} tabs`)
+    .default([]),
 };
 
 const quoteOptionListShape = {
@@ -508,6 +607,31 @@ const quoteCalculatorDefinitionObjectSchema = z.object({
       `Formula must be ${QUOTE_FORMULA_MAX_LENGTH} characters or fewer`,
     ),
   /**
+   * The tab switcher, if this calculator has one.
+   *
+   * Empty is the default and the no-op: no tabs means no switcher, every
+   * question is asked, and the root `formula` prices everything — exactly what
+   * every calculator stored before this field existed does. A definition read
+   * out of the database must never grow a fork its owner did not draw, which is
+   * why this defaults to `[]` here rather than being written by
+   * `migrateQuoteDefinition`.
+   */
+  tabs: z
+    .array(quoteTabSchema)
+    .max(QUOTE_MAX_TABS, `A calculator can have at most ${QUOTE_MAX_TABS} tabs`)
+    .default([]),
+  /**
+   * The line above the switcher — "What kind of move is this?". Optional, and
+   * empty by default: the tab labels usually say it themselves, and a prompt
+   * that restates them is one more thing between the visitor and their first
+   * answer.
+   */
+  tabsPrompt: z
+    .string()
+    .trim()
+    .max(120, "Tab prompt must be 120 characters or fewer")
+    .default(""),
+  /**
    * Whether the visitor is shown the computed number at all. Off by default:
    * for most trades the point of the calculator is to start a conversation,
    * and a bare number with no context loses more leads than it wins.
@@ -606,7 +730,7 @@ function checkQuoteDefinition(
   definition: QuoteCalculatorDefinitionShape,
   ctx: z.RefinementCtx,
 ): void {
-  const { screens, distances } = definition;
+  const { screens, distances, tabs } = definition;
 
   type FlatQuestion = {
     question: QuoteQuestion;
@@ -650,6 +774,26 @@ function checkQuoteDefinition(
       });
     }
     seenScreenIds.add(screen.id);
+  });
+
+  // ── Unique tab ids ───────────────────────────────────────────────────────
+  // A question's `tabIds`, and the `tabId` the storefront posts back, both
+  // address a tab by bare id. Two tabs sharing one makes every such reference
+  // ambiguous — the visitor lands on whichever the lookup happens to find
+  // first, and since a tab may override the formula, "whichever" is a
+  // different PRICE for the same answers. That is a computation-integrity
+  // problem, not a taste one, so it lives here rather than in the
+  // owner-configuration pass.
+  const seenTabIds = new Set<string>();
+  tabs.forEach((tab, tabIndex) => {
+    if (seenTabIds.has(tab.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duplicate tab id "${tab.id}"`,
+        path: ["tabs", tabIndex, "id"],
+      });
+    }
+    seenTabIds.add(tab.id);
   });
 
   // ── Unique question ids, across ALL screens ──────────────────────────────
@@ -838,6 +982,42 @@ function checkQuoteDefinition(
     }
   });
 
+  // ── Tab formula overrides ────────────────────────────────────────────────
+  // Identical rule to the root formula below, against the same
+  // `declaredVariables` set, because it is the same failure: whichever formula
+  // the visitor's chosen tab resolves to is the one `computeQuote` evaluates,
+  // so an override that does not parse — or that names a variable no question
+  // and no distance defines — is a tab that cannot be priced at all. Reported
+  // against the tab's own field so the builder highlights that row rather than
+  // the shared formula box.
+  //
+  // Checked BEFORE the root formula on purpose: the root check returns early
+  // on a parse failure (to avoid piling "unknown variable" noise on top of a
+  // syntax error), and an owner mid-edit on the shared formula must still see
+  // what is wrong with their tabs.
+  tabs.forEach((tab, tabIndex) => {
+    if (tab.formula === null) return;
+
+    const parsedOverride = parseFormula(tab.formula);
+    if (!parsedOverride.ok) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: parsedOverride.error.message,
+        path: ["tabs", tabIndex, "formula"],
+      });
+      return;
+    }
+
+    for (const referenced of parsedOverride.variables) {
+      if (declaredVariables.has(referenced)) continue;
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Unknown variable "${referenced}" — no question or distance defines it`,
+        path: ["tabs", tabIndex, "formula"],
+      });
+    }
+  });
+
   // ── Formula ──────────────────────────────────────────────────────────────
   // Both halves report against ["formula"] so the builder shows them on the
   // one field the owner types into. `FormulaFailure.message` already carries
@@ -891,7 +1071,63 @@ function checkQuoteOwnerConfiguration(
   definition: QuoteCalculatorDefinitionShape,
   ctx: z.RefinementCtx,
 ): void {
-  const { screens, distances } = definition;
+  const { screens, distances, tabs } = definition;
+
+  // ── Tabs ───────────────────────────────────────────────────────────────
+  // Every rule in this block is save-time-only for the same reason: each one
+  // still COMPUTES. A lone tab renders as a switcher with one button and
+  // prices normally; a question pointing at a deleted tab simply never matches
+  // the selected one, so it stays hidden and its variable falls to its
+  // `hiddenDefault` — the same defined, closed behavior a question behind an
+  // unmet show-if already has; two tabs with the same label are two perfectly
+  // evaluable tabs the visitor cannot tell apart. None of them is a broken
+  // definition, so enforcing them on READ would lock an owner out of a
+  // calculator that quotes correctly — and out of the builder page that could
+  // fix it. They are caught here, where the owner is looking at the form.
+  //
+  // A single tab is the one an owner reaches by deleting the second: the
+  // switcher is now a choice with no alternative, which is worse than no
+  // switcher at all, and the fix is one click either way.
+  if (tabs.length === 1) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Add a second tab, or turn tabs off",
+      path: ["tabs"],
+    });
+  }
+
+  // Two tabs the visitor cannot tell apart. Compared case-insensitively (the
+  // schema has already trimmed): "Commercial" and "commercial" read as the
+  // same button, and the one the visitor does not want is the one they may
+  // pick.
+  const seenTabLabels = new Set<string>();
+  tabs.forEach((tab, tabIndex) => {
+    const key = tab.label.toLowerCase();
+    if (seenTabLabels.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Another tab is already called "${tab.label}" — give each tab a distinct name.`,
+        path: ["tabs", tabIndex, "label"],
+      });
+    }
+    seenTabLabels.add(key);
+  });
+
+  // A question limited to a tab that no longer exists is a question no
+  // visitor will ever be asked — invisible on every tab, including the one the
+  // owner thinks it lives on. Silent at runtime by design (that is what
+  // "hidden" means), so save time is the only moment it can be pointed out.
+  const definedTabIds = new Set(tabs.map((tab) => tab.id));
+  screens.forEach((screen, screenIndex) => {
+    screen.questions.forEach((question, questionIndex) => {
+      if (question.tabIds.every((tabId) => definedTabIds.has(tabId))) return;
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "This question is limited to a tab that no longer exists",
+        path: ["screens", screenIndex, "questions", questionIndex, "tabIds"],
+      });
+    });
+  });
 
   // ── Estimate visibility ────────────────────────────────────────────────
   // "Show the customer their estimate" + "not on screen" + "no confirmation
@@ -1031,10 +1267,11 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
  * Settings added to v2 AFTER this migration was written are deliberately not
  * listed here: they take their schema defaults, and every one of those
  * defaults is chosen to be the no-op (`showEstimateOnScreen: true`,
- * `sendConfirmationEmail: true`, `roadFactor: 1`, `minDate: "none"`). Adding a
- * field must never change what a stored calculator quotes, so a new setting
- * whose default WOULD change behavior belongs in this function with an
- * explicit v1 value — not in the schema default.
+ * `sendConfirmationEmail: true`, `roadFactor: 1`, `minDate: "none"`,
+ * `tabs: []`, `tabIds: []`). Adding a field must never change what a stored
+ * calculator quotes, so a new setting whose default WOULD change behavior
+ * belongs in this function with an explicit v1 value — not in the schema
+ * default.
  */
 export function migrateQuoteDefinition(raw: unknown): unknown {
   if (!isPlainRecord(raw)) return raw;
@@ -1102,6 +1339,24 @@ export type PublicQuoteOption = {
   icon: string | null;
 };
 
+/**
+ * A tab as the browser sees it.
+ *
+ * Note what is missing: there is no `formula` key AT ALL — not even
+ * `formula: null` for a tab that does not override. A per-tab override is the
+ * pricing model for that half of the business, exactly as sensitive as the root
+ * formula, and this type is the reason a serialized projection can be asserted
+ * never to contain the string "formula" (see the test of that name). A `null`
+ * placeholder would break that assertion while leaking nothing, which is the
+ * worst of both: the guard stops guarding, and the day someone projects the
+ * real string there is nothing left to notice it.
+ */
+export type PublicQuoteTab = {
+  id: string;
+  label: string;
+  description: string | null;
+};
+
 export type PublicQuoteQuestion = {
   id: string;
   type: QuoteQuestionType;
@@ -1109,6 +1364,13 @@ export type PublicQuoteQuestion = {
   description: string | null;
   required: boolean;
   showIf: QuoteShowIf | null;
+  /**
+   * Which tabs this question appears on; empty = all of them. Public because
+   * the runner has to decide what to render the moment a tab is picked, and it
+   * reveals nothing about price — it is the same kind of visibility metadata
+   * `showIf` already is.
+   */
+  tabIds: string[];
   options?: PublicQuoteOption[];
   min?: number | null;
   max?: number | null;
@@ -1135,6 +1397,10 @@ export type PublicQuoteCalculatorDefinition = {
    * with `flattenScreens` (`~/lib/quote/screens`).
    */
   screens: PublicQuoteScreen[];
+  /** Empty = this calculator has no switcher; render the flow directly. */
+  tabs: PublicQuoteTab[];
+  /** Empty = no heading above the switcher. */
+  tabsPrompt: string;
   showEstimateToCustomer: boolean;
   showReviewStep: boolean;
   /**
@@ -1175,6 +1441,9 @@ function toPublicQuestion(question: QuoteQuestion): PublicQuoteQuestion {
           optionId: question.showIf.optionId,
         }
       : null,
+    // Copied, not aliased: everything else here is a fresh value, and a shared
+    // array handed to a caller that mutates it would edit the definition.
+    tabIds: [...question.tabIds],
   };
 
   switch (question.type) {
@@ -1223,6 +1492,8 @@ function toPublicQuestion(question: QuoteQuestion): PublicQuoteQuestion {
  * What it strips, and why each one matters:
  *
  * - `formula` — the entire pricing model in one string.
+ * - every tab's `formula` override — the same thing again, per fork. Tabs are
+ *   projected through `PublicQuoteTab`, which has no `formula` key to fill.
  * - `distances` — reveals which location pair drives price and by how much.
  * - every option `value` — with the formula, this is the price list.
  * - every `hiddenDefault` — the "doesn't apply" price for each variable.
@@ -1248,6 +1519,15 @@ export function toPublicCalculatorDefinition(
       description: screen.description ?? null,
       questions: screen.questions.map(toPublicQuestion),
     })),
+    // Field-by-field, like everything else here — and deliberately WITHOUT a
+    // `formula` key, so a per-tab pricing override cannot ride out on a tab the
+    // runner only needed a label for. See `PublicQuoteTab`.
+    tabs: definition.tabs.map((tab) => ({
+      id: tab.id,
+      label: tab.label,
+      description: tab.description ?? null,
+    })),
+    tabsPrompt: definition.tabsPrompt,
     // NOT projected: `showEstimateOnScreen` and `sendConfirmationEmail`. Both
     // are folded into the two effective booleans below, so the browser learns
     // where the number goes without learning the owner's delivery settings.
@@ -1386,6 +1666,13 @@ export type QuoteWireAnswer = z.infer<typeof quoteWireAnswerSchema>;
 
 export const quoteSubmitSchema = z.object({
   calculatorId: z.string().min(1).max(QUOTE_ID_MAX_LENGTH),
+  /**
+   * The tab the visitor was on. Optional and bounded like every other id here:
+   * a calculator with no tabs never sends one, and a stranger cannot use it to
+   * post an unbounded string. The server resolves it against the stored
+   * definition — an id matching no tab is not trusted to select a formula.
+   */
+  tabId: z.string().min(1).max(QUOTE_ID_MAX_LENGTH).optional(),
   answers: z.array(quoteWireAnswerSchema).max(30, "Too many answers submitted"),
   contactName: z
     .string()
@@ -1420,6 +1707,10 @@ export type QuoteSubmitData = z.infer<typeof quoteSubmitSchema>;
  */
 export const quotePreviewEstimateSchema = quoteSubmitSchema.pick({
   calculatorId: true,
+  // Picked, not omitted: the running estimate has to price the tab the visitor
+  // is standing on, or a calculator whose tabs override the formula shows a
+  // number from the wrong half of the business all the way to the last screen.
+  tabId: true,
   answers: true,
 });
 
@@ -1444,6 +1735,20 @@ export const quoteSubmissionAnswerSchema = z.object({
   title: z.string(),
   variableName: z.string().optional(),
   hidden: z.boolean(),
+  /**
+   * WHY the row is hidden, when it is: `"branch"` = a show-if the visitor's
+   * answers did not meet, `"tab"` = the question does not belong to the tab
+   * they picked. Both look identical on the row itself, and the owner reading
+   * a six-month-old lead needs to tell them apart — "they said no to stairs"
+   * and "this question is only asked of commercial jobs" are different facts
+   * about the same blank.
+   *
+   * Optional, and must stay optional: every submission stored before tabs
+   * existed has a `hidden` with no reason beside it, and a required field here
+   * would fail the parse in `admin/quotes/[id]/page.tsx` and blank the whole
+   * answer list.
+   */
+  hiddenReason: z.enum(["branch", "tab"]).optional(),
   optionId: z.string().optional(),
   optionIds: z.array(z.string()).optional(),
   number: z.number().optional(),
@@ -1484,6 +1789,21 @@ export type QuoteSubmissionAnswer = z.infer<typeof quoteSubmissionAnswerSchema>;
 export const quoteFormulaSnapshotSchema = z.object({
   formula: z.string(),
   variables: z.record(z.string(), z.number()),
+  /**
+   * The tab the visitor priced against, when the calculator had any. Both
+   * halves are snapshotted for the same reason the formula is: the id answers
+   * "which override produced this?" after the tab list has been rewritten, and
+   * the label is what the owner actually reads — a tab renamed or deleted next
+   * quarter must not turn a stored lead into a bare cuid.
+   *
+   * Optional, so every submission stored before tabs existed still parses.
+   */
+  tab: z
+    .object({
+      id: z.string().min(1),
+      label: z.string(),
+    })
+    .optional(),
 });
 
 export type QuoteFormulaSnapshot = z.infer<typeof quoteFormulaSnapshotSchema>;

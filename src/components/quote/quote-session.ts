@@ -74,17 +74,26 @@ const CONTACT_PHONE_MAX = 30;
  * The stored blob. `answers` and `contact` are the runner's own state shapes,
  * not the wire shapes — a draft has to be able to hold a half-typed ZIP, which
  * is precisely what `QuoteWireAnswer` refuses to represent.
+ *
+ * `tabId` is additive and optional rather than a version bump: a draft written
+ * before tabs existed simply lacks the key, and `loadQuoteSession` reads that
+ * the same way it reads an explicit `null` — no tab chosen. `SESSION_VERSION`
+ * stays 1 on purpose (see its own docblock on why a shape addition a reader
+ * can default around is not "a shape change older payloads cannot be read
+ * as").
  */
 export type StoredQuoteSessionV1 = {
   v: typeof SESSION_VERSION;
   answers: QuoteAnswerMap;
   contact: QuoteContact;
+  tabId?: string | null;
 };
 
 /** What a restore hands back — never partial, never `undefined` fields. */
 export type RestoredQuoteSession = {
   answers: QuoteAnswerMap;
   contact: QuoteContact;
+  tabId: string | null;
 };
 
 /**
@@ -149,11 +158,21 @@ function answerHasContent(answer: QuoteAnswer): boolean {
  * Two callers: the runner's persist effect (which clears the key rather than
  * writing an empty draft) and the "Start over" control (hidden when there is
  * nothing to discard).
+ *
+ * `tabId` counts on its own, independent of `answers`/`contact`: a visitor who
+ * has done nothing but pick "Commercial" off the tabs step has still told the
+ * runner something real, and losing that on a closed tab means re-picking it
+ * before anything else can even render (the tabs step gates every screen, so
+ * there is no way to skip re-answering it). Defaults to `null` so every
+ * existing call site — none of which know about tabs yet — keeps behaving
+ * exactly as before.
  */
 export function hasQuoteSessionContent(
   answers: QuoteAnswerMap,
   contact: QuoteContact,
+  tabId: string | null = null,
 ): boolean {
+  if (tabId !== null) return true;
   for (const answer of Object.values(answers)) {
     if (answerHasContent(answer)) return true;
   }
@@ -169,6 +188,7 @@ export function saveQuoteSession(
   calculatorId: string,
   answers: QuoteAnswerMap,
   contact: QuoteContact,
+  tabId: string | null,
 ): void {
   const store = sessionStore();
   if (!store) return;
@@ -177,6 +197,7 @@ export function saveQuoteSession(
     v: SESSION_VERSION,
     answers,
     contact,
+    tabId,
   };
 
   try {
@@ -215,10 +236,17 @@ export function clearQuoteSession(calculatorId: string): void {
  * Returns `null` for "there is nothing to restore" — no key, unreadable JSON,
  * an unknown version, a shape that is not a session, or a draft in which
  * nothing at all survived validation. Callers treat all of those identically.
+ *
+ * `tabId` is sanitized the same way answers are: kept only if it still lines
+ * up with the CURRENT definition, i.e. it is a string matching one of
+ * `definition.tabs`' ids. An owner who renamed or deleted a tab invalidates
+ * any draft pointing at the old id — restoring it would gate screens by a tab
+ * that no longer exists, which is a worse failure mode than just asking the
+ * visitor to pick again.
  */
 export function loadQuoteSession(
   calculatorId: string,
-  definition: Pick<PublicQuoteCalculatorDefinition, "screens">,
+  definition: Pick<PublicQuoteCalculatorDefinition, "screens" | "tabs">,
 ): RestoredQuoteSession | null {
   const store = sessionStore();
   if (!store) return null;
@@ -258,10 +286,26 @@ export function loadQuoteSession(
   }
 
   const contact = sanitizeContact(parsed.contact);
+  const tabId = sanitizeTabId(parsed.tabId, definition.tabs);
 
-  if (!hasQuoteSessionContent(answers, contact)) return null;
+  if (!hasQuoteSessionContent(answers, contact, tabId)) return null;
 
-  return { answers, contact };
+  return { answers, contact, tabId };
+}
+
+/**
+ * A stored `tabId`, kept only if it is a string naming a tab that still
+ * exists on the current definition. Anything else — `undefined` (a
+ * pre-tabs draft), `null` (explicitly no tab chosen), a non-string, or a
+ * stale id from a tab the owner has since renamed or deleted — sanitizes to
+ * `null`, the same "no tab chosen" state.
+ */
+function sanitizeTabId(
+  stored: unknown,
+  tabs: PublicQuoteCalculatorDefinition["tabs"],
+): string | null {
+  if (typeof stored !== "string") return null;
+  return tabs.some((tab) => tab.id === stored) ? stored : null;
 }
 
 /**

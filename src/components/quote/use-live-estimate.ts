@@ -46,32 +46,48 @@ export function useLiveEstimate({
   enabled,
   visibleQuestions,
   answers,
+  tabId,
 }: {
   calculatorId: string;
   /** `definition.showLiveEstimate` — already the EFFECTIVE owner setting. */
   enabled: boolean;
   visibleQuestions: PublicQuoteQuestion[];
   answers: QuoteAnswerMap;
+  /** The visitor's current tab choice — `null` for a tabs-less calculator, or
+   *  before one has been picked. A calculator whose tabs override the
+   *  formula prices the wrong half of the business without this: the server
+   *  re-derives EVERYTHING from the stored definition, and the tab is part
+   *  of which definition that is. */
+  tabId: string | null;
 }): { estimate: CustomerEstimate | null; isFetching: boolean } {
   const wire = useMemo(
     () => toPreviewWireAnswers(visibleQuestions, answers),
     [visibleQuestions, answers],
   );
 
-  // Debounced as a STRING, not as the array. The array is rebuilt on every
-  // keystroke even when nothing about it changed (a new object each render),
-  // so debouncing it directly would restart the timer forever and, on a fast
-  // typist, never fire. Serialising first means an edit that leaves the
-  // priced answers identical — typing in a `text` question, say — produces the
-  // same key and costs nothing.
+  // Debounced as a STRING, not as the array/tabId pair. Both are rebuilt (or
+  // re-passed) on every keystroke even when nothing about them changed, so
+  // debouncing the pair directly would restart the timer forever and, on a
+  // fast typist, never fire. Serialising first means an edit that leaves the
+  // priced answers identical — typing in a `text` question, say — produces
+  // the same key and costs nothing. `tabId` rides in the SAME key
+  // (`JSON.stringify({ tabId, wire })`), not a separate debounce: switching
+  // tabs must re-price exactly once, not once for the tab and again for
+  // whatever `wire` happens to look like when the timer next settles.
   const debouncedKey = useDebouncedValue(
-    JSON.stringify(wire),
+    JSON.stringify({ tabId, wire }),
     PREVIEW_DEBOUNCE_MS,
   );
-  const debouncedWire = useMemo(
-    () => JSON.parse(debouncedKey) as QuoteWireAnswer[],
+  const debounced = useMemo(
+    () =>
+      JSON.parse(debouncedKey) as {
+        tabId: string | null;
+        wire: QuoteWireAnswer[];
+      },
     [debouncedKey],
   );
+  const debouncedWire = debounced.wire;
+  const debouncedTabId = debounced.tabId;
 
   // Separate from `enabled` (the prop): also folds in "nothing priced has
   // been answered yet". Both the query's `enabled` option and the "should the
@@ -81,7 +97,15 @@ export function useLiveEstimate({
 
   const { data, isFetching, isError } =
     api.quoteCalculator.previewEstimate.useQuery(
-      { calculatorId, answers: debouncedWire },
+      {
+        calculatorId,
+        answers: debouncedWire,
+        // Omitted rather than sent as `null`: `quotePreviewEstimateSchema`
+        // (via `quoteSubmitSchema`) types `tabId` as an optional STRING, so a
+        // tabs-less calculator — or a request that raced ahead of the first
+        // tab pick — must not send a key the schema does not recognize.
+        ...(debouncedTabId !== null ? { tabId: debouncedTabId } : {}),
+      },
       {
         enabled: queryEnabled,
         // `keepPreviousData` so the panel shows the last figure while the next

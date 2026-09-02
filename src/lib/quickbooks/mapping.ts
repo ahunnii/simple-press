@@ -20,6 +20,37 @@ import { QBO_MAX_ERROR_LENGTH } from "~/lib/quickbooks/constants";
 // ─── Deposit / prefill math ─────────────────────────────────────────────────
 
 /**
+ * Invoice statuses that do NOT count as a live invoice: `pending` never
+ * reached QuickBooks, `error` failed on the way there, and `voided` was
+ * cancelled afterwards. Every other status (`created`, `sent`, `overdue`,
+ * `paid`) is a real bill sitting in the customer's QuickBooks, whether or not
+ * any money has moved yet.
+ *
+ * Deliberately ONE const shared by `computeFinalPrefillCents` and
+ * `summarizeLeadBilling` (and importable by the admin UI, which used to keep
+ * its own copy): "already deducted from the final balance" and "shown as
+ * invoiced in the billing summary" must never be able to disagree, or the
+ * owner reads one number on the lead card while QuickBooks bills another.
+ */
+export const QBO_DEAD_INVOICE_STATUSES: readonly InvoiceStatus[] = [
+  "error",
+  "voided",
+  "pending",
+];
+
+/**
+ * Whether an invoice row is a bill that actually exists in QBO — the inverse
+ * of `QBO_DEAD_INVOICE_STATUSES`.
+ *
+ * Takes a plain `string`, not `InvoiceStatus`, because
+ * `QuickBooksInvoice.status` is a Prisma `String` column with no enum behind
+ * it: every caller (routers, cron, admin UI) holds the raw column value.
+ */
+export function isLiveInvoiceStatus(status: string): boolean {
+  return !QBO_DEAD_INVOICE_STATUSES.some((dead) => dead === status);
+}
+
+/**
  * The deposit invoice amount for a quote, given the owner's `DepositRule`
  * and the quote's total estimate (in cents, or `null` when the quote has no
  * priced estimate at all).
@@ -53,10 +84,10 @@ export function computeDepositCents(
  *
  * A deposit invoice counts unless its status is `error` (the QBO write never
  * succeeded), `voided` (cancelled), or `pending` (not yet created in QBO —
- * still reversible, nothing has been collected). `paid`, `sent`, `created`,
- * and `overdue` all count: the deposit was successfully invoiced, whether or
- * not it has been paid yet, because the owner is asking QBO to bill the
- * remainder regardless.
+ * still reversible, nothing has been collected) — i.e. unless it is one of
+ * `QBO_DEAD_INVOICE_STATUSES`. `paid`, `sent`, `created`, and `overdue` all
+ * count: the deposit was successfully invoiced, whether or not it has been
+ * paid yet, because the owner is asking QBO to bill the remainder regardless.
  *
  * `null` when `finalQuoteCents` is `null` (nothing to prefill against).
  * Floors at 0 — a final invoice is never prefilled negative even if prior
@@ -72,16 +103,173 @@ export function computeFinalPrefillCents(
 ): number | null {
   if (finalQuoteCents === null) return null;
 
-  const excludedDepositStatuses = new Set(["error", "voided", "pending"]);
   const depositedCents = priorInvoices
     .filter(
       (invoice) =>
-        invoice.kind === "deposit" &&
-        !excludedDepositStatuses.has(invoice.status),
+        invoice.kind === "deposit" && isLiveInvoiceStatus(invoice.status),
     )
     .reduce((total, invoice) => total + invoice.amountCents, 0);
 
   return Math.max(0, finalQuoteCents - depositedCents);
+}
+
+// ─── Deposit presets ────────────────────────────────────────────────────────
+
+/**
+ * The percentages offered as one-tap deposit choices in the admin UI. The
+ * owner's saved `DepositRule` still decides which one is PRE-selected (see
+ * `presetForRule`) — these are the alternatives they can switch to on a
+ * single lead without doing the arithmetic themselves or editing the rule.
+ */
+export const DEPOSIT_PRESET_PERCENTS = [25, 50, 75] as const;
+
+export type DepositPresetPercent = (typeof DEPOSIT_PRESET_PERCENTS)[number];
+
+/** A deposit choice in the UI: one of the presets, or an owner-typed amount. */
+export type DepositPreset = DepositPresetPercent | "custom";
+
+/**
+ * One row per preset percentage, priced against `basisCents` — the quote
+ * total the deposit is taken from.
+ *
+ * `[]` when `basisCents` is `null`: there is no basis to take a percentage
+ * OF, so there are no preset amounts to offer and the UI has nothing but a
+ * custom amount to fall back on. A `0` basis still yields all three rows, all
+ * `0` — the presets exist, they're just worth nothing against a $0 quote.
+ *
+ * Routed through `computeDepositCents` in percent mode rather than
+ * multiplying here, and that indirection is the point: a preset amount is
+ * then IDENTICAL to the rule amount whenever the owner's rule IS that preset,
+ * so the pre-selected chip can never show a cent more or less than what the
+ * invoice would have been prefilled with anyway. (In percent mode
+ * `computeDepositCents` only returns `null` for a `null` basis, which is
+ * already handled above; the `?? 0` is unreachable and exists solely to keep
+ * the return type honest without a non-null assertion.)
+ */
+export function computeDepositPresets(
+  basisCents: number | null,
+): Array<{ percent: DepositPresetPercent; amountCents: number }> {
+  if (basisCents === null) return [];
+
+  return DEPOSIT_PRESET_PERCENTS.map((percent) => ({
+    percent,
+    amountCents:
+      computeDepositCents(
+        {
+          depositMode: "percent",
+          depositPercent: percent,
+          depositFixedCents: 0,
+        },
+        basisCents,
+      ) ?? 0,
+  }));
+}
+
+/**
+ * Which preset the owner's saved rule corresponds to — i.e. which chip the UI
+ * should pre-select.
+ *
+ * `fixed` mode is always `"custom"`: a fixed-dollar rule is a percentage of
+ * nothing, and labelling it "50%" because it happens to equal half of THIS
+ * quote would quietly re-anchor it to a percentage on the next one. A
+ * percentage outside the offered set (30%, 100%, …) is likewise `"custom"` —
+ * the amount is still prefilled from the rule, it just isn't one of the chips.
+ */
+export function presetForRule(rule: DepositRule): DepositPreset {
+  if (rule.depositMode !== "percent") return "custom";
+  return (
+    DEPOSIT_PRESET_PERCENTS.find(
+      (percent) => percent === rule.depositPercent,
+    ) ?? "custom"
+  );
+}
+
+// ─── Lead billing summary ───────────────────────────────────────────────────
+
+/** Every figure the lead card's billing summary shows — see `summarizeLeadBilling`. */
+export type LeadBillingSummary = {
+  /** The lead's quote amount, or `null` when it has no priced quote yet. */
+  quoteCents: number | null;
+  /**
+   * Every live deposit, paid or not — exactly the set
+   * `computeFinalPrefillCents` subtracts. An issued-but-unpaid deposit is
+   * counted here on purpose: it is money QuickBooks is already asking the
+   * customer for, so billing it again on the final invoice would double-bill.
+   */
+  invoicedDepositCents: number;
+  /** The part of `invoicedDepositCents` QBO has reported as `paid`. */
+  paidDepositCents: number;
+  /** `invoicedDepositCents − paidDepositCents` — invoiced, not yet collected. */
+  unpaidDepositCents: number;
+  /**
+   * What a final invoice would be prefilled with right now — literally
+   * `computeFinalPrefillCents(quoteCents, invoices)`. `null` when
+   * `quoteCents` is `null`; floors at 0.
+   */
+  remainingAfterDepositsCents: number | null;
+  /**
+   * The amount of the live `final` invoice when one exists — the signal that
+   * the balance has already been billed. `null` when there is none.
+   */
+  liveFinalCents: number | null;
+};
+
+/**
+ * Derives the whole billing picture for one quote lead in a single pass, so
+ * the admin UI renders money it was handed rather than money it computed.
+ *
+ * Three rules worth stating out loud:
+ *
+ * 1. Only `deposit` invoices feed the deposit totals. `final` and `custom`
+ *    rows are not deposits and never were — folding a custom invoice into
+ *    "deposits invoiced" would understate the remaining balance the owner is
+ *    about to bill.
+ * 2. `remainingAfterDepositsCents` DELEGATES to `computeFinalPrefillCents`
+ *    instead of re-deriving `quote − invoiced`. The summary and the amount
+ *    actually prefilled into the invoice dialog are then the same number by
+ *    construction, including the floor at 0.
+ * 3. `liveFinalCents` reports the FIRST live final in the array given. The
+ *    router already rejects a second live final per lead, and rows arrive
+ *    newest-first, so "first" means "the one that exists" in practice and
+ *    "the most recent" if a race ever slipped a second one past the guard.
+ */
+export function summarizeLeadBilling(input: {
+  quoteCents: number | null;
+  invoices: ReadonlyArray<{
+    kind: string;
+    status: string;
+    amountCents: number;
+  }>;
+}): LeadBillingSummary {
+  const liveDeposits = input.invoices.filter(
+    (invoice) =>
+      invoice.kind === "deposit" && isLiveInvoiceStatus(invoice.status),
+  );
+
+  const sumCents = (invoices: ReadonlyArray<{ amountCents: number }>): number =>
+    invoices.reduce((total, invoice) => total + invoice.amountCents, 0);
+
+  const invoicedDepositCents = sumCents(liveDeposits);
+  const paidDepositCents = sumCents(
+    liveDeposits.filter((invoice) => invoice.status === "paid"),
+  );
+
+  const liveFinal = input.invoices.find(
+    (invoice) =>
+      invoice.kind === "final" && isLiveInvoiceStatus(invoice.status),
+  );
+
+  return {
+    quoteCents: input.quoteCents,
+    invoicedDepositCents,
+    paidDepositCents,
+    unpaidDepositCents: invoicedDepositCents - paidDepositCents,
+    remainingAfterDepositsCents: computeFinalPrefillCents(
+      input.quoteCents,
+      input.invoices,
+    ),
+    liveFinalCents: liveFinal?.amountCents ?? null,
+  };
 }
 
 // ─── Status derivation ───────────────────────────────────────────────────

@@ -4,6 +4,7 @@ import type { QuoteAnswerMap, QuoteContact } from "./quote-answers";
 import type {
   PublicQuoteQuestion,
   PublicQuoteScreen,
+  PublicQuoteTab,
 } from "~/lib/validators/quote-calculator";
 
 import {
@@ -30,6 +31,7 @@ function question(
     description: null,
     required: false,
     showIf: null,
+    tabIds: [],
     ...overrides,
   };
 }
@@ -41,6 +43,10 @@ function screen(
   return { id, title: null, description: null, questions };
 }
 
+function tab(id: string, label = id): PublicQuoteTab {
+  return { id, label, description: null };
+}
+
 const validContact: QuoteContact = {
   name: "Ada",
   email: "ada@example.com",
@@ -49,7 +55,7 @@ const validContact: QuoteContact = {
 
 describe("buildSteps", () => {
   it("puts contact after the screens and review last", () => {
-    const steps = buildSteps({ showReviewStep: true }, [
+    const steps = buildSteps({ showReviewStep: true, tabs: [] }, [
       screen("s1", [question("a")]),
       screen("s2", [question("b")]),
     ]);
@@ -63,7 +69,7 @@ describe("buildSteps", () => {
   });
 
   it("omits the review step when the owner turned it off", () => {
-    const steps = buildSteps({ showReviewStep: false }, [
+    const steps = buildSteps({ showReviewStep: false, tabs: [] }, [
       screen("s1", [question("a")]),
     ]);
 
@@ -74,22 +80,48 @@ describe("buildSteps", () => {
     // `visibleScreensFor` drops screens whose questions are all hidden, so an
     // all-branched-away calculator arrives here as an empty list. The flow must
     // still be walkable rather than collapsing to zero steps.
-    const steps = buildSteps({ showReviewStep: true }, []);
+    const steps = buildSteps({ showReviewStep: true, tabs: [] }, []);
 
     expect(steps.map((step) => step.kind)).toEqual(["contact", "review"]);
   });
 
   it("keeps screen identity so React keys stay stable", () => {
     const first = screen("s1", [question("a")]);
-    const steps = buildSteps({ showReviewStep: false }, [first]);
+    const steps = buildSteps({ showReviewStep: false, tabs: [] }, [first]);
 
     expect(steps[0]).toEqual({ kind: "screen", screen: first });
     expect(steps[0]?.kind === "screen" && steps[0].screen).toBe(first);
   });
+
+  it("puts a tabs step first when the definition has tabs", () => {
+    const steps = buildSteps(
+      { showReviewStep: true, tabs: [tab("commercial"), tab("residential")] },
+      [screen("s1", [question("a")])],
+    );
+
+    expect(steps.map((step) => step.kind)).toEqual([
+      "tabs",
+      "screen",
+      "contact",
+      "review",
+    ]);
+  });
+
+  it("omits the tabs step when the definition has no tabs", () => {
+    const steps = buildSteps({ showReviewStep: true, tabs: [] }, [
+      screen("s1", [question("a")]),
+    ]);
+
+    expect(steps.map((step) => step.kind)).toEqual([
+      "screen",
+      "contact",
+      "review",
+    ]);
+  });
 });
 
 describe("firstIncompleteStepIndex", () => {
-  const steps = buildSteps({ showReviewStep: true }, [
+  const steps = buildSteps({ showReviewStep: true, tabs: [] }, [
     screen("s1", [question("a", { required: true, type: "zip" })]),
     screen("s2", [
       question("b", { required: false }),
@@ -176,10 +208,78 @@ describe("firstIncompleteStepIndex", () => {
       -1,
     );
   });
+
+  describe("with tabs", () => {
+    const tabbedSteps = buildSteps(
+      { showReviewStep: true, tabs: [tab("commercial"), tab("residential")] },
+      [screen("s1", [question("a", { required: true, type: "zip" })])],
+    );
+
+    it("returns the tabs step while no tab has been chosen, ahead of any screen", () => {
+      expect(
+        firstIncompleteStepIndex(tabbedSteps, {}, validContact, false, null),
+      ).toBe(0);
+    });
+
+    it("returns the tabs step even when every screen and the contact step already pass", () => {
+      const answers: QuoteAnswerMap = { a: { kind: "value", raw: "48601" } };
+
+      expect(
+        firstIncompleteStepIndex(
+          tabbedSteps,
+          answers,
+          validContact,
+          false,
+          null,
+        ),
+      ).toBe(0);
+    });
+
+    it("falls through to the first incomplete screen once a tab is chosen", () => {
+      expect(
+        firstIncompleteStepIndex(
+          tabbedSteps,
+          {},
+          validContact,
+          false,
+          "commercial",
+        ),
+      ).toBe(1);
+    });
+
+    it("returns -1 once a tab is chosen and everything else is complete", () => {
+      const answers: QuoteAnswerMap = { a: { kind: "value", raw: "48601" } };
+
+      expect(
+        firstIncompleteStepIndex(
+          tabbedSteps,
+          answers,
+          validContact,
+          false,
+          "commercial",
+        ),
+      ).toBe(-1);
+    });
+
+    it("defaults activeTabId to null, so an un-updated call site still stops at tabs", () => {
+      expect(
+        firstIncompleteStepIndex(tabbedSteps, {}, validContact, false),
+      ).toBe(0);
+    });
+  });
+
+  it("the no-tabs default behaves exactly as before when activeTabId is omitted", () => {
+    const answers: QuoteAnswerMap = { ...answered };
+    delete answers.a;
+
+    expect(firstIncompleteStepIndex(steps, answers, validContact, false)).toBe(
+      0,
+    );
+  });
 });
 
 describe("findScreenStepIndex", () => {
-  const steps = buildSteps({ showReviewStep: true }, [
+  const steps = buildSteps({ showReviewStep: true, tabs: [] }, [
     screen("s1", [question("a")]),
     screen("s2", [question("b"), question("c")]),
   ]);
@@ -192,5 +292,16 @@ describe("findScreenStepIndex", () => {
 
   it("returns -1 for a question that is no longer visible", () => {
     expect(findScreenStepIndex(steps, "gone")).toBe(-1);
+  });
+
+  it("ignores a leading tabs step, shifting every screen index by one", () => {
+    const tabbedSteps = buildSteps(
+      { showReviewStep: true, tabs: [tab("commercial")] },
+      [screen("s1", [question("a")]), screen("s2", [question("b")])],
+    );
+
+    expect(tabbedSteps[0]?.kind).toBe("tabs");
+    expect(findScreenStepIndex(tabbedSteps, "a")).toBe(1);
+    expect(findScreenStepIndex(tabbedSteps, "b")).toBe(2);
   });
 });

@@ -47,9 +47,14 @@ let storage: ReturnType<typeof createMemoryStorage>;
 /**
  * A definition with one question of each answer KIND, since that is what
  * `sanitizeAnswer` switches on: single (choice), multi (multiselect), value
- * (number) and address.
+ * (number) and address. Two tabs so `sanitizeTabId` has something to validate
+ * a stored `tabId` against.
  */
-const definition: Pick<PublicQuoteCalculatorDefinition, "screens"> = {
+const definition: Pick<PublicQuoteCalculatorDefinition, "screens" | "tabs"> = {
+  tabs: [
+    { id: "t-commercial", label: "Commercial", description: null },
+    { id: "t-residential", label: "Residential", description: null },
+  ],
   screens: [
     {
       id: "s-1",
@@ -63,6 +68,7 @@ const definition: Pick<PublicQuoteCalculatorDefinition, "screens"> = {
           description: null,
           required: true,
           showIf: null,
+          tabIds: [],
           options: [
             { id: "o-local", label: "Local", icon: null },
             { id: "o-long", label: "Long distance", icon: null },
@@ -75,6 +81,7 @@ const definition: Pick<PublicQuoteCalculatorDefinition, "screens"> = {
           description: null,
           required: false,
           showIf: null,
+          tabIds: [],
           options: [
             { id: "o-packing", label: "Packing", icon: null },
             { id: "o-storage", label: "Storage", icon: null },
@@ -94,6 +101,7 @@ const definition: Pick<PublicQuoteCalculatorDefinition, "screens"> = {
           description: null,
           required: true,
           showIf: null,
+          tabIds: [],
           min: 0,
           max: 20,
           unitLabel: null,
@@ -105,6 +113,7 @@ const definition: Pick<PublicQuoteCalculatorDefinition, "screens"> = {
           description: null,
           required: true,
           showIf: null,
+          tabIds: [],
         },
       ],
     },
@@ -142,7 +151,9 @@ function seed(payload: unknown) {
 describe("quote-session without a window", () => {
   it("no-ops rather than throwing when there is no storage at all", () => {
     // Server render, or a browser that refuses the property outright.
-    expect(() => saveQuoteSession("calc-1", answers, contact)).not.toThrow();
+    expect(() =>
+      saveQuoteSession("calc-1", answers, contact, null),
+    ).not.toThrow();
     expect(() => clearQuoteSession("calc-1")).not.toThrow();
     expect(loadQuoteSession("calc-1", definition)).toBeNull();
   });
@@ -159,23 +170,71 @@ describe("quote-session", () => {
   });
 
   it("round-trips every answer kind and the contact details", () => {
-    saveQuoteSession("calc-1", answers, contact);
+    saveQuoteSession("calc-1", answers, contact, null);
 
     expect(loadQuoteSession("calc-1", definition)).toEqual({
       answers,
       contact,
+      tabId: null,
+    });
+  });
+
+  it("round-trips a chosen tabId", () => {
+    saveQuoteSession("calc-1", answers, contact, "t-commercial");
+
+    expect(loadQuoteSession("calc-1", definition)).toEqual({
+      answers,
+      contact,
+      tabId: "t-commercial",
+    });
+  });
+
+  it("drops a tabId naming a tab that no longer exists on the definition", () => {
+    // The owner renamed or deleted the tab between the draft being written and
+    // the tab being reopened, same as a deleted question or option.
+    seed({ v: 1, answers, contact, tabId: "t-deleted" });
+
+    expect(loadQuoteSession("calc-1", definition)?.tabId).toBeNull();
+  });
+
+  it("loads a legacy draft with no tabId key at all as tabId: null", () => {
+    // Written before tabs existed. `SESSION_VERSION` deliberately did not bump
+    // for this addition, so an old draft must still load.
+    seed({ v: 1, answers, contact });
+
+    expect(loadQuoteSession("calc-1", definition)).toEqual({
+      answers,
+      contact,
+      tabId: null,
+    });
+  });
+
+  it("saves and restores a draft holding only a chosen tab", () => {
+    // No answers, no contact — just a tab pick. Must not be treated as "no
+    // draft" and discarded.
+    saveQuoteSession(
+      "calc-1",
+      {},
+      { name: "", email: "", phone: "" },
+      "t-residential",
+    );
+
+    expect(loadQuoteSession("calc-1", definition)).toEqual({
+      answers: {},
+      contact: { name: "", email: "", phone: "" },
+      tabId: "t-residential",
     });
   });
 
   it("keeps one draft per calculator", () => {
-    saveQuoteSession("calc-1", answers, contact);
+    saveQuoteSession("calc-1", answers, contact, null);
 
     // A page can embed two calculators; neither may read the other's draft.
     expect(loadQuoteSession("calc-2", definition)).toBeNull();
   });
 
   it("clears the key on request", () => {
-    saveQuoteSession("calc-1", answers, contact);
+    saveQuoteSession("calc-1", answers, contact, null);
     clearQuoteSession("calc-1");
 
     expect(storage.getItem(STORAGE_KEY)).toBeNull();
@@ -355,7 +414,9 @@ describe("quote-session", () => {
 
     // Safari private mode. A draft that cannot be saved is not an error the
     // visitor should ever hear about.
-    expect(() => saveQuoteSession("calc-1", answers, contact)).not.toThrow();
+    expect(() =>
+      saveQuoteSession("calc-1", answers, contact, null),
+    ).not.toThrow();
   });
 });
 
@@ -403,5 +464,27 @@ describe("hasQuoteSessionContent", () => {
     expect(hasQuoteSessionContent({}, { ...blank, email: "a@b.co" })).toBe(
       true,
     );
+  });
+
+  it("defaults tabId to null, so an un-updated call site behaves as before", () => {
+    expect(hasQuoteSessionContent({}, blank)).toBe(false);
+  });
+
+  it("is false for a null tabId with nothing else", () => {
+    expect(hasQuoteSessionContent({}, blank, null)).toBe(false);
+  });
+
+  it("is true for a chosen tabId alone, with empty answers and blank contact", () => {
+    expect(hasQuoteSessionContent({}, blank, "t-commercial")).toBe(true);
+  });
+
+  it("is true for a chosen tabId even when answers and contact are also empty-but-present", () => {
+    expect(
+      hasQuoteSessionContent(
+        { "q-move": { kind: "single", optionId: "" } },
+        blank,
+        "t-commercial",
+      ),
+    ).toBe(true);
   });
 });

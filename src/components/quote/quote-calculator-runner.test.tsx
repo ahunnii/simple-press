@@ -140,6 +140,7 @@ const definition: PublicQuoteCalculatorDefinition = {
           description: null,
           required: true,
           showIf: null,
+          tabIds: [],
           options: [
             { id: "o-local", label: "Local", icon: null },
             { id: "o-long", label: "Long distance", icon: null },
@@ -159,6 +160,7 @@ const definition: PublicQuoteCalculatorDefinition = {
           description: null,
           required: true,
           showIf: null,
+          tabIds: [],
           min: 0,
           max: 20,
           unitLabel: null,
@@ -170,6 +172,7 @@ const definition: PublicQuoteCalculatorDefinition = {
           description: null,
           required: true,
           showIf: { questionId: "q-move", optionId: "o-long" },
+          tabIds: [],
           options: [
             { id: "o-pack-yes", label: "Yes", icon: null },
             { id: "o-pack-no", label: "No", icon: null },
@@ -189,10 +192,13 @@ const definition: PublicQuoteCalculatorDefinition = {
           description: null,
           required: true,
           showIf: null,
+          tabIds: [],
         },
       ],
     },
   ],
+  tabs: [],
+  tabsPrompt: "",
   showEstimateToCustomer: true,
   showReviewStep: true,
   showLiveEstimate: true,
@@ -238,6 +244,7 @@ const DROPDOWN_DEFINITION: PublicQuoteCalculatorDefinition = {
           description: null,
           required: true,
           showIf: null,
+          tabIds: [],
           options: [
             { id: "o-a", label: "Option A", icon: null },
             { id: "o-b", label: "Option B", icon: null },
@@ -249,6 +256,107 @@ const DROPDOWN_DEFINITION: PublicQuoteCalculatorDefinition = {
   showReviewStep: false,
   showLiveEstimate: false,
 };
+
+const TAB_COMMERCIAL = "t-com";
+const TAB_RESIDENTIAL = "t-res";
+
+/**
+ * A calculator with tabs: one screen shared by both ("Where are you moving
+ * from?"), and one screen restricted to each. `s-shared` sits FIRST in
+ * `screens[]` on purpose — it keeps the shared screen at the same step index
+ * (step 2) no matter which tab is active, so the tab-switching tests below
+ * can assert "the step did not move" without also computing a different
+ * index per branch.
+ */
+const TABBED_DEFINITION: PublicQuoteCalculatorDefinition = {
+  screens: [
+    {
+      id: "s-shared",
+      title: "Where are you moving from?",
+      description: null,
+      questions: [
+        {
+          id: "q-shared-zip",
+          type: "zip",
+          title: "Origin ZIP",
+          description: null,
+          required: true,
+          showIf: null,
+          tabIds: [],
+        },
+      ],
+    },
+    {
+      id: "s-com",
+      title: "Business details",
+      description: null,
+      questions: [
+        {
+          id: "q-com-size",
+          type: "choice",
+          title: "Office size",
+          description: null,
+          required: true,
+          showIf: null,
+          tabIds: [TAB_COMMERCIAL],
+          options: [
+            { id: "o-small", label: "Small office", icon: null },
+            { id: "o-large", label: "Large office", icon: null },
+          ],
+        },
+      ],
+    },
+    {
+      id: "s-res",
+      title: "Home details",
+      description: null,
+      questions: [
+        {
+          id: "q-res-bedrooms",
+          type: "number",
+          title: "Bedrooms",
+          description: null,
+          required: true,
+          showIf: null,
+          tabIds: [TAB_RESIDENTIAL],
+          min: 0,
+          max: 20,
+          unitLabel: null,
+        },
+      ],
+    },
+  ],
+  tabs: [
+    {
+      id: TAB_COMMERCIAL,
+      label: "Commercial",
+      description: "For a business move",
+    },
+    {
+      id: TAB_RESIDENTIAL,
+      label: "Residential",
+      description: "For a home move",
+    },
+  ],
+  tabsPrompt: "What kind of move is this?",
+  showEstimateToCustomer: false,
+  showReviewStep: true,
+  showLiveEstimate: false,
+  estimateByEmail: false,
+  liveEstimateDisclaimer: "",
+  requirePhone: false,
+  responseDays: 2,
+  thankYouMessage: "Thanks! We received your request.",
+};
+
+async function renderTabbedRunner(id: string) {
+  const { QuoteCalculatorRunner } = await import("./quote-calculator-runner");
+  return render(
+    <QuoteCalculatorRunner
+      calculator={{ id, name: "Tabbed", definition: TABBED_DEFINITION }}
+    />,
+  );
+}
 
 /** The step counter renders twice (visible + sr-only live region); assert via the progressbar. */
 function expectStep(current: number, total: number) {
@@ -869,5 +977,254 @@ describe("QuoteCalculatorRunner (v2 step model)", () => {
     // itself; the wrapping form must not also read that as "advance".
     fireEvent.keyDown(select, { key: "Enter" });
     expectStep(1, 2);
+  });
+
+  describe("tabs", () => {
+    it("shows a tabs step first; picking a tab reveals only that tab's screen plus the shared one", async () => {
+      const user = userEvent.setup();
+      await renderTabbedRunner("calc-tabs-a");
+
+      // No restricted screen is answerable yet, so only the unrestricted
+      // shared screen counts toward the total.
+      expectStep(1, 4);
+      expect(
+        screen.getByRole("heading", { name: "What kind of move is this?" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("radio", { name: /Commercial/ }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("radio", { name: /Residential/ }),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole("radio", { name: /Commercial/ }));
+
+      // Picking a tab reveals its screen, growing the total from 4 to 5.
+      await waitFor(() => expectStep(2, 5));
+      expect(
+        screen.getByRole("heading", { name: "Where are you moving from?" }),
+      ).toBeInTheDocument();
+      await user.type(screen.getByLabelText(/Origin ZIP/), "48601");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+
+      expectStep(3, 5);
+      expect(
+        screen.getByRole("heading", { name: "Business details" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("radio", { name: "Small office" }),
+      ).toBeInTheDocument();
+      // Residential's screen never shows up on the Commercial branch.
+      expect(
+        screen.queryByRole("heading", { name: "Home details" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows a step error and stays put when Next is pressed with no tab picked", async () => {
+      const user = userEvent.setup();
+      await renderTabbedRunner("calc-tabs-next-blocked");
+
+      expectStep(1, 4);
+      await user.click(screen.getByRole("button", { name: "Next" }));
+
+      expectStep(1, 4);
+      expect(
+        screen.getByText("Choose an option to continue"),
+      ).toBeInTheDocument();
+    });
+
+    it("switching tabs from the bar on a shared screen keeps the step and the answer, and swaps the tab-only screen behind it", async () => {
+      const user = userEvent.setup();
+      await renderTabbedRunner("calc-tabs-b");
+
+      await user.click(screen.getByRole("radio", { name: /Commercial/ }));
+      await waitFor(() => expectStep(2, 5));
+      await user.type(screen.getByLabelText(/Origin ZIP/), "48601");
+
+      // The bar only appears once a tab is active, above the screen body.
+      await user.click(screen.getByRole("button", { name: "Residential" }));
+
+      // Same step, same answer — the shared screen did not move.
+      expectStep(2, 5);
+      expect(
+        screen.getByRole("heading", { name: "Where are you moving from?" }),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/Origin ZIP/)).toHaveValue("48601");
+
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      expectStep(3, 5);
+      expect(
+        screen.getByRole("heading", { name: "Home details" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Business details" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("review lists the chosen tab, and its Edit button returns to the tabs step", async () => {
+      const user = userEvent.setup();
+      await renderTabbedRunner("calc-tabs-c");
+
+      await user.click(screen.getByRole("radio", { name: /Commercial/ }));
+      await waitFor(() => expectStep(2, 5));
+      await user.type(screen.getByLabelText(/Origin ZIP/), "48601");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expectStep(3, 5));
+      await user.click(screen.getByRole("radio", { name: "Small office" }));
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expectStep(4, 5));
+      await user.type(screen.getByLabelText(/^Name/), "Ada Lovelace");
+      await user.type(screen.getByLabelText(/^Email/), "ada@example.com");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expectStep(5, 5));
+
+      expect(screen.getByText("Commercial")).toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "Edit What kind of move is this?",
+        }),
+      );
+      expectStep(1, 5);
+      expect(
+        screen.getByRole("radio", { name: /Commercial/, checked: true }),
+      ).toBeInTheDocument();
+    });
+
+    it("submits with the chosen tabId and omits an answer hidden by the final tab choice", async () => {
+      const user = userEvent.setup();
+      await renderTabbedRunner("calc-tabs-d");
+
+      // Start on Residential and answer its tab-only question.
+      await user.click(screen.getByRole("radio", { name: /Residential/ }));
+      await waitFor(() => expectStep(2, 5));
+      await user.type(screen.getByLabelText(/Origin ZIP/), "48601");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expectStep(3, 5));
+      expect(
+        screen.getByRole("heading", { name: "Home details" }),
+      ).toBeInTheDocument();
+      await user.type(screen.getByLabelText(/Bedrooms/), "3");
+
+      // Change our mind: switch to Commercial. "Home details" is not shared,
+      // so this falls back to the first step past the tabs step.
+      await user.click(screen.getByRole("button", { name: "Commercial" }));
+      expectStep(2, 5);
+      expect(
+        screen.getByRole("heading", { name: "Where are you moving from?" }),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/Origin ZIP/)).toHaveValue("48601");
+
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expectStep(3, 5));
+      expect(
+        screen.getByRole("heading", { name: "Business details" }),
+      ).toBeInTheDocument();
+      await user.click(screen.getByRole("radio", { name: "Small office" }));
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expectStep(4, 5));
+      await user.type(screen.getByLabelText(/^Name/), "Ada Lovelace");
+      await user.type(screen.getByLabelText(/^Email/), "ada@example.com");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expectStep(5, 5));
+
+      await user.click(screen.getByRole("button", { name: "Get my quote" }));
+      await waitFor(() => expect(submitCalls).toHaveLength(1));
+
+      const payload = submitCalls[0] as {
+        tabId?: string;
+        answers: Record<string, unknown>[];
+      };
+      expect(payload.tabId).toBe(TAB_COMMERCIAL);
+      expect(payload.answers).toEqual(
+        expect.arrayContaining([
+          { questionId: "q-shared-zip", zip: "48601" },
+          { questionId: "q-com-size", optionId: "o-small" },
+        ]),
+      );
+      // The Residential-only "Bedrooms" answer never rides along, even though
+      // it was genuinely typed in — it is hidden by the final tab choice.
+      expect(payload.answers).toHaveLength(2);
+    });
+
+    it("a restored draft with a saved tabId skips the tabs step; one without it lands there", async () => {
+      window.sessionStorage.setItem(
+        "sp-quote-session:calc-tabs-e1",
+        JSON.stringify({
+          v: 1,
+          answers: { "q-shared-zip": { kind: "value", raw: "48601" } },
+          contact: { name: "", email: "", phone: "" },
+          tabId: TAB_COMMERCIAL,
+        }),
+      );
+      await renderTabbedRunner("calc-tabs-e1");
+
+      // The tab is honored, so the visitor lands past the tabs step, on the
+      // earliest thing still owed under Commercial.
+      await waitFor(() => expectStep(3, 5));
+      expect(
+        screen.getByRole("heading", { name: "Business details" }),
+      ).toBeInTheDocument();
+    });
+
+    it("a restored draft with no saved tabId lands on the tabs step", async () => {
+      window.sessionStorage.setItem(
+        "sp-quote-session:calc-tabs-e2",
+        JSON.stringify({
+          v: 1,
+          answers: { "q-shared-zip": { kind: "value", raw: "48601" } },
+          contact: { name: "", email: "", phone: "" },
+        }),
+      );
+      await renderTabbedRunner("calc-tabs-e2");
+
+      await waitFor(() => expectStep(1, 4));
+      expect(
+        screen.getByRole("heading", { name: "What kind of move is this?" }),
+      ).toBeInTheDocument();
+    });
+
+    it('routes an "unknown-tab" rejection back to the tabs step with the return-to-review note', async () => {
+      const user = userEvent.setup();
+      window.sessionStorage.setItem(
+        "sp-quote-session:calc-tabs-f",
+        JSON.stringify({
+          v: 1,
+          answers: {
+            "q-shared-zip": { kind: "value", raw: "48601" },
+            "q-com-size": { kind: "single", optionId: "o-small" },
+          },
+          contact: {
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            phone: "",
+          },
+          tabId: TAB_COMMERCIAL,
+        }),
+      );
+      submitQueue.push({
+        success: false,
+        error: { code: "unknown-tab", message: "Choose an option to continue" },
+      });
+      await renderTabbedRunner("calc-tabs-f");
+
+      await waitFor(() => expectStep(5, 5));
+      await user.click(screen.getByRole("button", { name: "Get my quote" }));
+
+      await waitFor(() => expectStep(1, 5));
+      expect(
+        screen.getByText(
+          "One answer needs your attention before we can price this.",
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Return to review" }),
+      ).toBeInTheDocument();
+
+      // Re-confirming the tab (still selected) tries to send again, and
+      // nothing else is left owing, so it lands straight back on review.
+      await user.click(screen.getByRole("radio", { name: /Commercial/ }));
+      await waitFor(() => expectStep(5, 5));
+    });
   });
 });

@@ -15,6 +15,8 @@ import { qboInvoiceUrl } from "~/lib/quickbooks/constants";
 import {
   computeDepositCents,
   computeFinalPrefillCents,
+  isLiveInvoiceStatus,
+  summarizeLeadBilling,
 } from "~/lib/quickbooks/mapping";
 import { cn } from "~/lib/utils";
 import { QBO_INVOICE_KIND_LABELS } from "~/lib/validators/quickbooks";
@@ -67,19 +69,6 @@ type Props = {
 const INTEGRATIONS_HREF = "/admin/settings/integrations";
 
 /**
- * Invoice statuses that do NOT count as a live invoice: `pending` never
- * reached QuickBooks, `error` failed on the way there, and `voided` was
- * cancelled afterwards. Deliberately the same exclusion set
- * `computeFinalPrefillCents` applies to deposits, so "already sent" and
- * "already deducted from the balance" can never disagree.
- */
-const DEAD_INVOICE_STATUSES = ["error", "voided", "pending"];
-
-function isLive(invoice: { status: string }): boolean {
-  return !DEAD_INVOICE_STATUSES.includes(invoice.status);
-}
-
-/**
  * `kind` is a plain `String` column (Prisma has no enum for it), so it arrives
  * typed as `string` and cannot index the label Record directly. Widening the
  * Record to a `string` key keeps the lookup total, falling back to the raw
@@ -127,11 +116,17 @@ export function QuoteQuickBooksCard({
     invoices,
   );
 
+  // Every figure the billing-summary line and the invoice dialog's "final"
+  // breakdown show — derived once here so both read the same numbers.
+  const billing = summarizeLeadBilling({ quoteCents, invoices });
+
   const hasLiveDeposit = invoices.some(
-    (invoice) => invoice.kind === "deposit" && isLive(invoice),
+    (invoice) =>
+      invoice.kind === "deposit" && isLiveInvoiceStatus(invoice.status),
   );
   const hasLiveFinal = invoices.some(
-    (invoice) => invoice.kind === "final" && isLive(invoice),
+    (invoice) =>
+      invoice.kind === "final" && isLiveInvoiceStatus(invoice.status),
   );
 
   const contactDefaults = {
@@ -170,13 +165,12 @@ export function QuoteQuickBooksCard({
     });
   };
 
-  // Two separate reasons a deposit can't be raised right now, each with its
-  // own hint: no quote to take a percentage/fixed amount OF, or a quote
-  // exists but the store's deposit rule computes to $0 (a `fixed` rule left
-  // at its schema default, or otherwise misconfigured) — the button being
-  // simply disabled with no explanation would look like a bug rather than a
-  // Settings page the owner hasn't visited yet.
-  const depositDisabled = quoteCents == null || depositPrefill === 0;
+  // Disabled only when there's no quote/estimate (or it's $0) to take a
+  // deposit OF. Unlike before, a `fixed`-mode rule left at its schema default
+  // no longer disables this: the deposit presets in the dialog always give
+  // the owner a real percentage-of-quote amount to work with, regardless of
+  // what the saved rule computes to.
+  const depositDisabled = quoteCents == null || quoteCents <= 0;
   const finalHint =
     submission.finalQuoteCents == null
       ? "Set a final quote first"
@@ -193,7 +187,7 @@ export function QuoteQuickBooksCard({
   const hasUnpaidLiveDeposit = invoices.some(
     (invoice) =>
       invoice.kind === "deposit" &&
-      isLive(invoice) &&
+      isLiveInvoiceStatus(invoice.status) &&
       invoice.status !== "paid",
   );
 
@@ -249,7 +243,7 @@ export function QuoteQuickBooksCard({
         </CardContent>
       ) : (
         <CardContent className="space-y-4">
-          {invoices.some(isLive) && (
+          {invoices.some((invoice) => isLiveInvoiceStatus(invoice.status)) && (
             <div className="flex justify-end">
               <Button
                 variant="outline"
@@ -284,7 +278,7 @@ export function QuoteQuickBooksCard({
                     key={invoice.id}
                     className={cn(
                       "space-y-1 py-3 first:pt-0 last:pb-0",
-                      !isLive(invoice) && "opacity-60",
+                      !isLiveInvoiceStatus(invoice.status) && "opacity-60",
                     )}
                   >
                     <div className="flex flex-wrap items-center gap-2">
@@ -347,22 +341,11 @@ export function QuoteQuickBooksCard({
               </Button>
             </div>
 
-            {depositDisabled &&
-              (quoteCents == null ? (
-                <p className="text-muted-foreground text-xs">
-                  Set a final quote or estimate first
-                </p>
-              ) : (
-                <p className="text-muted-foreground text-xs">
-                  Set a deposit rule in{" "}
-                  <Link
-                    href={INTEGRATIONS_HREF}
-                    className="text-foreground font-medium hover:underline"
-                  >
-                    Settings → Integrations
-                  </Link>
-                </p>
-              ))}
+            {depositDisabled && (
+              <p className="text-muted-foreground text-xs">
+                Set a final quote or estimate first
+              </p>
+            )}
             {finalHint && (
               <p className="text-muted-foreground text-xs">{finalHint}</p>
             )}
@@ -374,15 +357,21 @@ export function QuoteQuickBooksCard({
               </p>
             )}
 
-            {quoteCents != null && (
-              <p className="text-muted-foreground text-xs">
-                {`Deposit default: ${
-                  depositMode === "percent"
-                    ? `${depositPercent}% of the quote`
-                    : formatPrice(depositFixedCents)
-                } · Final prefill = final quote − deposits`}
-              </p>
-            )}
+            <p className="text-muted-foreground text-xs">
+              {[
+                `Quote ${quoteCents != null ? formatPrice(quoteCents) : "—"}`,
+                `Deposits invoiced ${formatPrice(billing.invoicedDepositCents)}${
+                  billing.paidDepositCents > 0
+                    ? ` (${formatPrice(billing.paidDepositCents)} paid)`
+                    : ""
+                }`,
+                `Remaining ${
+                  billing.remainingAfterDepositsCents != null
+                    ? formatPrice(billing.remainingAfterDepositsCents)
+                    : "—"
+                }`,
+              ].join(" · ")}
+            </p>
           </div>
 
           <InvoiceFormDialog
@@ -395,6 +384,9 @@ export function QuoteQuickBooksCard({
             defaultDueDays={connection.defaultDueDays}
             timeZone={account.timeZone}
             lockKind
+            depositBasisCents={quoteCents}
+            depositRule={{ depositMode, depositPercent, depositFixedCents }}
+            billing={billing}
             onCreated={onChanged}
           />
         </CardContent>

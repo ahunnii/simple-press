@@ -17,8 +17,6 @@ type NewQuoteNotificationEmailProps = {
   /** Null when the formula could not be evaluated for this submission. */
   estimateCents: number | null;
   answers: QuoteAnswerRow[];
-  formula: string;
-  variables: Record<string, number>;
   businessName: string;
   businessLogoUrl?: string;
   adminQuoteUrl: string;
@@ -31,8 +29,6 @@ export default function NewQuoteNotificationEmail({
   contactPhone,
   estimateCents,
   answers,
-  formula,
-  variables,
   businessName,
   businessLogoUrl,
   adminQuoteUrl,
@@ -45,7 +41,6 @@ export default function NewQuoteNotificationEmail({
   };
 
   const visibleAnswers = answers.filter((answer) => !answer.hidden);
-  const variableEntries = Object.entries(variables);
 
   return (
     <EmailLayout
@@ -97,17 +92,10 @@ export default function NewQuoteNotificationEmail({
         </Section>
       )}
 
-      <Section style={formulaSection}>
-        <Text style={sectionHeading}>Formula</Text>
-        <Text style={formulaText}>{formula}</Text>
-        {variableEntries.length > 0 && (
-          <Text style={variablesText}>
-            {variableEntries
-              .map(([name, value]) => `${name} = ${value}`)
-              .join("  ·  ")}
-          </Text>
-        )}
-      </Section>
+      <Text style={paragraph}>
+        The full pricing breakdown — formula and every value that went into it —
+        is in your dashboard.
+      </Text>
 
       <Section style={buttonSection}>
         <Button href={adminQuoteUrl} style={button}>
@@ -220,27 +208,6 @@ const answerValue = {
   fontSize: "14px",
   fontWeight: "500",
   color: "#1f2937",
-  margin: "0",
-};
-
-const formulaSection = {
-  backgroundColor: "#f9fafb",
-  borderRadius: "8px",
-  padding: "16px",
-  marginBottom: "24px",
-};
-
-const formulaText = {
-  fontSize: "13px",
-  fontFamily: "monospace",
-  color: "#374151",
-  margin: "0 0 8px 0",
-  whiteSpace: "pre-wrap" as const,
-};
-
-const variablesText = {
-  fontSize: "12px",
-  color: "#6b7280",
   margin: "0",
 };
 

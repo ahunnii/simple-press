@@ -35,6 +35,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -367,7 +368,9 @@ export function QuoteDetail({
                           {answer.display}
                           {answer.hidden && (
                             <span className="ml-2 text-xs italic">
-                              not shown — skipped by branching
+                              {answer.hiddenReason === "tab"
+                                ? "not shown for this type"
+                                : "not shown — skipped by branching"}
                             </span>
                           )}
                         </dd>
@@ -388,6 +391,14 @@ export function QuoteDetail({
               <CardContent className="space-y-4">
                 {formulaSnapshot ? (
                   <>
+                    {formulaSnapshot.tab && (
+                      <div className="text-muted-foreground text-sm">
+                        Type:{" "}
+                        <Badge variant="secondary">
+                          {formulaSnapshot.tab.label}
+                        </Badge>
+                      </div>
+                    )}
                     <code className="bg-muted block overflow-x-auto rounded-md p-3 text-sm">
                       {formulaSnapshot.formula}
                     </code>
@@ -466,10 +477,18 @@ export function QuoteDetail({
                       className="font-medium hover:underline"
                     >
                       {submission.calculatorName}
+                      {formulaSnapshot?.tab && (
+                        <> · {formulaSnapshot.tab.label}</>
+                      )}
                     </Link>
                   ) : (
                     <>
-                      <p className="font-medium">{submission.calculatorName}</p>
+                      <p className="font-medium">
+                        {submission.calculatorName}
+                        {formulaSnapshot?.tab && (
+                          <> · {formulaSnapshot.tab.label}</>
+                        )}
+                      </p>
                       <p className="text-muted-foreground text-xs">
                         (calculator deleted)
                       </p>
