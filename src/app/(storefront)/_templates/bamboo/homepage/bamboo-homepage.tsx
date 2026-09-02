@@ -152,6 +152,7 @@ export async function BambooHomepage() {
           secondaryLink={
             f["bamboo.homepage.hero-secondary-button-link"] ?? "/about"
           }
+          imageFieldKey="bamboo.homepage.hero-image"
           heroImage={f["bamboo.homepage.hero-image"] ?? "/placeholder.svg"}
           heroImageLabel="Hero Photo"
         />

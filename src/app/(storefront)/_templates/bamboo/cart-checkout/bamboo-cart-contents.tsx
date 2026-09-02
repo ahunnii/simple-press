@@ -38,7 +38,7 @@ export function BambooCartContents({ business }: Props) {
     return (
       <section
         aria-hidden="true"
-        className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20"
+        className="mx-auto flex min-h-[calc(100svh-var(--bamboo-header-offset))] w-full max-w-7xl flex-col justify-center px-4 pt-10 pb-[12vh] lg:px-8"
       >
         <div className="mb-10 h-11 w-56 animate-pulse rounded-xl bg-[var(--bamboo-sage)]" />
         <div className="flex flex-col gap-8 lg:flex-row">
@@ -60,7 +60,7 @@ export function BambooCartContents({ business }: Props) {
 
   if (items.length === 0) {
     return (
-      <section className="mx-auto flex max-w-3xl flex-col items-center px-4 py-20 text-center lg:px-8 lg:py-28">
+      <section className="mx-auto flex min-h-[calc(100svh-var(--bamboo-header-offset))] w-full max-w-3xl flex-col items-center justify-center px-4 pt-10 pb-[12vh] text-center lg:px-8">
         <BambooReveal>
           {/* Illustrated roll — the empty cart's one decorative moment. */}
           <div className="relative mx-auto mb-8 w-[142px]">

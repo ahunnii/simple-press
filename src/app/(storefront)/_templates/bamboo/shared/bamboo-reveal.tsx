@@ -18,8 +18,12 @@ type Props = {
  * system by wrapping already-rendered children, without becoming
  * `"use client"` themselves — mirrors vii's `ViiReveal`.
  *
- * Progressive enhancement + reduced-motion are handled by the hook and the
- * `.bamboo-js` / `@media (prefers-reduced-motion)` rules in globals.css.
+ * Renders one of three phase classes alongside the base `bamboo-reveal`
+ * class: no extra class while `"idle"` (SSR/no-JS/reduced-motion/already
+ * on screen — CSS shows it as-is), `"out"` while off-screen and armed (CSS
+ * hides it with no transition), `"in"` once the observer has fired (CSS
+ * carries the reveal transition). See `use-bamboo-reveal.ts` for why the
+ * phase is set in a layout effect instead of a root `.bamboo-js` gate.
  */
 export function BambooReveal({
   children,
@@ -27,11 +31,11 @@ export function BambooReveal({
   style,
   threshold = 0.1,
 }: Props) {
-  const { ref, visible } = useBambooReveal(threshold);
+  const { ref, phase } = useBambooReveal(threshold);
   return (
     <div
       ref={ref}
-      className={cn("bamboo-reveal", visible && "in", className)}
+      className={cn("bamboo-reveal", phase !== "idle" && phase, className)}
       style={style}
     >
       {children}
@@ -43,8 +47,8 @@ export function BambooReveal({
  * Staggered reveal group. The container observer lives here; mapped children
  * must each carry `className="bamboo-reveal-item"` and
  * `style={{ "--i": index }}` for the cascade (see the
- * `.bamboo-js .bamboo-reveal-group.in .bamboo-reveal-item` rule in
- * globals.css, which delays each item by `calc(var(--i, 0) * 90ms)`).
+ * `.bamboo-reveal-group.in .bamboo-reveal-item` rule in globals.css, which
+ * delays each item by `calc(var(--i, 0) * 90ms)`).
  */
 export function BambooRevealGroup({
   children,
@@ -52,11 +56,15 @@ export function BambooRevealGroup({
   style,
   threshold = 0.1,
 }: Props) {
-  const { ref, visible } = useBambooReveal(threshold);
+  const { ref, phase } = useBambooReveal(threshold);
   return (
     <div
       ref={ref}
-      className={cn("bamboo-reveal-group", visible && "in", className)}
+      className={cn(
+        "bamboo-reveal-group",
+        phase !== "idle" && phase,
+        className,
+      )}
       style={style}
     >
       {children}

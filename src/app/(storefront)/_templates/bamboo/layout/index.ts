@@ -8,9 +8,12 @@ import type { TemplateSection } from "~/lib/template-sections";
  *
  * Header nav, cart, account, and wishlist are NOT template fields — they read
  * live from `Business.siteContent.navigationItems` and feature flags, same as
- * every other template (see `bamboo-header.tsx`). Footer nav columns and the
- * bottom-bar address are likewise sourced from Content → Navigation and
- * Settings, not fields.
+ * every other template (see `bamboo-header.tsx`). The ≤900px burger opens the
+ * full-screen roll-paper menu dialog (`bamboo-mobile-nav.tsx`), which renders
+ * that same nav list plus the Settings phone/email, so there is nothing to
+ * configure separately for mobile. Footer nav columns and the bottom-bar
+ * address are likewise sourced from Content → Navigation and Settings, not
+ * fields.
  *
  * NOT self-registering: merged into the root `bambooData` /
  * `bambooFieldGroups` / `bambooSections` (`../index.tsx`, `../sections.ts`) by

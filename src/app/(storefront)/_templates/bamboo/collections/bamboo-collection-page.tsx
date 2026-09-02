@@ -140,19 +140,24 @@ export function BambooCollectionPage({
           </div>
 
           {collection.imageUrl ? (
-            <figure className="bamboo-photo-card hidden rotate-[-2.5deg] lg:block">
-              <Image
-                src={collection.imageUrl}
-                alt=""
-                width={1200}
-                height={1011}
-                sizes="340px"
-                priority
-              />
-              <span className="bamboo-photo-badge" aria-hidden="true">
-                <BambooGlyph id="s-wreath" className="block h-auto w-full" />
-              </span>
-            </figure>
+            // Plain wrapper carries the responsive display utility: the
+            // unlayered `.bamboo-photo-card` rule sets `display: block` and
+            // would defeat a Tailwind `hidden` placed on the figure itself.
+            <div className="hidden lg:block">
+              <figure className="bamboo-photo-card rotate-[-2.5deg]">
+                <Image
+                  src={collection.imageUrl}
+                  alt=""
+                  width={1200}
+                  height={1011}
+                  sizes="340px"
+                  priority
+                />
+                <span className="bamboo-photo-badge" aria-hidden="true">
+                  <BambooGlyph id="s-wreath" className="block h-auto w-full" />
+                </span>
+              </figure>
+            </div>
           ) : null}
         </div>
       </section>

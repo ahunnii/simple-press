@@ -46,10 +46,14 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
       className="on-pine relative overflow-hidden bg-[var(--bamboo-pine)] pt-[74px] pb-10 text-[var(--bamboo-cream)]"
       {...sectionGroupAttr("global", "footer")}
     >
-      {/* Scattered, cropped illustration strip along the top edge — not a
-          neat row: irregular sizes/angles, several cropped by the fold. */}
-      <div className="bamboo-foot-strip" aria-hidden="true">
-        <svg viewBox="0 0 1440 104" preserveAspectRatio="xMidYMid slice">
+      {/* Full-bleed scattered illustration field — not a neat row and not a
+          top strip: irregular sizes/angles across the whole pine band, several
+          cropped by the top fold, the sides and the bottom. The 1440x560
+          viewBox is sliced (xMidYMid) so it covers a footer of any height
+          instead of leaving a bare pine expanse below a fixed band; objects
+          sit in the gaps around the columns, never directly behind text. */}
+      <div className="bamboo-foot-field" aria-hidden="true">
+        <svg viewBox="0 0 1440 560" preserveAspectRatio="xMidYMid slice">
           <use
             href="#s-roll-top"
             x="44"
@@ -105,6 +109,70 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
             width="49"
             height="18"
             transform="rotate(5 1391 71)"
+          />
+          <use
+            href="#s-pot"
+            x="-22"
+            y="300"
+            width="78"
+            height="108"
+            transform="rotate(-13 17 354)"
+          />
+          <use
+            href="#s-leaf-d"
+            x="150"
+            y="372"
+            width="66"
+            height="24"
+            transform="rotate(12 183 384)"
+          />
+          <use
+            href="#s-sprig"
+            x="470"
+            y="268"
+            width="92"
+            height="73"
+            transform="rotate(-19 516 305)"
+          />
+          <use
+            href="#s-tissue-box"
+            x="612"
+            y="388"
+            width="88"
+            height="70"
+            transform="rotate(7 656 423)"
+          />
+          <use
+            href="#s-roll-front"
+            x="1246"
+            y="214"
+            width="96"
+            height="92"
+            transform="rotate(-9 1294 260)"
+          />
+          <use
+            href="#s-leaf"
+            x="1392"
+            y="348"
+            width="72"
+            height="26"
+            transform="rotate(15 1428 361)"
+          />
+          <use
+            href="#s-roll-top"
+            x="1108"
+            y="496"
+            width="84"
+            height="84"
+            transform="rotate(13 1150 538)"
+          />
+          <use
+            href="#s-culm-tan"
+            x="1320"
+            y="470"
+            width="64"
+            height="182"
+            transform="rotate(-6 1352 561)"
           />
         </svg>
       </div>

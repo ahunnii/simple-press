@@ -41,7 +41,7 @@ export function BambooLayout({
       <BambooHeader business={business} />
       <main
         id="bamboo-main-content"
-        className="min-h-[calc(100vh-4rem)] flex-1"
+        className="min-h-[calc(100vh-var(--bamboo-header-offset))] flex-1"
       >
         {children}
       </main>

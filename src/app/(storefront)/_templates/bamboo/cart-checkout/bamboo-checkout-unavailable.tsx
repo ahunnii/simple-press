@@ -17,7 +17,7 @@ import { BambooReveal } from "../shared/bamboo-reveal";
  */
 export function BambooCheckoutUnavailable() {
   return (
-    <section className="mx-auto flex w-full max-w-2xl flex-col px-4 py-20 lg:px-8 lg:py-28">
+    <section className="mx-auto flex min-h-[calc(100svh-var(--bamboo-header-offset))] w-full max-w-2xl flex-col justify-center px-4 pt-10 pb-[12vh] lg:px-8">
       <BambooReveal>
         <div className="bamboo-torn-card text-center">
           <BambooGlyph

@@ -53,6 +53,7 @@ type HeroProps = {
   secondaryTextFieldKey: string;
   secondaryText: string;
   secondaryLink: string;
+  imageFieldKey: string;
   heroImage: string;
   heroImageLabel: string;
 };
@@ -71,6 +72,7 @@ export function BambooHomeHero({
   secondaryTextFieldKey,
   secondaryText,
   secondaryLink,
+  imageFieldKey,
   heroImage,
   heroImageLabel,
 }: HeroProps) {
@@ -81,7 +83,7 @@ export function BambooHomeHero({
     <section
       {...sectionAttrs}
       aria-labelledby="bamboo-hero-h"
-      className="relative flex min-h-[min(92vh,900px)] items-center overflow-hidden bg-[var(--bamboo-sage)] pt-[124px] pb-[150px] max-[900px]:min-h-[min(86vh,760px)] max-[900px]:items-start max-[900px]:pt-14 max-[900px]:pb-10"
+      className="relative flex min-h-[min(92vh,900px)] items-center overflow-hidden bg-[var(--bamboo-sage)] pt-[124px] pb-[150px] max-[900px]:min-h-[min(86vh,760px)] max-[900px]:items-start max-[900px]:pt-[calc(var(--bamboo-header-offset)+20px)] max-[900px]:pb-[270px]"
       style={{ marginTop: "calc(var(--bamboo-header-offset) * -1)" }}
     >
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -503,25 +505,8 @@ export function BambooHomeHero({
         </span>
       </div>
 
-      {hasHeroPhoto && (
-        // Outer div carries the absolute placement — `.bamboo-photo-card`
-        // itself sets `position: relative` at higher specificity than a
-        // plain Tailwind `.absolute`, so positioning must live one level up.
-        <div className="absolute top-[32%] left-[38%] z-1 w-[clamp(140px,15vw,200px)] max-[900px]:hidden">
-          <figure className="bamboo-photo-card -rotate-[4deg]">
-            <Image
-              src={heroImage}
-              alt={heroImageLabel}
-              width={200}
-              height={200}
-              className="aspect-square object-cover"
-            />
-          </figure>
-        </div>
-      )}
-
-      <div className="relative z-2 mx-auto w-[min(1200px,calc(100%-48px))]">
-        <div className="max-w-[min(600px,48vw)] max-[900px]:max-w-none">
+      <div className="relative z-2 mx-auto flex w-[min(1200px,calc(100%-48px))] items-start gap-8 max-[900px]:block">
+        <div className="max-w-[min(640px,50vw)] shrink-0 max-[900px]:max-w-none">
           <h1
             id="bamboo-hero-h"
             {...fieldAttr(titleFieldKey)}
@@ -531,7 +516,7 @@ export function BambooHomeHero({
           </h1>
           <p
             {...fieldAttr(descriptionFieldKey)}
-            className="mt-[22px] max-w-[34ch] text-[1.1rem] leading-[1.62] text-[var(--bamboo-ink)] max-[900px]:max-w-[31ch]"
+            className="mt-[22px] max-w-[56ch] text-[1.1rem] leading-[1.62] text-[var(--bamboo-ink)] max-[900px]:max-w-[31ch]"
           >
             {description}
           </p>
@@ -550,6 +535,29 @@ export function BambooHomeHero({
             {tagline}
           </p>
         </div>
+
+        {hasHeroPhoto && (
+          // In-flow sibling of the copy, never an absolute overlay: the photo
+          // hangs in the empty upper-right sage zone above the still-life and
+          // can therefore never land on the paragraph, at any width or any
+          // copy length. `-mt-[2%]`/`pr-[4%]` resolve against the 1200px wrap
+          // — enough lift to clear the 82px header at the tall-copy extreme
+          // and to stay off the 4-pack when the owner shortens the lede.
+          <div className="-mt-[2%] flex flex-1 justify-end self-start pr-[4%] max-[900px]:hidden">
+            <figure
+              {...fieldAttr(imageFieldKey)}
+              className="bamboo-photo-card w-[clamp(180px,17vw,240px)] -rotate-[4deg] transition-transform duration-[400ms] ease-[var(--bamboo-ease)] hover:translate-y-[-4px] hover:rotate-0"
+            >
+              <Image
+                src={heroImage}
+                alt={heroImageLabel}
+                width={240}
+                height={240}
+                className="aspect-square object-cover"
+              />
+            </figure>
+          </div>
+        )}
       </div>
 
       <span
