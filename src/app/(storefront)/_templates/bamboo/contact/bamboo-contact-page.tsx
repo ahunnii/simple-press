@@ -49,7 +49,10 @@ export function BambooContactPage({
     hasCoords && isSectionVisible(customFields, "bamboo", "contact.map");
 
   return (
-    <div>
+    // flex column + flex-1 so this root grows to fill <main> (a column flex
+    // container) and the trailing pine BambooEdge's mt-auto can pin to the
+    // bottom instead of leaving a strip of paper above the footer.
+    <div className="flex flex-1 flex-col">
       {/* 1. Hero — short sage band (~30vh), one pot anchoring the corner */}
       <section
         {...sectionGroupAttr("contact", "info")}

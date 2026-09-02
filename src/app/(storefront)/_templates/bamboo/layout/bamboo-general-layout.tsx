@@ -39,9 +39,12 @@ export function BambooLayout({
 
       <BambooRouteAnnouncer />
       <BambooHeader business={business} />
+      {/* Column flex so a page's trailing footer edge (mt-auto) can pin to
+          the bottom of main even when the page content is shorter than the
+          viewport, instead of leaving a strip of paper above the footer. */}
       <main
         id="bamboo-main-content"
-        className="min-h-[calc(100vh-var(--bamboo-header-offset))] flex-1"
+        className="flex min-h-[calc(100vh-var(--bamboo-header-offset))] flex-1 flex-col"
       >
         {children}
       </main>

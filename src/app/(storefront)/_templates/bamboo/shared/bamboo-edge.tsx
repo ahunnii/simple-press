@@ -85,9 +85,25 @@ export function BambooEdge({
   className,
 }: BambooEdgeProps) {
   const wave = WAVE_PATHS[variant];
+  // The edge into the footer (to="pine") is the last element inside <main>,
+  // which is now a column flexbox — mt-auto pins it to the bottom of main so
+  // it always sits flush against the footer, even on pages shorter than the
+  // viewport. `.bamboo .bamboo-edge` sets `margin-block: -2px` unlayered
+  // (before any @layer in globals.css), which beats a layered Tailwind
+  // utility like mt-auto regardless of specificity — so this also needs a
+  // `bamboo-edge-foot` marker class; globals.css must add a matching
+  // unlayered override: `.bamboo .bamboo-edge.bamboo-edge-foot { margin-top: auto }`.
+  const isFooterEdge = to === "pine";
 
   return (
-    <div className={cn("bamboo-edge", className)} aria-hidden="true">
+    <div
+      className={cn(
+        "bamboo-edge",
+        isFooterEdge && "bamboo-edge-foot mt-auto",
+        className,
+      )}
+      aria-hidden="true"
+    >
       <svg viewBox="0 0 1440 78" preserveAspectRatio="none">
         <rect width="1440" height="78" fill={TOKEN_VAR[from]} />
         <path d={wave.d} fill="var(--bamboo-sage-deep)" />

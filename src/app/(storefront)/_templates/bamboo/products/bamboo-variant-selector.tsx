@@ -138,40 +138,29 @@ export function BambooVariantSelector({
         )}
       </fieldset>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         {/* Quantity Selection */}
         {selectedVariant && (
-          <div>
-            <div className="bamboo-qty-stepper">
-              <button
-                type="button"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
-              >
-                <Minus className="size-4" aria-hidden="true" />
-              </button>
-              <span aria-live="polite" aria-atomic="true">
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setQuantity(Math.min(effectiveMax, quantity + 1))
-                }
-                disabled={quantity >= effectiveMax}
-                aria-label="Increase quantity"
-              >
-                <Plus className="size-4" aria-hidden="true" />
-              </button>
-            </div>
-            {selectedVariant && product.trackInventory && (
-              <span className="mt-1.5 block text-[0.86rem] text-[var(--bamboo-ink-soft)]">
-                {isBackordered
-                  ? "Backordered — ships when available"
-                  : `${selectedVariant?.inventoryQty ?? 0} available`}
-              </span>
-            )}
+          <div className="bamboo-qty-stepper">
+            <button
+              type="button"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              disabled={quantity <= 1}
+              aria-label="Decrease quantity"
+            >
+              <Minus className="size-4" aria-hidden="true" />
+            </button>
+            <span aria-live="polite" aria-atomic="true">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+              disabled={quantity >= effectiveMax}
+              aria-label="Increase quantity"
+            >
+              <Plus className="size-4" aria-hidden="true" />
+            </button>
           </div>
         )}
 
@@ -210,6 +199,13 @@ export function BambooVariantSelector({
             : ""}
         </div>
       </div>
+      {selectedVariant && product.trackInventory && (
+        <p className="mt-2 text-[0.86rem] text-[var(--bamboo-ink-soft)]">
+          {isBackordered
+            ? "Backordered — ships when available"
+            : `${selectedVariant?.inventoryQty ?? 0} available`}
+        </p>
+      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && effectiveMax === 0 && (

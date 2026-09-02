@@ -422,6 +422,23 @@
   margin-block: -2px;
 }
 
+/* Footer edge (`to="pine"`): pinned to the bottom of <main>, which is a column
+   flexbox, so a page shorter than the viewport never shows body paper between
+   its last torn edge and the footer. The margin-block rule above is unlayered,
+   so Tailwind's mt-auto cannot win over it — this unlayered, more specific
+   rule can (margin-bottom keeps its -2px seam overlap with the footer). */
+.bamboo .bamboo-edge.bamboo-edge-foot {
+  margin-top: auto;
+}
+
+/* …and the band right before that edge absorbs any leftover height first, so
+   the filler takes the band's own colour (sage bands included, not just
+   paper). Auto margins only receive space that flex-grow leaves over. */
+.bamboo main > :has(+ .bamboo-edge-foot),
+.bamboo main > * > :has(+ .bamboo-edge-foot) {
+  flex-grow: 1;
+}
+
 .bamboo .bamboo-edge svg {
   display: block;
   width: 100%;
@@ -652,6 +669,9 @@
   font-size: 1rem;
   letter-spacing: 0.005em;
   padding: 0.86rem 1.5rem;
+  /* Shared control height with .bamboo-qty-stepper so a stepper + button row
+     reads as one line (border-box, so padding/border sit inside it). */
+  min-height: 3.5rem;
   border-radius: 999px;
   border: 2px solid transparent;
   text-decoration: none;
@@ -1147,6 +1167,7 @@
 .bamboo .bamboo-qty-stepper {
   display: inline-flex;
   align-items: center;
+  min-height: 3.5rem; /* = .bamboo-btn, so the purchase row aligns */
   border: 2px solid var(--bamboo-outline);
   border-radius: 999px;
   overflow: hidden;
@@ -1156,8 +1177,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: calc(3.5rem - 4px);
   background: transparent;
   border: none;
   color: var(--bamboo-pine);

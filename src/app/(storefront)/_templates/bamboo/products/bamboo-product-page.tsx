@@ -84,7 +84,10 @@ export function BambooProductPage({
       : "In stock";
 
   return (
-    <div className="bg-[var(--bamboo-paper)]">
+    // flex column + flex-1 so this root grows to fill <main> (a column flex
+    // container) and the trailing pine BambooEdge's mt-auto can pin to the
+    // bottom instead of leaving a strip of paper above the footer.
+    <div className="flex flex-1 flex-col bg-[var(--bamboo-paper)]">
       <TrackView
         event={ANALYTICS_EVENTS.PRODUCT_VIEW}
         data={{ productId: product.id }}
@@ -160,18 +163,25 @@ export function BambooProductPage({
                 </span>
               ) : null}
             </p>
-            <p className="mt-2.5 flex items-center gap-2 text-[0.92rem] text-[var(--bamboo-muted)]">
-              <i
-                aria-hidden="true"
-                className={cn(
-                  "h-[9px] w-[9px] flex-none rounded-full",
-                  inStock
-                    ? "bg-[var(--bamboo-ill-leaf-mid)]"
-                    : "bg-[var(--bamboo-terracotta-deep)]",
-                )}
-              />
-              {stockLine}
-            </p>
+            {/* Variant products get their stock signal from the variant
+                selector (per-variant count under the purchase row, sold-out
+                pills): this page-level line comes from a separate useProduct
+                instance that never learns about a pill switch, so it would
+                freeze on the first variant. Simple products keep it. */}
+            {product.variants.length === 0 && (
+              <p className="mt-2.5 flex items-center gap-2 text-[0.92rem] text-[var(--bamboo-muted)]">
+                <i
+                  aria-hidden="true"
+                  className={cn(
+                    "h-[9px] w-[9px] flex-none rounded-full",
+                    inStock
+                      ? "bg-[var(--bamboo-ill-leaf-mid)]"
+                      : "bg-[var(--bamboo-terracotta-deep)]",
+                  )}
+                />
+                {stockLine}
+              </p>
+            )}
 
             <div className="mt-7">
               <BambooProductActions product={product} business={business} />

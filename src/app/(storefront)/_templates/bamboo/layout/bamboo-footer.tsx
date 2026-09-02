@@ -38,7 +38,9 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
       : []),
     ...(isEnabled("blog") ? [{ label: "Insights", href: "/blog" }] : []),
     { label: "Contact", href: "/contact" },
-    ...policies.map((p) => ({ label: p.title, href: p.slug })),
+    // Root-relative: a bare slug would resolve against the current path and
+    // 404 from nested routes such as /blog/<post>.
+    ...policies.map((p) => ({ label: p.title, href: `/${p.slug}` })),
   ];
 
   return (

@@ -44,7 +44,10 @@ export function BambooAccountLayout({ children, heading }: Props) {
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <div className="bg-[var(--bamboo-paper)]">
+    // flex column + flex-1 so this root grows to fill <main> (a column flex
+    // container) and the trailing pine BambooEdge's mt-auto can pin to the
+    // bottom instead of leaving a strip of paper above the footer.
+    <div className="flex flex-1 flex-col bg-[var(--bamboo-paper)]">
       <section
         aria-labelledby="bamboo-account-heading"
         className="bg-[var(--bamboo-sage)] px-6 pt-[112px] pb-[72px]"
