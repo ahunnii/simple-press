@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 
 import type { MapViewport } from "~/components/ui/map";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { Button } from "~/components/ui/button";
 import {
   Map,
   MapMarker,
@@ -22,14 +23,6 @@ type BambooMapProps = {
   directionsUrl: string;
 };
 
-/**
- * Real, functional locator (MapLibre) — restyled to the "Illustrated & Alive"
- * `.bamboo-map`/`.bamboo-map-chip` frame (radius/shadow/caption). This is a
- * real embed with a real marker, so unlike the mockup's illustrated map it
- * gets NO fake bouncing pin animation — the marker just renders where it is.
- * Props and `sectionGroupAttr` wiring are unchanged; this component is shared
- * by both the homepage Location section and the Contact page map.
- */
 export function BambooMap({
   businessName,
   address,
@@ -50,7 +43,7 @@ export function BambooMap({
       {...sectionGroupAttr("global", "location")}
       role="region"
       aria-label="Location map"
-      className="bamboo-map relative h-[420px] w-full"
+      className="border-border/60 relative h-[420px] w-full overflow-hidden rounded-2xl border shadow-sm"
     >
       <Map
         viewport={viewport}
@@ -63,45 +56,50 @@ export function BambooMap({
         <MapMarker longitude={longitude} latitude={latitude} anchor="bottom">
           <MarkerContent>
             <MapPin
-              className="size-10 fill-[var(--bamboo-terracotta)] text-[var(--bamboo-roll)] drop-shadow-md"
+              className="fill-primary size-10 text-white drop-shadow-md"
               aria-hidden="true"
             />
           </MarkerContent>
           <MarkerTooltip>{businessName}</MarkerTooltip>
           <MarkerPopup>
             <div className="space-y-1">
-              <p className="font-heading font-semibold text-[var(--bamboo-pine)]">
+              <p className="font-heading text-foreground font-semibold">
                 {businessName}
               </p>
               {address && (
-                <p className="text-xs text-[var(--bamboo-ink-soft)]">
-                  {address}
-                </p>
+                <p className="text-muted-foreground text-xs">{address}</p>
               )}
             </div>
           </MarkerPopup>
         </MapMarker>
       </Map>
 
-      <div className="bamboo-map-chip">
-        <b>{businessName}</b>
-        <span>{address ?? "Find us here"}</span>
-        <div className="mt-3 flex items-center gap-4">
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Get directions (opens in new tab)"
-            className="bamboo-swipe text-sm font-semibold text-[var(--bamboo-pine)]"
-          >
-            Directions
-          </a>
+      <div className="bg-card border-border/60 absolute bottom-4 left-4 z-10 max-w-[min(320px,calc(100%-2rem))] rounded-lg border p-5 shadow-sm">
+        <p className="font-heading text-foreground text-lg font-bold">
+          {businessName}
+        </p>
+        {address && (
+          <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+            {address}
+          </p>
+        )}
+        <div className="mt-4 flex items-center gap-4">
+          <Button size="sm" asChild>
+            <a
+              href={directionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Get directions (opens in new tab)"
+            >
+              Directions
+            </a>
+          </Button>
           <a
             href={viewUrl}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="View larger map on Google Maps (opens in new tab)"
-            className="bamboo-swipe text-sm font-semibold text-[var(--bamboo-pine)]"
+            className="text-primary text-sm font-semibold hover:underline"
           >
             View larger map
           </a>

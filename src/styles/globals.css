@@ -89,8 +89,87 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* ── Bamboo — "Illustrated & Alive" design tokens. ───────────────────────────
-   Scoped to .bamboo so they never bleed into other templates. Two tiers:
+.bamboo {
+  --background: oklch(0.98 0.005 90);
+  --foreground: oklch(0.2 0.02 50);
+  --card: oklch(0.99 0.003 90);
+  --card-foreground: oklch(0.2 0.02 50);
+  --popover: oklch(0.99 0.003 90);
+  --popover-foreground: oklch(0.2 0.02 50);
+  --primary: oklch(0.35 0.08 160);
+  --primary-foreground: oklch(0.97 0.01 90);
+  --secondary: oklch(0.92 0.03 85);
+  --secondary-foreground: oklch(0.25 0.02 50);
+  --muted: oklch(0.94 0.02 140);
+  --muted-foreground: oklch(0.45 0.03 50);
+  --accent: oklch(0.78 0.1 85);
+  --accent-foreground: oklch(0.2 0.02 50);
+  --destructive: oklch(0.55 0.15 30);
+  --destructive-foreground: oklch(0.97 0.01 90);
+  --border: oklch(0.9 0.02 90);
+  --input: oklch(0.9 0.02 90);
+  --ring: oklch(0.45 0.08 160);
+  --chart-1: oklch(0.35 0.08 160);
+  --chart-2: oklch(0.78 0.1 85);
+  --chart-3: oklch(0.55 0.06 160);
+  --chart-4: oklch(0.65 0.08 85);
+  --chart-5: oklch(0.45 0.06 140);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.97 0.005 90);
+  --sidebar-foreground: oklch(0.2 0.02 50);
+  --sidebar-primary: oklch(0.35 0.08 160);
+  --sidebar-primary-foreground: oklch(0.97 0.01 90);
+  --sidebar-accent: oklch(0.92 0.03 85);
+  --sidebar-accent-foreground: oklch(0.25 0.02 50);
+  --sidebar-border: oklch(0.9 0.02 90);
+  --sidebar-ring: oklch(0.45 0.08 160);
+  --font-sans: "Inter", "Inter Fallback";
+  --font-heading: "Plus Jakarta Sans", "Inter Fallback";
+}
+
+/* ─── Bamboo template — accessibility enhancements ──────────────────────────
+   Focus-visible outlines for every interactive element (WCAG 2.4.7 / 2.4.11).
+   prefers-reduced-motion support (WCAG 2.3.3 / best practice at AA).         */
+
+.bamboo *:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bamboo *,
+  .bamboo *::before,
+  .bamboo *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Variant selector buttons (N-5) — shared by every template that renders a
+   variant selector with the `.bamboo-variant-btn` class: .bamboo,
+   .animated-bamboo and .happy-bamboo. Keep these two rules functionally
+   identical across all three roots: do not rename, delete, or restyle them,
+   and extend the selector list rather than adding a second copy. ── */
+.bamboo .bamboo-variant-btn[aria-disabled="true"],
+.animated-bamboo .bamboo-variant-btn[aria-disabled="true"],
+.happy-bamboo .bamboo-variant-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bamboo .bamboo-variant-btn:focus-visible,
+.animated-bamboo .bamboo-variant-btn:focus-visible,
+.happy-bamboo .bamboo-variant-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ── Animated Bamboo — "Illustrated & Alive" design tokens. ──────────────────
+   Everything below, down to the `.happy-bamboo` block, belongs to the
+   animated-bamboo template and is scoped to .animated-bamboo so it never
+   bleeds into .bamboo or any other template. Two tiers:
    Layer A = brand surface tokens (text/backgrounds/buttons, always consumed
    via var(--bamboo-*)); Layer A2 = --bamboo-ill-* illustration sub-palette,
    used ONLY as SVG fills inside shared/bamboo-sprite.tsx, never for text or
@@ -98,7 +177,7 @@
    page components (replaced template-wave by template-wave) keep rendering
    correctly until they're rebuilt. Authority: docs/templates/bamboo/design.md */
 
-.bamboo {
+.animated-bamboo {
   /* Layer A — brand tokens */
   --bamboo-sage: #cfe0b4;
   --bamboo-sage-deep: #b7cf96;
@@ -204,24 +283,24 @@
   color: var(--bamboo-ink);
 }
 
-/* ─── Bamboo template — accessibility enhancements ──────────────────────────
+/* ─── Animated Bamboo template — accessibility enhancements ─────────────────
    Focus-visible outlines for every interactive element (WCAG 2.4.7 / 2.4.11).
    prefers-reduced-motion support (WCAG 2.3.3 / best practice at AA).         */
 
-.bamboo *:focus-visible {
+.animated-bamboo *:focus-visible {
   outline: 2px solid var(--bamboo-pine);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
-.bamboo .on-pine *:focus-visible {
+.animated-bamboo .on-pine *:focus-visible {
   outline-color: var(--bamboo-cream);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bamboo *,
-  .bamboo *::before,
-  .bamboo *::after {
+  .animated-bamboo *,
+  .animated-bamboo *::before,
+  .animated-bamboo *::after {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
@@ -231,24 +310,8 @@
   }
 }
 
-/* ── Variant selector buttons (N-5) — shared with happy-bamboo, which also
-   uses the `.bamboo-variant-btn` class on its variant selector. Keep these
-   two rules functionally byte-identical for .happy-bamboo: do not rename,
-   delete, or restyle them. ── */
-.bamboo .bamboo-variant-btn[aria-disabled="true"],
-.happy-bamboo .bamboo-variant-btn[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.bamboo .bamboo-variant-btn:focus-visible,
-.happy-bamboo .bamboo-variant-btn:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
 /* ── Skip link ── */
-.bamboo .bamboo-skip-link {
+.animated-bamboo .bamboo-skip-link {
   position: absolute;
   left: 16px;
   top: -60px;
@@ -262,14 +325,14 @@
   transition: top 0.2s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-skip-link:focus {
+.animated-bamboo .bamboo-skip-link:focus {
   top: 14px;
 }
 
 /* The skip link's only jump target — without this, activating it scrolls
    #bamboo-main-content flush to the viewport top while the sticky header
    (`--bamboo-header-offset`) still renders over the first ~82px of it. */
-.bamboo #bamboo-main-content {
+.animated-bamboo #bamboo-main-content {
   scroll-margin-top: var(--bamboo-header-offset, 82px);
 }
 
@@ -397,24 +460,24 @@
   }
 }
 
-.bamboo .bamboo-reveal.out,
-.bamboo .bamboo-reveal-group.out .bamboo-reveal-item {
+.animated-bamboo .bamboo-reveal.out,
+.animated-bamboo .bamboo-reveal-group.out .bamboo-reveal-item {
   opacity: 0;
   transform: translateY(24px);
 }
 
-.bamboo .bamboo-reveal.in {
+.animated-bamboo .bamboo-reveal.in {
   animation: bamboo-reveal-in 0.7s var(--bamboo-ease) backwards;
   animation-delay: var(--rd, 0ms);
 }
 
-.bamboo .bamboo-reveal-group.in .bamboo-reveal-item {
+.animated-bamboo .bamboo-reveal-group.in .bamboo-reveal-item {
   animation: bamboo-reveal-in 0.7s var(--bamboo-ease) backwards;
   animation-delay: calc(var(--i, 0) * 90ms);
 }
 
 /* ── Torn-leaf section divider (shared/bamboo-edge.tsx) ── */
-.bamboo .bamboo-edge {
+.animated-bamboo .bamboo-edge {
   display: block;
   line-height: 0;
   position: relative;
@@ -427,31 +490,31 @@
    its last torn edge and the footer. The margin-block rule above is unlayered,
    so Tailwind's mt-auto cannot win over it — this unlayered, more specific
    rule can (margin-bottom keeps its -2px seam overlap with the footer). */
-.bamboo .bamboo-edge.bamboo-edge-foot {
+.animated-bamboo .bamboo-edge.bamboo-edge-foot {
   margin-top: auto;
 }
 
 /* …and the band right before that edge absorbs any leftover height first, so
    the filler takes the band's own colour (sage bands included, not just
    paper). Auto margins only receive space that flex-grow leaves over. */
-.bamboo main > :has(+ .bamboo-edge-foot),
-.bamboo main > * > :has(+ .bamboo-edge-foot) {
+.animated-bamboo main > :has(+ .bamboo-edge-foot),
+.animated-bamboo main > * > :has(+ .bamboo-edge-foot) {
   flex-grow: 1;
 }
 
-.bamboo .bamboo-edge svg {
+.animated-bamboo .bamboo-edge svg {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.bamboo .bamboo-edge-leaves {
+.animated-bamboo .bamboo-edge-leaves {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.bamboo .bamboo-edge-leaves span {
+.animated-bamboo .bamboo-edge-leaves span {
   position: absolute;
   left: var(--l);
   top: var(--t, 20%);
@@ -459,14 +522,14 @@
   transform: rotate(var(--r, 0deg));
 }
 
-.bamboo .bamboo-edge-leaves svg {
+.animated-bamboo .bamboo-edge-leaves svg {
   width: 100%;
   height: auto;
 }
 
 /* ── Hero still-life scene primitives (the composition itself is the
    homepage agent's job next wave — these are the shared mechanics) ── */
-.bamboo .bamboo-el {
+.animated-bamboo .bamboo-el {
   position: absolute;
   left: var(--l, 50%);
   top: var(--t, auto);
@@ -475,39 +538,39 @@
   animation: bamboo-pop-in 0.72s var(--bamboo-ease) both var(--d, 0s);
 }
 
-.bamboo .bamboo-el--b {
+.animated-bamboo .bamboo-el--b {
   top: auto;
   bottom: var(--b, 0);
 }
 
-.bamboo .bamboo-el svg {
+.animated-bamboo .bamboo-el svg {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.bamboo .bamboo-el .bamboo-sway {
+.animated-bamboo .bamboo-el .bamboo-sway {
   display: block;
   transform-origin: 50% 100%;
   animation: bamboo-sway var(--dur, 8s) ease-in-out infinite alternate;
   animation-delay: var(--dl, 0s);
 }
 
-.bamboo .bamboo-el .bamboo-bob {
+.animated-bamboo .bamboo-el .bamboo-bob {
   display: block;
   transform-origin: 50% 50%;
   animation: bamboo-bob var(--dur, 5.4s) ease-in-out infinite alternate;
   animation-delay: var(--dl, 0s);
 }
 
-.bamboo .bamboo-el .bamboo-tilt {
+.animated-bamboo .bamboo-el .bamboo-tilt {
   display: block;
   transform-origin: 50% 100%;
   transform: rotate(var(--rz, 0deg));
 }
 
 /* Contact shadow — every still-life element gets one so nothing floats. */
-.bamboo .bamboo-shd {
+.animated-bamboo .bamboo-shd {
   position: absolute;
   left: 50%;
   bottom: var(--sb, -5%);
@@ -523,7 +586,7 @@
   pointer-events: none;
 }
 
-.bamboo .bamboo-drift {
+.animated-bamboo .bamboo-drift {
   position: absolute;
   left: var(--l, 50%);
   top: var(--t, 10%);
@@ -533,7 +596,7 @@
   animation-delay: var(--dl, 0s);
 }
 
-.bamboo .bamboo-drift svg {
+.animated-bamboo .bamboo-drift svg {
   display: block;
   width: 100%;
   height: auto;
@@ -543,16 +606,16 @@
    `display: block` unlayered, which out-specifies Tailwind's layered
    `hidden`/responsive-hidden utilities, so pages can't mobile-hide a
    decorative scene element with a plain `hidden md:block`. These two
-   `.bamboo`-scoped utilities give pages an explicit, always-winning escape
+   `.animated-bamboo`-scoped utilities give pages an explicit, always-winning escape
    hatch instead. ── */
 @media (max-width: 900px) {
-  .bamboo .bamboo-m-hide {
+  .animated-bamboo .bamboo-m-hide {
     display: none !important;
   }
 }
 
 @media (min-width: 901px) {
-  .bamboo .bamboo-d-hide {
+  .animated-bamboo .bamboo-d-hide {
     display: none !important;
   }
 }
@@ -573,37 +636,37 @@
 @media (max-width: 900px) {
   /* Homepage hero (`homepage/sections/bamboo-home-hero.tsx`) — mockup
      `.h-stalk-r` / `.c-pack` / `.c-roll-b` / `.c-pot` / `.drift.d1-3`. */
-  .bamboo .bamboo-h-stalk-r {
+  .animated-bamboo .bamboo-h-stalk-r {
     --w: 158px !important;
     --l: 76% !important;
     --b: -206px !important;
   }
-  .bamboo .bamboo-c-pack {
+  .animated-bamboo .bamboo-c-pack {
     --w: 55% !important;
     --l: 0% !important;
     --b: 4% !important;
   }
-  .bamboo .bamboo-c-roll-b {
+  .animated-bamboo .bamboo-c-roll-b {
     --w: 24% !important;
     --l: 58% !important;
     --b: 8% !important;
   }
-  .bamboo .bamboo-c-pot {
+  .animated-bamboo .bamboo-c-pot {
     --w: 22% !important;
     --l: 69% !important;
     --b: 6% !important;
   }
-  .bamboo .bamboo-d1 {
+  .animated-bamboo .bamboo-d1 {
     --l: 78% !important;
     --t: 8% !important;
     --dy: 400px !important;
   }
-  .bamboo .bamboo-d2 {
+  .animated-bamboo .bamboo-d2 {
     --l: 86% !important;
     --t: 4% !important;
     --dy: 420px !important;
   }
-  .bamboo .bamboo-d3 {
+  .animated-bamboo .bamboo-d3 {
     --l: 14% !important;
     --t: 24% !important;
     --dy: 330px !important;
@@ -612,7 +675,7 @@
 
   /* Shop hero shelf (`shop/bamboo-shop-page.tsx`) — mockup
      `.hero-band .drift.sd1`. */
-  .bamboo .bamboo-shop-drift-1 {
+  .animated-bamboo .bamboo-shop-drift-1 {
     --l: 74% !important;
     --t: 6% !important;
     --dy: 250px !important;
@@ -621,18 +684,18 @@
 
   /* Product page reassurance band (`products/bamboo-product-page.tsx`) —
      mockup `.sp-stalk` / `.sp-leaf-a` / `.sp-leaf-b`. */
-  .bamboo .bamboo-pdp-stalk {
+  .animated-bamboo .bamboo-pdp-stalk {
     --w: 132px !important;
     --l: 78% !important;
     --b: -128px !important;
   }
-  .bamboo .bamboo-pdp-leaf-a {
+  .animated-bamboo .bamboo-pdp-leaf-a {
     --l: 84% !important;
     --t: 1% !important;
     --dx: -44px !important;
     --dy: 230px !important;
   }
-  .bamboo .bamboo-pdp-leaf-b {
+  .animated-bamboo .bamboo-pdp-leaf-b {
     --l: 93% !important;
     --t: 6% !important;
     --dx: -52px !important;
@@ -640,12 +703,12 @@
   }
 
   /* About page hero (`about/bamboo-about-page.tsx`) — mockup `.ad1` / `.ad2`. */
-  .bamboo .bamboo-about-d1 {
+  .animated-bamboo .bamboo-about-d1 {
     --l: 36% !important;
     --t: 6% !important;
     --dy: 300px !important;
   }
-  .bamboo .bamboo-about-d2 {
+  .animated-bamboo .bamboo-about-d2 {
     --l: 60% !important;
     --t: 3% !important;
     --dy: 320px !important;
@@ -653,7 +716,7 @@
 
   /* Contact page hero (`contact/bamboo-contact-page.tsx`) — mockup
      `.p-hero .el`. */
-  .bamboo .bamboo-contact-pot {
+  .animated-bamboo .bamboo-contact-pot {
     --w: 104px !important;
     --l: 80% !important;
     --b: -14px !important;
@@ -661,7 +724,7 @@
 }
 
 /* ── Buttons ── */
-.bamboo .bamboo-btn {
+.animated-bamboo .bamboo-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
@@ -685,32 +748,32 @@
     color 0.28s;
 }
 
-.bamboo .bamboo-btn-primary {
+.animated-bamboo .bamboo-btn-primary {
   background: var(--bamboo-pine);
   color: var(--bamboo-cream);
   box-shadow: 0 12px 26px -16px
     color-mix(in srgb, var(--bamboo-pine) 90%, transparent);
 }
 
-.bamboo .bamboo-btn-primary:hover {
+.animated-bamboo .bamboo-btn-primary:hover {
   background: var(--bamboo-pine-dark);
   transform: translateY(-2px);
   box-shadow: 0 18px 32px -16px
     color-mix(in srgb, var(--bamboo-pine) 95%, transparent);
 }
 
-.bamboo .bamboo-btn-ghost {
+.animated-bamboo .bamboo-btn-ghost {
   border-color: var(--bamboo-pine);
   color: var(--bamboo-pine);
   background: transparent;
 }
 
-.bamboo .bamboo-btn-ghost:hover {
+.animated-bamboo .bamboo-btn-ghost:hover {
   background: color-mix(in srgb, var(--bamboo-pine) 9%, transparent);
   transform: translateY(-2px);
 }
 
-.bamboo .bamboo-btn::after {
+.animated-bamboo .bamboo-btn::after {
   content: "";
   position: absolute;
   left: 1.5rem;
@@ -725,20 +788,20 @@
     opacity 0.25s;
 }
 
-.bamboo .bamboo-btn:hover::after,
-.bamboo .bamboo-btn:focus-visible::after {
+.animated-bamboo .bamboo-btn:hover::after,
+.animated-bamboo .bamboo-btn:focus-visible::after {
   right: 1.5rem;
   opacity: 1;
 }
 
 /* ── Swipe links (inline text links + footer nav) ── */
-.bamboo .bamboo-swipe {
+.animated-bamboo .bamboo-swipe {
   position: relative;
   text-decoration: none;
   font-weight: 500;
 }
 
-.bamboo .bamboo-swipe::after {
+.animated-bamboo .bamboo-swipe::after {
   content: "";
   position: absolute;
   left: 0;
@@ -750,25 +813,25 @@
   transition: right 0.38s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-swipe:hover::after,
-.bamboo .bamboo-swipe:focus-visible::after {
+.animated-bamboo .bamboo-swipe:hover::after,
+.animated-bamboo .bamboo-swipe:focus-visible::after {
   right: 0;
 }
 
-.bamboo .on-pine .bamboo-swipe::after {
+.animated-bamboo .on-pine .bamboo-swipe::after {
   background: var(--bamboo-sage-deep);
 }
 
 /* ── Header nav links — terracotta hover swipe; permanent pine underline on
    the active page (data-current="true", set from usePathname). ── */
-.bamboo .bamboo-nav-link {
+.animated-bamboo .bamboo-nav-link {
   position: relative;
   text-decoration: none;
   font-weight: 500;
   color: var(--bamboo-pine);
 }
 
-.bamboo .bamboo-nav-link::after {
+.animated-bamboo .bamboo-nav-link::after {
   content: "";
   position: absolute;
   left: 0;
@@ -782,22 +845,22 @@
     background-color 0.2s;
 }
 
-.bamboo .bamboo-nav-link:hover::after,
-.bamboo .bamboo-nav-link:focus-visible::after {
+.animated-bamboo .bamboo-nav-link:hover::after,
+.animated-bamboo .bamboo-nav-link:focus-visible::after {
   right: 0;
 }
 
-.bamboo .bamboo-nav-link[data-current="true"] {
+.animated-bamboo .bamboo-nav-link[data-current="true"] {
   font-weight: 600;
 }
 
-.bamboo .bamboo-nav-link[data-current="true"]::after {
+.animated-bamboo .bamboo-nav-link[data-current="true"]::after {
   right: 0;
   background: var(--bamboo-pine);
 }
 
 /* ── Chip / pill controls (shop toolbar, product variant picker) ── */
-.bamboo .bamboo-chip {
+.animated-bamboo .bamboo-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -816,19 +879,19 @@
     transform 0.25s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-chip:hover {
+.animated-bamboo .bamboo-chip:hover {
   border-color: var(--bamboo-sage-deep);
   transform: translateY(-1px);
 }
 
-.bamboo .bamboo-chip[aria-pressed="true"],
-.bamboo .bamboo-chip[data-active="true"] {
+.animated-bamboo .bamboo-chip[aria-pressed="true"],
+.animated-bamboo .bamboo-chip[data-active="true"] {
   background: var(--bamboo-pine);
   border-color: var(--bamboo-pine);
   color: var(--bamboo-cream);
 }
 
-.bamboo .bamboo-pill-radio {
+.animated-bamboo .bamboo-pill-radio {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -848,19 +911,19 @@
     transform 0.2s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-pill-radio:hover {
+.animated-bamboo .bamboo-pill-radio:hover {
   border-color: var(--bamboo-sage-deep);
 }
 
-.bamboo .bamboo-pill-radio[data-state="checked"],
-.bamboo .bamboo-pill-radio[aria-checked="true"] {
+.animated-bamboo .bamboo-pill-radio[data-state="checked"],
+.animated-bamboo .bamboo-pill-radio[aria-checked="true"] {
   background: var(--bamboo-pine);
   border-color: var(--bamboo-pine);
   color: var(--bamboo-cream);
 }
 
-.bamboo .bamboo-pill-radio[data-disabled="true"],
-.bamboo .bamboo-pill-radio[aria-disabled="true"] {
+.animated-bamboo .bamboo-pill-radio[data-disabled="true"],
+.animated-bamboo .bamboo-pill-radio[aria-disabled="true"] {
   opacity: 0.5;
   cursor: not-allowed;
   text-decoration: line-through;
@@ -868,7 +931,7 @@
 }
 
 /* ── Torn-paper card shell (contact form / info panels) ── */
-.bamboo .bamboo-torn-card {
+.animated-bamboo .bamboo-torn-card {
   position: relative;
   background: var(--bamboo-roll);
   border-radius: 20px;
@@ -876,7 +939,7 @@
   box-shadow: var(--bamboo-soft);
 }
 
-.bamboo .bamboo-torn-card::before {
+.animated-bamboo .bamboo-torn-card::before {
   content: "";
   position: absolute;
   left: 28px;
@@ -892,7 +955,7 @@
 }
 
 /* ── Speech-bubble testimonials ── */
-.bamboo .bamboo-bubble {
+.animated-bamboo .bamboo-bubble {
   position: relative;
   background: var(--bamboo-roll);
   border-radius: 22px;
@@ -903,7 +966,7 @@
     box-shadow 0.4s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-bubble::after {
+.animated-bamboo .bamboo-bubble::after {
   content: "";
   position: absolute;
   left: 38px;
@@ -914,26 +977,26 @@
   clip-path: polygon(0 0, 100% 0, 8% 100%);
 }
 
-.bamboo .bamboo-bubble[data-rotate="left"] {
+.animated-bamboo .bamboo-bubble[data-rotate="left"] {
   transform: rotate(-1deg);
 }
 
-.bamboo .bamboo-bubble[data-rotate="right"] {
+.animated-bamboo .bamboo-bubble[data-rotate="right"] {
   transform: rotate(1deg);
 }
 
-.bamboo .bamboo-bubble:hover {
+.animated-bamboo .bamboo-bubble:hover {
   transform: rotate(0deg) translateY(-6px);
   box-shadow: var(--bamboo-soft-lg);
 }
 
 /* ── Why-bamboo self-drawing timeline ── */
-.bamboo .bamboo-timeline {
+.animated-bamboo .bamboo-timeline {
   position: relative;
   margin-top: 60px;
 }
 
-.bamboo .bamboo-tl-line {
+.animated-bamboo .bamboo-tl-line {
   position: absolute;
   left: 0;
   right: 0;
@@ -942,44 +1005,44 @@
   pointer-events: none;
 }
 
-.bamboo .bamboo-tl-line svg {
+.animated-bamboo .bamboo-tl-line svg {
   display: block;
   width: 100%;
   height: 140px;
 }
 
-.bamboo .bamboo-tl-line.bamboo-tl-v {
+.animated-bamboo .bamboo-tl-line.bamboo-tl-v {
   display: none;
 }
 
-.bamboo .bamboo-tl-path {
+.animated-bamboo .bamboo-tl-path {
   stroke-dasharray: var(--len, 1200);
   stroke-dashoffset: var(--len, 1200);
   transition: stroke-dashoffset 1.4s cubic-bezier(0.4, 0.1, 0.2, 1);
 }
 
-.bamboo .bamboo-timeline.drawn .bamboo-tl-path {
+.animated-bamboo .bamboo-timeline.drawn .bamboo-tl-path {
   stroke-dashoffset: 0;
 }
 
-.bamboo .bamboo-tl-node,
-.bamboo .bamboo-tl-sprig {
+.animated-bamboo .bamboo-tl-node,
+.animated-bamboo .bamboo-tl-sprig {
   opacity: 0;
 }
 
-.bamboo .bamboo-timeline.drawn .bamboo-tl-node,
-.bamboo .bamboo-timeline.drawn .bamboo-tl-sprig {
+.animated-bamboo .bamboo-timeline.drawn .bamboo-tl-node,
+.animated-bamboo .bamboo-timeline.drawn .bamboo-tl-sprig {
   animation: bamboo-pop-in 0.5s var(--bamboo-ease) both var(--nd, 0.6s);
 }
 
-.bamboo .bamboo-tl-stations {
+.animated-bamboo .bamboo-tl-stations {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 34px;
 }
 
-.bamboo .bamboo-station {
+.animated-bamboo .bamboo-station {
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -992,12 +1055,12 @@
   transition-delay: var(--sd, 0s);
 }
 
-.bamboo .bamboo-timeline.drawn .bamboo-station {
+.animated-bamboo .bamboo-timeline.drawn .bamboo-station {
   opacity: 1;
   transform: none;
 }
 
-.bamboo .bamboo-disc {
+.animated-bamboo .bamboo-disc {
   width: var(--dw, 132px);
   height: var(--dw, 132px);
   border-radius: 50%;
@@ -1009,18 +1072,18 @@
     color-mix(in srgb, var(--bamboo-ink) 60%, transparent);
 }
 
-.bamboo .bamboo-disc svg {
+.animated-bamboo .bamboo-disc svg {
   width: 66%;
   height: auto;
   display: block;
 }
 
 @media (max-width: 900px) {
-  .bamboo .bamboo-tl-line.bamboo-tl-h {
+  .animated-bamboo .bamboo-tl-line.bamboo-tl-h {
     display: none;
   }
 
-  .bamboo .bamboo-tl-line.bamboo-tl-v {
+  .animated-bamboo .bamboo-tl-line.bamboo-tl-v {
     display: block;
     position: absolute;
     left: 18px;
@@ -1031,24 +1094,24 @@
     height: auto;
   }
 
-  .bamboo .bamboo-tl-line.bamboo-tl-v svg {
+  .animated-bamboo .bamboo-tl-line.bamboo-tl-v svg {
     height: 100%;
     width: 40px;
   }
 
-  .bamboo .bamboo-tl-stations {
+  .animated-bamboo .bamboo-tl-stations {
     grid-template-columns: 1fr;
     gap: 42px;
   }
 
-  .bamboo .bamboo-station {
+  .animated-bamboo .bamboo-station {
     text-align: left;
     flex-direction: row;
     align-items: flex-start;
     gap: 18px;
   }
 
-  .bamboo .bamboo-disc {
+  .animated-bamboo .bamboo-disc {
     --dw: 76px !important;
     flex: none;
     border-width: 2px;
@@ -1056,14 +1119,14 @@
 }
 
 /* ── Blog / generic rich text ── */
-.bamboo .bamboo-prose {
+.animated-bamboo .bamboo-prose {
   color: var(--bamboo-ink);
   font-size: 1.05rem;
   line-height: 1.7;
   max-width: 68ch;
 }
 
-.bamboo .bamboo-prose h2 {
+.animated-bamboo .bamboo-prose h2 {
   font-family: var(--font-bamboo-display), var(--font-heading);
   color: var(--bamboo-pine);
   font-size: clamp(1.6rem, 2.6vw, 2.2rem);
@@ -1071,7 +1134,7 @@
   margin-bottom: 0.5em;
 }
 
-.bamboo .bamboo-prose h3 {
+.animated-bamboo .bamboo-prose h3 {
   font-family: var(--font-bamboo-display), var(--font-heading);
   color: var(--bamboo-pine);
   font-size: 1.3rem;
@@ -1079,12 +1142,12 @@
   margin-bottom: 0.5em;
 }
 
-.bamboo .bamboo-prose p {
+.animated-bamboo .bamboo-prose p {
   margin-top: 1.2em;
 }
 
-.bamboo .bamboo-prose ul,
-.bamboo .bamboo-prose ol {
+.animated-bamboo .bamboo-prose ul,
+.animated-bamboo .bamboo-prose ol {
   margin-top: 1.2em;
   padding-left: 1.4em;
   display: flex;
@@ -1092,26 +1155,26 @@
   gap: 0.5em;
 }
 
-.bamboo .bamboo-prose li::marker {
+.animated-bamboo .bamboo-prose li::marker {
   color: var(--bamboo-terracotta-deep);
 }
 
-.bamboo .bamboo-prose a {
+.animated-bamboo .bamboo-prose a {
   color: var(--bamboo-terracotta-deep);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.bamboo .bamboo-prose a:hover {
+.animated-bamboo .bamboo-prose a:hover {
   color: var(--bamboo-pine);
 }
 
-.bamboo .bamboo-prose strong {
+.animated-bamboo .bamboo-prose strong {
   color: var(--bamboo-pine);
   font-weight: 600;
 }
 
-.bamboo .bamboo-prose blockquote {
+.animated-bamboo .bamboo-prose blockquote {
   margin: 2em 0;
   padding: 1.5em 1.75em;
   background: var(--bamboo-sage);
@@ -1120,14 +1183,14 @@
   color: var(--bamboo-ink-soft);
 }
 
-.bamboo .bamboo-prose img {
+.animated-bamboo .bamboo-prose img {
   border-radius: 16px;
   margin: 2em 0;
   width: 100%;
 }
 
 /* ── Contact form ── */
-.bamboo .bamboo-contact-form label {
+.animated-bamboo .bamboo-contact-form label {
   display: block;
   margin-bottom: 0.4rem;
   font-size: 0.92rem;
@@ -1135,9 +1198,9 @@
   color: var(--bamboo-ink-soft);
 }
 
-.bamboo .bamboo-contact-form input,
-.bamboo .bamboo-contact-form textarea,
-.bamboo .bamboo-contact-form select {
+.animated-bamboo .bamboo-contact-form input,
+.animated-bamboo .bamboo-contact-form textarea,
+.animated-bamboo .bamboo-contact-form select {
   width: 100%;
   background: var(--bamboo-paper);
   border: 2px solid var(--bamboo-sage-deep);
@@ -1150,21 +1213,21 @@
     box-shadow 0.2s;
 }
 
-.bamboo .bamboo-contact-form input::placeholder,
-.bamboo .bamboo-contact-form textarea::placeholder {
+.animated-bamboo .bamboo-contact-form input::placeholder,
+.animated-bamboo .bamboo-contact-form textarea::placeholder {
   color: var(--bamboo-muted);
 }
 
-.bamboo .bamboo-contact-form input:focus-visible,
-.bamboo .bamboo-contact-form textarea:focus-visible,
-.bamboo .bamboo-contact-form select:focus-visible {
+.animated-bamboo .bamboo-contact-form input:focus-visible,
+.animated-bamboo .bamboo-contact-form textarea:focus-visible,
+.animated-bamboo .bamboo-contact-form select:focus-visible {
   outline: none;
   border-color: var(--bamboo-pine);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--bamboo-pine) 18%, transparent);
 }
 
 /* ── Quantity stepper ── */
-.bamboo .bamboo-qty-stepper {
+.animated-bamboo .bamboo-qty-stepper {
   display: inline-flex;
   align-items: center;
   min-height: 3.5rem; /* = .bamboo-btn, so the purchase row aligns */
@@ -1173,7 +1236,7 @@
   overflow: hidden;
 }
 
-.bamboo .bamboo-qty-stepper button {
+.animated-bamboo .bamboo-qty-stepper button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1186,17 +1249,17 @@
   transition: background-color 0.2s;
 }
 
-.bamboo .bamboo-qty-stepper button:hover:not(:disabled) {
+.animated-bamboo .bamboo-qty-stepper button:hover:not(:disabled) {
   background: color-mix(in srgb, var(--bamboo-pine) 9%, transparent);
 }
 
-.bamboo .bamboo-qty-stepper button:disabled {
+.animated-bamboo .bamboo-qty-stepper button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.bamboo .bamboo-qty-stepper output,
-.bamboo .bamboo-qty-stepper span {
+.animated-bamboo .bamboo-qty-stepper output,
+.animated-bamboo .bamboo-qty-stepper span {
   min-width: 2.5rem;
   text-align: center;
   font-weight: 600;
@@ -1204,7 +1267,7 @@
 }
 
 /* ── Tilted photo card (location lifestyle photo, about mission/label) ── */
-.bamboo .bamboo-photo-card {
+.animated-bamboo .bamboo-photo-card {
   position: relative;
   display: block;
   background: var(--bamboo-roll);
@@ -1213,7 +1276,7 @@
   box-shadow: var(--bamboo-soft-lg);
 }
 
-.bamboo .bamboo-photo-card::before {
+.animated-bamboo .bamboo-photo-card::before {
   content: "";
   position: absolute;
   left: 14px;
@@ -1228,7 +1291,7 @@
   border-radius: 2px;
 }
 
-.bamboo .bamboo-photo-card::after {
+.animated-bamboo .bamboo-photo-card::after {
   content: "";
   position: absolute;
   left: 10%;
@@ -1244,14 +1307,14 @@
   );
 }
 
-.bamboo .bamboo-photo-card img {
+.animated-bamboo .bamboo-photo-card img {
   display: block;
   width: 100%;
   height: auto;
   border-radius: 8px;
 }
 
-.bamboo .bamboo-photo-card figcaption {
+.animated-bamboo .bamboo-photo-card figcaption {
   margin: 14px 0 0;
   font-size: 0.85rem;
   font-weight: 500;
@@ -1259,7 +1322,7 @@
   text-align: right;
 }
 
-.bamboo .bamboo-photo-badge {
+.animated-bamboo .bamboo-photo-badge {
   position: absolute;
   top: -18px;
   right: -16px;
@@ -1273,20 +1336,20 @@
 /* ── Footer full-bleed illustration field + drifting leaf. The field is a
    1440x560 scatter scaled with xMidYMid slice, so it covers whatever height
    the footer has (mobile's stacked columns included). ── */
-.bamboo .bamboo-foot-field {
+.animated-bamboo .bamboo-foot-field {
   position: absolute;
   inset: 0;
   opacity: 0.05;
   pointer-events: none;
 }
 
-.bamboo .bamboo-foot-field svg {
+.animated-bamboo .bamboo-foot-field svg {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.bamboo .bamboo-foot-leaf {
+.animated-bamboo .bamboo-foot-leaf {
   position: absolute;
   top: 150px;
   left: 0;
@@ -1302,7 +1365,7 @@
    descendant and shrink the dialog to the header strip. Closed = visibility
    hidden (delayed until the exit finishes) + the inert attribute set by the
    component. ── */
-.bamboo .bamboo-menu {
+.animated-bamboo .bamboo-menu {
   position: fixed;
   inset: 0;
   z-index: 60;
@@ -1312,20 +1375,20 @@
   transition: visibility 0s linear 0.3s;
 }
 
-.bamboo .bamboo-menu[data-open="true"] {
+.animated-bamboo .bamboo-menu[data-open="true"] {
   visibility: visible;
   transition-delay: 0s;
 }
 
-.bamboo .bamboo-menu:not([data-open="true"]) {
+.animated-bamboo .bamboo-menu:not([data-open="true"]) {
   pointer-events: none;
 }
 
-.bamboo .bamboo-menu:not([data-open="true"]) .bamboo-drift {
+.animated-bamboo .bamboo-menu:not([data-open="true"]) .bamboo-drift {
   animation-play-state: paused;
 }
 
-.bamboo .bamboo-menu-backdrop {
+.animated-bamboo .bamboo-menu-backdrop {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -1334,12 +1397,12 @@
   transition: opacity 0.2s linear;
 }
 
-.bamboo .bamboo-menu[data-open="true"] .bamboo-menu-backdrop {
+.animated-bamboo .bamboo-menu[data-open="true"] .bamboo-menu-backdrop {
   opacity: 1;
   transition-duration: 0.25s;
 }
 
-.bamboo .bamboo-menu-panel {
+.animated-bamboo .bamboo-menu-panel {
   position: relative;
   display: flex;
   flex: 1;
@@ -1361,14 +1424,14 @@
     transform 0.2s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-menu[data-open="true"] .bamboo-menu-panel {
+.animated-bamboo .bamboo-menu[data-open="true"] .bamboo-menu-panel {
   opacity: 1;
   transform: none;
   transition-duration: 0.42s;
 }
 
 /* Perforation dash along the panel's top edge — the card system's mark */
-.bamboo .bamboo-menu-panel::before {
+.animated-bamboo .bamboo-menu-panel::before {
   content: "";
   position: absolute;
   left: 22px;
@@ -1383,7 +1446,7 @@
   border-radius: 2px;
 }
 
-.bamboo .bamboo-menu-top {
+.animated-bamboo .bamboo-menu-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1391,13 +1454,13 @@
   padding-top: 6px;
 }
 
-.bamboo .bamboo-menu-list {
+.animated-bamboo .bamboo-menu-list {
   list-style: none;
   margin: 28px 0 0;
   padding: 0;
 }
 
-.bamboo .bamboo-menu-item {
+.animated-bamboo .bamboo-menu-item {
   opacity: 0;
   transform: translateY(14px);
   transition:
@@ -1406,14 +1469,14 @@
   transition-delay: 0ms;
 }
 
-.bamboo .bamboo-menu[data-open="true"] .bamboo-menu-item {
+.animated-bamboo .bamboo-menu[data-open="true"] .bamboo-menu-item {
   opacity: 1;
   transform: none;
   transition-duration: 0.5s;
   transition-delay: calc(var(--i, 0) * 55ms + 120ms);
 }
 
-.bamboo .bamboo-menu-link {
+.animated-bamboo .bamboo-menu-link {
   position: relative;
   display: block;
   padding: 15px 4px 17px;
@@ -1428,7 +1491,7 @@
   text-decoration: none;
 }
 
-.bamboo .bamboo-menu-link::after {
+.animated-bamboo .bamboo-menu-link::after {
   content: "";
   position: absolute;
   left: 4px;
@@ -1440,17 +1503,17 @@
   transition: width 0.38s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-menu-link:hover::after,
-.bamboo .bamboo-menu-link:focus-visible::after {
+.animated-bamboo .bamboo-menu-link:hover::after,
+.animated-bamboo .bamboo-menu-link:focus-visible::after {
   width: 48px;
 }
 
-.bamboo .bamboo-menu-link[data-current="true"]::after {
+.animated-bamboo .bamboo-menu-link[data-current="true"]::after {
   width: 48px;
   background: var(--bamboo-pine);
 }
 
-.bamboo .bamboo-menu-sublist {
+.animated-bamboo .bamboo-menu-sublist {
   list-style: none;
   margin: 0;
   padding: 6px 0 10px 16px;
@@ -1458,7 +1521,7 @@
     color-mix(in srgb, var(--bamboo-ink) 10%, transparent);
 }
 
-.bamboo .bamboo-menu-sublink {
+.animated-bamboo .bamboo-menu-sublink {
   display: block;
   padding: 9px 4px;
   font-size: 1.02rem;
@@ -1467,12 +1530,12 @@
   text-decoration: none;
 }
 
-.bamboo .bamboo-menu-sublink:hover,
-.bamboo .bamboo-menu-sublink[data-current="true"] {
+.animated-bamboo .bamboo-menu-sublink:hover,
+.animated-bamboo .bamboo-menu-sublink[data-current="true"] {
   color: var(--bamboo-pine);
 }
 
-.bamboo .bamboo-menu-foot {
+.animated-bamboo .bamboo-menu-foot {
   margin-top: auto;
   padding-top: 26px;
   font-size: 0.95rem;
@@ -1480,7 +1543,7 @@
   color: var(--bamboo-muted);
 }
 
-.bamboo .bamboo-menu-foot a {
+.animated-bamboo .bamboo-menu-foot a {
   color: var(--bamboo-ink-soft);
   text-decoration: underline;
   text-decoration-color: color-mix(
@@ -1491,13 +1554,13 @@
   text-underline-offset: 4px;
 }
 
-.bamboo .bamboo-menu-foot a:hover {
+.animated-bamboo .bamboo-menu-foot a:hover {
   color: var(--bamboo-pine);
   text-decoration-color: var(--bamboo-terracotta);
 }
 
 @media (min-width: 901px) {
-  .bamboo .bamboo-menu {
+  .animated-bamboo .bamboo-menu {
     display: none;
   }
 }
@@ -1505,7 +1568,7 @@
 /* ── Header icon buttons (cart / account / wishlist / burger) — the mockup's
    `.cart`/`.burger` treatment, shared so every icon button reads as one
    family. ── */
-.bamboo .bamboo-icon-btn {
+.animated-bamboo .bamboo-icon-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -1524,13 +1587,13 @@
     transform 0.25s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-icon-btn:hover {
+.animated-bamboo .bamboo-icon-btn:hover {
   background: color-mix(in srgb, var(--bamboo-pine) 10%, transparent);
   border-color: var(--bamboo-pine);
   transform: translateY(-2px);
 }
 
-.bamboo .bamboo-icon-badge {
+.animated-bamboo .bamboo-icon-badge {
   position: absolute;
   top: -4px;
   right: -4px;
@@ -1547,7 +1610,7 @@
 }
 
 /* ── Desktop nav dropdown panel (nav items with children) ── */
-.bamboo .bamboo-nav-dropdown {
+.animated-bamboo .bamboo-nav-dropdown {
   min-width: 180px;
   overflow: hidden;
   border-radius: var(--radius);
@@ -1557,7 +1620,7 @@
   box-shadow: var(--bamboo-soft);
 }
 
-.bamboo .bamboo-nav-dropdown-link {
+.animated-bamboo .bamboo-nav-dropdown-link {
   display: block;
   padding: 10px 18px;
   font-size: 0.92rem;
@@ -1567,20 +1630,20 @@
     color 0.2s;
 }
 
-.bamboo .bamboo-nav-dropdown-link:hover,
-.bamboo .bamboo-nav-dropdown-link:focus-visible {
+.animated-bamboo .bamboo-nav-dropdown-link:hover,
+.animated-bamboo .bamboo-nav-dropdown-link:focus-visible {
   background: color-mix(in srgb, var(--bamboo-sage) 45%, transparent);
   color: var(--bamboo-pine);
 }
 
-.bamboo .bamboo-nav-dropdown-link[data-current="true"] {
+.animated-bamboo .bamboo-nav-dropdown-link[data-current="true"] {
   background: var(--bamboo-sage);
   color: var(--bamboo-pine);
   font-weight: 600;
 }
 
 /* ── Footer text tints ── */
-.bamboo .bamboo-foot-heading {
+.animated-bamboo .bamboo-foot-heading {
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -1588,14 +1651,14 @@
   color: color-mix(in srgb, var(--bamboo-cream) 70%, transparent);
 }
 
-.bamboo .bamboo-foot-tagline {
+.animated-bamboo .bamboo-foot-tagline {
   margin-top: 16px;
   max-width: 34ch;
   font-size: 0.98rem;
   color: color-mix(in srgb, var(--bamboo-cream) 78%, transparent);
 }
 
-.bamboo .bamboo-foot-bottom {
+.animated-bamboo .bamboo-foot-bottom {
   position: relative;
   margin-top: 56px;
   display: flex;
@@ -1612,7 +1675,7 @@
    ~202-256). Real-product photo cards only — the mockup's illustrated
    `.art` sample cards are NOT ported (design.md: catalog stays DB-driven,
    those were mockup filler). ── */
-.bamboo .bamboo-card {
+.animated-bamboo .bamboo-card {
   position: relative;
   background: var(--bamboo-roll);
   border-radius: 20px;
@@ -1623,7 +1686,7 @@
     box-shadow 0.4s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-card::before {
+.animated-bamboo .bamboo-card::before {
   content: "";
   position: absolute;
   left: 22px;
@@ -1638,7 +1701,7 @@
   border-radius: 2px;
 }
 
-.bamboo .bamboo-card:hover {
+.animated-bamboo .bamboo-card:hover {
   transform: rotate(-1.5deg) translateY(-8px);
   box-shadow: var(--bamboo-soft-lg);
 }
@@ -1652,17 +1715,17 @@
    nth child", cycling every 3 items so the variance repeats down a long grid
    instead of only ever touching cards #2/#3 literally. Same rotation values
    as the mockup: −1.5° / +1.2° / −0.9°. */
-.bamboo :nth-child(3n + 2).bamboo-card:hover,
-.bamboo :nth-child(3n + 2) > .bamboo-card:hover {
+.animated-bamboo :nth-child(3n + 2).bamboo-card:hover,
+.animated-bamboo :nth-child(3n + 2) > .bamboo-card:hover {
   transform: rotate(1.2deg) translateY(-8px);
 }
 
-.bamboo :nth-child(3n).bamboo-card:hover,
-.bamboo :nth-child(3n) > .bamboo-card:hover {
+.animated-bamboo :nth-child(3n).bamboo-card:hover,
+.animated-bamboo :nth-child(3n) > .bamboo-card:hover {
   transform: rotate(-0.9deg) translateY(-8px);
 }
 
-.bamboo .bamboo-card-art {
+.animated-bamboo .bamboo-card-art {
   position: relative;
   height: 258px;
   display: grid;
@@ -1671,7 +1734,7 @@
 }
 
 @media (max-width: 620px) {
-  .bamboo .bamboo-card-art {
+  .animated-bamboo .bamboo-card-art {
     height: 212px;
   }
 }
@@ -1679,7 +1742,7 @@
 /* Each card's blob is its own shape, tint and angle — the row must not read
    stamped. Set --bc/--br/--bw/--bh/--brad per card (the mockup varies them
    by nth-child; page agents may instead vary them per product id). */
-.bamboo .bamboo-blob {
+.animated-bamboo .bamboo-blob {
   position: absolute;
   width: var(--bw, 78%);
   height: var(--bh, 78%);
@@ -1689,7 +1752,7 @@
   transition: transform 0.45s var(--bamboo-ease);
 }
 
-.bamboo .bamboo-card:hover .bamboo-blob {
+.animated-bamboo .bamboo-card:hover .bamboo-blob {
   transform: rotate(var(--br, -6deg)) scale(1.09);
 }
 
@@ -1697,7 +1760,7 @@
    grid exactly (card 3's tint is a 55/45 sage/sage-deep blend via
    color-mix, not a new hue) — override with inline --bc/--br/--bw/--bh/--brad
    vars on any card that needs its own personality instead. */
-.bamboo .bamboo-card:nth-child(1) .bamboo-blob {
+.animated-bamboo .bamboo-card:nth-child(1) .bamboo-blob {
   --bc: var(--bamboo-sage);
   --br: -13deg;
   --bw: 80%;
@@ -1705,7 +1768,7 @@
   --brad: 58% 42% 47% 53% / 45% 52% 48% 55%;
 }
 
-.bamboo .bamboo-card:nth-child(2) .bamboo-blob {
+.animated-bamboo .bamboo-card:nth-child(2) .bamboo-blob {
   --bc: var(--bamboo-sage-deep);
   --br: 9deg;
   --bw: 74%;
@@ -1713,7 +1776,7 @@
   --brad: 44% 56% 62% 38% / 53% 42% 58% 47%;
 }
 
-.bamboo .bamboo-card:nth-child(3) .bamboo-blob {
+.animated-bamboo .bamboo-card:nth-child(3) .bamboo-blob {
   --bc: color-mix(in srgb, var(--bamboo-sage) 55%, var(--bamboo-sage-deep) 45%);
   --br: -3deg;
   --bw: 79%;
@@ -1723,7 +1786,7 @@
 
 /* Real-product photo card, in the same photo-frame language as
    `.bamboo-photo-card` (Location band). */
-.bamboo .bamboo-card-photo {
+.animated-bamboo .bamboo-card-photo {
   position: relative;
   width: var(--aw, 74%);
   background: var(--bamboo-roll);
@@ -1734,7 +1797,7 @@
   transform: rotate(-3deg);
 }
 
-.bamboo .bamboo-card-photo::before {
+.animated-bamboo .bamboo-card-photo::before {
   content: "";
   position: absolute;
   left: 12px;
@@ -1749,7 +1812,7 @@
   border-radius: 2px;
 }
 
-.bamboo .bamboo-card-photo-img {
+.animated-bamboo .bamboo-card-photo-img {
   display: block;
   width: 100%;
   height: auto;
@@ -1759,7 +1822,7 @@
   object-position: 50% 42%;
 }
 
-.bamboo .bamboo-sprout {
+.animated-bamboo .bamboo-sprout {
   position: absolute;
   top: -4px;
   right: 10px;
@@ -1772,27 +1835,27 @@
     opacity 0.35s;
 }
 
-.bamboo .bamboo-card:hover .bamboo-sprout,
-.bamboo .bamboo-card:focus-within .bamboo-sprout {
+.animated-bamboo .bamboo-card:hover .bamboo-sprout,
+.animated-bamboo .bamboo-card:focus-within .bamboo-sprout {
   opacity: 1;
   transform: scale(1) rotate(0);
 }
 
 /* The whole real-product card is one link; the card's title element carries
    the accessible name. */
-.bamboo .bamboo-card-link {
+.animated-bamboo .bamboo-card-link {
   text-decoration: none;
   color: inherit;
 }
 
-.bamboo .bamboo-card-link::after {
+.animated-bamboo .bamboo-card-link::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: 20px;
 }
 
-.bamboo .bamboo-price {
+.animated-bamboo .bamboo-price {
   margin-top: 8px;
   font-family: var(--font-bamboo-display), var(--font-heading);
   font-weight: 700;
@@ -1800,14 +1863,14 @@
   color: var(--bamboo-ink);
 }
 
-.bamboo .bamboo-card-foot {
+.animated-bamboo .bamboo-card-foot {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
 }
 
-.bamboo .bamboo-foot-note {
+.animated-bamboo .bamboo-foot-note {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1819,7 +1882,7 @@
 /* ── Map treatment (Location band, Contact page) — ported from the mockup's
    `.map`/`.pin`/`.chip` rules (mockup-b.elided.html lines ~309-326). The
    photo-card tucked over the map reuses `.bamboo-photo-card` above. ── */
-.bamboo .bamboo-map {
+.animated-bamboo .bamboo-map {
   position: relative;
   border-radius: 26px;
   overflow: hidden;
@@ -1827,18 +1890,18 @@
 }
 
 @media (max-width: 620px) {
-  .bamboo .bamboo-map {
+  .animated-bamboo .bamboo-map {
     border-radius: 20px;
   }
 }
 
-.bamboo .bamboo-map > svg {
+.animated-bamboo .bamboo-map > svg {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.bamboo .bamboo-pin {
+.animated-bamboo .bamboo-pin {
   position: absolute;
   left: 50%;
   top: 27%;
@@ -1847,11 +1910,11 @@
   transform-origin: 50% 100%;
 }
 
-.bamboo .bamboo-reveal.in .bamboo-pin {
+.animated-bamboo .bamboo-reveal.in .bamboo-pin {
   animation: bamboo-pin-drop 1s cubic-bezier(0.2, 1.3, 0.4, 1) both 0.25s;
 }
 
-.bamboo .bamboo-map-chip {
+.animated-bamboo .bamboo-map-chip {
   position: absolute;
   left: 20px;
   bottom: 20px;
@@ -1862,7 +1925,7 @@
   max-width: 78%;
 }
 
-.bamboo .bamboo-map-chip b {
+.animated-bamboo .bamboo-map-chip b {
   display: block;
   font-family: var(--font-bamboo-display), var(--font-heading);
   font-weight: 700;
@@ -1870,7 +1933,7 @@
   font-size: 1.02rem;
 }
 
-.bamboo .bamboo-map-chip span {
+.animated-bamboo .bamboo-map-chip span {
   font-size: 0.9rem;
   color: var(--bamboo-ink-soft);
 }
@@ -1878,28 +1941,28 @@
 /* ── Reduced motion — kills every bamboo animation/transition and forces
    reveal / timeline / pin end states (mirrors the mockup's static mode). ── */
 @media (prefers-reduced-motion: reduce) {
-  .bamboo .bamboo-reveal,
-  .bamboo .bamboo-reveal-group .bamboo-reveal-item {
+  .animated-bamboo .bamboo-reveal,
+  .animated-bamboo .bamboo-reveal-group .bamboo-reveal-item {
     opacity: 1 !important;
     transform: none !important;
     animation: none !important;
   }
 
-  .bamboo .bamboo-station {
+  .animated-bamboo .bamboo-station {
     opacity: 1 !important;
     transform: none !important;
   }
 
-  .bamboo .bamboo-tl-node,
-  .bamboo .bamboo-tl-sprig {
+  .animated-bamboo .bamboo-tl-node,
+  .animated-bamboo .bamboo-tl-sprig {
     opacity: 1 !important;
   }
 
-  .bamboo .bamboo-tl-path {
+  .animated-bamboo .bamboo-tl-path {
     stroke-dashoffset: 0 !important;
   }
 
-  .bamboo .bamboo-pin {
+  .animated-bamboo .bamboo-pin {
     opacity: 1 !important;
   }
 }
@@ -3589,7 +3652,8 @@
     font-family: var(--font-heading), sans-serif;
   }
 
-  .bamboo {
+  .bamboo,
+  .animated-bamboo {
     p {
       @apply font-sans;
     }

@@ -6,6 +6,8 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -15,20 +17,6 @@ type Props = {
   setSelectedVariantId: (variantId: string | null) => void;
 };
 
-/**
- * Variant picker, presented as `.bamboo-pill-radio` pills over a real native
- * `<fieldset>`/radiogroup (mockup: `.opts`/`.pills`/`.pill`/`.pill-face`,
- * mockup-b-product.elided.html lines ~1061-1076) — NEVER the shared
- * `.bamboo-variant-btn` class, which is byte-identical with `.happy-bamboo`
- * and must stay untouched. `.bamboo-pill-radio`'s checked/disabled look is
- * keyed off `data-state`/`data-disabled` (the Radix RadioGroup convention);
- * these are native `<input type="radio">`s instead, so those attributes are
- * set by hand from React state.
- *
- * Wiring is unchanged: this component still owns its own
- * `selectedVariant`/`quantity`/`isAdded` state and calls `useCart().addItem`
- * directly via `buildVariantCartItem` — restyle only.
- */
 export function BambooVariantSelector({
   product,
   setSelectedVariantId,
@@ -59,15 +47,6 @@ export function BambooVariantSelector({
         ? BACKORDER_MAX
         : 0;
 
-  const disabledVariantNames = product.variants
-    .filter(
-      (variant) =>
-        product.trackInventory &&
-        variant.inventoryQty === 0 &&
-        !product.allowBackorders,
-    )
-    .map((variant) => variant.name);
-
   const handleAddToCart = () => {
     if (!selectedVariant) return;
 
@@ -84,13 +63,17 @@ export function BambooVariantSelector({
   };
 
   return (
-    <div className="space-y-5">
-      {/* Variant selection — real radiogroup via a native fieldset */}
-      <fieldset className="m-0 min-w-0 border-0 p-0">
-        <legend className="font-heading p-0 text-[1.02rem] font-semibold text-[var(--bamboo-pine)]">
+    <div className="space-y-4">
+      {/* Variant Selection */}
+      <div className="mb-6">
+        <Label className="mb-3 block text-sm font-medium" id="variant-label">
           Select Variant
-        </legend>
-        <div className="mt-3.5 flex flex-wrap gap-3">
+        </Label>
+        <div
+          className="flex flex-wrap gap-3"
+          role="group"
+          aria-labelledby="variant-label"
+        >
           {product.variants.map((variant) => {
             const isOutOfStock =
               product.trackInventory &&
@@ -100,67 +83,77 @@ export function BambooVariantSelector({
               product.trackInventory &&
               variant.inventoryQty === 0 &&
               !!product.allowBackorders;
-            const isChecked = selectedVariant?.id === variant.id;
             return (
-              <label
+              <Button
                 key={variant.id}
-                className="bamboo-pill-radio relative inline-flex"
-                data-state={isChecked ? "checked" : "unchecked"}
-                data-disabled={isOutOfStock ? "true" : undefined}
+                variant={
+                  selectedVariant?.id === variant.id ? "default" : "outline"
+                }
+                onClick={() => {
+                  if (isOutOfStock) return;
+                  setSelectedVariant(variant);
+                  setSelectedVariantId(variant.id);
+                }}
+                aria-disabled={isOutOfStock ? "true" : undefined}
+                aria-pressed={selectedVariant?.id === variant.id}
+                className={`bamboo-variant-btn ${
+                  selectedVariant?.id === variant.id
+                    ? "bamboo-variant-btn--selected"
+                    : "bamboo-variant-btn--unselected"
+                } ${isOutOfStock ? "bamboo-variant-btn--disabled cursor-not-allowed opacity-50" : ""}`}
               >
-                <input
-                  type="radio"
-                  name={`bamboo-variant-${product.id}`}
-                  value={variant.id}
-                  checked={isChecked}
-                  disabled={isOutOfStock}
-                  onChange={() => {
-                    if (isOutOfStock) return;
-                    setSelectedVariant(variant);
-                    setSelectedVariantId(variant.id);
-                  }}
-                  className="absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
-                />
                 {variant.name}
                 {isOutOfStock && " (Out of Stock)"}
                 {isBackorderVariant && " (Pre-order)"}
-              </label>
+              </Button>
             );
           })}
         </div>
-        {disabledVariantNames.length > 0 && (
-          <p className="mt-2.5 text-[0.86rem] text-[var(--bamboo-muted)]">
-            {disabledVariantNames.join(", ")}{" "}
-            {disabledVariantNames.length === 1 ? "is" : "are"} out of stock —{" "}
-            {disabledVariantNames.length === 1 ? "it" : "they"} can&apos;t be
-            selected.
-          </p>
-        )}
-      </fieldset>
+      </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         {/* Quantity Selection */}
         {selectedVariant && (
-          <div className="bamboo-qty-stepper">
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              aria-label="Decrease quantity"
-            >
-              <Minus className="size-4" aria-hidden="true" />
-            </button>
-            <span aria-live="polite" aria-atomic="true">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
-              disabled={quantity >= effectiveMax}
-              aria-label="Increase quantity"
-            >
-              <Plus className="size-4" aria-hidden="true" />
-            </button>
+          <div>
+            <Label className="mb-3 block text-sm font-medium">Quantity</Label>
+            <div className="border-border flex items-center gap-1 rounded-lg border">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label="Decrease quantity"
+              >
+                <Minus className="size-4" aria-hidden="true" />
+              </Button>
+              <span
+                className="text-foreground w-10 text-center text-base font-semibold"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {quantity}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11"
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
+                disabled={quantity >= effectiveMax}
+                aria-label="Increase quantity"
+              >
+                <Plus className="size-4" aria-hidden="true" />
+              </Button>
+            </div>{" "}
+            {selectedVariant && product.trackInventory && (
+              <span className="text-sm">
+                {isBackordered
+                  ? "Backordered — ships when available"
+                  : `${selectedVariant?.inventoryQty ?? 0} available`}
+              </span>
+            )}
           </div>
         )}
 
@@ -172,14 +165,14 @@ export function BambooVariantSelector({
               selectedVariant.inventoryQty === 0 &&
               !product.allowBackorders);
           return (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 if (isUnavailable) return;
                 handleAddToCart();
               }}
-              disabled={isUnavailable}
-              className="bamboo-btn bamboo-btn-primary flex-1 justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+              aria-disabled={isUnavailable ? "true" : undefined}
+              className={`flex-1 ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
             >
               {isAdded ? (
                 <>
@@ -189,7 +182,7 @@ export function BambooVariantSelector({
               ) : (
                 `Add ${quantity} to Cart`
               )}
-            </button>
+            </Button>
           );
         })()}
         {/* S-1: live region announces add-to-cart confirmation */}
@@ -199,13 +192,6 @@ export function BambooVariantSelector({
             : ""}
         </div>
       </div>
-      {selectedVariant && product.trackInventory && (
-        <p className="mt-2 text-[0.86rem] text-[var(--bamboo-ink-soft)]">
-          {isBackordered
-            ? "Backordered — ships when available"
-            : `${selectedVariant?.inventoryQty ?? 0} available`}
-        </p>
-      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && effectiveMax === 0 && (
@@ -213,9 +199,9 @@ export function BambooVariantSelector({
           productId={product.id}
           variantId={selectedVariant.id}
           message="Get notified when this option is back in stock."
-          messageClassName="text-[var(--bamboo-ink-soft)] text-sm"
-          inputClassName="rounded-full border-2 border-[var(--bamboo-outline)] bg-[var(--bamboo-roll)] focus-visible:border-[var(--bamboo-pine)]"
-          buttonClassName="bamboo-btn bamboo-btn-primary"
+          messageClassName="text-muted-foreground text-sm"
+          inputClassName="border-border rounded-lg"
+          buttonClassName="rounded-lg"
         />
       )}
     </div>

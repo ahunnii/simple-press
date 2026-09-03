@@ -18,6 +18,10 @@ import {
 } from "~/lib/embed";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import {
+  animatedBambooData,
+  animatedBambooFieldGroups,
+} from "~/app/(storefront)/_templates/animated-bamboo";
+import {
   bambooData,
   bambooFieldGroups,
 } from "~/app/(storefront)/_templates/bamboo";
@@ -437,6 +441,7 @@ export type TemplateFieldGroup = {
 // Define groups for each template
 export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...bambooFieldGroups,
+  ...animatedBambooFieldGroups,
   ...buildersFieldGroups,
   ...pollenFieldGroups,
   ...darkTrendFieldGroups,
@@ -455,6 +460,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...bambooData,
+  ...animatedBambooData,
   ...buildersData,
   ...darkTrendData,
   ...pollenData,

@@ -29,6 +29,7 @@ import { SelectFormField } from "~/components/inputs/select-form-field";
 const TEMPLATES = [
   { id: "modern", label: "Modern" },
   { id: "bamboo", label: "Bamboo" },
+  { id: "animated-bamboo", label: "Animated Bamboo" },
   { id: "happy-bamboo", label: "Happy Bamboo" },
   { id: "elegant", label: "Elegant" },
   { id: "pollen", label: "Pollen" },

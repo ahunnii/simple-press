@@ -13,6 +13,30 @@
 import type { ComponentType } from "react";
 
 // ---------------------------------------------------------------------------
+// Animated Bamboo
+// ---------------------------------------------------------------------------
+import { BambooAboutPage as AnimatedBambooAboutPage } from "./animated-bamboo/about/bamboo-about-page";
+import { BambooAccountSecurityPage as AnimatedBambooAccountSecurityPage } from "./animated-bamboo/account/bamboo-account-security-page";
+import { BambooAccountSettingsPage as AnimatedBambooAccountSettingsPage } from "./animated-bamboo/account/bamboo-account-settings-page";
+import { BambooAddressBookPage as AnimatedBambooAddressBookPage } from "./animated-bamboo/account/bamboo-address-book-page";
+import { BambooOrderDetailPage as AnimatedBambooOrderDetailPage } from "./animated-bamboo/account/bamboo-order-detail-page";
+import { BambooOrdersPage as AnimatedBambooOrdersPage } from "./animated-bamboo/account/bamboo-orders-page";
+import { BambooPreferencesPage as AnimatedBambooPreferencesPage } from "./animated-bamboo/account/bamboo-preferences-page";
+import { BambooGenericPage as AnimatedBambooGenericPage } from "./animated-bamboo/bamboo-generic-page";
+import { BambooBlogPage as AnimatedBambooBlogPage } from "./animated-bamboo/blog/bamboo-blog-page";
+import { BambooBlogPostPage as AnimatedBambooBlogPostPage } from "./animated-bamboo/blog/bamboo-blog-post-page";
+import { BambooCartPage as AnimatedBambooCartPage } from "./animated-bamboo/cart-checkout/bamboo-cart-page";
+import { BambooCheckoutPage as AnimatedBambooCheckoutPage } from "./animated-bamboo/cart-checkout/bamboo-checkout-page";
+import { BambooCheckoutUnavailable as AnimatedBambooCheckoutUnavailable } from "./animated-bamboo/cart-checkout/bamboo-checkout-unavailable";
+import { BambooOrderSuccessPage as AnimatedBambooOrderSuccessPage } from "./animated-bamboo/cart-checkout/bamboo-order-success-page";
+import { BambooCollectionPage as AnimatedBambooCollectionPage } from "./animated-bamboo/collections/bamboo-collection-page";
+import { BambooCollectionsPage as AnimatedBambooCollectionsPage } from "./animated-bamboo/collections/bamboo-collections-page";
+import { BambooContactPage as AnimatedBambooContactPage } from "./animated-bamboo/contact/bamboo-contact-page";
+import { BambooLayout as AnimatedBambooLayout } from "./animated-bamboo/layout/bamboo-general-layout";
+import { BambooProductPage as AnimatedBambooProductPage } from "./animated-bamboo/products/bamboo-product-page";
+import { BambooShopPage as AnimatedBambooShopPage } from "./animated-bamboo/shop/bamboo-shop-page";
+import { BambooTestimonialsPage as AnimatedBambooTestimonialsPage } from "./animated-bamboo/testimonials/bamboo-testimonials-page";
+// ---------------------------------------------------------------------------
 // Bamboo
 // ---------------------------------------------------------------------------
 import { BambooAboutPage } from "./bamboo/about/bamboo-about-page";
@@ -27,7 +51,6 @@ import { BambooBlogPage } from "./bamboo/blog/bamboo-blog-page";
 import { BambooBlogPostPage } from "./bamboo/blog/bamboo-blog-post-page";
 import { BambooCartPage } from "./bamboo/cart-checkout/bamboo-cart-page";
 import { BambooCheckoutPage } from "./bamboo/cart-checkout/bamboo-checkout-page";
-import { BambooCheckoutUnavailable } from "./bamboo/cart-checkout/bamboo-checkout-unavailable";
 import { BambooOrderSuccessPage } from "./bamboo/cart-checkout/bamboo-order-success-page";
 import { BambooCollectionPage } from "./bamboo/collections/bamboo-collection-page";
 import { BambooCollectionsPage } from "./bamboo/collections/bamboo-collections-page";
@@ -406,7 +429,6 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: BambooBlogPostPage,
     CartPage: BambooCartPage,
     CheckoutPage: BambooCheckoutPage,
-    CheckoutUnavailable: BambooCheckoutUnavailable,
     OrderSuccessPage: BambooOrderSuccessPage,
     CollectionPage: BambooCollectionPage,
     CollectionsPage: BambooCollectionsPage,
@@ -421,6 +443,30 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: BambooOrderDetailPage,
     OrdersPage: BambooOrdersPage,
     PreferencesPage: BambooPreferencesPage,
+  },
+
+  "animated-bamboo": {
+    Layout: AnimatedBambooLayout,
+    AboutPage: AnimatedBambooAboutPage,
+    BlogPage: AnimatedBambooBlogPage,
+    BlogPostPage: AnimatedBambooBlogPostPage,
+    CartPage: AnimatedBambooCartPage,
+    CheckoutPage: AnimatedBambooCheckoutPage,
+    CheckoutUnavailable: AnimatedBambooCheckoutUnavailable,
+    OrderSuccessPage: AnimatedBambooOrderSuccessPage,
+    CollectionPage: AnimatedBambooCollectionPage,
+    CollectionsPage: AnimatedBambooCollectionsPage,
+    ContactPage: AnimatedBambooContactPage,
+    GenericPage: AnimatedBambooGenericPage,
+    ProductPage: AnimatedBambooProductPage,
+    ShopPage: AnimatedBambooShopPage,
+    TestimonialsPage: AnimatedBambooTestimonialsPage,
+    AccountSettingsPage: AnimatedBambooAccountSettingsPage,
+    AccountSecurityPage: AnimatedBambooAccountSecurityPage,
+    AddressBookPage: AnimatedBambooAddressBookPage,
+    OrderDetailPage: AnimatedBambooOrderDetailPage,
+    OrdersPage: AnimatedBambooOrdersPage,
+    PreferencesPage: AnimatedBambooPreferencesPage,
   },
 
   "dark-trend": {

@@ -8,8 +8,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "homepage.hero",
       page: "homepage",
       title: "Hero",
-      description:
-        "The living still-life scene at the top of the homepage — headline, lede, and CTA pair.",
+      description: "Main banner at the top of the homepage.",
       groupIds: ["homepage.hero"],
       order: 0,
     },
@@ -24,9 +23,9 @@ export const bambooSections: Record<string, TemplateSection[]> = {
     {
       id: "homepage.sustainability",
       page: "homepage",
-      title: "Why Bamboo Timeline",
+      title: "Sustainability Banner",
       description:
-        "The self-drawing why-bamboo timeline below the featured products — heading, intro, and up to four illustrated stations.",
+        "Three feature highlights below the featured products (e.g. Premium Quality, Competitive Prices).",
       groupIds: ["homepage.sustainability"],
       order: 2,
       hideable: true,
@@ -35,8 +34,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "homepage.aboutTeaser",
       page: "homepage",
       title: "About Teaser",
-      description:
-        "Short business introduction block on the homepage, its promises list, and the Detroit vignette.",
+      description: "Short business introduction block on the homepage.",
       groupIds: ["homepage.aboutTeaser"],
       order: 3,
     },
@@ -55,8 +53,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "homepage.location",
       page: "homepage",
       title: "Location",
-      description:
-        "Location heading, fact list, and the illustrated Detroit map with a photo card.",
+      description: "Store location heading and interactive map.",
       groupIds: ["homepage.location"],
       order: 5,
       hideable: true,
@@ -67,8 +64,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "about.hero",
       page: "about",
       title: "Hero",
-      description:
-        "Heading, intro, and Detroit skyline illustration at the top of the about page.",
+      description: "Tagline, heading, and intro at the top of the about page.",
       groupIds: ["about.hero"],
       order: 0,
     },
@@ -80,18 +76,19 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       order: 1,
     },
     {
-      id: "about.detroit",
-      page: "about",
-      title: "Rooted in Detroit",
-      groupIds: ["about.detroit"],
-      order: 2,
-    },
-    {
       id: "about.values",
       page: "about",
       title: "What We Stand For",
-      description: "Leaf-bulleted values list beside the illustrated vignette.",
+      description: "Value cards below the mission section.",
       groupIds: ["about.values"],
+      order: 2,
+    },
+    {
+      id: "about.supplier",
+      page: "about",
+      title: "Supplier",
+      description: "More Than a Supplier section.",
+      groupIds: ["about.supplier"],
       order: 3,
     },
     {
@@ -104,33 +101,20 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       hideable: true,
     },
     {
-      id: "about.supplier",
+      id: "about.nationwide",
       page: "about",
-      title: "Supplier",
-      description: "More Than a Supplier prose band.",
-      groupIds: ["about.supplier"],
+      title: "Nationwide Distribution",
+      description: "Nationwide reach heading, text, and fact cards.",
+      groupIds: ["about.nationwide"],
       order: 5,
       hideable: true,
     },
     {
-      id: "about.label",
+      id: "about.detroit",
       page: "about",
-      title: "Our Label",
-      description:
-        "The printed label — photo and factual description of the wreath mark and verse.",
-      groupIds: ["about.label"],
+      title: "Rooted in Detroit",
+      groupIds: ["about.detroit"],
       order: 6,
-      hideable: true,
-    },
-    {
-      id: "about.nationwide",
-      page: "about",
-      title: "Nationwide Distribution",
-      description:
-        "From Detroit to Your Door reach band with three illustrated stations.",
-      groupIds: ["about.nationwide"],
-      order: 7,
-      hideable: true,
     },
     {
       id: "about.cta",
@@ -138,7 +122,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       title: "CTA Banner",
       description: "Bottom call-to-action on the about page.",
       groupIds: ["about.cta"],
-      order: 8,
+      order: 7,
       hideable: true,
     },
 
@@ -181,33 +165,12 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       order: 0,
       links: [SECTION_LINKS.products],
     },
-    {
-      id: "products.whyStrip",
-      page: "products",
-      title: "Why Bamboo Strip",
-      description:
-        "Compact benefits strip near the bottom of the shop page, reused as the trust row on every product page.",
-      groupIds: ["products.whyStrip"],
-      order: 1,
-      hideable: true,
-    },
-    {
-      id: "products.detail",
-      page: "products",
-      title: "Product Reassurance Band",
-      description:
-        "Sage shipping/reassurance band near the bottom of every product page. Previewed on the shop page in the editor — product pages have no editor preview, so this section's hotspot won't highlight in the live preview; editing the fields still works and shows on the real product page.",
-      groupIds: ["products.detail"],
-      order: 2,
-    },
 
     // Blog
     {
       id: "blog.listing",
       page: "blog",
       title: "Blog Listing",
-      description:
-        "Sage hero band on the blog index — title, intro, optional photo card.",
       groupIds: ["blog.listing"],
       order: 0,
       links: [SECTION_LINKS.blog],
@@ -217,7 +180,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       page: "blog",
       renderContext: "blog-post",
       title: "Blog Post CTA",
-      description: "Sage call-to-action band at the end of every blog article.",
+      description: "Call-to-action shown at the end of every blog article.",
       groupIds: ["blog.post"],
       order: 1,
       hideable: true,
@@ -243,19 +206,6 @@ export const bambooSections: Record<string, TemplateSection[]> = {
         "Coordinates for the map pin used by the homepage and contact page maps.",
       groupIds: ["global.location"],
       order: 0,
-    },
-    {
-      id: "global.footer",
-      page: "global",
-      title: "Footer",
-      description:
-        "The mission line under the wreath brand mark in the footer, shown on every page.",
-      groupIds: ["global.footer"],
-      order: 1,
-      links: [
-        { label: "Navigation", href: "/admin/content/navigation" },
-        { label: "Business info", href: "/admin/settings/general" },
-      ],
     },
   ],
 };

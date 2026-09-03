@@ -15,13 +15,13 @@ import type { TemplateSection } from "~/lib/template-sections";
  * address are likewise sourced from Content → Navigation and Settings, not
  * fields.
  *
- * NOT self-registering: merged into the root `bambooData` /
- * `bambooFieldGroups` / `bambooSections` (`../index.tsx`, `../sections.ts`) by
+ * NOT self-registering: merged into the root `animatedBambooData` /
+ * `animatedBambooFieldGroups` / `animatedBambooSections` (`../index.tsx`, `../sections.ts`) by
  * the template's later orchestration wave.
  */
-export const bambooLayoutData: TemplateField[] = [
+export const animatedBambooLayoutData: TemplateField[] = [
   {
-    key: "bamboo.global.footer-tagline",
+    key: "animated-bamboo.global.footer-tagline",
     label: "Footer Mission Line",
     description:
       "One sentence under the wreath mark in the footer, shown on every page.",
@@ -34,7 +34,7 @@ export const bambooLayoutData: TemplateField[] = [
   },
 ];
 
-export const bambooLayoutFieldGroups: TemplateFieldGroup[] = [
+export const animatedBambooLayoutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.footer",
     title: "Footer",

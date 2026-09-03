@@ -10,20 +10,13 @@ import {
   getFreeShippingProgress,
   SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
-import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
+import { Separator } from "~/components/ui/separator";
 import { useCart } from "~/providers/cart-context";
-
-import { BambooGlyph } from "../shared/bamboo-glyph";
 
 type CartSummaryProps = {
   shippingConfig: ShippingConfig;
-};
-
-/** Same dash rhythm as `.bamboo-torn-card::before` in globals.css. */
-const PERFORATION_RULE: React.CSSProperties = {
-  backgroundImage:
-    "repeating-linear-gradient(90deg, color-mix(in srgb, var(--bamboo-core-tan) 55%, transparent) 0 7px, transparent 7px 15px)",
 };
 
 export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
@@ -43,26 +36,22 @@ export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
     progress !== null &&
     untilFree !== null;
   return (
-    <div className="bamboo-torn-card">
-      {/* Pine accent: the wreath mark sitting beside the summary heading. */}
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="font-heading text-xl font-semibold text-[var(--bamboo-pine)]">
-          Order Summary
-        </h2>
-        <BambooGlyph id="s-wreath" className="w-[40px] shrink-0 opacity-80" />
-      </div>
-      <div className="mt-5 flex flex-col gap-3">
-        <div className="flex justify-between text-[0.95rem]">
-          <span className="text-[var(--bamboo-ink-soft)]">
+    <div className="border-border bg-card rounded-xl border p-6">
+      <h2 className="text-card-foreground font-heading text-lg font-semibold">
+        Order Summary
+      </h2>
+      <div className="mt-4 flex flex-col gap-3">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">
             Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
           </span>
-          <span className="font-medium text-[var(--bamboo-ink)]">
+          <span className="text-foreground font-medium">
             {formatPrice(subtotal)}
           </span>
         </div>
-        <div className="flex justify-between text-[0.95rem]">
-          <span className="text-[var(--bamboo-ink-soft)]">Shipping</span>
-          <span className="font-medium text-[var(--bamboo-ink)]">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Shipping</span>
+          <span className="text-foreground font-medium">
             {isZoneWeight
               ? "Calculated at checkout"
               : shipping === 0
@@ -74,47 +63,31 @@ export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
           <div className="space-y-2">
             <Progress
               value={progress * 100}
-              className="h-2 bg-[var(--bamboo-sage)]"
+              className="h-2"
               aria-label={`Free shipping progress: ${Math.round(progress * 100)}% of the way there`}
             />
-            <p className="text-xs text-[var(--bamboo-muted)]">
+            <p className="text-muted-foreground text-xs">
               Add {formatPrice(untilFree)} more for free shipping
             </p>
           </div>
         )}
         {shipping > 0 &&
           shippingConfig.shippingType === SHIPPING_TYPES.FLAT_RATE && (
-            <p className="text-xs text-[var(--bamboo-muted)]">
+            <p className="text-muted-foreground text-xs">
               Flat rate shipping on all orders
             </p>
           )}
-        {/* Perforated rule — the roll-paper tear line, not a generic divider.
-            Inline because `color-mix()` must never live in a Tailwind
-            arbitrary value (F1 build-report convention). */}
-        <div
-          aria-hidden="true"
-          className="my-1 h-[3px] rounded-sm"
-          style={PERFORATION_RULE}
-        />
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="font-heading font-semibold text-[var(--bamboo-pine)]">
-            Estimated Total
-          </span>
-          <span className="bamboo-price">
+        <Separator />
+        <div className="flex justify-between">
+          <span className="text-foreground font-semibold">Estimated Total</span>
+          <span className="text-foreground text-lg font-bold">
             {formatPrice(estimatedOrderTotal)}
           </span>
         </div>
       </div>
-      <Link
-        href="/checkout"
-        className={cn(
-          "bamboo-btn",
-          "bamboo-btn-primary",
-          "mt-7 w-full justify-center",
-        )}
-      >
-        Proceed to Checkout
-      </Link>
+      <Button className="mt-6 w-full" size="lg" asChild>
+        <Link href="/checkout">Proceed to Checkout</Link>
+      </Button>
     </div>
   );
 }

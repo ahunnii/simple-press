@@ -1,0 +1,172 @@
+import {
+  Building2,
+  Droplets,
+  Heart,
+  Leaf,
+  ShieldCheck,
+  Sprout,
+  TreePine,
+  Truck,
+  Users,
+} from "lucide-react";
+
+import type {
+  GenericIconRow,
+  TemplateField,
+  TemplateFieldGroup,
+} from "~/lib/template-fields";
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
+
+import { aboutBambooData, bambooAboutFieldGroups } from "./about";
+import { bambooBlogData, bambooBlogFieldGroups } from "./blog";
+import {
+  bambooCollectionsData,
+  bambooCollectionsFieldGroups,
+} from "./collections";
+import { bambooContactData, bambooContactFieldGroups } from "./contact";
+import { bambooHomepageFieldGroups, homepageBambooData } from "./homepage";
+import {
+  animatedBambooLayoutData,
+  animatedBambooLayoutFieldGroups,
+} from "./layout";
+import { bambooProductsData, bambooProductsFieldGroups } from "./shop";
+import {
+  bambooTestimonialsData,
+  bambooTestimonialsFieldGroups,
+} from "./testimonials";
+
+const globalLocationData: TemplateField[] = [
+  {
+    key: "animated-bamboo.global.map-lat",
+    label: "Map Latitude",
+    description:
+      "Latitude of your location pin. In Google Maps, right-click your spot and click the coordinates to copy them — this is the first number.",
+    type: "number",
+    page: "global",
+    group: "global.location",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "42.4305",
+  },
+  {
+    key: "animated-bamboo.global.map-lng",
+    label: "Map Longitude",
+    description:
+      "Longitude of your location pin — the second number from the copied Google Maps coordinates.",
+    type: "number",
+    page: "global",
+    group: "global.location",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "-83.1419",
+  },
+];
+
+const fieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "global.location",
+    title: "Map Location",
+    description:
+      "Coordinates for the map pin shown on the homepage and contact page maps.",
+    icon: "🗺️",
+    columns: 2,
+  },
+  ...bambooHomepageFieldGroups,
+  ...bambooAboutFieldGroups,
+  ...bambooBlogFieldGroups,
+  ...bambooContactFieldGroups,
+  ...bambooTestimonialsFieldGroups,
+  ...bambooCollectionsFieldGroups,
+  ...bambooProductsFieldGroups,
+  ...animatedBambooLayoutFieldGroups,
+];
+
+export const animatedBambooData = {
+  "animated-bamboo": [
+    ...homepageBambooData,
+    ...aboutBambooData,
+    ...bambooContactData,
+    ...bambooBlogData,
+    ...bambooTestimonialsData,
+    ...bambooCollectionsData,
+    ...bambooProductsData,
+    ...animatedBambooLayoutData,
+    ...globalLocationData,
+  ],
+};
+
+export const animatedBambooFieldGroups = {
+  "animated-bamboo": fieldGroups,
+};
+
+const _bambooFieldMap = new Map(
+  animatedBambooData["animated-bamboo"].map((field) => [field.key, field]),
+);
+
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _bambooFieldMap);
+}
+
+export const DEFAULT_ANIMATED_BAMBOO_VALUES: GenericIconRow[] = [
+  {
+    icon: Leaf,
+    title: "Sustainability First",
+    description:
+      "Every decision we make starts with the planet. From sourcing to packaging, we choose the path that leaves the smallest footprint.",
+  },
+  {
+    icon: Heart,
+    title: "Premium Quality",
+    description:
+      "We refuse to compromise. Our bamboo products match or exceed the softness and strength of traditional premium brands.",
+  },
+  {
+    icon: Users,
+    title: "Community Driven",
+    description:
+      "We believe in the power of community. We are always here to help you find the perfect product for your needs.",
+  },
+];
+export const DEFAULT_ANIMATED_BAMBOO_NATIONWIDE_FACTS: GenericIconRow[] = [
+  {
+    icon: Truck,
+    title: "Nationwide Shipping",
+    description:
+      "We deliver our premium products to doorsteps across the country, carefully packaged and always on time.",
+  },
+  {
+    icon: Building2,
+    title: "Homes & Businesses",
+    description:
+      "From your bathroom to bustling restaurants, hotels, schools, and local stores -- we have solutions for every setting.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Customer-First Service",
+    description:
+      "Our dedicated Detroit-based team provides responsive, knowledgeable support for every order and inquiry.",
+  },
+];
+export const DEFAULT_ANIMATED_BAMBOO_WHY_BAMBOO_FACTS: GenericIconRow[] = [
+  {
+    icon: Sprout,
+    title: "Rapid Growth",
+    description:
+      "Bamboo grows up to 35 inches per day and reaches maturity in 3-5 years, compared to 20-50 years for hardwood trees.",
+  },
+  {
+    icon: TreePine,
+    title: "No Replanting Needed",
+    description:
+      "Bamboo regenerates from its own root system after harvest, which means the soil stays intact and carbon continues to be sequestered.",
+  },
+  {
+    icon: Droplets,
+    title: "Water Efficient",
+    description:
+      "Bamboo requires significantly less water than traditional tree farming and thrives without pesticides or fertilizers.",
+  },
+];

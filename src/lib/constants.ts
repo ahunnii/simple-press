@@ -2,6 +2,7 @@ export const TEMPLATE_IDS = {
   DEFAULT: "default",
   MODERN: "modern",
   BAMBOO: "bamboo",
+  ANIMATED_BAMBOO: "animated-bamboo",
   HAPPY_BAMBOO: "happy-bamboo",
   DARK_TREND: "dark-trend",
   ELEGANT: "elegant",
@@ -36,6 +37,13 @@ export const TEMPLATES = [
     description:
       "Warm illustrated storefront where the brand's own artwork comes alive — ambient motion, torn-paper edges, and hand-drawn product scenes for eco-friendly brands",
     previewImage: "/templates/bamboo-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.ANIMATED_BAMBOO,
+    name: "Animated Bamboo",
+    description:
+      "Illustrated, animation-forward take on the Bamboo storefront — living scenes, scroll reveals, and hand-drawn artwork throughout.",
+    previewImage: "/templates/animated-bamboo-preview.png",
   },
   {
     id: TEMPLATE_IDS.HAPPY_BAMBOO,

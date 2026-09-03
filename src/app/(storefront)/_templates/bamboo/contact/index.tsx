@@ -28,12 +28,11 @@ const contactPageData: TemplateField[] = [
   {
     key: "bamboo.contact.hours",
     label: "Business Hours",
-    description:
-      "Shown in the contact info card. Leave blank to hide — Finally Results' own live site doesn't list hours.",
+    description: "Business hours text",
     type: "text",
     page: "contact",
     group: "contact.info",
-    defaultValue: "",
+    defaultValue: "Mon - Fri, 9am - 5pm EST",
     placeholder: "Mon - Fri, 9am - 5pm EST",
     gridColumn: "col-span-full",
   },

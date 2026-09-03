@@ -6,6 +6,7 @@ import {
   groupFieldsByGroup,
   groupFieldsByPage,
 } from "~/lib/template-fields";
+import { animatedBambooSections } from "~/app/(storefront)/_templates/animated-bamboo/sections";
 import { bambooSections } from "~/app/(storefront)/_templates/bamboo/sections";
 import { buildersSections } from "~/app/(storefront)/_templates/builders/sections";
 import { coopSections } from "~/app/(storefront)/_templates/coop/sections";
@@ -75,6 +76,7 @@ export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
   ...modernSections,
   ...elegantSections,
   ...bambooSections,
+  ...animatedBambooSections,
   ...darkTrendSections,
   ...noiseSections,
   ...pollenSections,

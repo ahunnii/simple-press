@@ -1,247 +1,109 @@
 import Link from "next/link";
+import { Leaf } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
-import { resolveFlags } from "~/lib/features/resolve-flags";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
-import { resolveFields } from "..";
-import { BambooGlyph } from "../shared/bamboo-glyph";
-
-const SWIPE_LINK_CLASS = "bamboo-swipe text-[0.98rem]";
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" },
+] as const;
 
 export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
-  const { isEnabled } = resolveFlags(business?.featureFlags);
+  const email = business?.supportEmail;
 
-  const customFields = business?.siteContent?.customFields;
-  const f = resolveFields(customFields, ["bamboo.global.footer-tagline"]);
-  const tagline = f["bamboo.global.footer-tagline"] ?? "";
-
-  const policies = await api.content.getSimplifiedPages({ type: "policy" });
-
-  const name = business?.name ?? "Business";
+  const name = business?.name ?? "Business Name";
+  const footerTagline = business?.siteContent?.footerText;
   const address = business?.businessAddress;
 
-  const shopLinks = [
-    ...(isEnabled("products")
-      ? [{ label: "All Products", href: "/shop" }]
-      : []),
-    ...(isEnabled("collections")
-      ? [{ label: "Collections", href: "/collections" }]
-      : []),
-  ];
+  const policies = await api.content.getSimplifiedPages({
+    type: "policy",
+  });
 
-  const companyLinks = [
-    { label: "About", href: "/about" },
-    ...(isEnabled("testimonials")
-      ? [{ label: "Testimonials", href: "/testimonials" }]
-      : []),
-    ...(isEnabled("blog") ? [{ label: "Insights", href: "/blog" }] : []),
-    { label: "Contact", href: "/contact" },
-    // Root-relative: a bare slug would resolve against the current path and
-    // 404 from nested routes such as /blog/<post>.
-    ...policies.map((p) => ({ label: p.title, href: `/${p.slug}` })),
-  ];
+  const navigationItems = business?.siteContent?.navigationItems as
+    | { label: string; href: string }[]
+    | undefined;
 
   return (
-    <footer
-      className="on-pine relative overflow-hidden bg-[var(--bamboo-pine)] pt-[74px] pb-10 text-[var(--bamboo-cream)]"
-      {...sectionGroupAttr("global", "footer")}
-    >
-      {/* Full-bleed scattered illustration field — not a neat row and not a
-          top strip: irregular sizes/angles across the whole pine band, several
-          cropped by the top fold, the sides and the bottom. The 1440x560
-          viewBox is sliced (xMidYMid) so it covers a footer of any height
-          instead of leaving a bare pine expanse below a fixed band; objects
-          sit in the gaps around the columns, never directly behind text. */}
-      <div className="bamboo-foot-field" aria-hidden="true">
-        <svg viewBox="0 0 1440 560" preserveAspectRatio="xMidYMid slice">
-          <use
-            href="#s-roll-top"
-            x="44"
-            y="-18"
-            width="86"
-            height="86"
-            transform="rotate(-8 87 25)"
-          />
-          <use
-            href="#s-leaf"
-            x="238"
-            y="56"
-            width="58"
-            height="21"
-            transform="rotate(17 267 66)"
-          />
-          <use
-            href="#s-roll-front"
-            x="404"
-            y="18"
-            width="52"
-            height="50"
-            transform="rotate(11 430 43)"
-          />
-          <use
-            href="#s-leaf"
-            x="783"
-            y="24"
-            width="41"
-            height="15"
-            transform="rotate(-24 803 31)"
-          />
-          <use
-            href="#s-roll-top"
-            x="926"
-            y="34"
-            width="62"
-            height="62"
-            transform="rotate(9 957 65)"
-          />
-          <use
-            href="#s-roll-front"
-            x="1211"
-            y="-10"
-            width="74"
-            height="71"
-            transform="rotate(-6 1248 25)"
-          />
-          <use
-            href="#s-leaf"
-            x="1367"
-            y="62"
-            width="49"
-            height="18"
-            transform="rotate(5 1391 71)"
-          />
-          <use
-            href="#s-pot"
-            x="-22"
-            y="300"
-            width="78"
-            height="108"
-            transform="rotate(-13 17 354)"
-          />
-          <use
-            href="#s-leaf-d"
-            x="150"
-            y="372"
-            width="66"
-            height="24"
-            transform="rotate(12 183 384)"
-          />
-          <use
-            href="#s-sprig"
-            x="470"
-            y="268"
-            width="92"
-            height="73"
-            transform="rotate(-19 516 305)"
-          />
-          <use
-            href="#s-tissue-box"
-            x="612"
-            y="388"
-            width="88"
-            height="70"
-            transform="rotate(7 656 423)"
-          />
-          <use
-            href="#s-roll-front"
-            x="1246"
-            y="214"
-            width="96"
-            height="92"
-            transform="rotate(-9 1294 260)"
-          />
-          <use
-            href="#s-leaf"
-            x="1392"
-            y="348"
-            width="72"
-            height="26"
-            transform="rotate(15 1428 361)"
-          />
-          <use
-            href="#s-roll-top"
-            x="1108"
-            y="496"
-            width="84"
-            height="84"
-            transform="rotate(13 1150 538)"
-          />
-          <use
-            href="#s-culm-tan"
-            x="1320"
-            y="470"
-            width="64"
-            height="182"
-            transform="rotate(-6 1352 561)"
-          />
-        </svg>
-      </div>
-      <span className="bamboo-foot-leaf" aria-hidden="true">
-        <BambooGlyph id="s-leaf-l" />
-      </span>
-
-      <div className="relative mx-auto grid max-w-[1200px] [grid-template-columns:1.2fr_1fr_1fr] gap-10 px-6 max-[900px]:grid-cols-2 max-[620px]:grid-cols-1">
-        <div className="max-[900px]:col-span-2 max-[620px]:col-span-1">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-[11px] text-[var(--bamboo-cream)]"
-            aria-label={`${name} — home`}
-          >
-            <BambooGlyph id="s-wreath" className="h-9 w-auto shrink-0" />
-            <b className="font-heading text-[1.28rem] leading-none font-bold tracking-[-0.02em]">
-              {name}
-            </b>
-          </Link>
-          {tagline ? (
-            <p
-              {...fieldAttr("bamboo.global.footer-tagline")}
-              className="bamboo-foot-tagline"
-            >
-              {tagline}
+    <footer className="bg-primary text-primary-foreground">
+      <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col gap-4">
+            <Link href="/" className="flex items-center gap-2">
+              <Leaf className="size-5" aria-hidden="true" />
+              <span className="font-heading text-xl font-bold">{name}</span>
+            </Link>
+            <p className="text-primary-foreground/80 text-sm leading-relaxed">
+              {footerTagline}
             </p>
-          ) : null}
-        </div>
+          </div>
 
-        {shopLinks.length > 0 ? (
-          <nav aria-labelledby="bamboo-footer-shop">
-            <h2 id="bamboo-footer-shop" className="bamboo-foot-heading">
-              Shop
-            </h2>
-            <ul className="mt-4 grid gap-[11px]">
-              {shopLinks.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className={SWIPE_LINK_CLASS}>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ) : null}
-
-        <nav aria-labelledby="bamboo-footer-company">
-          <h2 id="bamboo-footer-company" className="bamboo-foot-heading">
-            Company
-          </h2>
-          <ul className="mt-4 grid gap-[11px]">
-            {companyLinks.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className={SWIPE_LINK_CLASS}>
+          <div>
+            <h3 className="text-primary-foreground/80 mb-4 text-sm font-semibold tracking-wider uppercase">
+              Quick Links
+            </h3>
+            <nav className="flex flex-col gap-2.5" aria-label="Quick links">
+              {(navigationItems ?? NAV_LINKS).map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-primary-foreground/80 hover:text-primary-foreground text-sm transition-colors"
+                >
                   {link.label}
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
+              ))}
+            </nav>
+          </div>
 
-      <div className="bamboo-foot-bottom mx-auto max-w-[1200px] px-6 sm:items-center sm:justify-between">
-        <span>
-          {`© ${new Date().getFullYear()} ${name}`}
-          {address ? ` · ${address}` : ""} · Proudly made in Detroit
-        </span>
+          <div>
+            <h3 className="text-primary-foreground/80 mb-4 text-sm font-semibold tracking-wider uppercase">
+              Policies
+            </h3>
+            <nav
+              className="flex flex-col gap-2.5"
+              aria-label="Customer care links"
+            >
+              {policies.map((link) => (
+                <Link
+                  key={link.id}
+                  href={link.slug}
+                  className="text-primary-foreground/80 hover:text-primary-foreground text-sm transition-colors"
+                >
+                  {link.title}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div>
+            <h3 className="text-primary-foreground/80 mb-4 text-sm font-semibold tracking-wider uppercase">
+              Connect
+            </h3>
+            <address className="text-primary-foreground/80 flex flex-col gap-2.5 text-sm not-italic">
+              <span>{name}</span>
+              {address && <span>{address}</span>}
+              {email && (
+                <a
+                  href={`mailto:${email}`}
+                  className="hover:text-primary-foreground transition-colors"
+                >
+                  {email}
+                </a>
+              )}
+            </address>
+          </div>
+        </div>
+
+        <div className="border-primary-foreground/20 mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
+          <p className="text-primary-foreground/80 text-xs">
+            {"© 2026 " + name + ". All rights reserved."}
+          </p>
+          <p className="text-primary-foreground/80 text-xs">
+            Proudly made in Detroit
+          </p>
+        </div>
       </div>
     </footer>
   );
