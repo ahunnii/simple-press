@@ -26,6 +26,16 @@ const contactPageData: TemplateField[] = [
     gridColumn: "col-span-full",
   },
   {
+    key: "bamboo.contact.hero-image",
+    label: "Contact Hero Image",
+    description: "Image beside the contact page heading",
+    type: "image",
+    page: "contact",
+    group: "contact.info",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+  {
     key: "bamboo.contact.hours",
     label: "Business Hours",
     description: "Business hours text",

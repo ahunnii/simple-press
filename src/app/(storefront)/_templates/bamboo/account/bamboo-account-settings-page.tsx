@@ -8,7 +8,14 @@ import { BambooAccountLayout } from "./bamboo-account-layout";
 export function BambooAccountSettingsPage() {
   return (
     <PageTransition>
-      <BambooAccountLayout heading="Settings">
+      <BambooAccountLayout
+        heading="Settings"
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account/settings" },
+          { label: "Settings" },
+        ]}
+      >
         <AccountSettingsCards />
       </BambooAccountLayout>
     </PageTransition>

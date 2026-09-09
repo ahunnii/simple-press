@@ -51,7 +51,7 @@ export function BambooProductActions({
             size="lg"
             aria-disabled="true"
             onClick={(e) => e.preventDefault()}
-            className="flex cursor-not-allowed opacity-50"
+            className="flex cursor-not-allowed rounded-full opacity-50"
           >
             Out of Stock
           </Button>
@@ -118,7 +118,7 @@ export function BambooProductActions({
                 <Button
                   size="lg"
                   onClick={handleAddToCart}
-                  className="flex-1 gap-2 sm:flex-none"
+                  className="flex-1 gap-2 rounded-full hover:bg-[var(--bam-forest-deep)] sm:flex-none"
                 >
                   {justAdded ? (
                     <>

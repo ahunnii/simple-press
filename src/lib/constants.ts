@@ -35,7 +35,7 @@ export const TEMPLATES = [
     id: TEMPLATE_IDS.BAMBOO,
     name: "Bamboo",
     description:
-      "Warm illustrated storefront where the brand's own artwork comes alive — ambient motion, torn-paper edges, and hand-drawn product scenes for eco-friendly brands",
+      "Luxe editorial storefront for eco brands — deep forest green and antique gold on warm cream, serif display type, and an emblem-first navigation that puts the brand's logo center stage",
     previewImage: "/templates/bamboo-preview.png",
   },
   {

@@ -104,7 +104,10 @@ export function BambooOrderConfirmation({ business }: Props) {
     return (
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-muted-foreground mb-4">No order found</p>
-        <Button asChild>
+        <Button
+          asChild
+          className="rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+        >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>
@@ -141,7 +144,7 @@ export function BambooOrderConfirmation({ business }: Props) {
       </div>
 
       {/* Order Details Card */}
-      <Card className="border-primary/20 bg-primary/5 mb-8">
+      <Card className="border-primary/20 bg-primary/5 mb-8 rounded-2xl">
         <CardContent className="p-8">
           <div className="flex items-start gap-4">
             <div
@@ -197,10 +200,17 @@ export function BambooOrderConfirmation({ business }: Props) {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-4 sm:flex-row">
-        <Button asChild variant="outline" className="flex-1">
+        <Button
+          asChild
+          variant="outline"
+          className="flex-1 rounded-full border-[var(--bam-forest)] text-[var(--bam-forest)] hover:bg-[var(--bam-cream-deep)] hover:text-[var(--bam-forest-deep)]"
+        >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
-        <Button asChild className="flex-1">
+        <Button
+          asChild
+          className="flex-1 rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+        >
           <Link href="/">Back to Home</Link>
         </Button>
       </div>

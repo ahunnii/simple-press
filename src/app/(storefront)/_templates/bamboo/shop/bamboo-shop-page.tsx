@@ -24,36 +24,45 @@ export async function BambooShopPage({
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-        <FadeIn direction="up">
-          <div {...sectionGroupAttr("products", "listing")} className="mb-12">
-            <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
-              <span
-                className="text-balance"
-                {...fieldAttr("bamboo.products.listing-title")}
+      {/* happy-bamboo's shop composition: one continuous section — centered
+          kicker/h1/lede header, then controls + grid directly below, no
+          background-band split between header and listing. */}
+      <section className="bg-background px-4 py-16 md:py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <FadeIn className="mx-auto max-w-3xl text-center">
+            <div {...sectionGroupAttr("products", "listing")}>
+              <p className="font-sans text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
+                Shop
+              </p>
+              <h1 className="text-foreground font-serif mt-3 text-4xl font-bold tracking-tight md:text-5xl">
+                <span
+                  className="text-balance"
+                  {...fieldAttr("bamboo.products.listing-title")}
+                >
+                  {f["bamboo.products.listing-title"]}
+                </span>
+              </h1>
+              <p
+                className="text-muted-foreground mt-4 font-sans text-lg"
+                {...fieldAttr("bamboo.products.listing-intro")}
               >
-                {f["bamboo.products.listing-title"]}
-              </span>
-            </h1>
-            <p
-              className="text-muted-foreground mt-3 max-w-2xl font-sans"
-              {...fieldAttr("bamboo.products.listing-intro")}
-            >
-              {f["bamboo.products.listing-intro"]}
-            </p>
-          </div>
-        </FadeIn>
-        {business.products?.length === 0 ? (
-          <div className="py-16 text-center">
-            <h2 className="text-muted-foreground font-sans text-lg">
-              No products available at this time.
-            </h2>
-          </div>
-        ) : (
-          <Suspense>
-            <BambooShopClient products={business.products ?? []} />
-          </Suspense>
-        )}
+                {f["bamboo.products.listing-intro"]}
+              </p>
+            </div>
+          </FadeIn>
+
+          {business.products?.length === 0 ? (
+            <div className="py-16 text-center">
+              <h2 className="text-muted-foreground font-sans text-lg">
+                No products available at this time.
+              </h2>
+            </div>
+          ) : (
+            <Suspense>
+              <BambooShopClient products={business.products ?? []} />
+            </Suspense>
+          )}
+        </div>
       </section>
     </PageTransition>
   );

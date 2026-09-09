@@ -33,7 +33,14 @@ function statusClass(status: string) {
 export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
   return (
     <PageTransition>
-      <BambooAccountLayout heading="My Orders">
+      <BambooAccountLayout
+        heading="My Orders"
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account/settings" },
+          { label: "Orders" },
+        ]}
+      >
         {orders.length === 0 ? (
           <FadeIn direction="up">
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -49,7 +56,10 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
               <p className="text-muted-foreground mb-6 text-sm">
                 When you place an order, it will appear here.
               </p>
-              <Button asChild>
+              <Button
+                asChild
+                className="rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+              >
                 <Link href="/shop">Start Shopping</Link>
               </Button>
             </div>
@@ -58,7 +68,7 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
           <StaggerContainer className="space-y-4" staggerDelay={0.08}>
             {orders.map((order) => (
               <StaggerItem key={order.id}>
-                <Card className="border-border/60 bg-card">
+                <Card className="bg-card rounded-2xl border-[var(--bam-hairline)]">
                   <CardContent className="p-6">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
@@ -84,12 +94,12 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
                         </p>
                       </div>
                     </div>
-                    <div className="mt-4 border-t pt-4">
+                    <div className="mt-4 border-t border-[var(--bam-hairline)] pt-4">
                       <div className="flex flex-wrap gap-2">
                         {order.items.slice(0, 3).map((item) => (
                           <span
                             key={item.id}
-                            className="bg-secondary text-foreground rounded px-2 py-1 text-xs"
+                            className="bg-secondary text-foreground rounded-full px-2.5 py-1 text-xs"
                           >
                             {item.productName}
                             {item.variantName
@@ -98,7 +108,7 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
                           </span>
                         ))}
                         {order.items.length > 3 && (
-                          <span className="bg-secondary text-muted-foreground rounded px-2 py-1 text-xs">
+                          <span className="bg-secondary text-muted-foreground rounded-full px-2.5 py-1 text-xs">
                             +{order.items.length - 3} more
                           </span>
                         )}

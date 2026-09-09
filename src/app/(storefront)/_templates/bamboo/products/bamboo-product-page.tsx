@@ -102,19 +102,19 @@ export function BambooProductPage({
                   {additionalFields.productTagline}
                 </p>
               )}
-              <p className="text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line">
-                {product.description}
-              </p>
             </div>
 
             <div className="flex flex-wrap items-baseline gap-3">
               {isOnSale && displayCompareAtPrice && (
-                <span className="bg-foreground text-background inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold">
+                <span className="inline-flex items-center rounded-full bg-[var(--bam-forest)] px-3 py-1 text-sm font-semibold text-[var(--bam-cream)]">
                   {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
                 </span>
               )}
               <div className="flex items-baseline gap-2">
-                <span className="text-foreground text-3xl font-bold">
+                {/* Large text only — --bam-gold measures ~3.5:1 on cream,
+                    which clears AA for large text but not body-size text
+                    (see docs/templates/bamboo/design.md contrast guardrails). */}
+                <span className="text-3xl font-bold text-[var(--bam-gold)]">
                   {formatPrice(displayPrice)}
                 </span>
                 {isOnSale && displayCompareAtPrice && (
@@ -152,15 +152,23 @@ export function BambooProductPage({
         <ProductDetailsAdditionalInfoTabs
           product={product}
           styleProps={{
+            // Inactive triggers default to text-foreground/60, which blends
+            // below 4.5:1 on bamboo's warm muted surface. twMerge doesn't
+            // recognize the two custom-token classes as the same group, so
+            // the important modifier is needed to actually win the cascade.
+            tabsTriggerClassName:
+              "text-muted-foreground! data-[state=active]:text-foreground!",
             cardContentClassName:
               "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line",
           }}
         />
 
-        {/* Related Products */}
+        {/* Related Products — mirrors happy-bamboo's plain mb-20 wrapper
+            (no divider); the "no related products" message below is
+            bamboo's own empty state and is preserved as-is. */}
         <div className="mb-20">
           <FadeIn direction="up">
-            <h2 className="text-foreground font-heading text-2xl font-bold">
+            <h2 className="text-[var(--bam-forest-deep)] font-heading text-2xl font-bold md:text-3xl">
               You Might Also Like
             </h2>
           </FadeIn>

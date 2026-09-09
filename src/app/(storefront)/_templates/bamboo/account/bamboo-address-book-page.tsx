@@ -12,7 +12,14 @@ export function BambooAddressBookPage({
 }: AccountAddressBookPageProps) {
   return (
     <PageTransition>
-      <BambooAccountLayout heading="Address Book">
+      <BambooAccountLayout
+        heading="Address Book"
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account/settings" },
+          { label: "Address Book" },
+        ]}
+      >
         <AddressBookContent
           customer={customer}
           salesCountries={business.salesCountries}

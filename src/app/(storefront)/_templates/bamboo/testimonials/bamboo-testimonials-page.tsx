@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- remote customer-uploaded photos */
 import Link from "next/link";
-import { Quote, Star } from "lucide-react";
+import { Quote } from "lucide-react";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -43,15 +43,15 @@ export async function BambooTestimonialsPage({
     <PageTransition>
       <section
         {...sectionGroupAttr("testimonials", "page")}
-        className="bg-secondary py-16 md:py-24"
+        className="bg-[var(--bam-cream-deep)] py-20 md:py-28"
       >
         <div className="mx-auto max-w-7xl px-4 text-center lg:px-8">
           <FadeIn>
-            <span className="text-primary text-sm font-semibold tracking-wider uppercase">
+            <span className="mb-3 block text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
               Testimonials
             </span>
             <h1
-              className="text-foreground font-heading mt-2 text-4xl font-bold tracking-tight md:text-5xl"
+              className="text-foreground font-serif text-4xl font-bold tracking-tight md:text-5xl"
               {...fieldAttr("bamboo.testimonials-page.heading")}
             >
               {heading}
@@ -66,17 +66,17 @@ export async function BambooTestimonialsPage({
         </div>
       </section>
 
-      <section className="py-12 md:py-20">
+      <section className="bg-background py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           {testimonials.length === 0 ? (
             <FadeIn>
-              <div className="bg-muted/40 mx-auto max-w-xl rounded-2xl py-16 text-center">
+              <div className="mx-auto max-w-xl rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] py-16 text-center">
                 <p className="text-muted-foreground">
                   No testimonials yet. Check back soon!
                 </p>
                 <Link
                   href="/"
-                  className="text-primary mt-6 inline-block font-semibold hover:underline"
+                  className="mt-6 inline-block font-semibold text-[var(--bam-forest)] hover:underline"
                 >
                   Back to home
                 </Link>
@@ -89,23 +89,10 @@ export async function BambooTestimonialsPage({
             >
               {testimonials.map((t) => (
                 <StaggerItem key={t.id}>
-                  <Card className="border-border/60 bg-card h-full">
+                  <Card className="h-full rounded-2xl border-[var(--bam-hairline)] bg-card transition-shadow hover:shadow-md">
                     <CardContent className="flex h-full flex-col p-8">
-                      <div
-                        className="flex gap-0.5"
-                        role="img"
-                        aria-label="5 out of 5 stars"
-                      >
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className="fill-accent text-accent size-4"
-                            aria-hidden="true"
-                          />
-                        ))}
-                      </div>
                       <Quote
-                        className="text-primary/30 mt-4 mb-3 h-8 w-8"
+                        className="mb-4 h-8 w-8 text-[var(--bam-forest)]/30"
                         aria-hidden="true"
                       />
                       {t.title ? (
@@ -125,7 +112,7 @@ export async function BambooTestimonialsPage({
                               className="object-cover"
                             />
                           ) : null}
-                          <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                          <AvatarFallback className="border border-[var(--bam-gold)]/40 bg-transparent text-sm font-medium text-[var(--bam-forest)]">
                             {getInitials(t.customerName)}
                           </AvatarFallback>
                         </Avatar>
@@ -163,8 +150,8 @@ export async function BambooTestimonialsPage({
           )}
 
           <FadeIn className="mt-14 text-center">
-            <div className="bg-secondary/50 mx-auto max-w-2xl rounded-2xl px-8 py-12">
-              <h2 className="font-heading text-2xl font-bold">
+            <div className="mx-auto max-w-2xl rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] px-8 py-12">
+              <h2 className="font-serif text-2xl font-bold">
                 Share Your Experience
               </h2>
               <p className="text-muted-foreground mt-2">
@@ -172,7 +159,7 @@ export async function BambooTestimonialsPage({
               </p>
               <Link
                 href="/testimonials/submit"
-                className="bg-primary text-primary-foreground mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+                className="mt-6 inline-block rounded-full bg-[var(--bam-forest)] px-6 py-3 text-sm font-semibold text-[var(--bam-cream)] transition-colors hover:bg-[var(--bam-forest-deep)]"
               >
                 Write a Testimonial
               </Link>
@@ -183,7 +170,7 @@ export async function BambooTestimonialsPage({
             <FadeIn className="mt-10 text-center">
               <Link
                 href="/shop"
-                className="text-primary font-semibold hover:underline"
+                className="font-semibold text-[var(--bam-forest)] hover:underline"
               >
                 Shop the collection
               </Link>
