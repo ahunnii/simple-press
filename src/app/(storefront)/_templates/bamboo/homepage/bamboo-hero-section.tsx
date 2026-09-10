@@ -90,27 +90,32 @@ export function BambooHeroSection({ customFields }: Props) {
             fetchPriority="high"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
           />
-          {/* Optional mood wash over the photo — a flat 20% of the merchant's
-              hex, never more: the scrim below is still the whole contrast
-              guarantee ("tint is mood, scrim is contrast", as on pink). No
-              z-index needed; a later z-auto sibling paints above the img and
-              below the z-[1] scrim/fade. */}
+          {/* Optional mood wash over the photo — a flat 12% of the merchant's
+              hex, never more: the translucent scrim no longer hides the tint
+              behind the copy, so 12% is what keeps a worst-case dark tint
+              above the measured 4.5:1 gold floor ("tint is mood, scrim is
+              contrast", as on pink). No z-index needed; a later z-auto sibling
+              paints above the img and below the z-[1] scrim/fade. */}
           {hasTint && (
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0"
               style={{
-                backgroundColor: `color-mix(in srgb, ${tint} 20%, transparent)`,
+                backgroundColor: `color-mix(in srgb, ${tint} 12%, transparent)`,
               }}
             />
           )}
-          {/* Scrim. Must stay FULLY opaque cream behind the copy column:
-              `--bam-gold` sits at oklch(0.50) for ~5:1 on cream with no
-              headroom (docs/bamboo-accessibility.md), so any photo bleeding
-              through under the kicker/accent line drops it below 4.5:1. */}
+          {/* Scrim: a translucent cream wash, not an opaque panel — the client
+              wants the photo to read as a true full-bleed background. The wash
+              floors are contrast-measured against the live photo per
+              docs/bamboo-accessibility.md (gold at oklch 0.50 has no headroom,
+              so the sampled worst pixel under every gold glyph must stay
+              ≥4.5:1): raising photo bleed past these stops needs a re-measure,
+              and a merchant swapping in a darker photo is caught by the same
+              audit cycle. */}
           <div
             aria-hidden="true"
-            className="absolute inset-0 z-[1] bg-gradient-to-b from-[var(--bam-cream)] from-66% via-[var(--bam-cream)]/85 via-82% to-[var(--bam-cream)]/40 lg:bg-gradient-to-r lg:from-[var(--bam-cream)] lg:from-50% lg:via-[var(--bam-cream)]/75 lg:via-66% lg:to-transparent lg:to-88%"
+            className="absolute inset-0 z-[1] bg-gradient-to-b from-[var(--bam-cream)]/90 from-64% via-[var(--bam-cream)]/60 via-78% to-[var(--bam-cream)]/25 lg:bg-gradient-to-r lg:from-[var(--bam-cream)]/85 lg:from-50% lg:via-[var(--bam-cream)]/40 lg:via-66% lg:to-[var(--bam-cream)]/5 lg:to-92%"
           />
           {/* Bottom fade: the value band's wave strip paints flat cream above
               its curve, so the photo has to land on cream at the seam or the
@@ -241,7 +246,7 @@ export function BambooHeroSection({ customFields }: Props) {
             // PNG but paints a rectangular halo around any opaque photo, so
             // it's gone. The aspect box renders UNCONDITIONALLY: it is a
             // load-bearing geometry spacer, because the sub-lg scrim stop
-            // (`from-66%`) was contrast-measured against a section height that
+            // (`from-64%`) was contrast-measured against a section height that
             // includes it. With no real hero image set, the background photo
             // alone is the hero and this box just holds the row open.
             <div className="relative aspect-4/5 w-full sm:aspect-square lg:aspect-4/5">
