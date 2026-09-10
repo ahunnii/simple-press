@@ -18,10 +18,10 @@ function mockReducedMotion(matches: boolean) {
     matches: matches && query.includes("prefers-reduced-motion"),
     media: query,
     onchange: null,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    addListener: () => {},
-    removeListener: () => {},
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
     dispatchEvent: () => false,
   })) as unknown as typeof window.matchMedia;
   return () => {
