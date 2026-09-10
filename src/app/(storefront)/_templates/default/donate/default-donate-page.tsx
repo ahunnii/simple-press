@@ -114,7 +114,7 @@ export function DefaultDonatePage({
               >
                 {f["default.donate.other-ways-heading"] ?? "Other ways to give"}
               </h2>
-              <DefaultDonateOtherWays handles={handles} />
+              <DefaultDonateOtherWays handles={handles} logoUrl={business.siteContent?.logoUrl} />
             </div>
           )}
 

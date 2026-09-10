@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveDonationLabel } from "~/lib/donations/label";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
@@ -19,6 +20,7 @@ export default async function NavigationPage() {
   const blogEnabled = isEnabled("blog");
   const productsEnabled = isEnabled("products");
   const collectionsEnabled = isEnabled("collections");
+  const donationsEnabled = isEnabled("donations");
 
   let services: Array<{ name: string; slug: string }> = [];
   if (servicesEnabled) {
@@ -50,6 +52,8 @@ export default async function NavigationPage() {
         blogEnabled={blogEnabled}
         productsEnabled={productsEnabled}
         collectionsEnabled={collectionsEnabled}
+        donationsEnabled={donationsEnabled}
+        donationNavLabel={resolveDonationLabel(business.donationLabel).verb}
       />
     </>
   );

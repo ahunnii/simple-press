@@ -1,11 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import { createQrCodeSvgData } from "@better-auth-ui/core";
-
 import type { ResolvedDonationHandle } from "~/lib/donation-handles";
 import { CashAppIcon } from "~/components/icons/cashapp-icon";
 import { VenmoIcon } from "~/components/icons/venmo-icon";
+import { BrandedQrCode } from "~/components/shared/branded-qr-code";
 
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
 
@@ -14,12 +12,14 @@ const HANDLE_ICONS: Record<ResolvedDonationHandle["key"], typeof VenmoIcon> = {
   cashapp: CashAppIcon,
 };
 
-function HandleCard({ handle }: { handle: ResolvedDonationHandle }) {
+function HandleCard({
+  handle,
+  logoUrl,
+}: {
+  handle: ResolvedDonationHandle;
+  logoUrl?: string | null;
+}) {
   const Icon = HANDLE_ICONS[handle.key];
-  // Memoized the same way `DefaultDonateOtherWays` memoizes its QR code — the
-  // SVG path is deterministic for a given URL, so there's no reason to
-  // regenerate it on every render.
-  const qrCode = useMemo(() => createQrCodeSvgData(handle.url), [handle.url]);
 
   return (
     <div
@@ -41,16 +41,12 @@ function HandleCard({ handle }: { handle: ResolvedDonationHandle }) {
         </p>
       </div>
 
-      <svg
-        viewBox={`0 0 ${qrCode.size} ${qrCode.size}`}
-        aria-hidden="true"
-        focusable="false"
-        className="size-32"
+      <BrandedQrCode
+        value={handle.url}
+        logoUrl={logoUrl}
+        className="size-44"
         style={{ border: "1px solid var(--pink-line)" }}
-      >
-        <path fill="white" d={`M0 0h${qrCode.size}v${qrCode.size}H0z`} />
-        <path fill="black" d={qrCode.path} shapeRendering="crispEdges" />
-      </svg>
+      />
 
       <a
         href={handle.url}
@@ -73,13 +69,15 @@ function HandleCard({ handle }: { handle: ResolvedDonationHandle }) {
  */
 export function PinkDonateOtherWays({
   handles,
+  logoUrl,
 }: {
   handles: ResolvedDonationHandle[];
+  logoUrl?: string | null;
 }) {
   return (
     <PinkHairlineGrid columnsClassName="grid-cols-1 sm:grid-cols-2">
       {handles.map((handle) => (
-        <HandleCard key={handle.key} handle={handle} />
+        <HandleCard key={handle.key} handle={handle} logoUrl={logoUrl} />
       ))}
     </PinkHairlineGrid>
   );

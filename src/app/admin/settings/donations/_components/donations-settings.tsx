@@ -442,7 +442,7 @@ export function DonationsSettings({ business, paymentsHealth }: Props) {
               <CardHeader>
                 <CardTitle>Placement</CardTitle>
                 <CardDescription>
-                  Where a link to the donate page appears automatically.
+                  Adds a link to your donate page to your site&apos;s header and footer.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -457,15 +457,17 @@ export function DonationsSettings({ business, paymentsHealth }: Props) {
                   label="Show link in footer"
                 />
                 <p className="text-muted-foreground text-sm">
-                  If you use a custom navigation menu, you&apos;ll need to add
-                  the donate page to it yourself in{" "}
+                  Automatic placement is supported on the Default and Pink
+                  templates. On other templates, or if you&apos;d like the link
+                  in a custom spot in your menu, add it yourself with the Donate
+                  shortcut in{" "}
                   <Link
                     href="/admin/content/navigation"
                     className="underline underline-offset-2"
                   >
                     Content → Navigation
                   </Link>
-                  — these toggles only control the automatic link.
+                  &apos;s Quick Add panel.
                 </p>
                 <p className="text-muted-foreground text-sm">
                   This feature has its own master on/off switch in{" "}

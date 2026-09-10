@@ -43,6 +43,10 @@ type Props = {
   productsEnabled?: boolean;
   /** Gates the Quick Add "Collections" shortcut. */
   collectionsEnabled?: boolean;
+  /** Gates the Quick Add "Donate" shortcut. */
+  donationsEnabled?: boolean;
+  /** Label for the Donate quick-add button (e.g., "Donate", "Contribute"). */
+  donationNavLabel?: string;
 };
 
 export function NavigationBuilder({
@@ -53,6 +57,8 @@ export function NavigationBuilder({
   blogEnabled,
   productsEnabled,
   collectionsEnabled,
+  donationsEnabled,
+  donationNavLabel,
 }: Props) {
   const router = useRouter();
 
@@ -505,6 +511,16 @@ export function NavigationBuilder({
                     >
                       About
                     </Button>
+                    {donationsEnabled && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => quickAddPage("donate", donationNavLabel ?? "Donate")}
+                      >
+                        {donationNavLabel ?? "Donate"}
+                      </Button>
+                    )}
                   </div>
                 </div>
 

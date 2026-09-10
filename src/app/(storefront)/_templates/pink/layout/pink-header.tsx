@@ -9,6 +9,7 @@ import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { isActiveNavLink } from "~/lib/nav-utils";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -127,10 +128,31 @@ export function PinkHeader({
     (business?.siteContent?.navigationItems as PinkNavLink[] | undefined) ??
     DEFAULT_NAV;
 
-  // The drawer is one flat level, so a parent is replaced by its children.
-  const mobileLinks = navLinks.flatMap((link) =>
-    link.children?.length ? link.children : [link],
+  // Pink renders donate as a chrome-level CTA (right actions cluster) rather than
+  // folding it into DEFAULT_NAV like default-header does. Reason: pink's nav can be
+  // fully owner-replaced via the Navigation builder (see the `??` comment above), and
+  // if donate only existed as a spliced-in DEFAULT_NAV entry, an owner who saves ANY
+  // custom nav would silently lose the toggle's effect. Rendering it at chrome level
+  // keeps `donationShowInHeader` authoritative regardless of custom nav content.
+  // `navHasDonate` avoids a duplicate CTA when the owner already links to /donate
+  // themselves (in a top-level link or inside a dropdown's children).
+  const donationVerb = resolveDonationLabel(business?.donationLabel).verb;
+  const navHasDonate = navLinks.some(
+    (l) =>
+      l.href === "/donate" ||
+      (l.children?.some((c) => c.href === "/donate") ?? false),
   );
+  const showDonateCta =
+    isEnabled("donations") && !!business?.donationShowInHeader && !navHasDonate;
+
+  // The drawer is one flat level, so a parent is replaced by its children. The
+  // donate CTA is appended last so it doesn't reorder the owner's own nav.
+  const mobileLinks = [
+    ...navLinks.flatMap((link) =>
+      link.children?.length ? link.children : [link],
+    ),
+    ...(showDonateCta ? [{ href: "/donate", label: donationVerb }] : []),
+  ];
 
   const isActive = (href: string) => isActiveNavLink(pathname ?? "/", href);
 
@@ -299,6 +321,33 @@ export function PinkHeader({
                     {wishlistCount}
                   </span>
                 )}
+              </Link>
+            )}
+
+            {showDonateCta && (
+              <Link
+                href="/donate"
+                // Outline sibling of the solid basket button below: same
+                // padding/type scale, inverted fill so the two chrome CTAs
+                // read as a pair without competing. Hidden on mobile — the
+                // drawer carries its own donate row via `mobileLinks`.
+                className="hidden items-center text-[14px] font-semibold transition-colors sm:inline-flex"
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--pink-rose)",
+                  color: "var(--pink-rose)",
+                  padding: "11px 20px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--pink-rose)";
+                  e.currentTarget.style.color = "var(--pink-on-accent)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "var(--pink-rose)";
+                }}
+              >
+                {donationVerb}
               </Link>
             )}
 

@@ -155,7 +155,7 @@ export function PinkDonatePage({
             >
               {otherWaysHeading}
             </h2>
-            <PinkDonateOtherWays handles={handles} />
+            <PinkDonateOtherWays handles={handles} logoUrl={business.siteContent?.logoUrl} />
           </div>
         )}
 

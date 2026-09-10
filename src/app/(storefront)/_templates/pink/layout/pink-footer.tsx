@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
@@ -154,6 +155,25 @@ export function PinkFooter({
           { label: "Contact", url: "/contact" },
         ];
 
+  // Toggle-authoritative, like the header CTA: appended to col2 (Studio) rather
+  // than folded into the col2Links fallback array, so it survives even when the
+  // owner has saved a custom col2 link list via `pink.global.footer-col2-links`.
+  // Deduped against BOTH columns in case the owner already links to /donate from
+  // either one.
+  const showDonateLink =
+    isEnabled("donations") &&
+    !!business?.donationShowInFooter &&
+    ![...col1Links, ...col2Links].some((l) => l.url === "/donate");
+  const col2LinksFinal = showDonateLink
+    ? [
+        ...col2Links,
+        {
+          label: resolveDonationLabel(business?.donationLabel).verb,
+          url: "/donate",
+        },
+      ]
+    : col2Links;
+
   // Gated on `socialLinks.length` alone — an owner with no socials set at all
   // must never see an empty icon row reserving space under the blurb. There is
   // no separate hide toggle: the icons are part of the `global.footer` section,
@@ -271,7 +291,7 @@ export function PinkFooter({
           />
           <FooterCol
             title={col2Title}
-            links={col2Links}
+            links={col2LinksFinal}
             labelClass={labelClass}
             fg={fg}
           />

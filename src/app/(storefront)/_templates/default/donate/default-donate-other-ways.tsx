@@ -1,23 +1,23 @@
 "use client";
 
-import { useMemo } from "react";
-import { createQrCodeSvgData } from "@better-auth-ui/core";
-
 import type { ResolvedDonationHandle } from "~/lib/donation-handles";
 import { CashAppIcon } from "~/components/icons/cashapp-icon";
 import { VenmoIcon } from "~/components/icons/venmo-icon";
+import { BrandedQrCode } from "~/components/shared/branded-qr-code";
 
 const HANDLE_ICONS: Record<ResolvedDonationHandle["key"], typeof VenmoIcon> = {
   venmo: VenmoIcon,
   cashapp: CashAppIcon,
 };
 
-function HandleCard({ handle }: { handle: ResolvedDonationHandle }) {
+function HandleCard({
+  handle,
+  logoUrl,
+}: {
+  handle: ResolvedDonationHandle;
+  logoUrl?: string | null;
+}) {
   const Icon = HANDLE_ICONS[handle.key];
-  // Memoized the same way `OpenEmailButton` memoizes its QR code — the SVG
-  // path is deterministic for a given URL, so there's no reason to
-  // regenerate it on every render.
-  const qrCode = useMemo(() => createQrCodeSvgData(handle.url), [handle.url]);
 
   return (
     <div className="flex flex-col items-center gap-4 rounded-(--radius) border border-[#e8e8e8] p-6 text-center">
@@ -29,15 +29,11 @@ function HandleCard({ handle }: { handle: ResolvedDonationHandle }) {
         <p className="mt-0.5 text-sm text-[#6b6b6b]">{handle.displayHandle}</p>
       </div>
 
-      <svg
-        viewBox={`0 0 ${qrCode.size} ${qrCode.size}`}
-        aria-hidden="true"
-        focusable="false"
-        className="size-32"
-      >
-        <path fill="white" d={`M0 0h${qrCode.size}v${qrCode.size}H0z`} />
-        <path fill="black" d={qrCode.path} shapeRendering="crispEdges" />
-      </svg>
+      <BrandedQrCode
+        value={handle.url}
+        logoUrl={logoUrl}
+        className="size-44"
+      />
 
       <a
         href={handle.url}
@@ -59,13 +55,15 @@ function HandleCard({ handle }: { handle: ResolvedDonationHandle }) {
  */
 export function DefaultDonateOtherWays({
   handles,
+  logoUrl,
 }: {
   handles: ResolvedDonationHandle[];
+  logoUrl?: string | null;
 }) {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       {handles.map((handle) => (
-        <HandleCard key={handle.key} handle={handle} />
+        <HandleCard key={handle.key} handle={handle} logoUrl={logoUrl} />
       ))}
     </div>
   );
