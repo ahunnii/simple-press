@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, CreditCard, Landmark } from "lucide-react";
+import {
+  AlertTriangle,
+  CreditCard,
+  HeartHandshake,
+  Landmark,
+} from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -59,6 +64,7 @@ export function FinanceBreakdown({ data }: { data: Data }) {
     range,
     orders,
     stripe,
+    donations,
     taxCollectedYtdCents,
     stripeAutoTaxEnabled,
     isStripeConnected,
@@ -67,6 +73,9 @@ export function FinanceBreakdown({ data }: { data: Data }) {
     stripeDetailsSubmitted,
     recentPayouts,
   } = data;
+
+  const noun = donations.labelNoun;
+  const showDonations = donations.enabled || donations.allTimeCount > 0;
 
   return (
     <div className="admin-container space-y-6">
@@ -180,7 +189,67 @@ export function FinanceBreakdown({ data }: { data: Data }) {
         </CardContent>
       </Card>
 
-      {/* Card 2 — What Stripe took */}
+      {showDonations && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <HeartHandshake className="h-4 w-4" />
+              {noun}s
+            </CardTitle>
+            <CardDescription>
+              {noun}s collected through Stripe Checkout for{" "}
+              {range.label.toLowerCase()}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {donations.count > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <StatTile
+                  label="Total raised"
+                  value={formatCurrency(donations.totalCents)}
+                  emphasize
+                />
+                <StatTile
+                  label={`${noun}s`}
+                  value={donations.count.toLocaleString()}
+                />
+                <StatTile
+                  label="Average"
+                  value={formatCurrency(
+                    Math.round(donations.totalCents / donations.count),
+                  )}
+                />
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                No {noun.toLowerCase()}s in this period.
+              </p>
+            )}
+
+            <p className="text-muted-foreground mt-4 text-xs">
+              {donations.hasOffPlatformHandles ? (
+                <>
+                  Only {noun.toLowerCase()}s paid through Stripe Checkout
+                  appear here. {noun}s sent directly to your Venmo or Cash App
+                  are not tracked by SimplePress and are not included
+                  anywhere on this page. Amounts are gross — Stripe&apos;s
+                  processing fee on {noun.toLowerCase()}s is included in the
+                  What Stripe took card below.
+                </>
+              ) : (
+                <>
+                  Only {noun.toLowerCase()}s paid through Stripe Checkout
+                  appear here — payments received outside SimplePress (e.g.
+                  Venmo or Cash App) are not tracked. Amounts are gross;
+                  Stripe&apos;s fee is included in the card below.
+                </>
+              )}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Card 3 — What Stripe took */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -304,7 +373,7 @@ export function FinanceBreakdown({ data }: { data: Data }) {
         />
       </div>
 
-      {/* Card 3 — Set aside */}
+      {/* Card 4 — Set aside */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -374,6 +443,15 @@ export function FinanceBreakdown({ data }: { data: Data }) {
         cash orders never appear on the Stripe side, and disputes or adjustments
         can land outside the selected range. This page excludes cancelled
         orders.
+        {showDonations && (
+          <>
+            {" "}
+            Stripe&apos;s gross charges also include {noun.toLowerCase()}s
+            taken through Stripe — they appear in the {noun}s card, not in
+            Money in, so compare Money in plus {noun.toLowerCase()}s against
+            Stripe&apos;s gross.
+          </>
+        )}
       </p>
     </div>
   );

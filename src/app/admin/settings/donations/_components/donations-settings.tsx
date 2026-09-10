@@ -14,6 +14,7 @@ import type { PaymentsHealth } from "~/lib/stripe/payments-health";
 import type { RouterOutputs } from "~/trpc/react";
 import {
   cashAppUrl,
+  donationNote,
   normalizeCashAppHandle,
   normalizeVenmoHandle,
   venmoUrl,
@@ -409,12 +410,14 @@ export function DonationsSettings({ business, paymentsHealth }: Props) {
                     placeholder="janedoe"
                     description={
                       <span className="inline-flex items-center gap-1.5">
-                        <VenmoIcon className="h-4 w-4" /> venmo.com/u/…
+                        <VenmoIcon className="h-4 w-4" /> venmo.com/…
                       </span>
                     }
                   />
                   {normalizedVenmo && (
-                    <HandlePreview url={venmoUrl(normalizedVenmo)} />
+                    <HandlePreview
+                      url={venmoUrl(normalizedVenmo, donationNote(business.name))}
+                    />
                   )}
                 </div>
 

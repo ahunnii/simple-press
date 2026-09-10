@@ -302,6 +302,37 @@ export function createOrderItem(
   });
 }
 
+export function createDonation(
+  businessId: string,
+  opts: {
+    amountCents?: number;
+    currency?: string;
+    stripeSessionId?: string;
+    stripePaymentIntentId?: string | null;
+    donorName?: string | null;
+    donorEmail?: string | null;
+    message?: string | null;
+    createdAt?: Date;
+  } = {},
+) {
+  return db.donation.create({
+    data: {
+      businessId,
+      amountCents: opts.amountCents ?? 2500,
+      currency: opts.currency ?? "usd",
+      stripeSessionId:
+        opts.stripeSessionId === undefined
+          ? `cs_test_don_${uniq("test")}`
+          : opts.stripeSessionId,
+      stripePaymentIntentId: opts.stripePaymentIntentId ?? null,
+      donorName: opts.donorName ?? null,
+      donorEmail: opts.donorEmail ?? null,
+      message: opts.message ?? null,
+      ...(opts.createdAt !== undefined ? { createdAt: opts.createdAt } : {}),
+    },
+  });
+}
+
 export function createDiscount(
   businessId: string,
   opts: {

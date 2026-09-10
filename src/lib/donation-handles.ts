@@ -45,14 +45,28 @@ export function normalizeCashAppHandle(raw: string | null | undefined): string |
   return trimmed.length > 0 ? trimmed : null;
 }
 
-/** Builds a Venmo profile URL from a handle already stripped of its leading "@". */
-export function venmoUrl(handle: string): string {
-  return `https://venmo.com/u/${handle}`;
+/**
+ * Builds a Venmo payment-intent link from a handle already stripped of its
+ * leading "@", with a prefilled note (no amount). Uses `/<handle>`
+ * (Venmo's payment-link path), not `/u/<handle>` (the profile page, which
+ * redirects and may drop query params).
+ *
+ * Encodes the note with `encodeURIComponent` rather than `URLSearchParams` —
+ * the latter renders spaces as `+`, which some Venmo clients display
+ * literally instead of decoding.
+ */
+export function venmoUrl(handle: string, note: string): string {
+  return `https://venmo.com/${handle}?txn=pay&note=${encodeURIComponent(note)}`;
 }
 
 /** Builds a Cash App profile URL from a cashtag already stripped of its leading "$". */
 export function cashAppUrl(cashtag: string): string {
   return `https://cash.app/$${cashtag}`;
+}
+
+/** Prefilled payment note used in Venmo payment-intent links. */
+export function donationNote(businessName: string): string {
+  return `Donation to ${businessName}`;
 }
 
 /**
@@ -61,6 +75,7 @@ export function cashAppUrl(cashtag: string): string {
  * always returns an array.
  */
 export function resolveDonationHandles(business: {
+  name: string;
   venmoHandle: string | null;
   cashAppHandle: string | null;
 }): ResolvedDonationHandle[] {
@@ -72,7 +87,7 @@ export function resolveDonationHandles(business: {
       key: "venmo",
       label: "Venmo",
       displayHandle: `@${venmo}`,
-      url: venmoUrl(venmo),
+      url: venmoUrl(venmo, donationNote(business.name)),
     });
   }
 

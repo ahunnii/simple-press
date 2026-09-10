@@ -4,6 +4,7 @@ import { createTestCaller } from "../helpers/caller";
 import { db, resetDb } from "../helpers/db";
 import {
   createBusiness,
+  createDonation,
   createOrder,
   createOwnerUser,
 } from "../helpers/factories";
@@ -315,5 +316,133 @@ describe("finance.getBreakdown — DB half (no Stripe account connected)", () =>
 
     expect(result.orders.orderCount).toBe(1);
     expect(result.orders.totalChargedCents).toBe(mine.total);
+  });
+});
+
+describe("finance.getBreakdown — donations block", () => {
+  beforeEach(async () => {
+    await resetDb();
+    reqHost.value = "finance-biz.simplepress.test";
+  });
+
+  async function setupBusiness(
+    opts: Parameters<typeof createBusiness>[0] = {},
+  ) {
+    const business = await createBusiness(opts);
+    const owner = await createOwnerUser(business.id);
+    reqHost.value = `${business.subdomain}.simplepress.test`;
+    const caller = createTestCaller({ userId: owner.id });
+    return { business, owner, caller };
+  }
+
+  it("in-range donations: totalCents/count sum exactly, allTimeCount matches, orders breakdown is unaffected", async () => {
+    const { business, caller } = await setupBusiness();
+    const a = await createDonation(business.id, {
+      amountCents: 1500,
+      createdAt: localNoonDaysAgo(5),
+    });
+    const b = await createDonation(business.id, {
+      amountCents: 4200,
+      createdAt: localNoonDaysAgo(10),
+    });
+
+    const result = await caller.finance.getBreakdown({ range: "30d" });
+
+    expect(result.donations.totalCents).toBe(a.amountCents + b.amountCents);
+    expect(result.donations.count).toBe(2);
+    expect(result.donations.allTimeCount).toBe(2);
+    // Donation rows must never leak into the (order-only) orders breakdown.
+    expect(result.orders.orderCount).toBe(0);
+    expect(result.orders.productSalesCents).toBe(0);
+  });
+
+  it("range boundary (30d/90d): a 45-day-old donation is excluded from the 30d totals but counted in allTimeCount, and is included under 90d", async () => {
+    const { business, caller } = await setupBusiness();
+    const old = await createDonation(business.id, {
+      amountCents: 3000,
+      createdAt: localNoonDaysAgo(45),
+    });
+
+    const result30 = await caller.finance.getBreakdown({ range: "30d" });
+    expect(result30.donations.totalCents).toBe(0);
+    expect(result30.donations.count).toBe(0);
+    expect(result30.donations.allTimeCount).toBe(1);
+
+    const result90 = await caller.finance.getBreakdown({ range: "90d" });
+    expect(result90.donations.totalCents).toBe(old.amountCents);
+    expect(result90.donations.count).toBe(1);
+    expect(result90.donations.allTimeCount).toBe(1);
+  });
+
+  it("tenant isolation: another business's donations never appear in this business's donations block", async () => {
+    const { business, caller } = await setupBusiness();
+    const other = await createBusiness({});
+    const mine = await createDonation(business.id, { amountCents: 1000 });
+    await createDonation(other.id, { amountCents: 999_999 });
+
+    const result = await caller.finance.getBreakdown({ range: "30d" });
+
+    expect(result.donations.totalCents).toBe(mine.amountCents);
+    expect(result.donations.count).toBe(1);
+    expect(result.donations.allTimeCount).toBe(1);
+  });
+
+  it("zero-state: a business with no donations returns an all-zero donations block", async () => {
+    const { caller } = await setupBusiness();
+
+    const result = await caller.finance.getBreakdown({ range: "30d" });
+
+    expect(result.donations.totalCents).toBe(0);
+    expect(result.donations.count).toBe(0);
+    expect(result.donations.allTimeCount).toBe(0);
+  });
+
+  it("metadata: donationLabel 'tip' + a venmoHandle drive labelNoun and hasOffPlatformHandles", async () => {
+    const { business, caller } = await setupBusiness();
+    await db.business.update({
+      where: { id: business.id },
+      data: { donationLabel: "tip", venmoHandle: "test-venmo" },
+    });
+
+    const result = await caller.finance.getBreakdown({ range: "30d" });
+
+    expect(result.donations.labelNoun).toBe("Tip");
+    expect(result.donations.hasOffPlatformHandles).toBe(true);
+  });
+
+  it("metadata: a default business has labelNoun 'Donation' and no off-platform handles", async () => {
+    const { caller } = await setupBusiness();
+
+    const result = await caller.finance.getBreakdown({ range: "30d" });
+
+    expect(result.donations.labelNoun).toBe("Donation");
+    expect(result.donations.hasOffPlatformHandles).toBe(false);
+  });
+
+  it("flag independence: the donations block stays fully populated when the donations flag is disabled", async () => {
+    const { business, caller } = await setupBusiness({
+      featureFlags: { donations: false },
+    });
+    await createDonation(business.id, { amountCents: 5000 });
+
+    const result = await caller.finance.getBreakdown({ range: "30d" });
+
+    expect(result.donations.enabled).toBe(false);
+    expect(result.donations.totalCents).toBe(5000);
+    expect(result.donations.count).toBe(1);
+    expect(result.donations.allTimeCount).toBe(1);
+  });
+
+  it("flag independence: `enabled` reflects a true stored flag while the block stays populated", async () => {
+    const { business, caller } = await setupBusiness({
+      featureFlags: { donations: true },
+    });
+    await createDonation(business.id, { amountCents: 7500 });
+
+    const result = await caller.finance.getBreakdown({ range: "30d" });
+
+    expect(result.donations.enabled).toBe(true);
+    expect(result.donations.totalCents).toBe(7500);
+    expect(result.donations.count).toBe(1);
   });
 });

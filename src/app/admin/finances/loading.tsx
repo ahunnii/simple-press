@@ -66,6 +66,28 @@ export default function FinancesLoading() {
           <Skeleton className="mt-4 h-3 w-full max-w-lg" />
         </div>
 
+        {/* Donations card */}
+        <div className="bg-card rounded-xl border p-6 shadow-sm">
+          <div className="mb-4 space-y-1">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-5 w-40" />
+            </div>
+            <Skeleton className="h-4 w-80" />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-lg border p-4">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="mt-2 h-8 w-24" />
+              </div>
+            ))}
+          </div>
+
+          <Skeleton className="mt-4 h-3 w-full max-w-lg" />
+        </div>
+
         {/* What Stripe took card */}
         <div className="bg-card rounded-xl border p-6 shadow-sm">
           <div className="mb-4 space-y-1">
