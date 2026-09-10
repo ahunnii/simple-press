@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf } from "lucide-react";
@@ -16,13 +17,22 @@ import { resolveFields } from "..";
 type Props = { customFields: unknown };
 
 /**
- * Split editorial hero — copy left, arched photography right (stacked on
- * mobile). Flat cream: the hanging emblem in the header overhangs the top of
- * the page, so the generous `pt-24 lg:pt-32` is load-bearing, not decoration —
- * it is what keeps the emblem clear of the kicker at every width from lg up.
+ * Split editorial hero — copy left, photography right (stacked on mobile), in
+ * two modes driven by `bamboo.homepage.hero-bg-image`:
+ *
+ * - **Unset (default):** flat cream split, the right column an arched portrait
+ *   whose offset gold hairline echoes the nav emblem.
+ * - **Set:** the photo goes full-bleed behind the whole section under a cream
+ *   scrim, and the right column drops the arch for a free-floating
+ *   object-contain cut-out.
+ *
+ * In BOTH modes the hanging emblem in the header overhangs the top of the page,
+ * so the generous `pt-24 lg:pt-32` is load-bearing, not decoration — it is what
+ * keeps the emblem clear of the kicker at every width from lg up.
  */
 export function BambooHeroSection({ customFields }: Props) {
   const f = resolveFields(customFields, [
+    "bamboo.homepage.hero-bg-image",
     "bamboo.homepage.hero-image",
     "bamboo.homepage.hero-title",
     "bamboo.homepage.hero-title-accent",
@@ -43,6 +53,8 @@ export function BambooHeroSection({ customFields }: Props) {
   const tagline = f["bamboo.homepage.hero-tagline"] ?? "";
   const description = f["bamboo.homepage.hero-description"] ?? "";
   const secondaryText = f["bamboo.homepage.hero-secondary-button-text"] ?? "";
+  const bgImage = f["bamboo.homepage.hero-bg-image"] ?? "";
+  const hasBg = bgImage.length > 0;
 
   return (
     <section
@@ -50,7 +62,50 @@ export function BambooHeroSection({ customFields }: Props) {
       aria-label="Introduction"
       className="relative overflow-hidden bg-[var(--bam-cream)]"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-4 pt-24 pb-20 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-8 lg:pt-32 lg:pb-28">
+      {hasBg && (
+        <>
+          {/* Raw `<img>`, not `next/image`: the URL is arbitrary merchant input
+              and next/image's remotePatterns allowlist 500s on unknown hosts
+              (same reason as `shared/bamboo-page-hero.tsx`). The section keeps
+              its cream background as the loading/error fallback. No `fieldAttr`
+              on any of these layers — image fields refresh the preview iframe
+              through draft-save, they are not textContent-patched. */}
+          <img
+            src={bgImage}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            fetchPriority="high"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+          />
+          {/* Scrim. Must stay FULLY opaque cream behind the copy column:
+              `--bam-gold` sits at oklch(0.50) for ~5:1 on cream with no
+              headroom (docs/bamboo-accessibility.md), so any photo bleeding
+              through under the kicker/accent line drops it below 4.5:1. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 z-[1] bg-gradient-to-b from-[var(--bam-cream)] from-66% via-[var(--bam-cream)]/85 via-82% to-[var(--bam-cream)]/40 lg:bg-gradient-to-r lg:from-[var(--bam-cream)] lg:from-50% lg:via-[var(--bam-cream)]/75 lg:via-66% lg:to-transparent lg:to-88%"
+          />
+          {/* Bottom fade: the value band's wave strip paints flat cream above
+              its curve, so the photo has to land on cream at the seam or the
+              wave reads as a hard cut. Also covers the case where the value
+              band is hidden and cream page background follows instead. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 z-[1] h-16 bg-gradient-to-t from-[var(--bam-cream)] to-transparent md:h-24"
+          />
+        </>
+      )}
+
+      <div
+        className={cn(
+          "mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-4 pt-24 pb-20 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-8 lg:pt-32 lg:pb-28",
+          // FadeIn columns settle at `transform: none`, which destroys the
+          // stacking context they'd otherwise create — so the order is spelled
+          // out: img (z-auto) → scrim/fade (z-1) → this grid (z-2).
+          hasBg && "relative z-[2]",
+        )}
+      >
         <FadeIn direction="right" className="flex flex-col items-start">
           {tagline ? (
             <p
@@ -153,21 +208,41 @@ export function BambooHeroSection({ customFields }: Props) {
         </FadeIn>
 
         <FadeIn direction="left" delay={0.15} className="relative">
-          {/* Offset gold hairline frame — the arch is echoed, never outlined twice. */}
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-3 rounded-t-full rounded-b-2xl border border-[var(--bam-gold)]/25"
-          />
-          <div className="relative aspect-4/5 w-full overflow-hidden rounded-t-full rounded-b-2xl bg-[var(--bam-cream-deep)] ring-1 ring-[var(--bam-gold)]/30 sm:aspect-square lg:aspect-4/5">
-            <Image
-              src={f["bamboo.homepage.hero-image"] ?? "/placeholder.svg"}
-              alt=""
-              fill
-              priority
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 45vw"
-            />
-          </div>
+          {hasBg ? (
+            // Over photography the arch would frame a frame, so the product
+            // floats instead: same aspect box so the grid row can't collapse,
+            // and a `drop-shadow` (a filter — it follows the alpha silhouette)
+            // rather than a box-shadow, which would draw a rectangle behind a
+            // PNG cut-out instead of hugging it like the client mockup.
+            <div className="relative aspect-4/5 w-full sm:aspect-square lg:aspect-4/5">
+              <Image
+                src={f["bamboo.homepage.hero-image"] ?? "/placeholder.svg"}
+                alt=""
+                fill
+                priority
+                className="object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.25)]"
+                sizes="(max-width: 1024px) 100vw, 45vw"
+              />
+            </div>
+          ) : (
+            <>
+              {/* Offset gold hairline frame — the arch is echoed, never outlined twice. */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-3 rounded-t-full rounded-b-2xl border border-[var(--bam-gold)]/25"
+              />
+              <div className="relative aspect-4/5 w-full overflow-hidden rounded-t-full rounded-b-2xl bg-[var(--bam-cream-deep)] ring-1 ring-[var(--bam-gold)]/30 sm:aspect-square lg:aspect-4/5">
+                <Image
+                  src={f["bamboo.homepage.hero-image"] ?? "/placeholder.svg"}
+                  alt=""
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                />
+              </div>
+            </>
+          )}
         </FadeIn>
       </div>
     </section>

@@ -67,6 +67,17 @@ const homepageHeroData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "bamboo.homepage.hero-bg-image",
+    label: "Homepage Hero Background Image",
+    description:
+      "Optional photo that fills the whole hero band behind the headline and hero image. When set, the hero image loses its arched frame and floats over the scene, and a cream wash keeps the text readable. Leave empty for the solid cream look.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
     key: "bamboo.homepage.hero-description",
     label: "Homepage Hero Description",
     description: "Short paragraph below the hero headline.",
