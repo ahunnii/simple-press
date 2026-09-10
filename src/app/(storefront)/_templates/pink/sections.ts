@@ -6,6 +6,7 @@ import { pinkBlogSections } from "./blog";
 import { pinkCartCheckoutSections } from "./cart-checkout";
 import { pinkCollectionsSections } from "./collections";
 import { pinkContactSections } from "./contact";
+import { pinkDonateSections } from "./donate";
 import { pinkEventsSections } from "./events";
 import { pinkGenericSections } from "./generic";
 import { pinkHomepageSections } from "./homepage";
@@ -52,6 +53,7 @@ export const pinkSections: Record<string, TemplateSection[]> = {
     ...pinkBlogSections,
     ...pinkTestimonialsSections,
     ...pinkContactSections,
+    ...pinkDonateSections,
     ...pinkCartCheckoutSections,
     ...pinkGenericSections,
     ...pinkAccountSections,

@@ -51,6 +51,12 @@ export const STATIC_SEO_ROUTES = [
   { key: "faq", path: "/faq", label: "FAQ", featureKey: null },
   { key: "events", path: "/events", label: "Events", featureKey: "events" },
   { key: "videos", path: "/videos", label: "Videos", featureKey: "videos" },
+  {
+    key: "donate",
+    path: "/donate",
+    label: "Donate",
+    featureKey: "donations",
+  },
 ] as const;
 
 export type StaticSeoRoute = (typeof STATIC_SEO_ROUTES)[number];

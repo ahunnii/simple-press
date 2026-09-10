@@ -9,6 +9,7 @@ import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { UserButton } from "~/components/auth/user/user-button";
@@ -125,6 +126,14 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
     ...(isEnabled("events") ? [{ href: "/events", label: "Events" }] : []),
     ...(isEnabled("testimonials")
       ? [{ href: "/testimonials", label: "Reviews" }]
+      : []),
+    ...(isEnabled("donations") && business.donationShowInHeader
+      ? [
+          {
+            href: "/donate",
+            label: resolveDonationLabel(business.donationLabel).verb,
+          },
+        ]
       : []),
     { href: "/contact", label: "Contact" },
   ];

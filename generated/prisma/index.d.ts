@@ -318,6 +318,16 @@ export type QuickBooksInvoice = $Result.DefaultSelection<Prisma.$QuickBooksInvoi
  * lookups use the plaintext `customerEmail` + `businessId`.
  */
 export type Subscription = $Result.DefaultSelection<Prisma.$SubscriptionPayload>
+/**
+ * Model Donation
+ * One-time donation/tip taken through Stripe Checkout on the connected
+ * account (metadata.kind = "donation"). Created ONLY by the webhook after a
+ * paid session — there is no pre-payment row, so `stripeSessionId @unique`
+ * doubles as the retry-idempotency key. Encrypted donor columns can never
+ * appear in a `where`; the admin list filters in memory (same trade-off as
+ * Subscription's encrypted snapshot).
+ */
+export type Donation = $Result.DefaultSelection<Prisma.$DonationPayload>
 
 /**
  * Enums
@@ -959,6 +969,16 @@ export class PrismaClient<
     * ```
     */
   get subscription(): Prisma.SubscriptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.donation`: Exposes CRUD operations for the **Donation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Donations
+    * const donations = await prisma.donation.findMany()
+    * ```
+    */
+  get donation(): Prisma.DonationDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1447,7 +1467,8 @@ export namespace Prisma {
     QuoteSubmission: 'QuoteSubmission',
     QuickBooksConnection: 'QuickBooksConnection',
     QuickBooksInvoice: 'QuickBooksInvoice',
-    Subscription: 'Subscription'
+    Subscription: 'Subscription',
+    Donation: 'Donation'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1466,7 +1487,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "subscription"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "subscription" | "donation"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5022,6 +5043,80 @@ export namespace Prisma {
           }
         }
       }
+      Donation: {
+        payload: Prisma.$DonationPayload<ExtArgs>
+        fields: Prisma.DonationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DonationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DonationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>
+          }
+          findFirst: {
+            args: Prisma.DonationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DonationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>
+          }
+          findMany: {
+            args: Prisma.DonationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>[]
+          }
+          create: {
+            args: Prisma.DonationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>
+          }
+          createMany: {
+            args: Prisma.DonationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DonationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>[]
+          }
+          delete: {
+            args: Prisma.DonationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>
+          }
+          update: {
+            args: Prisma.DonationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>
+          }
+          deleteMany: {
+            args: Prisma.DonationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DonationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DonationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>[]
+          }
+          upsert: {
+            args: Prisma.DonationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DonationPayload>
+          }
+          aggregate: {
+            args: Prisma.DonationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDonation>
+          }
+          groupBy: {
+            args: Prisma.DonationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DonationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DonationCountArgs<ExtArgs>
+            result: $Utils.Optional<DonationCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -5166,6 +5261,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionOmit
     quickBooksInvoice?: QuickBooksInvoiceOmit
     subscription?: SubscriptionOmit
+    donation?: DonationOmit
   }
 
   /* Types for Logging */
@@ -5360,6 +5456,7 @@ export namespace Prisma {
     quoteSubmissions: number
     quickBooksInvoices: number
     subscriptions: number
+    donations: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5392,6 +5489,7 @@ export namespace Prisma {
     quoteSubmissions?: boolean | BusinessCountOutputTypeCountQuoteSubmissionsArgs
     quickBooksInvoices?: boolean | BusinessCountOutputTypeCountQuickBooksInvoicesArgs
     subscriptions?: boolean | BusinessCountOutputTypeCountSubscriptionsArgs
+    donations?: boolean | BusinessCountOutputTypeCountDonationsArgs
   }
 
   // Custom InputTypes
@@ -5606,6 +5704,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SubscriptionWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountDonationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DonationWhereInput
   }
 
 
@@ -12061,6 +12166,11 @@ export namespace Prisma {
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
+    donationLabel: string | null
+    venmoHandle: string | null
+    cashAppHandle: string | null
+    donationShowInHeader: boolean | null
+    donationShowInFooter: boolean | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -12104,6 +12214,11 @@ export namespace Prisma {
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
+    donationLabel: string | null
+    venmoHandle: string | null
+    cashAppHandle: string | null
+    donationShowInHeader: boolean | null
+    donationShowInFooter: boolean | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -12151,6 +12266,12 @@ export namespace Prisma {
     shippingFallbackRate: number
     shippingDefaultItemWeightLb: number
     salesCountries: number
+    donationLabel: number
+    donationPresetAmounts: number
+    venmoHandle: number
+    cashAppHandle: number
+    donationShowInHeader: number
+    donationShowInFooter: number
     _all: number
   }
 
@@ -12210,6 +12331,11 @@ export namespace Prisma {
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
+    donationLabel?: true
+    venmoHandle?: true
+    cashAppHandle?: true
+    donationShowInHeader?: true
+    donationShowInFooter?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -12253,6 +12379,11 @@ export namespace Prisma {
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
+    donationLabel?: true
+    venmoHandle?: true
+    cashAppHandle?: true
+    donationShowInHeader?: true
+    donationShowInFooter?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -12300,6 +12431,12 @@ export namespace Prisma {
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
     salesCountries?: true
+    donationLabel?: true
+    donationPresetAmounts?: true
+    venmoHandle?: true
+    cashAppHandle?: true
+    donationShowInHeader?: true
+    donationShowInFooter?: true
     _all?: true
   }
 
@@ -12434,6 +12571,12 @@ export namespace Prisma {
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
     salesCountries: string[]
+    donationLabel: string
+    donationPresetAmounts: JsonValue | null
+    venmoHandle: string | null
+    cashAppHandle: string | null
+    donationShowInHeader: boolean
+    donationShowInFooter: boolean
     _count: BusinessCountAggregateOutputType | null
     _avg: BusinessAvgAggregateOutputType | null
     _sum: BusinessSumAggregateOutputType | null
@@ -12500,6 +12643,12 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    donationLabel?: boolean
+    donationPresetAmounts?: boolean
+    venmoHandle?: boolean
+    cashAppHandle?: boolean
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
     services?: boolean | Business$servicesArgs<ExtArgs>
@@ -12531,6 +12680,7 @@ export namespace Prisma {
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
+    donations?: boolean | Business$donationsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -12579,6 +12729,12 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    donationLabel?: boolean
+    donationPresetAmounts?: boolean
+    venmoHandle?: boolean
+    cashAppHandle?: boolean
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12626,6 +12782,12 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    donationLabel?: boolean
+    donationPresetAmounts?: boolean
+    venmoHandle?: boolean
+    cashAppHandle?: boolean
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -12673,9 +12835,15 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    donationLabel?: boolean
+    donationPresetAmounts?: boolean
+    venmoHandle?: boolean
+    cashAppHandle?: boolean
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -12708,6 +12876,7 @@ export namespace Prisma {
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
+    donations?: boolean | Business$donationsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -12747,6 +12916,7 @@ export namespace Prisma {
       quickBooksConnection: Prisma.$QuickBooksConnectionPayload<ExtArgs> | null
       quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
       subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
+      donations: Prisma.$DonationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12793,6 +12963,12 @@ export namespace Prisma {
       shippingFallbackRate: number | null
       shippingDefaultItemWeightLb: number | null
       salesCountries: string[]
+      donationLabel: string
+      donationPresetAmounts: Prisma.JsonValue | null
+      venmoHandle: string | null
+      cashAppHandle: string | null
+      donationShowInHeader: boolean
+      donationShowInFooter: boolean
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -13218,6 +13394,7 @@ export namespace Prisma {
     quickBooksConnection<T extends Business$quickBooksConnectionArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksConnectionArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     quickBooksInvoices<T extends Business$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscriptions<T extends Business$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    donations<T extends Business$donationsArgs<ExtArgs> = {}>(args?: Subset<T, Business$donationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13291,6 +13468,12 @@ export namespace Prisma {
     readonly shippingFallbackRate: FieldRef<"Business", 'Int'>
     readonly shippingDefaultItemWeightLb: FieldRef<"Business", 'Float'>
     readonly salesCountries: FieldRef<"Business", 'String[]'>
+    readonly donationLabel: FieldRef<"Business", 'String'>
+    readonly donationPresetAmounts: FieldRef<"Business", 'Json'>
+    readonly venmoHandle: FieldRef<"Business", 'String'>
+    readonly cashAppHandle: FieldRef<"Business", 'String'>
+    readonly donationShowInHeader: FieldRef<"Business", 'Boolean'>
+    readonly donationShowInFooter: FieldRef<"Business", 'Boolean'>
   }
     
 
@@ -14410,6 +14593,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * Business.donations
+   */
+  export type Business$donationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    where?: DonationWhereInput
+    orderBy?: DonationOrderByWithRelationInput | DonationOrderByWithRelationInput[]
+    cursor?: DonationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DonationScalarFieldEnum | DonationScalarFieldEnum[]
   }
 
   /**
@@ -67108,6 +67315,1172 @@ export namespace Prisma {
 
 
   /**
+   * Model Donation
+   */
+
+  export type AggregateDonation = {
+    _count: DonationCountAggregateOutputType | null
+    _avg: DonationAvgAggregateOutputType | null
+    _sum: DonationSumAggregateOutputType | null
+    _min: DonationMinAggregateOutputType | null
+    _max: DonationMaxAggregateOutputType | null
+  }
+
+  export type DonationAvgAggregateOutputType = {
+    amountCents: number | null
+  }
+
+  export type DonationSumAggregateOutputType = {
+    amountCents: number | null
+  }
+
+  export type DonationMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    stripeSessionId: string | null
+    stripePaymentIntentId: string | null
+    amountCents: number | null
+    currency: string | null
+    donorName: string | null
+    donorEmail: string | null
+    message: string | null
+  }
+
+  export type DonationMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    stripeSessionId: string | null
+    stripePaymentIntentId: string | null
+    amountCents: number | null
+    currency: string | null
+    donorName: string | null
+    donorEmail: string | null
+    message: string | null
+  }
+
+  export type DonationCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    businessId: number
+    stripeSessionId: number
+    stripePaymentIntentId: number
+    amountCents: number
+    currency: number
+    donorName: number
+    donorEmail: number
+    message: number
+    _all: number
+  }
+
+
+  export type DonationAvgAggregateInputType = {
+    amountCents?: true
+  }
+
+  export type DonationSumAggregateInputType = {
+    amountCents?: true
+  }
+
+  export type DonationMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    stripeSessionId?: true
+    stripePaymentIntentId?: true
+    amountCents?: true
+    currency?: true
+    donorName?: true
+    donorEmail?: true
+    message?: true
+  }
+
+  export type DonationMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    stripeSessionId?: true
+    stripePaymentIntentId?: true
+    amountCents?: true
+    currency?: true
+    donorName?: true
+    donorEmail?: true
+    message?: true
+  }
+
+  export type DonationCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    stripeSessionId?: true
+    stripePaymentIntentId?: true
+    amountCents?: true
+    currency?: true
+    donorName?: true
+    donorEmail?: true
+    message?: true
+    _all?: true
+  }
+
+  export type DonationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Donation to aggregate.
+     */
+    where?: DonationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Donations to fetch.
+     */
+    orderBy?: DonationOrderByWithRelationInput | DonationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DonationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Donations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Donations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Donations
+    **/
+    _count?: true | DonationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DonationAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DonationSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DonationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DonationMaxAggregateInputType
+  }
+
+  export type GetDonationAggregateType<T extends DonationAggregateArgs> = {
+        [P in keyof T & keyof AggregateDonation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDonation[P]>
+      : GetScalarType<T[P], AggregateDonation[P]>
+  }
+
+
+
+
+  export type DonationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DonationWhereInput
+    orderBy?: DonationOrderByWithAggregationInput | DonationOrderByWithAggregationInput[]
+    by: DonationScalarFieldEnum[] | DonationScalarFieldEnum
+    having?: DonationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DonationCountAggregateInputType | true
+    _avg?: DonationAvgAggregateInputType
+    _sum?: DonationSumAggregateInputType
+    _min?: DonationMinAggregateInputType
+    _max?: DonationMaxAggregateInputType
+  }
+
+  export type DonationGroupByOutputType = {
+    id: string
+    createdAt: Date
+    businessId: string
+    stripeSessionId: string
+    stripePaymentIntentId: string | null
+    amountCents: number
+    currency: string
+    donorName: string | null
+    donorEmail: string | null
+    message: string | null
+    _count: DonationCountAggregateOutputType | null
+    _avg: DonationAvgAggregateOutputType | null
+    _sum: DonationSumAggregateOutputType | null
+    _min: DonationMinAggregateOutputType | null
+    _max: DonationMaxAggregateOutputType | null
+  }
+
+  type GetDonationGroupByPayload<T extends DonationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DonationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DonationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DonationGroupByOutputType[P]>
+            : GetScalarType<T[P], DonationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DonationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    stripePaymentIntentId?: boolean
+    amountCents?: boolean
+    currency?: boolean
+    donorName?: boolean
+    donorEmail?: boolean
+    message?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["donation"]>
+
+  export type DonationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    stripePaymentIntentId?: boolean
+    amountCents?: boolean
+    currency?: boolean
+    donorName?: boolean
+    donorEmail?: boolean
+    message?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["donation"]>
+
+  export type DonationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    stripePaymentIntentId?: boolean
+    amountCents?: boolean
+    currency?: boolean
+    donorName?: boolean
+    donorEmail?: boolean
+    message?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["donation"]>
+
+  export type DonationSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    stripePaymentIntentId?: boolean
+    amountCents?: boolean
+    currency?: boolean
+    donorName?: boolean
+    donorEmail?: boolean
+    message?: boolean
+  }
+
+  export type DonationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "businessId" | "stripeSessionId" | "stripePaymentIntentId" | "amountCents" | "currency" | "donorName" | "donorEmail" | "message", ExtArgs["result"]["donation"]>
+  export type DonationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type DonationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type DonationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $DonationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Donation"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      businessId: string
+      stripeSessionId: string
+      stripePaymentIntentId: string | null
+      amountCents: number
+      currency: string
+      /**
+       * @encrypted
+       */
+      donorName: string | null
+      /**
+       * @encrypted
+       */
+      donorEmail: string | null
+      /**
+       * @encrypted
+       */
+      message: string | null
+    }, ExtArgs["result"]["donation"]>
+    composites: {}
+  }
+
+  type DonationGetPayload<S extends boolean | null | undefined | DonationDefaultArgs> = $Result.GetResult<Prisma.$DonationPayload, S>
+
+  type DonationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DonationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DonationCountAggregateInputType | true
+    }
+
+  export interface DonationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Donation'], meta: { name: 'Donation' } }
+    /**
+     * Find zero or one Donation that matches the filter.
+     * @param {DonationFindUniqueArgs} args - Arguments to find a Donation
+     * @example
+     * // Get one Donation
+     * const donation = await prisma.donation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DonationFindUniqueArgs>(args: SelectSubset<T, DonationFindUniqueArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Donation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DonationFindUniqueOrThrowArgs} args - Arguments to find a Donation
+     * @example
+     * // Get one Donation
+     * const donation = await prisma.donation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DonationFindUniqueOrThrowArgs>(args: SelectSubset<T, DonationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Donation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DonationFindFirstArgs} args - Arguments to find a Donation
+     * @example
+     * // Get one Donation
+     * const donation = await prisma.donation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DonationFindFirstArgs>(args?: SelectSubset<T, DonationFindFirstArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Donation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DonationFindFirstOrThrowArgs} args - Arguments to find a Donation
+     * @example
+     * // Get one Donation
+     * const donation = await prisma.donation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DonationFindFirstOrThrowArgs>(args?: SelectSubset<T, DonationFindFirstOrThrowArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Donations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DonationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Donations
+     * const donations = await prisma.donation.findMany()
+     * 
+     * // Get first 10 Donations
+     * const donations = await prisma.donation.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const donationWithIdOnly = await prisma.donation.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DonationFindManyArgs>(args?: SelectSubset<T, DonationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Donation.
+     * @param {DonationCreateArgs} args - Arguments to create a Donation.
+     * @example
+     * // Create one Donation
+     * const Donation = await prisma.donation.create({
+     *   data: {
+     *     // ... data to create a Donation
+     *   }
+     * })
+     * 
+     */
+    create<T extends DonationCreateArgs>(args: SelectSubset<T, DonationCreateArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Donations.
+     * @param {DonationCreateManyArgs} args - Arguments to create many Donations.
+     * @example
+     * // Create many Donations
+     * const donation = await prisma.donation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DonationCreateManyArgs>(args?: SelectSubset<T, DonationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Donations and returns the data saved in the database.
+     * @param {DonationCreateManyAndReturnArgs} args - Arguments to create many Donations.
+     * @example
+     * // Create many Donations
+     * const donation = await prisma.donation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Donations and only return the `id`
+     * const donationWithIdOnly = await prisma.donation.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DonationCreateManyAndReturnArgs>(args?: SelectSubset<T, DonationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Donation.
+     * @param {DonationDeleteArgs} args - Arguments to delete one Donation.
+     * @example
+     * // Delete one Donation
+     * const Donation = await prisma.donation.delete({
+     *   where: {
+     *     // ... filter to delete one Donation
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DonationDeleteArgs>(args: SelectSubset<T, DonationDeleteArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Donation.
+     * @param {DonationUpdateArgs} args - Arguments to update one Donation.
+     * @example
+     * // Update one Donation
+     * const donation = await prisma.donation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DonationUpdateArgs>(args: SelectSubset<T, DonationUpdateArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Donations.
+     * @param {DonationDeleteManyArgs} args - Arguments to filter Donations to delete.
+     * @example
+     * // Delete a few Donations
+     * const { count } = await prisma.donation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DonationDeleteManyArgs>(args?: SelectSubset<T, DonationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Donations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DonationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Donations
+     * const donation = await prisma.donation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DonationUpdateManyArgs>(args: SelectSubset<T, DonationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Donations and returns the data updated in the database.
+     * @param {DonationUpdateManyAndReturnArgs} args - Arguments to update many Donations.
+     * @example
+     * // Update many Donations
+     * const donation = await prisma.donation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Donations and only return the `id`
+     * const donationWithIdOnly = await prisma.donation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DonationUpdateManyAndReturnArgs>(args: SelectSubset<T, DonationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Donation.
+     * @param {DonationUpsertArgs} args - Arguments to update or create a Donation.
+     * @example
+     * // Update or create a Donation
+     * const donation = await prisma.donation.upsert({
+     *   create: {
+     *     // ... data to create a Donation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Donation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DonationUpsertArgs>(args: SelectSubset<T, DonationUpsertArgs<ExtArgs>>): Prisma__DonationClient<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Donations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DonationCountArgs} args - Arguments to filter Donations to count.
+     * @example
+     * // Count the number of Donations
+     * const count = await prisma.donation.count({
+     *   where: {
+     *     // ... the filter for the Donations we want to count
+     *   }
+     * })
+    **/
+    count<T extends DonationCountArgs>(
+      args?: Subset<T, DonationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DonationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Donation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DonationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DonationAggregateArgs>(args: Subset<T, DonationAggregateArgs>): Prisma.PrismaPromise<GetDonationAggregateType<T>>
+
+    /**
+     * Group by Donation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DonationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DonationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DonationGroupByArgs['orderBy'] }
+        : { orderBy?: DonationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DonationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDonationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Donation model
+   */
+  readonly fields: DonationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Donation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DonationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Donation model
+   */
+  interface DonationFieldRefs {
+    readonly id: FieldRef<"Donation", 'String'>
+    readonly createdAt: FieldRef<"Donation", 'DateTime'>
+    readonly businessId: FieldRef<"Donation", 'String'>
+    readonly stripeSessionId: FieldRef<"Donation", 'String'>
+    readonly stripePaymentIntentId: FieldRef<"Donation", 'String'>
+    readonly amountCents: FieldRef<"Donation", 'Int'>
+    readonly currency: FieldRef<"Donation", 'String'>
+    readonly donorName: FieldRef<"Donation", 'String'>
+    readonly donorEmail: FieldRef<"Donation", 'String'>
+    readonly message: FieldRef<"Donation", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Donation findUnique
+   */
+  export type DonationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * Filter, which Donation to fetch.
+     */
+    where: DonationWhereUniqueInput
+  }
+
+  /**
+   * Donation findUniqueOrThrow
+   */
+  export type DonationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * Filter, which Donation to fetch.
+     */
+    where: DonationWhereUniqueInput
+  }
+
+  /**
+   * Donation findFirst
+   */
+  export type DonationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * Filter, which Donation to fetch.
+     */
+    where?: DonationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Donations to fetch.
+     */
+    orderBy?: DonationOrderByWithRelationInput | DonationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Donations.
+     */
+    cursor?: DonationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Donations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Donations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Donations.
+     */
+    distinct?: DonationScalarFieldEnum | DonationScalarFieldEnum[]
+  }
+
+  /**
+   * Donation findFirstOrThrow
+   */
+  export type DonationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * Filter, which Donation to fetch.
+     */
+    where?: DonationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Donations to fetch.
+     */
+    orderBy?: DonationOrderByWithRelationInput | DonationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Donations.
+     */
+    cursor?: DonationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Donations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Donations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Donations.
+     */
+    distinct?: DonationScalarFieldEnum | DonationScalarFieldEnum[]
+  }
+
+  /**
+   * Donation findMany
+   */
+  export type DonationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * Filter, which Donations to fetch.
+     */
+    where?: DonationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Donations to fetch.
+     */
+    orderBy?: DonationOrderByWithRelationInput | DonationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Donations.
+     */
+    cursor?: DonationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Donations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Donations.
+     */
+    skip?: number
+    distinct?: DonationScalarFieldEnum | DonationScalarFieldEnum[]
+  }
+
+  /**
+   * Donation create
+   */
+  export type DonationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Donation.
+     */
+    data: XOR<DonationCreateInput, DonationUncheckedCreateInput>
+  }
+
+  /**
+   * Donation createMany
+   */
+  export type DonationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Donations.
+     */
+    data: DonationCreateManyInput | DonationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Donation createManyAndReturn
+   */
+  export type DonationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * The data used to create many Donations.
+     */
+    data: DonationCreateManyInput | DonationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Donation update
+   */
+  export type DonationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Donation.
+     */
+    data: XOR<DonationUpdateInput, DonationUncheckedUpdateInput>
+    /**
+     * Choose, which Donation to update.
+     */
+    where: DonationWhereUniqueInput
+  }
+
+  /**
+   * Donation updateMany
+   */
+  export type DonationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Donations.
+     */
+    data: XOR<DonationUpdateManyMutationInput, DonationUncheckedUpdateManyInput>
+    /**
+     * Filter which Donations to update
+     */
+    where?: DonationWhereInput
+    /**
+     * Limit how many Donations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Donation updateManyAndReturn
+   */
+  export type DonationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * The data used to update Donations.
+     */
+    data: XOR<DonationUpdateManyMutationInput, DonationUncheckedUpdateManyInput>
+    /**
+     * Filter which Donations to update
+     */
+    where?: DonationWhereInput
+    /**
+     * Limit how many Donations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Donation upsert
+   */
+  export type DonationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Donation to update in case it exists.
+     */
+    where: DonationWhereUniqueInput
+    /**
+     * In case the Donation found by the `where` argument doesn't exist, create a new Donation with this data.
+     */
+    create: XOR<DonationCreateInput, DonationUncheckedCreateInput>
+    /**
+     * In case the Donation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DonationUpdateInput, DonationUncheckedUpdateInput>
+  }
+
+  /**
+   * Donation delete
+   */
+  export type DonationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+    /**
+     * Filter which Donation to delete.
+     */
+    where: DonationWhereUniqueInput
+  }
+
+  /**
+   * Donation deleteMany
+   */
+  export type DonationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Donations to delete
+     */
+    where?: DonationWhereInput
+    /**
+     * Limit how many Donations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Donation without action
+   */
+  export type DonationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Donation
+     */
+    select?: DonationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Donation
+     */
+    omit?: DonationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DonationInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -67243,7 +68616,13 @@ export namespace Prisma {
     businessHours: 'businessHours',
     shippingFallbackRate: 'shippingFallbackRate',
     shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
-    salesCountries: 'salesCountries'
+    salesCountries: 'salesCountries',
+    donationLabel: 'donationLabel',
+    donationPresetAmounts: 'donationPresetAmounts',
+    venmoHandle: 'venmoHandle',
+    cashAppHandle: 'cashAppHandle',
+    donationShowInHeader: 'donationShowInHeader',
+    donationShowInFooter: 'donationShowInFooter'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -68125,6 +69504,22 @@ export namespace Prisma {
   export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
 
 
+  export const DonationScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    businessId: 'businessId',
+    stripeSessionId: 'stripeSessionId',
+    stripePaymentIntentId: 'stripePaymentIntentId',
+    amountCents: 'amountCents',
+    currency: 'currency',
+    donorName: 'donorName',
+    donorEmail: 'donorEmail',
+    message: 'message'
+  };
+
+  export type DonationScalarFieldEnum = (typeof DonationScalarFieldEnum)[keyof typeof DonationScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -68757,6 +70152,12 @@ export namespace Prisma {
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
+    donationLabel?: StringFilter<"Business"> | string
+    donationPresetAmounts?: JsonNullableFilter<"Business">
+    venmoHandle?: StringNullableFilter<"Business"> | string | null
+    cashAppHandle?: StringNullableFilter<"Business"> | string | null
+    donationShowInHeader?: BoolFilter<"Business"> | boolean
+    donationShowInFooter?: BoolFilter<"Business"> | boolean
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
     services?: ServiceListRelationFilter
@@ -68788,6 +70189,7 @@ export namespace Prisma {
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    donations?: DonationListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -68835,6 +70237,12 @@ export namespace Prisma {
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
     salesCountries?: SortOrder
+    donationLabel?: SortOrder
+    donationPresetAmounts?: SortOrderInput | SortOrder
+    venmoHandle?: SortOrderInput | SortOrder
+    cashAppHandle?: SortOrderInput | SortOrder
+    donationShowInHeader?: SortOrder
+    donationShowInFooter?: SortOrder
     products?: ProductOrderByRelationAggregateInput
     collections?: CollectionOrderByRelationAggregateInput
     services?: ServiceOrderByRelationAggregateInput
@@ -68866,6 +70274,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionOrderByWithRelationInput
     quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
     subscriptions?: SubscriptionOrderByRelationAggregateInput
+    donations?: DonationOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -68916,6 +70325,12 @@ export namespace Prisma {
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
+    donationLabel?: StringFilter<"Business"> | string
+    donationPresetAmounts?: JsonNullableFilter<"Business">
+    venmoHandle?: StringNullableFilter<"Business"> | string | null
+    cashAppHandle?: StringNullableFilter<"Business"> | string | null
+    donationShowInHeader?: BoolFilter<"Business"> | boolean
+    donationShowInFooter?: BoolFilter<"Business"> | boolean
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
     services?: ServiceListRelationFilter
@@ -68947,6 +70362,7 @@ export namespace Prisma {
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    donations?: DonationListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -68994,6 +70410,12 @@ export namespace Prisma {
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
     salesCountries?: SortOrder
+    donationLabel?: SortOrder
+    donationPresetAmounts?: SortOrderInput | SortOrder
+    venmoHandle?: SortOrderInput | SortOrder
+    cashAppHandle?: SortOrderInput | SortOrder
+    donationShowInHeader?: SortOrder
+    donationShowInFooter?: SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _avg?: BusinessAvgOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
@@ -69049,6 +70471,12 @@ export namespace Prisma {
     shippingFallbackRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableWithAggregatesFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
+    donationLabel?: StringWithAggregatesFilter<"Business"> | string
+    donationPresetAmounts?: JsonNullableWithAggregatesFilter<"Business">
+    venmoHandle?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    cashAppHandle?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    donationShowInHeader?: BoolWithAggregatesFilter<"Business"> | boolean
+    donationShowInFooter?: BoolWithAggregatesFilter<"Business"> | boolean
   }
 
   export type SiteContentWhereInput = {
@@ -73689,6 +75117,88 @@ export namespace Prisma {
     merchantTermsUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
   }
 
+  export type DonationWhereInput = {
+    AND?: DonationWhereInput | DonationWhereInput[]
+    OR?: DonationWhereInput[]
+    NOT?: DonationWhereInput | DonationWhereInput[]
+    id?: StringFilter<"Donation"> | string
+    createdAt?: DateTimeFilter<"Donation"> | Date | string
+    businessId?: StringFilter<"Donation"> | string
+    stripeSessionId?: StringFilter<"Donation"> | string
+    stripePaymentIntentId?: StringNullableFilter<"Donation"> | string | null
+    amountCents?: IntFilter<"Donation"> | number
+    currency?: StringFilter<"Donation"> | string
+    donorName?: StringNullableFilter<"Donation"> | string | null
+    donorEmail?: StringNullableFilter<"Donation"> | string | null
+    message?: StringNullableFilter<"Donation"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type DonationOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    stripePaymentIntentId?: SortOrderInput | SortOrder
+    amountCents?: SortOrder
+    currency?: SortOrder
+    donorName?: SortOrderInput | SortOrder
+    donorEmail?: SortOrderInput | SortOrder
+    message?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type DonationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    stripeSessionId?: string
+    AND?: DonationWhereInput | DonationWhereInput[]
+    OR?: DonationWhereInput[]
+    NOT?: DonationWhereInput | DonationWhereInput[]
+    createdAt?: DateTimeFilter<"Donation"> | Date | string
+    businessId?: StringFilter<"Donation"> | string
+    stripePaymentIntentId?: StringNullableFilter<"Donation"> | string | null
+    amountCents?: IntFilter<"Donation"> | number
+    currency?: StringFilter<"Donation"> | string
+    donorName?: StringNullableFilter<"Donation"> | string | null
+    donorEmail?: StringNullableFilter<"Donation"> | string | null
+    message?: StringNullableFilter<"Donation"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "stripeSessionId">
+
+  export type DonationOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    stripePaymentIntentId?: SortOrderInput | SortOrder
+    amountCents?: SortOrder
+    currency?: SortOrder
+    donorName?: SortOrderInput | SortOrder
+    donorEmail?: SortOrderInput | SortOrder
+    message?: SortOrderInput | SortOrder
+    _count?: DonationCountOrderByAggregateInput
+    _avg?: DonationAvgOrderByAggregateInput
+    _max?: DonationMaxOrderByAggregateInput
+    _min?: DonationMinOrderByAggregateInput
+    _sum?: DonationSumOrderByAggregateInput
+  }
+
+  export type DonationScalarWhereWithAggregatesInput = {
+    AND?: DonationScalarWhereWithAggregatesInput | DonationScalarWhereWithAggregatesInput[]
+    OR?: DonationScalarWhereWithAggregatesInput[]
+    NOT?: DonationScalarWhereWithAggregatesInput | DonationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Donation"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Donation"> | Date | string
+    businessId?: StringWithAggregatesFilter<"Donation"> | string
+    stripeSessionId?: StringWithAggregatesFilter<"Donation"> | string
+    stripePaymentIntentId?: StringNullableWithAggregatesFilter<"Donation"> | string | null
+    amountCents?: IntWithAggregatesFilter<"Donation"> | number
+    currency?: StringWithAggregatesFilter<"Donation"> | string
+    donorName?: StringNullableWithAggregatesFilter<"Donation"> | string | null
+    donorEmail?: StringNullableWithAggregatesFilter<"Donation"> | string | null
+    message?: StringNullableWithAggregatesFilter<"Donation"> | string | null
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -74199,6 +75709,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -74230,6 +75746,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -74277,6 +75794,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -74308,6 +75831,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -74355,6 +75879,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -74386,6 +75916,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -74433,6 +75964,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -74464,6 +76001,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -74511,6 +76049,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -74558,6 +76102,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -74605,6 +76155,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SiteContentCreateInput = {
@@ -79928,6 +81484,96 @@ export namespace Prisma {
     merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type DonationCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    stripeSessionId: string
+    stripePaymentIntentId?: string | null
+    amountCents: number
+    currency?: string
+    donorName?: string | null
+    donorEmail?: string | null
+    message?: string | null
+    business: BusinessCreateNestedOneWithoutDonationsInput
+  }
+
+  export type DonationUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    stripeSessionId: string
+    stripePaymentIntentId?: string | null
+    amountCents: number
+    currency?: string
+    donorName?: string | null
+    donorEmail?: string | null
+    message?: string | null
+  }
+
+  export type DonationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    amountCents?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    donorName?: NullableStringFieldUpdateOperationsInput | string | null
+    donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutDonationsNestedInput
+  }
+
+  export type DonationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    amountCents?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    donorName?: NullableStringFieldUpdateOperationsInput | string | null
+    donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DonationCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    stripeSessionId: string
+    stripePaymentIntentId?: string | null
+    amountCents: number
+    currency?: string
+    donorName?: string | null
+    donorEmail?: string | null
+    message?: string | null
+  }
+
+  export type DonationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    amountCents?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    donorName?: NullableStringFieldUpdateOperationsInput | string | null
+    donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DonationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    amountCents?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    donorName?: NullableStringFieldUpdateOperationsInput | string | null
+    donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -80607,6 +82253,12 @@ export namespace Prisma {
     none?: SubscriptionWhereInput
   }
 
+  export type DonationListRelationFilter = {
+    every?: DonationWhereInput
+    some?: DonationWhereInput
+    none?: DonationWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -80703,6 +82355,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type DonationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BusinessCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -80748,6 +82404,12 @@ export namespace Prisma {
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
     salesCountries?: SortOrder
+    donationLabel?: SortOrder
+    donationPresetAmounts?: SortOrder
+    venmoHandle?: SortOrder
+    cashAppHandle?: SortOrder
+    donationShowInHeader?: SortOrder
+    donationShowInFooter?: SortOrder
   }
 
   export type BusinessAvgOrderByAggregateInput = {
@@ -80798,6 +82460,11 @@ export namespace Prisma {
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
+    donationLabel?: SortOrder
+    venmoHandle?: SortOrder
+    cashAppHandle?: SortOrder
+    donationShowInHeader?: SortOrder
+    donationShowInFooter?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -80841,6 +82508,11 @@ export namespace Prisma {
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
+    donationLabel?: SortOrder
+    venmoHandle?: SortOrder
+    cashAppHandle?: SortOrder
+    donationShowInHeader?: SortOrder
+    donationShowInFooter?: SortOrder
   }
 
   export type BusinessSumOrderByAggregateInput = {
@@ -83808,6 +85480,53 @@ export namespace Prisma {
     shippingCents?: SortOrder
   }
 
+  export type DonationCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    stripePaymentIntentId?: SortOrder
+    amountCents?: SortOrder
+    currency?: SortOrder
+    donorName?: SortOrder
+    donorEmail?: SortOrder
+    message?: SortOrder
+  }
+
+  export type DonationAvgOrderByAggregateInput = {
+    amountCents?: SortOrder
+  }
+
+  export type DonationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    stripePaymentIntentId?: SortOrder
+    amountCents?: SortOrder
+    currency?: SortOrder
+    donorName?: SortOrder
+    donorEmail?: SortOrder
+    message?: SortOrder
+  }
+
+  export type DonationMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    stripePaymentIntentId?: SortOrder
+    amountCents?: SortOrder
+    currency?: SortOrder
+    donorName?: SortOrder
+    donorEmail?: SortOrder
+    message?: SortOrder
+  }
+
+  export type DonationSumOrderByAggregateInput = {
+    amountCents?: SortOrder
+  }
+
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -84405,6 +86124,13 @@ export namespace Prisma {
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
+  export type DonationCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<DonationCreateWithoutBusinessInput, DonationUncheckedCreateWithoutBusinessInput> | DonationCreateWithoutBusinessInput[] | DonationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: DonationCreateOrConnectWithoutBusinessInput | DonationCreateOrConnectWithoutBusinessInput[]
+    createMany?: DonationCreateManyBusinessInputEnvelope
+    connect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -84618,6 +86344,13 @@ export namespace Prisma {
     connectOrCreate?: SubscriptionCreateOrConnectWithoutBusinessInput | SubscriptionCreateOrConnectWithoutBusinessInput[]
     createMany?: SubscriptionCreateManyBusinessInputEnvelope
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
+  export type DonationUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<DonationCreateWithoutBusinessInput, DonationUncheckedCreateWithoutBusinessInput> | DonationCreateWithoutBusinessInput[] | DonationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: DonationCreateOrConnectWithoutBusinessInput | DonationCreateOrConnectWithoutBusinessInput[]
+    createMany?: DonationCreateManyBusinessInputEnvelope
+    connect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -85071,6 +86804,20 @@ export namespace Prisma {
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
   }
 
+  export type DonationUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<DonationCreateWithoutBusinessInput, DonationUncheckedCreateWithoutBusinessInput> | DonationCreateWithoutBusinessInput[] | DonationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: DonationCreateOrConnectWithoutBusinessInput | DonationCreateOrConnectWithoutBusinessInput[]
+    upsert?: DonationUpsertWithWhereUniqueWithoutBusinessInput | DonationUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: DonationCreateManyBusinessInputEnvelope
+    set?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    disconnect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    delete?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    connect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    update?: DonationUpdateWithWhereUniqueWithoutBusinessInput | DonationUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: DonationUpdateManyWithWhereWithoutBusinessInput | DonationUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: DonationScalarWhereInput | DonationScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -85495,6 +87242,20 @@ export namespace Prisma {
     update?: SubscriptionUpdateWithWhereUniqueWithoutBusinessInput | SubscriptionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: SubscriptionUpdateManyWithWhereWithoutBusinessInput | SubscriptionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
+  export type DonationUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<DonationCreateWithoutBusinessInput, DonationUncheckedCreateWithoutBusinessInput> | DonationCreateWithoutBusinessInput[] | DonationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: DonationCreateOrConnectWithoutBusinessInput | DonationCreateOrConnectWithoutBusinessInput[]
+    upsert?: DonationUpsertWithWhereUniqueWithoutBusinessInput | DonationUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: DonationCreateManyBusinessInputEnvelope
+    set?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    disconnect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    delete?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    connect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+    update?: DonationUpdateWithWhereUniqueWithoutBusinessInput | DonationUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: DonationUpdateManyWithWhereWithoutBusinessInput | DonationUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: DonationScalarWhereInput | DonationScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
@@ -88034,6 +89795,20 @@ export namespace Prisma {
     deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
   }
 
+  export type BusinessCreateNestedOneWithoutDonationsInput = {
+    create?: XOR<BusinessCreateWithoutDonationsInput, BusinessUncheckedCreateWithoutDonationsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutDonationsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutDonationsNestedInput = {
+    create?: XOR<BusinessCreateWithoutDonationsInput, BusinessUncheckedCreateWithoutDonationsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutDonationsInput
+    upsert?: BusinessUpsertWithoutDonationsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutDonationsInput, BusinessUpdateWithoutDonationsInput>, BusinessUncheckedUpdateWithoutDonationsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -88965,6 +90740,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -88995,6 +90776,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -89042,6 +90824,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -89072,6 +90860,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -89184,6 +90973,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -89214,6 +91009,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -89261,6 +91057,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -89291,6 +91093,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -90979,6 +92782,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DonationCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    stripeSessionId: string
+    stripePaymentIntentId?: string | null
+    amountCents: number
+    currency?: string
+    donorName?: string | null
+    donorEmail?: string | null
+    message?: string | null
+  }
+
+  export type DonationUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    stripeSessionId: string
+    stripePaymentIntentId?: string | null
+    amountCents: number
+    currency?: string
+    donorName?: string | null
+    donorEmail?: string | null
+    message?: string | null
+  }
+
+  export type DonationCreateOrConnectWithoutBusinessInput = {
+    where: DonationWhereUniqueInput
+    create: XOR<DonationCreateWithoutBusinessInput, DonationUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type DonationCreateManyBusinessInputEnvelope = {
+    data: DonationCreateManyBusinessInput | DonationCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -92128,6 +93965,38 @@ export namespace Prisma {
     merchantTermsUpdatedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
   }
 
+  export type DonationUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: DonationWhereUniqueInput
+    update: XOR<DonationUpdateWithoutBusinessInput, DonationUncheckedUpdateWithoutBusinessInput>
+    create: XOR<DonationCreateWithoutBusinessInput, DonationUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type DonationUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: DonationWhereUniqueInput
+    data: XOR<DonationUpdateWithoutBusinessInput, DonationUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type DonationUpdateManyWithWhereWithoutBusinessInput = {
+    where: DonationScalarWhereInput
+    data: XOR<DonationUpdateManyMutationInput, DonationUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type DonationScalarWhereInput = {
+    AND?: DonationScalarWhereInput | DonationScalarWhereInput[]
+    OR?: DonationScalarWhereInput[]
+    NOT?: DonationScalarWhereInput | DonationScalarWhereInput[]
+    id?: StringFilter<"Donation"> | string
+    createdAt?: DateTimeFilter<"Donation"> | Date | string
+    businessId?: StringFilter<"Donation"> | string
+    stripeSessionId?: StringFilter<"Donation"> | string
+    stripePaymentIntentId?: StringNullableFilter<"Donation"> | string | null
+    amountCents?: IntFilter<"Donation"> | number
+    currency?: StringFilter<"Donation"> | string
+    donorName?: StringNullableFilter<"Donation"> | string | null
+    donorEmail?: StringNullableFilter<"Donation"> | string | null
+    message?: StringNullableFilter<"Donation"> | string | null
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -92173,6 +94042,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -92203,6 +94078,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -92250,6 +94126,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -92280,6 +94162,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -92343,6 +94226,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -92373,6 +94262,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -92420,6 +94310,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -92450,6 +94346,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -92497,6 +94394,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -92527,6 +94430,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -92574,6 +94478,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -92604,6 +94514,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -92667,6 +94578,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -92697,6 +94614,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -92744,6 +94662,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -92774,6 +94698,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -92858,6 +94783,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -92888,6 +94819,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -92935,6 +94867,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -92965,6 +94903,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -93443,6 +95382,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -93473,6 +95418,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -93520,6 +95466,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -93550,6 +95502,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -94240,6 +96193,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -94270,6 +96229,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -94317,6 +96277,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -94347,6 +96313,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -94432,6 +96399,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -94462,6 +96435,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -94509,6 +96483,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -94539,6 +96519,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -94894,6 +96875,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -94924,6 +96911,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -94971,6 +96959,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -95001,6 +96995,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -95116,6 +97111,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -95146,6 +97147,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -95193,6 +97195,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -95223,6 +97231,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -95403,6 +97412,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -95433,6 +97448,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEventsInput = {
@@ -95480,6 +97496,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -95510,6 +97532,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEventsInput = {
@@ -95573,6 +97596,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -95603,6 +97632,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEventsInput = {
@@ -95650,6 +97680,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -95680,6 +97716,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutVideoSourcesInput = {
@@ -95727,6 +97764,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -95757,6 +97800,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
@@ -95804,6 +97848,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -95834,6 +97884,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
@@ -95943,6 +97994,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -95973,6 +98030,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
@@ -96020,6 +98078,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -96050,6 +98114,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
@@ -96146,6 +98211,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -96176,6 +98247,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideosInput = {
@@ -96223,6 +98295,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -96253,6 +98331,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideosInput = {
@@ -96355,6 +98434,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -96385,6 +98470,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideosInput = {
@@ -96432,6 +98518,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -96462,6 +98554,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductCreateWithoutImagesInput = {
@@ -96610,6 +98703,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -96640,6 +98739,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -96687,6 +98787,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -96717,6 +98823,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -96887,6 +98994,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -96917,6 +99030,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -96964,6 +99078,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -96994,6 +99114,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -97084,6 +99205,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -97114,6 +99241,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -97161,6 +99289,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -97191,6 +99325,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -97689,6 +99824,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -97719,6 +99860,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -97766,6 +99908,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -97796,6 +99944,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -98409,6 +100558,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -98439,6 +100594,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -98486,6 +100642,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -98516,6 +100678,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -98991,6 +101154,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -99021,6 +101190,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -99068,6 +101238,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -99098,6 +101274,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -100026,6 +102203,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -100056,6 +102239,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -100103,6 +102287,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -100133,6 +102323,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -100286,6 +102477,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -100316,6 +102513,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -100363,6 +102561,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -100393,6 +102597,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -100635,6 +102840,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -100665,6 +102876,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -100712,6 +102924,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -100742,6 +102960,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -101130,6 +103349,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -101160,6 +103385,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -101207,6 +103433,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -101237,6 +103469,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -101424,6 +103657,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -101454,6 +103693,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -101501,6 +103741,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -101531,6 +103777,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -101740,6 +103987,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -101770,6 +104023,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -101817,6 +104071,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -101847,6 +104107,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -101926,6 +104187,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -101956,6 +104223,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -102003,6 +104271,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -102033,6 +104307,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -102096,6 +104371,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -102126,6 +104407,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -102173,6 +104455,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -102203,6 +104491,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -102250,6 +104539,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -102280,6 +104575,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -102327,6 +104623,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -102357,6 +104659,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -102420,6 +104723,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -102450,6 +104759,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -102497,6 +104807,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -102527,6 +104843,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutEditorNotesInput = {
@@ -102574,6 +104891,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -102604,6 +104927,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEditorNotesInput = {
@@ -102651,6 +104975,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -102681,6 +105011,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEditorNotesInput = {
@@ -102787,6 +105118,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -102817,6 +105154,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
@@ -102864,6 +105202,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -102894,6 +105238,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutEditorNotesInput = {
@@ -102990,6 +105335,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -103020,6 +105371,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -103067,6 +105419,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -103097,6 +105455,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -103160,6 +105519,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -103190,6 +105555,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -103237,6 +105603,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -103267,6 +105639,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -103314,6 +105687,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -103344,6 +105723,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -103391,6 +105771,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -103421,6 +105807,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -103516,6 +105903,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -103546,6 +105939,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -103593,6 +105987,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -103623,6 +106023,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -103785,6 +106186,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -103815,6 +106222,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -103862,6 +106270,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -103892,6 +106306,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -104008,6 +106423,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -104038,6 +106459,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -104085,6 +106507,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -104115,6 +106543,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -104221,6 +106650,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -104251,6 +106686,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -104298,6 +106734,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -104328,6 +106770,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -104444,6 +106887,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -104474,6 +106923,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -104521,6 +106971,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -104551,6 +107007,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -105319,6 +107776,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -105349,6 +107812,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -105396,6 +107860,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -105426,6 +107896,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -105532,6 +108003,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -105562,6 +108039,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -105609,6 +108087,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -105639,6 +108123,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -105735,6 +108220,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -105765,6 +108256,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -105812,6 +108304,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -105842,6 +108340,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -105905,6 +108404,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -105935,6 +108440,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -105982,6 +108488,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -106012,6 +108524,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutZonesInput = {
@@ -106059,6 +108572,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -106089,6 +108608,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -106136,6 +108656,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -106166,6 +108692,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -106251,6 +108778,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -106281,6 +108814,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -106328,6 +108862,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -106358,6 +108898,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -106580,6 +109121,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -106610,6 +109157,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -106657,6 +109205,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -106687,6 +109241,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -106857,6 +109412,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -106887,6 +109448,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -106934,6 +109496,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -106964,6 +109532,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuoteCalculatorsInput = {
@@ -107011,6 +109580,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -107041,6 +109616,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteCalculatorsInput = {
@@ -107088,6 +109664,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -107118,6 +109700,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteCalculatorsInput = {
@@ -107233,6 +109816,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -107263,6 +109852,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteCalculatorsInput = {
@@ -107310,6 +109900,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -107340,6 +109936,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput = {
@@ -107492,6 +110089,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -107522,6 +110125,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteSubmissionsInput = {
@@ -107569,6 +110173,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -107599,6 +110209,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteSubmissionsInput = {
@@ -107709,6 +110320,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -107739,6 +110356,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteSubmissionsInput = {
@@ -107786,6 +110404,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -107816,6 +110440,7 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksConnectionInput = {
@@ -107863,6 +110488,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -107893,6 +110524,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksConnectionInput = {
@@ -107940,6 +110572,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -107970,6 +110608,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksConnectionInput = {
@@ -108033,6 +110672,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -108063,6 +110708,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksConnectionInput = {
@@ -108110,6 +110756,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -108140,6 +110792,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksInvoicesInput = {
@@ -108187,6 +110840,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -108217,6 +110876,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksInvoicesInput = {
@@ -108264,6 +110924,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -108294,6 +110960,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksInvoicesInput = {
@@ -108404,6 +111071,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -108434,6 +111107,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput = {
@@ -108481,6 +111155,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -108511,6 +111191,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithoutQuickBooksInvoicesInput = {
@@ -108611,6 +111292,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -108641,6 +111328,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSubscriptionsInput = {
@@ -108688,6 +111376,12 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -108718,6 +111412,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSubscriptionsInput = {
@@ -109109,6 +111804,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -109139,6 +111840,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSubscriptionsInput = {
@@ -109186,6 +111888,12 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -109216,6 +111924,7 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutSubscriptionsInput = {
@@ -109494,6 +112203,358 @@ export namespace Prisma {
   export type OrderUpdateManyWithWhereWithoutSubscriptionInput = {
     where: OrderScalarWhereInput
     data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutSubscriptionInput>
+  }
+
+  export type BusinessCreateWithoutDonationsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutDonationsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutDonationsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutDonationsInput, BusinessUncheckedCreateWithoutDonationsInput>
+  }
+
+  export type BusinessUpsertWithoutDonationsInput = {
+    update: XOR<BusinessUpdateWithoutDonationsInput, BusinessUncheckedUpdateWithoutDonationsInput>
+    create: XOR<BusinessCreateWithoutDonationsInput, BusinessUncheckedCreateWithoutDonationsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutDonationsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutDonationsInput, BusinessUncheckedUpdateWithoutDonationsInput>
+  }
+
+  export type BusinessUpdateWithoutDonationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutDonationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type SessionCreateManyUserInput = {
@@ -110403,6 +113464,18 @@ export namespace Prisma {
     termsAcceptedAt?: Date | string | null
     termsVersion?: string | null
     merchantTermsUpdatedAt?: Date | string | null
+  }
+
+  export type DonationCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    stripeSessionId: string
+    stripePaymentIntentId?: string | null
+    amountCents: number
+    currency?: string
+    donorName?: string | null
+    donorEmail?: string | null
+    message?: string | null
   }
 
   export type ProductUpdateWithoutBusinessInput = {
@@ -111988,6 +115061,42 @@ export namespace Prisma {
     termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type DonationUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    amountCents?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    donorName?: NullableStringFieldUpdateOperationsInput | string | null
+    donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DonationUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    amountCents?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    donorName?: NullableStringFieldUpdateOperationsInput | string | null
+    donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DonationUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    amountCents?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    donorName?: NullableStringFieldUpdateOperationsInput | string | null
+    donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ImageCreateManyProductInput = {

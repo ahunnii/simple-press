@@ -8,6 +8,7 @@ import DisputeAlertEmail from "~/emails/dispute-alert";
 import FinalQuoteEmail from "~/emails/final-quote";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
+import NewDonationNotificationEmail from "~/emails/new-donation-notification";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
 import NewReviewEmail from "~/emails/new-review";
@@ -32,6 +33,7 @@ import SubscriptionUpdatedEmail from "~/emails/subscription-updated";
 import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 
+import type { DonationLabel } from "~/lib/donations/label";
 import { getBusinessUrl } from "~/lib/business-url";
 import { applySubjectTemplate } from "~/lib/email/customization";
 import { getEmailOverrides } from "~/lib/email/overrides.server";
@@ -1515,6 +1517,63 @@ export async function sendOwnerSubscriptionNotification(params: {
     }),
     tags: [
       { name: "category", value: category },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// New Donation Notification (owner) — the only email the donation lane sends.
+// The donor gets Stripe's own receipt from the connected account; SimplePress
+// has nothing to add to it and no manage link to offer.
+export async function sendOwnerDonationNotification(params: {
+  /** Resolved from `Business.donationLabel` by the caller — one wording per store. */
+  label: DonationLabel;
+  amountCents: number;
+  donorName?: string | null;
+  donorEmail?: string | null;
+  message?: string | null;
+  adminUrl: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  /**
+   * `donation-owner-<sessionId>`. Belt and braces with the webhook's
+   * `stripeSessionId` uniqueness check: a redelivered event that loses the race
+   * against the DB read still cannot produce a second email.
+   */
+  idempotencyKey?: string;
+}) {
+  const noun = params.label.noun.toLowerCase();
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    // Only when the donor actually left an address — an anonymous donation has
+    // nobody to reply to, and `replyTo: undefined` correctly falls back to the
+    // platform `from`.
+    replyTo: params.donorEmail ?? undefined,
+    subject: `New ${noun} to ${params.business.name}`,
+    react: NewDonationNotificationEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      label: params.label,
+      amountCents: params.amountCents,
+      donorName: params.donorName,
+      donorEmail: params.donorEmail,
+      message: params.message,
+      adminUrl: params.adminUrl,
+    }),
+    tags: [
+      { name: "category", value: "donation" },
       { name: "business", value: params.business.subdomain },
     ],
     idempotencyKey: params.idempotencyKey,

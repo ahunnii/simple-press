@@ -230,6 +230,15 @@ model Business {
   // Country allowlist for sales/shipping. "US" is always implicitly allowed.
   salesCountries String[] @default([]) // additional countries beyond US: subset of ["CA","MX"]
 
+  // Donations / Tips (feature-flagged; page + card lane gated separately —
+  // Venmo/CashApp handles work without a Stripe connection)
+  donationLabel         String  @default("donate") // "donate" | "tip" | "support"
+  donationPresetAmounts Json? // number[] of cents; null → lib defaults in src/lib/donations/constants.ts
+  venmoHandle           String? // stored without leading "@"
+  cashAppHandle         String? // stored without leading "$"
+  donationShowInHeader  Boolean @default(true)
+  donationShowInFooter  Boolean @default(true)
+
   // Relationships
   products              Product[]
   collections           Collection[]
@@ -262,6 +271,7 @@ model Business {
   quickBooksConnection  QuickBooksConnection?
   quickBooksInvoices    QuickBooksInvoice[]
   subscriptions         Subscription[]
+  donations             Donation[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -1895,4 +1905,30 @@ model Subscription {
   @@index([customerId]) // SetNull fan-out + account page (getMine)
   @@index([status, lastSyncedAt]) // cron sweep: open subscriptions, stalest first
   @@index([productId]) // SetNull fan-out
+}
+
+/// One-time donation/tip taken through Stripe Checkout on the connected
+/// account (metadata.kind = "donation"). Created ONLY by the webhook after a
+/// paid session — there is no pre-payment row, so `stripeSessionId @unique`
+/// doubles as the retry-idempotency key. Encrypted donor columns can never
+/// appear in a `where`; the admin list filters in memory (same trade-off as
+/// Subscription's encrypted snapshot).
+model Donation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  stripeSessionId       String  @unique // webhook idempotency key
+  stripePaymentIntentId String? // stored now so refund tracking can be added later without backfill
+
+  amountCents Int
+  currency    String @default("usd")
+
+  donorName  String? /// @encrypted
+  donorEmail String? /// @encrypted
+  message    String? @db.Text /// @encrypted
+
+  @@index([businessId, createdAt]) // admin list, newest first
 }

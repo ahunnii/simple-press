@@ -65,6 +65,17 @@ export type DefaultEventsPageTemplateProps = {
   timeZone: string;
 };
 
+export type DefaultDonatePageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  /**
+   * `?status=success` from the Stripe Checkout return URL — read server-side
+   * in `donate/page.tsx` and passed down rather than read via
+   * `useSearchParams` client-side, matching `/subscribe`'s pattern of
+   * resolving search params on the server page.
+   */
+  status?: string;
+};
+
 export type DefaultVideosPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   videos: RouterOutputs["videos"]["getPublic"];

@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       subdomain: true,
       customDomain: true,
       domainStatus: true,
+      featureFlags: true,
     },
   });
 
@@ -132,6 +133,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/videos`,
       changeFrequency: "weekly",
       priority: 0.6,
+    });
+  }
+
+  // Donations static index page — only when the donations feature is enabled
+  if ((business.featureFlags as Record<string, boolean> | null)?.donations) {
+    staticRoutes.push({
+      url: `${baseUrl}/donate`,
+      changeFrequency: "monthly",
+      priority: 0.5,
     });
   }
 

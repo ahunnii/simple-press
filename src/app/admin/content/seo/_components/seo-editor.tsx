@@ -150,6 +150,7 @@ const pageMetaShape = {
   faq: pageMetaRowSchema,
   events: pageMetaRowSchema,
   videos: pageMetaRowSchema,
+  donate: pageMetaRowSchema,
 } satisfies Record<StaticSeoRouteKey, typeof pageMetaRowSchema>;
 
 // Favicon upload/persistence already has a complete, working home on the

@@ -119,6 +119,7 @@ import { DefaultCollectionPage } from "./default/collections/default-collection-
 import { DefaultCollectionsPage } from "./default/collections/default-collections-page";
 import { DefaultContactPage } from "./default/contact/default-contact-page";
 import { DefaultGenericPage } from "./default/default-generic-page";
+import { DefaultDonatePage } from "./default/donate/default-donate-page";
 import { DefaultEventsPage } from "./default/events/default-events-page";
 import { DefaultFaqPage } from "./default/faq/default-faq-page";
 import { DefaultLayout } from "./default/layout/default-layout";
@@ -236,6 +237,7 @@ import { PinkOrderSuccessPage } from "./pink/cart-checkout/pink-order-success-pa
 import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
 import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
 import { PinkContactPage } from "./pink/contact/pink-contact-page";
+import { PinkDonatePage } from "./pink/donate/pink-donate-page";
 import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
 import { PinkGenericPage } from "./pink/generic/pink-generic-page";
 import { PinkLayout } from "./pink/layout/pink-layout";
@@ -381,6 +383,7 @@ export type TemplateComponentSet = {
   ServicesPage?: AnyComponent;
   ServicesIndexPage?: AnyComponent;
   EventsPage?: AnyComponent;
+  DonatePage?: AnyComponent;
   VideosPage?: AnyComponent;
   // Optional per-template override of /faq; defaultEntry always supplies one.
   FaqPage?: AnyComponent;
@@ -415,6 +418,7 @@ const defaultEntry: TemplateComponentSet = {
   SubscriptionsPage: DefaultSubscriptionsPage,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
+  DonatePage: DefaultDonatePage,
   VideosPage: DefaultVideosPage,
   FaqPage: DefaultFaqPage,
 };
@@ -597,6 +601,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     CollectionPage: PinkCollectionPage,
     CollectionsPage: PinkCollectionsPage,
     ContactPage: PinkContactPage,
+    DonatePage: PinkDonatePage,
     EventsPage: PinkEventsIndexPage,
     VideosPage: PinkVideosPage,
     GenericPage: PinkGenericPage,

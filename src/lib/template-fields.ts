@@ -80,6 +80,7 @@ export type TemplatePage =
   | "shop"
   | "services"
   | "events"
+  | "donate"
   | "videos"
   | "faq"
   | "cart"
@@ -614,6 +615,11 @@ export const PAGE_METADATA = {
     title: "Videos",
     description: "Video gallery page content",
     icon: "📺",
+  },
+  donate: {
+    title: "Donate",
+    description: "Donations/tips page content",
+    icon: "💝",
   },
   // Not a `TemplatePage` value — no field declares `page: "authentication"`.
   // The auth fields live on the `global` page; this entry exists so the visual

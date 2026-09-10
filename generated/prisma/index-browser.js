@@ -228,7 +228,13 @@ exports.Prisma.BusinessScalarFieldEnum = {
   businessHours: 'businessHours',
   shippingFallbackRate: 'shippingFallbackRate',
   shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
-  salesCountries: 'salesCountries'
+  salesCountries: 'salesCountries',
+  donationLabel: 'donationLabel',
+  donationPresetAmounts: 'donationPresetAmounts',
+  venmoHandle: 'venmoHandle',
+  cashAppHandle: 'cashAppHandle',
+  donationShowInHeader: 'donationShowInHeader',
+  donationShowInFooter: 'donationShowInFooter'
 };
 
 exports.Prisma.SiteContentScalarFieldEnum = {
@@ -981,6 +987,19 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   merchantTermsUpdatedAt: 'merchantTermsUpdatedAt'
 };
 
+exports.Prisma.DonationScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  stripeSessionId: 'stripeSessionId',
+  stripePaymentIntentId: 'stripePaymentIntentId',
+  amountCents: 'amountCents',
+  currency: 'currency',
+  donorName: 'donorName',
+  donorEmail: 'donorEmail',
+  message: 'message'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1075,7 +1094,8 @@ exports.Prisma.ModelName = {
   QuoteSubmission: 'QuoteSubmission',
   QuickBooksConnection: 'QuickBooksConnection',
   QuickBooksInvoice: 'QuickBooksInvoice',
-  Subscription: 'Subscription'
+  Subscription: 'Subscription',
+  Donation: 'Donation'
 };
 
 /**

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveDonationLabel } from "~/lib/donations/label";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { api } from "~/trpc/server";
@@ -245,6 +246,15 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
                 ...(blogEnabled ? [{ href: "/blog", label: "Blog" }] : []),
                 ...(isEnabled("services")
                   ? [{ href: "/services", label: "Services" }]
+                  : []),
+                ...(isEnabled("donations") && business.donationShowInFooter
+                  ? [
+                      {
+                        href: "/donate",
+                        label: resolveDonationLabel(business.donationLabel)
+                          .verb,
+                      },
+                    ]
                   : []),
               ].map(({ href, label }) => (
                 <Link

@@ -12,6 +12,7 @@ import { getBusinessUrl } from "~/lib/business-url";
 import { createOrderFromCheckout } from "~/lib/checkout/create-order";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import { splitCustomerName } from "~/lib/customer-name";
+import { handleDonationCheckoutCompleted } from "~/lib/donations/webhook";
 import {
   sendAbandonedCheckoutEmail,
   sendBackorderAlert,
@@ -88,6 +89,14 @@ export async function POST(req: NextRequest) {
       // `stripeSessionId` must never see them.
       if (session.mode === "subscription")
         return handleSubscriptionCheckoutCompleted(event);
+
+      // Donations are a third parallel lane. Same `mode: "payment"` as a cart
+      // checkout, so the discriminator is metadata rather than mode — and the
+      // guard must sit ABOVE the `metadata.businessId` read below, because a
+      // donation session carries that key too but has no cart, no line items to
+      // turn into an Order and no reservation to settle.
+      if (session.metadata?.kind === "donation")
+        return handleDonationCheckoutCompleted(event);
 
       try {
         // Get business ID from metadata
@@ -1035,6 +1044,17 @@ export async function POST(req: NextRequest) {
       // and the abandoned-checkout email must never fire for it.
       if (expiredSession.mode === "subscription")
         return handleSubscriptionCheckoutExpired(event);
+
+      // An abandoned donation holds no reservation either, and the
+      // abandoned-CART recovery email would be nonsense for one: it tells the
+      // visitor their items are waiting and links them to /cart. The lane below
+      // is already structurally cart-shaped (it looks for an
+      // `InventoryReservation`, so the release is a no-op), but the email is
+      // NOT — it only needs `metadata.businessId` and an email address, both of
+      // which a donation session has. Cheap insurance, explicitly stated.
+      if (expiredSession.metadata?.kind === "donation") {
+        return NextResponse.json({ received: true });
+      }
 
       try {
         const reservationId = expiredSession.metadata?.reservationId;

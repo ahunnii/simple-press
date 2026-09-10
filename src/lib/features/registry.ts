@@ -305,6 +305,18 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     dependsOn: ["products", "payments"],
   },
+  donations: {
+    key: "donations",
+    label: "Donations",
+    description:
+      "Accept one-time donations or tips via Stripe, Venmo, or Cash App",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    // Deliberately no dependsOn: a Venmo/CashApp-only store without a
+    // connected Stripe account must still be able to enable this. The
+    // Stripe checkout lane is guarded separately in its own route.
+  },
 };
 
 // Ordered category labels for display
