@@ -21,6 +21,7 @@ import {
   Trash,
   Trash2,
   Upload,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -290,17 +291,44 @@ export function FieldInput({
           defaultChecked={field.defaultValue === "true"}
           onCheckedChange={(checked) => onChange(checked ? "true" : "false")}
         />
+      ) : field.type === "color" ? (
+        <div className="flex items-center gap-2">
+          {/* Native color inputs have no empty state (an unset value renders
+              as black), so the current value is echoed as text — "None" when
+              unset — and Clear writes "" back, which templates treat as
+              "no color". */}
+          <Input
+            id={field.key}
+            type="color"
+            value={stringValue || "#000000"}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-16 shrink-0 cursor-pointer"
+          />
+          <span className="text-muted-foreground text-xs tabular-nums">
+            {stringValue ? stringValue.toUpperCase() : "None"}
+          </span>
+          {stringValue ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground ml-auto h-7 px-2 text-xs"
+              onClick={() => onChange("")}
+            >
+              <X className="size-3.5" aria-hidden="true" />
+              Clear
+            </Button>
+          ) : null}
+        </div>
       ) : (
         <Input
           id={field.key}
           type={
             field.type === "url"
               ? "url"
-              : field.type === "color"
-                ? "color"
-                : field.type === "number"
-                  ? "number"
-                  : "text"
+              : field.type === "number"
+                ? "number"
+                : "text"
           }
           value={stringValue}
           onChange={(e) => onChange(e.target.value)}

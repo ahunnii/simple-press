@@ -33,6 +33,7 @@ type Props = { customFields: unknown };
 export function BambooHeroSection({ customFields }: Props) {
   const f = resolveFields(customFields, [
     "bamboo.homepage.hero-bg-image",
+    "bamboo.homepage.hero-bg-tint",
     "bamboo.homepage.hero-image",
     "bamboo.homepage.hero-title",
     "bamboo.homepage.hero-title-accent",
@@ -55,6 +56,16 @@ export function BambooHeroSection({ customFields }: Props) {
   const secondaryText = f["bamboo.homepage.hero-secondary-button-text"] ?? "";
   const bgImage = f["bamboo.homepage.hero-bg-image"] ?? "";
   const hasBg = bgImage.length > 0;
+  // The hex test is doing two jobs: it is the tint's off-switch AND its
+  // injection guard — `tint` lands in an inline `style`, so anything that
+  // isn't exactly `#rrggbb` must never reach it. And `resolveTemplateFields`
+  // hands back a saved empty string verbatim (no defaultValue fallback), so a
+  // merchant who cleared the hero image yields `""` while an untouched one
+  // yields the `/placeholder.svg` default — both mean "no real hero image".
+  const tint = f["bamboo.homepage.hero-bg-tint"] ?? "";
+  const hasTint = hasBg && /^#[0-9a-fA-F]{6}$/.test(tint);
+  const heroImage = f["bamboo.homepage.hero-image"] ?? "";
+  const hasForeground = heroImage !== "" && heroImage !== "/placeholder.svg";
 
   return (
     <section
@@ -69,7 +80,8 @@ export function BambooHeroSection({ customFields }: Props) {
               (same reason as `shared/bamboo-page-hero.tsx`). The section keeps
               its cream background as the loading/error fallback. No `fieldAttr`
               on any of these layers — image fields refresh the preview iframe
-              through draft-save, they are not textContent-patched. */}
+              through draft-save, they are not textContent-patched, and the
+              tint color field goes through that same draft-save refresh. */}
           <img
             src={bgImage}
             alt=""
@@ -78,6 +90,20 @@ export function BambooHeroSection({ customFields }: Props) {
             fetchPriority="high"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
           />
+          {/* Optional mood wash over the photo — a flat 20% of the merchant's
+              hex, never more: the scrim below is still the whole contrast
+              guarantee ("tint is mood, scrim is contrast", as on pink). No
+              z-index needed; a later z-auto sibling paints above the img and
+              below the z-[1] scrim/fade. */}
+          {hasTint && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0"
+              style={{
+                backgroundColor: `color-mix(in srgb, ${tint} 20%, transparent)`,
+              }}
+            />
+          )}
           {/* Scrim. Must stay FULLY opaque cream behind the copy column:
               `--bam-gold` sits at oklch(0.50) for ~5:1 on cream with no
               headroom (docs/bamboo-accessibility.md), so any photo bleeding
@@ -210,19 +236,25 @@ export function BambooHeroSection({ customFields }: Props) {
         <FadeIn direction="left" delay={0.15} className="relative">
           {hasBg ? (
             // Over photography the arch would frame a frame, so the product
-            // floats instead: same aspect box so the grid row can't collapse,
-            // and a `drop-shadow` (a filter — it follows the alpha silhouette)
-            // rather than a box-shadow, which would draw a rectangle behind a
-            // PNG cut-out instead of hugging it like the client mockup.
+            // floats instead — and it floats shadowless: `drop-shadow` is a
+            // filter that traces the alpha silhouette, which hugs a cut-out
+            // PNG but paints a rectangular halo around any opaque photo, so
+            // it's gone. The aspect box renders UNCONDITIONALLY: it is a
+            // load-bearing geometry spacer, because the sub-lg scrim stop
+            // (`from-66%`) was contrast-measured against a section height that
+            // includes it. With no real hero image set, the background photo
+            // alone is the hero and this box just holds the row open.
             <div className="relative aspect-4/5 w-full sm:aspect-square lg:aspect-4/5">
-              <Image
-                src={f["bamboo.homepage.hero-image"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                priority
-                className="object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.25)]"
-                sizes="(max-width: 1024px) 100vw, 45vw"
-              />
+              {hasForeground && (
+                <Image
+                  src={heroImage}
+                  alt=""
+                  fill
+                  priority
+                  className="object-contain"
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                />
+              )}
             </div>
           ) : (
             <>

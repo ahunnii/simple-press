@@ -70,11 +70,22 @@ const homepageHeroData: TemplateField[] = [
     key: "bamboo.homepage.hero-bg-image",
     label: "Homepage Hero Background Image",
     description:
-      "Optional photo that fills the whole hero band behind the headline and hero image. When set, the hero image loses its arched frame and floats over the scene, and a cream wash keeps the text readable. Leave empty for the solid cream look.",
+      "Optional photo that fills the whole hero band behind the headline. When set, a cream wash keeps the text readable, and the hero image (if one is chosen) floats over the scene without its arched frame — leave the hero image as the placeholder to let the background photo stand alone. Leave empty for the solid cream look.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "bamboo.homepage.hero-bg-tint",
+    label: "Homepage Hero Background Tint",
+    description:
+      "Optional color wash blended over the hero background photo. Only applies when a background image is set. Use Clear to remove the tint.",
+    type: "color",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
     defaultValue: "",
   },
   {
