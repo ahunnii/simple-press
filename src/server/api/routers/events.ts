@@ -59,7 +59,8 @@ export const eventsRouter = createTRPCRouter({
       // derivations (`getEventWhen`/`getEventStatus`/`eventCutoff` in
       // ~/lib/validators/events and ~/lib/events/format) need:
       //   - id, name: identity + link target
-      //   - coverImage: table thumbnail
+      //   - coverImage, coverVideo: table thumbnail (video takes precedence
+      //     over image when both are somehow present — see `create` below)
       //   - startAt, endAt, allDay: feed formatEventDate/eventCutoff and the
       //     When (upcoming/past) derivation
       //   - location: mobile reflow line + search field
@@ -74,6 +75,7 @@ export const eventsRouter = createTRPCRouter({
           id: true,
           name: true,
           coverImage: true,
+          coverVideo: true,
           startAt: true,
           endAt: true,
           allDay: true,
@@ -123,7 +125,12 @@ export const eventsRouter = createTRPCRouter({
           businessId,
           name: input.name,
           blurb: input.blurb,
+          // "Not both set" (one media slot: photo OR uploaded video) is
+          // enforced by the admin form and by render precedence (coverVideo
+          // wins), deliberately not here — an update-side check would need
+          // an extra read and would break store-transfer imports.
           coverImage: input.coverImage,
+          coverVideo: input.coverVideo,
           startAt,
           endAt,
           allDay: input.allDay,

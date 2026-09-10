@@ -1091,6 +1091,9 @@ export async function importStoreBundle(args: {
         coverImage: event.coverImage
           ? rewriteUrl(event.coverImage, urlMap)
           : null,
+        coverVideo: event.coverVideo
+          ? rewriteUrl(event.coverVideo, urlMap)
+          : null,
         startAt,
         endAt: event.endAt ? new Date(event.endAt) : null,
         allDay: event.allDay,

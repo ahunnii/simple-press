@@ -53,6 +53,7 @@ function makeEvent(overrides: Partial<PinkEvent> = {}): PinkEvent {
     name: `Test Event ${idCounter}`,
     blurb: "Come say hi.",
     coverImage: null,
+    coverVideo: null,
     startAt: new Date("2026-08-15T23:00:00.000Z"),
     endAt: null,
     allDay: false,
@@ -180,6 +181,38 @@ describe("PinkUpcomingSection", () => {
 
     expect(
       screen.getByRole("button", { name: "View flier for Flier Market" }),
+    ).toBeInTheDocument();
+  });
+
+  it("plays a coverVideo event inline: a <video> in the frame, and no lightbox trigger for it", () => {
+    const events = [
+      makeEvent({
+        name: "Video Market",
+        // An event has one media slot and the video wins, so a stale
+        // coverImage alongside it must not resurface as a tappable flier.
+        coverImage: "https://storage.example.com/fliers/video-market.png",
+        coverVideo: "https://storage.example.com/fliers/video-market.mp4",
+      }),
+    ];
+    const { container } = render(
+      <PinkUpcomingSection {...baseProps} events={events} />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+    expect(video).toHaveAttribute(
+      "src",
+      "https://storage.example.com/fliers/video-market.mp4",
+    );
+
+    expect(container.querySelector("img")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /view flier/i }),
+    ).not.toBeInTheDocument();
+    // The only control on the card is the video's WCAG 2.2.2 pause/play.
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: "Pause video for Video Market" }),
     ).toBeInTheDocument();
   });
 

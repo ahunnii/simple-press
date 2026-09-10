@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { cn } from "~/lib/utils";
 import { EventFlierLightbox } from "~/app/(storefront)/_components/events/event-flier-lightbox";
+import { EventFlierVideo } from "~/app/(storefront)/_components/events/event-flier-video";
 
 import { PINK_SCOPE_CLASS } from "../layout/pink-scope";
 import {
@@ -30,6 +31,11 @@ const LIGHTBOX_PANEL_CLASS = `${PINK_SCOPE_CLASS} rounded-none border-[var(--pin
 type Props = {
   /** `Event.coverImage` — null/blank renders the template's own fallback. */
   src: string | null | undefined;
+  /**
+   * `Event.coverVideo`. An event has ONE media slot, and the video wins: when
+   * this is set the frame plays it inline and `src` is never consulted.
+   */
+  videoSrc?: string | null;
   /** Event name. Fliers carry words, so this is never decorative. */
   name: string;
   /** CSS `aspect-ratio` for the frame. Fliers are portrait, hence 3:4. */
@@ -52,9 +58,15 @@ type Props = {
  * lightbox trigger — an empty dialog would be a keyboard trap for no payoff,
  * and the fallback carries no alt text of its own (the card's heading already
  * names the event).
+ *
+ * `videoSrc` takes the same frame down a third path: the video plays inline,
+ * with no lightbox and no hover lift. Both of those say "tap me", and there is
+ * nothing to tap — enlarging a moving poster buys the viewer nothing the card
+ * isn't already showing them.
  */
 export function PinkEventFlier({
   src,
+  videoSrc,
   name,
   aspect = "3 / 4",
   sizes,
@@ -66,6 +78,23 @@ export function PinkEventFlier({
     aspectRatio: aspect,
     background: "var(--pink-panel)",
   } satisfies React.CSSProperties;
+
+  if (videoSrc) {
+    return (
+      <div
+        // Callers hand every flier `pink-lift` for the image path's tap
+        // affordance; dropped here rather than at the call sites so the
+        // "video fliers aren't tappable" rule lives in one place.
+        className={frameClassName
+          .split(" ")
+          .filter((token) => token !== "pink-lift")
+          .join(" ")}
+        style={frameStyle}
+      >
+        <EventFlierVideo src={videoSrc} name={name} />
+      </div>
+    );
+  }
 
   const flier = src ?? "";
   if (!hasCustomImage(flier)) {

@@ -52,6 +52,7 @@ export function PinkEventCard({
     <article className="flex h-full flex-col">
       <PinkEventFlier
         src={event.coverImage}
+        videoSrc={event.coverVideo}
         name={event.name}
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         priority={priority}

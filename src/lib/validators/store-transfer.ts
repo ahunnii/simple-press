@@ -341,6 +341,7 @@ const exportedEventSchema = z.object({
   name: z.string(),
   blurb: nullableString.optional(),
   coverImage: nullableString.optional(),
+  coverVideo: nullableString.optional(),
   startAt: z.string(),
   endAt: nullableString.optional(),
   allDay: z.boolean(),

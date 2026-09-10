@@ -140,6 +140,7 @@ export function PinkUpcomingSection({
                   >
                     <PinkEventFlier
                       src={event.coverImage}
+                      videoSrc={event.coverVideo}
                       name={event.name}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="pink-lift"

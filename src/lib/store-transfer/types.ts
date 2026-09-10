@@ -355,6 +355,7 @@ export interface ExportedEvent {
   name: string;
   blurb: string | null;
   coverImage: string | null;
+  coverVideo: string | null;
   startAt: string; // ISO string
   endAt: string | null; // ISO string
   allDay: boolean;

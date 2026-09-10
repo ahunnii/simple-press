@@ -604,7 +604,7 @@ model ServiceItem {
 }
 
 /// An upcoming event the owner wants shoppers to know about — a market, a class,
-/// a make & take. Owners typically upload a flier as `coverImage`.
+/// a make & take. Owners typically upload a flier as `coverImage` or `coverVideo`.
 ///
 /// Deliberately NOT a commerce object: `priceLabel` is a display string, there is
 /// no RSVP/ticketing, and there is no detail page (hence no `slug`). The flier is
@@ -617,6 +617,7 @@ model Event {
   name       String
   blurb      String? @db.Text
   coverImage String? // flier/cover URL — plain string, same convention as Service.image
+  coverVideo String? // uploaded video flier URL — renderers give this precedence over coverImage
 
   // Always stored as UTC instants; displayed through Business.timeZone via
   // src/lib/events/format.ts. `allDay` events are normalized on write to

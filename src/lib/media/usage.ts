@@ -605,11 +605,11 @@ export async function buildUsedMediaIndex(
       }
     });
 
-  // ── 5b. Events (flier cover image) ──────────────────────────────────────────
+  // ── 5b. Events (flier cover image / cover video) ────────────────────────────
   const eventsPromise = db.event
     .findMany({
       where: { businessId },
-      select: { id: true, name: true, coverImage: true },
+      select: { id: true, name: true, coverImage: true, coverVideo: true },
     })
     .then((events) => {
       for (const e of events) {
@@ -617,6 +617,16 @@ export async function buildUsedMediaIndex(
           addUsage(map, e.coverImage, {
             url: e.coverImage,
             location: "Event flier",
+            entityType: "event",
+            entityId: e.id,
+            entityLabel: e.name,
+            adminHref: `/admin/events/${e.id}`,
+          });
+        }
+        if (e.coverVideo) {
+          addUsage(map, e.coverVideo, {
+            url: e.coverVideo,
+            location: "Event video",
             entityType: "event",
             entityId: e.id,
             entityLabel: e.name,

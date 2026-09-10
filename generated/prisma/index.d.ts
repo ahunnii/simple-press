@@ -86,7 +86,7 @@ export type ServiceItem = $Result.DefaultSelection<Prisma.$ServiceItemPayload>
 /**
  * Model Event
  * An upcoming event the owner wants shoppers to know about — a market, a class,
- * a make & take. Owners typically upload a flier as `coverImage`.
+ * a make & take. Owners typically upload a flier as `coverImage` or `coverVideo`.
  * 
  * Deliberately NOT a commerce object: `priceLabel` is a display string, there is
  * no RSVP/ticketing, and there is no detail page (hence no `slug`). The flier is
@@ -24928,6 +24928,7 @@ export namespace Prisma {
     name: string | null
     blurb: string | null
     coverImage: string | null
+    coverVideo: string | null
     startAt: Date | null
     endAt: Date | null
     allDay: boolean | null
@@ -24948,6 +24949,7 @@ export namespace Prisma {
     name: string | null
     blurb: string | null
     coverImage: string | null
+    coverVideo: string | null
     startAt: Date | null
     endAt: Date | null
     allDay: boolean | null
@@ -24968,6 +24970,7 @@ export namespace Prisma {
     name: number
     blurb: number
     coverImage: number
+    coverVideo: number
     startAt: number
     endAt: number
     allDay: number
@@ -24998,6 +25001,7 @@ export namespace Prisma {
     name?: true
     blurb?: true
     coverImage?: true
+    coverVideo?: true
     startAt?: true
     endAt?: true
     allDay?: true
@@ -25018,6 +25022,7 @@ export namespace Prisma {
     name?: true
     blurb?: true
     coverImage?: true
+    coverVideo?: true
     startAt?: true
     endAt?: true
     allDay?: true
@@ -25038,6 +25043,7 @@ export namespace Prisma {
     name?: true
     blurb?: true
     coverImage?: true
+    coverVideo?: true
     startAt?: true
     endAt?: true
     allDay?: true
@@ -25145,6 +25151,7 @@ export namespace Prisma {
     name: string
     blurb: string | null
     coverImage: string | null
+    coverVideo: string | null
     startAt: Date
     endAt: Date | null
     allDay: boolean
@@ -25184,6 +25191,7 @@ export namespace Prisma {
     name?: boolean
     blurb?: boolean
     coverImage?: boolean
+    coverVideo?: boolean
     startAt?: boolean
     endAt?: boolean
     allDay?: boolean
@@ -25205,6 +25213,7 @@ export namespace Prisma {
     name?: boolean
     blurb?: boolean
     coverImage?: boolean
+    coverVideo?: boolean
     startAt?: boolean
     endAt?: boolean
     allDay?: boolean
@@ -25226,6 +25235,7 @@ export namespace Prisma {
     name?: boolean
     blurb?: boolean
     coverImage?: boolean
+    coverVideo?: boolean
     startAt?: boolean
     endAt?: boolean
     allDay?: boolean
@@ -25247,6 +25257,7 @@ export namespace Prisma {
     name?: boolean
     blurb?: boolean
     coverImage?: boolean
+    coverVideo?: boolean
     startAt?: boolean
     endAt?: boolean
     allDay?: boolean
@@ -25260,7 +25271,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type EventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "blurb" | "coverImage" | "startAt" | "endAt" | "allDay" | "location" | "externalUrl" | "externalUrlLabel" | "priceLabel" | "published" | "sortOrder" | "isArchived" | "businessId", ExtArgs["result"]["event"]>
+  export type EventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "blurb" | "coverImage" | "coverVideo" | "startAt" | "endAt" | "allDay" | "location" | "externalUrl" | "externalUrlLabel" | "priceLabel" | "published" | "sortOrder" | "isArchived" | "businessId", ExtArgs["result"]["event"]>
   export type EventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -25283,6 +25294,7 @@ export namespace Prisma {
       name: string
       blurb: string | null
       coverImage: string | null
+      coverVideo: string | null
       startAt: Date
       endAt: Date | null
       allDay: boolean
@@ -25724,6 +25736,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Event", 'String'>
     readonly blurb: FieldRef<"Event", 'String'>
     readonly coverImage: FieldRef<"Event", 'String'>
+    readonly coverVideo: FieldRef<"Event", 'String'>
     readonly startAt: FieldRef<"Event", 'DateTime'>
     readonly endAt: FieldRef<"Event", 'DateTime'>
     readonly allDay: FieldRef<"Event", 'Boolean'>
@@ -67436,6 +67449,7 @@ export namespace Prisma {
     name: 'name',
     blurb: 'blurb',
     coverImage: 'coverImage',
+    coverVideo: 'coverVideo',
     startAt: 'startAt',
     endAt: 'endAt',
     allDay: 'allDay',
@@ -70075,6 +70089,7 @@ export namespace Prisma {
     name?: StringFilter<"Event"> | string
     blurb?: StringNullableFilter<"Event"> | string | null
     coverImage?: StringNullableFilter<"Event"> | string | null
+    coverVideo?: StringNullableFilter<"Event"> | string | null
     startAt?: DateTimeFilter<"Event"> | Date | string
     endAt?: DateTimeNullableFilter<"Event"> | Date | string | null
     allDay?: BoolFilter<"Event"> | boolean
@@ -70096,6 +70111,7 @@ export namespace Prisma {
     name?: SortOrder
     blurb?: SortOrderInput | SortOrder
     coverImage?: SortOrderInput | SortOrder
+    coverVideo?: SortOrderInput | SortOrder
     startAt?: SortOrder
     endAt?: SortOrderInput | SortOrder
     allDay?: SortOrder
@@ -70120,6 +70136,7 @@ export namespace Prisma {
     name?: StringFilter<"Event"> | string
     blurb?: StringNullableFilter<"Event"> | string | null
     coverImage?: StringNullableFilter<"Event"> | string | null
+    coverVideo?: StringNullableFilter<"Event"> | string | null
     startAt?: DateTimeFilter<"Event"> | Date | string
     endAt?: DateTimeNullableFilter<"Event"> | Date | string | null
     allDay?: BoolFilter<"Event"> | boolean
@@ -70141,6 +70158,7 @@ export namespace Prisma {
     name?: SortOrder
     blurb?: SortOrderInput | SortOrder
     coverImage?: SortOrderInput | SortOrder
+    coverVideo?: SortOrderInput | SortOrder
     startAt?: SortOrder
     endAt?: SortOrderInput | SortOrder
     allDay?: SortOrder
@@ -70169,6 +70187,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Event"> | string
     blurb?: StringNullableWithAggregatesFilter<"Event"> | string | null
     coverImage?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    coverVideo?: StringNullableWithAggregatesFilter<"Event"> | string | null
     startAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
     endAt?: DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
     allDay?: BoolWithAggregatesFilter<"Event"> | boolean
@@ -75820,6 +75839,7 @@ export namespace Prisma {
     name: string
     blurb?: string | null
     coverImage?: string | null
+    coverVideo?: string | null
     startAt: Date | string
     endAt?: Date | string | null
     allDay?: boolean
@@ -75840,6 +75860,7 @@ export namespace Prisma {
     name: string
     blurb?: string | null
     coverImage?: string | null
+    coverVideo?: string | null
     startAt: Date | string
     endAt?: Date | string | null
     allDay?: boolean
@@ -75860,6 +75881,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDay?: BoolFieldUpdateOperationsInput | boolean
@@ -75880,6 +75902,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDay?: BoolFieldUpdateOperationsInput | boolean
@@ -75900,6 +75923,7 @@ export namespace Prisma {
     name: string
     blurb?: string | null
     coverImage?: string | null
+    coverVideo?: string | null
     startAt: Date | string
     endAt?: Date | string | null
     allDay?: boolean
@@ -75920,6 +75944,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDay?: BoolFieldUpdateOperationsInput | boolean
@@ -75939,6 +75964,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDay?: BoolFieldUpdateOperationsInput | boolean
@@ -81630,6 +81656,7 @@ export namespace Prisma {
     name?: SortOrder
     blurb?: SortOrder
     coverImage?: SortOrder
+    coverVideo?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     allDay?: SortOrder
@@ -81654,6 +81681,7 @@ export namespace Prisma {
     name?: SortOrder
     blurb?: SortOrder
     coverImage?: SortOrder
+    coverVideo?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     allDay?: SortOrder
@@ -81674,6 +81702,7 @@ export namespace Prisma {
     name?: SortOrder
     blurb?: SortOrder
     coverImage?: SortOrder
+    coverVideo?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     allDay?: SortOrder
@@ -90478,6 +90507,7 @@ export namespace Prisma {
     name: string
     blurb?: string | null
     coverImage?: string | null
+    coverVideo?: string | null
     startAt: Date | string
     endAt?: Date | string | null
     allDay?: boolean
@@ -90497,6 +90527,7 @@ export namespace Prisma {
     name: string
     blurb?: string | null
     coverImage?: string | null
+    coverVideo?: string | null
     startAt: Date | string
     endAt?: Date | string | null
     allDay?: boolean
@@ -91731,6 +91762,7 @@ export namespace Prisma {
     name?: StringFilter<"Event"> | string
     blurb?: StringNullableFilter<"Event"> | string | null
     coverImage?: StringNullableFilter<"Event"> | string | null
+    coverVideo?: StringNullableFilter<"Event"> | string | null
     startAt?: DateTimeFilter<"Event"> | Date | string
     endAt?: DateTimeNullableFilter<"Event"> | Date | string | null
     allDay?: BoolFilter<"Event"> | boolean
@@ -110215,6 +110247,7 @@ export namespace Prisma {
     name: string
     blurb?: string | null
     coverImage?: string | null
+    coverVideo?: string | null
     startAt: Date | string
     endAt?: Date | string | null
     allDay?: boolean
@@ -111461,6 +111494,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDay?: BoolFieldUpdateOperationsInput | boolean
@@ -111480,6 +111514,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDay?: BoolFieldUpdateOperationsInput | boolean
@@ -111499,6 +111534,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDay?: BoolFieldUpdateOperationsInput | boolean

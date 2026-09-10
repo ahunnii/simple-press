@@ -133,7 +133,7 @@ const router: Router = {
     video: route({
       fileTypes: ["video/*"],
       multipleFiles: false,
-      maxFileSize: 1024 * 1024 * 20, // 20MB
+      maxFileSize: 1024 * 1024 * 50, // 50MB — keep in sync with media-picker-dialog.tsx and template-field-widgets.tsx client-side checks
       onBeforeUpload: async ({ req, file }) => {
         const { business } = await requireBusinessManager(req);
 

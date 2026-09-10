@@ -66,8 +66,11 @@ export async function PinkEventsIndexPage({
   const flierHint = f["pink.events.list-flier-hint"] ?? "";
 
   // "Tap a flier" is a lie on a calendar where nobody has uploaded one, so the
-  // hint only appears once there is something to tap.
-  const hasAnyFlier = events.some((event) => hasCustomImage(event.coverImage));
+  // hint only appears once there is something to tap. A video flier plays
+  // inline with no lightbox, so it does not count towards that.
+  const hasAnyFlier = events.some(
+    (event) => !event.coverVideo && hasCustomImage(event.coverImage),
+  );
 
   const ctaImages = [
     f["pink.events.cta-image-1"] ?? "",
