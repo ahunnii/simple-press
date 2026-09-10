@@ -184,7 +184,7 @@ describe("PinkUpcomingSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("plays a coverVideo event inline: a <video> in the frame, and no lightbox trigger for it", () => {
+  it("plays a coverVideo event inline: a <video> in the frame, tappable into a lightbox, and the stale coverImage never resurfaces", () => {
     const events = [
       makeEvent({
         name: "Video Market",
@@ -205,15 +205,23 @@ describe("PinkUpcomingSection", () => {
       "https://storage.example.com/fliers/video-market.mp4",
     );
 
+    // The stale coverImage must never render as an <img> in the card.
     expect(container.querySelector("img")).toBeNull();
+
+    // Video fliers are tappable now: a lightbox trigger, a mute toggle, and
+    // the WCAG 2.2.2 pause/play control — three buttons total on the card.
+    // The inline video autoplays muted, so the toggle starts out offering to
+    // unmute it.
     expect(
-      screen.queryByRole("button", { name: /view flier/i }),
-    ).not.toBeInTheDocument();
-    // The only control on the card is the video's WCAG 2.2.2 pause/play.
-    expect(screen.getAllByRole("button")).toHaveLength(1);
+      screen.getByRole("button", { name: "View flier for Video Market" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Unmute video for Video Market" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Pause video for Video Market" }),
     ).toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(3);
   });
 
   it("renders the flier before the meta block in DOM order (image-top card, not the old 88px thumbnail row)", () => {

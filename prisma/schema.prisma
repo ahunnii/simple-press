@@ -616,15 +616,17 @@ model ServiceItem {
 /// An upcoming event the owner wants shoppers to know about — a market, a class,
 /// a make & take. Owners typically upload a flier as `coverImage` or `coverVideo`.
 ///
-/// Deliberately NOT a commerce object: `priceLabel` is a display string, there is
-/// no RSVP/ticketing, and there is no detail page (hence no `slug`). The flier is
-/// opened full-size in a lightbox from the list.
+/// Deliberately NOT a commerce object: `priceLabel` is a display string and there
+/// is no RSVP/ticketing. The flier is opened full-size in a lightbox from the list;
+/// `slug` exists only as a stable per-business handle for linking, not as a
+/// commitment to a detail page.
 model Event {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   name       String
+  slug       String // derived from `name`, unique per business — see Service/Collection
   blurb      String? @db.Text
   coverImage String? // flier/cover URL — plain string, same convention as Service.image
   coverVideo String? // uploaded video flier URL — renderers give this precedence over coverImage
@@ -653,6 +655,8 @@ model Event {
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
+  // Slug lookups are always business-scoped; this doubles as the uniqueness guard.
+  @@unique([businessId, slug])
   // Public storefront list.
   @@index([businessId, published, isArchived, startAt])
   // Admin list (both tabs) and the sitemap count.
@@ -909,7 +913,7 @@ model Order {
   orderNumber Int
 
   // Status
-  status            String @default("open") // open | completed | cancelled | refunded 
+  status            String @default("open") // open | completed | cancelled | refunded
   paymentStatus     String @default("pending") // pending | paid | failed | refunded
   fulfillmentStatus String @default("unfulfilled") // unfulfilled | fulfilled | partially_fulfilled
 

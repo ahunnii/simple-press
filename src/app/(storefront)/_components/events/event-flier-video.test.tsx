@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -44,6 +44,18 @@ function renderVideo(props: Partial<{ name: string }> = {}) {
   return { ...utils, video: video! };
 }
 
+/**
+ * happy-dom honours .play()/.pause() but never starts playback from the
+ * autoplay attribute on its own, so stand in for the browser here — otherwise
+ * the element is paused while the control (correctly, for a real browser)
+ * offers Pause, and the first click would only resync the two.
+ */
+async function startPlaying(video: HTMLVideoElement) {
+  await act(async () => {
+    await video.play();
+  });
+}
+
 describe("EventFlierVideo", () => {
   it("renders a video element with the given src, muted/looping/inline", () => {
     const { video } = renderVideo();
@@ -56,7 +68,7 @@ describe("EventFlierVideo", () => {
     expect(video.querySelector("source")).toBeNull();
   });
 
-  it("hides the video from assistive tech (the card's heading names the event)", () => {
+  it("hides the inline video from assistive tech (the trigger and controls carry the semantics)", () => {
     const { video } = renderVideo();
 
     expect(video).toHaveAttribute("aria-hidden", "true");
@@ -90,13 +102,7 @@ describe("EventFlierVideo", () => {
     const user = userEvent.setup();
     const { video } = renderVideo();
 
-    // happy-dom honours .play()/.pause() but never starts playback from the
-    // autoplay attribute on its own, so stand in for the browser here —
-    // otherwise the element is paused while the control (correctly, for a real
-    // browser) offers Pause, and the first click would only resync the two.
-    await act(async () => {
-      await video.play();
-    });
+    await startPlaying(video);
 
     await user.click(screen.getByRole("button", { name: "Pause video" }));
     expect(video.paused).toBe(true);
@@ -119,14 +125,122 @@ describe("EventFlierVideo", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders no lightbox trigger — videos play inline, they are not tappable", () => {
+  it("renders a lightbox trigger alongside the controls", () => {
     renderVideo({ name: NAME });
 
     expect(
-      screen.queryByRole("button", { name: /view flier/i }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: `View flier for ${NAME}` }),
+    ).toBeInTheDocument();
+    // Expand trigger + mute + pause, and nothing else, before it opens.
+    expect(screen.getAllByRole("button")).toHaveLength(3);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    // The pause/play control is the only button this component ships.
-    expect(screen.getAllByRole("button")).toHaveLength(1);
+  });
+
+  it("opens a dialog with a controllable, unmuted video", async () => {
+    const user = userEvent.setup();
+    renderVideo({ name: NAME });
+
+    await user.click(
+      screen.getByRole("button", { name: `View flier for ${NAME}` }),
+    );
+
+    const dialog = await screen.findByRole("dialog", {
+      name: `${NAME} — enlarged flier`,
+    });
+    const dialogVideo = dialog.querySelector("video");
+    expect(dialogVideo).not.toBeNull();
+    // Native controls are the point of expanding: scrub bar and volume.
+    expect(dialogVideo!.controls).toBe(true);
+    expect(dialogVideo!.muted).toBe(false);
+    expect(
+      within(dialog).getByRole("button", { name: "Close" }),
+    ).toBeInTheDocument();
+  });
+
+  it("pauses the inline video while the lightbox is open and resumes on close", async () => {
+    const user = userEvent.setup();
+    const { video } = renderVideo({ name: NAME });
+
+    await startPlaying(video);
+
+    await user.click(
+      screen.getByRole("button", { name: `View flier for ${NAME}` }),
+    );
+    await screen.findByRole("dialog");
+    // Two copies must never play — or sound — at once.
+    expect(video.paused).toBe(true);
+
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(video.paused).toBe(false);
+  });
+
+  it("leaves the inline video paused on close when the viewer had paused it", async () => {
+    const user = userEvent.setup();
+    const { video } = renderVideo({ name: NAME });
+
+    await startPlaying(video);
+
+    await user.click(
+      screen.getByRole("button", { name: `Pause video for ${NAME}` }),
+    );
+    expect(video.paused).toBe(true);
+
+    await user.click(
+      screen.getByRole("button", { name: `View flier for ${NAME}` }),
+    );
+    const dialog = await screen.findByRole("dialog");
+
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    // The viewer's own pause outranks the dialog's bookkeeping.
+    expect(video.paused).toBe(true);
+    expect(
+      screen.getByRole("button", { name: `Play video for ${NAME}` }),
+    ).toBeInTheDocument();
+  });
+
+  it("clicking the control buttons does not open the dialog", async () => {
+    const user = userEvent.setup();
+    renderVideo({ name: NAME });
+
+    await user.click(
+      screen.getByRole("button", { name: `Pause video for ${NAME}` }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: `Unmute video for ${NAME}` }),
+    );
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("starts muted and offers an unmute control", () => {
+    const { video } = renderVideo({ name: NAME });
+
+    expect(video.muted).toBe(true);
+    expect(
+      screen.getByRole("button", { name: `Unmute video for ${NAME}` }),
+    ).toBeInTheDocument();
+  });
+
+  it("toggles the inline video's sound when the mute control is activated", async () => {
+    const user = userEvent.setup();
+    const { video } = renderVideo({ name: NAME });
+
+    await user.click(
+      screen.getByRole("button", { name: `Unmute video for ${NAME}` }),
+    );
+    expect(video.muted).toBe(false);
+    expect(
+      screen.getByRole("button", { name: `Mute video for ${NAME}` }),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: `Mute video for ${NAME}` }),
+    );
+    expect(video.muted).toBe(true);
+    expect(
+      screen.getByRole("button", { name: `Unmute video for ${NAME}` }),
+    ).toBeInTheDocument();
   });
 });

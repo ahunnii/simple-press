@@ -353,6 +353,8 @@ export interface ExportedFaqItem {
 export interface ExportedEvent {
   exportId: string;
   name: string;
+  /** Added after events shipped in the original format — nullable so older manifests still parse. */
+  slug: string | null;
   blurb: string | null;
   coverImage: string | null;
   coverVideo: string | null;

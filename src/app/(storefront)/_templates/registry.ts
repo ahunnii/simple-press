@@ -120,6 +120,7 @@ import { DefaultCollectionsPage } from "./default/collections/default-collection
 import { DefaultContactPage } from "./default/contact/default-contact-page";
 import { DefaultGenericPage } from "./default/default-generic-page";
 import { DefaultDonatePage } from "./default/donate/default-donate-page";
+import { DefaultEventPage } from "./default/events/default-event-page";
 import { DefaultEventsPage } from "./default/events/default-events-page";
 import { DefaultFaqPage } from "./default/faq/default-faq-page";
 import { DefaultLayout } from "./default/layout/default-layout";
@@ -346,9 +347,9 @@ type AnyComponent = ComponentType<any>;
  * `ServicesPage` is optional — only pollen implements it. Routes check for its
  * presence and call `notFound()` when it is absent.
  *
- * `EventsPage`, `VideosPage` and `FaqPage` are optional in the type but always
- * present on `defaultEntry`, so their routes' presence checks only satisfy
- * TypeScript's optional-slot typing.
+ * `EventsPage`, `EventPage`, `VideosPage` and `FaqPage` are optional in the
+ * type but always present on `defaultEntry`, so their routes' presence checks
+ * only satisfy TypeScript's optional-slot typing.
  *
  * `CheckoutUnavailable` is the component rendered when Stripe is not connected.
  * All templates fall back to `DefaultCheckoutUnavailable`.
@@ -383,6 +384,7 @@ export type TemplateComponentSet = {
   ServicesPage?: AnyComponent;
   ServicesIndexPage?: AnyComponent;
   EventsPage?: AnyComponent;
+  EventPage?: AnyComponent;
   DonatePage?: AnyComponent;
   VideosPage?: AnyComponent;
   // Optional per-template override of /faq; defaultEntry always supplies one.
@@ -418,6 +420,7 @@ const defaultEntry: TemplateComponentSet = {
   SubscriptionsPage: DefaultSubscriptionsPage,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
+  EventPage: DefaultEventPage,
   DonatePage: DefaultDonatePage,
   VideosPage: DefaultVideosPage,
   FaqPage: DefaultFaqPage,

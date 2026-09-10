@@ -23,6 +23,7 @@ import {
   putStoredObject,
 } from "~/lib/s3/put";
 import { keyToPublicUrl } from "~/lib/s3/url";
+import { generateEventSlug } from "~/lib/slug";
 import {
   normalizeUrl,
   rewriteJsonValue,
@@ -1076,8 +1077,9 @@ export async function importStoreBundle(args: {
     }
   }
 
-  // ── 3l2. Events — no natural key on Event (no slug, no unique constraint),
-  // so match on (businessId, name, startAt) for idempotency.
+  // ── 3l2. Events — matched on (businessId, name, startAt) rather than
+  // slug, for manifest back-compat: manifests exported before Event.slug
+  // existed carry no slug at all, so it can't serve as the dedupe key.
   for (const event of content.events) {
     try {
       const startAt = new Date(event.startAt);
@@ -1106,11 +1108,33 @@ export async function importStoreBundle(args: {
         isArchived: event.isArchived,
       };
       if (existing) {
+        // slug is immutable after creation (see events router `create`) —
+        // omitted from the update so re-imports never disturb a slug that
+        // the target site may already have links pointing at.
         await db.event.update({ where: { id: existing.id }, data });
         track("Event", false);
       } else {
+        // Uniquify the slug against the target business, same counter-loop
+        // approach as the events router's `create` (src/server/api/routers/events.ts).
+        const baseSlug = event.slug ?? generateEventSlug(event.name);
+        let slug = baseSlug;
+        let counter = 1;
+        while (
+          await db.event.findUnique({
+            where: {
+              businessId_slug: { businessId: targetBusinessId, slug },
+            },
+            select: { id: true },
+          })
+        ) {
+          if (counter > 1000) {
+            throw new Error("Could not generate a unique event slug.");
+          }
+          slug = `${baseSlug}-${counter}`;
+          counter++;
+        }
         await db.event.create({
-          data: { businessId: targetBusinessId, ...data },
+          data: { businessId: targetBusinessId, slug, ...data },
         });
         track("Event", true);
       }

@@ -88,9 +88,10 @@ export type ServiceItem = $Result.DefaultSelection<Prisma.$ServiceItemPayload>
  * An upcoming event the owner wants shoppers to know about — a market, a class,
  * a make & take. Owners typically upload a flier as `coverImage` or `coverVideo`.
  * 
- * Deliberately NOT a commerce object: `priceLabel` is a display string, there is
- * no RSVP/ticketing, and there is no detail page (hence no `slug`). The flier is
- * opened full-size in a lightbox from the list.
+ * Deliberately NOT a commerce object: `priceLabel` is a display string and there
+ * is no RSVP/ticketing. The flier is opened full-size in a lightbox from the list;
+ * `slug` exists only as a stable per-business handle for linking, not as a
+ * commitment to a detail page.
  */
 export type Event = $Result.DefaultSelection<Prisma.$EventPayload>
 /**
@@ -25133,6 +25134,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     name: string | null
+    slug: string | null
     blurb: string | null
     coverImage: string | null
     coverVideo: string | null
@@ -25154,6 +25156,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     name: string | null
+    slug: string | null
     blurb: string | null
     coverImage: string | null
     coverVideo: string | null
@@ -25175,6 +25178,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     name: number
+    slug: number
     blurb: number
     coverImage: number
     coverVideo: number
@@ -25206,6 +25210,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     name?: true
+    slug?: true
     blurb?: true
     coverImage?: true
     coverVideo?: true
@@ -25227,6 +25232,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     name?: true
+    slug?: true
     blurb?: true
     coverImage?: true
     coverVideo?: true
@@ -25248,6 +25254,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     name?: true
+    slug?: true
     blurb?: true
     coverImage?: true
     coverVideo?: true
@@ -25356,6 +25363,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     name: string
+    slug: string
     blurb: string | null
     coverImage: string | null
     coverVideo: string | null
@@ -25396,6 +25404,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     name?: boolean
+    slug?: boolean
     blurb?: boolean
     coverImage?: boolean
     coverVideo?: boolean
@@ -25418,6 +25427,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     name?: boolean
+    slug?: boolean
     blurb?: boolean
     coverImage?: boolean
     coverVideo?: boolean
@@ -25440,6 +25450,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     name?: boolean
+    slug?: boolean
     blurb?: boolean
     coverImage?: boolean
     coverVideo?: boolean
@@ -25462,6 +25473,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     name?: boolean
+    slug?: boolean
     blurb?: boolean
     coverImage?: boolean
     coverVideo?: boolean
@@ -25478,7 +25490,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type EventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "blurb" | "coverImage" | "coverVideo" | "startAt" | "endAt" | "allDay" | "location" | "externalUrl" | "externalUrlLabel" | "priceLabel" | "published" | "sortOrder" | "isArchived" | "businessId", ExtArgs["result"]["event"]>
+  export type EventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "blurb" | "coverImage" | "coverVideo" | "startAt" | "endAt" | "allDay" | "location" | "externalUrl" | "externalUrlLabel" | "priceLabel" | "published" | "sortOrder" | "isArchived" | "businessId", ExtArgs["result"]["event"]>
   export type EventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -25499,6 +25511,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       name: string
+      slug: string
       blurb: string | null
       coverImage: string | null
       coverVideo: string | null
@@ -25941,6 +25954,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"Event", 'DateTime'>
     readonly updatedAt: FieldRef<"Event", 'DateTime'>
     readonly name: FieldRef<"Event", 'String'>
+    readonly slug: FieldRef<"Event", 'String'>
     readonly blurb: FieldRef<"Event", 'String'>
     readonly coverImage: FieldRef<"Event", 'String'>
     readonly coverVideo: FieldRef<"Event", 'String'>
@@ -68826,6 +68840,7 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     name: 'name',
+    slug: 'slug',
     blurb: 'blurb',
     coverImage: 'coverImage',
     coverVideo: 'coverVideo',
@@ -71515,6 +71530,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Event"> | Date | string
     updatedAt?: DateTimeFilter<"Event"> | Date | string
     name?: StringFilter<"Event"> | string
+    slug?: StringFilter<"Event"> | string
     blurb?: StringNullableFilter<"Event"> | string | null
     coverImage?: StringNullableFilter<"Event"> | string | null
     coverVideo?: StringNullableFilter<"Event"> | string | null
@@ -71537,6 +71553,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     blurb?: SortOrderInput | SortOrder
     coverImage?: SortOrderInput | SortOrder
     coverVideo?: SortOrderInput | SortOrder
@@ -71556,12 +71573,14 @@ export namespace Prisma {
 
   export type EventWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    businessId_slug?: EventBusinessIdSlugCompoundUniqueInput
     AND?: EventWhereInput | EventWhereInput[]
     OR?: EventWhereInput[]
     NOT?: EventWhereInput | EventWhereInput[]
     createdAt?: DateTimeFilter<"Event"> | Date | string
     updatedAt?: DateTimeFilter<"Event"> | Date | string
     name?: StringFilter<"Event"> | string
+    slug?: StringFilter<"Event"> | string
     blurb?: StringNullableFilter<"Event"> | string | null
     coverImage?: StringNullableFilter<"Event"> | string | null
     coverVideo?: StringNullableFilter<"Event"> | string | null
@@ -71577,13 +71596,14 @@ export namespace Prisma {
     isArchived?: BoolFilter<"Event"> | boolean
     businessId?: StringFilter<"Event"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
-  }, "id">
+  }, "id" | "businessId_slug">
 
   export type EventOrderByWithAggregationInput = {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     blurb?: SortOrderInput | SortOrder
     coverImage?: SortOrderInput | SortOrder
     coverVideo?: SortOrderInput | SortOrder
@@ -71613,6 +71633,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
     name?: StringWithAggregatesFilter<"Event"> | string
+    slug?: StringWithAggregatesFilter<"Event"> | string
     blurb?: StringNullableWithAggregatesFilter<"Event"> | string | null
     coverImage?: StringNullableWithAggregatesFilter<"Event"> | string | null
     coverVideo?: StringNullableWithAggregatesFilter<"Event"> | string | null
@@ -77393,6 +77414,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     name: string
+    slug: string
     blurb?: string | null
     coverImage?: string | null
     coverVideo?: string | null
@@ -77414,6 +77436,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     name: string
+    slug: string
     blurb?: string | null
     coverImage?: string | null
     coverVideo?: string | null
@@ -77435,6 +77458,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77456,6 +77480,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77477,6 +77502,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     name: string
+    slug: string
     blurb?: string | null
     coverImage?: string | null
     coverVideo?: string | null
@@ -77498,6 +77524,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77518,6 +77545,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83321,11 +83349,17 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
+  export type EventBusinessIdSlugCompoundUniqueInput = {
+    businessId: string
+    slug: string
+  }
+
   export type EventCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     blurb?: SortOrder
     coverImage?: SortOrder
     coverVideo?: SortOrder
@@ -83351,6 +83385,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     blurb?: SortOrder
     coverImage?: SortOrder
     coverVideo?: SortOrder
@@ -83372,6 +83407,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     blurb?: SortOrder
     coverImage?: SortOrder
     coverVideo?: SortOrder
@@ -92308,6 +92344,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     name: string
+    slug: string
     blurb?: string | null
     coverImage?: string | null
     coverVideo?: string | null
@@ -92328,6 +92365,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     name: string
+    slug: string
     blurb?: string | null
     coverImage?: string | null
     coverVideo?: string | null
@@ -93597,6 +93635,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Event"> | Date | string
     updatedAt?: DateTimeFilter<"Event"> | Date | string
     name?: StringFilter<"Event"> | string
+    slug?: StringFilter<"Event"> | string
     blurb?: StringNullableFilter<"Event"> | string | null
     coverImage?: StringNullableFilter<"Event"> | string | null
     coverVideo?: StringNullableFilter<"Event"> | string | null
@@ -113306,6 +113345,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     name: string
+    slug: string
     blurb?: string | null
     coverImage?: string | null
     coverVideo?: string | null
@@ -114565,6 +114605,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114585,6 +114626,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     coverVideo?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114605,6 +114647,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     blurb?: NullableStringFieldUpdateOperationsInput | string | null
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     coverVideo?: NullableStringFieldUpdateOperationsInput | string | null

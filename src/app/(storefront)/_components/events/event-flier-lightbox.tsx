@@ -24,12 +24,27 @@ type Props = {
   closeLabel?: string;
 };
 
+type PanelProps = {
+  /** Accessible dialog title, rendered sr-only. */
+  title: string;
+  /** Extra classes for the dialog panel, so a template can apply its own tokens. */
+  panelClassName?: string;
+  closeLabel?: string;
+  /** The panel's content — an image, a video, etc. */
+  children: React.ReactNode;
+};
+
 /**
  * Single-image lightbox for viewing an event flier at full size. Built on the
  * shared shadcn Dialog (Radix) so focus trap, Escape-to-close, scroll lock,
  * aria-modal, and focus restore all come for free. Deliberately NOT a copy of
  * the multi-image gallery lightboxes elsewhere in the repo — no prev/next, no
  * thumbnails, one image only.
+ *
+ * The dialog panel itself lives in `EventFlierLightboxPanel`, exported
+ * separately below, because `EventFlierVideo` composes the same panel chrome
+ * (sized frame, close button, portal/scoping caveats) for its own expand
+ * dialog around a video instead of an image.
  */
 export function EventFlierLightbox({
   src,
@@ -56,21 +71,11 @@ export function EventFlierLightbox({
           {children}
         </button>
       </DialogTrigger>
-      <DialogContent
-        showCloseButton={false}
-        className={cn(
-          // Sized for a poster rather than the default form-dialog width.
-          "max-w-[92vw] gap-0 overflow-hidden p-0 sm:max-w-3xl",
-          // NOTE: Radix portals this content to document.body, outside any
-          // template-scoped CSS (e.g. the `pink` template sets `--radius: 0`
-          // and force-resets `border-radius` on descendants of `.pink`, which
-          // does not reach here). `panelClassName` is the escape hatch —
-          // merge it last so a template can re-apply its own tokens directly
-          // on the panel instead of relying on ancestor scoping.
-          panelClassName,
-        )}
+      <EventFlierLightboxPanel
+        title={`${alt} — enlarged flier`}
+        panelClassName={panelClassName}
+        closeLabel={closeLabel}
       >
-        <DialogTitle className="sr-only">{`${alt} — enlarged flier`}</DialogTitle>
         <Image
           src={src}
           alt={alt}
@@ -78,13 +83,45 @@ export function EventFlierLightbox({
           height={1600}
           className="h-auto max-h-[88vh] w-full object-contain"
         />
-        <DialogClose
-          aria-label={closeLabel}
-          className="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-full bg-black/50 p-2 text-white opacity-90 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
-        >
-          <XIcon className="size-4" aria-hidden="true" />
-        </DialogClose>
-      </DialogContent>
+      </EventFlierLightboxPanel>
     </Dialog>
+  );
+}
+
+/**
+ * The dialog panel chrome shared by `EventFlierLightbox` (image) and
+ * `EventFlierVideo` (video): sized frame, sr-only title, and close button.
+ * Must be rendered inside a `Dialog`.
+ */
+export function EventFlierLightboxPanel({
+  title,
+  panelClassName,
+  closeLabel = "Close",
+  children,
+}: PanelProps) {
+  return (
+    <DialogContent
+      showCloseButton={false}
+      className={cn(
+        // Sized for a poster rather than the default form-dialog width.
+        "max-w-[92vw] gap-0 overflow-hidden p-0 sm:max-w-3xl",
+        // NOTE: Radix portals this content to document.body, outside any
+        // template-scoped CSS (e.g. the `pink` template sets `--radius: 0`
+        // and force-resets `border-radius` on descendants of `.pink`, which
+        // does not reach here). `panelClassName` is the escape hatch —
+        // merge it last so a template can re-apply its own tokens directly
+        // on the panel instead of relying on ancestor scoping.
+        panelClassName,
+      )}
+    >
+      <DialogTitle className="sr-only">{title}</DialogTitle>
+      {children}
+      <DialogClose
+        aria-label={closeLabel}
+        className="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-full bg-black/50 p-2 text-white opacity-90 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
+      >
+        <XIcon className="size-4" aria-hidden="true" />
+      </DialogClose>
+    </DialogContent>
   );
 }

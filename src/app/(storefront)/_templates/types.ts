@@ -65,6 +65,14 @@ export type DefaultEventsPageTemplateProps = {
   timeZone: string;
 };
 
+export type DefaultEventPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  event: RouterOutputs["events"]["getBySlug"];
+  timeZone: string;
+  /** Computed server-side in the route via eventCutoff so templates never call Date.now(). */
+  isPast: boolean;
+};
+
 export type DefaultDonatePageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   /**

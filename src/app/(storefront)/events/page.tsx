@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
-import { buildEventSchema } from "~/lib/structured-data";
+import { buildEventSchema, buildItemListSchema } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
@@ -31,18 +31,25 @@ export default async function EventsPage() {
   // practice while the "events" flag is on.
   if (!t.EventsPage) notFound();
 
-  // Event entities only — deliberately no ItemList, unlike the blog and
-  // services index pages. Those list items each have their own detail URL, so
-  // the ItemList genuinely describes a set of navigable things. Events have no
-  // detail page, so every entry would carry this same /events path: a list that
-  // says "here are five items" and points all five at itself adds no
-  // navigational information and just duplicates the Event markup below it.
-  // Skip the blob entirely when there's nothing to describe.
+  // Each event now has its own detail page at /events/[slug], so — like the
+  // blog and services index pages — an ItemList genuinely describes a set of
+  // navigable things here. Emit it alongside the per-event Event entities,
+  // skipping the whole blob when there's nothing to list.
   const jsonLd =
     events.length > 0
-      ? events.map((event) =>
-          buildEventSchema(event, business, business.timeZone),
-        )
+      ? [
+          buildItemListSchema(
+            business,
+            events.map((event) => ({
+              name: event.name,
+              path: `/events/${event.slug}`,
+              image: event.coverImage,
+            })),
+          ),
+          ...events.map((event) =>
+            buildEventSchema(event, business, business.timeZone),
+          ),
+        ]
       : null;
 
   return (

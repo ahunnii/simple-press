@@ -378,6 +378,7 @@ function mapEvent(
   return {
     exportId: e.id,
     name: e.name,
+    slug: e.slug,
     blurb: e.blurb,
     coverImage: e.coverImage,
     coverVideo: e.coverVideo,
@@ -799,6 +800,7 @@ async function fetchEvents(businessId: string) {
     select: {
       id: true,
       name: true,
+      slug: true,
       blurb: true,
       coverImage: true,
       coverVideo: true,

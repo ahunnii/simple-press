@@ -383,6 +383,7 @@ export function createEvent(
   businessId: string,
   opts: {
     name?: string;
+    slug?: string;
     startAt?: Date;
     endAt?: Date | null;
     allDay?: boolean;
@@ -395,6 +396,11 @@ export function createEvent(
     data: {
       businessId,
       name: opts.name ?? "Test Event",
+      // Not derived from `name` — the default name ("Test Event") repeats
+      // across calls within a test, and slug is unique per (businessId,
+      // slug), so this always generates its own unique value like the
+      // product/variant factories above do for the same reason.
+      slug: opts.slug ?? uniq("event"),
       startAt: opts.startAt ?? new Date(),
       endAt: opts.endAt === undefined ? null : opts.endAt,
       allDay: opts.allDay ?? false,

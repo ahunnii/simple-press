@@ -339,6 +339,10 @@ const exportedShippingZoneSchema = z.object({
 const exportedEventSchema = z.object({
   exportId: z.string(),
   name: z.string(),
+  // Added after events shipped in the original format — MUST stay optional
+  // with a default so manifests exported before Event.slug existed still
+  // parse instead of hard-failing. See the `events` field comment below.
+  slug: z.string().nullable().optional().default(null),
   blurb: nullableString.optional(),
   coverImage: nullableString.optional(),
   coverVideo: nullableString.optional(),

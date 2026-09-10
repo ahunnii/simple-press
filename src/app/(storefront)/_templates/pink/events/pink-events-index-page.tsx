@@ -65,11 +65,11 @@ export async function PinkEventsIndexPage({
   const linkFallbackLabel = f["pink.events.list-link-fallback-label"] ?? "";
   const flierHint = f["pink.events.list-flier-hint"] ?? "";
 
-  // "Tap a flier" is a lie on a calendar where nobody has uploaded one, so the
-  // hint only appears once there is something to tap. A video flier plays
-  // inline with no lightbox, so it does not count towards that.
+  // The hint appears once there's anything tappable — photo fliers open the
+  // lightbox and video fliers now expand too.
   const hasAnyFlier = events.some(
-    (event) => !event.coverVideo && hasCustomImage(event.coverImage),
+    (event) =>
+      Boolean(event.coverVideo?.trim()) || hasCustomImage(event.coverImage),
   );
 
   const ctaImages = [

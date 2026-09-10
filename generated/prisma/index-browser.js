@@ -411,6 +411,7 @@ exports.Prisma.EventScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   name: 'name',
+  slug: 'slug',
   blurb: 'blurb',
   coverImage: 'coverImage',
   coverVideo: 'coverVideo',

@@ -13,18 +13,19 @@ import {
 } from "../shared/pink-image-fallback";
 
 /**
- * `EventFlierLightbox` renders through a Radix portal onto `document.body`,
- * which sits OUTSIDE the `.pink` wrapper `PinkLayout` puts the page in — so
- * every `var(--pink-*)` resolves to nothing and the template's
- * `border-radius: 0` reset (`.pink *`) never reaches the panel. Re-applying
- * the scope class on the panel is the same fix `pink-cart-drawer.tsx` uses for
- * its Sheet. `rounded-none` is still needed on the panel itself: the reset
- * only covers DESCENDANTS of `.pink`, and `DialogContent` ships `rounded-lg`.
+ * Both `EventFlierLightbox` (image path) and `EventFlierVideo` (video path)
+ * render their dialog through a Radix portal onto `document.body`, which sits
+ * OUTSIDE the `.pink` wrapper `PinkLayout` puts the page in — so every
+ * `var(--pink-*)` resolves to nothing and the template's `border-radius: 0`
+ * reset (`.pink *`) never reaches the panel. Re-applying the scope class on
+ * the panel is the same fix `pink-cart-drawer.tsx` uses for its Sheet.
+ * `rounded-none` is still needed on the panel itself: the reset only covers
+ * DESCENDANTS of `.pink`, and `DialogContent` ships `rounded-lg`.
  *
  * Owner theme presets (`resolveThemeVars`) are set as inline vars on the
  * layout root and can't follow the portal — the lightbox is a plain frame
- * around a full-bleed image, so it falls back to the base palette rather than
- * carrying a second copy of the theme.
+ * around a full-bleed image or video, so it falls back to the base palette
+ * rather than carrying a second copy of the theme.
  */
 const LIGHTBOX_PANEL_CLASS = `${PINK_SCOPE_CLASS} rounded-none border-[var(--pink-line)] bg-[var(--pink-white)] shadow-none`;
 
@@ -59,10 +60,12 @@ type Props = {
  * and the fallback carries no alt text of its own (the card's heading already
  * names the event).
  *
- * `videoSrc` takes the same frame down a third path: the video plays inline,
- * with no lightbox and no hover lift. Both of those say "tap me", and there is
- * nothing to tap — enlarging a moving poster buys the viewer nothing the card
- * isn't already showing them.
+ * `videoSrc` takes the same frame down a third path: the video plays inline
+ * (muted, autoplaying) and expands into the same lightbox panel as the image
+ * path, with native `<video controls>` there for sound and scrubbing. The
+ * hover lift stays too — it is once again a correct "tap me" affordance now
+ * that there is something to tap. `LIGHTBOX_PANEL_CLASS` is threaded through
+ * on both media paths for the portal-scoping reasons documented above.
  */
 export function PinkEventFlier({
   src,
@@ -81,17 +84,13 @@ export function PinkEventFlier({
 
   if (videoSrc) {
     return (
-      <div
-        // Callers hand every flier `pink-lift` for the image path's tap
-        // affordance; dropped here rather than at the call sites so the
-        // "video fliers aren't tappable" rule lives in one place.
-        className={frameClassName
-          .split(" ")
-          .filter((token) => token !== "pink-lift")
-          .join(" ")}
-        style={frameStyle}
-      >
-        <EventFlierVideo src={videoSrc} name={name} />
+      <div className={frameClassName} style={frameStyle}>
+        <EventFlierVideo
+          src={videoSrc}
+          name={name}
+          panelClassName={LIGHTBOX_PANEL_CLASS}
+          closeLabel="Close flier"
+        />
       </div>
     );
   }
@@ -119,7 +118,7 @@ export function PinkEventFlier({
           fill
           priority={priority}
           sizes={sizes}
-          className="object-cover"
+          className="object-contain"
         />
       </div>
     </EventFlierLightbox>

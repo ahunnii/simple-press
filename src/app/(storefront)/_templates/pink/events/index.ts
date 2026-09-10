@@ -48,7 +48,7 @@ const eventsListData: TemplateField[] = [
     key: "pink.events.list-flier-hint",
     label: "Flier Hint",
     description:
-      "Small line above the cards, shown only when at least one event has a photo flier uploaded (video fliers play in place and aren't tappable). Leave blank to hide it.",
+      "Small line above the cards, shown only when at least one event has a flier (photo or video) uploaded. Leave blank to hide it.",
     type: "text",
     page: "events",
     group: "events.list",
