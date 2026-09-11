@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Global (chrome) fields for the `pink` template — header, footer,
@@ -347,13 +348,14 @@ export const pinkGlobalSections: TemplateSection[] = [
     page: "global",
     title: "Header",
     description:
-      "The cart button at the right of the header. Nav labels and links live in Content → Navigation.",
+      "The cart button at the right of the header. Nav labels and links live in Content → Navigation. The donate button can be shown, hidden, or relabeled in Settings → Donations.",
     groupIds: ["global.header"],
     order: 1,
     hideable: false,
     links: [
       { label: "Navigation", href: "/admin/content/navigation" },
       { label: "Business info", href: "/admin/settings/general" },
+      SECTION_LINKS.donations,
     ],
   },
   {
@@ -361,13 +363,14 @@ export const pinkGlobalSections: TemplateSection[] = [
     page: "global",
     title: "Footer",
     description:
-      "Brand mark, blurb, link columns, and the bottom strip — on every page. Social icons appear automatically from the links in Content → Branding, and the bottom strip already includes your published policy pages.",
+      "Brand mark, blurb, link columns, and the bottom strip — on every page. Social icons appear automatically from the links in Content → Branding, and the bottom strip already includes your published policy pages. The footer's donate link can be shown, hidden, or relabeled in Settings → Donations.",
     groupIds: ["global.footer"],
     order: 2,
     hideable: false,
     links: [
       { label: "Branding", href: "/admin/content/branding" },
       { label: "Business info", href: "/admin/settings/general" },
+      SECTION_LINKS.donations,
     ],
   },
   {

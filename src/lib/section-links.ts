@@ -43,7 +43,7 @@ export const SECTION_LINKS = {
   donations: {
     label: "Donations",
     href: "/admin/settings/donations",
-    description: "Configure donation amounts, labels, and payment methods.",
+    description: "Configure donation amounts, labels, and payment methods, and show or hide the donate link in your header and footer.",
     featureKey: "donations",
   },
   testimonials: {
