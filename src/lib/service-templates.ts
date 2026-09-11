@@ -28,6 +28,7 @@ import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/defaul
 import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/services/service-pages/fields";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
+import { wealthServiceTemplateDefs } from "~/app/(storefront)/_templates/wealth/services/service-pages/fields";
 
 // ─── Core type ───────────────────────────────────────────────────────────────
 
@@ -105,6 +106,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   pollen: pollenServiceTemplateDefs,
   vii: viiServiceTemplateDefs,
   pink: pinkServiceTemplateDefs,
+  wealth: wealthServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────

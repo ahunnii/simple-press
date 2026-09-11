@@ -16,7 +16,8 @@ const AVAILABLE_FREE_TEMPLATES = [
 const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   bamboo: {
     label: "Bamboo",
-    subdomains: ["finallyresults"],
+    // "demo" is included so runtime QA can switch the demo business to this template.
+    subdomains: ["finallyresults", "demo"],
   },
   "happy-bamboo": {
     label: "Happy Bamboo",
@@ -64,6 +65,13 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   relocation: {
     label: "Handy Relocations",
     subdomains: ["handyrelocations", "demo"],
+  },
+  // 1:1 recreation of detroitcommunitywealth.org (Detroit Community Wealth
+  // Fund nonprofit). "demo" is included so runtime QA can switch the demo
+  // business to this template.
+  wealth: {
+    label: "Detroit Community Wealth Fund",
+    subdomains: ["detroitcommunitywealth", "demo"],
   },
 };
 

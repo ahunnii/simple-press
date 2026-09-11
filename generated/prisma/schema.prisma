@@ -194,7 +194,8 @@ model Business {
   // Storefront availability (owner-controlled, storefront only)
   maintenanceMode    Boolean @default(false)
   maintenanceVariant String  @default("maintenance") // "maintenance" | "coming_soon"
-  maintenanceMessage String?
+  maintenanceMessage Json?
+  maintenanceCta     Json?
 
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID
@@ -230,6 +231,15 @@ model Business {
   // Country allowlist for sales/shipping. "US" is always implicitly allowed.
   salesCountries String[] @default([]) // additional countries beyond US: subset of ["CA","MX"]
 
+  // Donations / Tips (feature-flagged; page + card lane gated separately —
+  // Venmo/CashApp handles work without a Stripe connection)
+  donationLabel         String  @default("donate") // "donate" | "tip" | "support"
+  donationPresetAmounts Json? // number[] of cents; null → lib defaults in src/lib/donations/constants.ts
+  venmoHandle           String? // stored without leading "@"
+  cashAppHandle         String? // stored without leading "$"
+  donationShowInHeader  Boolean @default(true)
+  donationShowInFooter  Boolean @default(true)
+
   // Relationships
   products              Product[]
   collections           Collection[]
@@ -262,6 +272,7 @@ model Business {
   quickBooksConnection  QuickBooksConnection?
   quickBooksInvoices    QuickBooksInvoice[]
   subscriptions         Subscription[]
+  donations             Donation[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -604,19 +615,22 @@ model ServiceItem {
 }
 
 /// An upcoming event the owner wants shoppers to know about — a market, a class,
-/// a make & take. Owners typically upload a flier as `coverImage`.
+/// a make & take. Owners typically upload a flier as `coverImage` or `coverVideo`.
 ///
-/// Deliberately NOT a commerce object: `priceLabel` is a display string, there is
-/// no RSVP/ticketing, and there is no detail page (hence no `slug`). The flier is
-/// opened full-size in a lightbox from the list.
+/// Deliberately NOT a commerce object: `priceLabel` is a display string and there
+/// is no RSVP/ticketing. The flier is opened full-size in a lightbox from the list;
+/// `slug` exists only as a stable per-business handle for linking, not as a
+/// commitment to a detail page.
 model Event {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   name       String
+  slug       String // derived from `name`, unique per business — see Service/Collection
   blurb      String? @db.Text
   coverImage String? // flier/cover URL — plain string, same convention as Service.image
+  coverVideo String? // uploaded video flier URL — renderers give this precedence over coverImage
 
   // Always stored as UTC instants; displayed through Business.timeZone via
   // src/lib/events/format.ts. `allDay` events are normalized on write to
@@ -642,6 +656,8 @@ model Event {
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
+  // Slug lookups are always business-scoped; this doubles as the uniqueness guard.
+  @@unique([businessId, slug])
   // Public storefront list.
   @@index([businessId, published, isArchived, startAt])
   // Admin list (both tabs) and the sitemap count.
@@ -898,7 +914,7 @@ model Order {
   orderNumber Int
 
   // Status
-  status            String @default("open") // open | completed | cancelled | refunded 
+  status            String @default("open") // open | completed | cancelled | refunded
   paymentStatus     String @default("pending") // pending | paid | failed | refunded
   fulfillmentStatus String @default("unfulfilled") // unfulfilled | fulfilled | partially_fulfilled
 
@@ -1894,4 +1910,30 @@ model Subscription {
   @@index([customerId]) // SetNull fan-out + account page (getMine)
   @@index([status, lastSyncedAt]) // cron sweep: open subscriptions, stalest first
   @@index([productId]) // SetNull fan-out
+}
+
+/// One-time donation/tip taken through Stripe Checkout on the connected
+/// account (metadata.kind = "donation"). Created ONLY by the webhook after a
+/// paid session — there is no pre-payment row, so `stripeSessionId @unique`
+/// doubles as the retry-idempotency key. Encrypted donor columns can never
+/// appear in a `where`; the admin list filters in memory (same trade-off as
+/// Subscription's encrypted snapshot).
+model Donation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  stripeSessionId       String  @unique // webhook idempotency key
+  stripePaymentIntentId String? // stored now so refund tracking can be added later without backfill
+
+  amountCents Int
+  currency    String @default("usd")
+
+  donorName  String? /// @encrypted
+  donorEmail String? /// @encrypted
+  message    String? @db.Text /// @encrypted
+
+  @@index([businessId, createdAt]) // admin list, newest first
 }

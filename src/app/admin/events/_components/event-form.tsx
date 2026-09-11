@@ -5,7 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ExternalLink, RotateCcw, Save, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  ImageIcon,
+  RotateCcw,
+  Save,
+  Trash2,
+  Video,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -48,7 +56,9 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
+import { VideoUploadFormField } from "~/components/inputs/video-upload-form-field";
 import { AdminFormMoreMenu } from "~/app/admin/_components/admin-form-more-menu";
 
 import { toWallClockInput } from "./event-wall-clock";
@@ -63,13 +73,14 @@ type Props = {
 };
 
 /**
- * The wire schema plus one client-only field: the not-yet-uploaded cover image.
+ * The wire schema plus two client-only fields: the not-yet-uploaded cover
+ * image and the not-yet-uploaded cover video.
  *
- * `coverImageFile` holds a `File` in RHF state and is uploaded in `onSubmit`,
- * NOT when the file is picked — an abandoned form must not leave an orphaned
- * object in S3. `coverImage` (the persisted URL) stays the field that crosses
- * the wire; `onSubmit` resolves one from the other. Same split as Collections'
- * `imageFile`/`imageUrl`.
+ * `coverImageFile` / `coverVideoFile` hold a `File` in RHF state and are
+ * uploaded in `onSubmit`, NOT when the file is picked — an abandoned form must
+ * not leave an orphaned object in S3. `coverImage` / `coverVideo` (the
+ * persisted URLs) stay the fields that cross the wire; `onSubmit` resolves one
+ * from the other. Same split as Collections' `imageFile`/`imageUrl`.
  *
  * Declared here rather than in `~/lib/validators/events` because `events.create`
  * / `events.update` must never see it, and `eventFormSchema` is a `ZodEffects`
@@ -78,10 +89,16 @@ type Props = {
  */
 const eventFormWithImageSchema = z.intersection(
   eventFormSchema,
-  z.object({ coverImageFile: z.instanceof(File).optional().nullable() }),
+  z.object({
+    coverImageFile: z.instanceof(File).optional().nullable(),
+    coverVideoFile: z.instanceof(File).optional().nullable(),
+  }),
 );
 
 type FormValues = z.input<typeof eventFormWithImageSchema>;
+
+/** Which of the event's single media slot the form is currently editing. */
+type MediaKind = "photo" | "video";
 
 function timeZoneLabel(timeZone: string): string {
   return COMMON_TIME_ZONES.find((z) => z.value === timeZone)?.label ?? timeZone;
@@ -92,6 +109,15 @@ export function EventForm({ event, timeZone }: Props) {
   const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const coverImageInputRef = useRef<HTMLInputElement | null>(null);
+  const coverVideoInputRef = useRef<HTMLInputElement | null>(null);
+  // Which media slot the Basic Information card is showing. Deliberately plain
+  // local state and NOT an RHF field: flipping the tab is a view change, and a
+  // bare tab switch must not mark the form dirty or reach the wire. `onSubmit`
+  // reads it to decide which slot to resolve; every place that resets the form
+  // re-derives it from the freshly known `coverVideo`.
+  const [mediaKind, setMediaKind] = useState<MediaKind>(
+    event?.coverVideo ? "video" : "photo",
+  );
   // URLs uploaded to S3 during the in-flight submit that aren't yet persisted
   // to the DB. Populated right before `create`/`update` is called (those are
   // fire-and-forget `mutate`, not `mutateAsync`) so the mutation's `onError`
@@ -107,6 +133,8 @@ export function EventForm({ event, timeZone }: Props) {
       blurb: event?.blurb ?? "",
       coverImage: event?.coverImage ?? undefined,
       coverImageFile: undefined,
+      coverVideo: event?.coverVideo ?? undefined,
+      coverVideoFile: undefined,
       startAt: event
         ? toWallClockInput(event.startAt, event.allDay, timeZone)
         : "",
@@ -131,6 +159,18 @@ export function EventForm({ event, timeZone }: Props) {
     route: "image",
     onError: (error) => {
       toast.error(error.message ?? "Image upload failed.");
+    },
+  });
+
+  // Separate route from `image` — the video route caps at 50MB and accepts
+  // `video/*` (see src/app/api/upload/route.ts). Its keys are `video-`
+  // prefixed, which `upload.discardUploads` already recognises, so failed
+  // saves clean up the same way image uploads do.
+  const videoUploader = useUploadFile({
+    api: "/api/upload",
+    route: "video",
+    onError: (error) => {
+      toast.error(error.message ?? "Video upload failed.");
     },
   });
 
@@ -181,11 +221,18 @@ export function EventForm({ event, timeZone }: Props) {
       pendingUploadUrlsRef.current = [];
       void utils.events.invalidate();
       if (coverImageInputRef.current) coverImageInputRef.current.value = "";
+      if (coverVideoInputRef.current) coverVideoInputRef.current.value = "";
+      // The save may have flipped which slot holds media (they're mutually
+      // exclusive — see onSubmit), so re-derive the visible tab from what came
+      // back rather than leaving it on whatever the owner last clicked.
+      setMediaKind(data.coverVideo ? "video" : "photo");
       form.reset({
         name: data.name,
         blurb: data.blurb ?? "",
         coverImage: data.coverImage ?? undefined,
         coverImageFile: undefined,
+        coverVideo: data.coverVideo ?? undefined,
+        coverVideoFile: undefined,
         startAt: toWallClockInput(data.startAt, data.allDay, timeZone),
         endAt:
           data.endAt != null
@@ -229,37 +276,81 @@ export function EventForm({ event, timeZone }: Props) {
     // otherwise a rejected save leaves orphans with nothing referencing them.
     const uploadedThisSubmit: string[] = [];
 
-    // Three states, and they are NOT interchangeable on the wire:
+    // An event has ONE media slot: a photo OR an uploaded video. Only the
+    // ACTIVE tab is resolved — a File sitting in the hidden tab's field is
+    // ignored rather than uploaded, so flipping tabs never moves media between
+    // columns (and never orphans an object in S3 either, since nothing that
+    // isn't saved gets uploaded).
+    //
+    // Per slot there are three states, and they are NOT interchangeable on the
+    // wire:
     //   File      → upload now, save the resulting URL
-    //   null      → the owner removed the image, save null to clear the column
-    //   undefined → untouched, keep whatever `coverImage` already holds
+    //   null      → the owner removed the media, save null to clear the column
+    //   undefined → untouched, keep whatever the column already holds
     //               (`undefined` reaches Prisma as "leave this column alone")
     let coverImage: string | null | undefined;
-    const coverImageFile = data.coverImageFile;
-    if (coverImageFile === null) {
-      coverImage = null;
-    } else if (coverImageFile instanceof File) {
-      try {
-        const response = await imageUploader.upload(coverImageFile);
-        const fileLocation =
-          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
-          "";
-        if (fileLocation) {
-          coverImage = fileLocation;
-          uploadedThisSubmit.push(fileLocation);
+    let coverVideo: string | null | undefined;
+
+    if (mediaKind === "photo") {
+      const coverImageFile = data.coverImageFile;
+      if (coverImageFile === null) {
+        coverImage = null;
+      } else if (coverImageFile instanceof File) {
+        try {
+          const response = await imageUploader.upload(coverImageFile);
+          const fileLocation =
+            (response.file.objectInfo.metadata?.pathname as
+              | string
+              | undefined) ?? "";
+          if (fileLocation) {
+            coverImage = fileLocation;
+            uploadedThisSubmit.push(fileLocation);
+          }
+        } catch {
+          toast.error("Failed to upload image.");
+          return;
         }
-      } catch {
-        toast.error("Failed to upload image.");
-        return;
+      } else {
+        coverImage = data.coverImage ?? undefined;
       }
+      // Mutual exclusion, but only when the active slot actually resolves to a
+      // URL: that's the one case where the event definitively has a photo, so
+      // any saved video must go. When the active slot is untouched (undefined)
+      // we send undefined for both — otherwise merely switching to the Photo
+      // tab and hitting Save would wipe a saved video. An explicit removal
+      // (null) still clears its own column, but leaves the other alone.
+      coverVideo = typeof coverImage === "string" ? null : undefined;
     } else {
-      coverImage = data.coverImage ?? undefined;
+      const coverVideoFile = data.coverVideoFile;
+      if (coverVideoFile === null) {
+        coverVideo = null;
+      } else if (coverVideoFile instanceof File) {
+        try {
+          const response = await videoUploader.upload(coverVideoFile);
+          const fileLocation =
+            (response.file.objectInfo.metadata?.pathname as
+              | string
+              | undefined) ?? "";
+          if (fileLocation) {
+            coverVideo = fileLocation;
+            uploadedThisSubmit.push(fileLocation);
+          }
+        } catch {
+          toast.error("Failed to upload video.");
+          return;
+        }
+      } else {
+        coverVideo = data.coverVideo ?? undefined;
+      }
+      // Mirror of the guard above, with the slots swapped.
+      coverImage = typeof coverVideo === "string" ? null : undefined;
     }
 
     const payload = {
       name: data.name,
       blurb: data.blurb,
       coverImage,
+      coverVideo,
       startAt: data.startAt,
       // Already undefined-or-valid by the time it gets here — the endAt
       // field's onChange (below) converts "" to undefined at input time,
@@ -334,18 +425,27 @@ export function EventForm({ event, timeZone }: Props) {
   const isSubmitting =
     createMutation.isPending ||
     updateMutation.isPending ||
-    imageUploader.isPending;
+    imageUploader.isPending ||
+    videoUploader.isPending;
   const isDeleting = deleteMutation.isPending;
-  // No local image state to fold in any more: the pending cover image is a
-  // real RHF field (`coverImageFile`), so picking or removing one already
-  // marks the form dirty.
+  // No local media state to fold in: the pending cover photo/video are real
+  // RHF fields (`coverImageFile` / `coverVideoFile`), so picking or removing
+  // one already marks the form dirty. `mediaKind` is intentionally excluded —
+  // a bare tab switch changes nothing that would be saved.
   const isDirty = form.formState.isDirty;
 
   useDirtyForm(isDirty);
 
   const handleReset = () => {
+    // `form.reset()` with no argument restores the current defaults, which
+    // clears `coverImageFile` / `coverVideoFile` back to undefined for us.
     form.reset();
     if (coverImageInputRef.current) coverImageInputRef.current.value = "";
+    if (coverVideoInputRef.current) coverVideoInputRef.current.value = "";
+    // Re-derive from the values just restored, not from the `event` prop — a
+    // successful update rewrites the form's defaults, and those (not the
+    // possibly stale prop) are what reset puts back.
+    setMediaKind(form.getValues("coverVideo") ? "video" : "photo");
   };
 
   const moreMenuItems: AdminFormMoreMenuItem[] = [
@@ -461,7 +561,7 @@ export function EventForm({ event, timeZone }: Props) {
                 <CardHeader>
                   <CardTitle>Basic Information</CardTitle>
                   <CardDescription>
-                    Event name, description, and flier image
+                    Event name, description, and flier photo or video
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -508,20 +608,72 @@ export function EventForm({ event, timeZone }: Props) {
                     )}
                   />
 
-                  {/* Cover image — held as a File and uploaded on Save (see
+                  {/* Cover media — one slot, photo OR video. Whichever is
+                      picked is held as a File and uploaded on Save (see
                       onSubmit), so abandoning the form can't orphan an S3
-                      object. `existingPreviewUrl` is watched, not read off the
-                      `event` prop, so the preview updates the moment a save
-                      lands rather than waiting on router.refresh(). */}
-                  <ImageUploadFormField
-                    form={form}
-                    name="coverImageFile"
-                    label="Flier or cover image"
-                    description="Shown on your events page — visitors can tap it to see it full size."
-                    existingPreviewUrl={form.watch("coverImage") ?? undefined}
-                    inputRef={coverImageInputRef}
-                    disabled={isSubmitting}
-                  />
+                      object. Each `existingPreviewUrl` is watched, not read
+                      off the `event` prop, so the preview updates the moment a
+                      save lands rather than waiting on router.refresh(). Only
+                      the active tab's field is rendered; the hidden one keeps
+                      its RHF value but onSubmit ignores it. */}
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label id="event-media-kind-label" className="text-sm">
+                        Flier or cover media
+                      </Label>
+                      <ToggleGroup
+                        type="single"
+                        variant="outline"
+                        value={mediaKind}
+                        onValueChange={(value) => {
+                          // Radix's `type="single"` ToggleGroup re-fires with
+                          // "" when the already-pressed item is clicked again
+                          // (it behaves like a toggle, not a radio) — ignore
+                          // that rather than clearing the selection to nothing.
+                          if (value === "photo" || value === "video") {
+                            setMediaKind(value);
+                          }
+                        }}
+                        aria-labelledby="event-media-kind-label"
+                        disabled={isSubmitting}
+                      >
+                        <ToggleGroupItem value="photo" aria-label="Use a photo">
+                          <ImageIcon className="mr-2 h-4 w-4" />
+                          Photo
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="video" aria-label="Use a video">
+                          <Video className="mr-2 h-4 w-4" />
+                          Video
+                        </ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
+
+                    {mediaKind === "photo" ? (
+                      <ImageUploadFormField
+                        form={form}
+                        name="coverImageFile"
+                        label="Flier or cover image"
+                        description="Shown on your events page — visitors can tap it to see it full size."
+                        existingPreviewUrl={
+                          form.watch("coverImage") ?? undefined
+                        }
+                        inputRef={coverImageInputRef}
+                        disabled={isSubmitting}
+                      />
+                    ) : (
+                      <VideoUploadFormField
+                        form={form}
+                        name="coverVideoFile"
+                        label="Video flier"
+                        description="MP4 or WebM recommended, up to 50MB."
+                        existingPreviewUrl={
+                          form.watch("coverVideo") ?? undefined
+                        }
+                        inputRef={coverVideoInputRef}
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 

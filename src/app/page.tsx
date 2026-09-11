@@ -15,6 +15,9 @@ import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
+import { getTemplate } from "./(storefront)/_templates/registry";
+import { BambooHomepage as AnimatedBambooHomepage } from "./(storefront)/_templates/animated-bamboo/homepage/bamboo-homepage";
+import { BambooLayout as AnimatedBambooLayout } from "./(storefront)/_templates/animated-bamboo/layout/bamboo-general-layout";
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
 import { BambooLayout } from "./(storefront)/_templates/bamboo/layout/bamboo-general-layout";
 import { BuildersHomepage } from "./(storefront)/_templates/builders/homepage/builders-homepage";
@@ -39,6 +42,8 @@ import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
 import { RelocationHomepage } from "./(storefront)/_templates/relocation/homepage/relocation-homepage";
 import { RelocationLayout } from "./(storefront)/_templates/relocation/layout/relocation-layout";
+import { WealthHomepage } from "./(storefront)/_templates/wealth/homepage/wealth-homepage";
+import { WealthLayout } from "./(storefront)/_templates/wealth/layout/wealth-layout";
 import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
 import { SledgeLayout } from "./(storefront)/_templates/sledge/layout/sledge-layout";
 import { ViiHomepage } from "./(storefront)/_templates/vii/homepage/vii-homepage";
@@ -75,10 +80,16 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
   }
 
   if (business.maintenance?.active) {
+    const m = business.maintenance;
+    const t = getTemplate(business.templateId);
+    if (m.scope === "business" && t.MaintenancePage) {
+      return <t.MaintenancePage business={business} maintenance={m} />;
+    }
     return (
       <MaintenanceScreen
-        variant={business.maintenance.variant}
-        message={business.maintenance.message}
+        variant={m.variant}
+        message={m.message}
+        cta={m.scope === "business" ? m.cta : null}
         businessName={business.name}
       />
     );
@@ -92,6 +103,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       elegant: ElegantHomePage,
       pollen: PollenHomepage,
       bamboo: BambooHomepage,
+      "animated-bamboo": AnimatedBambooHomepage,
       "happy-bamboo": HappyBambooHomepage,
       noise: NoiseHomepage,
       builders: BuildersHomepage,
@@ -100,6 +112,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       relocation: RelocationHomepage,
       sledge: SledgeHomepage,
       vii: ViiHomepage,
+      wealth: WealthHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
@@ -107,6 +120,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       "dark-trend": DarkTrendLayout,
       default: DefaultLayout,
       bamboo: BambooLayout,
+      "animated-bamboo": AnimatedBambooLayout,
       elegant: ElegantLayout,
       modern: ModernLayout,
       pollen: PollenLayout,
@@ -118,6 +132,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       relocation: RelocationLayout,
       sledge: SledgeLayout,
       vii: ViiLayout,
+      wealth: WealthLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

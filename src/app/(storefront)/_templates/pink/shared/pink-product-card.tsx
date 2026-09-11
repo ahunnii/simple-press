@@ -55,7 +55,7 @@ type PinkProductCardProps = {
 };
 
 /**
- * 4:5 image + corner badge + `border-top: 1px solid var(--pink-ink)` meta
+ * 4:5 image (object-contain over an ambient blurred backdrop) + corner badge + `border-top: 1px solid var(--pink-ink)` meta
  * row with name/material left, price right; optional add-to-basket button
  * below (design.md → Shared component inventory). Consumed by shop,
  * collections, and related-product grids — deliberately decoupled from the
@@ -104,14 +104,30 @@ export function PinkProductCard({
           style={{ aspectRatio: "4 / 5", background: "var(--pink-panel)" }}
         >
           {hasImage ? (
-            <Image
-              src={imageUrl!}
-              alt={imageAlt}
-              fill
-              priority={priority}
-              className="object-cover"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
+            <>
+              {/* Ambient backdrop: tiny blurred self-copy fills the 4:5
+                  letterbox as a glow over var(--pink-panel) (same recipe as
+                  happy-bamboo-product-card.tsx). scale-150 because blur-2xl's
+                  ~40px edge halo must land outside this ~300px-wide
+                  overflow-hidden frame; static, so it never fights the
+                  .pink-lift transform. */}
+              <Image
+                src={imageUrl!}
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="128px"
+                className="scale-150 object-cover opacity-90 blur-2xl saturate-125"
+              />
+              <Image
+                src={imageUrl!}
+                alt={imageAlt}
+                fill
+                priority={priority}
+                className="object-contain"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+            </>
           ) : (
             <PinkImageFallback surface="paper" className="absolute inset-0" />
           )}

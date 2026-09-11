@@ -51,8 +51,10 @@ function makeEvent(overrides: Partial<PinkEvent> = {}): PinkEvent {
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
     updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     name: `Test Event ${idCounter}`,
+    slug: `test-event-${idCounter}`,
     blurb: "Come say hi.",
     coverImage: null,
+    coverVideo: null,
     startAt: new Date("2026-08-15T23:00:00.000Z"),
     endAt: null,
     allDay: false,
@@ -183,6 +185,46 @@ describe("PinkUpcomingSection", () => {
     ).toBeInTheDocument();
   });
 
+  it("plays a coverVideo event inline: a <video> in the frame, tappable into a lightbox, and the stale coverImage never resurfaces", () => {
+    const events = [
+      makeEvent({
+        name: "Video Market",
+        // An event has one media slot and the video wins, so a stale
+        // coverImage alongside it must not resurface as a tappable flier.
+        coverImage: "https://storage.example.com/fliers/video-market.png",
+        coverVideo: "https://storage.example.com/fliers/video-market.mp4",
+      }),
+    ];
+    const { container } = render(
+      <PinkUpcomingSection {...baseProps} events={events} />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+    expect(video).toHaveAttribute(
+      "src",
+      "https://storage.example.com/fliers/video-market.mp4",
+    );
+
+    // The stale coverImage must never render as an <img> in the card.
+    expect(container.querySelector("img")).toBeNull();
+
+    // Video fliers are tappable now: a lightbox trigger, a mute toggle, and
+    // the WCAG 2.2.2 pause/play control — three buttons total on the card.
+    // The inline video autoplays muted, so the toggle starts out offering to
+    // unmute it.
+    expect(
+      screen.getByRole("button", { name: "View flier for Video Market" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Unmute video for Video Market" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Pause video for Video Market" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(3);
+  });
+
   it("renders the flier before the meta block in DOM order (image-top card, not the old 88px thumbnail row)", () => {
     const events = [
       makeEvent({
@@ -244,5 +286,13 @@ describe("PinkUpcomingSection", () => {
     // src/lib/events/format.test.ts. Just confirm something date-ish is
     // actually rendered as visible text inside the <time> element.
     expect(time?.textContent?.trim().length).toBeGreaterThan(0);
+  });
+
+  it("links the event name to its detail page, matching the /events listing card", () => {
+    const events = [makeEvent({ name: "Linked Market", slug: "linked-market" })];
+    render(<PinkUpcomingSection {...baseProps} events={events} />);
+
+    const link = screen.getByRole("link", { name: "Linked Market" });
+    expect(link).toHaveAttribute("href", "/events/linked-market");
   });
 });

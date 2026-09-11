@@ -40,6 +40,8 @@ type Props = {
    */
   questions: QuestionInput[];
   distances: DistanceInput[];
+  /** Every tab the calculator has — empty when tabs are off. */
+  tabs: { id: string; label: string; formula: string | null }[];
   formula: string;
   showEstimateToCustomer: boolean;
   /** Off = the figure only ever reaches the visitor by email, never on screen. */
@@ -84,6 +86,7 @@ const UNANSWERED = "__unanswered__";
 export function CalculatorTestPanel({
   questions,
   distances,
+  tabs,
   formula,
   showEstimateToCustomer,
   showEstimateOnScreen,
@@ -91,6 +94,39 @@ export function CalculatorTestPanel({
   rangePaddingPercent,
   thankYouMessage,
 }: Props) {
+  // A plain `useState` seed rather than a derived value: the owner may
+  // deliberately switch tabs mid-test, and that choice should survive
+  // re-renders caused by editing elsewhere in the builder. `resolvedTabId`
+  // below is what falls back to a valid tab if this one goes stale (removed,
+  // or tabs turned off entirely) — this state is only ever the owner's LAST
+  // click, never re-derived from it.
+  const [selectedTabId, setSelectedTabId] = useState<string | null>(
+    tabs[0]?.id ?? null,
+  );
+
+  // Fails closed the same way `resolveVisibility` does for a dangling id: no
+  // tabs → `null` (pre-tabs behavior); a selection that no longer exists
+  // (the owner removed or renamed away from it while this panel was mounted)
+  // → the first available tab, rather than silently pricing against a tab
+  // that is no longer on screen.
+  const resolvedTabId =
+    tabs.length === 0
+      ? null
+      : (tabs.find((tab) => tab.id === selectedTabId)?.id ??
+        tabs[0]?.id ??
+        null);
+  const activeTab = tabs.find((tab) => tab.id === resolvedTabId);
+  // `undefined`, not `""`, for a blank-but-present override: `formula ?? ""`
+  // has already ruled out `null`/`undefined` two lines down, so an override
+  // that trims to nothing has to become `undefined` itself to actually fall
+  // through to the shared formula rather than evaluate as an empty string.
+  const rawTabFormula = activeTab?.formula?.trim();
+  const activeTabFormula = rawTabFormula === "" ? undefined : rawTabFormula;
+  // The tab's override prices the tab it applies to; everything else still
+  // falls back to the shared root formula — same rule `computeQuote` applies
+  // server-side.
+  const effectiveFormula = activeTabFormula ?? formula;
+
   const [choiceAnswers, setChoiceAnswers] = useState<Record<string, string>>(
     {},
   );
@@ -120,14 +156,18 @@ export function CalculatorTestPanel({
     ...question,
     showIf: question.showIf?.questionId ? question.showIf : null,
   }));
-  const visibility = resolveVisibility(visibilityQuestions, (questionId) => {
-    const target = questions.find((question) => question.id === questionId);
-    if (!target) return undefined;
-    if (target.type !== "choice" && target.type !== "dropdown") {
-      return undefined;
-    }
-    return choiceAnswers[questionId];
-  });
+  const visibility = resolveVisibility(
+    visibilityQuestions,
+    (questionId) => {
+      const target = questions.find((question) => question.id === questionId);
+      if (!target) return undefined;
+      if (target.type !== "choice" && target.type !== "dropdown") {
+        return undefined;
+      }
+      return choiceAnswers[questionId];
+    },
+    resolvedTabId,
+  );
 
   const variables: Record<string, number> = {};
 
@@ -182,7 +222,7 @@ export function CalculatorTestPanel({
       distanceAnswers[distance.id] ?? asFinite(distance.hiddenDefault, 0);
   }
 
-  const trimmedFormula = formula.trim();
+  const trimmedFormula = effectiveFormula.trim();
   const evaluated =
     trimmedFormula === "" ? null : evaluateFormula(trimmedFormula, variables);
 
@@ -228,6 +268,30 @@ export function CalculatorTestPanel({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {tabs.length > 0 && (
+          <div className="space-y-1.5">
+            <Label htmlFor="test-panel-tab">Tab</Label>
+            <Select
+              value={resolvedTabId ?? undefined}
+              onValueChange={setSelectedTabId}
+            >
+              <SelectTrigger id="test-panel-tab">
+                <SelectValue placeholder="Pick a tab" />
+              </SelectTrigger>
+              <SelectContent>
+                {tabs.map((tab) => (
+                  <SelectItem key={tab.id} value={tab.id}>
+                    {tab.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-muted-foreground text-xs">
+              {`Pricing with: ${activeTabFormula ? "Tab formula" : "Shared formula"}`}
+            </p>
+          </div>
+        )}
+
         {!hasSamples ? (
           <p className="text-muted-foreground text-sm">
             Add a priced question — choice, multi-select, dropdown or number —

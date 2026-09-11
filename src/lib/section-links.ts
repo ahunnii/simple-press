@@ -40,6 +40,12 @@ export const SECTION_LINKS = {
     description: "Group products into collections and choose what they show.",
     featureKey: "collections",
   },
+  donations: {
+    label: "Donations",
+    href: "/admin/settings/donations",
+    description: "Configure donation amounts, labels, and payment methods, and show or hide the donate link in your header and footer.",
+    featureKey: "donations",
+  },
   testimonials: {
     label: "Testimonials",
     href: "/admin/testimonials",

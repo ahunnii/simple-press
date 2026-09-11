@@ -402,6 +402,19 @@ export const quoteCalculatorRouter = createTRPCRouter({
    * `mode: "preview"` makes `computeQuote` lenient: a half-answered form is the
    * normal case on this path, so missing required answers fall to their hidden
    * defaults and an unknown ZIP is never fatal. `submit` stays strict.
+   *
+   * That leniency extends to the TAB, and it has to. A visitor who has not
+   * picked one yet is the ordinary opening state of a forked calculator, so
+   * preview never fails on `unknown-tab` the way `submit` does: with no usable
+   * tab it prices only the questions that belong to every tab, using the ROOT
+   * formula. That can only under-ask, never over-ask — a tab-restricted
+   * question contributes its owner-configured `hiddenDefault` rather than a
+   * guessed answer — and it keeps a running estimate that updates rather than
+   * one that sits blank until the first click. The tab the visitor IS on is
+   * passed straight through, so once they pick one the panel immediately shows
+   * that half's own formula and questions; without it, a calculator whose tabs
+   * override the formula would show a number from the wrong half of the
+   * business all the way to the last screen.
    */
   previewEstimate: publicProcedure
     // Throttle FIRST, for the same reason as `lookupZip` above: `featureGate`
@@ -508,6 +521,13 @@ export const quoteCalculatorRouter = createTRPCRouter({
             // worse, prices one that will be rejected). Same expression as
             // `submit`; see the note there.
             today: zonedCalendarDate(new Date(), business.timeZone),
+            // The tab the visitor is standing on, resolved against the STORED
+            // definition inside `computeQuote` — this endpoint is handed an id
+            // and never a formula. `null` before they have picked one, which
+            // preview treats as "price the unrestricted questions with the
+            // root formula" rather than as a failure; see the tab note in the
+            // docblock above.
+            tabId: input.tabId ?? null,
           },
         );
 

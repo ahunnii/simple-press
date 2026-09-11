@@ -25,6 +25,15 @@ export type QuoteReviewStepProps = {
   onEditQuestion: (questionId: string) => void;
   onEditContact: () => void;
   uid: string;
+  /**
+   * The tab the visitor picked, when this calculator has any — `null` (or
+   * omitted) for a tabs-less calculator, which renders no row for it at all
+   * rather than a section with nothing under it.
+   */
+  tab?: { prompt: string; label: string } | null;
+  /** Edit → the tabs step. Required whenever `tab` is set; there is no tabs
+   *  step to jump back to otherwise. */
+  onEditTab?: () => void;
 };
 
 /**
@@ -49,9 +58,15 @@ export function QuoteReviewStep({
   onEditQuestion,
   onEditContact,
   uid,
+  tab = null,
+  onEditTab,
 }: QuoteReviewStepProps) {
   const density = useQuoteDensity();
   const phone = contact.phone.trim();
+  // "Type" is the fallback term, not the fallback VALUE: `tab.label` (the
+  // owner-written tab name) is never blank by the time it reaches here, but
+  // `tabsPrompt` is optional and frequently left empty.
+  const tabTerm = tab ? tab.prompt.trim() || "Type" : null;
 
   return (
     <div className={density.body}>
@@ -82,6 +97,28 @@ export function QuoteReviewStep({
       )}
 
       <div className="space-y-5">
+        {/* The tab, when there is one, is what decided which of the sections
+            below even exist — it goes first for the same reason the tabs
+            step itself comes before every screen. */}
+        {tab && tabTerm && onEditTab && (
+          <section aria-labelledby={`${uid}-review-tab`}>
+            <h4
+              id={`${uid}-review-tab`}
+              className="text-muted-foreground sr-only mb-1 text-xs font-semibold tracking-wide uppercase"
+            >
+              {tabTerm}
+            </h4>
+            <dl className="divide-input/60 divide-y">
+              <ReviewRow
+                term={tabTerm}
+                value={tab.label}
+                editLabel={`Edit ${tabTerm}`}
+                onEdit={onEditTab}
+              />
+            </dl>
+          </section>
+        )}
+
         {screens.map((screen) => {
           // `flatMap` rather than `map().filter()` so the narrowing is
           // structural: a type predicate here would have to name the row shape

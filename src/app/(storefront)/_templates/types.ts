@@ -1,4 +1,5 @@
 import type { Session } from "~/server/better-auth/config";
+import type { StorefrontMaintenance } from "~/lib/maintenance";
 import type { RouterOutputs } from "~/trpc/react";
 
 export type DefaultHomepageTemplateProps = {
@@ -65,6 +66,25 @@ export type DefaultEventsPageTemplateProps = {
   timeZone: string;
 };
 
+export type DefaultEventPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  event: RouterOutputs["events"]["getBySlug"];
+  timeZone: string;
+  /** Computed server-side in the route via eventCutoff so templates never call Date.now(). */
+  isPast: boolean;
+};
+
+export type DefaultDonatePageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  /**
+   * `?status=success` from the Stripe Checkout return URL — read server-side
+   * in `donate/page.tsx` and passed down rather than read via
+   * `useSearchParams` client-side, matching `/subscribe`'s pattern of
+   * resolving search params on the server page.
+   */
+  status?: string;
+};
+
 export type DefaultVideosPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   videos: RouterOutputs["videos"]["getPublic"];
@@ -129,4 +149,9 @@ export type AccountAddressBookPageProps = {
 export type AccountPreferencesPageProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   customer: RouterOutputs["customer"]["getMyProfile"];
+};
+
+export type MaintenancePageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
+  maintenance: Extract<StorefrontMaintenance, { scope: "business" }>;
 };

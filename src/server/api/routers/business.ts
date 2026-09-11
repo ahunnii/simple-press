@@ -1,4 +1,4 @@
-import type { Prisma } from "generated/prisma";
+import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -8,6 +8,9 @@ import { TEMPLATES } from "~/lib/constants";
 import { emailOverridesSchema } from "~/lib/email/customization";
 import {
   getPlatformMaintenance,
+  maintenanceCtaSchema,
+  maintenanceMessageSchema,
+  normalizeMaintenanceMessage,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
@@ -42,6 +45,13 @@ export const businessRouter = createTRPCRouter({
         id: true,
         stripeAccountId: true,
         stripeAutoTaxEnabled: true,
+        stripeChargesEnabled: true,
+        donationLabel: true,
+        donationPresetAmounts: true,
+        venmoHandle: true,
+        cashAppHandle: true,
+        donationShowInHeader: true,
+        donationShowInFooter: true,
         name: true,
         templateId: true,
         businessAddress: true,
@@ -143,6 +153,13 @@ export const businessRouter = createTRPCRouter({
         businessHours: true,
         timeZone: true,
         stripeAccountId: true,
+        stripeChargesEnabled: true,
+        donationLabel: true,
+        donationPresetAmounts: true,
+        venmoHandle: true,
+        cashAppHandle: true,
+        donationShowInHeader: true,
+        donationShowInFooter: true,
         supportEmail: true,
         phoneNumber: true,
         subdomain: true,
@@ -166,6 +183,7 @@ export const businessRouter = createTRPCRouter({
         maintenanceMode: true,
         maintenanceVariant: true,
         maintenanceMessage: true,
+        maintenanceCta: true,
         products: {
           where: { published: true },
           include: {
@@ -210,6 +228,7 @@ export const businessRouter = createTRPCRouter({
       maintenanceMode,
       maintenanceVariant,
       maintenanceMessage,
+      maintenanceCta,
       ...rest
     } = businessData;
     const { siteContent, ...restWithoutSiteContent } = rest;
@@ -224,6 +243,9 @@ export const businessRouter = createTRPCRouter({
         maintenanceMode,
         maintenanceVariant,
         maintenanceMessage: maintenanceMessage ?? null,
+        maintenanceCta: maintenanceCta ?? null,
+        phoneNumber: businessData.phoneNumber ?? null,
+        supportEmail: businessData.supportEmail ?? null,
       },
     });
 
@@ -708,16 +730,58 @@ export const businessRouter = createTRPCRouter({
       z.object({
         maintenanceMode: z.boolean(),
         maintenanceVariant: z.enum(["maintenance", "coming_soon"]),
-        maintenanceMessage: z.string().max(500).optional(),
+        maintenanceMessage: maintenanceMessageSchema.nullish(),
+        maintenanceCta: maintenanceCtaSchema.nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const normalizedMessage = normalizeMaintenanceMessage(
+        input.maintenanceMessage ?? null,
+      );
+
+      if (
+        input.maintenanceCta?.type === "call" &&
+        !input.maintenanceCta.value
+      ) {
+        const business = await ctx.db.business.findUnique({
+          where: { id: ctx.businessId },
+          select: { phoneNumber: true },
+        });
+        if (!business?.phoneNumber?.trim()) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Add a phone number in Settings or enter one here",
+          });
+        }
+      }
+
+      if (
+        input.maintenanceCta?.type === "email" &&
+        !input.maintenanceCta.value
+      ) {
+        const business = await ctx.db.business.findUnique({
+          where: { id: ctx.businessId },
+          select: { supportEmail: true },
+        });
+        if (!business?.supportEmail?.trim()) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Add a support email in Settings or enter one here",
+          });
+        }
+      }
+
       await ctx.db.business.update({
         where: { id: ctx.businessId },
         data: {
           maintenanceMode: input.maintenanceMode,
           maintenanceVariant: input.maintenanceVariant,
-          maintenanceMessage: input.maintenanceMessage ?? null,
+          maintenanceMessage: normalizedMessage
+            ? (normalizedMessage as Prisma.InputJsonValue)
+            : Prisma.DbNull,
+          maintenanceCta: input.maintenanceCta
+            ? (input.maintenanceCta as Prisma.InputJsonValue)
+            : Prisma.DbNull,
         },
       });
       return { success: true };
@@ -730,6 +794,9 @@ export const businessRouter = createTRPCRouter({
         maintenanceMode: true,
         maintenanceVariant: true,
         maintenanceMessage: true,
+        maintenanceCta: true,
+        phoneNumber: true,
+        supportEmail: true,
       },
     });
     if (!business) {

@@ -25,8 +25,8 @@ export function BambooCartItem({ item }: Props) {
   } = item;
 
   return (
-    <div className="border-border bg-card flex gap-4 rounded-lg border p-4">
-      <div className="bg-secondary relative size-20 shrink-0 overflow-hidden rounded-md sm:size-24">
+    <div className="bg-card flex gap-4 rounded-2xl border border-[var(--bam-hairline)] p-4">
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-md bg-[var(--bam-cream-deep)] sm:size-24">
         <Image
           src={imageUrl ?? "/placeholder.svg"}
           alt={productName}
@@ -38,9 +38,9 @@ export function BambooCartItem({ item }: Props) {
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h2 className="text-card-foreground font-heading text-sm font-semibold sm:text-base">
+            <h3 className="text-card-foreground font-heading text-sm font-semibold sm:text-base">
               {productName}
-            </h2>
+            </h3>
             {variantName && (
               <p className="text-muted-foreground text-xs sm:text-sm">
                 {variantName}
@@ -61,11 +61,11 @@ export function BambooCartItem({ item }: Props) {
           </Button>
         </div>
         <div className="mt-auto flex items-center justify-between">
-          <div className="border-border flex items-center gap-1 rounded-lg border">
+          <div className="flex items-center gap-1 rounded-full border border-[var(--bam-hairline)]">
             <Button
               variant="ghost"
               size="icon"
-              className="size-11"
+              className="rounded-full text-[var(--bam-forest)] hover:bg-[var(--bam-cream-deep)] hover:text-[var(--bam-forest-deep)] size-11"
               onClick={() => updateQuantity(productId, variantId, quantity - 1)}
               disabled={quantity <= 1}
               aria-label={`Decrease quantity of ${productName}`}
@@ -82,7 +82,7 @@ export function BambooCartItem({ item }: Props) {
             <Button
               variant="ghost"
               size="icon"
-              className="size-11"
+              className="rounded-full text-[var(--bam-forest)] hover:bg-[var(--bam-cream-deep)] hover:text-[var(--bam-forest-deep)] size-11"
               onClick={() => updateQuantity(productId, variantId, quantity + 1)}
               aria-label={`Increase quantity of ${productName}`}
             >

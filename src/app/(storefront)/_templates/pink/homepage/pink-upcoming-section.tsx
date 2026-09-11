@@ -140,6 +140,7 @@ export function PinkUpcomingSection({
                   >
                     <PinkEventFlier
                       src={event.coverImage}
+                      videoSrc={event.coverVideo}
                       name={event.name}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="pink-lift"
@@ -168,7 +169,12 @@ export function PinkUpcomingSection({
                         className="pink-display text-[1.0625rem] leading-[1.25] font-semibold tracking-[-0.015em]"
                         style={{ color: "var(--pink-ink)" }}
                       >
-                        {event.name}
+                        <Link
+                          href={`/events/${event.slug}`}
+                          className="hover:underline underline-offset-4"
+                        >
+                          {event.name}
+                        </Link>
                       </h3>
 
                       {event.location && (

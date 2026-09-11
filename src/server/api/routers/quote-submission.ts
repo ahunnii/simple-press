@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { QuoteComputationErrorCode } from "~/lib/quote/evaluate";
 import type { QuoteStatusDb } from "~/lib/validators/quote-calculator";
 import { zonedCalendarDate } from "~/lib/calendar-date";
 import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
@@ -41,6 +42,43 @@ import {
 const GENERIC_FAILURE_MESSAGE =
   "We couldn't calculate your estimate. Please try again or contact us directly.";
 
+/**
+ * The half of `computeQuote`'s failure surface that comes back to the browser
+ * as a VALUE instead of a throw — the failures the visitor can actually do
+ * something about.
+ *
+ * Written as an `Exclude` rather than a hand-listed union on purpose.
+ * `formula-failed` is the ONE code the visitor cannot act on (it means the
+ * stored definition drifted out from under the schema that accepted it), so it
+ * is the one code subtracted here; every other member of
+ * `QuoteComputationErrorCode` is visitor-fixable by construction. A code added
+ * to that union later therefore reaches this return — and, through
+ * `RouterOutputs`, the runner's `QuoteSubmitFailure` — without anyone having to
+ * remember to widen a second list. `unknown-tab` is exactly that case: it
+ * joined the union when tabs shipped and needed no edit here beyond this note.
+ * The enumerated alternative fails silently in the worst possible way: a new
+ * code would be inferred as unreachable by the client's exhaustive handling and
+ * the visitor would land in the generic banner with nothing to click.
+ */
+type VisitorFixableQuoteError = {
+  code: Exclude<QuoteComputationErrorCode, "formula-failed">;
+  message: string;
+  /**
+   * The question to walk the visitor back to. Present for the four codes that
+   * name one; absent for `unknown-tab`, because the tab fork happens before the
+   * first question and there is no field to focus. The runner's fallback for a
+   * `questionId`-less failure — show the message where the visitor is standing
+   * — is the right one here: the switcher is at the top of the flow, and the
+   * message ("Choose an option to continue") reads as an instruction rather
+   * than an apology.
+   *
+   * Spread in conditionally rather than written as `questionId: undefined`, so
+   * the wire shape of a failure that has no question is byte-for-byte what it
+   * was before tabs existed.
+   */
+  questionId?: string;
+};
+
 /** Hard ceiling on the rows `list` ships to the admin inbox. See the comment there. */
 const QUOTE_INBOX_MAX_ROWS = 1000;
 
@@ -68,10 +106,11 @@ export const quoteSubmissionRouter = createTRPCRouter({
    *
    * Returns a DISCRIMINATED UNION, and only for the last of those steps:
    * everything up to `computeQuote` (rate limit, captcha, tenant, the
-   * published gate, `requirePhone`) still throws, because none of it names a
-   * question the visitor could go back and fix. The four computation failures
-   * that DO name one come back as `{ success: false, error }` instead — see
-   * the note at the failure branch below.
+   * published gate, `requirePhone`) still throws, because none of it points at
+   * something the visitor could go back and change. The computation failures
+   * that DO come back as `{ success: false, error }` instead — four naming the
+   * question at fault, plus `unknown-tab` naming the tab switcher. See
+   * `VisitorFixableQuoteError` and the note at the failure branch below.
    */
   submit: publicProcedure
     // 1. Throttle ─────────────────────────────────────────────────────────────
@@ -222,16 +261,36 @@ export const quoteSubmissionRouter = createTRPCRouter({
           // `computeQuote` skips them entirely when it is undefined, so this
           // argument is not optional in production, it is the feature.
           today: zonedCalendarDate(new Date(), business.timeZone),
+          // The tab the visitor was standing on when they hit send, as a bare
+          // id. Resolved against the STORED definition inside `computeQuote`,
+          // never trusted as a formula: the projection the browser was handed
+          // carries no formula at all, so the worst a crafted value can do is
+          // select a tab the owner published — and an id matching none of them
+          // fails `unknown-tab` rather than silently defaulting to the first
+          // one, which would price a commercial job at residential rates and
+          // tell nobody.
+          //
+          // `null` (a calculator with no tabs, or an embed rendered before
+          // tabs existed) is the same as omitting it: a tab-less definition
+          // ignores this option outright.
+          tabId: input.tabId ?? null,
         },
       );
 
       if (!result.ok) {
+        // Destructured before the discriminant test rather than read through
+        // `result.error.*` at each use, because the narrow below has to be
+        // airtight: `code` is what gets assigned to
+        // `VisitorFixableQuoteError["code"]`, and a plain local const is the
+        // one form of narrowing nothing downstream can invalidate.
+        const { code, message, questionId } = result.error;
+
         // `formula-failed` is DEFINITION drift surfacing at runtime — a parse
         // error or a variable no question defines. The visitor did nothing
         // wrong and can do nothing about it, so they get the generic apology
         // and we get a Sentry issue. Every other code (missing-required /
-        // unknown-option / bad-answer / unknown-zip) is about THIS submission
-        // and carries a message written for the visitor.
+        // unknown-option / bad-answer / unknown-zip / unknown-tab) is about
+        // THIS submission and carries a message written for the visitor.
         //
         // Note what is NOT here: a formula that fails on the visitor's own
         // numbers (divide by a zero they typed, an overflow to Infinity) comes
@@ -239,8 +298,8 @@ export const quoteSubmissionRouter = createTRPCRouter({
         // destroy a real lead over a price we can compute by hand later. See
         // `estimateFailure` below and `VALUE_LEVEL_FORMULA_CODES` in
         // `src/lib/quote/evaluate.ts`.
-        if (result.error.code === "formula-failed") {
-          Sentry.captureException(new Error(result.error.message), {
+        if (code === "formula-failed") {
+          Sentry.captureException(new Error(message), {
             tags: { feature: "quote", step: "evaluate" },
             extra: { calculatorId: calculator.id, businessId: business.id },
           });
@@ -250,8 +309,10 @@ export const quoteSubmissionRouter = createTRPCRouter({
           });
         }
 
-        // The remaining four codes are VISITOR-FIXABLE and each names the one
-        // question at fault, so they come back as a VALUE rather than a throw.
+        // The remaining codes are VISITOR-FIXABLE, so they come back as a
+        // VALUE rather than a throw. Four of them name the one question at
+        // fault; `unknown-tab` names none, because the fork it is about happens
+        // before the first question — see `VisitorFixableQuoteError`.
         //
         // Why not a TRPCError: tRPC does not serialize an error's `cause`
         // without a global `errorFormatter`, so a thrown BAD_REQUEST reaches
@@ -268,16 +329,16 @@ export const quoteSubmissionRouter = createTRPCRouter({
         // /siteverify above either way — v3 tokens burn on verification, not on
         // success — and the runner mints a fresh one per attempt, so returning
         // instead of throwing neither preserves nor reuses one.
-        return {
-          success: false as const,
-          error: {
-            code: result.error.code,
-            message: result.error.message,
-            ...(result.error.questionId !== undefined
-              ? { questionId: result.error.questionId }
-              : {}),
-          },
+        //
+        // Annotated rather than inferred so the set of codes that may travel
+        // this way is a checked contract and not an accident of narrowing —
+        // see `VisitorFixableQuoteError`.
+        const error: VisitorFixableQuoteError = {
+          code,
+          message,
+          ...(questionId !== undefined ? { questionId } : {}),
         };
+        return { success: false as const, error };
       }
 
       // The answers were all accepted but the formula could not put a number on
@@ -300,7 +361,13 @@ export const quoteSubmissionRouter = createTRPCRouter({
             extra: {
               calculatorId: calculator.id,
               businessId: business.id,
-              formula: definition.formula,
+              // `result.formula`, NOT `definition.formula`: on a tabbed
+              // calculator the tab may override the root formula, and this
+              // event exists so a developer can read the expression that
+              // actually produced nothing. The root would send them looking at
+              // a formula that never ran. `tabId` says which override it was.
+              formula: result.formula,
+              tabId: result.tab?.id ?? null,
               variables: result.variables,
             },
           },
@@ -329,14 +396,61 @@ export const quoteSubmissionRouter = createTRPCRouter({
           estimateCents,
           // Written even when the estimate is null — it is the ONLY record of
           // why: the formula plus the exact variable values that broke it.
+          //
+          // `result.formula`, NOT `definition.formula`. On a tabbed calculator
+          // the active tab may override the root formula, and a snapshot that
+          // records the root for a quote priced by an override answers "why is
+          // this $3,264?" with an expression that never ran — the single
+          // failure mode this column exists to prevent. `computeQuote` returns
+          // the formula it actually evaluated precisely so nothing out here
+          // has to re-derive (i.e. re-implement) the tab lookup.
+          //
+          // `tab` is spread in only when there was one, so a row from a
+          // tab-less calculator carries exactly the JSON it always has —
+          // matching `quoteFormulaSnapshotSchema`, where `tab` is optional so
+          // that every submission stored before tabs existed still parses.
           formulaSnapshot: {
-            formula: definition.formula,
+            formula: result.formula,
             variables: result.variables,
+            ...(result.tab ? { tab: result.tab } : {}),
           } as Prisma.InputJsonValue,
           showEstimateToCustomer: definition.showEstimateToCustomer,
         },
         select: { id: true },
       });
+
+      /**
+       * The tab choice, rendered as one more Q&A row for the two emails.
+       *
+       * On a forked calculator this is the first thing the visitor picked and
+       * the thing that decided everything after it — which questions they were
+       * asked, and which formula priced them — so an email that lists their
+       * answers without it is missing the most load-bearing one. ("$4,120" over
+       * a list that never says "Commercial" is how an owner mis-reads a lead.)
+       *
+       * Deliberately NOT pushed into the persisted `answers` snapshot: that
+       * column is validated row-by-row against `quoteSubmissionAnswerSchema`,
+       * whose `type` is a hard enum of QUESTION types, and a tab is not a
+       * question — there is no member it could honestly claim, and inventing
+       * one would break every existing consumer's exhaustive switch. The
+       * durable record of the tab is `formulaSnapshot.tab`, written above.
+       *
+       * Title: the owner's own switcher prompt when they wrote one ("What kind
+       * of move is this?"), falling back to "Type". `tabsPrompt` defaults to
+       * empty and is free text, so an owner who never filled it in — the common
+       * case, since the tab labels usually speak for themselves — would
+       * otherwise get a blank label sitting above a real answer.
+       *
+       * `hidden: false` because the owner's template filters on that flag; see
+       * the note on `visibleRows` just below.
+       */
+      const tabRow = result.tab
+        ? {
+            title: definition.tabsPrompt.trim() || "Type",
+            display: result.tab.label,
+            hidden: false,
+          }
+        : null;
 
       // Rows the CUSTOMER may see. Two exclusions, same reasoning: a
       // branched-away question ("Do you need packing? —") and an optional
@@ -346,14 +460,26 @@ export const quoteSubmissionRouter = createTRPCRouter({
       // `hidden: false` and the unanswered sentinel still on `display` — so
       // the `hidden` check alone does not catch them.
       //
-      // The owner's copy keeps every row (see `answers` on the notification
-      // below): an owner auditing a price needs to know a question was skipped
-      // by branching rather than left blank.
-      const visibleRows = result.answerSnapshots
-        .filter(
-          (row) => row.hidden === false && row.display !== UNANSWERED_DISPLAY,
-        )
-        .map((row) => ({ title: row.title, display: row.display }));
+      // The owner's notification is handed every row, hidden ones included,
+      // but it does not render them either: `new-quote-notification.tsx`
+      // filters on the flag itself. That is on purpose — the flag is part of
+      // the notification's contract, and passing the rows is what lets the
+      // TEMPLATE make the call. The place a branched-away question is actually
+      // visible to an owner is the admin detail page, which reads the persisted
+      // `answers` snapshot with `hidden` and `hiddenReason` intact, so "they
+      // said no to stairs" and "we never ask commercial jobs that" stay
+      // distinguishable months later.
+      //
+      // The tab row leads, because it is the frame the rest of the answers are
+      // read inside.
+      const visibleRows = [
+        ...(tabRow ? [{ title: tabRow.title, display: tabRow.display }] : []),
+        ...result.answerSnapshots
+          .filter(
+            (row) => row.hidden === false && row.display !== UNANSWERED_DISPLAY,
+          )
+          .map((row) => ({ title: row.title, display: row.display })),
+      ];
 
       // The single source of truth for WHAT FIGURE the customer is told, when
       // they are told one at all — shared by the confirmation email and the
@@ -401,19 +527,28 @@ export const quoteSubmissionRouter = createTRPCRouter({
         contactName,
         contactEmail,
         contactPhone: contactPhone === "" ? null : contactPhone,
-        // `null` is the owner's flag that no estimate could be computed —
-        // the notification renders an em dash where the figure goes, and the
-        // formula + variables section right below it shows exactly which
-        // values produced nothing. Their lead is intact; only the number is
-        // missing, and they price this one by hand.
+        // `null` is the owner's flag that no estimate could be computed — the
+        // notification renders an em dash where the figure goes. Their lead is
+        // intact; only the number is missing, and they price this one by hand.
+        //
+        // The email carries NO formula and NO variable dump, deliberately. It
+        // is an alert, not a work surface: an inbox is forwarded, quoted and
+        // archived by people who are not the owner, and the pricing expression
+        // is the one thing on this row that must not travel that way. The
+        // breakdown is one click away on the dashboard — through the link this
+        // email already carries — and `formulaSnapshot` on the row above is the
+        // durable record of what actually priced this quote.
         estimateCents,
-        answers: result.answerSnapshots.map((row) => ({
-          title: row.title,
-          display: row.display,
-          hidden: row.hidden,
-        })),
-        formula: definition.formula,
-        variables: result.variables,
+        // Tab first, then the questions in flow order. Hidden rows are passed
+        // through and dropped by the template; see the `visibleRows` note.
+        answers: [
+          ...(tabRow ? [tabRow] : []),
+          ...result.answerSnapshots.map((row) => ({
+            title: row.title,
+            display: row.display,
+            hidden: row.hidden,
+          })),
+        ],
         business: {
           name: businessData.name,
           ownerEmail: businessData.ownerEmail,

@@ -8,13 +8,16 @@ import {
   centsToQboAmount,
   chunk,
   computeDepositCents,
+  computeDepositPresets,
   computeFinalPrefillCents,
   deriveInvoiceStatus,
   dueDateString,
   escapeQboQueryValue,
   pickEntity,
   pickQueryRows,
+  presetForRule,
   qboAmountToCents,
+  summarizeLeadBilling,
   toQboBillAddr,
   truncateError,
 } from "~/lib/quickbooks/mapping";
@@ -102,6 +105,207 @@ describe("computeFinalPrefillCents", () => {
 
   it("is null when there is no final quote amount", () => {
     expect(computeFinalPrefillCents(null, [])).toBeNull();
+  });
+});
+
+describe("computeDepositPresets", () => {
+  /**
+   * Odd bases are where a naive `basis * pct / 100` leaks a fraction of a
+   * cent. Both facts asserted here are promises to the owner: the amount is
+   * whole cents that leave an exact remainder against the quote, and it is
+   * bit-for-bit the amount the deposit RULE would have produced at that
+   * percentage — so switching the pre-selected chip to the value it already
+   * shows can never change the invoice by a cent.
+   */
+  it.each([10001, 123457])(
+    "prices each preset off %d in whole cents that reconcile to the basis",
+    (basis) => {
+      const presets = computeDepositPresets(basis);
+      expect(presets.map((preset) => preset.percent)).toEqual([25, 50, 75]);
+
+      for (const preset of presets) {
+        expect(Number.isInteger(preset.amountCents)).toBe(true);
+        const remainder = basis - preset.amountCents;
+        expect(remainder).toBeGreaterThanOrEqual(0);
+        expect(preset.amountCents + remainder).toBe(basis);
+        expect(preset.amountCents).toBe(
+          computeDepositCents(
+            {
+              depositMode: "percent",
+              depositPercent: preset.percent,
+              depositFixedCents: 0,
+            },
+            basis,
+          ),
+        );
+      }
+    },
+  );
+
+  it("offers nothing when there is no basis to take a percentage of", () => {
+    expect(computeDepositPresets(null)).toEqual([]);
+  });
+
+  it("still offers all three presets against a $0 quote, all worth 0", () => {
+    expect(computeDepositPresets(0)).toEqual([
+      { percent: 25, amountCents: 0 },
+      { percent: 50, amountCents: 0 },
+      { percent: 75, amountCents: 0 },
+    ]);
+  });
+});
+
+describe("presetForRule", () => {
+  it.each([25, 50, 75] as const)(
+    "pre-selects the matching chip for a %d%% rule",
+    (percent) => {
+      expect(
+        presetForRule({
+          depositMode: "percent",
+          depositPercent: percent,
+          depositFixedCents: 0,
+        }),
+      ).toBe(percent);
+    },
+  );
+
+  it.each([30, 100])(
+    "falls back to custom for a %d%% rule that is not one of the chips",
+    (percent) => {
+      expect(
+        presetForRule({
+          depositMode: "percent",
+          depositPercent: percent,
+          depositFixedCents: 0,
+        }),
+      ).toBe("custom");
+    },
+  );
+
+  it("is custom for a fixed rule, whatever the amount", () => {
+    // Even $50 of a $100 quote — a fixed rule is a percentage of nothing, and
+    // labelling it 50% would re-anchor it on the next, differently-sized lead.
+    for (const depositFixedCents of [0, 5000, 999_999]) {
+      expect(
+        presetForRule({
+          depositMode: "fixed",
+          depositPercent: 50,
+          depositFixedCents,
+        }),
+      ).toBe("custom");
+    }
+  });
+});
+
+describe("summarizeLeadBilling", () => {
+  it("counts only live deposits, split paid vs unpaid, ignoring finals and customs", () => {
+    const invoices = [
+      { kind: "deposit", status: "paid", amountCents: 3000 },
+      { kind: "deposit", status: "sent", amountCents: 2000 },
+      { kind: "deposit", status: "overdue", amountCents: 1000 },
+      { kind: "deposit", status: "error", amountCents: 400 },
+      { kind: "deposit", status: "voided", amountCents: 300 },
+      { kind: "deposit", status: "pending", amountCents: 200 },
+      { kind: "custom", status: "paid", amountCents: 7777 },
+      { kind: "final", status: "voided", amountCents: 8888 },
+    ];
+
+    expect(summarizeLeadBilling({ quoteCents: 20000, invoices })).toEqual({
+      quoteCents: 20000,
+      invoicedDepositCents: 6000, // 3000 + 2000 + 1000
+      paidDepositCents: 3000,
+      unpaidDepositCents: 3000,
+      remainingAfterDepositsCents: 14000,
+      liveFinalCents: null, // the only final is voided
+    });
+  });
+
+  it("reports the live final's amount when one exists", () => {
+    expect(
+      summarizeLeadBilling({
+        quoteCents: 20000,
+        invoices: [
+          { kind: "final", status: "sent", amountCents: 14000 },
+          { kind: "deposit", status: "paid", amountCents: 6000 },
+        ],
+      }).liveFinalCents,
+    ).toBe(14000);
+  });
+
+  it.each(["error", "voided", "pending"])(
+    "reports no live final when the only final is %s",
+    (status) => {
+      expect(
+        summarizeLeadBilling({
+          quoteCents: 20000,
+          invoices: [{ kind: "final", status, amountCents: 14000 }],
+        }).liveFinalCents,
+      ).toBeNull();
+    },
+  );
+
+  /**
+   * The summary the owner reads and the amount prefilled into the invoice
+   * dialog must be the same number — including the floor at 0, which is the
+   * case most likely to drift if either side ever re-derives the subtraction.
+   */
+  it.each([
+    {
+      label: "ordinary remainder",
+      quoteCents: 20000,
+      invoices: [{ kind: "deposit", status: "sent", amountCents: 5000 }],
+    },
+    {
+      label: "deposits exceeding the quote (floors at 0)",
+      quoteCents: 2000,
+      invoices: [{ kind: "deposit", status: "sent", amountCents: 5000 }],
+    },
+    {
+      label: "no deposits at all",
+      quoteCents: 2000,
+      invoices: [] as Array<{
+        kind: string;
+        status: string;
+        amountCents: number;
+      }>,
+    },
+  ])(
+    "remainingAfterDepositsCents matches computeFinalPrefillCents — $label",
+    ({ quoteCents, invoices }) => {
+      expect(
+        summarizeLeadBilling({ quoteCents, invoices })
+          .remainingAfterDepositsCents,
+      ).toBe(computeFinalPrefillCents(quoteCents, invoices));
+    },
+  );
+
+  it("floors the remaining balance at 0 rather than going negative", () => {
+    expect(
+      summarizeLeadBilling({
+        quoteCents: 2000,
+        invoices: [{ kind: "deposit", status: "sent", amountCents: 5000 }],
+      }),
+    ).toMatchObject({
+      invoicedDepositCents: 5000,
+      unpaidDepositCents: 5000,
+      remainingAfterDepositsCents: 0,
+    });
+  });
+
+  it("has no remaining balance to report when the lead has no priced quote", () => {
+    expect(
+      summarizeLeadBilling({
+        quoteCents: null,
+        invoices: [{ kind: "deposit", status: "paid", amountCents: 5000 }],
+      }),
+    ).toEqual({
+      quoteCents: null,
+      invoicedDepositCents: 5000,
+      paidDepositCents: 5000,
+      unpaidDepositCents: 0,
+      remainingAfterDepositsCents: null,
+      liveFinalCents: null,
+    });
   });
 });
 

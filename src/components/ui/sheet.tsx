@@ -49,13 +49,21 @@ function SheetContent({
   children,
   side = "right",
   showCloseButton = true,
+  container,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left";
   showCloseButton?: boolean;
+  /**
+   * Portal target. Templates that scope their design tokens and font
+   * variables to a wrapper class must portal the sheet INTO that wrapper —
+   * the default document.body portal escapes the scope and renders the
+   * sheet with unstyled tokens.
+   */
+  container?: HTMLElement | null;
 }) {
   return (
-    <SheetPortal>
+    <SheetPortal container={container ?? undefined}>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"

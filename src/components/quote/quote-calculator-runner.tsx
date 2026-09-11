@@ -61,6 +61,7 @@ import {
   findScreenStepIndex,
   firstIncompleteStepIndex,
 } from "./quote-steps";
+import { QuoteTabBar, QuoteTabsStep } from "./quote-tabs-step";
 import { useLiveEstimate } from "./use-live-estimate";
 
 /**
@@ -95,6 +96,14 @@ const INCOMPLETE_BEFORE_SEND_NOTE =
  */
 const FIX_ANSWER_NOTE =
   "One answer needs your attention before we can price this.";
+
+/**
+ * Shown on the tabs step when Next is pressed with nothing picked. Mirrors
+ * the server's own `unknown-tab` message (`evaluate.ts`) on purpose — a
+ * visitor who somehow reaches submit without a tab chosen sees the identical
+ * wording whether the client or the server was the one to catch it.
+ */
+const CHOOSE_TAB_NOTE = "Choose an option to continue";
 
 /**
  * The visitor-fixable half of `quoteSubmission.submit`'s discriminated union.
@@ -154,6 +163,15 @@ export function QuoteCalculatorRunner({
   const densityClasses = useMemo(() => quoteDensityClasses(density), [density]);
 
   const [answers, setAnswers] = useState<QuoteAnswerMap>({});
+  /**
+   * The visitor's tab choice — `null` until the tabs step is answered, and
+   * for the (overwhelmingly common) tabs-less calculator, forever. Seeded
+   * from a restored draft's `tabId` by the restore effect below, and reset
+   * to `null` on "Start over".
+   */
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  /** Set on the tabs step only — see `CHOOSE_TAB_NOTE`. */
+  const [tabsError, setTabsError] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   /** Per-question validation messages for the CURRENT step, keyed by id. */
   const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
@@ -193,11 +211,13 @@ export function QuoteCalculatorRunner({
   );
 
   const visibleScreens = useMemo(() => {
-    const visibility = resolveVisibility(flatQuestions, (questionId) =>
-      selectedOptionId(answers, questionId),
+    const visibility = resolveVisibility(
+      flatQuestions,
+      (questionId) => selectedOptionId(answers, questionId),
+      activeTabId,
     );
     return visibleScreensFor(definition.screens, visibility);
-  }, [answers, definition.screens, flatQuestions]);
+  }, [activeTabId, answers, definition.screens, flatQuestions]);
 
   const visibleQuestions = useMemo(
     () => flattenScreens(visibleScreens),
@@ -206,8 +226,11 @@ export function QuoteCalculatorRunner({
 
   const steps = useMemo(
     () =>
-      buildSteps({ showReviewStep: definition.showReviewStep }, visibleScreens),
-    [definition.showReviewStep, visibleScreens],
+      buildSteps(
+        { showReviewStep: definition.showReviewStep, tabs: definition.tabs },
+        visibleScreens,
+      ),
+    [definition.showReviewStep, definition.tabs, visibleScreens],
   );
 
   // Clamped on READ rather than corrected in an effect. Answering a branching
@@ -240,6 +263,7 @@ export function QuoteCalculatorRunner({
       enabled: definition.showLiveEstimate && result === null,
       visibleQuestions,
       answers,
+      tabId: activeTabId,
     });
 
   // ── Step transitions ──────────────────────────────────────────────────────
@@ -274,6 +298,19 @@ export function QuoteCalculatorRunner({
   const goNext = useCallback(() => {
     clearAdvance();
 
+    // The tabs step is a forced fork: nothing past it can be evaluated for
+    // visibility until one is picked (`resolveVisibility` treats "no active
+    // tab" as ruling out every restricted question, never as a wildcard), so
+    // an empty choice is refused right here rather than let the visitor
+    // advance into a step list that has not settled yet.
+    if (currentStep.kind === "tabs") {
+      if (activeTabId === null) {
+        setTabsError(CHOOSE_TAB_NOTE);
+        return;
+      }
+      setTabsError(null);
+    }
+
     if (currentStep.kind === "screen") {
       const errors = validateScreen(currentStep.screen);
       if (Object.keys(errors).length > 0) {
@@ -304,6 +341,7 @@ export function QuoteCalculatorRunner({
         answers,
         contact,
         definition.requirePhone,
+        activeTabId,
       );
       if (incomplete !== -1 && incomplete !== currentIndex) {
         // The edit revealed something new. Route there, say why, and KEEP the
@@ -351,6 +389,7 @@ export function QuoteCalculatorRunner({
     setFocusRequest(null);
     setStepIndex(currentIndex + 1);
   }, [
+    activeTabId,
     answers,
     clearAdvance,
     contact,
@@ -408,6 +447,78 @@ export function QuoteCalculatorRunner({
     setStepIndex(contactStepIndex);
   }, [clearAdvance, contactStepIndex]);
 
+  /** Review-step "Edit" on the chosen tab — always step 0, the tabs step. */
+  const jumpToTab = useCallback(() => {
+    clearAdvance();
+    setStepErrors({});
+    setSubmitError(null);
+    setReviewNote(null);
+    setReturnToSend(true);
+    setFocusRequest(null);
+    setStepIndex(0);
+  }, [clearAdvance]);
+
+  /**
+   * The compact tab bar on a screen step — switching mid-flow, as opposed to
+   * the forced first choice `QuoteTabsStep` renders. Never blocks: the
+   * visitor is already past the fork, so changing their mind must not throw
+   * away what they answered on a screen the two tabs share.
+   *
+   * The landing step for the NEW tab is derived right here rather than left
+   * to react to `activeTabId` in an effect: the decision — "does the screen
+   * I'm looking at still exist?" — has to be made from the exact answers the
+   * visitor had a moment ago, using the SAME shared visibility/step-building
+   * calls the render path uses, so the two can never draw different
+   * conclusions about what the new step list even is.
+   */
+  const switchTab = useCallback(
+    (nextTabId: string) => {
+      if (nextTabId === activeTabId) return;
+      clearAdvance();
+      setActiveTabId(nextTabId);
+
+      const nextVisibility = resolveVisibility(
+        flatQuestions,
+        (questionId) => selectedOptionId(answers, questionId),
+        nextTabId,
+      );
+      const nextSteps = buildSteps(
+        { showReviewStep: definition.showReviewStep, tabs: definition.tabs },
+        visibleScreensFor(definition.screens, nextVisibility),
+      );
+
+      const currentScreenId =
+        currentStep.kind === "screen" ? currentStep.screen.id : null;
+      const matchIndex =
+        currentScreenId === null
+          ? -1
+          : nextSteps.findIndex(
+              (step) =>
+                step.kind === "screen" && step.screen.id === currentScreenId,
+            );
+
+      // The screen the visitor was looking at survives the switch (it is
+      // shared by both tabs) → stay on it. Otherwise it was tab-only and just
+      // vanished, so land on the first step past the tabs step rather than
+      // guess which of the new tab's screens is meant to replace it.
+      setStepIndex(matchIndex !== -1 ? matchIndex : 1);
+      setReturnToSend(false);
+      setReviewNote(null);
+      setStepErrors({});
+      setFocusRequest(null);
+    },
+    [
+      activeTabId,
+      answers,
+      clearAdvance,
+      currentStep,
+      definition.screens,
+      definition.showReviewStep,
+      definition.tabs,
+      flatQuestions,
+    ],
+  );
+
   // Held in a ref so the auto-advance timeout runs the LATEST `goNext` — the
   // one that has already seen the selection that triggered it, and therefore
   // the recomputed visible-screen list.
@@ -415,20 +526,23 @@ export function QuoteCalculatorRunner({
   // Same trick for the guard below: by the time the timeout fires, a same-screen
   // show-if reveal may have turned this one-question screen into a two-question
   // screen. Auto-advancing then would carry the visitor straight past a
-  // required question they never saw, into an error on the way back.
-  const singleQuestionScreenRef = useRef(false);
+  // required question they never saw, into an error on the way back. The tabs
+  // step is eligible unconditionally — picking a tab can never reveal a
+  // SECOND thing to pick on the same step, unlike a screen's show-if.
+  const autoAdvanceEligibleRef = useRef(false);
   useEffect(() => {
     goNextRef.current = goNext;
-    singleQuestionScreenRef.current =
-      currentStep.kind === "screen" &&
-      currentStep.screen.questions.length === 1;
+    autoAdvanceEligibleRef.current =
+      currentStep.kind === "tabs" ||
+      (currentStep.kind === "screen" &&
+        currentStep.screen.questions.length === 1);
   });
 
   const scheduleAdvance = useCallback(() => {
     clearAdvance();
     advanceTimer.current = setTimeout(() => {
       advanceTimer.current = null;
-      if (!singleQuestionScreenRef.current) return;
+      if (!autoAdvanceEligibleRef.current) return;
       goNextRef.current();
     }, AUTO_ADVANCE_MS);
   }, [clearAdvance]);
@@ -499,15 +613,15 @@ export function QuoteCalculatorRunner({
     // Nothing to keep once the lead is in: the thank-you screen is terminal,
     // and a draft left behind would repopulate the form on the next visit.
     if (result !== null) return;
-    if (hasQuoteSessionContent(answers, contact)) {
-      saveQuoteSession(calculator.id, answers, contact);
+    if (hasQuoteSessionContent(answers, contact, activeTabId)) {
+      saveQuoteSession(calculator.id, answers, contact, activeTabId);
     } else {
       // Emptied back out (Start over, or a lone contact field cleared). The
       // stored draft mirrors state exactly, so "nothing to keep" means no key
       // rather than an empty one.
       clearQuoteSession(calculator.id);
     }
-  }, [answers, calculator.id, contact, result]);
+  }, [activeTabId, answers, calculator.id, contact, result]);
 
   useEffect(() => {
     // Guarded on the same ref the persist effect reads, which makes this
@@ -523,6 +637,7 @@ export function QuoteCalculatorRunner({
     if (restored) {
       setAnswers(restored.answers);
       setContact(restored.contact);
+      setActiveTabId(restored.tabId);
 
       // The landing step is DERIVED here, never stored. A saved index would be
       // meaningless the moment the owner adds or reorders a screen, and would
@@ -532,9 +647,10 @@ export function QuoteCalculatorRunner({
       const restoredVisibility = resolveVisibility(
         flatQuestions,
         (questionId) => selectedOptionId(restored.answers, questionId),
+        restored.tabId,
       );
       const restoredSteps = buildSteps(
-        { showReviewStep: definition.showReviewStep },
+        { showReviewStep: definition.showReviewStep, tabs: definition.tabs },
         visibleScreensFor(definition.screens, restoredVisibility),
       );
       const incomplete = firstIncompleteStepIndex(
@@ -542,6 +658,7 @@ export function QuoteCalculatorRunner({
         restored.answers,
         restored.contact,
         definition.requirePhone,
+        restored.tabId,
       );
       // `-1` means the whole flow is answerable as it stands, so land on the
       // last step — the one holding the submit button.
@@ -576,9 +693,25 @@ export function QuoteCalculatorRunner({
    * is re-hung under the question that owns it, and the primary button becomes
    * "Return to review" (or, with no review step, "Return to send"), so fixing
    * it is one click back to sending rather than a second walk through the flow.
+   *
+   * A fifth code, `unknown-tab`, is handled first and separately: it is not
+   * about any one question — the fork happens before the first one exists —
+   * so there is no `questionId` to route by. It always means the same thing
+   * (the tab the visitor thought they had picked did not reach the server, or
+   * named one the owner has since removed), so it always routes to step 0.
    */
   const handleSubmitIssue = useCallback(
     (error: QuoteSubmitFailure) => {
+      if (error.code === "unknown-tab") {
+        setSubmitError(null);
+        setTabsError(null);
+        setStepIndex(0);
+        setReviewNote(FIX_ANSWER_NOTE);
+        setReturnToSend(true);
+        setFocusRequest(null);
+        return;
+      }
+
       const index =
         error.questionId === undefined
           ? -1
@@ -724,6 +857,9 @@ export function QuoteCalculatorRunner({
 
     submitMutation.mutate({
       calculatorId: calculator.id,
+      // `undefined` for a tabs-less calculator (never `null`) — the schema
+      // types this as an optional string, same reason as the preview query.
+      tabId: activeTabId ?? undefined,
       // VISIBLE questions only. A hidden question's answer stays in state (so
       // flipping the branch back restores it) but never ships.
       answers: toWireAnswers(visibleQuestions, answers),
@@ -735,6 +871,7 @@ export function QuoteCalculatorRunner({
       captchaToken: token ?? "",
     });
   }, [
+    activeTabId,
     answers,
     calculator.id,
     clearAdvance,
@@ -775,11 +912,13 @@ export function QuoteCalculatorRunner({
   }, [startOverConfirming]);
 
   const canStartOver =
-    result === null && hasQuoteSessionContent(answers, contact);
+    result === null && hasQuoteSessionContent(answers, contact, activeTabId);
 
   const handleStartOver = useCallback(() => {
     clearAdvance();
     setAnswers({});
+    setActiveTabId(null);
+    setTabsError(null);
     setContact({ name: "", email: "", phone: "" });
     setStepErrors({});
     setContactErrors({});
@@ -829,6 +968,9 @@ export function QuoteCalculatorRunner({
   const startOverPromptId = `${uid}-start-over-prompt`;
   const totalSteps = steps.length;
 
+  // The `currentStep.kind === "screen"` guard means this is structurally
+  // "Next" for the tabs step too — a fork the visitor must resolve is never
+  // presented as skippable.
   const nextLabel = returnToSend
     ? reviewStepIndex !== -1
       ? "Return to review"
@@ -840,6 +982,10 @@ export function QuoteCalculatorRunner({
         )
       ? "Skip"
       : "Next";
+
+  /** The tab object behind `activeTabId`, for the review step's Type row. */
+  const activeTab =
+    definition.tabs.find((tab) => tab.id === activeTabId) ?? null;
 
   const progressPercent = Math.round(((currentIndex + 1) / totalSteps) * 100);
 
@@ -905,18 +1051,49 @@ export function QuoteCalculatorRunner({
         {/* Step body. `flex-1` so the nav pins to the bottom of the card when
             a min-height preset leaves slack. */}
         <div className="flex-1">
-          {currentStep.kind === "screen" && (
-            <QuoteScreen
-              screen={currentStep.screen}
-              answers={answers}
-              errors={stepErrors}
-              onAnswer={setAnswer}
-              onCommit={scheduleAdvance}
+          {currentStep.kind === "tabs" && (
+            <QuoteTabsStep
+              prompt={definition.tabsPrompt}
+              tabs={definition.tabs}
+              value={activeTabId}
+              onChange={(id) => {
+                setTabsError(null);
+                setActiveTabId(id);
+                // Same auto-advance the single-question screens get — see
+                // `autoAdvanceEligibleRef`.
+                scheduleAdvance();
+              }}
+              error={tabsError}
               headingId={headingId}
               headingRef={headingRef}
-              uid={uid}
-              focusRequest={focusRequest}
             />
+          )}
+
+          {currentStep.kind === "screen" && (
+            <>
+              {/* Only once a tab is active: on a tabs-less calculator
+                  `definition.tabs` is empty, and mid-flow a screen step is
+                  never reached before the forced first choice anyway. */}
+              {definition.tabs.length > 0 && (
+                <QuoteTabBar
+                  prompt={definition.tabsPrompt}
+                  tabs={definition.tabs}
+                  value={activeTabId}
+                  onChange={switchTab}
+                />
+              )}
+              <QuoteScreen
+                screen={currentStep.screen}
+                answers={answers}
+                errors={stepErrors}
+                onAnswer={setAnswer}
+                onCommit={scheduleAdvance}
+                headingId={headingId}
+                headingRef={headingRef}
+                uid={uid}
+                focusRequest={focusRequest}
+              />
+            </>
           )}
 
           {currentStep.kind === "contact" && (
@@ -946,6 +1123,12 @@ export function QuoteCalculatorRunner({
               onEditQuestion={jumpToQuestion}
               onEditContact={jumpToContact}
               uid={uid}
+              tab={
+                activeTab
+                  ? { prompt: definition.tabsPrompt, label: activeTab.label }
+                  : null
+              }
+              onEditTab={jumpToTab}
             />
           )}
         </div>

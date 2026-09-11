@@ -6,6 +6,7 @@ import {
   groupFieldsByGroup,
   groupFieldsByPage,
 } from "~/lib/template-fields";
+import { animatedBambooSections } from "~/app/(storefront)/_templates/animated-bamboo/sections";
 import { bambooSections } from "~/app/(storefront)/_templates/bamboo/sections";
 import { buildersSections } from "~/app/(storefront)/_templates/builders/sections";
 import { coopSections } from "~/app/(storefront)/_templates/coop/sections";
@@ -20,6 +21,7 @@ import { pollenSections } from "~/app/(storefront)/_templates/pollen/sections";
 import { relocationSections } from "~/app/(storefront)/_templates/relocation/sections";
 import { sledgeSections } from "~/app/(storefront)/_templates/sledge/sections";
 import { viiSections } from "~/app/(storefront)/_templates/vii/sections";
+import { wealthSections } from "~/app/(storefront)/_templates/wealth/sections";
 
 // `SectionLink` / `SECTION_LINKS` live in the leaf module `~/lib/section-links`
 // (every template's `sections.ts` reads the catalog at module-init time, and
@@ -75,12 +77,14 @@ export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
   ...modernSections,
   ...elegantSections,
   ...bambooSections,
+  ...animatedBambooSections,
   ...darkTrendSections,
   ...noiseSections,
   ...pollenSections,
   ...sledgeSections,
   ...buildersSections,
   ...relocationSections,
+  ...wealthSections,
 };
 
 function humanizeGroupKey(key: string): string {

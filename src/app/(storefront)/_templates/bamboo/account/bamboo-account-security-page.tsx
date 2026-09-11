@@ -8,7 +8,14 @@ import { BambooAccountLayout } from "./bamboo-account-layout";
 export function BambooAccountSecurityPage() {
   return (
     <PageTransition>
-      <BambooAccountLayout heading="Security">
+      <BambooAccountLayout
+        heading="Security"
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account/settings" },
+          { label: "Security" },
+        ]}
+      >
         <SecuritySettingsCards />
       </BambooAccountLayout>
     </PageTransition>

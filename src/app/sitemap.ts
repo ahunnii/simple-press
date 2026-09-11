@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       subdomain: true,
       customDomain: true,
       domainStatus: true,
+      featureFlags: true,
     },
   });
 
@@ -32,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     pages,
     services,
     faqCount,
-    eventCount,
+    events,
     videoCount,
   ] = await Promise.all([
     db.product.findMany({
@@ -54,8 +55,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     db.faqItem.count({
       where: { businessId: business.id, published: true },
     }),
-    db.event.count({
-      where: { businessId: business.id, published: true, isArchived: false },
+    db.event.findMany({
+      where: { businessId: business.id, published: true },
+      select: { slug: true, updatedAt: true, isArchived: true },
     }),
     db.video.count({
       where: { businessId: business.id, published: true },
@@ -114,8 +116,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Events static index page — only when there are published events
-  if (eventCount > 0) {
+  // Events static index page — only when there are published, non-archived
+  // events (past events still get their own per-event route below, but
+  // don't keep the index itself listed once nothing upcoming remains).
+  if (events.some((e) => !e.isArchived)) {
     staticRoutes.push({
       url: `${baseUrl}/events`,
       changeFrequency: "weekly",
@@ -132,6 +136,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/videos`,
       changeFrequency: "weekly",
       priority: 0.6,
+    });
+  }
+
+  // Donations static index page — only when the donations feature is enabled
+  if ((business.featureFlags as Record<string, boolean> | null)?.donations) {
+    staticRoutes.push({
+      url: `${baseUrl}/donate`,
+      changeFrequency: "monthly",
+      priority: 0.5,
     });
   }
 
@@ -175,6 +188,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Per-event detail routes — includes past events too, since their pages
+  // stay live after the event date.
+  const eventRoutes: MetadataRoute.Sitemap = events.map((e) => ({
+    url: `${baseUrl}/events/${e.slug}`,
+    lastModified: e.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
   return [
     ...staticRoutes,
     ...productRoutes,
@@ -182,5 +204,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...blogRoutes,
     ...pageRoutes,
     ...serviceRoutes,
+    ...eventRoutes,
   ];
 }

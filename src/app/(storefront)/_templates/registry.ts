@@ -13,6 +13,30 @@
 import type { ComponentType } from "react";
 
 // ---------------------------------------------------------------------------
+// Animated Bamboo
+// ---------------------------------------------------------------------------
+import { BambooAboutPage as AnimatedBambooAboutPage } from "./animated-bamboo/about/bamboo-about-page";
+import { BambooAccountSecurityPage as AnimatedBambooAccountSecurityPage } from "./animated-bamboo/account/bamboo-account-security-page";
+import { BambooAccountSettingsPage as AnimatedBambooAccountSettingsPage } from "./animated-bamboo/account/bamboo-account-settings-page";
+import { BambooAddressBookPage as AnimatedBambooAddressBookPage } from "./animated-bamboo/account/bamboo-address-book-page";
+import { BambooOrderDetailPage as AnimatedBambooOrderDetailPage } from "./animated-bamboo/account/bamboo-order-detail-page";
+import { BambooOrdersPage as AnimatedBambooOrdersPage } from "./animated-bamboo/account/bamboo-orders-page";
+import { BambooPreferencesPage as AnimatedBambooPreferencesPage } from "./animated-bamboo/account/bamboo-preferences-page";
+import { BambooGenericPage as AnimatedBambooGenericPage } from "./animated-bamboo/bamboo-generic-page";
+import { BambooBlogPage as AnimatedBambooBlogPage } from "./animated-bamboo/blog/bamboo-blog-page";
+import { BambooBlogPostPage as AnimatedBambooBlogPostPage } from "./animated-bamboo/blog/bamboo-blog-post-page";
+import { BambooCartPage as AnimatedBambooCartPage } from "./animated-bamboo/cart-checkout/bamboo-cart-page";
+import { BambooCheckoutPage as AnimatedBambooCheckoutPage } from "./animated-bamboo/cart-checkout/bamboo-checkout-page";
+import { BambooCheckoutUnavailable as AnimatedBambooCheckoutUnavailable } from "./animated-bamboo/cart-checkout/bamboo-checkout-unavailable";
+import { BambooOrderSuccessPage as AnimatedBambooOrderSuccessPage } from "./animated-bamboo/cart-checkout/bamboo-order-success-page";
+import { BambooCollectionPage as AnimatedBambooCollectionPage } from "./animated-bamboo/collections/bamboo-collection-page";
+import { BambooCollectionsPage as AnimatedBambooCollectionsPage } from "./animated-bamboo/collections/bamboo-collections-page";
+import { BambooContactPage as AnimatedBambooContactPage } from "./animated-bamboo/contact/bamboo-contact-page";
+import { BambooLayout as AnimatedBambooLayout } from "./animated-bamboo/layout/bamboo-general-layout";
+import { BambooProductPage as AnimatedBambooProductPage } from "./animated-bamboo/products/bamboo-product-page";
+import { BambooShopPage as AnimatedBambooShopPage } from "./animated-bamboo/shop/bamboo-shop-page";
+import { BambooTestimonialsPage as AnimatedBambooTestimonialsPage } from "./animated-bamboo/testimonials/bamboo-testimonials-page";
+// ---------------------------------------------------------------------------
 // Bamboo
 // ---------------------------------------------------------------------------
 import { BambooAboutPage } from "./bamboo/about/bamboo-about-page";
@@ -95,6 +119,8 @@ import { DefaultCollectionPage } from "./default/collections/default-collection-
 import { DefaultCollectionsPage } from "./default/collections/default-collections-page";
 import { DefaultContactPage } from "./default/contact/default-contact-page";
 import { DefaultGenericPage } from "./default/default-generic-page";
+import { DefaultDonatePage } from "./default/donate/default-donate-page";
+import { DefaultEventPage } from "./default/events/default-event-page";
 import { DefaultEventsPage } from "./default/events/default-events-page";
 import { DefaultFaqPage } from "./default/faq/default-faq-page";
 import { DefaultLayout } from "./default/layout/default-layout";
@@ -212,6 +238,7 @@ import { PinkOrderSuccessPage } from "./pink/cart-checkout/pink-order-success-pa
 import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
 import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
 import { PinkContactPage } from "./pink/contact/pink-contact-page";
+import { PinkDonatePage } from "./pink/donate/pink-donate-page";
 import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
 import { PinkGenericPage } from "./pink/generic/pink-generic-page";
 import { PinkLayout } from "./pink/layout/pink-layout";
@@ -256,6 +283,27 @@ import { RelocationGenericPage } from "./relocation/generic/relocation-generic-p
 import { RelocationLayout } from "./relocation/layout/relocation-layout";
 import { RelocationServicesPage } from "./relocation/services/relocation-services-page";
 import { RelocationTestimonialsPage } from "./relocation/testimonials/relocation-testimonials-page";
+
+// ---------------------------------------------------------------------------
+// Detroit Community Wealth Fund
+// ---------------------------------------------------------------------------
+import { WealthAboutPage } from "./wealth/about/wealth-about-page";
+import { WealthAccountSecurityPage } from "./wealth/account/wealth-account-security-page";
+import { WealthAccountSettingsPage } from "./wealth/account/wealth-account-settings-page";
+import { WealthAddressBookPage } from "./wealth/account/wealth-address-book-page";
+import { WealthOrderDetailPage } from "./wealth/account/wealth-order-detail-page";
+import { WealthOrdersPage } from "./wealth/account/wealth-orders-page";
+import { WealthPreferencesPage } from "./wealth/account/wealth-preferences-page";
+import { WealthSubscriptionsPage } from "./wealth/account/wealth-subscriptions-page";
+import { WealthBlogPage } from "./wealth/blog/wealth-blog-page";
+import { WealthBlogPostPage } from "./wealth/blog/wealth-blog-post-page";
+import { WealthContactPage } from "./wealth/contact/wealth-contact-page";
+import { WealthDonatePage } from "./wealth/donate/wealth-donate-page";
+import { WealthGenericPage } from "./wealth/generic/wealth-generic-page";
+import { WealthLayout } from "./wealth/layout/wealth-layout";
+import { WealthMaintenancePage } from "./wealth/maintenance/wealth-maintenance-page";
+import { WealthServicesIndexPage } from "./wealth/services/wealth-services-index-page";
+import { WealthTestimonialsPage } from "./wealth/testimonials/wealth-testimonials-page";
 // ---------------------------------------------------------------------------
 // Sledge
 // ---------------------------------------------------------------------------
@@ -300,6 +348,7 @@ import { ViiCollectionsPage } from "./vii/collections/vii-collections-page";
 import { ViiContactPage } from "./vii/contact/vii-contact-page";
 import { ViiGenericPage } from "./vii/generic/vii-generic-page";
 import { ViiLayout } from "./vii/layout/vii-layout";
+import { ViiMaintenancePage } from "./vii/maintenance/vii-maintenance-page";
 import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
@@ -320,9 +369,9 @@ type AnyComponent = ComponentType<any>;
  * `ServicesPage` is optional — only pollen implements it. Routes check for its
  * presence and call `notFound()` when it is absent.
  *
- * `EventsPage`, `VideosPage` and `FaqPage` are optional in the type but always
- * present on `defaultEntry`, so their routes' presence checks only satisfy
- * TypeScript's optional-slot typing.
+ * `EventsPage`, `EventPage`, `VideosPage` and `FaqPage` are optional in the
+ * type but always present on `defaultEntry`, so their routes' presence checks
+ * only satisfy TypeScript's optional-slot typing.
  *
  * `CheckoutUnavailable` is the component rendered when Stripe is not connected.
  * All templates fall back to `DefaultCheckoutUnavailable`.
@@ -357,9 +406,17 @@ export type TemplateComponentSet = {
   ServicesPage?: AnyComponent;
   ServicesIndexPage?: AnyComponent;
   EventsPage?: AnyComponent;
+  EventPage?: AnyComponent;
+  DonatePage?: AnyComponent;
   VideosPage?: AnyComponent;
   // Optional per-template override of /faq; defaultEntry always supplies one.
   FaqPage?: AnyComponent;
+  /**
+   * Optional full-screen maintenance / coming-soon view. Absent ⇒ the shared
+   * MaintenanceScreen fallback renders. Only used for business-scope
+   * maintenance; platform-scope always renders the shared screen.
+   */
+  MaintenancePage?: AnyComponent;
 };
 
 // ---------------------------------------------------------------------------
@@ -391,6 +448,8 @@ const defaultEntry: TemplateComponentSet = {
   SubscriptionsPage: DefaultSubscriptionsPage,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
+  EventPage: DefaultEventPage,
+  DonatePage: DefaultDonatePage,
   VideosPage: DefaultVideosPage,
   FaqPage: DefaultFaqPage,
 };
@@ -419,6 +478,30 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: BambooOrderDetailPage,
     OrdersPage: BambooOrdersPage,
     PreferencesPage: BambooPreferencesPage,
+  },
+
+  "animated-bamboo": {
+    Layout: AnimatedBambooLayout,
+    AboutPage: AnimatedBambooAboutPage,
+    BlogPage: AnimatedBambooBlogPage,
+    BlogPostPage: AnimatedBambooBlogPostPage,
+    CartPage: AnimatedBambooCartPage,
+    CheckoutPage: AnimatedBambooCheckoutPage,
+    CheckoutUnavailable: AnimatedBambooCheckoutUnavailable,
+    OrderSuccessPage: AnimatedBambooOrderSuccessPage,
+    CollectionPage: AnimatedBambooCollectionPage,
+    CollectionsPage: AnimatedBambooCollectionsPage,
+    ContactPage: AnimatedBambooContactPage,
+    GenericPage: AnimatedBambooGenericPage,
+    ProductPage: AnimatedBambooProductPage,
+    ShopPage: AnimatedBambooShopPage,
+    TestimonialsPage: AnimatedBambooTestimonialsPage,
+    AccountSettingsPage: AnimatedBambooAccountSettingsPage,
+    AccountSecurityPage: AnimatedBambooAccountSecurityPage,
+    AddressBookPage: AnimatedBambooAddressBookPage,
+    OrderDetailPage: AnimatedBambooOrderDetailPage,
+    OrdersPage: AnimatedBambooOrdersPage,
+    PreferencesPage: AnimatedBambooPreferencesPage,
   },
 
   "dark-trend": {
@@ -549,6 +632,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     CollectionPage: PinkCollectionPage,
     CollectionsPage: PinkCollectionsPage,
     ContactPage: PinkContactPage,
+    DonatePage: PinkDonatePage,
     EventsPage: PinkEventsIndexPage,
     VideosPage: PinkVideosPage,
     GenericPage: PinkGenericPage,
@@ -576,6 +660,32 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     GenericPage: RelocationGenericPage,
     ServicesPage: RelocationServicesPage,
     TestimonialsPage: RelocationTestimonialsPage,
+  },
+
+  // Detroit Community Wealth Fund — service archetype (1:1 recreation of
+  // detroitcommunitywealth.org): no commerce slots, those fall back to
+  // Default. Uses the data-driven `ServicesIndexPage` slot (the `services`
+  // feature flag should be ON for owning businesses) plus the optional
+  // `DonatePage` and `MaintenancePage` slots. TestimonialsPage renders the
+  // site's "Meet the Co-ops" directory.
+  wealth: {
+    Layout: WealthLayout,
+    AboutPage: WealthAboutPage,
+    BlogPage: WealthBlogPage,
+    BlogPostPage: WealthBlogPostPage,
+    ContactPage: WealthContactPage,
+    GenericPage: WealthGenericPage,
+    TestimonialsPage: WealthTestimonialsPage,
+    ServicesIndexPage: WealthServicesIndexPage,
+    DonatePage: WealthDonatePage,
+    MaintenancePage: WealthMaintenancePage,
+    AccountSettingsPage: WealthAccountSettingsPage,
+    AccountSecurityPage: WealthAccountSecurityPage,
+    AddressBookPage: WealthAddressBookPage,
+    OrderDetailPage: WealthOrderDetailPage,
+    OrdersPage: WealthOrdersPage,
+    PreferencesPage: WealthPreferencesPage,
+    SubscriptionsPage: WealthSubscriptionsPage,
   },
 
   noise: {
@@ -670,6 +780,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: ViiPreferencesPage,
     TestimonialsPage: ViiTestimonialsPage,
     ServicesIndexPage: ViiServicesIndexPage,
+    MaintenancePage: ViiMaintenancePage,
   },
 };
 

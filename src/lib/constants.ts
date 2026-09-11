@@ -2,6 +2,7 @@ export const TEMPLATE_IDS = {
   DEFAULT: "default",
   MODERN: "modern",
   BAMBOO: "bamboo",
+  ANIMATED_BAMBOO: "animated-bamboo",
   HAPPY_BAMBOO: "happy-bamboo",
   DARK_TREND: "dark-trend",
   ELEGANT: "elegant",
@@ -13,6 +14,7 @@ export const TEMPLATE_IDS = {
   COOP: "coop",
   PINK: "pink",
   RELOCATION: "relocation",
+  WEALTH: "wealth",
 } as const;
 
 export const TEMPLATES = [
@@ -34,8 +36,15 @@ export const TEMPLATES = [
     id: TEMPLATE_IDS.BAMBOO,
     name: "Bamboo",
     description:
-      "Warm, nature-inspired storefront with a hero image, featured products, and trust-badge sections for eco-friendly brands",
+      "Luxe editorial storefront for eco brands — deep forest green and antique gold on warm cream, serif display type, and an emblem-first navigation that puts the brand's logo center stage",
     previewImage: "/templates/bamboo-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.ANIMATED_BAMBOO,
+    name: "Animated Bamboo",
+    description:
+      "Illustrated, animation-forward take on the Bamboo storefront — living scenes, scroll reveals, and hand-drawn artwork throughout.",
+    previewImage: "/templates/animated-bamboo-preview.png",
   },
   {
     id: TEMPLATE_IDS.HAPPY_BAMBOO,
@@ -113,6 +122,13 @@ export const TEMPLATES = [
     description:
       "1:1 recreation of handyrelocations.com — terracotta wave heroes, quote form, reviews, and FAQ for a Detroit moving company (no shop or checkout)",
     previewImage: "/templates/relocation-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.WEALTH,
+    name: "Wealth",
+    description:
+      "1:1 recreation of detroitcommunitywealth.org — quiet sage-and-paper nonprofit site with overlap heroes, programs, donate, and co-op directory (no shop or checkout)",
+    previewImage: "/templates/wealth-preview.png",
   },
 ] as const;
 

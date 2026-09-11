@@ -14,6 +14,7 @@ import {
   Plus,
   Search,
   Trash2,
+  Video,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -667,6 +668,11 @@ export function EventsClient({
                                     loading="lazy"
                                     className="h-full w-full object-cover"
                                   />
+                                </div>
+                              ) : event.coverVideo ? (
+                                <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded">
+                                  <Video className="text-muted-foreground h-4 w-4" />
+                                  <span className="sr-only">Cover video</span>
                                 </div>
                               ) : (
                                 <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded">

@@ -506,6 +506,11 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             estimateCents: 162000,
             answers: [
               {
+                title: "What kind of move?",
+                display: "Residential",
+                hidden: false,
+              },
+              {
                 title: "How many bedrooms are you moving?",
                 display: "3-4 bedrooms",
                 hidden: false,
@@ -522,8 +527,6 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
                 hidden: false,
               },
             ],
-            formula: "round((bedrooms * 400 + distance * 2) * 1.1)",
-            variables: { bedrooms: 4, distance: 90 },
             businessName: business.name,
             businessLogoUrl: logoUrl,
             adminQuoteUrl: `${businessUrl}/admin/quotes/sample`,

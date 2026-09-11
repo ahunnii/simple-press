@@ -53,10 +53,16 @@ export function BambooContactForm() {
 
   if (isSuccess) {
     return (
-      <Card className="border-primary/20 bg-primary/5" role="status">
+      <Card
+        className="bg-card rounded-2xl border-[var(--bam-hairline)] shadow-sm"
+        role="status"
+      >
         <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
-          <div className="bg-primary/10 flex size-16 items-center justify-center rounded-full">
-            <CheckCircle2 className="text-primary size-8" aria-hidden="true" />
+          <div className="flex size-16 items-center justify-center rounded-full border border-[var(--bam-gold)]/40 bg-[var(--bam-gold)]/10">
+            <CheckCircle2
+              className="size-8 text-[var(--bam-forest)]"
+              aria-hidden="true"
+            />
           </div>
           <h2
             ref={successHeadingRef}
@@ -69,7 +75,11 @@ export function BambooContactForm() {
             Thank you for reaching out. We will get back to you within 1-2
             business days.
           </p>
-          <Button variant="outline" onClick={resetSuccess} className="mt-2">
+          <Button
+            variant="outline"
+            onClick={resetSuccess}
+            className="mt-2 rounded-full"
+          >
             Send Another Message
           </Button>
         </CardContent>
@@ -164,6 +174,7 @@ export function BambooContactForm() {
         <Button
           type="submit"
           size="lg"
+          className="rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
           disabled={isSubmitting || (!captchaToken && IS_IN_PRODUCTION)}
         >
           {isSubmitting ? (

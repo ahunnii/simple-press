@@ -56,6 +56,7 @@ const eventFormObjectSchema = z.object({
     .optional()
     .nullable(),
   coverImage: z.string().url().optional().nullable(),
+  coverVideo: z.string().url().optional().nullable(),
   startAt: localDateTime,
   endAt: localDateTime.optional().nullable(),
   allDay: z.boolean().default(false),

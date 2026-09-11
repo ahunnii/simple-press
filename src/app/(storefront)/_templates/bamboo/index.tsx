@@ -58,6 +58,31 @@ const globalLocationData: TemplateField[] = [
   },
 ];
 
+const globalBrandingData: TemplateField[] = [
+  {
+    key: "bamboo.global.footer-note",
+    label: "Footer Note",
+    description:
+      "Short note shown in the footer's bottom bar next to the copyright line (e.g. \"Proudly made in Detroit\"). Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.branding",
+    defaultValue: "Proudly made in Detroit",
+    placeholder: "Proudly made in Detroit",
+  },
+  {
+    key: "bamboo.global.nav-wordmark",
+    label: "Navigation Wordmark",
+    description:
+      "Optional horizontal wordmark logo. Once the page is scrolled, it replaces the round logo in the centre of the navigation bar; on phones it replaces the round logo and business name in the top bar. It sits on the dark green bar, so upload a light or transparent version. Leave blank to keep the round logo and name.",
+    type: "image",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+];
+
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.location",
@@ -66,6 +91,12 @@ const fieldGroups: TemplateFieldGroup[] = [
       "Coordinates for the map pin shown on the homepage and contact page maps.",
     icon: "🗺️",
     columns: 2,
+  },
+  {
+    id: "global.branding",
+    title: "Branding",
+    description: "Navigation wordmark and the footer's bottom-bar note.",
+    icon: "🖋️",
   },
   ...bambooHomepageFieldGroups,
   ...bambooAboutFieldGroups,
@@ -86,6 +117,7 @@ export const bambooData = {
     ...bambooCollectionsData,
     ...bambooProductsData,
     ...globalLocationData,
+    ...globalBrandingData,
   ],
 };
 

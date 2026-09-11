@@ -8,7 +8,7 @@ import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { formatDate } from "~/lib/utils";
+import { cn, formatDate } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -43,11 +43,16 @@ export function BambooBlogPostPage({
   const ctaHref = f["bamboo.blog.post-cta-button-link"];
   const ctaVisible = isSectionVisible(customFields, "bamboo", "blog.post");
 
-  const others = relatedPosts.filter((p) => p.slug !== page.slug);
+  const others = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 2);
 
   return (
     <PageTransition>
-      <section className="bg-secondary mb-6 pt-12 pb-6">
+      <section
+        className={cn(
+          "bg-[var(--bam-cream-deep)] pt-12 md:pt-16",
+          page?.image ? "pb-24 md:pb-28" : "pb-14 md:pb-16",
+        )}
+      >
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="mx-auto max-w-4xl">
             <FadeIn>
@@ -60,9 +65,15 @@ export function BambooBlogPostPage({
               </Link>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <h1 className="text-foreground font-heading text-3xl leading-tight font-bold tracking-tight md:text-4xl lg:text-5xl">
+              <h1 className="text-foreground font-serif text-3xl leading-tight font-bold md:text-4xl lg:text-5xl">
                 {page.title}
               </h1>
+            </FadeIn>
+            <FadeIn delay={0.12}>
+              <div
+                className="mt-6 h-px w-16 bg-[var(--bam-gold)]/40"
+                aria-hidden="true"
+              />
             </FadeIn>
             <FadeIn delay={0.15}>
               <div className="text-muted-foreground mt-6 mb-8 flex flex-wrap items-center gap-5 text-sm">
@@ -83,10 +94,11 @@ export function BambooBlogPostPage({
         <section className="pb-16">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn delay={0.2} className="mx-auto max-w-4xl">
-              <div className="border-border/60 relative aspect-16/7 overflow-hidden rounded-2xl border shadow-lg">
+              <div className="relative -mt-14 aspect-16/7 overflow-hidden rounded-2xl border border-[var(--bam-hairline)] shadow-lg md:-mt-16">
+                {/* Decorative: the article h1 right above already names it. */}
                 <Image
                   src={page.image ?? "/placeholder.svg"}
-                  alt={page.title}
+                  alt=""
                   fill
                   className="object-cover"
                   priority
@@ -102,27 +114,30 @@ export function BambooBlogPostPage({
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-12">
             <FadeIn direction="left">
-              <article className="prose-sm md:prose prose-headings:font-heading prose-headings:text-foreground prose-p:text-muted-foreground prose-p:leading-relaxed prose-strong:text-foreground w-full max-w-none">
+              <article className="prose-sm md:prose prose-headings:font-heading prose-headings:text-foreground prose-p:text-muted-foreground prose-p:leading-relaxed prose-strong:text-foreground mx-auto w-full max-w-[70ch]">
                 <TiptapRenderer content={page.content as TiptapJSON} />
               </article>
 
               {(ctaHeading ?? ctaBody) && ctaVisible && (
-                <FadeIn delay={0.1} className="mt-10">
+                <FadeIn
+                  delay={0.1}
+                  className={cn(others.length > 0 ? "mt-10" : "my-10")}
+                >
                   <div
                     {...sectionGroupAttr("blog", "post")}
-                    className="border-border/60 bg-muted/50 rounded-2xl border p-6 md:p-8"
+                    className="mx-auto max-w-[70ch] rounded-2xl bg-[var(--bam-forest)] p-6 text-[var(--bam-cream)] md:p-8"
                   >
                     <div className="flex items-start gap-4">
                       <div
-                        className="bg-primary/10 shrink-0 rounded-full p-3"
+                        className="shrink-0 rounded-full bg-[var(--bam-gold-soft)]/20 p-3"
                         aria-hidden="true"
                       >
-                        <Leaf className="text-primary h-6 w-6" />
+                        <Leaf className="h-6 w-6 text-[var(--bam-gold-soft)]" />
                       </div>
                       <div>
                         {ctaHeading ? (
                           <h2
-                            className="text-foreground font-heading mb-2 text-xl font-bold"
+                            className="font-heading mb-2 text-xl font-bold text-[var(--bam-cream)]"
                             {...fieldAttr("bamboo.blog.post-cta-heading")}
                           >
                             {ctaHeading}
@@ -130,13 +145,16 @@ export function BambooBlogPostPage({
                         ) : null}
                         {ctaBody ? (
                           <p
-                            className="text-muted-foreground mb-4 text-sm leading-relaxed whitespace-pre-line"
+                            className="mb-4 text-sm leading-relaxed whitespace-pre-line text-[var(--bam-cream)]/80"
                             {...fieldAttr("bamboo.blog.post-cta-body")}
                           >
                             {ctaBody}
                           </p>
                         ) : null}
-                        <Button asChild className="group">
+                        <Button
+                          asChild
+                          className="group rounded-full bg-[var(--bam-cream)] text-[var(--bam-forest)] hover:bg-[var(--bam-gold-soft)]"
+                        >
                           <Link href={ctaHref!}>
                             <span
                               {...fieldAttr("bamboo.blog.post-cta-button-text")}
@@ -160,27 +178,28 @@ export function BambooBlogPostPage({
       </section>
 
       {others.length > 0 ? (
-        <section className="border-border mt-16 border-t py-16 md:py-20">
+        <section className="bg-[var(--bam-cream-deep)] py-16 md:py-20">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="mb-10">
               <h2 className="text-foreground font-heading text-2xl font-bold tracking-tight md:text-3xl">
                 You might also like
               </h2>
             </FadeIn>
-            <StaggerContainer className="grid max-w-5xl gap-6 sm:grid-cols-2">
+            <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {others.map((post) => (
                 <StaggerItem key={post.slug}>
                   <Link
                     href={`/blog/${post.slug}`}
                     className="group block h-full"
                   >
-                    <Card className="border-border/60 bg-card h-full overflow-hidden transition-shadow hover:shadow-lg">
+                    <Card className="bg-card h-full overflow-hidden border-[var(--bam-hairline)] transition-shadow hover:shadow-md">
                       <div className="relative aspect-video overflow-hidden">
+                        {/* Decorative: the card shows the title as text. */}
                         <Image
                           src={post.image ?? "/placeholder.svg"}
-                          alt={post.title}
+                          alt=""
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                           sizes="(max-width: 640px) 100vw, 432px"
                         />
                       </div>

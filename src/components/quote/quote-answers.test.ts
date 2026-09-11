@@ -21,6 +21,9 @@ function question(
     description: null,
     required: false,
     showIf: null,
+    // Every question in these fixtures is unrestricted — belongs to every
+    // tab, including the no-tabs case these tests exercise.
+    tabIds: [],
     ...overrides,
   };
 }

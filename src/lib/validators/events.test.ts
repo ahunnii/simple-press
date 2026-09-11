@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { getEventStatus, getEventWhen, isEventPast } from "./events";
+import {
+  eventCreateSchema,
+  getEventStatus,
+  getEventWhen,
+  isEventPast,
+} from "./events";
 
 /**
  * `getEventStatus` returns the mechanical publish state of an event for the
@@ -185,5 +190,40 @@ describe("isEventPast / getEventWhen", () => {
       expect(isEventPast(futureAllDay, now)).toBe(false);
       expect(getEventWhen(futureAllDay, now)).toBe("upcoming");
     });
+  });
+});
+
+/**
+ * `coverVideo` mirrors `coverImage`'s validation exactly (same
+ * `z.string().url().optional().nullable()` shape) — an event has one media
+ * slot, photo or uploaded video, with the admin form enforcing "one or the
+ * other" client-side and render precedence (video wins) doing the same
+ * server-side, so the schema itself just needs to accept a valid URL or null.
+ */
+describe("eventCreateSchema coverVideo", () => {
+  const base = { name: "Test Event", startAt: "2026-08-07T12:00" };
+
+  it("accepts a valid coverVideo URL", () => {
+    const result = eventCreateSchema.safeParse({
+      ...base,
+      coverVideo: "https://example.com/video.mp4",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null for coverVideo", () => {
+    const result = eventCreateSchema.safeParse({
+      ...base,
+      coverVideo: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a non-URL string for coverVideo", () => {
+    const result = eventCreateSchema.safeParse({
+      ...base,
+      coverVideo: "not-a-url",
+    });
+    expect(result.success).toBe(false);
   });
 });

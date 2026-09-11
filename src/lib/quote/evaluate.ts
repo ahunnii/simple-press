@@ -3,13 +3,14 @@ import type {
   QuoteCalculatorDefinition,
   QuoteQuestion,
   QuoteSubmissionAnswer,
+  QuoteTab,
   QuoteWireAnswer,
 } from "~/lib/validators/quote-calculator";
 import { addCalendarDays, isRealCalendarDate } from "~/lib/calendar-date";
 import { haversineMiles } from "~/lib/geo/haversine";
 import { evaluateAst, parseFormula } from "~/lib/quote/formula";
 import { flattenScreens } from "~/lib/quote/screens";
-import { resolveVisibility } from "~/lib/quote/visibility";
+import { resolveVisibility, tabApplies } from "~/lib/quote/visibility";
 import {
   isQuoteVariableQuestion,
   QUOTE_DATE_RE,
@@ -55,6 +56,41 @@ import {
  * because each of those means the payload or the definition is wrong rather
  * than merely incomplete. Preview never widens what a visitor can learn — it
  * runs the same formula over the same stored values and returns one number.
+ *
+ * ── Tabs ───────────────────────────────────────────────────────────────────
+ *
+ * A calculator may fork at the top into tabs ("Commercial" vs "Residential").
+ * The tab decides two things, and both are resolved HERE from the stored
+ * definition, never from the payload:
+ *
+ * - WHICH QUESTIONS APPLY. `resolveVisibility` takes the active tab id, so a
+ *   question limited to the other tab is hidden — and the anti-tamper rule for
+ *   hidden questions then covers it for free: a smuggled answer for a
+ *   Commercial-only question is DISCARDED when the visitor is on Residential,
+ *   and its variable takes the owner's `hiddenDefault`. Without that, the two
+ *   halves of a forked calculator would be one crafted payload away from being
+ *   priced against each other.
+ * - WHICH FORMULA PRICES THEM. `tab.formula ?? definition.formula` — the tab's
+ *   override when it has one, the shared root formula otherwise. The client
+ *   posts a tab ID; the projection it was handed carries no formula at all, so
+ *   the worst a crafted `tabId` can do is select a tab the owner published.
+ *
+ * The tab is resolved BEFORE anything else, because the formula that gets
+ * parsed once (for ZIP narrowing and for pricing) depends on it.
+ *
+ * Missing or unknown `tabId` on a calculator that HAS tabs is a hard
+ * `unknown-tab` failure in submit mode — the visitor has not made the one
+ * choice the whole flow forks on, and there is no safe default: guessing the
+ * first tab would price a commercial job at residential rates. Preview is
+ * lenient for the same reason it is lenient about a missing required answer:
+ * the running estimate exists to update mid-flow, and blanking it out because
+ * the visitor has not clicked a tab yet is worse than showing a conservative
+ * number. With no tab, only unrestricted questions apply and the root formula
+ * prices them — which can only UNDER-ask, never over-ask.
+ *
+ * `tabs: []` (every calculator built before tabs existed, and most built
+ * since) short-circuits all of this: `options.tabId` is ignored outright, and
+ * every question and the root formula apply exactly as before.
  */
 
 export type ZipLocation = {
@@ -76,11 +112,21 @@ export type QuoteComputationErrorCode =
   | "unknown-option"
   | "bad-answer"
   | "formula-failed"
-  | "unknown-zip";
+  | "unknown-zip"
+  /**
+   * A calculator with tabs was submitted without one, or with an id matching
+   * no tab. Not about any single question — the fork happens before the first
+   * one — so it carries no `questionId`; the runner routes it back to the tab
+   * switcher.
+   */
+  | "unknown-tab";
 
 export type QuoteComputationError = {
   code: QuoteComputationErrorCode;
-  /** Set for every code except `formula-failed`, which is not about one question. */
+  /**
+   * Set for every code except `formula-failed` and `unknown-tab`, neither of
+   * which is about one question.
+   */
   questionId?: string;
   message: string;
 };
@@ -120,6 +166,26 @@ export type QuoteComputationResult =
       estimateFailure?: QuoteEstimateFailure;
       variables: Record<string, number>;
       answerSnapshots: QuoteSubmissionAnswer[];
+      /**
+       * The tab this was priced against, or `null` for a calculator with no
+       * tabs (and for the preview path when the visitor has not picked one).
+       *
+       * Both halves, not just the id: the label is what the owner reads back
+       * off a six-month-old lead, and a tab renamed or deleted next quarter
+       * must not turn a stored quote into a bare cuid. Callers copy this
+       * straight onto `formulaSnapshot.tab`.
+       */
+      tab: { id: string; label: string } | null;
+      /**
+       * The formula that was ACTUALLY evaluated — the active tab's override
+       * when it has one, `definition.formula` otherwise.
+       *
+       * Returned rather than left for the caller to re-derive, because
+       * re-deriving it means re-implementing the tab lookup, and a
+       * `formulaSnapshot` that records the root formula for a quote priced by
+       * an override is a snapshot that answers "why is this $3,264?" wrongly.
+       */
+      formula: string;
     }
   | { ok: false; error: QuoteComputationError };
 
@@ -175,15 +241,32 @@ function failure(
   };
 }
 
+/**
+ * `hiddenReason` is spread in ONLY when the row is hidden, so a visible row
+ * carries no such key at all.
+ *
+ * That is not tidiness — `answerSnapshots` is written verbatim into
+ * `QuoteSubmission.answers` and compared against rows written before tabs
+ * existed. Adding an always-present key would change the JSON of every row on
+ * every quote, and any test or consumer doing an exact-shape comparison
+ * against a visible row would start failing over a field that says nothing.
+ *
+ * When the row IS hidden, the reason is the thing an owner cannot recover
+ * later: "they said no to stairs" (`branch`) and "this is only asked of
+ * commercial jobs" (`tab`) render as the same blank, and the definition they
+ * would have to reconstruct it from has been edited since.
+ */
 function baseSnapshot(
   question: QuoteQuestion,
   hidden: boolean,
+  hiddenReason?: "branch" | "tab",
 ): QuoteSubmissionAnswer {
   const row: QuoteSubmissionAnswer = {
     questionId: question.id,
     type: question.type,
     title: question.title,
     hidden,
+    ...(hiddenReason === undefined ? {} : { hiddenReason }),
     display: UNANSWERED_DISPLAY,
   };
   if (isQuoteVariableQuestion(question)) {
@@ -216,6 +299,20 @@ export type QuoteComputationOptions = {
    * silently comparing against the wrong day.
    */
   today?: string;
+  /**
+   * Which tab the visitor is standing on, as an id from `definition.tabs`.
+   *
+   * Ignored entirely when the definition has no tabs — a stray id from an
+   * older embed, or a hand-built payload, must never make a tab-less
+   * calculator behave differently.
+   *
+   * When the definition DOES have tabs, submit mode requires it to match one:
+   * see the `unknown-tab` failure below and the "Tabs" note at the top of the
+   * file. `null` and `undefined` mean the same thing (no tab chosen); both are
+   * accepted so a caller reading an optional wire field can pass it straight
+   * through.
+   */
+  tabId?: string | null;
 };
 
 export function computeQuote(
@@ -234,10 +331,54 @@ export function computeQuote(
   /** See `QuoteComputationOptions.today` — `undefined` disables date bounds. */
   const today = options?.today;
 
+  // ── The tab ───────────────────────────────────────────────────────────────
+  // First, because everything downstream depends on it: which questions apply,
+  // and which formula gets parsed exactly once just below.
+  //
+  // `tabs: []` short-circuits to `null` and IGNORES `options.tabId` outright.
+  // A tab-less calculator has no fork to resolve, and letting a stray id from
+  // an old embed reach the lookup would be a way to make it fail.
+  let activeTab: QuoteTab | null = null;
+  if (definition.tabs.length > 0) {
+    const requestedTabId = options?.tabId ?? null;
+    const matched =
+      requestedTabId === null
+        ? undefined
+        : definition.tabs.find((tab) => tab.id === requestedTabId);
+
+    if (matched) {
+      activeTab = matched;
+    } else if (!lenient) {
+      // No safe default exists. Falling back to the first tab would price a
+      // commercial job at residential rates and tell nobody; falling back to
+      // "no tab" would drop every tab-restricted question and quote the
+      // visitor for a form they did not fill in. So submit refuses, with a
+      // message written for the visitor rather than the developer — a missing
+      // tab is almost always "they never clicked one", and an unknown one is a
+      // tab deleted between page load and submit, which reads the same to
+      // them. No `questionId`: the fork is not a question.
+      return failure("unknown-tab", "Choose an option to continue");
+    }
+    // Preview with no usable tab falls through with `activeTab === null` — the
+    // conservative reading. See the "Tabs" note at the top of the file.
+  }
+
+  /** `null` for a tab-less calculator, and for a tab-less preview. */
+  const activeTabId = activeTab?.id ?? null;
+
+  /**
+   * The formula that actually prices this submission: the active tab's
+   * override if it set one, the shared root formula otherwise. Returned on the
+   * result so the caller's `formulaSnapshot` records what really ran.
+   */
+  const activeFormula = activeTab?.formula ?? definition.formula;
+
   // Parsed ONCE, here, because two separate things need it: deciding which
   // distances can fail a submission over an unknown ZIP (just below), and
-  // pricing at the end.
-  const parsedFormula = parseFormula(definition.formula);
+  // pricing at the end. Note this is the ACTIVE formula — a tab whose override
+  // never names the distance variable must not turn an unrecognized ZIP into a
+  // dead end on a tab that does not price with it.
+  const parsedFormula = parseFormula(activeFormula);
 
   // `null` means "we could not read the formula", NOT "the formula names
   // nothing" — the two must not collapse, because the first has to keep
@@ -263,17 +404,22 @@ export function computeQuote(
     if (!questionById.has(question.id)) questionById.set(question.id, question);
   }
 
-  // Visibility is resolved from the SUBMITTED choice/dropdown selections, using
-  // the exact helper the storefront runner used to decide what to show. See
-  // `src/lib/quote/visibility.ts` for why that sharing is load-bearing.
-  const visibility = resolveVisibility(questions, (questionId) => {
-    const question = questionById.get(questionId);
-    if (!question) return undefined;
-    if (question.type !== "choice" && question.type !== "dropdown") {
-      return undefined;
-    }
-    return answers.get(questionId)?.optionId;
-  });
+  // Visibility is resolved from the ACTIVE TAB plus the SUBMITTED
+  // choice/dropdown selections, using the exact helper the storefront runner
+  // used to decide what to show. See `src/lib/quote/visibility.ts` for why that
+  // sharing is load-bearing.
+  const visibility = resolveVisibility(
+    questions,
+    (questionId) => {
+      const question = questionById.get(questionId);
+      if (!question) return undefined;
+      if (question.type !== "choice" && question.type !== "dropdown") {
+        return undefined;
+      }
+      return answers.get(questionId)?.optionId;
+    },
+    activeTabId,
+  );
 
   // Which location questions feed a distance the FORMULA ACTUALLY PRICES WITH.
   // Only those have to resolve to real coordinates: without them there is no
@@ -314,12 +460,24 @@ export function computeQuote(
     if (!isVisible) {
       // Anti-tamper: a submitted answer for a hidden question is DISCARDED,
       // not read. Otherwise a crafted payload could smuggle the cheapest
-      // option into a branch the visitor never qualified for, and the price
-      // would come out as if they had.
+      // option into a branch the visitor never qualified for — or into the
+      // OTHER TAB, since a Commercial-only question is hidden here whenever
+      // Residential is active — and the price would come out as if they had.
       if (isQuoteVariableQuestion(question)) {
         variables.set(question.variableName, question.hiddenDefault);
       }
-      snapshots.push(baseSnapshot(question, true));
+      // The two reasons render as the same blank on the owner's lead, so the
+      // row records which one it was. `tabApplies` is re-asked rather than
+      // threaded out of `resolveVisibility` because it is a pure, cheap
+      // membership test and the alternative is a second parallel map that can
+      // fall out of step with the first.
+      snapshots.push(
+        baseSnapshot(
+          question,
+          true,
+          tabApplies(question.tabIds, activeTabId) ? "branch" : "tab",
+        ),
+      );
       continue;
     }
 
@@ -728,6 +886,14 @@ export function computeQuote(
     variables.set(distance.variableName, miles);
   }
 
+  // The `{ id, label }` pair every ok:true path carries. Narrowed once here
+  // rather than at each return so the two cannot drift apart, and reduced to
+  // the two fields a stored snapshot needs — a tab's `formula` is owner-only
+  // and has no business travelling out on a result the router hands onward.
+  const activeTabSnapshot = activeTab
+    ? { id: activeTab.id, label: activeTab.label }
+    : null;
+
   // ── Price ─────────────────────────────────────────────────────────────────
   const resolvedVariables = Object.fromEntries(variables);
   // `evaluateFormula` inlined against the AST parsed at the top of the function
@@ -753,6 +919,8 @@ export function computeQuote(
         },
         variables: resolvedVariables,
         answerSnapshots: snapshots,
+        tab: activeTabSnapshot,
+        formula: activeFormula,
       };
     }
     return failure("formula-failed", evaluated.error.message);
@@ -766,6 +934,8 @@ export function computeQuote(
     ...(finalized.failure ? { estimateFailure: finalized.failure } : {}),
     variables: resolvedVariables,
     answerSnapshots: snapshots,
+    tab: activeTabSnapshot,
+    formula: activeFormula,
   };
 }
 

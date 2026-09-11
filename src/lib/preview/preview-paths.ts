@@ -5,6 +5,7 @@ export const PAGE_PREVIEW_PATHS: Record<string, string> = {
   blog: "/blog",
   contact: "/contact",
   collections: "/collections",
+  donate: "/donate",
   testimonials: "/testimonials",
   // The "products" tab edits the shop/product-listing page, served at /shop.
   products: "/shop",

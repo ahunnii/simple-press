@@ -703,6 +703,7 @@ export function buildBlogPostingSchema(
 
 interface EventForSchema {
   name: string;
+  slug: string;
   blurb?: string | null;
   coverImage?: string | null;
   startAt: Date | string;
@@ -713,10 +714,11 @@ interface EventForSchema {
 }
 
 /**
- * Build a schema.org Event object for the storefront /events index.
+ * Build a schema.org Event object for the storefront /events index and its
+ * per-event detail pages.
  *
- * There is deliberately no per-event detail page — `url` always points at
- * the canonical `/events` index, for every event.
+ * Each event has its own canonical detail page at `/events/[slug]`, so `url`
+ * points there rather than at the `/events` index, for every event.
  *
  * `startDate`/`endDate` are date-only ("YYYY-MM-DD") for all-day events,
  * computed in the business's own `timeZone` (never the server's ambient
@@ -737,7 +739,7 @@ export function buildEventSchema(
   business: CanonicalBusiness & { name: string },
   timeZone: string,
 ): Record<string, unknown> {
-  const canonicalUrl = getCanonicalUrl(business, "/events");
+  const canonicalUrl = getCanonicalUrl(business, `/events/${event.slug}`);
 
   // Reuse eventDateTimeAttr (the same helper the <time dateTime> attribute
   // uses) rather than re-deriving the all-day-vs-timed / zone logic here —

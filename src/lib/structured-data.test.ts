@@ -14,6 +14,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Market Day",
+        slug: "market-day",
         startAt: new Date("2026-08-15T19:00:00.000Z"),
         endAt: new Date("2026-08-15T21:00:00.000Z"),
         allDay: false,
@@ -30,6 +31,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Community Meetup",
+        slug: "community-meetup",
         startAt: new Date("2026-08-15T19:00:00.000Z"),
         allDay: false,
         priceLabel: "Free",
@@ -51,6 +53,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Summer Fair",
+        slug: "summer-fair",
         startAt: new Date("2026-08-15T07:00:00.000Z"),
         endAt: new Date("2026-08-16T06:59:59.999Z"),
         allDay: true,
@@ -70,6 +73,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Night Market",
+        slug: "night-market",
         startAt: new Date("2026-08-14T15:00:00.000Z"),
         endAt: new Date("2026-08-15T14:59:59.999Z"),
         allDay: true,
@@ -86,6 +90,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Evening Workshop",
+        slug: "evening-workshop",
         startAt: new Date("2026-08-15T19:00:00.000Z"),
         endAt: new Date("2026-08-15T21:00:00.000Z"),
         allDay: false,
@@ -102,6 +107,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Pop-Up",
+        slug: "pop-up",
         startAt: new Date("2026-08-15T19:00:00.000Z"),
         endAt: null,
         allDay: false,
@@ -117,6 +123,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Pop-Up",
+        slug: "pop-up",
         startAt: new Date("2026-08-15T19:00:00.000Z"),
         allDay: false,
         location: null,
@@ -132,6 +139,7 @@ describe("buildEventSchema", () => {
     const schema = buildEventSchema(
       {
         name: "Pop-Up",
+        slug: "pop-up",
         startAt: new Date("2026-08-15T19:00:00.000Z"),
         allDay: false,
         location: "123 Main St, Detroit, MI",
@@ -146,10 +154,11 @@ describe("buildEventSchema", () => {
     });
   });
 
-  it("points url at the canonical /events index, not a per-event path", () => {
+  it("points url at the event's own canonical detail path, not the /events index", () => {
     const schema = buildEventSchema(
       {
         name: "Pop-Up",
+        slug: "pop-up",
         startAt: new Date("2026-08-15T19:00:00.000Z"),
         allDay: false,
       },
@@ -157,7 +166,7 @@ describe("buildEventSchema", () => {
       "America/Detroit",
     );
 
-    expect(schema.url).toBe("https://testshop.simplepress.test/events");
+    expect(schema.url).toBe("https://testshop.simplepress.test/events/pop-up");
   });
 });
 

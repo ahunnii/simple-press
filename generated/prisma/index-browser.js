@@ -209,6 +209,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   maintenanceMode: 'maintenanceMode',
   maintenanceVariant: 'maintenanceVariant',
   maintenanceMessage: 'maintenanceMessage',
+  maintenanceCta: 'maintenanceCta',
   umamiWebsiteId: 'umamiWebsiteId',
   umamiEnabled: 'umamiEnabled',
   status: 'status',
@@ -228,7 +229,13 @@ exports.Prisma.BusinessScalarFieldEnum = {
   businessHours: 'businessHours',
   shippingFallbackRate: 'shippingFallbackRate',
   shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
-  salesCountries: 'salesCountries'
+  salesCountries: 'salesCountries',
+  donationLabel: 'donationLabel',
+  donationPresetAmounts: 'donationPresetAmounts',
+  venmoHandle: 'venmoHandle',
+  cashAppHandle: 'cashAppHandle',
+  donationShowInHeader: 'donationShowInHeader',
+  donationShowInFooter: 'donationShowInFooter'
 };
 
 exports.Prisma.SiteContentScalarFieldEnum = {
@@ -405,8 +412,10 @@ exports.Prisma.EventScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   name: 'name',
+  slug: 'slug',
   blurb: 'blurb',
   coverImage: 'coverImage',
+  coverVideo: 'coverVideo',
   startAt: 'startAt',
   endAt: 'endAt',
   allDay: 'allDay',
@@ -980,17 +989,30 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   merchantTermsUpdatedAt: 'merchantTermsUpdatedAt'
 };
 
+exports.Prisma.DonationScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  stripeSessionId: 'stripeSessionId',
+  stripePaymentIntentId: 'stripePaymentIntentId',
+  amountCents: 'amountCents',
+  currency: 'currency',
+  donorName: 'donorName',
+  donorEmail: 'donorEmail',
+  message: 'message'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
 };
 
-exports.Prisma.JsonNullValueInput = {
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -1074,7 +1096,8 @@ exports.Prisma.ModelName = {
   QuoteSubmission: 'QuoteSubmission',
   QuickBooksConnection: 'QuickBooksConnection',
   QuickBooksInvoice: 'QuickBooksInvoice',
-  Subscription: 'Subscription'
+  Subscription: 'Subscription',
+  Donation: 'Donation'
 };
 
 /**

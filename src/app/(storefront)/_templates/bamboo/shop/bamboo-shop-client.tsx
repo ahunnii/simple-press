@@ -44,7 +44,7 @@ export function BambooShopClient({ products }: Props) {
   } = useShopFilters(products, { pageSize: 12 });
 
   return (
-    <div>
+    <div className="mt-10">
       {/* Controls */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
@@ -117,8 +117,8 @@ export function BambooShopClient({ products }: Props) {
             aria-pressed={!activeCollectionId}
             className={`rounded-full border px-4 py-1.5 font-sans text-xs font-medium transition-colors ${
               !activeCollectionId
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:text-foreground"
+                ? "border-[var(--bam-forest)] bg-[var(--bam-forest)] text-[var(--bam-cream)]"
+                : "text-muted-foreground border-[var(--bam-hairline)] hover:border-[var(--bam-gold)]/40 hover:text-[var(--bam-forest-deep)]"
             }`}
           >
             All
@@ -135,8 +135,8 @@ export function BambooShopClient({ products }: Props) {
               aria-pressed={activeCollectionId === col.id}
               className={`rounded-full border px-4 py-1.5 font-sans text-xs font-medium transition-colors ${
                 activeCollectionId === col.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:text-foreground"
+                  ? "border-[var(--bam-forest)] bg-[var(--bam-forest)] text-[var(--bam-cream)]"
+                  : "text-muted-foreground border-[var(--bam-hairline)] hover:border-[var(--bam-gold)]/40 hover:text-[var(--bam-forest-deep)]"
               }`}
             >
               {col.name}
@@ -152,7 +152,8 @@ export function BambooShopClient({ products }: Props) {
           : `${filtered.length} of ${products.length} products`}
       </p>
 
-      {/* Product grid */}
+      {/* Product grid. The sr-only h2 keeps the outline h1 → h2 → card h3. */}
+      <h2 className="sr-only">Products</h2>
       {paginated.length === 0 ? (
         <p
           role="status"
@@ -170,7 +171,7 @@ export function BambooShopClient({ products }: Props) {
       ) : (
         <StaggerContainer
           key={paginated.map((p) => p.id).join(",")}
-          className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2"
           staggerDelay={0.12}
         >
           {paginated.map((product, index) => (

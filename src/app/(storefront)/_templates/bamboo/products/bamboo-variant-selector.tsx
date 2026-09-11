@@ -172,7 +172,7 @@ export function BambooVariantSelector({
                 handleAddToCart();
               }}
               aria-disabled={isUnavailable ? "true" : undefined}
-              className={`flex-1 ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
+              className={`flex-1 rounded-full hover:bg-[var(--bam-forest-deep)] ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
             >
               {isAdded ? (
                 <>

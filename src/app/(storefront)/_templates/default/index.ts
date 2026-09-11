@@ -8,6 +8,7 @@ import {
   defaultCollectionsFieldGroups,
 } from "./collections";
 import { defaultContactData, defaultContactFieldGroups } from "./contact";
+import { defaultDonateData, defaultDonateFieldGroups } from "./donate";
 import { defaultEventsData, defaultEventsFieldGroups } from "./events";
 import { defaultHomepageData, defaultHomepageFieldGroups } from "./homepage";
 import { defaultServicesData, defaultServicesFieldGroups } from "./services";
@@ -131,6 +132,7 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...defaultBlogFieldGroups,
   ...defaultCollectionsFieldGroups,
   ...defaultContactFieldGroups,
+  ...defaultDonateFieldGroups,
   ...defaultEventsFieldGroups,
   ...defaultServicesFieldGroups,
   ...defaultShopFieldGroups,
@@ -159,6 +161,7 @@ export const defaultTemplateData = {
     ...defaultBlogData,
     ...defaultCollectionsData,
     ...defaultContactData,
+    ...defaultDonateData,
     ...defaultEventsData,
     ...defaultServicesData,
     ...defaultShopData,

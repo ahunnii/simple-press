@@ -183,6 +183,14 @@ export const subscriptionCheckoutLimiter = makeLazy({
   keyPrefix: "rl:subscription-checkout",
 });
 
+// 5 donation checkout attempts per minute per IP — donation forms (small,
+// no-login, often-repeated card charges) are a card-testing target.
+export const donationCheckoutLimiter = makeLazy({
+  points: 5,
+  duration: 60,
+  keyPrefix: "rl:donation-checkout",
+});
+
 // 5 subscription manage-link lookups per 15 minutes per IP+host
 export const subscriptionLookupLimiter = makeLazy({
   points: 5,

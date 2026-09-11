@@ -74,7 +74,9 @@ import {
   loadingToast,
 } from "../../../_lib/admin-mutation-toast";
 import {
+  applyTypeChange,
   collectVariableNames,
+  commonTabIds,
   isConditionSourceType,
   isLocationQuestionInput,
   isOptionQuestionInput,
@@ -88,6 +90,7 @@ import { CalculatorDistancesCard } from "./calculator-distances-card";
 import { CalculatorFormulaCard } from "./calculator-formula-card";
 import { CalculatorScreenCard } from "./calculator-screen-card";
 import { CalculatorSettingsCard } from "./calculator-settings-card";
+import { CalculatorTabsCard } from "./calculator-tabs-card";
 import { CalculatorTestPanel } from "./calculator-test-panel";
 
 const LIST_PATH = "/admin/quotes/calculators";
@@ -151,6 +154,7 @@ export function CalculatorBuilder({ calculator }: Props) {
   // id — and the questions nested under a row are not on `fields` at all.
   const watchedScreens = form.watch("definition.screens") ?? [];
   const watchedDistances = form.watch("definition.distances") ?? [];
+  const watchedTabs = form.watch("definition.tabs") ?? [];
   const watchedFormula = form.watch("definition.formula") ?? "";
   const showEstimateToCustomer =
     form.watch("definition.showEstimateToCustomer") ?? false;
@@ -191,6 +195,19 @@ export function CalculatorBuilder({ calculator }: Props) {
   const screenOptions = watchedScreens.map((screen, index) => ({
     index,
     label: (screen.title ?? "").trim() || `Screen ${index + 1}`,
+  }));
+
+  /**
+   * Tabs, resolved once so a blank label reads the same everywhere: "Tab N".
+   * Fed to the screen card's "Show this screen on" picker (which forwards it
+   * to each question card's own tab picker) and the test panel's tab
+   * selector — the latter also needs `formula` to know which override prices
+   * the tab it is standing on, which the screen card simply ignores.
+   */
+  const tabOptions = watchedTabs.map((tab, index) => ({
+    id: tab.id,
+    label: tab.label.trim() || `Tab ${index + 1}`,
+    formula: tab.formula ?? null,
   }));
 
   /**
@@ -265,6 +282,15 @@ export function CalculatorBuilder({ calculator }: Props) {
     if (!screen) return;
 
     const question = makeQuestion(type);
+    // Inherit the screen's tab membership rather than defaulting to "every
+    // tab": joining a Commercial-only screen with a question visible
+    // everywhere would silently break the "this screen is Commercial-only"
+    // mental model the owner is editing under. `"mixed"` (the screen's
+    // existing questions already disagree) seeds `[]` instead — there is no
+    // single membership to inherit, so the new question falls back to the
+    // one every pre-tabs question already has.
+    const shared = commonTabIds(screen.questions);
+    question.tabIds = shared === "mixed" ? [] : shared;
     screen.questions.push(question);
     commitScreens(next);
     setOpenQuestionIds((previous) => [...previous, question.id]);
@@ -328,6 +354,73 @@ export function CalculatorBuilder({ calculator }: Props) {
     if (source.questions.length === 0) next.splice(fromScreenIndex, 1);
 
     commitScreens(next);
+  };
+
+  /**
+   * Sets every question on one screen to the same tab membership.
+   *
+   * Whole-screen, not per-question: the screen card's "Show this screen on"
+   * control is how an owner actually thinks about tabs ("this screen is
+   * Commercial-only"), not question by question. `tabIds` here is already
+   * normalized to `[]` for "every tab" by the caller (the screen card, which
+   * is the one that knows how many tabs exist and can tell "all selected"
+   * apart from "none selected") — this function just fans the value out.
+   */
+  const setScreenTabIds = (screenIndex: number, tabIds: string[]) => {
+    const next = cloneScreens();
+    const screen = next[screenIndex];
+    if (!screen) return;
+
+    screen.questions = screen.questions.map((question) => ({
+      ...question,
+      tabIds: [...tabIds],
+    }));
+    commitScreens(next);
+  };
+
+  /**
+   * Applies a type change to one question, wherever it lives.
+   *
+   * Reads `definition` fresh via `getValues` rather than trusting
+   * `watchedScreens`/`watchedDistances`: `applyTypeChange` needs both halves
+   * together (a dropped location type can remove a distance that references
+   * it), and only `getValues` guarantees they are read from the same instant.
+   *
+   * The distances half is NOT owned here — `CalculatorDistancesCard` owns its
+   * own `useFieldArray("definition.distances")` — so a distance removal is
+   * written through `form.setValue` on that same registered path rather than
+   * a local `replace`. **This needs a manual QA pass in the running app**:
+   * react-hook-form v7 is documented to propagate a `setValue` on a
+   * field-array's own name to that array's hook, but that behavior has not
+   * been exercised end-to-end here (no typecheck or test run was available
+   * while writing this). If it silently fails to sync, the distances card
+   * would keep showing a row pointing at a question that no longer exists;
+   * the fallback, if QA finds that, is hoisting the distances field array up
+   * into this component so both halves are written by the same `replace`.
+   *
+   * The changed question's card stays open for free: `openQuestionIds` is
+   * keyed by question id, and `applyTypeChange` always preserves the id.
+   */
+  const changeQuestionType = (
+    screenIndex: number,
+    questionIndex: number,
+    nextType: QuoteQuestionType,
+  ) => {
+    const definition = form.getValues("definition");
+    const question = definition.screens[screenIndex]?.questions[questionIndex];
+    if (!question) return;
+
+    const { screens, distances } = applyTypeChange(
+      definition,
+      question.id,
+      nextType,
+    );
+    commitScreens(screens);
+
+    const previousDistances = definition.distances ?? [];
+    if (distances.length !== previousDistances.length) {
+      form.setValue("definition.distances", distances, { shouldDirty: true });
+    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -620,6 +713,20 @@ export function CalculatorBuilder({ calculator }: Props) {
                                 screenOptions={screenOptions}
                                 totalQuestionCount={flatQuestions.length}
                                 conditionSourcesFor={conditionSourcesFor}
+                                tabs={tabOptions}
+                                onSetScreenTabIds={(tabIds) =>
+                                  setScreenTabIds(screenIndex, tabIds)
+                                }
+                                onChangeQuestionType={(
+                                  questionIndex,
+                                  nextType,
+                                ) =>
+                                  changeQuestionType(
+                                    screenIndex,
+                                    questionIndex,
+                                    nextType,
+                                  )
+                                }
                                 openQuestionIds={openQuestionIds}
                                 onOpenChange={(questionId, next) =>
                                   setOpenQuestionIds((previous) =>
@@ -667,6 +774,14 @@ export function CalculatorBuilder({ calculator }: Props) {
                 </CardContent>
               </Card>
 
+              <CalculatorTabsCard
+                form={form}
+                flatQuestions={flatQuestions}
+                availableVariables={availableVariables}
+                cloneScreens={cloneScreens}
+                commitScreens={commitScreens}
+              />
+
               {/* Distances need two endpoints, so the panel appears only once
                   two location questions (ZIP or address) exist. Below that
                   there is nothing it could offer that the validator would
@@ -682,6 +797,7 @@ export function CalculatorBuilder({ calculator }: Props) {
                 form={form}
                 formula={watchedFormula}
                 availableVariables={availableVariables}
+                hasTabs={watchedTabs.length > 0}
               />
             </div>
 
@@ -690,6 +806,7 @@ export function CalculatorBuilder({ calculator }: Props) {
               <CalculatorTestPanel
                 questions={flatQuestions}
                 distances={watchedDistances}
+                tabs={tabOptions}
                 formula={watchedFormula}
                 showEstimateToCustomer={showEstimateToCustomer}
                 showEstimateOnScreen={showEstimateOnScreen}

@@ -16,7 +16,7 @@
 
 // ─── Format version ───────────────────────────────────────────────────────────
 
-export const STORE_TRANSFER_FORMAT_VERSION = 1 as const;
+export const STORE_TRANSFER_FORMAT_VERSION = 2 as const;
 
 // ─── Media kind ───────────────────────────────────────────────────────────────
 
@@ -82,7 +82,8 @@ export interface ExportedBusiness {
   testimonialsAutoApprove: boolean;
   maintenanceMode: boolean;
   maintenanceVariant: string;
-  maintenanceMessage: string | null;
+  maintenanceMessage: unknown; // TipTap JSON doc
+  maintenanceCta: unknown; // MaintenanceCta JSON
   // SEO
   localBusinessEnabled: boolean;
   allowAiCrawlers: boolean;
@@ -353,8 +354,11 @@ export interface ExportedFaqItem {
 export interface ExportedEvent {
   exportId: string;
   name: string;
+  /** Added after events shipped in the original format — nullable so older manifests still parse. */
+  slug: string | null;
   blurb: string | null;
   coverImage: string | null;
+  coverVideo: string | null;
   startAt: string; // ISO string
   endAt: string | null; // ISO string
   allDay: boolean;

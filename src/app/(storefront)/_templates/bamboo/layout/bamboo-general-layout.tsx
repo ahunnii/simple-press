@@ -1,20 +1,47 @@
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Outfit, Spectral } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveBanner } from "~/lib/site-banner/resolve";
+import { resolveThemeVars } from "~/lib/template-themes";
+import { getSession } from "~/server/better-auth/server";
 
+import { BambooAnnouncementBar } from "./bamboo-announcement-bar";
 import { BambooFooter } from "./bamboo-footer";
 import { BambooHeader } from "./bamboo-header";
 import { BambooRouteAnnouncer } from "./bamboo-route-announcer";
 
-const _inter = Inter({ subsets: ["latin"] });
-const _plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"] });
-export function BambooLayout({
+const fontSans = Outfit({
+  subsets: ["latin"],
+  variable: "--font-bam-sans",
+  display: "swap",
+});
+const fontSerif = Spectral({
+  subsets: ["latin"],
+  variable: "--font-bam-serif",
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+export async function BambooLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
+  const [session, { isEnabled }] = await Promise.all([
+    getSession(),
+    getBusinessFlags(),
+  ]);
+
+  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const themeVars = resolveThemeVars(
+    "bamboo",
+    business.siteContent?.customFields,
+  );
+
   return (
     <div
-      className={`${_inter.className} ${_plusJakartaSans.className} bamboo flex min-h-screen flex-col`}
+      className={`${fontSans.variable} ${fontSerif.variable} bamboo bg-background relative flex min-h-screen flex-col`}
+      style={themeVars ?? undefined}
     >
       {/* Skip navigation — first focusable element on every page */}
       <a
@@ -24,7 +51,8 @@ export function BambooLayout({
         Skip to main content
       </a>
       <BambooRouteAnnouncer />
-      <BambooHeader business={business} />
+      {banner && <BambooAnnouncementBar banner={banner} />}
+      <BambooHeader business={business} initialSession={session ?? null} />
       <main
         id="bamboo-main-content"
         className="min-h-[calc(100vh-4rem)] flex-1"

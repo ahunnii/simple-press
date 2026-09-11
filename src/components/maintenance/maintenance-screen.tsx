@@ -1,10 +1,25 @@
+import { cn } from "~/lib/utils";
+import { buttonVariants } from "~/components/ui/button";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import {
+  normalizeMaintenanceMessage,
+  type ResolvedMaintenanceCta,
+} from "~/lib/maintenance-config";
+
 type Props = {
   variant: "maintenance" | "coming_soon";
-  message?: string | null;
+  message?: string | TiptapJSON | null;
+  cta?: ResolvedMaintenanceCta | null;
   businessName?: string | null;
 };
 
-export function MaintenanceScreen({ variant, message, businessName }: Props) {
+export function MaintenanceScreen({
+  variant,
+  message,
+  cta,
+  businessName,
+}: Props) {
   const heading =
     variant === "coming_soon" ? "Coming soon" : "We'll be back soon";
 
@@ -44,10 +59,32 @@ export function MaintenanceScreen({ variant, message, businessName }: Props) {
           <p className="text-muted-foreground max-w-md text-base leading-relaxed sm:text-lg">
             {subtext}
           </p>
-          {message && (
+          {typeof message === "string" && message ? (
             <p className="text-foreground/80 mt-4 max-w-md text-sm leading-relaxed">
               {message}
             </p>
+          ) : message ? (
+            (() => {
+              const normalized = normalizeMaintenanceMessage(message);
+              return normalized ? (
+                <TiptapRenderer
+                  content={normalized}
+                  className="text-foreground/80 mt-4 max-w-md text-sm leading-relaxed"
+                />
+              ) : null;
+            })()
+          ) : null}
+          {cta && (
+            <a
+              href={cta.href}
+              className={cn(buttonVariants(), "mt-6")}
+              {...(cta.type === "external" && {
+                target: "_blank",
+                rel: "noopener noreferrer",
+              })}
+            >
+              {cta.label}
+            </a>
           )}
         </main>
       </div>

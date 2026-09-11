@@ -7,6 +7,7 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 import { EventFlierLightbox } from "~/app/(storefront)/_components/events/event-flier-lightbox";
+import { EventFlierVideo } from "~/app/(storefront)/_components/events/event-flier-video";
 
 import { resolveFields } from "..";
 
@@ -107,9 +108,17 @@ export async function DefaultEventsPage({
                     key={event.id}
                     className="grid grid-cols-1 gap-8 border-b border-[#e8e8e8] pb-14 last:border-b-0 last:pb-0 sm:grid-cols-[280px_1fr]"
                   >
-                    {/* Flier */}
+                    {/* Flier — one media slot per event, video first. Both
+                        media types letterbox inside the framed 3:4 box on the
+                        #efece8 background; a video now expands into a lightbox
+                        with native controls, an image opens full size. */}
                     <div className="relative aspect-3/4 overflow-hidden rounded-(--radius) bg-[#efece8]">
-                      {event.coverImage ? (
+                      {event.coverVideo ? (
+                        <EventFlierVideo
+                          src={event.coverVideo}
+                          name={event.name}
+                        />
+                      ) : event.coverImage ? (
                         <EventFlierLightbox
                           src={event.coverImage}
                           alt={event.name}
@@ -119,7 +128,7 @@ export async function DefaultEventsPage({
                               src={event.coverImage}
                               alt={event.name}
                               fill
-                              className="object-cover transition-transform duration-500 hover:scale-105"
+                              className="object-contain transition-transform duration-500 hover:scale-105"
                               sizes="(max-width: 640px) 100vw, 280px"
                             />
                           </div>
@@ -136,7 +145,12 @@ export async function DefaultEventsPage({
                         {formatEventDate(event, timeZone, { showZone: true })}
                       </time>
                       <h2 className="font-serif text-[26px] font-medium tracking-[-0.015em]">
-                        {event.name}
+                        <Link
+                          href={`/events/${event.slug}`}
+                          className="hover:underline underline-offset-4"
+                        >
+                          {event.name}
+                        </Link>
                       </h2>
                       {event.location && (
                         <p className="text-[14px] text-[#6b6b6b]">

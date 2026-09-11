@@ -150,16 +150,33 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
           }}
         >
           {list.map((img, i) => (
-            <Image
+            <div
               key={img.id}
-              src={img.url}
-              alt={img.altText ?? productName}
-              fill
-              priority={i === 0}
-              className="object-cover transition-opacity duration-500"
+              className="absolute inset-0 transition-opacity duration-500"
               style={{ opacity: active === i ? 1 : 0 }}
-              sizes="(max-width: 640px) 100vw, 45vw"
-            />
+            >
+              {/* Ambient backdrop: tiny blurred self-copy fills the 4:5
+                  letterbox as a glow over var(--pink-panel) (same recipe as
+                  the shared gallery's mainImageFit="contain"). scale-125
+                  suffices at this ~45vw frame; rendered per image so the
+                  backdrop cross-fades in lockstep with its foreground. */}
+              <Image
+                src={img.url}
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="128px"
+                className="scale-125 object-cover opacity-90 blur-2xl saturate-125"
+              />
+              <Image
+                src={img.url}
+                alt={img.altText ?? productName}
+                fill
+                priority={i === 0}
+                className="object-contain"
+                sizes="(max-width: 640px) 100vw, 45vw"
+              />
+            </div>
           ))}
           {badge && (
             <span className="absolute top-3 left-3">

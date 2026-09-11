@@ -14,12 +14,12 @@ export async function BambooCheckoutPage({
   if (!business.isStripeConnected) {
     return (
       <PageTransition>
-        <div className="bg-foreground flex min-h-[50vh] flex-1 items-center justify-center p-4">
+        <div className="flex min-h-[50vh] flex-1 items-center justify-center bg-[var(--bam-forest)] p-4">
           <div className="max-w-md text-center">
-            <h1 className="text-background mb-4 text-2xl font-bold">
+            <h1 className="font-heading mb-4 text-2xl font-bold text-[var(--bam-cream)]">
               Checkout Unavailable
             </h1>
-            <p className="text-background/70">
+            <p className="text-[var(--bam-cream)]/70">
               This store hasn&apos;t set up payment processing yet. Please
               contact the store owner.
             </p>
@@ -45,7 +45,7 @@ export async function BambooCheckoutPage({
                 Back to Cart
               </Link>
             </Button>
-            <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
+            <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
               Checkout
             </h1>
           </div>

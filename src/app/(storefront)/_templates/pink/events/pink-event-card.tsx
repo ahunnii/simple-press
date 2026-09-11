@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { RouterOutputs } from "~/trpc/react";
 import { eventDateTimeAttr, formatEventDateParts } from "~/lib/events/format";
 
@@ -30,8 +31,8 @@ type Props = {
  *
  * Anatomy (design.md → Shared component inventory): 3:4 flier, then a meta
  * block hung under the same `1px solid var(--pink-ink)` rule the product card
- * uses — date, name, blurb, a label line for where/how much, and the event's
- * own outbound link.
+ * uses — date, name (links to event detail page), blurb, a label line for
+ * where/how much, and the event's own outbound link.
  */
 export function PinkEventCard({
   event,
@@ -52,6 +53,7 @@ export function PinkEventCard({
     <article className="flex h-full flex-col">
       <PinkEventFlier
         src={event.coverImage}
+        videoSrc={event.coverVideo}
         name={event.name}
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         priority={priority}
@@ -81,7 +83,12 @@ export function PinkEventCard({
           className="pink-display text-[1.25rem] leading-[1.2] font-semibold tracking-[-0.015em]"
           style={{ color: "var(--pink-ink)" }}
         >
-          {event.name}
+          <Link
+            href={`/events/${event.slug}`}
+            className="hover:underline underline-offset-4"
+          >
+            {event.name}
+          </Link>
         </h2>
 
         {event.blurb && (

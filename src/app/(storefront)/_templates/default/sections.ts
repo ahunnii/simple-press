@@ -125,6 +125,35 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       hideable: true,
     },
 
+    // ── Donate ────────────────────────────────────────────────────────────
+    {
+      id: "donate.hero",
+      page: "donate",
+      title: "Hero",
+      groupIds: ["donate.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "donate.thank-you",
+      page: "donate",
+      title: "Thank You",
+      description: "Copy shown after a successful donation",
+      groupIds: ["donate.thank-you"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "donate.other-ways",
+      page: "donate",
+      title: "Other Ways to Give",
+      description: "Heading for the Venmo/Cash App section",
+      groupIds: ["donate.other-ways"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.donations],
+    },
+
     // ── Services ──────────────────────────────────────────────────────────
     {
       id: "services.hero",

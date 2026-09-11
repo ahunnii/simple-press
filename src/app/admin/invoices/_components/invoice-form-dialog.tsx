@@ -5,9 +5,22 @@ import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
+import type {
+  DepositPreset,
+  LeadBillingSummary,
+} from "~/lib/quickbooks/mapping";
+import type { DepositRule } from "~/lib/quickbooks/types";
 import type { QboInvoiceKind } from "~/lib/validators/quickbooks";
-import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
-import { dueDateString } from "~/lib/quickbooks/mapping";
+import {
+  centsToDollarsString,
+  dollarsToCents,
+  formatPrice,
+} from "~/lib/prices";
+import {
+  computeDepositPresets,
+  dueDateString,
+  presetForRule,
+} from "~/lib/quickbooks/mapping";
 import { cn } from "~/lib/utils";
 import {
   QBO_INVOICE_KIND_LABELS,
@@ -42,6 +55,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 
 import {
   dismissLoadingToast,
@@ -89,6 +103,20 @@ export type InvoiceFormDialogProps = {
   timeZone: string;
   /** When true the Kind select is read-only (lead page passes the kind). */
   lockKind?: boolean;
+  /**
+   * What a deposit is a percentage OF — the lead's quote/estimate. Optional
+   * and only consulted when `defaults.kind === "deposit"`: the plain
+   * `/admin/invoices` caller (no lead, `kind: "custom"`) never passes it, so
+   * the deposit-preset control simply never renders there.
+   */
+  depositBasisCents?: number | null;
+  /** The owner's saved deposit rule — decides which preset chip starts
+   *  selected (`presetForRule`). Only consulted alongside `depositBasisCents`. */
+  depositRule?: DepositRule;
+  /** The lead's running billing totals — drives the "final" kind's
+   *  quote-minus-deposits breakdown. Only consulted when `defaults.kind ===
+   *  "final"`. */
+  billing?: LeadBillingSummary;
   onCreated?: () => void;
 };
 
@@ -145,10 +173,19 @@ function buildInitialState(
   defaults: InvoiceFormDefaults,
   defaultDueDays: number,
   timeZone: string,
+  depositRule: DepositRule | undefined,
 ) {
   return {
     kind: defaults.kind,
     amountDollars: centsToDollarsString(defaults.amountCents),
+    // Which deposit chip started selected. `defaults.amountCents` already
+    // equals the preset amount whenever the rule IS a preset (see
+    // `computeDepositPresets`'s doc comment), so this never contradicts the
+    // seeded `amountDollars` above — it just labels which chip that amount
+    // corresponds to.
+    depositPreset: depositRule
+      ? presetForRule(depositRule)
+      : ("custom" satisfies DepositPreset),
     customerName: defaults.customerName,
     customerEmail: defaults.customerEmail,
     customerPhone: defaults.customerPhone,
@@ -177,12 +214,15 @@ export function InvoiceFormDialog({
   defaultDueDays,
   timeZone,
   lockKind = false,
+  depositBasisCents,
+  depositRule,
+  billing,
   onCreated,
 }: InvoiceFormDialogProps) {
   const router = useRouter();
 
   const [form, setForm] = useState(() =>
-    buildInitialState(defaults, defaultDueDays, timeZone),
+    buildInitialState(defaults, defaultDueDays, timeZone, depositRule),
   );
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   // Catches issues on fields the form doesn't render inputs for
@@ -206,7 +246,9 @@ export function InvoiceFormDialog({
   if (open !== lastOpen) {
     setLastOpen(open);
     if (open) {
-      setForm(buildInitialState(defaults, defaultDueDays, timeZone));
+      setForm(
+        buildInitialState(defaults, defaultDueDays, timeZone, depositRule),
+      );
       setFieldErrors({});
       setFormError(null);
       setBillingExpanded(Boolean(defaults.billingAddress?.line1));
@@ -254,6 +296,42 @@ export function InvoiceFormDialog({
     if (formError) setFormError(null);
   };
 
+  // Preset chips, priced against `depositBasisCents` — `[]` (so the toggle
+  // group below renders nothing but "Custom") when there's no basis to take a
+  // percentage OF.
+  const depositPresets =
+    depositBasisCents != null ? computeDepositPresets(depositBasisCents) : [];
+
+  const handleDepositPresetChange = (value: string) => {
+    // Radix's `type="single"` `ToggleGroup` re-fires with `""` when the
+    // already-pressed item is clicked again (it behaves like a toggle, not a
+    // radio) — ignore that rather than clearing the selection to nothing.
+    if (!value) return;
+    if (value === "custom") {
+      setField({ depositPreset: "custom" });
+      return;
+    }
+    const preset = depositPresets.find(
+      (candidate) => String(candidate.percent) === value,
+    );
+    if (!preset) return;
+    setField({
+      depositPreset: preset.percent,
+      amountDollars: centsToDollarsString(preset.amountCents),
+    });
+    clearError("amountCents");
+  };
+
+  // The Amount field's current value as cents, recomputed on every render so
+  // the "remaining after this deposit" line and the over-basis warning below
+  // track what's typed, not just what was last submitted. `dollarsToCents`
+  // never actually returns non-finite (an unparseable string floors to `0`),
+  // but the `Number.isFinite` guard is kept so this can't silently start
+  // rendering a bogus figure if that contract ever changes.
+  const typedAmountCents = dollarsToCents(
+    normalizeAmountInput(form.amountDollars),
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -268,6 +346,22 @@ export function InvoiceFormDialog({
 
     if (!Number.isFinite(parsedAmount)) {
       setFieldErrors({ amountCents: "Enter a valid amount" });
+      setFormError(null);
+      return;
+    }
+
+    // Same pre-`safeParse` treatment as the finite check above: the schema
+    // has no notion of a deposit basis, so a too-large deposit would
+    // otherwise sail through as a "valid" amount and only get caught later,
+    // at the QBO API or by the owner's own accounting.
+    if (
+      form.kind === "deposit" &&
+      depositBasisCents != null &&
+      dollarsToCents(normalizedAmount) > depositBasisCents
+    ) {
+      setFieldErrors({
+        amountCents: `A deposit can't exceed the quote (${formatPrice(depositBasisCents)})`,
+      });
       setFormError(null);
       return;
     }
@@ -367,6 +461,59 @@ export function InvoiceFormDialog({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            {form.kind === "deposit" && depositBasisCents != null && (
+              <div className="space-y-2">
+                <Label id="invoice-deposit-preset-label">Deposit</Label>
+                <ToggleGroup
+                  type="single"
+                  variant="outline"
+                  value={String(form.depositPreset)}
+                  onValueChange={handleDepositPresetChange}
+                  aria-labelledby="invoice-deposit-preset-label"
+                  className="flex-wrap"
+                  disabled={isPending}
+                >
+                  {depositPresets.map((preset) => (
+                    <ToggleGroupItem
+                      key={preset.percent}
+                      value={String(preset.percent)}
+                      aria-label={`${preset.percent}% deposit, ${formatPrice(preset.amountCents)}`}
+                    >
+                      {preset.percent}% · {formatPrice(preset.amountCents)}
+                    </ToggleGroupItem>
+                  ))}
+                  <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            )}
+
+            {form.kind === "final" && billing?.quoteCents != null && (
+              <div className="bg-muted/50 space-y-1 rounded-md p-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Final quote</span>
+                  <span className="tabular-nums">
+                    {formatPrice(billing.quoteCents)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">
+                    {billing.unpaidDepositCents > 0
+                      ? `− Deposits invoiced (${formatPrice(billing.unpaidDepositCents)} unpaid — still collectible in QuickBooks)`
+                      : "− Deposits invoiced"}
+                  </span>
+                  <span className="tabular-nums">
+                    {formatPrice(billing.invoicedDepositCents)}
+                  </span>
+                </div>
+                <div className="border-border flex items-center justify-between border-t pt-1 font-medium">
+                  <span>= Remaining</span>
+                  <span className="tabular-nums">
+                    {formatPrice(billing.remainingAfterDepositsCents ?? 0)}
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label id="invoice-kind-label" htmlFor="invoice-kind">
@@ -417,7 +564,14 @@ export function InvoiceFormDialog({
                     className="pl-6"
                     value={form.amountDollars}
                     onChange={(e) => {
-                      setField({ amountDollars: e.target.value });
+                      // Typing always drops the deposit selection to
+                      // "custom" — even if the typed figure happens to match
+                      // a preset, that's a coincidence the UI shouldn't
+                      // re-attribute to the chip on the owner's behalf.
+                      setField({
+                        amountDollars: e.target.value,
+                        depositPreset: "custom",
+                      });
                       clearError("amountCents");
                     }}
                     onBlur={() => {
@@ -450,6 +604,27 @@ export function InvoiceFormDialog({
                     {fieldErrors.amountCents}
                   </p>
                 )}
+                {form.kind === "deposit" &&
+                  depositBasisCents != null &&
+                  Number.isFinite(typedAmountCents) &&
+                  (typedAmountCents > depositBasisCents ? (
+                    <p role="alert" className="text-destructive text-xs">
+                      {`A deposit can't exceed the quote (${formatPrice(depositBasisCents)})`}
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground text-xs">
+                      {`Remaining after this deposit: ${formatPrice(
+                        depositBasisCents - typedAmountCents,
+                      )} of ${formatPrice(depositBasisCents)}`}
+                    </p>
+                  ))}
+                {form.kind === "final" &&
+                  billing?.remainingAfterDepositsCents != null &&
+                  typedAmountCents !== billing.remainingAfterDepositsCents && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      This differs from the computed remaining balance.
+                    </p>
+                  )}
               </div>
             </div>
 

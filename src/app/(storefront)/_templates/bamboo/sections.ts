@@ -13,11 +13,29 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       order: 0,
     },
     {
+      id: "homepage.valueBand",
+      page: "homepage",
+      title: "Value Band",
+      description:
+        "Gold wave flowing into a deep green band of four value statements, directly below the hero.",
+      groupIds: ["homepage.valueBand"],
+      order: 1,
+      hideable: true,
+    },
+    {
+      id: "homepage.aboutTeaser",
+      page: "homepage",
+      title: "About Teaser",
+      description: "Short business introduction block on the homepage.",
+      groupIds: ["homepage.aboutTeaser"],
+      order: 2,
+    },
+    {
       id: "homepage.featured",
       page: "homepage",
       title: "Featured Products",
       groupIds: ["homepage.featured"],
-      order: 1,
+      order: 3,
       links: [SECTION_LINKS.products],
     },
     {
@@ -27,16 +45,8 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       description:
         "Three feature highlights below the featured products (e.g. Premium Quality, Competitive Prices).",
       groupIds: ["homepage.sustainability"],
-      order: 2,
+      order: 4,
       hideable: true,
-    },
-    {
-      id: "homepage.aboutTeaser",
-      page: "homepage",
-      title: "About Teaser",
-      description: "Short business introduction block on the homepage.",
-      groupIds: ["homepage.aboutTeaser"],
-      order: 3,
     },
     {
       id: "homepage.testimonials",
@@ -45,7 +55,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       description:
         "Three customer testimonials with a link to the testimonials page.",
       groupIds: ["homepage.testimonials"],
-      order: 4,
+      order: 5,
       hideable: true,
       links: [SECTION_LINKS.testimonials],
     },
@@ -55,7 +65,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       title: "Location",
       description: "Store location heading and interactive map.",
       groupIds: ["homepage.location"],
-      order: 5,
+      order: 6,
       hideable: true,
     },
 
@@ -206,6 +216,14 @@ export const bambooSections: Record<string, TemplateSection[]> = {
         "Coordinates for the map pin used by the homepage and contact page maps.",
       groupIds: ["global.location"],
       order: 0,
+    },
+    {
+      id: "global.branding",
+      page: "global",
+      title: "Footer Branding",
+      description: "Short note shown in the footer's bottom bar.",
+      groupIds: ["global.branding"],
+      order: 1,
     },
   ],
 };

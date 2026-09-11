@@ -29,6 +29,7 @@ import { SelectFormField } from "~/components/inputs/select-form-field";
 const TEMPLATES = [
   { id: "modern", label: "Modern" },
   { id: "bamboo", label: "Bamboo" },
+  { id: "animated-bamboo", label: "Animated Bamboo" },
   { id: "happy-bamboo", label: "Happy Bamboo" },
   { id: "elegant", label: "Elegant" },
   { id: "pollen", label: "Pollen" },
@@ -39,6 +40,7 @@ const TEMPLATES = [
   { id: "vii", label: "Skinbar VII" },
   { id: "pink", label: "PinkArt" },
   { id: "relocation", label: "Handy Relocations" },
+  { id: "wealth", label: "Detroit Community Wealth Fund" },
 ];
 
 const defaultValues: CreateBusinessFormData = {

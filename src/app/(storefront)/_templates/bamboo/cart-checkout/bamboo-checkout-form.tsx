@@ -101,7 +101,10 @@ export function CheckoutForm({
     return (
       <div className="py-16 text-center">
         <p className="text-muted-foreground mb-4">Your cart is empty</p>
-        <Button asChild>
+        <Button
+          asChild
+          className="rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+        >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>
@@ -114,14 +117,14 @@ export function CheckoutForm({
       className="flex flex-col gap-8 lg:flex-row"
     >
       <div className="flex-1 space-y-8">
-        {/* M-7: required field explanation */}
-        <p className="text-muted-foreground text-sm">
-          Fields marked with * are required.
-        </p>
         <fieldset className="flex flex-col gap-4">
           <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
             Contact Information
           </legend>
+          {/* M-7: required field explanation */}
+          <p className="text-muted-foreground text-sm">
+            Fields marked with * are required.
+          </p>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email">Email *</Label>
@@ -245,6 +248,7 @@ export function CheckoutForm({
                 variant={deliveryMethod === "ship" ? "default" : "outline"}
                 aria-pressed={deliveryMethod === "ship"}
                 onClick={() => setDeliveryMethod("ship")}
+                className="rounded-full"
                 style={
                   deliveryMethod === "ship"
                     ? { backgroundColor: primaryColor }
@@ -258,6 +262,7 @@ export function CheckoutForm({
                 variant={deliveryMethod === "pickup" ? "default" : "outline"}
                 aria-pressed={deliveryMethod === "pickup"}
                 onClick={() => setDeliveryMethod("pickup")}
+                className="rounded-full"
                 style={
                   deliveryMethod === "pickup"
                     ? { backgroundColor: primaryColor }
@@ -443,147 +448,155 @@ export function CheckoutForm({
 
       {/* Order Summary */}
       <div className="w-full shrink-0 lg:w-80">
-        <div className="border-border bg-card sticky top-20 rounded-xl border p-6">
-          <h2 className="text-card-foreground font-heading text-lg font-semibold">
-            Order Summary
-          </h2>
-          <div className="mt-4 flex flex-col gap-4">
-            <div className="max-h-64 space-y-3 overflow-y-auto">
-              {items.map((item) => (
-                <div
-                  key={`${item.productId}-${item.variantId}`}
-                  className="flex items-center gap-3"
-                >
-                  <div className="bg-secondary relative size-12 shrink-0 overflow-hidden rounded-md">
-                    {item.imageUrl ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.productName}
-                        fill
-                        className="object-cover"
-                        sizes="48px"
-                      />
-                    ) : (
-                      <div className="text-muted-foreground flex size-full items-center justify-center text-xs">
-                        No img
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-card-foreground truncate text-sm font-medium">
-                      {item.productName}
-                    </p>
-                    {item.variantName && (
-                      <p className="text-muted-foreground text-xs">
-                        {item.variantName}
+        <div className="sticky top-20 space-y-4">
+          <div className="rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] p-6">
+            <h2 className="font-heading text-[var(--bam-forest-deep)] text-lg font-semibold">
+              Order Summary
+            </h2>
+            <div className="mt-4 flex flex-col gap-4">
+              <div className="max-h-64 space-y-3 overflow-y-auto">
+                {items.map((item) => (
+                  <div
+                    key={`${item.productId}-${item.variantId}`}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="bg-card relative size-12 shrink-0 overflow-hidden rounded-md">
+                      {item.imageUrl ? (
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                        />
+                      ) : (
+                        <div className="text-muted-foreground flex size-full items-center justify-center text-xs">
+                          No img
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-[var(--bam-forest-deep)]">
+                        {item.productName}
                       </p>
-                    )}
-                    <p className="text-muted-foreground text-xs">
-                      Qty: {item.quantity}
-                    </p>
+                      {item.variantName && (
+                        <p className="text-[var(--bam-forest)]/70 text-xs">
+                          {item.variantName}
+                        </p>
+                      )}
+                      <p className="text-[var(--bam-forest)]/70 text-xs">
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <span className="text-[var(--bam-forest-deep)] text-sm font-medium">
+                      {formatPrice(item.price * item.quantity)}
+                    </span>
                   </div>
-                  <span className="text-foreground text-sm font-medium">
-                    {formatPrice(item.price * item.quantity)}
+                ))}
+              </div>
+
+              <div className="space-y-2 border-t border-[var(--bam-hairline)] pt-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--bam-forest)]/75">
+                    Subtotal
+                  </span>
+                  <span className="text-[var(--bam-forest-deep)]">
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
-              ))}
-            </div>
-
-            <div className="space-y-2 border-t pt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
-              </div>
-              {discountAmount > 0 && discountCodeLabel && (
-                <div className="flex justify-between text-sm text-green-700">
-                  <span>Discount ({discountCodeLabel})</span>
-                  <span>-{formatPrice(discountAmount)}</span>
+                {discountAmount > 0 && discountCodeLabel && (
+                  <div className="flex justify-between text-sm text-green-700">
+                    <span>Discount ({discountCodeLabel})</span>
+                    <span>-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--bam-forest)]/75">
+                    Shipping
+                  </span>
+                  <span className="text-[var(--bam-forest-deep)]">
+                    {deliveryMethod === "pickup" ? (
+                      "In-store pickup (free)"
+                    ) : shippingCalculating ? (
+                      <span
+                        className="text-[var(--bam-forest)]/75 inline-flex items-center gap-1.5"
+                        aria-live="polite"
+                      >
+                        <Loader2
+                          className="size-3.5 animate-spin"
+                          aria-hidden="true"
+                        />
+                        Calculating…
+                      </span>
+                    ) : shippingPending ? (
+                      "Calculated at checkout"
+                    ) : shipping === 0 ? (
+                      "Free"
+                    ) : (
+                      formatPrice(shipping)
+                    )}
+                  </span>
                 </div>
-              )}
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Shipping</span>
-                <span>
-                  {deliveryMethod === "pickup" ? (
-                    "In-store pickup (free)"
-                  ) : shippingCalculating ? (
-                    <span
-                      className="text-muted-foreground inline-flex items-center gap-1.5"
-                      aria-live="polite"
-                    >
-                      <Loader2
-                        className="size-3.5 animate-spin"
-                        aria-hidden="true"
-                      />
-                      Calculating…
-                    </span>
-                  ) : shippingPending ? (
-                    "Calculated at checkout"
-                  ) : shipping === 0 ? (
-                    "Free"
-                  ) : (
-                    formatPrice(shipping)
-                  )}
-                </span>
+                <div className="flex justify-between border-t border-[var(--bam-hairline)] pt-2 font-bold text-[var(--bam-forest-deep)]">
+                  <span>Estimated total</span>
+                  <span>{formatPrice(finalTotal)}</span>
+                </div>
+                <p className="text-[var(--bam-forest)]/70 text-xs">
+                  Tax and final total are confirmed on Stripe Checkout.
+                </p>
               </div>
-              <div className="flex justify-between border-t pt-2 font-bold">
-                <span>Estimated total</span>
-                <span>{formatPrice(finalTotal)}</span>
-              </div>
-              <p className="text-muted-foreground text-xs">
-                Tax and final total are confirmed on Stripe Checkout.
-              </p>
             </div>
-
-            <div role="alert" aria-live="assertive" aria-atomic="true">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              disabled={isProcessing || shippingCalculating}
-              aria-busy={isProcessing || shippingCalculating}
-              className="w-full"
-              size="lg"
-              style={
-                primaryColor ? { backgroundColor: primaryColor } : undefined
-              }
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2
-                    className="mr-2 size-4 animate-spin"
-                    aria-hidden="true"
-                  />
-                  Processing...
-                </>
-              ) : shippingCalculating ? (
-                <>
-                  <Loader2
-                    className="mr-2 size-4 animate-spin"
-                    aria-hidden="true"
-                  />
-                  Calculating shipping…
-                </>
-              ) : (
-                "Continue to Payment"
-              )}
-            </Button>
-
-            <CheckoutTermsNotice
-              disclosure={termsDisclosure}
-              className="text-muted-foreground text-center text-xs"
-              linkClassName="underline hover:text-foreground"
-            />
-
-            <p className="text-muted-foreground text-center text-xs">
-              All transactions are secure and encrypted via Stripe. 100% Secure
-              and Encrypted Payments.
-            </p>
           </div>
+
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isProcessing || shippingCalculating}
+            aria-busy={isProcessing || shippingCalculating}
+            className="w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+            size="lg"
+            style={
+              primaryColor ? { backgroundColor: primaryColor } : undefined
+            }
+          >
+            {isProcessing ? (
+              <>
+                <Loader2
+                  className="mr-2 size-4 animate-spin"
+                  aria-hidden="true"
+                />
+                Processing...
+              </>
+            ) : shippingCalculating ? (
+              <>
+                <Loader2
+                  className="mr-2 size-4 animate-spin"
+                  aria-hidden="true"
+                />
+                Calculating shipping…
+              </>
+            ) : (
+              "Continue to Payment"
+            )}
+          </Button>
+
+          <CheckoutTermsNotice
+            disclosure={termsDisclosure}
+            className="text-muted-foreground text-center text-xs"
+            linkClassName="underline hover:text-foreground"
+          />
+
+          <p className="text-muted-foreground text-center text-xs">
+            All transactions are secure and encrypted via Stripe. 100% Secure
+            and Encrypted Payments.
+          </p>
         </div>
       </div>
     </form>

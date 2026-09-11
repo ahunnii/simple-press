@@ -22,6 +22,8 @@ import type Stripe from "stripe";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 
+import { resolveDonationLabel } from "~/lib/donations/label";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import type { OrdersBreakdown } from "~/lib/orders/order-money";
 import {
   EMPTY_ORDERS_BREAKDOWN,
@@ -201,6 +203,11 @@ export const financeRouter = createTRPCRouter({
    * Stripe half (best-effort): balance transactions, payouts and balance for
    * the same window, read from the connected account with direct charges, plus
    * the account's verification status and its last few payouts overall.
+   * The `donations` block is deliberately NOT gated on the `donations`
+   * feature flag — same rationale as `donationRouter.list` (see
+   * `src/server/api/routers/donation.ts`:6-23): a donation is a money
+   * record, and it must stay readable here even after the owner turns the
+   * feature back off.
    */
   getBreakdown: ownerAdminProcedure
     .input(z.object({ range: rangeKeySchema.default("30d") }))
@@ -211,7 +218,14 @@ export const financeRouter = createTRPCRouter({
 
       const business = await ctx.db.business.findFirst({
         where: { id: businessId },
-        select: { stripeAccountId: true, stripeAutoTaxEnabled: true },
+        select: {
+          stripeAccountId: true,
+          stripeAutoTaxEnabled: true,
+          donationLabel: true,
+          venmoHandle: true,
+          cashAppHandle: true,
+          featureFlags: true,
+        },
       });
 
       // Order scope for the Finances page. Deliberately STRICTER than the
@@ -244,28 +258,44 @@ export const financeRouter = createTRPCRouter({
         paymentStatus: { in: ["paid", "refunded", "disputed"] },
       };
 
-      const [orderRows, ytdTaxAgg, informAgg] = await Promise.all([
-        ctx.db.order.findMany({
-          where: orderScope,
-          select: {
-            total: true,
-            tax: true,
-            shipping: true,
-            discount: true,
-            refundAmountCents: true,
-            paymentMethod: true,
-          },
-        }),
-        ctx.db.order.aggregate({
-          where: ytdOrderScope,
-          _sum: { tax: true },
-        }),
-        ctx.db.order.aggregate({
-          where: informOrderScope,
-          _count: { id: true },
-          _sum: { total: true },
-        }),
-      ]);
+      const [orderRows, ytdTaxAgg, informAgg, donationAgg, allTimeDonationCount] =
+        await Promise.all([
+          ctx.db.order.findMany({
+            where: orderScope,
+            select: {
+              total: true,
+              tax: true,
+              shipping: true,
+              discount: true,
+              refundAmountCents: true,
+              paymentMethod: true,
+            },
+          }),
+          ctx.db.order.aggregate({
+            where: ytdOrderScope,
+            _sum: { tax: true },
+          }),
+          ctx.db.order.aggregate({
+            where: informOrderScope,
+            _count: { id: true },
+            _sum: { total: true },
+          }),
+          // Range-scoped donation totals for the new donations card. Gross
+          // (Stripe amount_total) only — refunds are not tracked on donations,
+          // unlike orders, so there is no net figure to compute here.
+          ctx.db.donation.aggregate({
+            where: {
+              businessId,
+              createdAt: { gte: range.start, lt: range.endExclusive },
+            },
+            _sum: { amountCents: true },
+            _count: true,
+          }),
+          // All-time count, independent of `range` — drives the card's
+          // visibility client-side (show once a business has ANY donation
+          // history, not just within the selected window).
+          ctx.db.donation.count({ where: { businessId } }),
+        ]);
 
       const orders: OrdersBreakdown =
         orderRows.length > 0
@@ -476,6 +506,25 @@ export const financeRouter = createTRPCRouter({
         inform,
         stripeDetailsSubmitted,
         recentPayouts,
+        donations: {
+          // Gross (Stripe amount_total) for the selected range; refunds are
+          // not tracked on donations.
+          totalCents: donationAgg._sum.amountCents ?? 0,
+          count: donationAgg._count,
+          // All-time count — drives card visibility client-side.
+          allTimeCount: allTimeDonationCount,
+          // `donations` feature-flag state; donation data may exist while
+          // the flag is off (see the JSDoc above for why this block is
+          // returned regardless).
+          enabled: resolveFlags(business?.featureFlags).isEnabled(
+            "donations",
+          ),
+          // Owner's chosen noun: "Donation" | "Tip" | "Contribution".
+          labelNoun: resolveDonationLabel(business?.donationLabel).noun,
+          hasOffPlatformHandles: !!(
+            business?.venmoHandle ?? business?.cashAppHandle
+          ),
+        },
       };
     }),
 });

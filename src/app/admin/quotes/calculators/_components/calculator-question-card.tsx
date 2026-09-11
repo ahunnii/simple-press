@@ -1,6 +1,7 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
+import { useId, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -13,7 +14,12 @@ import {
 } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
 
-import type { CalculatorFormValues, QuestionInput } from "./builder-shared";
+import type {
+  CalculatorFormValues,
+  QuestionInput,
+  TypeChangeImpact,
+} from "./builder-shared";
+import type { QuoteQuestionType } from "~/lib/validators/quote-calculator";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -42,6 +48,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -51,14 +58,18 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 
 import { BuilderNumberField } from "./builder-number-field";
 import {
+  describeTypeChangeImpact,
   isOptionQuestionInput,
   isVariableQuestionInput,
   makeOption,
   QUESTION_TYPE_META,
+  QUESTION_TYPE_ORDER,
 } from "./builder-shared";
+import { ChangeTypeDialog } from "./change-type-dialog";
 import { QuoteIconPicker } from "./quote-icon-picker";
 
 /** A question an earlier show-if may branch on: single-answer types only. */
@@ -84,6 +95,42 @@ const SHOW_IF_NONE = "__always__";
 
 const MAX_OPTIONS = 12;
 
+/**
+ * A no-op impact, used only as the `ChangeTypeDialog`'s prop value while it
+ * is closed (`pendingTypeChange` is `null`). Never shown to an owner — the
+ * dialog is unmounted from the accessibility tree whenever `open` is false —
+ * it exists purely so the dialog stays mounted between opens, matching the
+ * "drive `open` off a nullable id" pattern used elsewhere in the admin (e.g.
+ * `team-members.tsx`'s remove-member dialog) instead of remounting on every
+ * type change.
+ */
+const EMPTY_TYPE_CHANGE_IMPACT: TypeChangeImpact = {
+  optionsDiscarded: false,
+  variableDropped: null,
+  dependentShowIfs: [],
+  distancesRemoved: [],
+  formulaReferencesVariable: false,
+};
+
+/**
+ * Free-text suggestions for a `number` question's unit — common enough across
+ * quote calculators (moving, landscaping, cleaning, events) to offer as
+ * autocomplete, never as a constraint: the field stays a plain `Input`, so
+ * anything the owner types is accepted as-is.
+ */
+const UNIT_SUGGESTIONS = [
+  "ft",
+  "in",
+  "mi",
+  "sq ft",
+  "lbs",
+  "hours",
+  "items",
+  "rooms",
+  "boxes",
+  "flights",
+];
+
 type Props = {
   form: UseFormReturn<CalculatorFormValues>;
   /** `definition.screens.<screenIndex>.questions.<questionIndex>`. */
@@ -98,10 +145,20 @@ type Props = {
   conditionSources: ConditionSource[];
   /** Screens this question could move to — never including its own. */
   screenOptions: { index: number; label: string }[];
+  /** The calculator's tabs, in order. Empty = the calculator doesn't fork. */
+  tabs: { id: string; label: string }[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemove: () => void;
   onMoveToScreen: (target: number | "new") => void;
+  /**
+   * Applies a confirmed type change to THIS question — called from the
+   * `ChangeTypeDialog`'s "Change type" button, never straight from the
+   * `Select`. Every attempted change opens the dialog first, whether or not
+   * `describeTypeChangeImpact` found anything at stake, so the owner always
+   * sees what carries over before it happens.
+   */
+  onChangeType: (nextType: QuoteQuestionType) => void;
 };
 
 export function CalculatorQuestionCard({
@@ -112,10 +169,12 @@ export function CalculatorQuestionCard({
   question,
   conditionSources,
   screenOptions,
+  tabs,
   open,
   onOpenChange,
   onRemove,
   onMoveToScreen,
+  onChangeType,
 }: Props) {
   const {
     attributes,
@@ -128,6 +187,17 @@ export function CalculatorQuestionCard({
   } = useSortable({ id: sortableId });
 
   const meta = QUESTION_TYPE_META[question.type];
+  const typeFieldId = useId();
+  const unitDatalistId = useId();
+
+  // Holds the type a change would move TO while its confirmation dialog is
+  // open. `null` means no dialog is open. Deliberately not derived from the
+  // question itself: the `Select`'s displayed value always reads back
+  // `question.type`, so cancelling needs nothing to unwind here.
+  const [pendingTypeChange, setPendingTypeChange] = useState<{
+    nextType: QuoteQuestionType;
+    impact: TypeChangeImpact;
+  } | null>(null);
 
   // Any resolver error anywhere under this row. Used to flag a COLLAPSED card,
   // which is the case where an owner would otherwise submit, see a toast, and
@@ -308,17 +378,42 @@ export function CalculatorQuestionCard({
           />
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {/* Type is shown, never edited. Switching it would orphan the
-                options an existing show-if points at and silently change what
-                the variable means in the formula — delete and re-add instead,
-                which forces both to be reconsidered. */}
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Type</p>
-              <p className="text-sm">{meta.label}</p>
-              <p className="text-muted-foreground text-xs">
-                {meta.hint} Type is fixed once a question is added — delete and
-                re-add to change it.
-              </p>
+            {/* NOT `FormField`-registered — the type is never written through
+                react-hook-form. Switching it now goes through
+                `ChangeTypeDialog`: the owner sees exactly what
+                `applyTypeChange` (see `builder-shared.ts`) is about to do —
+                options discarded, a variable dropped, dependent show-ifs and
+                distances removed — before confirming, and the builder applies
+                every one of those consequences atomically. The `Select`'s
+                value always reads back `question.type`, so a cancelled
+                change leaves nothing to unwind. */}
+            <div className="space-y-1.5">
+              <Label htmlFor={typeFieldId}>Type</Label>
+              <Select
+                value={question.type}
+                onValueChange={(value) => {
+                  const nextType = value as QuoteQuestionType;
+                  if (nextType === question.type) return;
+                  const impact = describeTypeChangeImpact(
+                    form.getValues("definition"),
+                    question.id,
+                    nextType,
+                  );
+                  setPendingTypeChange({ nextType, impact });
+                }}
+              >
+                <SelectTrigger id={typeFieldId} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {QUESTION_TYPE_ORDER.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {QUESTION_TYPE_META[type].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">{meta.hint}</p>
             </div>
 
             <FormField
@@ -342,6 +437,55 @@ export function CalculatorQuestionCard({
               )}
             />
           </div>
+
+          {tabs.length > 0 && (
+            <div className="space-y-2 rounded-lg border p-4">
+              <p className="text-sm font-medium">Shown on</p>
+              <ToggleGroup
+                type="multiple"
+                variant="outline"
+                value={question.tabIds ?? []}
+                onValueChange={(values) => {
+                  // Every tab pressed is the same restriction as none —
+                  // store the canonical `[]` so `commonTabIds` and the
+                  // visitor-facing filter agree on one representation of
+                  // "every tab" rather than two.
+                  form.setValue(
+                    `${base}.tabIds`,
+                    values.length === tabs.length ? [] : values,
+                    { shouldDirty: true, shouldTouch: true },
+                  );
+                }}
+              >
+                {tabs.map((tab) => (
+                  <ToggleGroupItem
+                    key={tab.id}
+                    value={tab.id}
+                    aria-label={tab.label.trim() || "Untitled tab"}
+                  >
+                    {tab.label.trim() || "Untitled tab"}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+              {(question.tabIds ?? []).length === 0 && (
+                <p className="text-muted-foreground text-xs">All tabs</p>
+              )}
+
+              {/* Mounted ONLY while tabs exist, for the exact reason the
+                  show-if message slots below are conditional: registering
+                  `tabIds` on a calculator with no tabs would make
+                  react-hook-form materialize a field nothing here edits. */}
+              <FormField
+                control={form.control}
+                name={`${base}.tabIds`}
+                render={() => (
+                  <FormItem>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
 
           {isVariableQuestionInput(question) && (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -422,12 +566,22 @@ export function CalculatorQuestionCard({
                     <FormControl>
                       <Input
                         placeholder="e.g. boxes"
+                        maxLength={20}
+                        list={unitDatalistId}
                         value={field.value ?? ""}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         name={field.name}
                       />
                     </FormControl>
+                    {/* Suggestions only — the field stays free text, so
+                        anything the owner types (or a value already saved
+                        before this list existed) is accepted as-is. */}
+                    <datalist id={unitDatalistId}>
+                      {UNIT_SUGGESTIONS.map((unit) => (
+                        <option key={unit} value={unit} />
+                      ))}
+                    </datalist>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -589,6 +743,27 @@ export function CalculatorQuestionCard({
           )}
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Driven off `pendingTypeChange` rather than an `AlertDialogTrigger`,
+          matching the "nullable-id controls `open`" pattern used elsewhere in
+          the admin (e.g. `team-members.tsx`'s remove-member dialog): the
+          trigger is the `Select` above, one component away from this dialog.
+          Always mounted — `AlertDialog` renders nothing to this card's layout
+          while closed — so cancelling never remounts it on the next attempt. */}
+      <ChangeTypeDialog
+        open={pendingTypeChange !== null}
+        onOpenChange={(next) => {
+          if (!next) setPendingTypeChange(null);
+        }}
+        fromType={question.type}
+        toType={pendingTypeChange?.nextType ?? question.type}
+        impact={pendingTypeChange?.impact ?? EMPTY_TYPE_CHANGE_IMPACT}
+        onConfirm={() => {
+          if (!pendingTypeChange) return;
+          onChangeType(pendingTypeChange.nextType);
+          setPendingTypeChange(null);
+        }}
+      />
     </Card>
   );
 }

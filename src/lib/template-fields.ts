@@ -18,6 +18,10 @@ import {
 } from "~/lib/embed";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import {
+  animatedBambooData,
+  animatedBambooFieldGroups,
+} from "~/app/(storefront)/_templates/animated-bamboo";
+import {
   bambooData,
   bambooFieldGroups,
 } from "~/app/(storefront)/_templates/bamboo";
@@ -60,6 +64,10 @@ import {
   relocationFieldGroups,
 } from "~/app/(storefront)/_templates/relocation";
 import {
+  wealthData,
+  wealthFieldGroups,
+} from "~/app/(storefront)/_templates/wealth";
+import {
   sledgeData,
   sledgeFieldGroups,
 } from "~/app/(storefront)/_templates/sledge";
@@ -76,6 +84,7 @@ export type TemplatePage =
   | "shop"
   | "services"
   | "events"
+  | "donate"
   | "videos"
   | "faq"
   | "cart"
@@ -437,6 +446,7 @@ export type TemplateFieldGroup = {
 // Define groups for each template
 export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...bambooFieldGroups,
+  ...animatedBambooFieldGroups,
   ...buildersFieldGroups,
   ...pollenFieldGroups,
   ...darkTrendFieldGroups,
@@ -449,12 +459,14 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...coopFieldGroups,
   ...pinkFieldGroups,
   ...relocationFieldGroups,
+  ...wealthFieldGroups,
 
   ...defaultTemplateFieldGroups,
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...bambooData,
+  ...animatedBambooData,
   ...buildersData,
   ...darkTrendData,
   ...pollenData,
@@ -467,6 +479,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...coopData,
   ...pinkData,
   ...relocationData,
+  ...wealthData,
 
   ...defaultTemplateData,
 };
@@ -608,6 +621,11 @@ export const PAGE_METADATA = {
     title: "Videos",
     description: "Video gallery page content",
     icon: "📺",
+  },
+  donate: {
+    title: "Donate",
+    description: "Donations/tips page content",
+    icon: "💝",
   },
   // Not a `TemplatePage` value — no field declares `page: "authentication"`.
   // The auth fields live on the `global` page; this entry exists so the visual

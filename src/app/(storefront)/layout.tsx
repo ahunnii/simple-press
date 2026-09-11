@@ -34,17 +34,22 @@ export default async function StorefrontLayout({ children }: Props) {
     }
   }
 
+  const t = getTemplate(business.templateId);
+
   if (business.maintenance?.active) {
+    const m = business.maintenance;
+    if (m.scope === "business" && t.MaintenancePage) {
+      return <t.MaintenancePage business={business} maintenance={m} />;
+    }
     return (
       <MaintenanceScreen
-        variant={business.maintenance.variant}
-        message={business.maintenance.message}
+        variant={m.variant}
+        message={m.message}
+        cta={m.scope === "business" ? m.cta : null}
         businessName={business.name}
       />
     );
   }
-
-  const t = getTemplate(business.templateId);
 
   return (
     <HydrateClient>

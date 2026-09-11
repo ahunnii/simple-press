@@ -12,7 +12,14 @@ export function BambooPreferencesPage({
 }: AccountPreferencesPageProps) {
   return (
     <PageTransition>
-      <BambooAccountLayout heading="Preferences">
+      <BambooAccountLayout
+        heading="Preferences"
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account/settings" },
+          { label: "Preferences" },
+        ]}
+      >
         <PreferencesContent business={business} customer={customer} />
       </BambooAccountLayout>
     </PageTransition>

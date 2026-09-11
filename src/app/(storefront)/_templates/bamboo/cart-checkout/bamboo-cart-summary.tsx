@@ -36,22 +36,22 @@ export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
     progress !== null &&
     untilFree !== null;
   return (
-    <div className="border-border bg-card rounded-xl border p-6">
-      <h2 className="text-card-foreground font-heading text-lg font-semibold">
+    <div className="rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] p-6">
+      <h2 className="font-heading text-[var(--bam-forest-deep)] text-lg font-semibold">
         Order Summary
       </h2>
       <div className="mt-4 flex flex-col gap-3">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">
+          <span className="text-[var(--bam-forest)]/75">
             Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
           </span>
-          <span className="text-foreground font-medium">
+          <span className="text-[var(--bam-forest-deep)] font-medium">
             {formatPrice(subtotal)}
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Shipping</span>
-          <span className="text-foreground font-medium">
+          <span className="text-[var(--bam-forest)]/75">Shipping</span>
+          <span className="text-[var(--bam-forest-deep)] font-medium">
             {isZoneWeight
               ? "Calculated at checkout"
               : shipping === 0
@@ -66,26 +66,32 @@ export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
               className="h-2"
               aria-label={`Free shipping progress: ${Math.round(progress * 100)}% of the way there`}
             />
-            <p className="text-muted-foreground text-xs">
+            <p className="text-[var(--bam-forest)]/70 text-xs">
               Add {formatPrice(untilFree)} more for free shipping
             </p>
           </div>
         )}
         {shipping > 0 &&
           shippingConfig.shippingType === SHIPPING_TYPES.FLAT_RATE && (
-            <p className="text-muted-foreground text-xs">
+            <p className="text-[var(--bam-forest)]/70 text-xs">
               Flat rate shipping on all orders
             </p>
           )}
-        <Separator />
+        <Separator className="bg-[var(--bam-hairline)]" />
         <div className="flex justify-between">
-          <span className="text-foreground font-semibold">Estimated Total</span>
-          <span className="text-foreground text-lg font-bold">
+          <span className="text-[var(--bam-forest-deep)] font-semibold">
+            Estimated Total
+          </span>
+          <span className="font-heading text-[var(--bam-forest-deep)] text-lg">
             {formatPrice(estimatedOrderTotal)}
           </span>
         </div>
       </div>
-      <Button className="mt-6 w-full" size="lg" asChild>
+      <Button
+        className="mt-6 w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+        size="lg"
+        asChild
+      >
         <Link href="/checkout">Proceed to Checkout</Link>
       </Button>
     </div>

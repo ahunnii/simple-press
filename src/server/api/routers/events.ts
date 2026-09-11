@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { DbClient } from "~/server/db";
 import { normalizeEventDates } from "~/lib/events/normalize";
 import { upcomingEventWhere } from "~/lib/events/query";
+import { generateEventSlug } from "~/lib/slug";
 import {
   eventArchiveSchema,
   eventBulkArchiveSchema,
@@ -59,7 +60,8 @@ export const eventsRouter = createTRPCRouter({
       // derivations (`getEventWhen`/`getEventStatus`/`eventCutoff` in
       // ~/lib/validators/events and ~/lib/events/format) need:
       //   - id, name: identity + link target
-      //   - coverImage: table thumbnail
+      //   - coverImage, coverVideo: table thumbnail (video takes precedence
+      //     over image when both are somehow present — see `create` below)
       //   - startAt, endAt, allDay: feed formatEventDate/eventCutoff and the
       //     When (upcoming/past) derivation
       //   - location: mobile reflow line + search field
@@ -74,6 +76,7 @@ export const eventsRouter = createTRPCRouter({
           id: true,
           name: true,
           coverImage: true,
+          coverVideo: true,
           startAt: true,
           endAt: true,
           allDay: true,
@@ -118,12 +121,41 @@ export const eventsRouter = createTRPCRouter({
         select: { sortOrder: true },
       });
 
+      // The slug is derived server-side from the name (invisible to the
+      // admin) and immutable after creation — see `update` below. Nothing is
+      // published yet and no link can exist, so a collision de-duplicates
+      // silently with a `-N` suffix rather than bouncing the create back.
+      const baseSlug = generateEventSlug(input.name);
+      let slug = baseSlug;
+      let counter = 1;
+
+      while (true) {
+        if (counter > 1000) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not generate a unique URL slug.",
+          });
+        }
+        const existing = await ctx.db.event.findUnique({
+          where: { businessId_slug: { businessId, slug } },
+        });
+        if (!existing) break;
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+
       return ctx.db.event.create({
         data: {
           businessId,
           name: input.name,
+          slug,
           blurb: input.blurb,
+          // "Not both set" (one media slot: photo OR uploaded video) is
+          // enforced by the admin form and by render precedence (coverVideo
+          // wins), deliberately not here — an update-side check would need
+          // an extra read and would break store-transfer imports.
           coverImage: input.coverImage,
+          coverVideo: input.coverVideo,
           startAt,
           endAt,
           allDay: input.allDay,
@@ -156,6 +188,9 @@ export const eventsRouter = createTRPCRouter({
       const timeZone = await resolveTimeZone(ctx.db, businessId);
       const { startAt, endAt } = normalizeEventDates(updates, timeZone);
 
+      // `slug` is deliberately immutable after creation — it's not in
+      // `eventUpdateSchema`, so `...updates` can never touch it — so public
+      // URLs/JSON-LD/sitemap entries never break.
       return ctx.db.event.update({
         where: { id },
         data: { ...updates, startAt, endAt },
@@ -300,6 +335,29 @@ export const eventsRouter = createTRPCRouter({
     }),
 
   // ─── Public: storefront reads ────────────────────────────────────────────────
+
+  getBySlug: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("events"))
+    .input(z.string())
+    .query(async ({ ctx, input: slug }) => {
+      const { businessId } = ctx;
+
+      // Deliberately does NOT filter on `isArchived` or the upcoming-date
+      // cutoff (`upcomingEventWhere`, used by `getUpcomingPublic` below):
+      // past events' detail pages stay live for shared/bookmarked links, and
+      // the `archivePastEvents` cron flips `isArchived` ~15 minutes after an
+      // event ends, so filtering on it here would 404 every past event page.
+      const event = await ctx.db.event.findUnique({
+        where: { businessId_slug: { businessId, slug }, published: true },
+      });
+
+      if (!event) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
+      }
+
+      return event;
+    }),
 
   getUpcomingPublic: publicProcedure
     .use(getBusinessProcedure())

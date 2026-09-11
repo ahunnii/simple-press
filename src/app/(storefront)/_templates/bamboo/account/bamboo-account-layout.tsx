@@ -9,8 +9,8 @@ import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
 
 const NAV_ITEMS = [
-  { href: "/account/settings", label: "Settings", icon: Settings },
   { href: "/account/orders", label: "Orders", icon: Package },
+  { href: "/account/settings", label: "Settings", icon: Settings },
   { href: "/account/security", label: "Security", icon: Lock },
   { href: "/account/address-book", label: "Address Book", icon: BookUser },
   { href: "/account/preferences", label: "Preferences", icon: Bell },
@@ -19,9 +19,10 @@ const NAV_ITEMS = [
 type Props = {
   children: ReactNode;
   heading: string;
+  breadcrumb?: { label: string; href?: string }[];
 };
 
-export function BambooAccountLayout({ children, heading }: Props) {
+export function BambooAccountLayout({ children, heading, breadcrumb }: Props) {
   const pathname = usePathname();
 
   return (
@@ -32,9 +33,25 @@ export function BambooAccountLayout({ children, heading }: Props) {
             <p className="text-primary mb-2 text-sm font-semibold tracking-wider uppercase">
               Account
             </p>
-            <h1 className="font-heading text-foreground text-4xl font-bold tracking-tight">
+            <h1 className="font-heading text-foreground text-4xl font-bold">
               {heading}
             </h1>
+            {breadcrumb && (
+              <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-0 text-sm">
+                {breadcrumb.map((crumb, i) => (
+                  <span key={i} className="flex items-center">
+                    {i > 0 && <span className="mx-2">/</span>}
+                    {crumb.href ? (
+                      <Link href={crumb.href} className="hover:text-primary">
+                        {crumb.label}
+                      </Link>
+                    ) : (
+                      <span>{crumb.label}</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
           </FadeIn>
         </div>
       </section>
@@ -79,9 +96,9 @@ export function BambooAccountLayout({ children, heading }: Props) {
                       href={href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg border-l-2 py-2.5 pr-4 pl-3 text-sm font-medium transition-colors",
+                        "flex items-center gap-3 rounded-lg border-l-4 py-2.5 pr-4 pl-3 text-sm font-medium transition-colors",
                         active
-                          ? "border-primary bg-primary/10 text-primary"
+                          ? "border-[var(--bam-forest)] bg-[var(--bam-gold-soft)]/40 text-[var(--bam-forest-deep)]"
                           : "text-foreground/70 hover:bg-secondary/60 hover:text-foreground border-transparent",
                       )}
                     >
