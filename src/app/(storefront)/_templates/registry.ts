@@ -283,6 +283,27 @@ import { RelocationGenericPage } from "./relocation/generic/relocation-generic-p
 import { RelocationLayout } from "./relocation/layout/relocation-layout";
 import { RelocationServicesPage } from "./relocation/services/relocation-services-page";
 import { RelocationTestimonialsPage } from "./relocation/testimonials/relocation-testimonials-page";
+
+// ---------------------------------------------------------------------------
+// Detroit Community Wealth Fund
+// ---------------------------------------------------------------------------
+import { WealthAboutPage } from "./wealth/about/wealth-about-page";
+import { WealthAccountSecurityPage } from "./wealth/account/wealth-account-security-page";
+import { WealthAccountSettingsPage } from "./wealth/account/wealth-account-settings-page";
+import { WealthAddressBookPage } from "./wealth/account/wealth-address-book-page";
+import { WealthOrderDetailPage } from "./wealth/account/wealth-order-detail-page";
+import { WealthOrdersPage } from "./wealth/account/wealth-orders-page";
+import { WealthPreferencesPage } from "./wealth/account/wealth-preferences-page";
+import { WealthSubscriptionsPage } from "./wealth/account/wealth-subscriptions-page";
+import { WealthBlogPage } from "./wealth/blog/wealth-blog-page";
+import { WealthBlogPostPage } from "./wealth/blog/wealth-blog-post-page";
+import { WealthContactPage } from "./wealth/contact/wealth-contact-page";
+import { WealthDonatePage } from "./wealth/donate/wealth-donate-page";
+import { WealthGenericPage } from "./wealth/generic/wealth-generic-page";
+import { WealthLayout } from "./wealth/layout/wealth-layout";
+import { WealthMaintenancePage } from "./wealth/maintenance/wealth-maintenance-page";
+import { WealthServicesIndexPage } from "./wealth/services/wealth-services-index-page";
+import { WealthTestimonialsPage } from "./wealth/testimonials/wealth-testimonials-page";
 // ---------------------------------------------------------------------------
 // Sledge
 // ---------------------------------------------------------------------------
@@ -639,6 +660,32 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     GenericPage: RelocationGenericPage,
     ServicesPage: RelocationServicesPage,
     TestimonialsPage: RelocationTestimonialsPage,
+  },
+
+  // Detroit Community Wealth Fund — service archetype (1:1 recreation of
+  // detroitcommunitywealth.org): no commerce slots, those fall back to
+  // Default. Uses the data-driven `ServicesIndexPage` slot (the `services`
+  // feature flag should be ON for owning businesses) plus the optional
+  // `DonatePage` and `MaintenancePage` slots. TestimonialsPage renders the
+  // site's "Meet the Co-ops" directory.
+  wealth: {
+    Layout: WealthLayout,
+    AboutPage: WealthAboutPage,
+    BlogPage: WealthBlogPage,
+    BlogPostPage: WealthBlogPostPage,
+    ContactPage: WealthContactPage,
+    GenericPage: WealthGenericPage,
+    TestimonialsPage: WealthTestimonialsPage,
+    ServicesIndexPage: WealthServicesIndexPage,
+    DonatePage: WealthDonatePage,
+    MaintenancePage: WealthMaintenancePage,
+    AccountSettingsPage: WealthAccountSettingsPage,
+    AccountSecurityPage: WealthAccountSecurityPage,
+    AddressBookPage: WealthAddressBookPage,
+    OrderDetailPage: WealthOrderDetailPage,
+    OrdersPage: WealthOrdersPage,
+    PreferencesPage: WealthPreferencesPage,
+    SubscriptionsPage: WealthSubscriptionsPage,
   },
 
   noise: {

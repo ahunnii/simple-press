@@ -21,6 +21,7 @@ import { pollenSections } from "~/app/(storefront)/_templates/pollen/sections";
 import { relocationSections } from "~/app/(storefront)/_templates/relocation/sections";
 import { sledgeSections } from "~/app/(storefront)/_templates/sledge/sections";
 import { viiSections } from "~/app/(storefront)/_templates/vii/sections";
+import { wealthSections } from "~/app/(storefront)/_templates/wealth/sections";
 
 // `SectionLink` / `SECTION_LINKS` live in the leaf module `~/lib/section-links`
 // (every template's `sections.ts` reads the catalog at module-init time, and
@@ -83,6 +84,7 @@ export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
   ...sledgeSections,
   ...buildersSections,
   ...relocationSections,
+  ...wealthSections,
 };
 
 function humanizeGroupKey(key: string): string {

@@ -14,6 +14,7 @@ export const TEMPLATE_IDS = {
   COOP: "coop",
   PINK: "pink",
   RELOCATION: "relocation",
+  WEALTH: "wealth",
 } as const;
 
 export const TEMPLATES = [
@@ -121,6 +122,13 @@ export const TEMPLATES = [
     description:
       "1:1 recreation of handyrelocations.com — terracotta wave heroes, quote form, reviews, and FAQ for a Detroit moving company (no shop or checkout)",
     previewImage: "/templates/relocation-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.WEALTH,
+    name: "Wealth",
+    description:
+      "1:1 recreation of detroitcommunitywealth.org — quiet sage-and-paper nonprofit site with overlap heroes, programs, donate, and co-op directory (no shop or checkout)",
+    previewImage: "/templates/wealth-preview.png",
   },
 ] as const;
 

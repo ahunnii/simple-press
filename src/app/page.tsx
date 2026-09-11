@@ -42,6 +42,8 @@ import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
 import { RelocationHomepage } from "./(storefront)/_templates/relocation/homepage/relocation-homepage";
 import { RelocationLayout } from "./(storefront)/_templates/relocation/layout/relocation-layout";
+import { WealthHomepage } from "./(storefront)/_templates/wealth/homepage/wealth-homepage";
+import { WealthLayout } from "./(storefront)/_templates/wealth/layout/wealth-layout";
 import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
 import { SledgeLayout } from "./(storefront)/_templates/sledge/layout/sledge-layout";
 import { ViiHomepage } from "./(storefront)/_templates/vii/homepage/vii-homepage";
@@ -110,6 +112,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       relocation: RelocationHomepage,
       sledge: SledgeHomepage,
       vii: ViiHomepage,
+      wealth: WealthHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
@@ -129,6 +132,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       relocation: RelocationLayout,
       sledge: SledgeLayout,
       vii: ViiLayout,
+      wealth: WealthLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

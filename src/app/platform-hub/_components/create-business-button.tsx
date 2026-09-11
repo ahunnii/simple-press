@@ -40,6 +40,7 @@ const TEMPLATES = [
   { id: "vii", label: "Skinbar VII" },
   { id: "pink", label: "PinkArt" },
   { id: "relocation", label: "Handy Relocations" },
+  { id: "wealth", label: "Detroit Community Wealth Fund" },
 ];
 
 const defaultValues: CreateBusinessFormData = {

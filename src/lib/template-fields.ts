@@ -64,6 +64,10 @@ import {
   relocationFieldGroups,
 } from "~/app/(storefront)/_templates/relocation";
 import {
+  wealthData,
+  wealthFieldGroups,
+} from "~/app/(storefront)/_templates/wealth";
+import {
   sledgeData,
   sledgeFieldGroups,
 } from "~/app/(storefront)/_templates/sledge";
@@ -455,6 +459,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...coopFieldGroups,
   ...pinkFieldGroups,
   ...relocationFieldGroups,
+  ...wealthFieldGroups,
 
   ...defaultTemplateFieldGroups,
 };
@@ -474,6 +479,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...coopData,
   ...pinkData,
   ...relocationData,
+  ...wealthData,
 
   ...defaultTemplateData,
 };

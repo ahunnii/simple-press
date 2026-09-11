@@ -66,6 +66,13 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Handy Relocations",
     subdomains: ["handyrelocations", "demo"],
   },
+  // 1:1 recreation of detroitcommunitywealth.org (Detroit Community Wealth
+  // Fund nonprofit). "demo" is included so runtime QA can switch the demo
+  // business to this template.
+  wealth: {
+    label: "Detroit Community Wealth Fund",
+    subdomains: ["detroitcommunitywealth", "demo"],
+  },
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {
