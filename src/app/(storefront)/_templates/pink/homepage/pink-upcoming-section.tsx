@@ -169,7 +169,12 @@ export function PinkUpcomingSection({
                         className="pink-display text-[1.0625rem] leading-[1.25] font-semibold tracking-[-0.015em]"
                         style={{ color: "var(--pink-ink)" }}
                       >
-                        {event.name}
+                        <Link
+                          href={`/events/${event.slug}`}
+                          className="hover:underline underline-offset-4"
+                        >
+                          {event.name}
+                        </Link>
                       </h3>
 
                       {event.location && (

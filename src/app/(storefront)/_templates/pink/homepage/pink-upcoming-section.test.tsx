@@ -51,6 +51,7 @@ function makeEvent(overrides: Partial<PinkEvent> = {}): PinkEvent {
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
     updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     name: `Test Event ${idCounter}`,
+    slug: `test-event-${idCounter}`,
     blurb: "Come say hi.",
     coverImage: null,
     coverVideo: null,
@@ -285,5 +286,13 @@ describe("PinkUpcomingSection", () => {
     // src/lib/events/format.test.ts. Just confirm something date-ish is
     // actually rendered as visible text inside the <time> element.
     expect(time?.textContent?.trim().length).toBeGreaterThan(0);
+  });
+
+  it("links the event name to its detail page, matching the /events listing card", () => {
+    const events = [makeEvent({ name: "Linked Market", slug: "linked-market" })];
+    render(<PinkUpcomingSection {...baseProps} events={events} />);
+
+    const link = screen.getByRole("link", { name: "Linked Market" });
+    expect(link).toHaveAttribute("href", "/events/linked-market");
   });
 });
