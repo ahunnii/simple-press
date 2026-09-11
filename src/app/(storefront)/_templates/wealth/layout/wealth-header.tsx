@@ -178,6 +178,8 @@ export function WealthHeader({
         logoAlt={logoAlt}
         socialLinks={socialLinks}
         initialSession={initialSession}
+        ordersEnabled={isEnabled("orders")}
+        accountsEnabled={isEnabled("customerAccounts")}
       />
     </>
   );

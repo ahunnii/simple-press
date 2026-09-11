@@ -4,6 +4,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { X } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
@@ -33,6 +34,8 @@ type WealthNavOverlayProps = {
   logoAlt: string;
   socialLinks?: { facebook?: string; instagram?: string };
   initialSession?: Session | null;
+  ordersEnabled: boolean;
+  accountsEnabled: boolean;
 };
 
 /** Milliseconds the exit fade runs before unmount (entrance is slower). */
@@ -61,9 +64,17 @@ export function WealthNavOverlay({
   logoAlt,
   socialLinks,
   initialSession,
+  ordersEnabled,
+  accountsEnabled,
 }: WealthNavOverlayProps) {
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession(initialSession);
+
+  // Business members reach /admin too, not just platform admins
+  const showAdminLink =
+    session?.user?.platformRole === "PLATFORM_ADMIN" ||
+    !!session?.session?.membershipId;
+
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
@@ -427,41 +438,63 @@ export function WealthNavOverlay({
       </nav>
 
       {/* Bottom: quiet account row */}
-      <div
-        className="wealth-nav-overlay-line flex shrink-0 justify-center px-[var(--wealth-gutter)] py-5"
-        style={
-          {
-            borderTop: "1px solid var(--wealth-surface-2)",
-            "--i": lineIndex + 2,
-          } as React.CSSProperties
-        }
-      >
-        {isPending ? (
-          <div
-            className="h-8 w-8 animate-pulse rounded-full"
-            style={{ background: "var(--wealth-surface)" }}
-          />
-        ) : session?.user ? (
-          <UserButton
-            size="icon"
-            className="h-auto w-auto rounded-full p-0"
-            avatarClassName="size-8"
-          />
-        ) : (
-          <Link
-            href="/auth/sign-in"
-            onClick={onClose}
-            className="wealth-btn-mono"
-            style={{
-              color: "var(--wealth-primary)",
-              textDecoration: "none",
-              letterSpacing: "1.9px",
-            }}
-          >
-            Sign In
-          </Link>
-        )}
-      </div>
+      {accountsEnabled ? (
+        <div
+          className="wealth-nav-overlay-line flex shrink-0 justify-center px-[var(--wealth-gutter)] py-5"
+          style={
+            {
+              borderTop: "1px solid var(--wealth-surface-2)",
+              "--i": lineIndex + 2,
+            } as React.CSSProperties
+          }
+        >
+          {isPending ? (
+            <div
+              className="h-8 w-8 animate-pulse rounded-full"
+              style={{ background: "var(--wealth-surface)" }}
+            />
+          ) : session?.user ? (
+            <UserButton
+              size="icon"
+              className="h-auto w-auto rounded-full p-0"
+              avatarClassName="size-8"
+              links={[
+                ...(ordersEnabled
+                  ? [
+                      {
+                        icon: <IconPackage className="h-4 w-4" />,
+                        label: "Orders",
+                        href: "/account/orders",
+                      },
+                    ]
+                  : []),
+                ...(showAdminLink
+                  ? [
+                      {
+                        icon: <IconLayoutDashboard className="h-4 w-4" />,
+                        label: "Admin",
+                        href: "/admin",
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          ) : (
+            <Link
+              href="/auth/sign-in"
+              onClick={onClose}
+              className="wealth-btn-mono"
+              style={{
+                color: "var(--wealth-primary)",
+                textDecoration: "none",
+                letterSpacing: "1.9px",
+              }}
+            >
+              Sign In
+            </Link>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
