@@ -12150,7 +12150,6 @@ export namespace Prisma {
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
-    maintenanceMessage: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -12198,7 +12197,6 @@ export namespace Prisma {
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
-    maintenanceMessage: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -12247,6 +12245,7 @@ export namespace Prisma {
     maintenanceMode: number
     maintenanceVariant: number
     maintenanceMessage: number
+    maintenanceCta: number
     umamiWebsiteId: number
     umamiEnabled: number
     status: number
@@ -12315,7 +12314,6 @@ export namespace Prisma {
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
-    maintenanceMessage?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -12363,7 +12361,6 @@ export namespace Prisma {
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
-    maintenanceMessage?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -12412,6 +12409,7 @@ export namespace Prisma {
     maintenanceMode?: true
     maintenanceVariant?: true
     maintenanceMessage?: true
+    maintenanceCta?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -12551,7 +12549,8 @@ export namespace Prisma {
     testimonialsAutoApprove: boolean
     maintenanceMode: boolean
     maintenanceVariant: string
-    maintenanceMessage: string | null
+    maintenanceMessage: JsonValue | null
+    maintenanceCta: JsonValue | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean
     status: string
@@ -12624,6 +12623,7 @@ export namespace Prisma {
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
+    maintenanceCta?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12710,6 +12710,7 @@ export namespace Prisma {
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
+    maintenanceCta?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12763,6 +12764,7 @@ export namespace Prisma {
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
+    maintenanceCta?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12816,6 +12818,7 @@ export namespace Prisma {
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
+    maintenanceCta?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12844,7 +12847,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -12943,7 +12946,8 @@ export namespace Prisma {
       testimonialsAutoApprove: boolean
       maintenanceMode: boolean
       maintenanceVariant: string
-      maintenanceMessage: string | null
+      maintenanceMessage: Prisma.JsonValue | null
+      maintenanceCta: Prisma.JsonValue | null
       umamiWebsiteId: string | null
       umamiEnabled: boolean
       status: string
@@ -13448,7 +13452,8 @@ export namespace Prisma {
     readonly testimonialsAutoApprove: FieldRef<"Business", 'Boolean'>
     readonly maintenanceMode: FieldRef<"Business", 'Boolean'>
     readonly maintenanceVariant: FieldRef<"Business", 'String'>
-    readonly maintenanceMessage: FieldRef<"Business", 'String'>
+    readonly maintenanceMessage: FieldRef<"Business", 'Json'>
+    readonly maintenanceCta: FieldRef<"Business", 'Json'>
     readonly umamiWebsiteId: FieldRef<"Business", 'String'>
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
@@ -68611,6 +68616,7 @@ export namespace Prisma {
     maintenanceMode: 'maintenanceMode',
     maintenanceVariant: 'maintenanceVariant',
     maintenanceMessage: 'maintenanceMessage',
+    maintenanceCta: 'maintenanceCta',
     umamiWebsiteId: 'umamiWebsiteId',
     umamiEnabled: 'umamiEnabled',
     status: 'status',
@@ -69543,19 +69549,19 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-  export const JsonNullValueInput: {
-    JsonNull: typeof JsonNull
-  };
-
-  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
   export const NullableJsonNullValueInput: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -70146,7 +70152,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     maintenanceMode?: BoolFilter<"Business"> | boolean
     maintenanceVariant?: StringFilter<"Business"> | string
-    maintenanceMessage?: StringNullableFilter<"Business"> | string | null
+    maintenanceMessage?: JsonNullableFilter<"Business">
+    maintenanceCta?: JsonNullableFilter<"Business">
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -70232,6 +70239,7 @@ export namespace Prisma {
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
     maintenanceMessage?: SortOrderInput | SortOrder
+    maintenanceCta?: SortOrderInput | SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -70319,7 +70327,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     maintenanceMode?: BoolFilter<"Business"> | boolean
     maintenanceVariant?: StringFilter<"Business"> | string
-    maintenanceMessage?: StringNullableFilter<"Business"> | string | null
+    maintenanceMessage?: JsonNullableFilter<"Business">
+    maintenanceCta?: JsonNullableFilter<"Business">
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -70405,6 +70414,7 @@ export namespace Prisma {
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
     maintenanceMessage?: SortOrderInput | SortOrder
+    maintenanceCta?: SortOrderInput | SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -70465,7 +70475,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolWithAggregatesFilter<"Business"> | boolean
     maintenanceMode?: BoolWithAggregatesFilter<"Business"> | boolean
     maintenanceVariant?: StringWithAggregatesFilter<"Business"> | string
-    maintenanceMessage?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    maintenanceMessage?: JsonNullableWithAggregatesFilter<"Business">
+    maintenanceCta?: JsonNullableWithAggregatesFilter<"Business">
     umamiWebsiteId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
@@ -75709,7 +75720,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -75794,7 +75806,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -75879,7 +75892,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -75964,7 +75978,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -76049,7 +76064,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -76102,7 +76118,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -76155,7 +76172,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -82050,6 +82068,29 @@ export namespace Prisma {
     notIn?: $Enums.BusinessDomainStatus[] | ListEnumBusinessDomainStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumBusinessDomainStatusFilter<$PrismaModel> | $Enums.BusinessDomainStatus
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -82083,29 +82124,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type FloatNullableFilter<$PrismaModel = never> = {
@@ -82412,6 +82430,7 @@ export namespace Prisma {
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
     maintenanceMessage?: SortOrder
+    maintenanceCta?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -82471,7 +82490,6 @@ export namespace Prisma {
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
-    maintenanceMessage?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -82519,7 +82537,6 @@ export namespace Prisma {
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
-    maintenanceMessage?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -82558,6 +82575,32 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
     _max?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -82600,32 +82643,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -90053,6 +90070,29 @@ export namespace Prisma {
     _min?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
     _max?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
   export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -90091,29 +90131,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -90755,7 +90772,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -90839,7 +90857,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -90988,7 +91007,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -91072,7 +91092,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94060,7 +94081,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94144,7 +94166,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94244,7 +94267,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94328,7 +94352,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94412,7 +94437,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94496,7 +94522,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94596,7 +94623,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94680,7 +94708,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94801,7 +94830,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94885,7 +94915,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -95400,7 +95431,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -95484,7 +95516,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -96211,7 +96244,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -96295,7 +96329,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -96417,7 +96452,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -96501,7 +96537,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -96893,7 +96930,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -96977,7 +97015,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97129,7 +97168,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97213,7 +97253,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97430,7 +97471,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97514,7 +97556,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97614,7 +97657,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97698,7 +97742,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97782,7 +97827,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97866,7 +97912,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98012,7 +98059,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98096,7 +98144,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98229,7 +98278,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98313,7 +98363,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98452,7 +98503,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98536,7 +98588,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98721,7 +98774,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98805,7 +98859,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -99012,7 +99067,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -99096,7 +99152,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -99223,7 +99280,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -99307,7 +99365,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -99842,7 +99901,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -99926,7 +99986,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -100576,7 +100637,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -100660,7 +100722,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -101172,7 +101235,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -101256,7 +101320,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -102221,7 +102286,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -102305,7 +102371,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -102495,7 +102562,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -102579,7 +102647,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -102858,7 +102927,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -102942,7 +103012,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -103367,7 +103438,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -103451,7 +103523,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -103675,7 +103748,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -103759,7 +103833,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104005,7 +104080,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104089,7 +104165,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104205,7 +104282,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104289,7 +104367,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104389,7 +104468,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104473,7 +104553,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104557,7 +104638,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104641,7 +104723,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104741,7 +104824,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104825,7 +104909,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104909,7 +104994,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104993,7 +105079,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105136,7 +105223,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105220,7 +105308,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105353,7 +105442,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105437,7 +105527,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105537,7 +105628,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105621,7 +105713,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105705,7 +105798,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105789,7 +105883,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105921,7 +106016,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106005,7 +106101,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106204,7 +106301,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106288,7 +106386,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106441,7 +106540,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106525,7 +106625,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106668,7 +106769,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106752,7 +106854,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106905,7 +107008,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106989,7 +107093,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -107794,7 +107899,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -107878,7 +107984,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108021,7 +108128,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108105,7 +108213,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108238,7 +108347,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108322,7 +108432,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108422,7 +108533,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108506,7 +108618,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108590,7 +108703,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108674,7 +108788,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108796,7 +108911,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108880,7 +108996,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -109139,7 +109256,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109223,7 +109341,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109430,7 +109549,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -109514,7 +109634,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -109598,7 +109719,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109682,7 +109804,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109834,7 +109957,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -109918,7 +110042,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110107,7 +110232,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110191,7 +110317,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110338,7 +110465,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110422,7 +110550,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110506,7 +110635,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110590,7 +110720,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110690,7 +110821,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110774,7 +110906,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110858,7 +110991,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110942,7 +111076,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -111089,7 +111224,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -111173,7 +111309,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -111310,7 +111447,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -111394,7 +111532,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -111822,7 +111961,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -111906,7 +112046,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -112268,7 +112409,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -112352,7 +112494,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
-    maintenanceMessage?: string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -112452,7 +112595,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -112536,7 +112680,8 @@ export namespace Prisma {
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
-    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string

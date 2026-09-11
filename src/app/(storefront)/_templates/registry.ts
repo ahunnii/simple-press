@@ -327,6 +327,7 @@ import { ViiCollectionsPage } from "./vii/collections/vii-collections-page";
 import { ViiContactPage } from "./vii/contact/vii-contact-page";
 import { ViiGenericPage } from "./vii/generic/vii-generic-page";
 import { ViiLayout } from "./vii/layout/vii-layout";
+import { ViiMaintenancePage } from "./vii/maintenance/vii-maintenance-page";
 import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
@@ -389,6 +390,12 @@ export type TemplateComponentSet = {
   VideosPage?: AnyComponent;
   // Optional per-template override of /faq; defaultEntry always supplies one.
   FaqPage?: AnyComponent;
+  /**
+   * Optional full-screen maintenance / coming-soon view. Absent ⇒ the shared
+   * MaintenanceScreen fallback renders. Only used for business-scope
+   * maintenance; platform-scope always renders the shared screen.
+   */
+  MaintenancePage?: AnyComponent;
 };
 
 // ---------------------------------------------------------------------------
@@ -726,6 +733,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: ViiPreferencesPage,
     TestimonialsPage: ViiTestimonialsPage,
     ServicesIndexPage: ViiServicesIndexPage,
+    MaintenancePage: ViiMaintenancePage,
   },
 };
 

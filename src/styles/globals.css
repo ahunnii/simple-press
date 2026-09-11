@@ -5556,6 +5556,141 @@
   margin-bottom: 6px;
 }
 
+/* ─── Maintenance / coming-soon takeover ───────────────────────────────────
+   Standalone navy screen rendered WITHOUT ViiLayout (see
+   vii/maintenance/vii-maintenance-page.tsx). Light-on-navy throughout:
+   paper text, tan secondaries, copper-light accents.                      */
+
+.vii.vii-maintenance {
+  background: #1e3540; /* fallback before the token cascade resolves */
+  background: var(--vii-navy);
+  color: var(--vii-paper);
+}
+
+/* Merchant rich-text note — re-tinted for the dark canvas. */
+.vii .vii-maintenance-body {
+  max-width: 52ch;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--vii-paper) 85%, transparent);
+}
+
+.vii .vii-maintenance-body p {
+  margin: 0 0 0.85em;
+}
+
+.vii .vii-maintenance-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.vii .vii-maintenance-body strong {
+  color: var(--vii-paper);
+  font-weight: 600;
+}
+
+.vii .vii-maintenance-body em {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.vii .vii-maintenance-body a {
+  color: var(--vii-copper-light);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.vii .vii-maintenance-body h2,
+.vii .vii-maintenance-body h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  color: var(--vii-paper);
+  margin: 0 0 0.5em;
+}
+
+.vii .vii-maintenance-body ul,
+.vii .vii-maintenance-body ol {
+  margin: 0 0 0.85em;
+  padding-left: 1.2em;
+  text-align: left;
+  display: inline-block;
+}
+
+.vii .vii-maintenance-body li {
+  margin-bottom: 0.3em;
+}
+
+/* CTA — the ViiCtaLink language (tracked uppercase + copper underline) as a
+   plain anchor, so tel:/mailto: hrefs skip next/link. Light-on-navy tones. */
+.vii .vii-maintenance-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--vii-paper);
+  text-decoration: none;
+  border-bottom: 1px solid var(--vii-copper-light);
+  padding-bottom: 4px;
+  transition:
+    color 0.3s var(--vii-ease),
+    border-color 0.3s var(--vii-ease);
+}
+
+.vii .vii-maintenance-cta:hover,
+.vii .vii-maintenance-cta:focus-visible {
+  color: var(--vii-copper-light);
+  border-bottom-color: var(--vii-paper);
+}
+
+/* Entrance — one-shot staggered rise down the centered column. */
+@keyframes vii-maintenance-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.vii .vii-maintenance-col > * {
+  animation: vii-maintenance-rise 0.7s var(--vii-ease) both;
+}
+
+.vii .vii-maintenance-col > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.vii .vii-maintenance-col > *:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.vii .vii-maintenance-col > *:nth-child(3) {
+  animation-delay: 0.25s;
+}
+.vii .vii-maintenance-col > *:nth-child(4) {
+  animation-delay: 0.35s;
+}
+.vii .vii-maintenance-col > *:nth-child(5) {
+  animation-delay: 0.45s;
+}
+.vii .vii-maintenance-col > *:nth-child(n + 6) {
+  animation-delay: 0.55s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vii .vii-maintenance-col > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ─── Builders / Industrial Solidarity — design tokens ─────────────────────
    Light-canvas co-op/construction template. Sharp 0px corners everywhere.
    Fonts: Jost (display/headlines) + Agdasima (body).

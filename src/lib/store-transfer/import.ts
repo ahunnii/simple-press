@@ -15,7 +15,9 @@
 
 import path from "node:path";
 import JSZip from "jszip";
+import { Prisma } from "generated/prisma";
 
+import { normalizeMaintenanceMessage } from "~/lib/maintenance-config";
 import { buildUsedMediaIndex } from "~/lib/media/usage";
 import {
   contentAddressedKey,
@@ -185,7 +187,16 @@ export async function importStoreBundle(args: {
         testimonialsAutoApprove: biz.testimonialsAutoApprove,
         maintenanceMode: biz.maintenanceMode,
         maintenanceVariant: biz.maintenanceVariant,
-        maintenanceMessage: biz.maintenanceMessage ?? null,
+        maintenanceMessage:
+          (normalizeMaintenanceMessage(biz.maintenanceMessage) as
+            | Prisma.InputJsonValue
+            | null) ?? Prisma.DbNull,
+        // v1 exports predate maintenanceCta; ?? clears the column for both
+        // null and absent values, matching the DbNull convention the
+        // updateMaintenanceMode mutation uses for these columns.
+        maintenanceCta:
+          (biz.maintenanceCta as Prisma.InputJsonValue | null | undefined) ??
+          Prisma.DbNull,
         localBusinessEnabled: biz.localBusinessEnabled,
         allowAiCrawlers: biz.allowAiCrawlers,
         shippingType: biz.shippingType,

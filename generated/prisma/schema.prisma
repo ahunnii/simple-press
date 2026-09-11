@@ -194,7 +194,8 @@ model Business {
   // Storefront availability (owner-controlled, storefront only)
   maintenanceMode    Boolean @default(false)
   maintenanceVariant String  @default("maintenance") // "maintenance" | "coming_soon"
-  maintenanceMessage String?
+  maintenanceMessage Json?
+  maintenanceCta     Json?
 
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID

@@ -15,6 +15,7 @@ import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
+import { getTemplate } from "./(storefront)/_templates/registry";
 import { BambooHomepage as AnimatedBambooHomepage } from "./(storefront)/_templates/animated-bamboo/homepage/bamboo-homepage";
 import { BambooLayout as AnimatedBambooLayout } from "./(storefront)/_templates/animated-bamboo/layout/bamboo-general-layout";
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
@@ -77,10 +78,16 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
   }
 
   if (business.maintenance?.active) {
+    const m = business.maintenance;
+    const t = getTemplate(business.templateId);
+    if (m.scope === "business" && t.MaintenancePage) {
+      return <t.MaintenancePage business={business} maintenance={m} />;
+    }
     return (
       <MaintenanceScreen
-        variant={business.maintenance.variant}
-        message={business.maintenance.message}
+        variant={m.variant}
+        message={m.message}
+        cta={m.scope === "business" ? m.cta : null}
         businessName={business.name}
       />
     );
