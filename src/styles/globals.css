@@ -7837,24 +7837,98 @@
   transition-delay: calc(var(--i, 0) * 80ms);
 }
 
-/* ── Nav overlay — full-screen menu fade/stagger ── */
-.wealth-nav-overlay-link {
+/* ── Nav overlay — the template's one authored motion moment ──
+   The white field fades in, then the centered italic link column arrives
+   line-by-line (rise + capped stagger, exponential ease-out); exit is a
+   faster plain fade. data-state: "enter" (pre-arm frame) → "open" →
+   "closing". Folder groups are in-place accordions (grid-rows 0fr→1fr,
+   "+" rotates 45°), matching the live Squarespace drawer. */
+.wealth .wealth-nav-overlay {
+  background: var(--wealth-paper);
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.4s var(--wealth-ease-reveal),
-    transform 0.4s var(--wealth-ease-reveal);
+  transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wealth .wealth-nav-overlay[data-state="open"] {
+  opacity: 1;
+}
+.wealth .wealth-nav-overlay[data-state="closing"] {
+  opacity: 0;
+  transition: opacity 180ms ease-in;
 }
 
-.wealth-nav-overlay[data-open="true"] .wealth-nav-overlay-link {
+.wealth .wealth-nav-overlay-line {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 450ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wealth .wealth-nav-overlay[data-state="open"] .wealth-nav-overlay-line {
   opacity: 1;
   transform: none;
-  transition-delay: calc(var(--i, 0) * 60ms);
+  transition-delay: min(calc(var(--i, 0) * 50ms), 350ms);
+}
+.wealth .wealth-nav-overlay[data-state="closing"] .wealth-nav-overlay-line {
+  opacity: 0;
+  transform: none;
+  transition: opacity 150ms ease-in;
+  transition-delay: 0ms;
+}
+
+/* The drawer's voice: italic display lines, centered. Current page reads
+   muted gray (the live site's convention) — never an underline here. */
+.wealth .wealth-nav-overlay-item {
+  font-family: var(--font-wealth-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(30px, 4.5vw, 40px);
+  line-height: 1.45;
+  letter-spacing: 0.2px;
+  color: var(--wealth-ink);
+  text-decoration: none;
+  transition: color var(--wealth-dur-hover) var(--wealth-ease-hover, ease-in-out);
+}
+.wealth .wealth-nav-overlay-item:hover,
+.wealth .wealth-nav-overlay-item[data-active="true"] {
+  color: var(--wealth-muted);
+}
+.wealth .wealth-nav-overlay-child {
+  font-size: clamp(20px, 3vw, 24px);
+  line-height: 1.5;
+}
+
+.wealth .wealth-nav-overlay-plus {
+  display: inline-block;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wealth .wealth-nav-overlay-plus[data-expanded="true"] {
+  transform: rotate(45deg);
+}
+
+.wealth .wealth-nav-overlay-children {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wealth .wealth-nav-overlay-children[data-expanded="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.wealth .wealth-nav-overlay-social {
+  color: var(--wealth-ink);
+  transition: color 0.17s ease-in-out;
+}
+.wealth .wealth-nav-overlay-social:hover {
+  color: var(--wealth-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .wealth .wealth-reveal,
   .wealth .wealth-reveal-group .wealth-reveal-item,
-  .wealth .wealth-nav-overlay-link,
   .wealth .wealth-btn-ledge,
   .wealth .wealth-link,
   .wealth .wealth-input {
@@ -7867,8 +7941,23 @@
     transform: none;
   }
 
-  .wealth-nav-overlay-link {
-    opacity: 1;
+  /* Overlay: state changes stay legible as opacity-only fades — no rise,
+     no stagger, no plus rotation, no row animation. */
+  .wealth .wealth-nav-overlay,
+  .wealth .wealth-nav-overlay[data-state="closing"] {
+    transition: opacity 120ms linear;
+  }
+  .wealth .wealth-nav-overlay-line,
+  .wealth .wealth-nav-overlay[data-state="open"] .wealth-nav-overlay-line,
+  .wealth .wealth-nav-overlay[data-state="closing"] .wealth-nav-overlay-line {
     transform: none;
+    transition: opacity 120ms linear;
+    transition-delay: 0ms;
+  }
+  .wealth .wealth-nav-overlay-plus {
+    transition: none;
+  }
+  .wealth .wealth-nav-overlay-children {
+    transition: opacity 120ms linear;
   }
 }

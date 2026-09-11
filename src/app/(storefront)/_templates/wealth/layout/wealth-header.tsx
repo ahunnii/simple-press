@@ -64,7 +64,7 @@ export function WealthHeader({
             type: "group" as const,
             label: "Programs",
             children: [
-              { label: "Programs", href: "/services" },
+              { label: "All Programs", href: "/services" },
               {
                 label: "CEND",
                 href: "https://www.cendetroit.com",
@@ -176,6 +176,7 @@ export function WealthHeader({
         businessName={businessName}
         logoUrl={business?.siteContent?.logoUrl}
         logoAlt={logoAlt}
+        socialLinks={socialLinks}
         initialSession={initialSession}
       />
     </>
