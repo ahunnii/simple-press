@@ -41,6 +41,7 @@ const TEMPLATES = [
   { id: "pink", label: "PinkArt" },
   { id: "relocation", label: "Handy Relocations" },
   { id: "wealth", label: "Detroit Community Wealth Fund" },
+  { id: "olive", label: "Olive Mode" },
 ];
 
 const defaultValues: CreateBusinessFormData = {

@@ -15,7 +15,6 @@ import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
-import { getTemplate } from "./(storefront)/_templates/registry";
 import { BambooHomepage as AnimatedBambooHomepage } from "./(storefront)/_templates/animated-bamboo/homepage/bamboo-homepage";
 import { BambooLayout as AnimatedBambooLayout } from "./(storefront)/_templates/animated-bamboo/layout/bamboo-general-layout";
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
@@ -36,18 +35,21 @@ import { ModernHomePage } from "./(storefront)/_templates/modern/homepage/modern
 import { ModernLayout } from "./(storefront)/_templates/modern/layout/modern-layout";
 import { NoiseHomepage } from "./(storefront)/_templates/noise/homepage/noise-homepage";
 import { NoiseLayout } from "./(storefront)/_templates/noise/layout/noise-layout";
+import { OliveHomepage } from "./(storefront)/_templates/olive/homepage/olive-homepage";
+import { OliveLayout } from "./(storefront)/_templates/olive/layout/olive-layout";
 import { PinkHomepage } from "./(storefront)/_templates/pink/homepage/pink-homepage";
 import { PinkLayout } from "./(storefront)/_templates/pink/layout/pink-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen-homepage";
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
+import { getTemplate } from "./(storefront)/_templates/registry";
 import { RelocationHomepage } from "./(storefront)/_templates/relocation/homepage/relocation-homepage";
 import { RelocationLayout } from "./(storefront)/_templates/relocation/layout/relocation-layout";
-import { WealthHomepage } from "./(storefront)/_templates/wealth/homepage/wealth-homepage";
-import { WealthLayout } from "./(storefront)/_templates/wealth/layout/wealth-layout";
 import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
 import { SledgeLayout } from "./(storefront)/_templates/sledge/layout/sledge-layout";
 import { ViiHomepage } from "./(storefront)/_templates/vii/homepage/vii-homepage";
 import { ViiLayout } from "./(storefront)/_templates/vii/layout/vii-layout";
+import { WealthHomepage } from "./(storefront)/_templates/wealth/homepage/wealth-homepage";
+import { WealthLayout } from "./(storefront)/_templates/wealth/layout/wealth-layout";
 
 // Next 15: searchParams is a Promise.
 type Props = {
@@ -113,6 +115,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       sledge: SledgeHomepage,
       vii: ViiHomepage,
       wealth: WealthHomepage,
+      olive: OliveHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
@@ -133,6 +136,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       sledge: SledgeLayout,
       vii: ViiLayout,
       wealth: WealthLayout,
+      olive: OliveLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

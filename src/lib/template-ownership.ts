@@ -73,6 +73,12 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Detroit Community Wealth Fund",
     subdomains: ["detroitcommunitywealth", "demo"],
   },
+  // Olive Mode — Detroit women's boutique. "demo" is included so runtime QA can
+  // point the demo business at this template.
+  olive: {
+    label: "Olive Mode",
+    subdomains: ["olivemode", "demo"],
+  },
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {

@@ -54,6 +54,10 @@ import {
   noiseData,
   noiseFieldGroups,
 } from "~/app/(storefront)/_templates/noise";
+import {
+  oliveData,
+  oliveFieldGroups,
+} from "~/app/(storefront)/_templates/olive";
 import { pinkData, pinkFieldGroups } from "~/app/(storefront)/_templates/pink";
 import {
   pollenData,
@@ -64,14 +68,14 @@ import {
   relocationFieldGroups,
 } from "~/app/(storefront)/_templates/relocation";
 import {
-  wealthData,
-  wealthFieldGroups,
-} from "~/app/(storefront)/_templates/wealth";
-import {
   sledgeData,
   sledgeFieldGroups,
 } from "~/app/(storefront)/_templates/sledge";
 import { viiData, viiFieldGroups } from "~/app/(storefront)/_templates/vii";
+import {
+  wealthData,
+  wealthFieldGroups,
+} from "~/app/(storefront)/_templates/wealth";
 
 export type TemplatePage =
   | "homepage"
@@ -460,6 +464,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...pinkFieldGroups,
   ...relocationFieldGroups,
   ...wealthFieldGroups,
+  ...oliveFieldGroups,
 
   ...defaultTemplateFieldGroups,
 };
@@ -480,6 +485,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...pinkData,
   ...relocationData,
   ...wealthData,
+  ...oliveData,
 
   ...defaultTemplateData,
 };

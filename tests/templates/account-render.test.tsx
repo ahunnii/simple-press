@@ -32,6 +32,8 @@ import { ModernAccountSecurityPage } from "~/app/(storefront)/_templates/modern/
 import { ModernAccountSettingsPage } from "~/app/(storefront)/_templates/modern/account/modern-account-settings-page";
 import { NoiseAccountSecurityPage } from "~/app/(storefront)/_templates/noise/account/noise-account-security-page";
 import { NoiseAccountSettingsPage } from "~/app/(storefront)/_templates/noise/account/noise-account-settings-page";
+import { OliveAccountSecurityPage } from "~/app/(storefront)/_templates/olive/account/olive-account-security-page";
+import { OliveAccountSettingsPage } from "~/app/(storefront)/_templates/olive/account/olive-account-settings-page";
 import { PinkAccountSecurityPage } from "~/app/(storefront)/_templates/pink/account/pink-account-security-page";
 import { PinkAccountSettingsPage } from "~/app/(storefront)/_templates/pink/account/pink-account-settings-page";
 import { PollenAccountSecurityPage } from "~/app/(storefront)/_templates/pollen/account/pollen-account-security-page";
@@ -183,7 +185,7 @@ function renderWithAuth(children: ReactNode) {
   );
 }
 
-// All 11 templates that ship their own account directory and register real
+// All 12 templates that ship their own account directory and register real
 // `AccountSettingsPage`/`AccountSecurityPage` entries in the registry.
 // `builders` and `coop` have no account dir and fall back to `default` there
 // (`getTemplate()` spreads the default entry under a partial template) — that
@@ -204,6 +206,7 @@ const SETTINGS_PAGES: [name: string, Page: PageComponent][] = [
   ["sledge", SledgeAccountSettingsPage],
   ["pink", PinkAccountSettingsPage],
   ["vii", ViiAccountSettingsPage],
+  ["olive", OliveAccountSettingsPage],
 ];
 
 const SECURITY_PAGES: [name: string, Page: PageComponent][] = [
@@ -218,6 +221,7 @@ const SECURITY_PAGES: [name: string, Page: PageComponent][] = [
   ["sledge", SledgeAccountSecurityPage],
   ["pink", PinkAccountSecurityPage],
   ["vii", ViiAccountSecurityPage],
+  ["olive", OliveAccountSecurityPage],
 ];
 
 describe("account settings/security pages render for every template", () => {
