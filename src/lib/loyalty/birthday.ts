@@ -1,17 +1,16 @@
 /**
- * Loyalty Rewards — birthday bonuses: the date math, and the cron sweep that
- * spends it.
+ * Loyalty Rewards — birthday bonuses: the cron sweep that spends them.
  *
- * The top half is pure (`isLeapYear`, `birthdayTargets`, `isValidBirthday`) and
- * is also imported by `birthdaySchema` in `src/lib/validators/loyalty.ts` and
- * the account "save your birthday" form. `zonedCalendarDate` (from
- * `~/lib/calendar-date`) is the one place it crosses into `Intl`, and it
- * already falls back to UTC on a bad time zone string, so nothing here can
- * throw on malformed `Business.timeZone`.
+ * The date math (`isLeapYear`, `birthdayTargets`, `isValidBirthday`) lives in
+ * `./birthday-date.ts` and is re-exported here for the cron route and tests.
+ * It is split out because `birthdaySchema` in `src/lib/validators/loyalty.ts`
+ * needs `isValidBirthday`, validators are shared with client components, and
+ * THIS file imports the `server-only` email stack — a validator importing
+ * this module drags Sentry, Prisma and Resend into the browser bundle and
+ * fails `next build`. Validators must import `birthday-date`, never this file.
  *
- * The bottom half (`awardBirthdayPoints`) is the server sweep. It takes its
- * `DbClient` as a parameter and never imports the `~/server/db` singleton, so
- * the pure unit test beside this file keeps testing pure functions.
+ * `awardBirthdayPoints` takes its `DbClient` as a parameter and never imports
+ * the `~/server/db` singleton.
  *
  * ────────────────────────────────────────────────────────────────────────────
  * STEADY-STATE COST
@@ -62,64 +61,16 @@
 import * as Sentry from "@sentry/nextjs";
 
 import type { DbClient } from "~/server/db";
-import { zonedCalendarDate } from "~/lib/calendar-date";
 import { sendLoyaltyBirthdayEmail } from "~/lib/email/templates";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { birthdayTargets } from "~/lib/loyalty/birthday-date";
 import { awardPoints } from "~/lib/loyalty/ledger";
 
-/** True for a Gregorian leap year (divisible by 4, not by 100 unless also by 400). */
-export function isLeapYear(year: number): boolean {
-  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-}
-
-/**
- * The birthday(s) that qualify for today's bonus in `timeZone`, plus the
- * current year for building the `birthday:<customerId>:<YYYY>` ledger
- * idempotency key. Consumed by `awardBirthdayPoints` below.
- *
- * `targets` is normally just `[today]`. On February 28th of a non-leap year
- * it additionally includes `{ month: 2, day: 29 }`, so a customer whose
- * stored birthday is February 29th still gets their bonus once a year
- * instead of being skipped for three years out of four.
- */
-export function birthdayTargets(
-  now: Date,
-  timeZone: string,
-): {
-  year: number;
-  today: { month: number; day: number };
-  targets: Array<{ month: number; day: number }>;
-} {
-  const ymd = zonedCalendarDate(now, timeZone);
-  const [yearStr, monthStr, dayStr] = ymd.split("-");
-  const year = Number(yearStr);
-  const month = Number(monthStr);
-  const day = Number(dayStr);
-  const today = { month, day };
-
-  const targets: Array<{ month: number; day: number }> = [today];
-  if (month === 2 && day === 28 && !isLeapYear(year)) {
-    targets.push({ month: 2, day: 29 });
-  }
-
-  return { year, today, targets };
-}
-
-const MONTH_MAX_DAYS = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-/**
- * Whether `month`/`day` is a real, year-agnostic calendar birthday (February
- * always allows the 29th, since a birthday is stored without a year).
- * Consumed by `birthdaySchema` in `src/lib/validators/loyalty.ts` and the
- * "save your birthday" account-preferences form.
- */
-export function isValidBirthday(month: number, day: number): boolean {
-  if (!Number.isInteger(month) || !Number.isInteger(day)) return false;
-  if (month < 1 || month > 12) return false;
-  if (day < 1) return false;
-  const max = MONTH_MAX_DAYS[month - 1] ?? 31;
-  return day <= max;
-}
+export {
+  birthdayTargets,
+  isLeapYear,
+  isValidBirthday,
+} from "~/lib/loyalty/birthday-date";
 
 /**
  * The business columns the sweep needs: `featureFlags` for the gate,

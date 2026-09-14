@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { birthdayTargets, isLeapYear, isValidBirthday } from "./birthday";
+import { birthdayTargets, isLeapYear, isValidBirthday } from "./birthday-date";
 
 describe("isLeapYear", () => {
   it("2028 is a leap year", () => {

@@ -1,14 +1,16 @@
 import { z } from "zod";
 
-import { isValidBirthday } from "~/lib/loyalty/birthday";
+import type {
+  LoyaltySocialNetwork,
+  LoyaltyTierType,
+} from "~/lib/loyalty/constants";
+import { isValidBirthday } from "~/lib/loyalty/birthday-date";
 import {
   LOYALTY_LEDGER_PAGE,
   LOYALTY_SOCIAL_NETWORKS,
   LOYALTY_TIER_TYPES,
   MAX_ADJUST_POINTS,
   MAX_LOYALTY_TIERS,
-  type LoyaltySocialNetwork,
-  type LoyaltyTierType,
 } from "~/lib/loyalty/constants";
 import { DISCOUNT_PERCENTAGE_MAX_ERROR } from "~/lib/validators/discounts";
 
