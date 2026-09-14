@@ -196,6 +196,12 @@ model Business {
   maintenanceVariant String  @default("maintenance") // "maintenance" | "coming_soon"
   maintenanceMessage Json?
   maintenanceCta    Json?
+  maintenanceOverline    String?   // ≤80 chars; null → template default copy
+  maintenanceHeadline    String?   // ≤160 chars; null → template default copy
+  maintenanceImage       String?   // public URL from the `image` upload route (flyer)
+  maintenanceLaunchAt    DateTime? // UTC instant; entered as wall clock in `timeZone`
+  maintenanceLaunchEndAt DateTime? // optional; must be after maintenanceLaunchAt
+  maintenanceLocation    String?   // ≤200 chars free text
 
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID
@@ -273,6 +279,8 @@ model Business {
   quickBooksInvoices    QuickBooksInvoice[]
   subscriptions         Subscription[]
   donations             Donation[]
+  loyaltyProgram        LoyaltyProgram?
+  loyaltyLedger         LoyaltyLedger[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -837,6 +845,17 @@ model Customer {
   totalSpent Int @default(0)
   orderCount Int @default(0)
 
+  // Loyalty rewards (src/lib/loyalty). `loyaltyPoints` is the denormalized
+  // balance, written ONLY inside the same transaction as a LoyaltyLedger row
+  // (see `awardPoints`). `loyaltyJoinedAt` = explicit "Join rewards" on the
+  // storefront (signup bonus seam). Birthday is month/day only, PLAINTEXT and
+  // no year on purpose: the cron must `where` on it and `/// @encrypted`
+  // columns cannot be filtered.
+  loyaltyPoints   Int       @default(0)
+  loyaltyJoinedAt DateTime?
+  birthMonth      Int?
+  birthDay        Int?
+
   // GDPR/CCPA data-subject rights
   deletionRequestedAt DateTime?
   anonymizedAt        DateTime?
@@ -858,10 +877,12 @@ model Customer {
   testimonialInvites TestimonialInvite[]
   reviews            ProductReview[]
   subscriptions      Subscription[]
+  loyaltyLedger      LoyaltyLedger[]
 
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
   @@index([userId])
+  @@index([businessId, birthMonth, birthDay]) // loyalty birthday cron sweep
 }
 
 model ShippingAddress {
@@ -974,6 +995,7 @@ model Order {
   inventoryHistory InventoryHistory[]
   reviews          ProductReview[]
   shipments        OrderShipment[]
+  loyaltyLedger    LoyaltyLedger[]
 
   @@unique([businessId, orderNumber])
   @@index([businessId, status])
@@ -1070,6 +1092,11 @@ model DiscountCode {
   // Status
   active Boolean @default(true)
 
+  // "manual" = owner-created in /admin/discounts; "loyalty" = single-use code
+  // minted by a rewards redemption (src/lib/loyalty/redeem.ts). The admin
+  // discounts list filters to "manual"; loyalty codes surface per customer.
+  source String @default("manual")
+
   // Usage limits
   usageLimit       Int? // null = unlimited (total redemptions)
   usageCount       Int  @default(0)
@@ -1084,7 +1111,8 @@ model DiscountCode {
   maxDiscount Int? // cap discount amount in cents
 
   // Relationships
-  orders Order[]
+  orders        Order[]
+  loyaltyLedger LoyaltyLedger?
 
   @@unique([businessId, code])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, code]) / @@index([businessId, active]) prefix.
@@ -1936,4 +1964,107 @@ model Donation {
   message    String? @db.Text /// @encrypted
 
   @@index([businessId, createdAt]) // admin list, newest first
+}
+
+// ============================================
+// LOYALTY / REWARDS  (src/lib/loyalty)
+// ============================================
+
+/// Per-business rewards program settings. One row per business, created on
+/// first save from /admin/settings/loyalty. Every rule is a toggle + value so
+/// turning a rule off keeps the owner's number. Points are snapshotted onto
+/// LoyaltyLedger rows at award time — changing a value here never rewrites
+/// history.
+model LoyaltyProgram {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Earning rules
+  earnOnOrders      Boolean @default(true)
+  pointsPerDollar   Int     @default(1) // per whole dollar of (subtotal - discount)
+  signupEnabled     Boolean @default(false)
+  signupBonus       Int     @default(0)
+  firstOrderEnabled Boolean @default(false)
+  firstOrderBonus   Int     @default(0)
+  birthdayEnabled   Boolean @default(false)
+  birthdayBonus     Int     @default(0)
+  socialEnabled     Boolean @default(false)
+  socialFollowBonus Int     @default(0) // per network, honor system
+
+  // Redemption
+  rewardCodeExpiryDays Int @default(90)
+
+  tiers LoyaltyRewardTier[]
+}
+
+/// A fixed redemption tier ("500 pts -> $5 off"). Rows, not JSON, so a redeem
+/// references a stable id and an owner deleting tier #1 between page load and
+/// click cannot shift the customer onto a different reward.
+model LoyaltyRewardTier {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  programId String
+  program   LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  businessId String // denormalized for tenant-scoped lookup in redeem
+
+  label       String // "$5 off"
+  pointsCost  Int
+  type        String // "percentage" | "fixed" — never free_shipping in MVP
+  value       Int // percent, or cents
+  minPurchase Int? // cents
+  sortOrder   Int     @default(0)
+  active      Boolean @default(true)
+
+  @@index([businessId, active])
+  @@index([programId])
+}
+
+/// Append-only points ledger. `Customer.loyaltyPoints` is the running balance
+/// and is written in the same transaction as every row here (`awardPoints` in
+/// src/lib/loyalty/ledger.ts is the single write path). `sourceKey` is the
+/// idempotency key — the 15-minute cron, replayed Stripe webhooks, and double
+/// clicks all collapse onto @@unique([businessId, sourceKey]):
+///   order:<orderId> | first-order:<customerId> | signup:<customerId>
+///   | birthday:<customerId>:<YYYY> | social:<customerId>:<network>
+///   | order-clawback:<orderId>:<refundId|manual|cancel> | redeem:<discountCodeId>
+///   | adjust:<uuid> | anonymize:<customerId>
+/// Rows carry no PII and survive customer anonymization.
+model LoyaltyLedger {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // order_earn | first_order_bonus | signup_bonus | birthday_bonus
+  // | social_follow | order_clawback | redeem | adjust
+  type         String
+  points       Int // signed: positive award, negative deduction
+  balanceAfter Int
+  reason       String?
+  metadata     Json? // { rate, eligibleCents } | { network } | { tierId }
+
+  sourceKey String
+
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  discountCodeId String?       @unique
+  discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id], onDelete: SetNull)
+
+  actorUserId String? // admin adjust only
+
+  @@unique([businessId, sourceKey])
+  @@index([customerId, createdAt])
+  @@index([orderId])
 }

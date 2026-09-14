@@ -205,6 +205,13 @@ export const subscriptionManageLimiter = makeLazy({
   keyPrefix: "rl:subscription-manage",
 });
 
+// 20 loyalty rewards customer actions (social-follow claims, redemptions) per 15 minutes per IP+host
+export const loyaltyActionLimiter = makeLazy({
+  points: 20,
+  duration: 900,
+  keyPrefix: "rl:loyalty-action",
+});
+
 /**
  * Extract a best-effort client IP from request headers.
  *

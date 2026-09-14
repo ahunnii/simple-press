@@ -7,6 +7,8 @@ import ContactFormEmail from "~/emails/contact-form";
 import DisputeAlertEmail from "~/emails/dispute-alert";
 import FinalQuoteEmail from "~/emails/final-quote";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
+import LoyaltyBirthdayEmail from "~/emails/loyalty-birthday";
+import LoyaltyRewardRedeemedEmail from "~/emails/loyalty-reward-redeemed";
 import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 import NewDonationNotificationEmail from "~/emails/new-donation-notification";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
@@ -38,6 +40,7 @@ import { getBusinessUrl } from "~/lib/business-url";
 import { applySubjectTemplate } from "~/lib/email/customization";
 import { getEmailOverrides } from "~/lib/email/overrides.server";
 import { createOrderStatusToken } from "~/lib/order-status-token";
+import { formatPrice } from "~/lib/prices";
 
 import { EMAIL_FROM, sendEmail } from "./send";
 
@@ -82,6 +85,8 @@ export async function sendOrderConfirmation(params: {
   orderId?: string;
   /** When provided, a "Manage your subscription" link is shown in the email. */
   subscriptionManageUrl?: string;
+  /** When provided with earned > 0, a "You earned N points" block is shown in the email. */
+  loyalty?: { earned: number; balance: number };
   idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
@@ -123,6 +128,9 @@ export async function sendOrderConfirmation(params: {
       businessUrl,
       orderStatusUrl,
       subscriptionManageUrl: params.subscriptionManageUrl,
+      loyalty: params.loyalty
+        ? { ...params.loyalty, rewardsUrl: `${businessUrl}/account/rewards` }
+        : undefined,
     }),
     tags: [
       { name: "category", value: "order_confirmation" },
@@ -1577,5 +1585,131 @@ export async function sendOwnerDonationNotification(params: {
       { name: "business", value: params.business.subdomain },
     ],
     idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// ─── Loyalty rewards ───
+
+/**
+ * Reward code redeemed — sent by the loyalty `redeem` tRPC procedure right
+ * after it mints the `DiscountCode` row for the customer's redemption.
+ *
+ * `idempotencyKey` is keyed on the minted `DiscountCode.id`, not the
+ * customer or a timestamp: a redemption creates exactly one discount code
+ * row, so keying on that row's id is what makes a client retry of the same
+ * `redeem` call (or any other duplicate invocation) unable to send the code
+ * twice.
+ */
+export async function sendLoyaltyRewardRedeemedEmail(params: {
+  to: string;
+  customerName?: string | null;
+  code: string;
+  rewardLabel: string;
+  rewardDescription: string;
+  expiresAt: Date | null;
+  minPurchaseCents?: number | null;
+  pointsSpent: number;
+  balance: number;
+  discountCodeId: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+}) {
+  const businessUrl = getBusinessUrl(params.business);
+  const expiresAt = params.expiresAt
+    ? params.expiresAt.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "no expiration";
+
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `Your ${params.business.name} reward code`,
+    react: LoyaltyRewardRedeemedEmail({
+      customerName: params.customerName,
+      code: params.code,
+      rewardLabel: params.rewardLabel,
+      rewardDescription: params.rewardDescription,
+      expiresAt,
+      minPurchase:
+        params.minPurchaseCents != null
+          ? formatPrice(params.minPurchaseCents)
+          : undefined,
+      pointsSpent: params.pointsSpent,
+      balance: params.balance,
+      shopUrl: businessUrl,
+      rewardsUrl: `${businessUrl}/account/rewards`,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "loyalty_reward_redeemed" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: `loyalty-redeem-${params.discountCodeId}`,
+  });
+}
+
+/**
+ * Birthday bonus awarded — sent by the daily birthday cron job after it
+ * awards a `birthday_bonus` ledger row for the customer.
+ *
+ * `idempotencyKey` is keyed on `<customerId>-<year>`, the same shape as the
+ * ledger's own `birthday:<customerId>:<YYYY>` idempotency key (see
+ * `src/lib/loyalty/birthday.ts`) — a re-run of the cron for a customer
+ * already credited this year (e.g. a retried job, or the sweep catching a
+ * customer twice) can never send a second email for the same birthday.
+ */
+export async function sendLoyaltyBirthdayEmail(params: {
+  to: string;
+  customerName?: string | null;
+  points: number;
+  balance: number;
+  customerId: string;
+  year: number;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+}) {
+  const businessUrl = getBusinessUrl(params.business);
+
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `Happy birthday from ${params.business.name}!`,
+    react: LoyaltyBirthdayEmail({
+      customerName: params.customerName,
+      points: params.points,
+      balance: params.balance,
+      rewardsUrl: `${businessUrl}/account/rewards`,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "loyalty_birthday" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: `loyalty-birthday-${params.customerId}-${params.year}`,
   });
 }

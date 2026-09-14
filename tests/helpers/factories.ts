@@ -535,3 +535,83 @@ export function createBaseInventoryUnit(
     },
   });
 }
+
+/**
+ * A rewards program with every rule ENABLED and a non-zero value, which is
+ * deliberately the opposite of the schema defaults (`signupEnabled`,
+ * `firstOrderEnabled`, `birthdayEnabled` and `socialEnabled` all default to
+ * `false` — see DEFAULT_LOYALTY_PROGRAM). A test that wants a rule off says
+ * so explicitly; a test that wants the production default should pass the
+ * overrides rather than relying on this factory.
+ *
+ * Note that creating a program does NOT turn the feature on: every earn path
+ * also checks `resolveFlags(business.featureFlags).isEnabled("loyalty")`, so
+ * pair this with `createBusiness({ featureFlags: { loyalty: true, ... } })`.
+ */
+export function createLoyaltyProgram(
+  businessId: string,
+  opts: {
+    earnOnOrders?: boolean;
+    pointsPerDollar?: number;
+    signupEnabled?: boolean;
+    signupBonus?: number;
+    firstOrderEnabled?: boolean;
+    firstOrderBonus?: number;
+    birthdayEnabled?: boolean;
+    birthdayBonus?: number;
+    socialEnabled?: boolean;
+    socialFollowBonus?: number;
+    rewardCodeExpiryDays?: number;
+  } = {},
+) {
+  return db.loyaltyProgram.create({
+    data: {
+      businessId,
+      earnOnOrders: opts.earnOnOrders ?? true,
+      pointsPerDollar: opts.pointsPerDollar ?? 1,
+      signupEnabled: opts.signupEnabled ?? true,
+      signupBonus: opts.signupBonus ?? 100,
+      firstOrderEnabled: opts.firstOrderEnabled ?? true,
+      firstOrderBonus: opts.firstOrderBonus ?? 50,
+      birthdayEnabled: opts.birthdayEnabled ?? true,
+      birthdayBonus: opts.birthdayBonus ?? 25,
+      socialEnabled: opts.socialEnabled ?? true,
+      socialFollowBonus: opts.socialFollowBonus ?? 10,
+      rewardCodeExpiryDays: opts.rewardCodeExpiryDays ?? 90,
+    },
+  });
+}
+
+/**
+ * A redemption tier ("500 pts -> $5 off"). `businessId` is denormalized onto
+ * the row in the schema for tenant-scoped redeem lookups, so it is a separate
+ * argument rather than derived — passing a program from one business and the
+ * id of another is exactly the cross-tenant case the redeem tests exercise.
+ */
+export function createLoyaltyTier(
+  programId: string,
+  businessId: string,
+  opts: {
+    label?: string;
+    pointsCost?: number;
+    type?: string;
+    value?: number;
+    minPurchase?: number | null;
+    sortOrder?: number;
+    active?: boolean;
+  } = {},
+) {
+  return db.loyaltyRewardTier.create({
+    data: {
+      programId,
+      businessId,
+      label: opts.label ?? "$5 off",
+      pointsCost: opts.pointsCost ?? 500,
+      type: opts.type ?? "fixed",
+      value: opts.value ?? 500,
+      minPurchase: opts.minPurchase ?? null,
+      sortOrder: opts.sortOrder ?? 0,
+      active: opts.active ?? true,
+    },
+  });
+}

@@ -27,6 +27,7 @@ const NAV_ITEMS: OliveAccountNavItem[] = [
   { href: "/account/security", label: "Security" },
   { href: "/account/address-book", label: "Address Book" },
   { href: "/account/preferences", label: "Preferences" },
+  { href: "/account/rewards", label: "Rewards", flag: "loyalty" },
 ];
 
 type Props = {

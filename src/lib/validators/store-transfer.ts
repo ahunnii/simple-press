@@ -66,6 +66,15 @@ const exportedBusinessSchema = z.object({
   maintenanceMode: z.boolean(),
   maintenanceVariant: z.string(),
   maintenanceMessage: nullableString.optional(),
+  // zod v3 `z.object` strips unknown keys, so the exporter's `maintenanceCta`
+  // was silently dropped before it ever reached import. Declared so it survives.
+  maintenanceCta: z.unknown().optional(),
+  maintenanceOverline: nullableString.optional(),
+  maintenanceHeadline: nullableString.optional(),
+  maintenanceImage: nullableString.optional(),
+  maintenanceLaunchAt: nullableString.optional(),
+  maintenanceLaunchEndAt: nullableString.optional(),
+  maintenanceLocation: nullableString.optional(),
   localBusinessEnabled: z.boolean(),
   allowAiCrawlers: z.boolean(),
   shippingType: z.string(),

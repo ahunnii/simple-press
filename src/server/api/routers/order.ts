@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { carrierLabel } from "~/data/fulfillment-constants";
 import { z } from "zod";
 
+import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
 import type { OrderSortValue } from "~/lib/validators/order";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
@@ -16,6 +17,10 @@ import {
   sendOrderShipped,
 } from "~/lib/email/templates";
 import { deductPoolInventory, restorePoolInventory } from "~/lib/inventory";
+import {
+  awardPointsForPaidOrder,
+  clawbackPointsForOrder,
+} from "~/lib/loyalty/order-hooks";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
@@ -1072,6 +1077,36 @@ export const orderRouter = createTRPCRouter({
         },
       });
 
+      // Loyalty clawback — deliberately NOT feature-gated (see
+      // `clawbackPointsForOrder`): points awarded while the program was on
+      // must still be corrected after a refund even if the owner has since
+      // turned it off. Non-fatal and idempotent on `stripeRefund.id`, so a
+      // retried mutation that reuses the same Stripe refund deducts nothing
+      // twice, while a genuinely second refund claws back the difference.
+      try {
+        await clawbackPointsForOrder(ctx.db, {
+          businessId,
+          orderId: order.id,
+          orderTotalCents: order.total,
+          // CUMULATIVE refunded total, not this refund's amount: the helper
+          // computes the intended clawback as a share of the whole order and
+          // then subtracts what earlier refunds already clawed, so a second
+          // partial refund must see the running total or it claws nothing.
+          refundCents: newTotalRefunded,
+          isFullRefund,
+          sourceSuffix: stripeRefund.id,
+          reason: `Refund on order #${order.orderNumber}`,
+        });
+      } catch (loyaltyError) {
+        Sentry.withScope((scope) => {
+          scope.setTag("trpc.procedure", "order.refund");
+          scope.setTag("loyalty.step", "clawback");
+          scope.setTag("businessId", businessId);
+          scope.setExtra("orderId", order.id);
+          Sentry.captureException(loyaltyError);
+        });
+      }
+
       // Restore inventory only when explicitly requested
       if (input.restockItems) {
         try {
@@ -1310,6 +1345,33 @@ export const orderRouter = createTRPCRouter({
 
       // Handle cancellation side-effects
       if (isCancelling) {
+        // Loyalty clawback — only for an order that was actually paid for.
+        // Cancelling an unpaid/pending order never earned anything, and the
+        // helper is ungated on purpose (a correction always runs). Successive
+        // corrections on one order are netted against each other inside the
+        // helper, so cancelling an already-refunded order deducts nothing more.
+        if (order.paymentStatus === "paid") {
+          try {
+            await clawbackPointsForOrder(ctx.db, {
+              businessId,
+              orderId: order.id,
+              orderTotalCents: order.total,
+              refundCents: order.total,
+              isFullRefund: true,
+              sourceSuffix: "cancel",
+              reason: "Order cancelled",
+            });
+          } catch (loyaltyError) {
+            Sentry.withScope((scope) => {
+              scope.setTag("trpc.procedure", "order.updateStatus");
+              scope.setTag("loyalty.step", "clawback");
+              scope.setTag("businessId", businessId);
+              scope.setExtra("orderId", order.id);
+              Sentry.captureException(loyaltyError);
+            });
+          }
+        }
+
         const hadInventoryDeducted =
           order.status === "open" || order.status === "completed";
 
@@ -1753,15 +1815,22 @@ export const orderRouter = createTRPCRouter({
       // Increment customer spend/order-count aggregates for paid manual orders
       // so they surface in the customer list metrics — mirrors the Stripe
       // webhook's customer-metrics update.
+      //
+      // The post-increment order count is read back here for the loyalty
+      // earn step below (it decides "is this their first order?" from it).
+      // Null when the metrics update failed or the order isn't paid.
+      let customerOrderCountAfter: number | null = null;
       if (isPaidOrder) {
         try {
-          await ctx.db.customer.update({
+          const metricsUpdate = await ctx.db.customer.update({
             where: { id: customer.id },
             data: {
               totalSpent: { increment: order.total },
               orderCount: { increment: 1 },
             },
+            select: { orderCount: true },
           });
+          customerOrderCountAfter = metricsUpdate.orderCount;
         } catch (customerError) {
           console.error(
             "[Manual Order] Failed to update customer metrics:",
@@ -1772,6 +1841,36 @@ export const orderRouter = createTRPCRouter({
               "trpc.procedure": "order.createManual",
               businessId,
             },
+          });
+        }
+      }
+
+      // Loyalty points for a paid manual order (flag- and program-gated inside
+      // the helper) — mirrors the Stripe webhook's earn step. Non-fatal: the
+      // order is already created and marked paid, so a points failure must not
+      // roll it back or block the confirmation email below.
+      let loyaltyEarn: OrderEarnResult | null = null;
+      if (isPaidOrder) {
+        try {
+          loyaltyEarn = await awardPointsForPaidOrder(ctx.db, {
+            businessId,
+            order: {
+              id: order.id,
+              subtotal: order.subtotal,
+              discount: order.discount,
+            },
+            customer: {
+              id: customer.id,
+              orderCount: customerOrderCountAfter ?? customer.orderCount + 1,
+            },
+          });
+        } catch (loyaltyError) {
+          Sentry.withScope((scope) => {
+            scope.setTag("trpc.procedure", "order.createManual");
+            scope.setTag("loyalty.step", "award");
+            scope.setTag("businessId", businessId);
+            scope.setExtra("orderId", order.id);
+            Sentry.captureException(loyaltyError);
           });
         }
       }
@@ -2007,6 +2106,17 @@ export const orderRouter = createTRPCRouter({
               customDomain: business.customDomain ?? undefined,
               domainStatus: business.domainStatus,
             },
+            // Only when points were actually awarded — `loyalty` absent means
+            // the email renders exactly as it did before this feature.
+            ...(loyaltyEarn &&
+            loyaltyEarn.earned + loyaltyEarn.firstOrderBonus > 0
+              ? {
+                  loyalty: {
+                    earned: loyaltyEarn.earned + loyaltyEarn.firstOrderBonus,
+                    balance: loyaltyEarn.balance,
+                  },
+                }
+              : {}),
             orderId: order.id,
           });
           console.log(
@@ -2164,6 +2274,30 @@ export const orderRouter = createTRPCRouter({
           refundAmountCents: order.total,
         },
       });
+
+      // Loyalty clawback — a manual "mark as refunded" is always the full
+      // order, so everything the order earned (less anything a prior partial
+      // Stripe refund already clawed back) comes off. Ungated and non-fatal,
+      // same contract as `order.refund` above.
+      try {
+        await clawbackPointsForOrder(ctx.db, {
+          businessId,
+          orderId: order.id,
+          orderTotalCents: order.total,
+          refundCents: order.total,
+          isFullRefund: true,
+          sourceSuffix: "manual",
+          reason: "Marked refunded",
+        });
+      } catch (loyaltyError) {
+        Sentry.withScope((scope) => {
+          scope.setTag("trpc.procedure", "order.markAsRefunded");
+          scope.setTag("loyalty.step", "clawback");
+          scope.setTag("businessId", businessId);
+          scope.setExtra("orderId", order.id);
+          Sentry.captureException(loyaltyError);
+        });
+      }
 
       if (input.restockItems) {
         try {

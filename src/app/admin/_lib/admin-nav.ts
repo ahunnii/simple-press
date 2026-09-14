@@ -34,6 +34,7 @@ import {
 import {
   Clock,
   FileText,
+  Gift,
   Globe,
   HeartHandshake,
   Home,
@@ -543,6 +544,18 @@ export const HUB_CARDS: HubCard[] = [
     keywords: ["tips", "support", "donate", "venmo", "cash app", "fundraiser"],
   },
   {
+    key: "settings-loyalty",
+    title: "Rewards",
+    description: "Points, bonuses, and reward tiers",
+    body: "Let customers earn points on orders, birthdays, and social follows, and redeem them for single-use discount codes.",
+    href: "/admin/settings/loyalty",
+    hub: "settings",
+    color: "yellow",
+    icon: Gift,
+    featureKey: "loyalty",
+    keywords: ["loyalty", "points", "rewards", "birthday", "tiers"],
+  },
+  {
     key: "settings-availability",
     title: "Maintenance Mode",
     description: "Take your storefront offline or show a coming-soon page",
@@ -827,6 +840,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     href: "/admin/settings/general",
     icon: Wrench,
     keywords: ["general", "info", "business"],
+  },
+  {
+    key: "loyalty-settings",
+    title: "Rewards settings",
+    href: "/admin/settings/loyalty",
+    icon: Gift,
+    featureKey: "loyalty",
+    keywords: ["loyalty", "points", "rewards"],
   },
   {
     key: "tax-guide",

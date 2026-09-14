@@ -14,10 +14,13 @@
  */
 
 import path from "node:path";
-import JSZip from "jszip";
 import { Prisma } from "generated/prisma";
+import JSZip from "jszip";
 
-import { normalizeMaintenanceMessage } from "~/lib/maintenance-config";
+import {
+  normalizeMaintenanceMessage,
+  normalizeMaintenanceText,
+} from "~/lib/maintenance-config";
 import { buildUsedMediaIndex } from "~/lib/media/usage";
 import {
   contentAddressedKey,
@@ -172,6 +175,15 @@ export async function importStoreBundle(args: {
 
   // ── Step 3: Upsert content in dependency order ──────────────────────────────
 
+  // ISO instant string → Date; anything else (missing key, garbage) → null.
+  function toDateOrNull(value: unknown): Date | null {
+    if (typeof value === "string") {
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+    return null;
+  }
+
   // ── 3a. Business config UPDATE only (never touch identity/stripe/domain fields)
   try {
     const biz = content.business;
@@ -188,15 +200,25 @@ export async function importStoreBundle(args: {
         maintenanceMode: biz.maintenanceMode,
         maintenanceVariant: biz.maintenanceVariant,
         maintenanceMessage:
-          (normalizeMaintenanceMessage(biz.maintenanceMessage) as
-            | Prisma.InputJsonValue
-            | null) ?? Prisma.DbNull,
+          (normalizeMaintenanceMessage(
+            biz.maintenanceMessage,
+          ) as Prisma.InputJsonValue | null) ?? Prisma.DbNull,
         // v1 exports predate maintenanceCta; ?? clears the column for both
         // null and absent values, matching the DbNull convention the
         // updateMaintenanceMode mutation uses for these columns.
         maintenanceCta:
           (biz.maintenanceCta as Prisma.InputJsonValue | null | undefined) ??
           Prisma.DbNull,
+        // Plain String?/DateTime? columns take `null`, not `Prisma.DbNull`
+        // (that sentinel is for Json columns only). v1 bundles predate these
+        // fields, so every value is normalized from `unknown` and a missing
+        // key clears the column — the bundle is authoritative.
+        maintenanceOverline: normalizeMaintenanceText(biz.maintenanceOverline),
+        maintenanceHeadline: normalizeMaintenanceText(biz.maintenanceHeadline),
+        maintenanceImage: normalizeMaintenanceText(biz.maintenanceImage),
+        maintenanceLaunchAt: toDateOrNull(biz.maintenanceLaunchAt),
+        maintenanceLaunchEndAt: toDateOrNull(biz.maintenanceLaunchEndAt),
+        maintenanceLocation: normalizeMaintenanceText(biz.maintenanceLocation),
         localBusinessEnabled: biz.localBusinessEnabled,
         allowAiCrawlers: biz.allowAiCrawlers,
         shippingType: biz.shippingType,

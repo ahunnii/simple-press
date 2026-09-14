@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
@@ -18,6 +19,7 @@ import {
 
 import { TrailHeader } from "../../_components/trail-header";
 import { OrdersTable } from "../../orders/_components/orders-table";
+import { CustomerLoyaltyCard } from "./_components/customer-loyalty-card";
 import { CustomerNotes } from "./_components/customer-notes";
 import { CustomerPrivacyActions } from "./_components/customer-privacy-actions";
 
@@ -28,13 +30,20 @@ type Props = {
 export default async function CustomerDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const customer = await api.customer
-    .getById(id)
-    .catch(rethrowTrpcForErrorBoundary);
+  // Same guard `/admin/layout.tsx` already ran, called again for its resolved
+  // `membershipRole` — which is what decides whether the Rewards card's
+  // "Adjust points" control renders. Matches /admin/orders/[id]/page.tsx's
+  // use of it.
+  const [customer, { membershipRole }] = await Promise.all([
+    api.customer.getById(id).catch(rethrowTrpcForErrorBoundary),
+    requireAdminAccess(),
+  ]);
 
   if (!customer) {
     notFound();
   }
+
+  const canAdjustLoyalty = membershipRole !== "STAFF";
 
   const name =
     [customer.firstName, customer.lastName].filter(Boolean).join(" ") || null;
@@ -156,6 +165,11 @@ export default async function CustomerDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+
+            <CustomerLoyaltyCard
+              customerId={customer.id}
+              canAdjust={canAdjustLoyalty}
+            />
 
             <CustomerNotes customerId={customer.id} notes={customer.notes} />
 

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
+import { listLedger } from "~/lib/loyalty/ledger";
 import { normalizeEmail } from "~/lib/utils";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 import {
@@ -397,6 +398,14 @@ export const customerRouter = createTRPCRouter({
 
     if (!customer) return null;
 
+    // Ledger rows carry no PII beyond this customer's own activity (type,
+    // points, reason, redeemed code), so they're safe to include verbatim.
+    const ledgerRows = await listLedger(ctx.db, {
+      businessId: business.id,
+      customerId: customer.id,
+      take: 1000,
+    });
+
     return {
       exportedAt: new Date().toISOString(),
       business: { id: business.id, name: business.name },
@@ -474,6 +483,21 @@ export const customerRouter = createTRPCRouter({
         testimonialDate: t.testimonialDate,
         createdAt: t.createdAt,
       })),
+      loyalty: {
+        balance: customer.loyaltyPoints,
+        birthday:
+          customer.birthMonth && customer.birthDay
+            ? { month: customer.birthMonth, day: customer.birthDay }
+            : null,
+        ledger: ledgerRows.map((row) => ({
+          createdAt: row.createdAt,
+          type: row.type,
+          points: row.points,
+          balanceAfter: row.balanceAfter,
+          reason: row.reason,
+          code: row.discountCode?.code ?? null,
+        })),
+      },
     };
   }),
 
@@ -527,7 +551,11 @@ export const customerRouter = createTRPCRouter({
     return { success: true, requested: true };
   }),
 
-  // Anonymize a customer's personal data (owner/admin action)
+  // Anonymize a customer's personal data (owner/admin action). Also zeroes
+  // out `loyaltyPoints`/`birthMonth`/`birthDay` and, when there was a balance,
+  // appends an append-only `adjust` ledger row recording the clawback to zero
+  // (the ledger row itself is kept — it's a money-adjacent audit record with
+  // no PII — while the customer's balance and birthday are erased).
   anonymize: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -603,6 +631,43 @@ export const customerRouter = createTRPCRouter({
           where: { customerId: input.id },
         });
 
+        // Claw back any remaining loyalty balance to zero. Written directly
+        // via the transaction client (not `awardPoints`, which opens its own
+        // transaction) with the same idempotency shape: the ledger row is
+        // inserted first, keyed so a second anonymize call raises P2002
+        // instead of double-clawing back a balance that's already zero.
+        const { loyaltyPoints } = await tx.customer.findUniqueOrThrow({
+          where: { id: input.id },
+          select: { loyaltyPoints: true },
+        });
+        if (loyaltyPoints > 0) {
+          // Existence check rather than catching P2002: a failed statement
+          // aborts the surrounding Postgres transaction (25P02), so a
+          // swallowed unique violation here would poison every statement
+          // after it. A truly concurrent double-submit still fails the whole
+          // transaction, which is the correct outcome.
+          const anonymizeKey = `anonymize:${input.id}`;
+          const already = await tx.loyaltyLedger.findUnique({
+            where: {
+              businessId_sourceKey: { businessId, sourceKey: anonymizeKey },
+            },
+            select: { id: true },
+          });
+          if (!already) {
+            await tx.loyaltyLedger.create({
+              data: {
+                businessId,
+                customerId: input.id,
+                type: "adjust",
+                points: -loyaltyPoints,
+                balanceAfter: 0,
+                sourceKey: anonymizeKey,
+                reason: "Account anonymized",
+              },
+            });
+          }
+        }
+
         await tx.customer.update({
           where: { id: input.id },
           data: {
@@ -614,6 +679,9 @@ export const customerRouter = createTRPCRouter({
             userId: null,
             anonymizedAt: new Date(),
             deletionRequestedAt: null,
+            loyaltyPoints: 0,
+            birthMonth: null,
+            birthDay: null,
           },
         });
       });

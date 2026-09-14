@@ -108,6 +108,7 @@ import { DefaultAddressBookFallback } from "./default/account/default-address-bo
 import { DefaultOrderDetailPage } from "./default/account/default-order-detail-page";
 import { DefaultOrdersPage } from "./default/account/default-orders-page";
 import { DefaultPreferencesFallback } from "./default/account/default-preferences-fallback";
+import { DefaultRewardsFallback } from "./default/account/default-rewards-fallback";
 import { DefaultSubscriptionsPage } from "./default/account/default-subscriptions-page";
 import { DefaultBlogPage } from "./default/blog/default-blog-page";
 import { DefaultBlogPostPage } from "./default/blog/default-blog-post-page";
@@ -232,6 +233,7 @@ import { OliveAddressBookPage } from "./olive/account/olive-address-book-page";
 import { OliveOrderDetailPage } from "./olive/account/olive-order-detail-page";
 import { OliveOrdersPage } from "./olive/account/olive-orders-page";
 import { OlivePreferencesPage } from "./olive/account/olive-preferences-page";
+import { OliveRewardsPage } from "./olive/account/olive-rewards-page";
 import { OliveSubscriptionsPage } from "./olive/account/olive-subscriptions-page";
 import { OliveBlogPage } from "./olive/blog/olive-blog-page";
 import { OliveBlogPostPage } from "./olive/blog/olive-blog-post-page";
@@ -426,6 +428,7 @@ export type TemplateComponentSet = {
   OrderDetailPage: AnyComponent;
   OrdersPage: AnyComponent;
   PreferencesPage: AnyComponent;
+  RewardsPage: AnyComponent;
   SubscriptionsPage: AnyComponent;
   // Optional — only some templates implement this
   ServicesPage?: AnyComponent;
@@ -470,6 +473,7 @@ const defaultEntry: TemplateComponentSet = {
   OrderDetailPage: DefaultOrderDetailPage,
   OrdersPage: DefaultOrdersPage,
   PreferencesPage: DefaultPreferencesFallback,
+  RewardsPage: DefaultRewardsFallback,
   SubscriptionsPage: DefaultSubscriptionsPage,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
@@ -758,6 +762,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: OliveOrderDetailPage,
     OrdersPage: OliveOrdersPage,
     PreferencesPage: OlivePreferencesPage,
+    RewardsPage: OliveRewardsPage,
     SubscriptionsPage: OliveSubscriptionsPage,
     MaintenancePage: OliveMaintenancePage,
   },

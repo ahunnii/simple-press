@@ -84,6 +84,12 @@ export interface ExportedBusiness {
   maintenanceVariant: string;
   maintenanceMessage: unknown; // TipTap JSON doc
   maintenanceCta: unknown; // MaintenanceCta JSON
+  maintenanceOverline: string | null;
+  maintenanceHeadline: string | null;
+  maintenanceImage: string | null;
+  maintenanceLaunchAt: string | null; // ISO instant
+  maintenanceLaunchEndAt: string | null;
+  maintenanceLocation: string | null;
   // SEO
   localBusinessEnabled: boolean;
   allowAiCrawlers: boolean;

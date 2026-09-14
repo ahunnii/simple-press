@@ -329,6 +329,36 @@ export type Subscription = $Result.DefaultSelection<Prisma.$SubscriptionPayload>
  * Subscription's encrypted snapshot).
  */
 export type Donation = $Result.DefaultSelection<Prisma.$DonationPayload>
+/**
+ * Model LoyaltyProgram
+ * Per-business rewards program settings. One row per business, created on
+ * first save from /admin/settings/loyalty. Every rule is a toggle + value so
+ * turning a rule off keeps the owner's number. Points are snapshotted onto
+ * LoyaltyLedger rows at award time — changing a value here never rewrites
+ * history.
+ */
+export type LoyaltyProgram = $Result.DefaultSelection<Prisma.$LoyaltyProgramPayload>
+/**
+ * Model LoyaltyRewardTier
+ * A fixed redemption tier ("500 pts -> $5 off"). Rows, not JSON, so a redeem
+ * references a stable id and an owner deleting tier #1 between page load and
+ * click cannot shift the customer onto a different reward.
+ */
+export type LoyaltyRewardTier = $Result.DefaultSelection<Prisma.$LoyaltyRewardTierPayload>
+/**
+ * Model LoyaltyLedger
+ * Append-only points ledger. `Customer.loyaltyPoints` is the running balance
+ * and is written in the same transaction as every row here (`awardPoints` in
+ * src/lib/loyalty/ledger.ts is the single write path). `sourceKey` is the
+ * idempotency key — the 15-minute cron, replayed Stripe webhooks, and double
+ * clicks all collapse onto @@unique([businessId, sourceKey]):
+ * order:<orderId> | first-order:<customerId> | signup:<customerId>
+ * | birthday:<customerId>:<YYYY> | social:<customerId>:<network>
+ * | order-clawback:<orderId>:<refundId|manual|cancel> | redeem:<discountCodeId>
+ * | adjust:<uuid> | anonymize:<customerId>
+ * Rows carry no PII and survive customer anonymization.
+ */
+export type LoyaltyLedger = $Result.DefaultSelection<Prisma.$LoyaltyLedgerPayload>
 
 /**
  * Enums
@@ -980,6 +1010,36 @@ export class PrismaClient<
     * ```
     */
   get donation(): Prisma.DonationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.loyaltyProgram`: Exposes CRUD operations for the **LoyaltyProgram** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoyaltyPrograms
+    * const loyaltyPrograms = await prisma.loyaltyProgram.findMany()
+    * ```
+    */
+  get loyaltyProgram(): Prisma.LoyaltyProgramDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.loyaltyRewardTier`: Exposes CRUD operations for the **LoyaltyRewardTier** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoyaltyRewardTiers
+    * const loyaltyRewardTiers = await prisma.loyaltyRewardTier.findMany()
+    * ```
+    */
+  get loyaltyRewardTier(): Prisma.LoyaltyRewardTierDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.loyaltyLedger`: Exposes CRUD operations for the **LoyaltyLedger** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoyaltyLedgers
+    * const loyaltyLedgers = await prisma.loyaltyLedger.findMany()
+    * ```
+    */
+  get loyaltyLedger(): Prisma.LoyaltyLedgerDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1469,7 +1529,10 @@ export namespace Prisma {
     QuickBooksConnection: 'QuickBooksConnection',
     QuickBooksInvoice: 'QuickBooksInvoice',
     Subscription: 'Subscription',
-    Donation: 'Donation'
+    Donation: 'Donation',
+    LoyaltyProgram: 'LoyaltyProgram',
+    LoyaltyRewardTier: 'LoyaltyRewardTier',
+    LoyaltyLedger: 'LoyaltyLedger'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1488,7 +1551,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "subscription" | "donation"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5118,6 +5181,228 @@ export namespace Prisma {
           }
         }
       }
+      LoyaltyProgram: {
+        payload: Prisma.$LoyaltyProgramPayload<ExtArgs>
+        fields: Prisma.LoyaltyProgramFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoyaltyProgramFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoyaltyProgramFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>
+          }
+          findFirst: {
+            args: Prisma.LoyaltyProgramFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoyaltyProgramFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>
+          }
+          findMany: {
+            args: Prisma.LoyaltyProgramFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>[]
+          }
+          create: {
+            args: Prisma.LoyaltyProgramCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>
+          }
+          createMany: {
+            args: Prisma.LoyaltyProgramCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoyaltyProgramCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>[]
+          }
+          delete: {
+            args: Prisma.LoyaltyProgramDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>
+          }
+          update: {
+            args: Prisma.LoyaltyProgramUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoyaltyProgramDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoyaltyProgramUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoyaltyProgramUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoyaltyProgramUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyProgramPayload>
+          }
+          aggregate: {
+            args: Prisma.LoyaltyProgramAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoyaltyProgram>
+          }
+          groupBy: {
+            args: Prisma.LoyaltyProgramGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyProgramGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoyaltyProgramCountArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyProgramCountAggregateOutputType> | number
+          }
+        }
+      }
+      LoyaltyRewardTier: {
+        payload: Prisma.$LoyaltyRewardTierPayload<ExtArgs>
+        fields: Prisma.LoyaltyRewardTierFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoyaltyRewardTierFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoyaltyRewardTierFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>
+          }
+          findFirst: {
+            args: Prisma.LoyaltyRewardTierFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoyaltyRewardTierFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>
+          }
+          findMany: {
+            args: Prisma.LoyaltyRewardTierFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>[]
+          }
+          create: {
+            args: Prisma.LoyaltyRewardTierCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>
+          }
+          createMany: {
+            args: Prisma.LoyaltyRewardTierCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoyaltyRewardTierCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>[]
+          }
+          delete: {
+            args: Prisma.LoyaltyRewardTierDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>
+          }
+          update: {
+            args: Prisma.LoyaltyRewardTierUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoyaltyRewardTierDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoyaltyRewardTierUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoyaltyRewardTierUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoyaltyRewardTierUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardTierPayload>
+          }
+          aggregate: {
+            args: Prisma.LoyaltyRewardTierAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoyaltyRewardTier>
+          }
+          groupBy: {
+            args: Prisma.LoyaltyRewardTierGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyRewardTierGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoyaltyRewardTierCountArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyRewardTierCountAggregateOutputType> | number
+          }
+        }
+      }
+      LoyaltyLedger: {
+        payload: Prisma.$LoyaltyLedgerPayload<ExtArgs>
+        fields: Prisma.LoyaltyLedgerFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoyaltyLedgerFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoyaltyLedgerFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>
+          }
+          findFirst: {
+            args: Prisma.LoyaltyLedgerFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoyaltyLedgerFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>
+          }
+          findMany: {
+            args: Prisma.LoyaltyLedgerFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>[]
+          }
+          create: {
+            args: Prisma.LoyaltyLedgerCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>
+          }
+          createMany: {
+            args: Prisma.LoyaltyLedgerCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoyaltyLedgerCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>[]
+          }
+          delete: {
+            args: Prisma.LoyaltyLedgerDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>
+          }
+          update: {
+            args: Prisma.LoyaltyLedgerUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoyaltyLedgerDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoyaltyLedgerUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoyaltyLedgerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoyaltyLedgerUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyLedgerPayload>
+          }
+          aggregate: {
+            args: Prisma.LoyaltyLedgerAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoyaltyLedger>
+          }
+          groupBy: {
+            args: Prisma.LoyaltyLedgerGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyLedgerGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoyaltyLedgerCountArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyLedgerCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -5263,6 +5548,9 @@ export namespace Prisma {
     quickBooksInvoice?: QuickBooksInvoiceOmit
     subscription?: SubscriptionOmit
     donation?: DonationOmit
+    loyaltyProgram?: LoyaltyProgramOmit
+    loyaltyRewardTier?: LoyaltyRewardTierOmit
+    loyaltyLedger?: LoyaltyLedgerOmit
   }
 
   /* Types for Logging */
@@ -5458,6 +5746,7 @@ export namespace Prisma {
     quickBooksInvoices: number
     subscriptions: number
     donations: number
+    loyaltyLedger: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5491,6 +5780,7 @@ export namespace Prisma {
     quickBooksInvoices?: boolean | BusinessCountOutputTypeCountQuickBooksInvoicesArgs
     subscriptions?: boolean | BusinessCountOutputTypeCountSubscriptionsArgs
     donations?: boolean | BusinessCountOutputTypeCountDonationsArgs
+    loyaltyLedger?: boolean | BusinessCountOutputTypeCountLoyaltyLedgerArgs
   }
 
   // Custom InputTypes
@@ -5712,6 +6002,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountDonationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DonationWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountLoyaltyLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyLedgerWhereInput
   }
 
 
@@ -5962,6 +6259,7 @@ export namespace Prisma {
     testimonialInvites: number
     reviews: number
     subscriptions: number
+    loyaltyLedger: number
   }
 
   export type CustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5971,6 +6269,7 @@ export namespace Prisma {
     testimonialInvites?: boolean | CustomerCountOutputTypeCountTestimonialInvitesArgs
     reviews?: boolean | CustomerCountOutputTypeCountReviewsArgs
     subscriptions?: boolean | CustomerCountOutputTypeCountSubscriptionsArgs
+    loyaltyLedger?: boolean | CustomerCountOutputTypeCountLoyaltyLedgerArgs
   }
 
   // Custom InputTypes
@@ -6026,6 +6325,13 @@ export namespace Prisma {
     where?: SubscriptionWhereInput
   }
 
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountLoyaltyLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyLedgerWhereInput
+  }
+
 
   /**
    * Count Type ShippingAddressCountOutputType
@@ -6076,6 +6382,7 @@ export namespace Prisma {
     inventoryHistory: number
     reviews: number
     shipments: number
+    loyaltyLedger: number
   }
 
   export type OrderCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6083,6 +6390,7 @@ export namespace Prisma {
     inventoryHistory?: boolean | OrderCountOutputTypeCountInventoryHistoryArgs
     reviews?: boolean | OrderCountOutputTypeCountReviewsArgs
     shipments?: boolean | OrderCountOutputTypeCountShipmentsArgs
+    loyaltyLedger?: boolean | OrderCountOutputTypeCountLoyaltyLedgerArgs
   }
 
   // Custom InputTypes
@@ -6122,6 +6430,13 @@ export namespace Prisma {
    */
   export type OrderCountOutputTypeCountShipmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderShipmentWhereInput
+  }
+
+  /**
+   * OrderCountOutputType without action
+   */
+  export type OrderCountOutputTypeCountLoyaltyLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyLedgerWhereInput
   }
 
 
@@ -6379,6 +6694,37 @@ export namespace Prisma {
    */
   export type SubscriptionCountOutputTypeCountOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderWhereInput
+  }
+
+
+  /**
+   * Count Type LoyaltyProgramCountOutputType
+   */
+
+  export type LoyaltyProgramCountOutputType = {
+    tiers: number
+  }
+
+  export type LoyaltyProgramCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tiers?: boolean | LoyaltyProgramCountOutputTypeCountTiersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * LoyaltyProgramCountOutputType without action
+   */
+  export type LoyaltyProgramCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgramCountOutputType
+     */
+    select?: LoyaltyProgramCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyProgramCountOutputType without action
+   */
+  export type LoyaltyProgramCountOutputTypeCountTiersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyRewardTierWhereInput
   }
 
 
@@ -12150,6 +12496,12 @@ export namespace Prisma {
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
+    maintenanceOverline: string | null
+    maintenanceHeadline: string | null
+    maintenanceImage: string | null
+    maintenanceLaunchAt: Date | null
+    maintenanceLaunchEndAt: Date | null
+    maintenanceLocation: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -12197,6 +12549,12 @@ export namespace Prisma {
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
+    maintenanceOverline: string | null
+    maintenanceHeadline: string | null
+    maintenanceImage: string | null
+    maintenanceLaunchAt: Date | null
+    maintenanceLaunchEndAt: Date | null
+    maintenanceLocation: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -12246,6 +12604,12 @@ export namespace Prisma {
     maintenanceVariant: number
     maintenanceMessage: number
     maintenanceCta: number
+    maintenanceOverline: number
+    maintenanceHeadline: number
+    maintenanceImage: number
+    maintenanceLaunchAt: number
+    maintenanceLaunchEndAt: number
+    maintenanceLocation: number
     umamiWebsiteId: number
     umamiEnabled: number
     status: number
@@ -12314,6 +12678,12 @@ export namespace Prisma {
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
+    maintenanceOverline?: true
+    maintenanceHeadline?: true
+    maintenanceImage?: true
+    maintenanceLaunchAt?: true
+    maintenanceLaunchEndAt?: true
+    maintenanceLocation?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -12361,6 +12731,12 @@ export namespace Prisma {
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
+    maintenanceOverline?: true
+    maintenanceHeadline?: true
+    maintenanceImage?: true
+    maintenanceLaunchAt?: true
+    maintenanceLaunchEndAt?: true
+    maintenanceLocation?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -12410,6 +12786,12 @@ export namespace Prisma {
     maintenanceVariant?: true
     maintenanceMessage?: true
     maintenanceCta?: true
+    maintenanceOverline?: true
+    maintenanceHeadline?: true
+    maintenanceImage?: true
+    maintenanceLaunchAt?: true
+    maintenanceLaunchEndAt?: true
+    maintenanceLocation?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -12551,6 +12933,12 @@ export namespace Prisma {
     maintenanceVariant: string
     maintenanceMessage: JsonValue | null
     maintenanceCta: JsonValue | null
+    maintenanceOverline: string | null
+    maintenanceHeadline: string | null
+    maintenanceImage: string | null
+    maintenanceLaunchAt: Date | null
+    maintenanceLaunchEndAt: Date | null
+    maintenanceLocation: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean
     status: string
@@ -12624,6 +13012,12 @@ export namespace Prisma {
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
     maintenanceCta?: boolean
+    maintenanceOverline?: boolean
+    maintenanceHeadline?: boolean
+    maintenanceImage?: boolean
+    maintenanceLaunchAt?: boolean
+    maintenanceLaunchEndAt?: boolean
+    maintenanceLocation?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12682,6 +13076,8 @@ export namespace Prisma {
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
     donations?: boolean | Business$donationsArgs<ExtArgs>
+    loyaltyProgram?: boolean | Business$loyaltyProgramArgs<ExtArgs>
+    loyaltyLedger?: boolean | Business$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -12711,6 +13107,12 @@ export namespace Prisma {
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
     maintenanceCta?: boolean
+    maintenanceOverline?: boolean
+    maintenanceHeadline?: boolean
+    maintenanceImage?: boolean
+    maintenanceLaunchAt?: boolean
+    maintenanceLaunchEndAt?: boolean
+    maintenanceLocation?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12765,6 +13167,12 @@ export namespace Prisma {
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
     maintenanceCta?: boolean
+    maintenanceOverline?: boolean
+    maintenanceHeadline?: boolean
+    maintenanceImage?: boolean
+    maintenanceLaunchAt?: boolean
+    maintenanceLaunchEndAt?: boolean
+    maintenanceLocation?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12819,6 +13227,12 @@ export namespace Prisma {
     maintenanceVariant?: boolean
     maintenanceMessage?: boolean
     maintenanceCta?: boolean
+    maintenanceOverline?: boolean
+    maintenanceHeadline?: boolean
+    maintenanceImage?: boolean
+    maintenanceLaunchAt?: boolean
+    maintenanceLaunchEndAt?: boolean
+    maintenanceLocation?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -12847,7 +13261,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -12881,6 +13295,8 @@ export namespace Prisma {
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
     donations?: boolean | Business$donationsArgs<ExtArgs>
+    loyaltyProgram?: boolean | Business$loyaltyProgramArgs<ExtArgs>
+    loyaltyLedger?: boolean | Business$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -12921,6 +13337,8 @@ export namespace Prisma {
       quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
       subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
       donations: Prisma.$DonationPayload<ExtArgs>[]
+      loyaltyProgram: Prisma.$LoyaltyProgramPayload<ExtArgs> | null
+      loyaltyLedger: Prisma.$LoyaltyLedgerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12948,6 +13366,12 @@ export namespace Prisma {
       maintenanceVariant: string
       maintenanceMessage: Prisma.JsonValue | null
       maintenanceCta: Prisma.JsonValue | null
+      maintenanceOverline: string | null
+      maintenanceHeadline: string | null
+      maintenanceImage: string | null
+      maintenanceLaunchAt: Date | null
+      maintenanceLaunchEndAt: Date | null
+      maintenanceLocation: string | null
       umamiWebsiteId: string | null
       umamiEnabled: boolean
       status: string
@@ -13400,6 +13824,8 @@ export namespace Prisma {
     quickBooksInvoices<T extends Business$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscriptions<T extends Business$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     donations<T extends Business$donationsArgs<ExtArgs> = {}>(args?: Subset<T, Business$donationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    loyaltyProgram<T extends Business$loyaltyProgramArgs<ExtArgs> = {}>(args?: Subset<T, Business$loyaltyProgramArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    loyaltyLedger<T extends Business$loyaltyLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Business$loyaltyLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13454,6 +13880,12 @@ export namespace Prisma {
     readonly maintenanceVariant: FieldRef<"Business", 'String'>
     readonly maintenanceMessage: FieldRef<"Business", 'Json'>
     readonly maintenanceCta: FieldRef<"Business", 'Json'>
+    readonly maintenanceOverline: FieldRef<"Business", 'String'>
+    readonly maintenanceHeadline: FieldRef<"Business", 'String'>
+    readonly maintenanceImage: FieldRef<"Business", 'String'>
+    readonly maintenanceLaunchAt: FieldRef<"Business", 'DateTime'>
+    readonly maintenanceLaunchEndAt: FieldRef<"Business", 'DateTime'>
+    readonly maintenanceLocation: FieldRef<"Business", 'String'>
     readonly umamiWebsiteId: FieldRef<"Business", 'String'>
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
@@ -14623,6 +15055,49 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: DonationScalarFieldEnum | DonationScalarFieldEnum[]
+  }
+
+  /**
+   * Business.loyaltyProgram
+   */
+  export type Business$loyaltyProgramArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    where?: LoyaltyProgramWhereInput
+  }
+
+  /**
+   * Business.loyaltyLedger
+   */
+  export type Business$loyaltyLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    where?: LoyaltyLedgerWhereInput
+    orderBy?: LoyaltyLedgerOrderByWithRelationInput | LoyaltyLedgerOrderByWithRelationInput[]
+    cursor?: LoyaltyLedgerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LoyaltyLedgerScalarFieldEnum | LoyaltyLedgerScalarFieldEnum[]
   }
 
   /**
@@ -30029,11 +30504,17 @@ export namespace Prisma {
   export type CustomerAvgAggregateOutputType = {
     totalSpent: number | null
     orderCount: number | null
+    loyaltyPoints: number | null
+    birthMonth: number | null
+    birthDay: number | null
   }
 
   export type CustomerSumAggregateOutputType = {
     totalSpent: number | null
     orderCount: number | null
+    loyaltyPoints: number | null
+    birthMonth: number | null
+    birthDay: number | null
   }
 
   export type CustomerMinAggregateOutputType = {
@@ -30048,6 +30529,10 @@ export namespace Prisma {
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
+    loyaltyPoints: number | null
+    loyaltyJoinedAt: Date | null
+    birthMonth: number | null
+    birthDay: number | null
     deletionRequestedAt: Date | null
     anonymizedAt: Date | null
     notes: string | null
@@ -30067,6 +30552,10 @@ export namespace Prisma {
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
+    loyaltyPoints: number | null
+    loyaltyJoinedAt: Date | null
+    birthMonth: number | null
+    birthDay: number | null
     deletionRequestedAt: Date | null
     anonymizedAt: Date | null
     notes: string | null
@@ -30086,6 +30575,10 @@ export namespace Prisma {
     acceptsMarketing: number
     totalSpent: number
     orderCount: number
+    loyaltyPoints: number
+    loyaltyJoinedAt: number
+    birthMonth: number
+    birthDay: number
     deletionRequestedAt: number
     anonymizedAt: number
     notes: number
@@ -30098,11 +30591,17 @@ export namespace Prisma {
   export type CustomerAvgAggregateInputType = {
     totalSpent?: true
     orderCount?: true
+    loyaltyPoints?: true
+    birthMonth?: true
+    birthDay?: true
   }
 
   export type CustomerSumAggregateInputType = {
     totalSpent?: true
     orderCount?: true
+    loyaltyPoints?: true
+    birthMonth?: true
+    birthDay?: true
   }
 
   export type CustomerMinAggregateInputType = {
@@ -30117,6 +30616,10 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    loyaltyPoints?: true
+    loyaltyJoinedAt?: true
+    birthMonth?: true
+    birthDay?: true
     deletionRequestedAt?: true
     anonymizedAt?: true
     notes?: true
@@ -30136,6 +30639,10 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    loyaltyPoints?: true
+    loyaltyJoinedAt?: true
+    birthMonth?: true
+    birthDay?: true
     deletionRequestedAt?: true
     anonymizedAt?: true
     notes?: true
@@ -30155,6 +30662,10 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    loyaltyPoints?: true
+    loyaltyJoinedAt?: true
+    birthMonth?: true
+    birthDay?: true
     deletionRequestedAt?: true
     anonymizedAt?: true
     notes?: true
@@ -30261,6 +30772,10 @@ export namespace Prisma {
     acceptsMarketing: boolean
     totalSpent: number
     orderCount: number
+    loyaltyPoints: number
+    loyaltyJoinedAt: Date | null
+    birthMonth: number | null
+    birthDay: number | null
     deletionRequestedAt: Date | null
     anonymizedAt: Date | null
     notes: string | null
@@ -30299,6 +30814,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    loyaltyPoints?: boolean
+    loyaltyJoinedAt?: boolean
+    birthMonth?: boolean
+    birthDay?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
     notes?: boolean
@@ -30312,6 +30831,7 @@ export namespace Prisma {
     testimonialInvites?: boolean | Customer$testimonialInvitesArgs<ExtArgs>
     reviews?: boolean | Customer$reviewsArgs<ExtArgs>
     subscriptions?: boolean | Customer$subscriptionsArgs<ExtArgs>
+    loyaltyLedger?: boolean | Customer$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -30327,6 +30847,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    loyaltyPoints?: boolean
+    loyaltyJoinedAt?: boolean
+    birthMonth?: boolean
+    birthDay?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
     notes?: boolean
@@ -30348,6 +30872,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    loyaltyPoints?: boolean
+    loyaltyJoinedAt?: boolean
+    birthMonth?: boolean
+    birthDay?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
     notes?: boolean
@@ -30369,6 +30897,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    loyaltyPoints?: boolean
+    loyaltyJoinedAt?: boolean
+    birthMonth?: boolean
+    birthDay?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
     notes?: boolean
@@ -30376,7 +30908,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "stripeCustomerId" | "acceptsMarketing" | "totalSpent" | "orderCount" | "deletionRequestedAt" | "anonymizedAt" | "notes" | "userId" | "businessId", ExtArgs["result"]["customer"]>
+  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "stripeCustomerId" | "acceptsMarketing" | "totalSpent" | "orderCount" | "loyaltyPoints" | "loyaltyJoinedAt" | "birthMonth" | "birthDay" | "deletionRequestedAt" | "anonymizedAt" | "notes" | "userId" | "businessId", ExtArgs["result"]["customer"]>
   export type CustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -30386,6 +30918,7 @@ export namespace Prisma {
     testimonialInvites?: boolean | Customer$testimonialInvitesArgs<ExtArgs>
     reviews?: boolean | Customer$reviewsArgs<ExtArgs>
     subscriptions?: boolean | Customer$subscriptionsArgs<ExtArgs>
+    loyaltyLedger?: boolean | Customer$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -30408,6 +30941,7 @@ export namespace Prisma {
       testimonialInvites: Prisma.$TestimonialInvitePayload<ExtArgs>[]
       reviews: Prisma.$ProductReviewPayload<ExtArgs>[]
       subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
+      loyaltyLedger: Prisma.$LoyaltyLedgerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -30424,6 +30958,10 @@ export namespace Prisma {
       acceptsMarketing: boolean
       totalSpent: number
       orderCount: number
+      loyaltyPoints: number
+      loyaltyJoinedAt: Date | null
+      birthMonth: number | null
+      birthDay: number | null
       deletionRequestedAt: Date | null
       anonymizedAt: Date | null
       /**
@@ -30834,6 +31372,7 @@ export namespace Prisma {
     testimonialInvites<T extends Customer$testimonialInvitesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$testimonialInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Customer$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscriptions<T extends Customer$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    loyaltyLedger<T extends Customer$loyaltyLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Customer$loyaltyLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -30874,6 +31413,10 @@ export namespace Prisma {
     readonly acceptsMarketing: FieldRef<"Customer", 'Boolean'>
     readonly totalSpent: FieldRef<"Customer", 'Int'>
     readonly orderCount: FieldRef<"Customer", 'Int'>
+    readonly loyaltyPoints: FieldRef<"Customer", 'Int'>
+    readonly loyaltyJoinedAt: FieldRef<"Customer", 'DateTime'>
+    readonly birthMonth: FieldRef<"Customer", 'Int'>
+    readonly birthDay: FieldRef<"Customer", 'Int'>
     readonly deletionRequestedAt: FieldRef<"Customer", 'DateTime'>
     readonly anonymizedAt: FieldRef<"Customer", 'DateTime'>
     readonly notes: FieldRef<"Customer", 'String'>
@@ -31435,6 +31978,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SubscriptionScalarFieldEnum | SubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * Customer.loyaltyLedger
+   */
+  export type Customer$loyaltyLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    where?: LoyaltyLedgerWhereInput
+    orderBy?: LoyaltyLedgerOrderByWithRelationInput | LoyaltyLedgerOrderByWithRelationInput[]
+    cursor?: LoyaltyLedgerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LoyaltyLedgerScalarFieldEnum | LoyaltyLedgerScalarFieldEnum[]
   }
 
   /**
@@ -33192,6 +33759,7 @@ export namespace Prisma {
     inventoryHistory?: boolean | Order$inventoryHistoryArgs<ExtArgs>
     reviews?: boolean | Order$reviewsArgs<ExtArgs>
     shipments?: boolean | Order$shipmentsArgs<ExtArgs>
+    loyaltyLedger?: boolean | Order$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
@@ -33327,6 +33895,7 @@ export namespace Prisma {
     inventoryHistory?: boolean | Order$inventoryHistoryArgs<ExtArgs>
     reviews?: boolean | Order$reviewsArgs<ExtArgs>
     shipments?: boolean | Order$shipmentsArgs<ExtArgs>
+    loyaltyLedger?: boolean | Order$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -33356,6 +33925,7 @@ export namespace Prisma {
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       reviews: Prisma.$ProductReviewPayload<ExtArgs>[]
       shipments: Prisma.$OrderShipmentPayload<ExtArgs>[]
+      loyaltyLedger: Prisma.$LoyaltyLedgerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -33804,6 +34374,7 @@ export namespace Prisma {
     inventoryHistory<T extends Order$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Order$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Order$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Order$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     shipments<T extends Order$shipmentsArgs<ExtArgs> = {}>(args?: Subset<T, Order$shipmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    loyaltyLedger<T extends Order$loyaltyLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Order$loyaltyLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -34432,6 +35003,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: OrderShipmentScalarFieldEnum | OrderShipmentScalarFieldEnum[]
+  }
+
+  /**
+   * Order.loyaltyLedger
+   */
+  export type Order$loyaltyLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    where?: LoyaltyLedgerWhereInput
+    orderBy?: LoyaltyLedgerOrderByWithRelationInput | LoyaltyLedgerOrderByWithRelationInput[]
+    cursor?: LoyaltyLedgerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LoyaltyLedgerScalarFieldEnum | LoyaltyLedgerScalarFieldEnum[]
   }
 
   /**
@@ -37876,6 +38471,7 @@ export namespace Prisma {
     type: string | null
     value: number | null
     active: boolean | null
+    source: string | null
     usageLimit: number | null
     usageCount: number | null
     perCustomerLimit: number | null
@@ -37894,6 +38490,7 @@ export namespace Prisma {
     type: string | null
     value: number | null
     active: boolean | null
+    source: string | null
     usageLimit: number | null
     usageCount: number | null
     perCustomerLimit: number | null
@@ -37912,6 +38509,7 @@ export namespace Prisma {
     type: number
     value: number
     active: number
+    source: number
     usageLimit: number
     usageCount: number
     perCustomerLimit: number
@@ -37950,6 +38548,7 @@ export namespace Prisma {
     type?: true
     value?: true
     active?: true
+    source?: true
     usageLimit?: true
     usageCount?: true
     perCustomerLimit?: true
@@ -37968,6 +38567,7 @@ export namespace Prisma {
     type?: true
     value?: true
     active?: true
+    source?: true
     usageLimit?: true
     usageCount?: true
     perCustomerLimit?: true
@@ -37986,6 +38586,7 @@ export namespace Prisma {
     type?: true
     value?: true
     active?: true
+    source?: true
     usageLimit?: true
     usageCount?: true
     perCustomerLimit?: true
@@ -38091,6 +38692,7 @@ export namespace Prisma {
     type: string
     value: number
     active: boolean
+    source: string
     usageLimit: number | null
     usageCount: number
     perCustomerLimit: number | null
@@ -38128,6 +38730,7 @@ export namespace Prisma {
     type?: boolean
     value?: boolean
     active?: boolean
+    source?: boolean
     usageLimit?: boolean
     usageCount?: boolean
     perCustomerLimit?: boolean
@@ -38137,6 +38740,7 @@ export namespace Prisma {
     maxDiscount?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | DiscountCode$ordersArgs<ExtArgs>
+    loyaltyLedger?: boolean | DiscountCode$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | DiscountCodeCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["discountCode"]>
 
@@ -38149,6 +38753,7 @@ export namespace Prisma {
     type?: boolean
     value?: boolean
     active?: boolean
+    source?: boolean
     usageLimit?: boolean
     usageCount?: boolean
     perCustomerLimit?: boolean
@@ -38168,6 +38773,7 @@ export namespace Prisma {
     type?: boolean
     value?: boolean
     active?: boolean
+    source?: boolean
     usageLimit?: boolean
     usageCount?: boolean
     perCustomerLimit?: boolean
@@ -38187,6 +38793,7 @@ export namespace Prisma {
     type?: boolean
     value?: boolean
     active?: boolean
+    source?: boolean
     usageLimit?: boolean
     usageCount?: boolean
     perCustomerLimit?: boolean
@@ -38196,10 +38803,11 @@ export namespace Prisma {
     maxDiscount?: boolean
   }
 
-  export type DiscountCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "code" | "type" | "value" | "active" | "usageLimit" | "usageCount" | "perCustomerLimit" | "startsAt" | "expiresAt" | "minPurchase" | "maxDiscount", ExtArgs["result"]["discountCode"]>
+  export type DiscountCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "code" | "type" | "value" | "active" | "source" | "usageLimit" | "usageCount" | "perCustomerLimit" | "startsAt" | "expiresAt" | "minPurchase" | "maxDiscount", ExtArgs["result"]["discountCode"]>
   export type DiscountCodeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | DiscountCode$ordersArgs<ExtArgs>
+    loyaltyLedger?: boolean | DiscountCode$loyaltyLedgerArgs<ExtArgs>
     _count?: boolean | DiscountCodeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DiscountCodeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -38214,6 +38822,7 @@ export namespace Prisma {
     objects: {
       business: Prisma.$BusinessPayload<ExtArgs>
       orders: Prisma.$OrderPayload<ExtArgs>[]
+      loyaltyLedger: Prisma.$LoyaltyLedgerPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -38224,6 +38833,7 @@ export namespace Prisma {
       type: string
       value: number
       active: boolean
+      source: string
       usageLimit: number | null
       usageCount: number
       perCustomerLimit: number | null
@@ -38627,6 +39237,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     orders<T extends DiscountCode$ordersArgs<ExtArgs> = {}>(args?: Subset<T, DiscountCode$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    loyaltyLedger<T extends DiscountCode$loyaltyLedgerArgs<ExtArgs> = {}>(args?: Subset<T, DiscountCode$loyaltyLedgerArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -38664,6 +39275,7 @@ export namespace Prisma {
     readonly type: FieldRef<"DiscountCode", 'String'>
     readonly value: FieldRef<"DiscountCode", 'Int'>
     readonly active: FieldRef<"DiscountCode", 'Boolean'>
+    readonly source: FieldRef<"DiscountCode", 'String'>
     readonly usageLimit: FieldRef<"DiscountCode", 'Int'>
     readonly usageCount: FieldRef<"DiscountCode", 'Int'>
     readonly perCustomerLimit: FieldRef<"DiscountCode", 'Int'>
@@ -39088,6 +39700,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: OrderScalarFieldEnum | OrderScalarFieldEnum[]
+  }
+
+  /**
+   * DiscountCode.loyaltyLedger
+   */
+  export type DiscountCode$loyaltyLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    where?: LoyaltyLedgerWhereInput
   }
 
   /**
@@ -68500,6 +69131,3731 @@ export namespace Prisma {
 
 
   /**
+   * Model LoyaltyProgram
+   */
+
+  export type AggregateLoyaltyProgram = {
+    _count: LoyaltyProgramCountAggregateOutputType | null
+    _avg: LoyaltyProgramAvgAggregateOutputType | null
+    _sum: LoyaltyProgramSumAggregateOutputType | null
+    _min: LoyaltyProgramMinAggregateOutputType | null
+    _max: LoyaltyProgramMaxAggregateOutputType | null
+  }
+
+  export type LoyaltyProgramAvgAggregateOutputType = {
+    pointsPerDollar: number | null
+    signupBonus: number | null
+    firstOrderBonus: number | null
+    birthdayBonus: number | null
+    socialFollowBonus: number | null
+    rewardCodeExpiryDays: number | null
+  }
+
+  export type LoyaltyProgramSumAggregateOutputType = {
+    pointsPerDollar: number | null
+    signupBonus: number | null
+    firstOrderBonus: number | null
+    birthdayBonus: number | null
+    socialFollowBonus: number | null
+    rewardCodeExpiryDays: number | null
+  }
+
+  export type LoyaltyProgramMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    earnOnOrders: boolean | null
+    pointsPerDollar: number | null
+    signupEnabled: boolean | null
+    signupBonus: number | null
+    firstOrderEnabled: boolean | null
+    firstOrderBonus: number | null
+    birthdayEnabled: boolean | null
+    birthdayBonus: number | null
+    socialEnabled: boolean | null
+    socialFollowBonus: number | null
+    rewardCodeExpiryDays: number | null
+  }
+
+  export type LoyaltyProgramMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    earnOnOrders: boolean | null
+    pointsPerDollar: number | null
+    signupEnabled: boolean | null
+    signupBonus: number | null
+    firstOrderEnabled: boolean | null
+    firstOrderBonus: number | null
+    birthdayEnabled: boolean | null
+    birthdayBonus: number | null
+    socialEnabled: boolean | null
+    socialFollowBonus: number | null
+    rewardCodeExpiryDays: number | null
+  }
+
+  export type LoyaltyProgramCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    earnOnOrders: number
+    pointsPerDollar: number
+    signupEnabled: number
+    signupBonus: number
+    firstOrderEnabled: number
+    firstOrderBonus: number
+    birthdayEnabled: number
+    birthdayBonus: number
+    socialEnabled: number
+    socialFollowBonus: number
+    rewardCodeExpiryDays: number
+    _all: number
+  }
+
+
+  export type LoyaltyProgramAvgAggregateInputType = {
+    pointsPerDollar?: true
+    signupBonus?: true
+    firstOrderBonus?: true
+    birthdayBonus?: true
+    socialFollowBonus?: true
+    rewardCodeExpiryDays?: true
+  }
+
+  export type LoyaltyProgramSumAggregateInputType = {
+    pointsPerDollar?: true
+    signupBonus?: true
+    firstOrderBonus?: true
+    birthdayBonus?: true
+    socialFollowBonus?: true
+    rewardCodeExpiryDays?: true
+  }
+
+  export type LoyaltyProgramMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    earnOnOrders?: true
+    pointsPerDollar?: true
+    signupEnabled?: true
+    signupBonus?: true
+    firstOrderEnabled?: true
+    firstOrderBonus?: true
+    birthdayEnabled?: true
+    birthdayBonus?: true
+    socialEnabled?: true
+    socialFollowBonus?: true
+    rewardCodeExpiryDays?: true
+  }
+
+  export type LoyaltyProgramMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    earnOnOrders?: true
+    pointsPerDollar?: true
+    signupEnabled?: true
+    signupBonus?: true
+    firstOrderEnabled?: true
+    firstOrderBonus?: true
+    birthdayEnabled?: true
+    birthdayBonus?: true
+    socialEnabled?: true
+    socialFollowBonus?: true
+    rewardCodeExpiryDays?: true
+  }
+
+  export type LoyaltyProgramCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    earnOnOrders?: true
+    pointsPerDollar?: true
+    signupEnabled?: true
+    signupBonus?: true
+    firstOrderEnabled?: true
+    firstOrderBonus?: true
+    birthdayEnabled?: true
+    birthdayBonus?: true
+    socialEnabled?: true
+    socialFollowBonus?: true
+    rewardCodeExpiryDays?: true
+    _all?: true
+  }
+
+  export type LoyaltyProgramAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyProgram to aggregate.
+     */
+    where?: LoyaltyProgramWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPrograms to fetch.
+     */
+    orderBy?: LoyaltyProgramOrderByWithRelationInput | LoyaltyProgramOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoyaltyProgramWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPrograms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPrograms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoyaltyPrograms
+    **/
+    _count?: true | LoyaltyProgramCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LoyaltyProgramAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LoyaltyProgramSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoyaltyProgramMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoyaltyProgramMaxAggregateInputType
+  }
+
+  export type GetLoyaltyProgramAggregateType<T extends LoyaltyProgramAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoyaltyProgram]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoyaltyProgram[P]>
+      : GetScalarType<T[P], AggregateLoyaltyProgram[P]>
+  }
+
+
+
+
+  export type LoyaltyProgramGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyProgramWhereInput
+    orderBy?: LoyaltyProgramOrderByWithAggregationInput | LoyaltyProgramOrderByWithAggregationInput[]
+    by: LoyaltyProgramScalarFieldEnum[] | LoyaltyProgramScalarFieldEnum
+    having?: LoyaltyProgramScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoyaltyProgramCountAggregateInputType | true
+    _avg?: LoyaltyProgramAvgAggregateInputType
+    _sum?: LoyaltyProgramSumAggregateInputType
+    _min?: LoyaltyProgramMinAggregateInputType
+    _max?: LoyaltyProgramMaxAggregateInputType
+  }
+
+  export type LoyaltyProgramGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    earnOnOrders: boolean
+    pointsPerDollar: number
+    signupEnabled: boolean
+    signupBonus: number
+    firstOrderEnabled: boolean
+    firstOrderBonus: number
+    birthdayEnabled: boolean
+    birthdayBonus: number
+    socialEnabled: boolean
+    socialFollowBonus: number
+    rewardCodeExpiryDays: number
+    _count: LoyaltyProgramCountAggregateOutputType | null
+    _avg: LoyaltyProgramAvgAggregateOutputType | null
+    _sum: LoyaltyProgramSumAggregateOutputType | null
+    _min: LoyaltyProgramMinAggregateOutputType | null
+    _max: LoyaltyProgramMaxAggregateOutputType | null
+  }
+
+  type GetLoyaltyProgramGroupByPayload<T extends LoyaltyProgramGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoyaltyProgramGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoyaltyProgramGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoyaltyProgramGroupByOutputType[P]>
+            : GetScalarType<T[P], LoyaltyProgramGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoyaltyProgramSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    earnOnOrders?: boolean
+    pointsPerDollar?: boolean
+    signupEnabled?: boolean
+    signupBonus?: boolean
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: boolean
+    birthdayEnabled?: boolean
+    birthdayBonus?: boolean
+    socialEnabled?: boolean
+    socialFollowBonus?: boolean
+    rewardCodeExpiryDays?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    tiers?: boolean | LoyaltyProgram$tiersArgs<ExtArgs>
+    _count?: boolean | LoyaltyProgramCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyProgram"]>
+
+  export type LoyaltyProgramSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    earnOnOrders?: boolean
+    pointsPerDollar?: boolean
+    signupEnabled?: boolean
+    signupBonus?: boolean
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: boolean
+    birthdayEnabled?: boolean
+    birthdayBonus?: boolean
+    socialEnabled?: boolean
+    socialFollowBonus?: boolean
+    rewardCodeExpiryDays?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyProgram"]>
+
+  export type LoyaltyProgramSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    earnOnOrders?: boolean
+    pointsPerDollar?: boolean
+    signupEnabled?: boolean
+    signupBonus?: boolean
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: boolean
+    birthdayEnabled?: boolean
+    birthdayBonus?: boolean
+    socialEnabled?: boolean
+    socialFollowBonus?: boolean
+    rewardCodeExpiryDays?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyProgram"]>
+
+  export type LoyaltyProgramSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    earnOnOrders?: boolean
+    pointsPerDollar?: boolean
+    signupEnabled?: boolean
+    signupBonus?: boolean
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: boolean
+    birthdayEnabled?: boolean
+    birthdayBonus?: boolean
+    socialEnabled?: boolean
+    socialFollowBonus?: boolean
+    rewardCodeExpiryDays?: boolean
+  }
+
+  export type LoyaltyProgramOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "earnOnOrders" | "pointsPerDollar" | "signupEnabled" | "signupBonus" | "firstOrderEnabled" | "firstOrderBonus" | "birthdayEnabled" | "birthdayBonus" | "socialEnabled" | "socialFollowBonus" | "rewardCodeExpiryDays", ExtArgs["result"]["loyaltyProgram"]>
+  export type LoyaltyProgramInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    tiers?: boolean | LoyaltyProgram$tiersArgs<ExtArgs>
+    _count?: boolean | LoyaltyProgramCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type LoyaltyProgramIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type LoyaltyProgramIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $LoyaltyProgramPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoyaltyProgram"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      tiers: Prisma.$LoyaltyRewardTierPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      earnOnOrders: boolean
+      pointsPerDollar: number
+      signupEnabled: boolean
+      signupBonus: number
+      firstOrderEnabled: boolean
+      firstOrderBonus: number
+      birthdayEnabled: boolean
+      birthdayBonus: number
+      socialEnabled: boolean
+      socialFollowBonus: number
+      rewardCodeExpiryDays: number
+    }, ExtArgs["result"]["loyaltyProgram"]>
+    composites: {}
+  }
+
+  type LoyaltyProgramGetPayload<S extends boolean | null | undefined | LoyaltyProgramDefaultArgs> = $Result.GetResult<Prisma.$LoyaltyProgramPayload, S>
+
+  type LoyaltyProgramCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoyaltyProgramFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoyaltyProgramCountAggregateInputType | true
+    }
+
+  export interface LoyaltyProgramDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoyaltyProgram'], meta: { name: 'LoyaltyProgram' } }
+    /**
+     * Find zero or one LoyaltyProgram that matches the filter.
+     * @param {LoyaltyProgramFindUniqueArgs} args - Arguments to find a LoyaltyProgram
+     * @example
+     * // Get one LoyaltyProgram
+     * const loyaltyProgram = await prisma.loyaltyProgram.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoyaltyProgramFindUniqueArgs>(args: SelectSubset<T, LoyaltyProgramFindUniqueArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoyaltyProgram that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoyaltyProgramFindUniqueOrThrowArgs} args - Arguments to find a LoyaltyProgram
+     * @example
+     * // Get one LoyaltyProgram
+     * const loyaltyProgram = await prisma.loyaltyProgram.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoyaltyProgramFindUniqueOrThrowArgs>(args: SelectSubset<T, LoyaltyProgramFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyProgram that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyProgramFindFirstArgs} args - Arguments to find a LoyaltyProgram
+     * @example
+     * // Get one LoyaltyProgram
+     * const loyaltyProgram = await prisma.loyaltyProgram.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoyaltyProgramFindFirstArgs>(args?: SelectSubset<T, LoyaltyProgramFindFirstArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyProgram that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyProgramFindFirstOrThrowArgs} args - Arguments to find a LoyaltyProgram
+     * @example
+     * // Get one LoyaltyProgram
+     * const loyaltyProgram = await prisma.loyaltyProgram.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoyaltyProgramFindFirstOrThrowArgs>(args?: SelectSubset<T, LoyaltyProgramFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoyaltyPrograms that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyProgramFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoyaltyPrograms
+     * const loyaltyPrograms = await prisma.loyaltyProgram.findMany()
+     * 
+     * // Get first 10 LoyaltyPrograms
+     * const loyaltyPrograms = await prisma.loyaltyProgram.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loyaltyProgramWithIdOnly = await prisma.loyaltyProgram.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoyaltyProgramFindManyArgs>(args?: SelectSubset<T, LoyaltyProgramFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoyaltyProgram.
+     * @param {LoyaltyProgramCreateArgs} args - Arguments to create a LoyaltyProgram.
+     * @example
+     * // Create one LoyaltyProgram
+     * const LoyaltyProgram = await prisma.loyaltyProgram.create({
+     *   data: {
+     *     // ... data to create a LoyaltyProgram
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoyaltyProgramCreateArgs>(args: SelectSubset<T, LoyaltyProgramCreateArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoyaltyPrograms.
+     * @param {LoyaltyProgramCreateManyArgs} args - Arguments to create many LoyaltyPrograms.
+     * @example
+     * // Create many LoyaltyPrograms
+     * const loyaltyProgram = await prisma.loyaltyProgram.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoyaltyProgramCreateManyArgs>(args?: SelectSubset<T, LoyaltyProgramCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoyaltyPrograms and returns the data saved in the database.
+     * @param {LoyaltyProgramCreateManyAndReturnArgs} args - Arguments to create many LoyaltyPrograms.
+     * @example
+     * // Create many LoyaltyPrograms
+     * const loyaltyProgram = await prisma.loyaltyProgram.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoyaltyPrograms and only return the `id`
+     * const loyaltyProgramWithIdOnly = await prisma.loyaltyProgram.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoyaltyProgramCreateManyAndReturnArgs>(args?: SelectSubset<T, LoyaltyProgramCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoyaltyProgram.
+     * @param {LoyaltyProgramDeleteArgs} args - Arguments to delete one LoyaltyProgram.
+     * @example
+     * // Delete one LoyaltyProgram
+     * const LoyaltyProgram = await prisma.loyaltyProgram.delete({
+     *   where: {
+     *     // ... filter to delete one LoyaltyProgram
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoyaltyProgramDeleteArgs>(args: SelectSubset<T, LoyaltyProgramDeleteArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoyaltyProgram.
+     * @param {LoyaltyProgramUpdateArgs} args - Arguments to update one LoyaltyProgram.
+     * @example
+     * // Update one LoyaltyProgram
+     * const loyaltyProgram = await prisma.loyaltyProgram.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoyaltyProgramUpdateArgs>(args: SelectSubset<T, LoyaltyProgramUpdateArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoyaltyPrograms.
+     * @param {LoyaltyProgramDeleteManyArgs} args - Arguments to filter LoyaltyPrograms to delete.
+     * @example
+     * // Delete a few LoyaltyPrograms
+     * const { count } = await prisma.loyaltyProgram.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoyaltyProgramDeleteManyArgs>(args?: SelectSubset<T, LoyaltyProgramDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyPrograms.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyProgramUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoyaltyPrograms
+     * const loyaltyProgram = await prisma.loyaltyProgram.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoyaltyProgramUpdateManyArgs>(args: SelectSubset<T, LoyaltyProgramUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyPrograms and returns the data updated in the database.
+     * @param {LoyaltyProgramUpdateManyAndReturnArgs} args - Arguments to update many LoyaltyPrograms.
+     * @example
+     * // Update many LoyaltyPrograms
+     * const loyaltyProgram = await prisma.loyaltyProgram.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoyaltyPrograms and only return the `id`
+     * const loyaltyProgramWithIdOnly = await prisma.loyaltyProgram.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoyaltyProgramUpdateManyAndReturnArgs>(args: SelectSubset<T, LoyaltyProgramUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoyaltyProgram.
+     * @param {LoyaltyProgramUpsertArgs} args - Arguments to update or create a LoyaltyProgram.
+     * @example
+     * // Update or create a LoyaltyProgram
+     * const loyaltyProgram = await prisma.loyaltyProgram.upsert({
+     *   create: {
+     *     // ... data to create a LoyaltyProgram
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoyaltyProgram we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoyaltyProgramUpsertArgs>(args: SelectSubset<T, LoyaltyProgramUpsertArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoyaltyPrograms.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyProgramCountArgs} args - Arguments to filter LoyaltyPrograms to count.
+     * @example
+     * // Count the number of LoyaltyPrograms
+     * const count = await prisma.loyaltyProgram.count({
+     *   where: {
+     *     // ... the filter for the LoyaltyPrograms we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoyaltyProgramCountArgs>(
+      args?: Subset<T, LoyaltyProgramCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoyaltyProgramCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoyaltyProgram.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyProgramAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoyaltyProgramAggregateArgs>(args: Subset<T, LoyaltyProgramAggregateArgs>): Prisma.PrismaPromise<GetLoyaltyProgramAggregateType<T>>
+
+    /**
+     * Group by LoyaltyProgram.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyProgramGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoyaltyProgramGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoyaltyProgramGroupByArgs['orderBy'] }
+        : { orderBy?: LoyaltyProgramGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoyaltyProgramGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoyaltyProgramGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoyaltyProgram model
+   */
+  readonly fields: LoyaltyProgramFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoyaltyProgram.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoyaltyProgramClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tiers<T extends LoyaltyProgram$tiersArgs<ExtArgs> = {}>(args?: Subset<T, LoyaltyProgram$tiersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoyaltyProgram model
+   */
+  interface LoyaltyProgramFieldRefs {
+    readonly id: FieldRef<"LoyaltyProgram", 'String'>
+    readonly createdAt: FieldRef<"LoyaltyProgram", 'DateTime'>
+    readonly updatedAt: FieldRef<"LoyaltyProgram", 'DateTime'>
+    readonly businessId: FieldRef<"LoyaltyProgram", 'String'>
+    readonly earnOnOrders: FieldRef<"LoyaltyProgram", 'Boolean'>
+    readonly pointsPerDollar: FieldRef<"LoyaltyProgram", 'Int'>
+    readonly signupEnabled: FieldRef<"LoyaltyProgram", 'Boolean'>
+    readonly signupBonus: FieldRef<"LoyaltyProgram", 'Int'>
+    readonly firstOrderEnabled: FieldRef<"LoyaltyProgram", 'Boolean'>
+    readonly firstOrderBonus: FieldRef<"LoyaltyProgram", 'Int'>
+    readonly birthdayEnabled: FieldRef<"LoyaltyProgram", 'Boolean'>
+    readonly birthdayBonus: FieldRef<"LoyaltyProgram", 'Int'>
+    readonly socialEnabled: FieldRef<"LoyaltyProgram", 'Boolean'>
+    readonly socialFollowBonus: FieldRef<"LoyaltyProgram", 'Int'>
+    readonly rewardCodeExpiryDays: FieldRef<"LoyaltyProgram", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoyaltyProgram findUnique
+   */
+  export type LoyaltyProgramFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyProgram to fetch.
+     */
+    where: LoyaltyProgramWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyProgram findUniqueOrThrow
+   */
+  export type LoyaltyProgramFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyProgram to fetch.
+     */
+    where: LoyaltyProgramWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyProgram findFirst
+   */
+  export type LoyaltyProgramFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyProgram to fetch.
+     */
+    where?: LoyaltyProgramWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPrograms to fetch.
+     */
+    orderBy?: LoyaltyProgramOrderByWithRelationInput | LoyaltyProgramOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyPrograms.
+     */
+    cursor?: LoyaltyProgramWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPrograms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPrograms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyPrograms.
+     */
+    distinct?: LoyaltyProgramScalarFieldEnum | LoyaltyProgramScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyProgram findFirstOrThrow
+   */
+  export type LoyaltyProgramFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyProgram to fetch.
+     */
+    where?: LoyaltyProgramWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPrograms to fetch.
+     */
+    orderBy?: LoyaltyProgramOrderByWithRelationInput | LoyaltyProgramOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyPrograms.
+     */
+    cursor?: LoyaltyProgramWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPrograms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPrograms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyPrograms.
+     */
+    distinct?: LoyaltyProgramScalarFieldEnum | LoyaltyProgramScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyProgram findMany
+   */
+  export type LoyaltyProgramFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyPrograms to fetch.
+     */
+    where?: LoyaltyProgramWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPrograms to fetch.
+     */
+    orderBy?: LoyaltyProgramOrderByWithRelationInput | LoyaltyProgramOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoyaltyPrograms.
+     */
+    cursor?: LoyaltyProgramWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPrograms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPrograms.
+     */
+    skip?: number
+    distinct?: LoyaltyProgramScalarFieldEnum | LoyaltyProgramScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyProgram create
+   */
+  export type LoyaltyProgramCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LoyaltyProgram.
+     */
+    data: XOR<LoyaltyProgramCreateInput, LoyaltyProgramUncheckedCreateInput>
+  }
+
+  /**
+   * LoyaltyProgram createMany
+   */
+  export type LoyaltyProgramCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoyaltyPrograms.
+     */
+    data: LoyaltyProgramCreateManyInput | LoyaltyProgramCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoyaltyProgram createManyAndReturn
+   */
+  export type LoyaltyProgramCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoyaltyPrograms.
+     */
+    data: LoyaltyProgramCreateManyInput | LoyaltyProgramCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyProgram update
+   */
+  export type LoyaltyProgramUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LoyaltyProgram.
+     */
+    data: XOR<LoyaltyProgramUpdateInput, LoyaltyProgramUncheckedUpdateInput>
+    /**
+     * Choose, which LoyaltyProgram to update.
+     */
+    where: LoyaltyProgramWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyProgram updateMany
+   */
+  export type LoyaltyProgramUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoyaltyPrograms.
+     */
+    data: XOR<LoyaltyProgramUpdateManyMutationInput, LoyaltyProgramUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyPrograms to update
+     */
+    where?: LoyaltyProgramWhereInput
+    /**
+     * Limit how many LoyaltyPrograms to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyProgram updateManyAndReturn
+   */
+  export type LoyaltyProgramUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * The data used to update LoyaltyPrograms.
+     */
+    data: XOR<LoyaltyProgramUpdateManyMutationInput, LoyaltyProgramUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyPrograms to update
+     */
+    where?: LoyaltyProgramWhereInput
+    /**
+     * Limit how many LoyaltyPrograms to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyProgram upsert
+   */
+  export type LoyaltyProgramUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LoyaltyProgram to update in case it exists.
+     */
+    where: LoyaltyProgramWhereUniqueInput
+    /**
+     * In case the LoyaltyProgram found by the `where` argument doesn't exist, create a new LoyaltyProgram with this data.
+     */
+    create: XOR<LoyaltyProgramCreateInput, LoyaltyProgramUncheckedCreateInput>
+    /**
+     * In case the LoyaltyProgram was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoyaltyProgramUpdateInput, LoyaltyProgramUncheckedUpdateInput>
+  }
+
+  /**
+   * LoyaltyProgram delete
+   */
+  export type LoyaltyProgramDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+    /**
+     * Filter which LoyaltyProgram to delete.
+     */
+    where: LoyaltyProgramWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyProgram deleteMany
+   */
+  export type LoyaltyProgramDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyPrograms to delete
+     */
+    where?: LoyaltyProgramWhereInput
+    /**
+     * Limit how many LoyaltyPrograms to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyProgram.tiers
+   */
+  export type LoyaltyProgram$tiersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    where?: LoyaltyRewardTierWhereInput
+    orderBy?: LoyaltyRewardTierOrderByWithRelationInput | LoyaltyRewardTierOrderByWithRelationInput[]
+    cursor?: LoyaltyRewardTierWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LoyaltyRewardTierScalarFieldEnum | LoyaltyRewardTierScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyProgram without action
+   */
+  export type LoyaltyProgramDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyProgram
+     */
+    select?: LoyaltyProgramSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyProgram
+     */
+    omit?: LoyaltyProgramOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyProgramInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model LoyaltyRewardTier
+   */
+
+  export type AggregateLoyaltyRewardTier = {
+    _count: LoyaltyRewardTierCountAggregateOutputType | null
+    _avg: LoyaltyRewardTierAvgAggregateOutputType | null
+    _sum: LoyaltyRewardTierSumAggregateOutputType | null
+    _min: LoyaltyRewardTierMinAggregateOutputType | null
+    _max: LoyaltyRewardTierMaxAggregateOutputType | null
+  }
+
+  export type LoyaltyRewardTierAvgAggregateOutputType = {
+    pointsCost: number | null
+    value: number | null
+    minPurchase: number | null
+    sortOrder: number | null
+  }
+
+  export type LoyaltyRewardTierSumAggregateOutputType = {
+    pointsCost: number | null
+    value: number | null
+    minPurchase: number | null
+    sortOrder: number | null
+  }
+
+  export type LoyaltyRewardTierMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    programId: string | null
+    businessId: string | null
+    label: string | null
+    pointsCost: number | null
+    type: string | null
+    value: number | null
+    minPurchase: number | null
+    sortOrder: number | null
+    active: boolean | null
+  }
+
+  export type LoyaltyRewardTierMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    programId: string | null
+    businessId: string | null
+    label: string | null
+    pointsCost: number | null
+    type: string | null
+    value: number | null
+    minPurchase: number | null
+    sortOrder: number | null
+    active: boolean | null
+  }
+
+  export type LoyaltyRewardTierCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    programId: number
+    businessId: number
+    label: number
+    pointsCost: number
+    type: number
+    value: number
+    minPurchase: number
+    sortOrder: number
+    active: number
+    _all: number
+  }
+
+
+  export type LoyaltyRewardTierAvgAggregateInputType = {
+    pointsCost?: true
+    value?: true
+    minPurchase?: true
+    sortOrder?: true
+  }
+
+  export type LoyaltyRewardTierSumAggregateInputType = {
+    pointsCost?: true
+    value?: true
+    minPurchase?: true
+    sortOrder?: true
+  }
+
+  export type LoyaltyRewardTierMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    programId?: true
+    businessId?: true
+    label?: true
+    pointsCost?: true
+    type?: true
+    value?: true
+    minPurchase?: true
+    sortOrder?: true
+    active?: true
+  }
+
+  export type LoyaltyRewardTierMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    programId?: true
+    businessId?: true
+    label?: true
+    pointsCost?: true
+    type?: true
+    value?: true
+    minPurchase?: true
+    sortOrder?: true
+    active?: true
+  }
+
+  export type LoyaltyRewardTierCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    programId?: true
+    businessId?: true
+    label?: true
+    pointsCost?: true
+    type?: true
+    value?: true
+    minPurchase?: true
+    sortOrder?: true
+    active?: true
+    _all?: true
+  }
+
+  export type LoyaltyRewardTierAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyRewardTier to aggregate.
+     */
+    where?: LoyaltyRewardTierWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewardTiers to fetch.
+     */
+    orderBy?: LoyaltyRewardTierOrderByWithRelationInput | LoyaltyRewardTierOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoyaltyRewardTierWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewardTiers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewardTiers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoyaltyRewardTiers
+    **/
+    _count?: true | LoyaltyRewardTierCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LoyaltyRewardTierAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LoyaltyRewardTierSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoyaltyRewardTierMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoyaltyRewardTierMaxAggregateInputType
+  }
+
+  export type GetLoyaltyRewardTierAggregateType<T extends LoyaltyRewardTierAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoyaltyRewardTier]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoyaltyRewardTier[P]>
+      : GetScalarType<T[P], AggregateLoyaltyRewardTier[P]>
+  }
+
+
+
+
+  export type LoyaltyRewardTierGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyRewardTierWhereInput
+    orderBy?: LoyaltyRewardTierOrderByWithAggregationInput | LoyaltyRewardTierOrderByWithAggregationInput[]
+    by: LoyaltyRewardTierScalarFieldEnum[] | LoyaltyRewardTierScalarFieldEnum
+    having?: LoyaltyRewardTierScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoyaltyRewardTierCountAggregateInputType | true
+    _avg?: LoyaltyRewardTierAvgAggregateInputType
+    _sum?: LoyaltyRewardTierSumAggregateInputType
+    _min?: LoyaltyRewardTierMinAggregateInputType
+    _max?: LoyaltyRewardTierMaxAggregateInputType
+  }
+
+  export type LoyaltyRewardTierGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    programId: string
+    businessId: string
+    label: string
+    pointsCost: number
+    type: string
+    value: number
+    minPurchase: number | null
+    sortOrder: number
+    active: boolean
+    _count: LoyaltyRewardTierCountAggregateOutputType | null
+    _avg: LoyaltyRewardTierAvgAggregateOutputType | null
+    _sum: LoyaltyRewardTierSumAggregateOutputType | null
+    _min: LoyaltyRewardTierMinAggregateOutputType | null
+    _max: LoyaltyRewardTierMaxAggregateOutputType | null
+  }
+
+  type GetLoyaltyRewardTierGroupByPayload<T extends LoyaltyRewardTierGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoyaltyRewardTierGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoyaltyRewardTierGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoyaltyRewardTierGroupByOutputType[P]>
+            : GetScalarType<T[P], LoyaltyRewardTierGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoyaltyRewardTierSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    programId?: boolean
+    businessId?: boolean
+    label?: boolean
+    pointsCost?: boolean
+    type?: boolean
+    value?: boolean
+    minPurchase?: boolean
+    sortOrder?: boolean
+    active?: boolean
+    program?: boolean | LoyaltyProgramDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyRewardTier"]>
+
+  export type LoyaltyRewardTierSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    programId?: boolean
+    businessId?: boolean
+    label?: boolean
+    pointsCost?: boolean
+    type?: boolean
+    value?: boolean
+    minPurchase?: boolean
+    sortOrder?: boolean
+    active?: boolean
+    program?: boolean | LoyaltyProgramDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyRewardTier"]>
+
+  export type LoyaltyRewardTierSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    programId?: boolean
+    businessId?: boolean
+    label?: boolean
+    pointsCost?: boolean
+    type?: boolean
+    value?: boolean
+    minPurchase?: boolean
+    sortOrder?: boolean
+    active?: boolean
+    program?: boolean | LoyaltyProgramDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyRewardTier"]>
+
+  export type LoyaltyRewardTierSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    programId?: boolean
+    businessId?: boolean
+    label?: boolean
+    pointsCost?: boolean
+    type?: boolean
+    value?: boolean
+    minPurchase?: boolean
+    sortOrder?: boolean
+    active?: boolean
+  }
+
+  export type LoyaltyRewardTierOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "programId" | "businessId" | "label" | "pointsCost" | "type" | "value" | "minPurchase" | "sortOrder" | "active", ExtArgs["result"]["loyaltyRewardTier"]>
+  export type LoyaltyRewardTierInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    program?: boolean | LoyaltyProgramDefaultArgs<ExtArgs>
+  }
+  export type LoyaltyRewardTierIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    program?: boolean | LoyaltyProgramDefaultArgs<ExtArgs>
+  }
+  export type LoyaltyRewardTierIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    program?: boolean | LoyaltyProgramDefaultArgs<ExtArgs>
+  }
+
+  export type $LoyaltyRewardTierPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoyaltyRewardTier"
+    objects: {
+      program: Prisma.$LoyaltyProgramPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      programId: string
+      businessId: string
+      label: string
+      pointsCost: number
+      type: string
+      value: number
+      minPurchase: number | null
+      sortOrder: number
+      active: boolean
+    }, ExtArgs["result"]["loyaltyRewardTier"]>
+    composites: {}
+  }
+
+  type LoyaltyRewardTierGetPayload<S extends boolean | null | undefined | LoyaltyRewardTierDefaultArgs> = $Result.GetResult<Prisma.$LoyaltyRewardTierPayload, S>
+
+  type LoyaltyRewardTierCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoyaltyRewardTierFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoyaltyRewardTierCountAggregateInputType | true
+    }
+
+  export interface LoyaltyRewardTierDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoyaltyRewardTier'], meta: { name: 'LoyaltyRewardTier' } }
+    /**
+     * Find zero or one LoyaltyRewardTier that matches the filter.
+     * @param {LoyaltyRewardTierFindUniqueArgs} args - Arguments to find a LoyaltyRewardTier
+     * @example
+     * // Get one LoyaltyRewardTier
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoyaltyRewardTierFindUniqueArgs>(args: SelectSubset<T, LoyaltyRewardTierFindUniqueArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoyaltyRewardTier that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoyaltyRewardTierFindUniqueOrThrowArgs} args - Arguments to find a LoyaltyRewardTier
+     * @example
+     * // Get one LoyaltyRewardTier
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoyaltyRewardTierFindUniqueOrThrowArgs>(args: SelectSubset<T, LoyaltyRewardTierFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyRewardTier that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardTierFindFirstArgs} args - Arguments to find a LoyaltyRewardTier
+     * @example
+     * // Get one LoyaltyRewardTier
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoyaltyRewardTierFindFirstArgs>(args?: SelectSubset<T, LoyaltyRewardTierFindFirstArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyRewardTier that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardTierFindFirstOrThrowArgs} args - Arguments to find a LoyaltyRewardTier
+     * @example
+     * // Get one LoyaltyRewardTier
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoyaltyRewardTierFindFirstOrThrowArgs>(args?: SelectSubset<T, LoyaltyRewardTierFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoyaltyRewardTiers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardTierFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoyaltyRewardTiers
+     * const loyaltyRewardTiers = await prisma.loyaltyRewardTier.findMany()
+     * 
+     * // Get first 10 LoyaltyRewardTiers
+     * const loyaltyRewardTiers = await prisma.loyaltyRewardTier.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loyaltyRewardTierWithIdOnly = await prisma.loyaltyRewardTier.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoyaltyRewardTierFindManyArgs>(args?: SelectSubset<T, LoyaltyRewardTierFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoyaltyRewardTier.
+     * @param {LoyaltyRewardTierCreateArgs} args - Arguments to create a LoyaltyRewardTier.
+     * @example
+     * // Create one LoyaltyRewardTier
+     * const LoyaltyRewardTier = await prisma.loyaltyRewardTier.create({
+     *   data: {
+     *     // ... data to create a LoyaltyRewardTier
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoyaltyRewardTierCreateArgs>(args: SelectSubset<T, LoyaltyRewardTierCreateArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoyaltyRewardTiers.
+     * @param {LoyaltyRewardTierCreateManyArgs} args - Arguments to create many LoyaltyRewardTiers.
+     * @example
+     * // Create many LoyaltyRewardTiers
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoyaltyRewardTierCreateManyArgs>(args?: SelectSubset<T, LoyaltyRewardTierCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoyaltyRewardTiers and returns the data saved in the database.
+     * @param {LoyaltyRewardTierCreateManyAndReturnArgs} args - Arguments to create many LoyaltyRewardTiers.
+     * @example
+     * // Create many LoyaltyRewardTiers
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoyaltyRewardTiers and only return the `id`
+     * const loyaltyRewardTierWithIdOnly = await prisma.loyaltyRewardTier.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoyaltyRewardTierCreateManyAndReturnArgs>(args?: SelectSubset<T, LoyaltyRewardTierCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoyaltyRewardTier.
+     * @param {LoyaltyRewardTierDeleteArgs} args - Arguments to delete one LoyaltyRewardTier.
+     * @example
+     * // Delete one LoyaltyRewardTier
+     * const LoyaltyRewardTier = await prisma.loyaltyRewardTier.delete({
+     *   where: {
+     *     // ... filter to delete one LoyaltyRewardTier
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoyaltyRewardTierDeleteArgs>(args: SelectSubset<T, LoyaltyRewardTierDeleteArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoyaltyRewardTier.
+     * @param {LoyaltyRewardTierUpdateArgs} args - Arguments to update one LoyaltyRewardTier.
+     * @example
+     * // Update one LoyaltyRewardTier
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoyaltyRewardTierUpdateArgs>(args: SelectSubset<T, LoyaltyRewardTierUpdateArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoyaltyRewardTiers.
+     * @param {LoyaltyRewardTierDeleteManyArgs} args - Arguments to filter LoyaltyRewardTiers to delete.
+     * @example
+     * // Delete a few LoyaltyRewardTiers
+     * const { count } = await prisma.loyaltyRewardTier.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoyaltyRewardTierDeleteManyArgs>(args?: SelectSubset<T, LoyaltyRewardTierDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyRewardTiers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardTierUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoyaltyRewardTiers
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoyaltyRewardTierUpdateManyArgs>(args: SelectSubset<T, LoyaltyRewardTierUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyRewardTiers and returns the data updated in the database.
+     * @param {LoyaltyRewardTierUpdateManyAndReturnArgs} args - Arguments to update many LoyaltyRewardTiers.
+     * @example
+     * // Update many LoyaltyRewardTiers
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoyaltyRewardTiers and only return the `id`
+     * const loyaltyRewardTierWithIdOnly = await prisma.loyaltyRewardTier.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoyaltyRewardTierUpdateManyAndReturnArgs>(args: SelectSubset<T, LoyaltyRewardTierUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoyaltyRewardTier.
+     * @param {LoyaltyRewardTierUpsertArgs} args - Arguments to update or create a LoyaltyRewardTier.
+     * @example
+     * // Update or create a LoyaltyRewardTier
+     * const loyaltyRewardTier = await prisma.loyaltyRewardTier.upsert({
+     *   create: {
+     *     // ... data to create a LoyaltyRewardTier
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoyaltyRewardTier we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoyaltyRewardTierUpsertArgs>(args: SelectSubset<T, LoyaltyRewardTierUpsertArgs<ExtArgs>>): Prisma__LoyaltyRewardTierClient<$Result.GetResult<Prisma.$LoyaltyRewardTierPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoyaltyRewardTiers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardTierCountArgs} args - Arguments to filter LoyaltyRewardTiers to count.
+     * @example
+     * // Count the number of LoyaltyRewardTiers
+     * const count = await prisma.loyaltyRewardTier.count({
+     *   where: {
+     *     // ... the filter for the LoyaltyRewardTiers we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoyaltyRewardTierCountArgs>(
+      args?: Subset<T, LoyaltyRewardTierCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoyaltyRewardTierCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoyaltyRewardTier.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardTierAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoyaltyRewardTierAggregateArgs>(args: Subset<T, LoyaltyRewardTierAggregateArgs>): Prisma.PrismaPromise<GetLoyaltyRewardTierAggregateType<T>>
+
+    /**
+     * Group by LoyaltyRewardTier.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardTierGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoyaltyRewardTierGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoyaltyRewardTierGroupByArgs['orderBy'] }
+        : { orderBy?: LoyaltyRewardTierGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoyaltyRewardTierGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoyaltyRewardTierGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoyaltyRewardTier model
+   */
+  readonly fields: LoyaltyRewardTierFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoyaltyRewardTier.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoyaltyRewardTierClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    program<T extends LoyaltyProgramDefaultArgs<ExtArgs> = {}>(args?: Subset<T, LoyaltyProgramDefaultArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoyaltyRewardTier model
+   */
+  interface LoyaltyRewardTierFieldRefs {
+    readonly id: FieldRef<"LoyaltyRewardTier", 'String'>
+    readonly createdAt: FieldRef<"LoyaltyRewardTier", 'DateTime'>
+    readonly updatedAt: FieldRef<"LoyaltyRewardTier", 'DateTime'>
+    readonly programId: FieldRef<"LoyaltyRewardTier", 'String'>
+    readonly businessId: FieldRef<"LoyaltyRewardTier", 'String'>
+    readonly label: FieldRef<"LoyaltyRewardTier", 'String'>
+    readonly pointsCost: FieldRef<"LoyaltyRewardTier", 'Int'>
+    readonly type: FieldRef<"LoyaltyRewardTier", 'String'>
+    readonly value: FieldRef<"LoyaltyRewardTier", 'Int'>
+    readonly minPurchase: FieldRef<"LoyaltyRewardTier", 'Int'>
+    readonly sortOrder: FieldRef<"LoyaltyRewardTier", 'Int'>
+    readonly active: FieldRef<"LoyaltyRewardTier", 'Boolean'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoyaltyRewardTier findUnique
+   */
+  export type LoyaltyRewardTierFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyRewardTier to fetch.
+     */
+    where: LoyaltyRewardTierWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyRewardTier findUniqueOrThrow
+   */
+  export type LoyaltyRewardTierFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyRewardTier to fetch.
+     */
+    where: LoyaltyRewardTierWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyRewardTier findFirst
+   */
+  export type LoyaltyRewardTierFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyRewardTier to fetch.
+     */
+    where?: LoyaltyRewardTierWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewardTiers to fetch.
+     */
+    orderBy?: LoyaltyRewardTierOrderByWithRelationInput | LoyaltyRewardTierOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyRewardTiers.
+     */
+    cursor?: LoyaltyRewardTierWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewardTiers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewardTiers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyRewardTiers.
+     */
+    distinct?: LoyaltyRewardTierScalarFieldEnum | LoyaltyRewardTierScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyRewardTier findFirstOrThrow
+   */
+  export type LoyaltyRewardTierFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyRewardTier to fetch.
+     */
+    where?: LoyaltyRewardTierWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewardTiers to fetch.
+     */
+    orderBy?: LoyaltyRewardTierOrderByWithRelationInput | LoyaltyRewardTierOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyRewardTiers.
+     */
+    cursor?: LoyaltyRewardTierWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewardTiers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewardTiers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyRewardTiers.
+     */
+    distinct?: LoyaltyRewardTierScalarFieldEnum | LoyaltyRewardTierScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyRewardTier findMany
+   */
+  export type LoyaltyRewardTierFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyRewardTiers to fetch.
+     */
+    where?: LoyaltyRewardTierWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewardTiers to fetch.
+     */
+    orderBy?: LoyaltyRewardTierOrderByWithRelationInput | LoyaltyRewardTierOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoyaltyRewardTiers.
+     */
+    cursor?: LoyaltyRewardTierWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewardTiers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewardTiers.
+     */
+    skip?: number
+    distinct?: LoyaltyRewardTierScalarFieldEnum | LoyaltyRewardTierScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyRewardTier create
+   */
+  export type LoyaltyRewardTierCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LoyaltyRewardTier.
+     */
+    data: XOR<LoyaltyRewardTierCreateInput, LoyaltyRewardTierUncheckedCreateInput>
+  }
+
+  /**
+   * LoyaltyRewardTier createMany
+   */
+  export type LoyaltyRewardTierCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoyaltyRewardTiers.
+     */
+    data: LoyaltyRewardTierCreateManyInput | LoyaltyRewardTierCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoyaltyRewardTier createManyAndReturn
+   */
+  export type LoyaltyRewardTierCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoyaltyRewardTiers.
+     */
+    data: LoyaltyRewardTierCreateManyInput | LoyaltyRewardTierCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyRewardTier update
+   */
+  export type LoyaltyRewardTierUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LoyaltyRewardTier.
+     */
+    data: XOR<LoyaltyRewardTierUpdateInput, LoyaltyRewardTierUncheckedUpdateInput>
+    /**
+     * Choose, which LoyaltyRewardTier to update.
+     */
+    where: LoyaltyRewardTierWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyRewardTier updateMany
+   */
+  export type LoyaltyRewardTierUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoyaltyRewardTiers.
+     */
+    data: XOR<LoyaltyRewardTierUpdateManyMutationInput, LoyaltyRewardTierUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyRewardTiers to update
+     */
+    where?: LoyaltyRewardTierWhereInput
+    /**
+     * Limit how many LoyaltyRewardTiers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyRewardTier updateManyAndReturn
+   */
+  export type LoyaltyRewardTierUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * The data used to update LoyaltyRewardTiers.
+     */
+    data: XOR<LoyaltyRewardTierUpdateManyMutationInput, LoyaltyRewardTierUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyRewardTiers to update
+     */
+    where?: LoyaltyRewardTierWhereInput
+    /**
+     * Limit how many LoyaltyRewardTiers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyRewardTier upsert
+   */
+  export type LoyaltyRewardTierUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LoyaltyRewardTier to update in case it exists.
+     */
+    where: LoyaltyRewardTierWhereUniqueInput
+    /**
+     * In case the LoyaltyRewardTier found by the `where` argument doesn't exist, create a new LoyaltyRewardTier with this data.
+     */
+    create: XOR<LoyaltyRewardTierCreateInput, LoyaltyRewardTierUncheckedCreateInput>
+    /**
+     * In case the LoyaltyRewardTier was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoyaltyRewardTierUpdateInput, LoyaltyRewardTierUncheckedUpdateInput>
+  }
+
+  /**
+   * LoyaltyRewardTier delete
+   */
+  export type LoyaltyRewardTierDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+    /**
+     * Filter which LoyaltyRewardTier to delete.
+     */
+    where: LoyaltyRewardTierWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyRewardTier deleteMany
+   */
+  export type LoyaltyRewardTierDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyRewardTiers to delete
+     */
+    where?: LoyaltyRewardTierWhereInput
+    /**
+     * Limit how many LoyaltyRewardTiers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyRewardTier without action
+   */
+  export type LoyaltyRewardTierDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardTier
+     */
+    select?: LoyaltyRewardTierSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyRewardTier
+     */
+    omit?: LoyaltyRewardTierOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardTierInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model LoyaltyLedger
+   */
+
+  export type AggregateLoyaltyLedger = {
+    _count: LoyaltyLedgerCountAggregateOutputType | null
+    _avg: LoyaltyLedgerAvgAggregateOutputType | null
+    _sum: LoyaltyLedgerSumAggregateOutputType | null
+    _min: LoyaltyLedgerMinAggregateOutputType | null
+    _max: LoyaltyLedgerMaxAggregateOutputType | null
+  }
+
+  export type LoyaltyLedgerAvgAggregateOutputType = {
+    points: number | null
+    balanceAfter: number | null
+  }
+
+  export type LoyaltyLedgerSumAggregateOutputType = {
+    points: number | null
+    balanceAfter: number | null
+  }
+
+  export type LoyaltyLedgerMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    type: string | null
+    points: number | null
+    balanceAfter: number | null
+    reason: string | null
+    sourceKey: string | null
+    orderId: string | null
+    discountCodeId: string | null
+    actorUserId: string | null
+  }
+
+  export type LoyaltyLedgerMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    type: string | null
+    points: number | null
+    balanceAfter: number | null
+    reason: string | null
+    sourceKey: string | null
+    orderId: string | null
+    discountCodeId: string | null
+    actorUserId: string | null
+  }
+
+  export type LoyaltyLedgerCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    businessId: number
+    customerId: number
+    type: number
+    points: number
+    balanceAfter: number
+    reason: number
+    metadata: number
+    sourceKey: number
+    orderId: number
+    discountCodeId: number
+    actorUserId: number
+    _all: number
+  }
+
+
+  export type LoyaltyLedgerAvgAggregateInputType = {
+    points?: true
+    balanceAfter?: true
+  }
+
+  export type LoyaltyLedgerSumAggregateInputType = {
+    points?: true
+    balanceAfter?: true
+  }
+
+  export type LoyaltyLedgerMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    customerId?: true
+    type?: true
+    points?: true
+    balanceAfter?: true
+    reason?: true
+    sourceKey?: true
+    orderId?: true
+    discountCodeId?: true
+    actorUserId?: true
+  }
+
+  export type LoyaltyLedgerMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    customerId?: true
+    type?: true
+    points?: true
+    balanceAfter?: true
+    reason?: true
+    sourceKey?: true
+    orderId?: true
+    discountCodeId?: true
+    actorUserId?: true
+  }
+
+  export type LoyaltyLedgerCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    customerId?: true
+    type?: true
+    points?: true
+    balanceAfter?: true
+    reason?: true
+    metadata?: true
+    sourceKey?: true
+    orderId?: true
+    discountCodeId?: true
+    actorUserId?: true
+    _all?: true
+  }
+
+  export type LoyaltyLedgerAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyLedger to aggregate.
+     */
+    where?: LoyaltyLedgerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyLedgers to fetch.
+     */
+    orderBy?: LoyaltyLedgerOrderByWithRelationInput | LoyaltyLedgerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoyaltyLedgerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyLedgers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyLedgers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoyaltyLedgers
+    **/
+    _count?: true | LoyaltyLedgerCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LoyaltyLedgerAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LoyaltyLedgerSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoyaltyLedgerMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoyaltyLedgerMaxAggregateInputType
+  }
+
+  export type GetLoyaltyLedgerAggregateType<T extends LoyaltyLedgerAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoyaltyLedger]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoyaltyLedger[P]>
+      : GetScalarType<T[P], AggregateLoyaltyLedger[P]>
+  }
+
+
+
+
+  export type LoyaltyLedgerGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyLedgerWhereInput
+    orderBy?: LoyaltyLedgerOrderByWithAggregationInput | LoyaltyLedgerOrderByWithAggregationInput[]
+    by: LoyaltyLedgerScalarFieldEnum[] | LoyaltyLedgerScalarFieldEnum
+    having?: LoyaltyLedgerScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoyaltyLedgerCountAggregateInputType | true
+    _avg?: LoyaltyLedgerAvgAggregateInputType
+    _sum?: LoyaltyLedgerSumAggregateInputType
+    _min?: LoyaltyLedgerMinAggregateInputType
+    _max?: LoyaltyLedgerMaxAggregateInputType
+  }
+
+  export type LoyaltyLedgerGroupByOutputType = {
+    id: string
+    createdAt: Date
+    businessId: string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason: string | null
+    metadata: JsonValue | null
+    sourceKey: string
+    orderId: string | null
+    discountCodeId: string | null
+    actorUserId: string | null
+    _count: LoyaltyLedgerCountAggregateOutputType | null
+    _avg: LoyaltyLedgerAvgAggregateOutputType | null
+    _sum: LoyaltyLedgerSumAggregateOutputType | null
+    _min: LoyaltyLedgerMinAggregateOutputType | null
+    _max: LoyaltyLedgerMaxAggregateOutputType | null
+  }
+
+  type GetLoyaltyLedgerGroupByPayload<T extends LoyaltyLedgerGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoyaltyLedgerGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoyaltyLedgerGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoyaltyLedgerGroupByOutputType[P]>
+            : GetScalarType<T[P], LoyaltyLedgerGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoyaltyLedgerSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    points?: boolean
+    balanceAfter?: boolean
+    reason?: boolean
+    metadata?: boolean
+    sourceKey?: boolean
+    orderId?: boolean
+    discountCodeId?: boolean
+    actorUserId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    order?: boolean | LoyaltyLedger$orderArgs<ExtArgs>
+    discountCode?: boolean | LoyaltyLedger$discountCodeArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyLedger"]>
+
+  export type LoyaltyLedgerSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    points?: boolean
+    balanceAfter?: boolean
+    reason?: boolean
+    metadata?: boolean
+    sourceKey?: boolean
+    orderId?: boolean
+    discountCodeId?: boolean
+    actorUserId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    order?: boolean | LoyaltyLedger$orderArgs<ExtArgs>
+    discountCode?: boolean | LoyaltyLedger$discountCodeArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyLedger"]>
+
+  export type LoyaltyLedgerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    points?: boolean
+    balanceAfter?: boolean
+    reason?: boolean
+    metadata?: boolean
+    sourceKey?: boolean
+    orderId?: boolean
+    discountCodeId?: boolean
+    actorUserId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    order?: boolean | LoyaltyLedger$orderArgs<ExtArgs>
+    discountCode?: boolean | LoyaltyLedger$discountCodeArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyLedger"]>
+
+  export type LoyaltyLedgerSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    points?: boolean
+    balanceAfter?: boolean
+    reason?: boolean
+    metadata?: boolean
+    sourceKey?: boolean
+    orderId?: boolean
+    discountCodeId?: boolean
+    actorUserId?: boolean
+  }
+
+  export type LoyaltyLedgerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "businessId" | "customerId" | "type" | "points" | "balanceAfter" | "reason" | "metadata" | "sourceKey" | "orderId" | "discountCodeId" | "actorUserId", ExtArgs["result"]["loyaltyLedger"]>
+  export type LoyaltyLedgerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    order?: boolean | LoyaltyLedger$orderArgs<ExtArgs>
+    discountCode?: boolean | LoyaltyLedger$discountCodeArgs<ExtArgs>
+  }
+  export type LoyaltyLedgerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    order?: boolean | LoyaltyLedger$orderArgs<ExtArgs>
+    discountCode?: boolean | LoyaltyLedger$discountCodeArgs<ExtArgs>
+  }
+  export type LoyaltyLedgerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    order?: boolean | LoyaltyLedger$orderArgs<ExtArgs>
+    discountCode?: boolean | LoyaltyLedger$discountCodeArgs<ExtArgs>
+  }
+
+  export type $LoyaltyLedgerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoyaltyLedger"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs>
+      order: Prisma.$OrderPayload<ExtArgs> | null
+      discountCode: Prisma.$DiscountCodePayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      businessId: string
+      customerId: string
+      type: string
+      points: number
+      balanceAfter: number
+      reason: string | null
+      metadata: Prisma.JsonValue | null
+      sourceKey: string
+      orderId: string | null
+      discountCodeId: string | null
+      actorUserId: string | null
+    }, ExtArgs["result"]["loyaltyLedger"]>
+    composites: {}
+  }
+
+  type LoyaltyLedgerGetPayload<S extends boolean | null | undefined | LoyaltyLedgerDefaultArgs> = $Result.GetResult<Prisma.$LoyaltyLedgerPayload, S>
+
+  type LoyaltyLedgerCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoyaltyLedgerFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoyaltyLedgerCountAggregateInputType | true
+    }
+
+  export interface LoyaltyLedgerDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoyaltyLedger'], meta: { name: 'LoyaltyLedger' } }
+    /**
+     * Find zero or one LoyaltyLedger that matches the filter.
+     * @param {LoyaltyLedgerFindUniqueArgs} args - Arguments to find a LoyaltyLedger
+     * @example
+     * // Get one LoyaltyLedger
+     * const loyaltyLedger = await prisma.loyaltyLedger.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoyaltyLedgerFindUniqueArgs>(args: SelectSubset<T, LoyaltyLedgerFindUniqueArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoyaltyLedger that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoyaltyLedgerFindUniqueOrThrowArgs} args - Arguments to find a LoyaltyLedger
+     * @example
+     * // Get one LoyaltyLedger
+     * const loyaltyLedger = await prisma.loyaltyLedger.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoyaltyLedgerFindUniqueOrThrowArgs>(args: SelectSubset<T, LoyaltyLedgerFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyLedger that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyLedgerFindFirstArgs} args - Arguments to find a LoyaltyLedger
+     * @example
+     * // Get one LoyaltyLedger
+     * const loyaltyLedger = await prisma.loyaltyLedger.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoyaltyLedgerFindFirstArgs>(args?: SelectSubset<T, LoyaltyLedgerFindFirstArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyLedger that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyLedgerFindFirstOrThrowArgs} args - Arguments to find a LoyaltyLedger
+     * @example
+     * // Get one LoyaltyLedger
+     * const loyaltyLedger = await prisma.loyaltyLedger.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoyaltyLedgerFindFirstOrThrowArgs>(args?: SelectSubset<T, LoyaltyLedgerFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoyaltyLedgers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyLedgerFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoyaltyLedgers
+     * const loyaltyLedgers = await prisma.loyaltyLedger.findMany()
+     * 
+     * // Get first 10 LoyaltyLedgers
+     * const loyaltyLedgers = await prisma.loyaltyLedger.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loyaltyLedgerWithIdOnly = await prisma.loyaltyLedger.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoyaltyLedgerFindManyArgs>(args?: SelectSubset<T, LoyaltyLedgerFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoyaltyLedger.
+     * @param {LoyaltyLedgerCreateArgs} args - Arguments to create a LoyaltyLedger.
+     * @example
+     * // Create one LoyaltyLedger
+     * const LoyaltyLedger = await prisma.loyaltyLedger.create({
+     *   data: {
+     *     // ... data to create a LoyaltyLedger
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoyaltyLedgerCreateArgs>(args: SelectSubset<T, LoyaltyLedgerCreateArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoyaltyLedgers.
+     * @param {LoyaltyLedgerCreateManyArgs} args - Arguments to create many LoyaltyLedgers.
+     * @example
+     * // Create many LoyaltyLedgers
+     * const loyaltyLedger = await prisma.loyaltyLedger.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoyaltyLedgerCreateManyArgs>(args?: SelectSubset<T, LoyaltyLedgerCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoyaltyLedgers and returns the data saved in the database.
+     * @param {LoyaltyLedgerCreateManyAndReturnArgs} args - Arguments to create many LoyaltyLedgers.
+     * @example
+     * // Create many LoyaltyLedgers
+     * const loyaltyLedger = await prisma.loyaltyLedger.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoyaltyLedgers and only return the `id`
+     * const loyaltyLedgerWithIdOnly = await prisma.loyaltyLedger.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoyaltyLedgerCreateManyAndReturnArgs>(args?: SelectSubset<T, LoyaltyLedgerCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoyaltyLedger.
+     * @param {LoyaltyLedgerDeleteArgs} args - Arguments to delete one LoyaltyLedger.
+     * @example
+     * // Delete one LoyaltyLedger
+     * const LoyaltyLedger = await prisma.loyaltyLedger.delete({
+     *   where: {
+     *     // ... filter to delete one LoyaltyLedger
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoyaltyLedgerDeleteArgs>(args: SelectSubset<T, LoyaltyLedgerDeleteArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoyaltyLedger.
+     * @param {LoyaltyLedgerUpdateArgs} args - Arguments to update one LoyaltyLedger.
+     * @example
+     * // Update one LoyaltyLedger
+     * const loyaltyLedger = await prisma.loyaltyLedger.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoyaltyLedgerUpdateArgs>(args: SelectSubset<T, LoyaltyLedgerUpdateArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoyaltyLedgers.
+     * @param {LoyaltyLedgerDeleteManyArgs} args - Arguments to filter LoyaltyLedgers to delete.
+     * @example
+     * // Delete a few LoyaltyLedgers
+     * const { count } = await prisma.loyaltyLedger.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoyaltyLedgerDeleteManyArgs>(args?: SelectSubset<T, LoyaltyLedgerDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyLedgers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyLedgerUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoyaltyLedgers
+     * const loyaltyLedger = await prisma.loyaltyLedger.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoyaltyLedgerUpdateManyArgs>(args: SelectSubset<T, LoyaltyLedgerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyLedgers and returns the data updated in the database.
+     * @param {LoyaltyLedgerUpdateManyAndReturnArgs} args - Arguments to update many LoyaltyLedgers.
+     * @example
+     * // Update many LoyaltyLedgers
+     * const loyaltyLedger = await prisma.loyaltyLedger.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoyaltyLedgers and only return the `id`
+     * const loyaltyLedgerWithIdOnly = await prisma.loyaltyLedger.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoyaltyLedgerUpdateManyAndReturnArgs>(args: SelectSubset<T, LoyaltyLedgerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoyaltyLedger.
+     * @param {LoyaltyLedgerUpsertArgs} args - Arguments to update or create a LoyaltyLedger.
+     * @example
+     * // Update or create a LoyaltyLedger
+     * const loyaltyLedger = await prisma.loyaltyLedger.upsert({
+     *   create: {
+     *     // ... data to create a LoyaltyLedger
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoyaltyLedger we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoyaltyLedgerUpsertArgs>(args: SelectSubset<T, LoyaltyLedgerUpsertArgs<ExtArgs>>): Prisma__LoyaltyLedgerClient<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoyaltyLedgers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyLedgerCountArgs} args - Arguments to filter LoyaltyLedgers to count.
+     * @example
+     * // Count the number of LoyaltyLedgers
+     * const count = await prisma.loyaltyLedger.count({
+     *   where: {
+     *     // ... the filter for the LoyaltyLedgers we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoyaltyLedgerCountArgs>(
+      args?: Subset<T, LoyaltyLedgerCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoyaltyLedgerCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoyaltyLedger.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyLedgerAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoyaltyLedgerAggregateArgs>(args: Subset<T, LoyaltyLedgerAggregateArgs>): Prisma.PrismaPromise<GetLoyaltyLedgerAggregateType<T>>
+
+    /**
+     * Group by LoyaltyLedger.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyLedgerGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoyaltyLedgerGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoyaltyLedgerGroupByArgs['orderBy'] }
+        : { orderBy?: LoyaltyLedgerGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoyaltyLedgerGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoyaltyLedgerGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoyaltyLedger model
+   */
+  readonly fields: LoyaltyLedgerFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoyaltyLedger.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoyaltyLedgerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    order<T extends LoyaltyLedger$orderArgs<ExtArgs> = {}>(args?: Subset<T, LoyaltyLedger$orderArgs<ExtArgs>>): Prisma__OrderClient<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    discountCode<T extends LoyaltyLedger$discountCodeArgs<ExtArgs> = {}>(args?: Subset<T, LoyaltyLedger$discountCodeArgs<ExtArgs>>): Prisma__DiscountCodeClient<$Result.GetResult<Prisma.$DiscountCodePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoyaltyLedger model
+   */
+  interface LoyaltyLedgerFieldRefs {
+    readonly id: FieldRef<"LoyaltyLedger", 'String'>
+    readonly createdAt: FieldRef<"LoyaltyLedger", 'DateTime'>
+    readonly businessId: FieldRef<"LoyaltyLedger", 'String'>
+    readonly customerId: FieldRef<"LoyaltyLedger", 'String'>
+    readonly type: FieldRef<"LoyaltyLedger", 'String'>
+    readonly points: FieldRef<"LoyaltyLedger", 'Int'>
+    readonly balanceAfter: FieldRef<"LoyaltyLedger", 'Int'>
+    readonly reason: FieldRef<"LoyaltyLedger", 'String'>
+    readonly metadata: FieldRef<"LoyaltyLedger", 'Json'>
+    readonly sourceKey: FieldRef<"LoyaltyLedger", 'String'>
+    readonly orderId: FieldRef<"LoyaltyLedger", 'String'>
+    readonly discountCodeId: FieldRef<"LoyaltyLedger", 'String'>
+    readonly actorUserId: FieldRef<"LoyaltyLedger", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoyaltyLedger findUnique
+   */
+  export type LoyaltyLedgerFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyLedger to fetch.
+     */
+    where: LoyaltyLedgerWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyLedger findUniqueOrThrow
+   */
+  export type LoyaltyLedgerFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyLedger to fetch.
+     */
+    where: LoyaltyLedgerWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyLedger findFirst
+   */
+  export type LoyaltyLedgerFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyLedger to fetch.
+     */
+    where?: LoyaltyLedgerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyLedgers to fetch.
+     */
+    orderBy?: LoyaltyLedgerOrderByWithRelationInput | LoyaltyLedgerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyLedgers.
+     */
+    cursor?: LoyaltyLedgerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyLedgers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyLedgers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyLedgers.
+     */
+    distinct?: LoyaltyLedgerScalarFieldEnum | LoyaltyLedgerScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyLedger findFirstOrThrow
+   */
+  export type LoyaltyLedgerFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyLedger to fetch.
+     */
+    where?: LoyaltyLedgerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyLedgers to fetch.
+     */
+    orderBy?: LoyaltyLedgerOrderByWithRelationInput | LoyaltyLedgerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyLedgers.
+     */
+    cursor?: LoyaltyLedgerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyLedgers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyLedgers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyLedgers.
+     */
+    distinct?: LoyaltyLedgerScalarFieldEnum | LoyaltyLedgerScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyLedger findMany
+   */
+  export type LoyaltyLedgerFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyLedgers to fetch.
+     */
+    where?: LoyaltyLedgerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyLedgers to fetch.
+     */
+    orderBy?: LoyaltyLedgerOrderByWithRelationInput | LoyaltyLedgerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoyaltyLedgers.
+     */
+    cursor?: LoyaltyLedgerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyLedgers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyLedgers.
+     */
+    skip?: number
+    distinct?: LoyaltyLedgerScalarFieldEnum | LoyaltyLedgerScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyLedger create
+   */
+  export type LoyaltyLedgerCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LoyaltyLedger.
+     */
+    data: XOR<LoyaltyLedgerCreateInput, LoyaltyLedgerUncheckedCreateInput>
+  }
+
+  /**
+   * LoyaltyLedger createMany
+   */
+  export type LoyaltyLedgerCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoyaltyLedgers.
+     */
+    data: LoyaltyLedgerCreateManyInput | LoyaltyLedgerCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoyaltyLedger createManyAndReturn
+   */
+  export type LoyaltyLedgerCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoyaltyLedgers.
+     */
+    data: LoyaltyLedgerCreateManyInput | LoyaltyLedgerCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyLedger update
+   */
+  export type LoyaltyLedgerUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LoyaltyLedger.
+     */
+    data: XOR<LoyaltyLedgerUpdateInput, LoyaltyLedgerUncheckedUpdateInput>
+    /**
+     * Choose, which LoyaltyLedger to update.
+     */
+    where: LoyaltyLedgerWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyLedger updateMany
+   */
+  export type LoyaltyLedgerUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoyaltyLedgers.
+     */
+    data: XOR<LoyaltyLedgerUpdateManyMutationInput, LoyaltyLedgerUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyLedgers to update
+     */
+    where?: LoyaltyLedgerWhereInput
+    /**
+     * Limit how many LoyaltyLedgers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyLedger updateManyAndReturn
+   */
+  export type LoyaltyLedgerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * The data used to update LoyaltyLedgers.
+     */
+    data: XOR<LoyaltyLedgerUpdateManyMutationInput, LoyaltyLedgerUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyLedgers to update
+     */
+    where?: LoyaltyLedgerWhereInput
+    /**
+     * Limit how many LoyaltyLedgers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyLedger upsert
+   */
+  export type LoyaltyLedgerUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LoyaltyLedger to update in case it exists.
+     */
+    where: LoyaltyLedgerWhereUniqueInput
+    /**
+     * In case the LoyaltyLedger found by the `where` argument doesn't exist, create a new LoyaltyLedger with this data.
+     */
+    create: XOR<LoyaltyLedgerCreateInput, LoyaltyLedgerUncheckedCreateInput>
+    /**
+     * In case the LoyaltyLedger was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoyaltyLedgerUpdateInput, LoyaltyLedgerUncheckedUpdateInput>
+  }
+
+  /**
+   * LoyaltyLedger delete
+   */
+  export type LoyaltyLedgerDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+    /**
+     * Filter which LoyaltyLedger to delete.
+     */
+    where: LoyaltyLedgerWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyLedger deleteMany
+   */
+  export type LoyaltyLedgerDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyLedgers to delete
+     */
+    where?: LoyaltyLedgerWhereInput
+    /**
+     * Limit how many LoyaltyLedgers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyLedger.order
+   */
+  export type LoyaltyLedger$orderArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Order
+     */
+    select?: OrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Order
+     */
+    omit?: OrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderInclude<ExtArgs> | null
+    where?: OrderWhereInput
+  }
+
+  /**
+   * LoyaltyLedger.discountCode
+   */
+  export type LoyaltyLedger$discountCodeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DiscountCode
+     */
+    select?: DiscountCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DiscountCode
+     */
+    omit?: DiscountCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DiscountCodeInclude<ExtArgs> | null
+    where?: DiscountCodeWhereInput
+  }
+
+  /**
+   * LoyaltyLedger without action
+   */
+  export type LoyaltyLedgerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyLedger
+     */
+    select?: LoyaltyLedgerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyLedger
+     */
+    omit?: LoyaltyLedgerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyLedgerInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -68617,6 +72973,12 @@ export namespace Prisma {
     maintenanceVariant: 'maintenanceVariant',
     maintenanceMessage: 'maintenanceMessage',
     maintenanceCta: 'maintenanceCta',
+    maintenanceOverline: 'maintenanceOverline',
+    maintenanceHeadline: 'maintenanceHeadline',
+    maintenanceImage: 'maintenanceImage',
+    maintenanceLaunchAt: 'maintenanceLaunchAt',
+    maintenanceLaunchEndAt: 'maintenanceLaunchEndAt',
+    maintenanceLocation: 'maintenanceLocation',
     umamiWebsiteId: 'umamiWebsiteId',
     umamiEnabled: 'umamiEnabled',
     status: 'status',
@@ -68932,6 +73294,10 @@ export namespace Prisma {
     acceptsMarketing: 'acceptsMarketing',
     totalSpent: 'totalSpent',
     orderCount: 'orderCount',
+    loyaltyPoints: 'loyaltyPoints',
+    loyaltyJoinedAt: 'loyaltyJoinedAt',
+    birthMonth: 'birthMonth',
+    birthDay: 'birthDay',
     deletionRequestedAt: 'deletionRequestedAt',
     anonymizedAt: 'anonymizedAt',
     notes: 'notes',
@@ -69056,6 +73422,7 @@ export namespace Prisma {
     type: 'type',
     value: 'value',
     active: 'active',
+    source: 'source',
     usageLimit: 'usageLimit',
     usageCount: 'usageCount',
     perCustomerLimit: 'perCustomerLimit',
@@ -69539,6 +73906,64 @@ export namespace Prisma {
   };
 
   export type DonationScalarFieldEnum = (typeof DonationScalarFieldEnum)[keyof typeof DonationScalarFieldEnum]
+
+
+  export const LoyaltyProgramScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    earnOnOrders: 'earnOnOrders',
+    pointsPerDollar: 'pointsPerDollar',
+    signupEnabled: 'signupEnabled',
+    signupBonus: 'signupBonus',
+    firstOrderEnabled: 'firstOrderEnabled',
+    firstOrderBonus: 'firstOrderBonus',
+    birthdayEnabled: 'birthdayEnabled',
+    birthdayBonus: 'birthdayBonus',
+    socialEnabled: 'socialEnabled',
+    socialFollowBonus: 'socialFollowBonus',
+    rewardCodeExpiryDays: 'rewardCodeExpiryDays'
+  };
+
+  export type LoyaltyProgramScalarFieldEnum = (typeof LoyaltyProgramScalarFieldEnum)[keyof typeof LoyaltyProgramScalarFieldEnum]
+
+
+  export const LoyaltyRewardTierScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    programId: 'programId',
+    businessId: 'businessId',
+    label: 'label',
+    pointsCost: 'pointsCost',
+    type: 'type',
+    value: 'value',
+    minPurchase: 'minPurchase',
+    sortOrder: 'sortOrder',
+    active: 'active'
+  };
+
+  export type LoyaltyRewardTierScalarFieldEnum = (typeof LoyaltyRewardTierScalarFieldEnum)[keyof typeof LoyaltyRewardTierScalarFieldEnum]
+
+
+  export const LoyaltyLedgerScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    businessId: 'businessId',
+    customerId: 'customerId',
+    type: 'type',
+    points: 'points',
+    balanceAfter: 'balanceAfter',
+    reason: 'reason',
+    metadata: 'metadata',
+    sourceKey: 'sourceKey',
+    orderId: 'orderId',
+    discountCodeId: 'discountCodeId',
+    actorUserId: 'actorUserId'
+  };
+
+  export type LoyaltyLedgerScalarFieldEnum = (typeof LoyaltyLedgerScalarFieldEnum)[keyof typeof LoyaltyLedgerScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -70154,6 +74579,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFilter<"Business"> | string
     maintenanceMessage?: JsonNullableFilter<"Business">
     maintenanceCta?: JsonNullableFilter<"Business">
+    maintenanceOverline?: StringNullableFilter<"Business"> | string | null
+    maintenanceHeadline?: StringNullableFilter<"Business"> | string | null
+    maintenanceImage?: StringNullableFilter<"Business"> | string | null
+    maintenanceLaunchAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    maintenanceLaunchEndAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    maintenanceLocation?: StringNullableFilter<"Business"> | string | null
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -70212,6 +74643,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
     donations?: DonationListRelationFilter
+    loyaltyProgram?: XOR<LoyaltyProgramNullableScalarRelationFilter, LoyaltyProgramWhereInput> | null
+    loyaltyLedger?: LoyaltyLedgerListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -70240,6 +74673,12 @@ export namespace Prisma {
     maintenanceVariant?: SortOrder
     maintenanceMessage?: SortOrderInput | SortOrder
     maintenanceCta?: SortOrderInput | SortOrder
+    maintenanceOverline?: SortOrderInput | SortOrder
+    maintenanceHeadline?: SortOrderInput | SortOrder
+    maintenanceImage?: SortOrderInput | SortOrder
+    maintenanceLaunchAt?: SortOrderInput | SortOrder
+    maintenanceLaunchEndAt?: SortOrderInput | SortOrder
+    maintenanceLocation?: SortOrderInput | SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -70298,6 +74737,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
     subscriptions?: SubscriptionOrderByRelationAggregateInput
     donations?: DonationOrderByRelationAggregateInput
+    loyaltyProgram?: LoyaltyProgramOrderByWithRelationInput
+    loyaltyLedger?: LoyaltyLedgerOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -70329,6 +74770,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFilter<"Business"> | string
     maintenanceMessage?: JsonNullableFilter<"Business">
     maintenanceCta?: JsonNullableFilter<"Business">
+    maintenanceOverline?: StringNullableFilter<"Business"> | string | null
+    maintenanceHeadline?: StringNullableFilter<"Business"> | string | null
+    maintenanceImage?: StringNullableFilter<"Business"> | string | null
+    maintenanceLaunchAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    maintenanceLaunchEndAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    maintenanceLocation?: StringNullableFilter<"Business"> | string | null
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -70387,6 +74834,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
     donations?: DonationListRelationFilter
+    loyaltyProgram?: XOR<LoyaltyProgramNullableScalarRelationFilter, LoyaltyProgramWhereInput> | null
+    loyaltyLedger?: LoyaltyLedgerListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -70415,6 +74864,12 @@ export namespace Prisma {
     maintenanceVariant?: SortOrder
     maintenanceMessage?: SortOrderInput | SortOrder
     maintenanceCta?: SortOrderInput | SortOrder
+    maintenanceOverline?: SortOrderInput | SortOrder
+    maintenanceHeadline?: SortOrderInput | SortOrder
+    maintenanceImage?: SortOrderInput | SortOrder
+    maintenanceLaunchAt?: SortOrderInput | SortOrder
+    maintenanceLaunchEndAt?: SortOrderInput | SortOrder
+    maintenanceLocation?: SortOrderInput | SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -70477,6 +74932,12 @@ export namespace Prisma {
     maintenanceVariant?: StringWithAggregatesFilter<"Business"> | string
     maintenanceMessage?: JsonNullableWithAggregatesFilter<"Business">
     maintenanceCta?: JsonNullableWithAggregatesFilter<"Business">
+    maintenanceOverline?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    maintenanceHeadline?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    maintenanceImage?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    maintenanceLaunchAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
+    maintenanceLaunchEndAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
+    maintenanceLocation?: StringNullableWithAggregatesFilter<"Business"> | string | null
     umamiWebsiteId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
@@ -71961,6 +76422,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    loyaltyPoints?: IntFilter<"Customer"> | number
+    loyaltyJoinedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    birthMonth?: IntNullableFilter<"Customer"> | number | null
+    birthDay?: IntNullableFilter<"Customer"> | number | null
     deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     notes?: StringNullableFilter<"Customer"> | string | null
@@ -71974,6 +76439,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteListRelationFilter
     reviews?: ProductReviewListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    loyaltyLedger?: LoyaltyLedgerListRelationFilter
   }
 
   export type CustomerOrderByWithRelationInput = {
@@ -71988,6 +76454,10 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    loyaltyPoints?: SortOrder
+    loyaltyJoinedAt?: SortOrderInput | SortOrder
+    birthMonth?: SortOrderInput | SortOrder
+    birthDay?: SortOrderInput | SortOrder
     deletionRequestedAt?: SortOrderInput | SortOrder
     anonymizedAt?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
@@ -72001,6 +76471,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteOrderByRelationAggregateInput
     reviews?: ProductReviewOrderByRelationAggregateInput
     subscriptions?: SubscriptionOrderByRelationAggregateInput
+    loyaltyLedger?: LoyaltyLedgerOrderByRelationAggregateInput
   }
 
   export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -72019,6 +76490,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    loyaltyPoints?: IntFilter<"Customer"> | number
+    loyaltyJoinedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    birthMonth?: IntNullableFilter<"Customer"> | number | null
+    birthDay?: IntNullableFilter<"Customer"> | number | null
     deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     notes?: StringNullableFilter<"Customer"> | string | null
@@ -72032,6 +76507,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteListRelationFilter
     reviews?: ProductReviewListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    loyaltyLedger?: LoyaltyLedgerListRelationFilter
   }, "id" | "businessId_email">
 
   export type CustomerOrderByWithAggregationInput = {
@@ -72046,6 +76522,10 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    loyaltyPoints?: SortOrder
+    loyaltyJoinedAt?: SortOrderInput | SortOrder
+    birthMonth?: SortOrderInput | SortOrder
+    birthDay?: SortOrderInput | SortOrder
     deletionRequestedAt?: SortOrderInput | SortOrder
     anonymizedAt?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
@@ -72073,6 +76553,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolWithAggregatesFilter<"Customer"> | boolean
     totalSpent?: IntWithAggregatesFilter<"Customer"> | number
     orderCount?: IntWithAggregatesFilter<"Customer"> | number
+    loyaltyPoints?: IntWithAggregatesFilter<"Customer"> | number
+    loyaltyJoinedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+    birthMonth?: IntNullableWithAggregatesFilter<"Customer"> | number | null
+    birthDay?: IntNullableWithAggregatesFilter<"Customer"> | number | null
     deletionRequestedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
     notes?: StringNullableWithAggregatesFilter<"Customer"> | string | null
@@ -72238,6 +76722,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryListRelationFilter
     reviews?: ProductReviewListRelationFilter
     shipments?: OrderShipmentListRelationFilter
+    loyaltyLedger?: LoyaltyLedgerListRelationFilter
   }
 
   export type OrderOrderByWithRelationInput = {
@@ -72284,6 +76769,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     reviews?: ProductReviewOrderByRelationAggregateInput
     shipments?: OrderShipmentOrderByRelationAggregateInput
+    loyaltyLedger?: LoyaltyLedgerOrderByRelationAggregateInput
   }
 
   export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -72334,6 +76820,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryListRelationFilter
     reviews?: ProductReviewListRelationFilter
     shipments?: OrderShipmentListRelationFilter
+    loyaltyLedger?: LoyaltyLedgerListRelationFilter
   }, "id" | "stripeSessionId" | "stripeInvoiceId" | "businessId_orderNumber">
 
   export type OrderOrderByWithAggregationInput = {
@@ -72657,6 +77144,7 @@ export namespace Prisma {
     type?: StringFilter<"DiscountCode"> | string
     value?: IntFilter<"DiscountCode"> | number
     active?: BoolFilter<"DiscountCode"> | boolean
+    source?: StringFilter<"DiscountCode"> | string
     usageLimit?: IntNullableFilter<"DiscountCode"> | number | null
     usageCount?: IntFilter<"DiscountCode"> | number
     perCustomerLimit?: IntNullableFilter<"DiscountCode"> | number | null
@@ -72666,6 +77154,7 @@ export namespace Prisma {
     maxDiscount?: IntNullableFilter<"DiscountCode"> | number | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
+    loyaltyLedger?: XOR<LoyaltyLedgerNullableScalarRelationFilter, LoyaltyLedgerWhereInput> | null
   }
 
   export type DiscountCodeOrderByWithRelationInput = {
@@ -72677,6 +77166,7 @@ export namespace Prisma {
     type?: SortOrder
     value?: SortOrder
     active?: SortOrder
+    source?: SortOrder
     usageLimit?: SortOrderInput | SortOrder
     usageCount?: SortOrder
     perCustomerLimit?: SortOrderInput | SortOrder
@@ -72686,6 +77176,7 @@ export namespace Prisma {
     maxDiscount?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
     orders?: OrderOrderByRelationAggregateInput
+    loyaltyLedger?: LoyaltyLedgerOrderByWithRelationInput
   }
 
   export type DiscountCodeWhereUniqueInput = Prisma.AtLeast<{
@@ -72701,6 +77192,7 @@ export namespace Prisma {
     type?: StringFilter<"DiscountCode"> | string
     value?: IntFilter<"DiscountCode"> | number
     active?: BoolFilter<"DiscountCode"> | boolean
+    source?: StringFilter<"DiscountCode"> | string
     usageLimit?: IntNullableFilter<"DiscountCode"> | number | null
     usageCount?: IntFilter<"DiscountCode"> | number
     perCustomerLimit?: IntNullableFilter<"DiscountCode"> | number | null
@@ -72710,6 +77202,7 @@ export namespace Prisma {
     maxDiscount?: IntNullableFilter<"DiscountCode"> | number | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
+    loyaltyLedger?: XOR<LoyaltyLedgerNullableScalarRelationFilter, LoyaltyLedgerWhereInput> | null
   }, "id" | "businessId_code">
 
   export type DiscountCodeOrderByWithAggregationInput = {
@@ -72721,6 +77214,7 @@ export namespace Prisma {
     type?: SortOrder
     value?: SortOrder
     active?: SortOrder
+    source?: SortOrder
     usageLimit?: SortOrderInput | SortOrder
     usageCount?: SortOrder
     perCustomerLimit?: SortOrderInput | SortOrder
@@ -72747,6 +77241,7 @@ export namespace Prisma {
     type?: StringWithAggregatesFilter<"DiscountCode"> | string
     value?: IntWithAggregatesFilter<"DiscountCode"> | number
     active?: BoolWithAggregatesFilter<"DiscountCode"> | boolean
+    source?: StringWithAggregatesFilter<"DiscountCode"> | string
     usageLimit?: IntNullableWithAggregatesFilter<"DiscountCode"> | number | null
     usageCount?: IntWithAggregatesFilter<"DiscountCode"> | number
     perCustomerLimit?: IntNullableWithAggregatesFilter<"DiscountCode"> | number | null
@@ -75231,6 +79726,315 @@ export namespace Prisma {
     message?: StringNullableWithAggregatesFilter<"Donation"> | string | null
   }
 
+  export type LoyaltyProgramWhereInput = {
+    AND?: LoyaltyProgramWhereInput | LoyaltyProgramWhereInput[]
+    OR?: LoyaltyProgramWhereInput[]
+    NOT?: LoyaltyProgramWhereInput | LoyaltyProgramWhereInput[]
+    id?: StringFilter<"LoyaltyProgram"> | string
+    createdAt?: DateTimeFilter<"LoyaltyProgram"> | Date | string
+    updatedAt?: DateTimeFilter<"LoyaltyProgram"> | Date | string
+    businessId?: StringFilter<"LoyaltyProgram"> | string
+    earnOnOrders?: BoolFilter<"LoyaltyProgram"> | boolean
+    pointsPerDollar?: IntFilter<"LoyaltyProgram"> | number
+    signupEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    signupBonus?: IntFilter<"LoyaltyProgram"> | number
+    firstOrderEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    firstOrderBonus?: IntFilter<"LoyaltyProgram"> | number
+    birthdayEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    birthdayBonus?: IntFilter<"LoyaltyProgram"> | number
+    socialEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    socialFollowBonus?: IntFilter<"LoyaltyProgram"> | number
+    rewardCodeExpiryDays?: IntFilter<"LoyaltyProgram"> | number
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    tiers?: LoyaltyRewardTierListRelationFilter
+  }
+
+  export type LoyaltyProgramOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    earnOnOrders?: SortOrder
+    pointsPerDollar?: SortOrder
+    signupEnabled?: SortOrder
+    signupBonus?: SortOrder
+    firstOrderEnabled?: SortOrder
+    firstOrderBonus?: SortOrder
+    birthdayEnabled?: SortOrder
+    birthdayBonus?: SortOrder
+    socialEnabled?: SortOrder
+    socialFollowBonus?: SortOrder
+    rewardCodeExpiryDays?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+    tiers?: LoyaltyRewardTierOrderByRelationAggregateInput
+  }
+
+  export type LoyaltyProgramWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    businessId?: string
+    AND?: LoyaltyProgramWhereInput | LoyaltyProgramWhereInput[]
+    OR?: LoyaltyProgramWhereInput[]
+    NOT?: LoyaltyProgramWhereInput | LoyaltyProgramWhereInput[]
+    createdAt?: DateTimeFilter<"LoyaltyProgram"> | Date | string
+    updatedAt?: DateTimeFilter<"LoyaltyProgram"> | Date | string
+    earnOnOrders?: BoolFilter<"LoyaltyProgram"> | boolean
+    pointsPerDollar?: IntFilter<"LoyaltyProgram"> | number
+    signupEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    signupBonus?: IntFilter<"LoyaltyProgram"> | number
+    firstOrderEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    firstOrderBonus?: IntFilter<"LoyaltyProgram"> | number
+    birthdayEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    birthdayBonus?: IntFilter<"LoyaltyProgram"> | number
+    socialEnabled?: BoolFilter<"LoyaltyProgram"> | boolean
+    socialFollowBonus?: IntFilter<"LoyaltyProgram"> | number
+    rewardCodeExpiryDays?: IntFilter<"LoyaltyProgram"> | number
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    tiers?: LoyaltyRewardTierListRelationFilter
+  }, "id" | "businessId">
+
+  export type LoyaltyProgramOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    earnOnOrders?: SortOrder
+    pointsPerDollar?: SortOrder
+    signupEnabled?: SortOrder
+    signupBonus?: SortOrder
+    firstOrderEnabled?: SortOrder
+    firstOrderBonus?: SortOrder
+    birthdayEnabled?: SortOrder
+    birthdayBonus?: SortOrder
+    socialEnabled?: SortOrder
+    socialFollowBonus?: SortOrder
+    rewardCodeExpiryDays?: SortOrder
+    _count?: LoyaltyProgramCountOrderByAggregateInput
+    _avg?: LoyaltyProgramAvgOrderByAggregateInput
+    _max?: LoyaltyProgramMaxOrderByAggregateInput
+    _min?: LoyaltyProgramMinOrderByAggregateInput
+    _sum?: LoyaltyProgramSumOrderByAggregateInput
+  }
+
+  export type LoyaltyProgramScalarWhereWithAggregatesInput = {
+    AND?: LoyaltyProgramScalarWhereWithAggregatesInput | LoyaltyProgramScalarWhereWithAggregatesInput[]
+    OR?: LoyaltyProgramScalarWhereWithAggregatesInput[]
+    NOT?: LoyaltyProgramScalarWhereWithAggregatesInput | LoyaltyProgramScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"LoyaltyProgram"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"LoyaltyProgram"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"LoyaltyProgram"> | Date | string
+    businessId?: StringWithAggregatesFilter<"LoyaltyProgram"> | string
+    earnOnOrders?: BoolWithAggregatesFilter<"LoyaltyProgram"> | boolean
+    pointsPerDollar?: IntWithAggregatesFilter<"LoyaltyProgram"> | number
+    signupEnabled?: BoolWithAggregatesFilter<"LoyaltyProgram"> | boolean
+    signupBonus?: IntWithAggregatesFilter<"LoyaltyProgram"> | number
+    firstOrderEnabled?: BoolWithAggregatesFilter<"LoyaltyProgram"> | boolean
+    firstOrderBonus?: IntWithAggregatesFilter<"LoyaltyProgram"> | number
+    birthdayEnabled?: BoolWithAggregatesFilter<"LoyaltyProgram"> | boolean
+    birthdayBonus?: IntWithAggregatesFilter<"LoyaltyProgram"> | number
+    socialEnabled?: BoolWithAggregatesFilter<"LoyaltyProgram"> | boolean
+    socialFollowBonus?: IntWithAggregatesFilter<"LoyaltyProgram"> | number
+    rewardCodeExpiryDays?: IntWithAggregatesFilter<"LoyaltyProgram"> | number
+  }
+
+  export type LoyaltyRewardTierWhereInput = {
+    AND?: LoyaltyRewardTierWhereInput | LoyaltyRewardTierWhereInput[]
+    OR?: LoyaltyRewardTierWhereInput[]
+    NOT?: LoyaltyRewardTierWhereInput | LoyaltyRewardTierWhereInput[]
+    id?: StringFilter<"LoyaltyRewardTier"> | string
+    createdAt?: DateTimeFilter<"LoyaltyRewardTier"> | Date | string
+    updatedAt?: DateTimeFilter<"LoyaltyRewardTier"> | Date | string
+    programId?: StringFilter<"LoyaltyRewardTier"> | string
+    businessId?: StringFilter<"LoyaltyRewardTier"> | string
+    label?: StringFilter<"LoyaltyRewardTier"> | string
+    pointsCost?: IntFilter<"LoyaltyRewardTier"> | number
+    type?: StringFilter<"LoyaltyRewardTier"> | string
+    value?: IntFilter<"LoyaltyRewardTier"> | number
+    minPurchase?: IntNullableFilter<"LoyaltyRewardTier"> | number | null
+    sortOrder?: IntFilter<"LoyaltyRewardTier"> | number
+    active?: BoolFilter<"LoyaltyRewardTier"> | boolean
+    program?: XOR<LoyaltyProgramScalarRelationFilter, LoyaltyProgramWhereInput>
+  }
+
+  export type LoyaltyRewardTierOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    programId?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    pointsCost?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    minPurchase?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    active?: SortOrder
+    program?: LoyaltyProgramOrderByWithRelationInput
+  }
+
+  export type LoyaltyRewardTierWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: LoyaltyRewardTierWhereInput | LoyaltyRewardTierWhereInput[]
+    OR?: LoyaltyRewardTierWhereInput[]
+    NOT?: LoyaltyRewardTierWhereInput | LoyaltyRewardTierWhereInput[]
+    createdAt?: DateTimeFilter<"LoyaltyRewardTier"> | Date | string
+    updatedAt?: DateTimeFilter<"LoyaltyRewardTier"> | Date | string
+    programId?: StringFilter<"LoyaltyRewardTier"> | string
+    businessId?: StringFilter<"LoyaltyRewardTier"> | string
+    label?: StringFilter<"LoyaltyRewardTier"> | string
+    pointsCost?: IntFilter<"LoyaltyRewardTier"> | number
+    type?: StringFilter<"LoyaltyRewardTier"> | string
+    value?: IntFilter<"LoyaltyRewardTier"> | number
+    minPurchase?: IntNullableFilter<"LoyaltyRewardTier"> | number | null
+    sortOrder?: IntFilter<"LoyaltyRewardTier"> | number
+    active?: BoolFilter<"LoyaltyRewardTier"> | boolean
+    program?: XOR<LoyaltyProgramScalarRelationFilter, LoyaltyProgramWhereInput>
+  }, "id">
+
+  export type LoyaltyRewardTierOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    programId?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    pointsCost?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    minPurchase?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    active?: SortOrder
+    _count?: LoyaltyRewardTierCountOrderByAggregateInput
+    _avg?: LoyaltyRewardTierAvgOrderByAggregateInput
+    _max?: LoyaltyRewardTierMaxOrderByAggregateInput
+    _min?: LoyaltyRewardTierMinOrderByAggregateInput
+    _sum?: LoyaltyRewardTierSumOrderByAggregateInput
+  }
+
+  export type LoyaltyRewardTierScalarWhereWithAggregatesInput = {
+    AND?: LoyaltyRewardTierScalarWhereWithAggregatesInput | LoyaltyRewardTierScalarWhereWithAggregatesInput[]
+    OR?: LoyaltyRewardTierScalarWhereWithAggregatesInput[]
+    NOT?: LoyaltyRewardTierScalarWhereWithAggregatesInput | LoyaltyRewardTierScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"LoyaltyRewardTier"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"LoyaltyRewardTier"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"LoyaltyRewardTier"> | Date | string
+    programId?: StringWithAggregatesFilter<"LoyaltyRewardTier"> | string
+    businessId?: StringWithAggregatesFilter<"LoyaltyRewardTier"> | string
+    label?: StringWithAggregatesFilter<"LoyaltyRewardTier"> | string
+    pointsCost?: IntWithAggregatesFilter<"LoyaltyRewardTier"> | number
+    type?: StringWithAggregatesFilter<"LoyaltyRewardTier"> | string
+    value?: IntWithAggregatesFilter<"LoyaltyRewardTier"> | number
+    minPurchase?: IntNullableWithAggregatesFilter<"LoyaltyRewardTier"> | number | null
+    sortOrder?: IntWithAggregatesFilter<"LoyaltyRewardTier"> | number
+    active?: BoolWithAggregatesFilter<"LoyaltyRewardTier"> | boolean
+  }
+
+  export type LoyaltyLedgerWhereInput = {
+    AND?: LoyaltyLedgerWhereInput | LoyaltyLedgerWhereInput[]
+    OR?: LoyaltyLedgerWhereInput[]
+    NOT?: LoyaltyLedgerWhereInput | LoyaltyLedgerWhereInput[]
+    id?: StringFilter<"LoyaltyLedger"> | string
+    createdAt?: DateTimeFilter<"LoyaltyLedger"> | Date | string
+    businessId?: StringFilter<"LoyaltyLedger"> | string
+    customerId?: StringFilter<"LoyaltyLedger"> | string
+    type?: StringFilter<"LoyaltyLedger"> | string
+    points?: IntFilter<"LoyaltyLedger"> | number
+    balanceAfter?: IntFilter<"LoyaltyLedger"> | number
+    reason?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    metadata?: JsonNullableFilter<"LoyaltyLedger">
+    sourceKey?: StringFilter<"LoyaltyLedger"> | string
+    orderId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    discountCodeId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    actorUserId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    order?: XOR<OrderNullableScalarRelationFilter, OrderWhereInput> | null
+    discountCode?: XOR<DiscountCodeNullableScalarRelationFilter, DiscountCodeWhereInput> | null
+  }
+
+  export type LoyaltyLedgerOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    points?: SortOrder
+    balanceAfter?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    sourceKey?: SortOrder
+    orderId?: SortOrderInput | SortOrder
+    discountCodeId?: SortOrderInput | SortOrder
+    actorUserId?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
+    order?: OrderOrderByWithRelationInput
+    discountCode?: DiscountCodeOrderByWithRelationInput
+  }
+
+  export type LoyaltyLedgerWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    discountCodeId?: string
+    businessId_sourceKey?: LoyaltyLedgerBusinessIdSourceKeyCompoundUniqueInput
+    AND?: LoyaltyLedgerWhereInput | LoyaltyLedgerWhereInput[]
+    OR?: LoyaltyLedgerWhereInput[]
+    NOT?: LoyaltyLedgerWhereInput | LoyaltyLedgerWhereInput[]
+    createdAt?: DateTimeFilter<"LoyaltyLedger"> | Date | string
+    businessId?: StringFilter<"LoyaltyLedger"> | string
+    customerId?: StringFilter<"LoyaltyLedger"> | string
+    type?: StringFilter<"LoyaltyLedger"> | string
+    points?: IntFilter<"LoyaltyLedger"> | number
+    balanceAfter?: IntFilter<"LoyaltyLedger"> | number
+    reason?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    metadata?: JsonNullableFilter<"LoyaltyLedger">
+    sourceKey?: StringFilter<"LoyaltyLedger"> | string
+    orderId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    actorUserId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    order?: XOR<OrderNullableScalarRelationFilter, OrderWhereInput> | null
+    discountCode?: XOR<DiscountCodeNullableScalarRelationFilter, DiscountCodeWhereInput> | null
+  }, "id" | "discountCodeId" | "businessId_sourceKey">
+
+  export type LoyaltyLedgerOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    points?: SortOrder
+    balanceAfter?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    sourceKey?: SortOrder
+    orderId?: SortOrderInput | SortOrder
+    discountCodeId?: SortOrderInput | SortOrder
+    actorUserId?: SortOrderInput | SortOrder
+    _count?: LoyaltyLedgerCountOrderByAggregateInput
+    _avg?: LoyaltyLedgerAvgOrderByAggregateInput
+    _max?: LoyaltyLedgerMaxOrderByAggregateInput
+    _min?: LoyaltyLedgerMinOrderByAggregateInput
+    _sum?: LoyaltyLedgerSumOrderByAggregateInput
+  }
+
+  export type LoyaltyLedgerScalarWhereWithAggregatesInput = {
+    AND?: LoyaltyLedgerScalarWhereWithAggregatesInput | LoyaltyLedgerScalarWhereWithAggregatesInput[]
+    OR?: LoyaltyLedgerScalarWhereWithAggregatesInput[]
+    NOT?: LoyaltyLedgerScalarWhereWithAggregatesInput | LoyaltyLedgerScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"LoyaltyLedger"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"LoyaltyLedger"> | Date | string
+    businessId?: StringWithAggregatesFilter<"LoyaltyLedger"> | string
+    customerId?: StringWithAggregatesFilter<"LoyaltyLedger"> | string
+    type?: StringWithAggregatesFilter<"LoyaltyLedger"> | string
+    points?: IntWithAggregatesFilter<"LoyaltyLedger"> | number
+    balanceAfter?: IntWithAggregatesFilter<"LoyaltyLedger"> | number
+    reason?: StringNullableWithAggregatesFilter<"LoyaltyLedger"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"LoyaltyLedger">
+    sourceKey?: StringWithAggregatesFilter<"LoyaltyLedger"> | string
+    orderId?: StringNullableWithAggregatesFilter<"LoyaltyLedger"> | string | null
+    discountCodeId?: StringNullableWithAggregatesFilter<"LoyaltyLedger"> | string | null
+    actorUserId?: StringNullableWithAggregatesFilter<"LoyaltyLedger"> | string | null
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -75722,6 +80526,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -75780,6 +80590,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -75808,6 +80620,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -75866,6 +80684,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -75894,6 +80714,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -75952,6 +80778,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -75980,6 +80808,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -76038,6 +80872,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -76066,6 +80902,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -76120,6 +80962,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -76174,6 +81022,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -77906,6 +82760,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -77917,6 +82775,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateInput = {
@@ -77931,6 +82790,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -77942,6 +82805,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUpdateInput = {
@@ -77956,6 +82820,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77967,6 +82835,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateInput = {
@@ -77981,6 +82850,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77992,6 +82865,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateManyInput = {
@@ -78006,6 +82880,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -78025,6 +82903,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78042,6 +82924,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78221,6 +83107,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateInput = {
@@ -78262,6 +83149,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUpdateInput = {
@@ -78303,6 +83191,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateInput = {
@@ -78344,6 +83233,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderCreateManyInput = {
@@ -78701,6 +83591,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -78710,6 +83601,7 @@ export namespace Prisma {
     maxDiscount?: number | null
     business: BusinessCreateNestedOneWithoutDiscountCodesInput
     orders?: OrderCreateNestedManyWithoutDiscountCodeInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedOneWithoutDiscountCodeInput
   }
 
   export type DiscountCodeUncheckedCreateInput = {
@@ -78721,6 +83613,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -78729,6 +83622,7 @@ export namespace Prisma {
     minPurchase?: number | null
     maxDiscount?: number | null
     orders?: OrderUncheckedCreateNestedManyWithoutDiscountCodeInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedOneWithoutDiscountCodeInput
   }
 
   export type DiscountCodeUpdateInput = {
@@ -78739,6 +83633,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78748,6 +83643,7 @@ export namespace Prisma {
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
     business?: BusinessUpdateOneRequiredWithoutDiscountCodesNestedInput
     orders?: OrderUpdateManyWithoutDiscountCodeNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateOneWithoutDiscountCodeNestedInput
   }
 
   export type DiscountCodeUncheckedUpdateInput = {
@@ -78759,6 +83655,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78767,6 +83664,7 @@ export namespace Prisma {
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
     orders?: OrderUncheckedUpdateManyWithoutDiscountCodeNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateOneWithoutDiscountCodeNestedInput
   }
 
   export type DiscountCodeCreateManyInput = {
@@ -78778,6 +83676,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -78795,6 +83694,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78813,6 +83713,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -81620,6 +86521,347 @@ export namespace Prisma {
     message?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type LoyaltyProgramCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    earnOnOrders?: boolean
+    pointsPerDollar?: number
+    signupEnabled?: boolean
+    signupBonus?: number
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: number
+    birthdayEnabled?: boolean
+    birthdayBonus?: number
+    socialEnabled?: boolean
+    socialFollowBonus?: number
+    rewardCodeExpiryDays?: number
+    business: BusinessCreateNestedOneWithoutLoyaltyProgramInput
+    tiers?: LoyaltyRewardTierCreateNestedManyWithoutProgramInput
+  }
+
+  export type LoyaltyProgramUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    earnOnOrders?: boolean
+    pointsPerDollar?: number
+    signupEnabled?: boolean
+    signupBonus?: number
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: number
+    birthdayEnabled?: boolean
+    birthdayBonus?: number
+    socialEnabled?: boolean
+    socialFollowBonus?: number
+    rewardCodeExpiryDays?: number
+    tiers?: LoyaltyRewardTierUncheckedCreateNestedManyWithoutProgramInput
+  }
+
+  export type LoyaltyProgramUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutLoyaltyProgramNestedInput
+    tiers?: LoyaltyRewardTierUpdateManyWithoutProgramNestedInput
+  }
+
+  export type LoyaltyProgramUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+    tiers?: LoyaltyRewardTierUncheckedUpdateManyWithoutProgramNestedInput
+  }
+
+  export type LoyaltyProgramCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    earnOnOrders?: boolean
+    pointsPerDollar?: number
+    signupEnabled?: boolean
+    signupBonus?: number
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: number
+    birthdayEnabled?: boolean
+    birthdayBonus?: number
+    socialEnabled?: boolean
+    socialFollowBonus?: number
+    rewardCodeExpiryDays?: number
+  }
+
+  export type LoyaltyProgramUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LoyaltyProgramUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LoyaltyRewardTierCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    pointsCost: number
+    type: string
+    value: number
+    minPurchase?: number | null
+    sortOrder?: number
+    active?: boolean
+    program: LoyaltyProgramCreateNestedOneWithoutTiersInput
+  }
+
+  export type LoyaltyRewardTierUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    programId: string
+    businessId: string
+    label: string
+    pointsCost: number
+    type: string
+    value: number
+    minPurchase?: number | null
+    sortOrder?: number
+    active?: boolean
+  }
+
+  export type LoyaltyRewardTierUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    pointsCost?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+    program?: LoyaltyProgramUpdateOneRequiredWithoutTiersNestedInput
+  }
+
+  export type LoyaltyRewardTierUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    programId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    pointsCost?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LoyaltyRewardTierCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    programId: string
+    businessId: string
+    label: string
+    pointsCost: number
+    type: string
+    value: number
+    minPurchase?: number | null
+    sortOrder?: number
+    active?: boolean
+  }
+
+  export type LoyaltyRewardTierUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    pointsCost?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LoyaltyRewardTierUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    programId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    pointsCost?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LoyaltyLedgerCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    actorUserId?: string | null
+    business: BusinessCreateNestedOneWithoutLoyaltyLedgerInput
+    customer: CustomerCreateNestedOneWithoutLoyaltyLedgerInput
+    order?: OrderCreateNestedOneWithoutLoyaltyLedgerInput
+    discountCode?: DiscountCodeCreateNestedOneWithoutLoyaltyLedgerInput
+  }
+
+  export type LoyaltyLedgerUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    orderId?: string | null
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
+  export type LoyaltyLedgerUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    order?: OrderUpdateOneWithoutLoyaltyLedgerNestedInput
+    discountCode?: DiscountCodeUpdateOneWithoutLoyaltyLedgerNestedInput
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LoyaltyLedgerCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    orderId?: string | null
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
+  export type LoyaltyLedgerUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -82305,6 +87547,17 @@ export namespace Prisma {
     none?: DonationWhereInput
   }
 
+  export type LoyaltyProgramNullableScalarRelationFilter = {
+    is?: LoyaltyProgramWhereInput | null
+    isNot?: LoyaltyProgramWhereInput | null
+  }
+
+  export type LoyaltyLedgerListRelationFilter = {
+    every?: LoyaltyLedgerWhereInput
+    some?: LoyaltyLedgerWhereInput
+    none?: LoyaltyLedgerWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -82405,6 +87658,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type LoyaltyLedgerOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BusinessCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -82431,6 +87688,12 @@ export namespace Prisma {
     maintenanceVariant?: SortOrder
     maintenanceMessage?: SortOrder
     maintenanceCta?: SortOrder
+    maintenanceOverline?: SortOrder
+    maintenanceHeadline?: SortOrder
+    maintenanceImage?: SortOrder
+    maintenanceLaunchAt?: SortOrder
+    maintenanceLaunchEndAt?: SortOrder
+    maintenanceLocation?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -82490,6 +87753,12 @@ export namespace Prisma {
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
+    maintenanceOverline?: SortOrder
+    maintenanceHeadline?: SortOrder
+    maintenanceImage?: SortOrder
+    maintenanceLaunchAt?: SortOrder
+    maintenanceLaunchEndAt?: SortOrder
+    maintenanceLocation?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -82537,6 +87806,12 @@ export namespace Prisma {
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
+    maintenanceOverline?: SortOrder
+    maintenanceHeadline?: SortOrder
+    maintenanceImage?: SortOrder
+    maintenanceLaunchAt?: SortOrder
+    maintenanceLaunchEndAt?: SortOrder
+    maintenanceLocation?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -83658,6 +88933,10 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    loyaltyPoints?: SortOrder
+    loyaltyJoinedAt?: SortOrder
+    birthMonth?: SortOrder
+    birthDay?: SortOrder
     deletionRequestedAt?: SortOrder
     anonymizedAt?: SortOrder
     notes?: SortOrder
@@ -83668,6 +88947,9 @@ export namespace Prisma {
   export type CustomerAvgOrderByAggregateInput = {
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    loyaltyPoints?: SortOrder
+    birthMonth?: SortOrder
+    birthDay?: SortOrder
   }
 
   export type CustomerMaxOrderByAggregateInput = {
@@ -83682,6 +88964,10 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    loyaltyPoints?: SortOrder
+    loyaltyJoinedAt?: SortOrder
+    birthMonth?: SortOrder
+    birthDay?: SortOrder
     deletionRequestedAt?: SortOrder
     anonymizedAt?: SortOrder
     notes?: SortOrder
@@ -83701,6 +88987,10 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    loyaltyPoints?: SortOrder
+    loyaltyJoinedAt?: SortOrder
+    birthMonth?: SortOrder
+    birthDay?: SortOrder
     deletionRequestedAt?: SortOrder
     anonymizedAt?: SortOrder
     notes?: SortOrder
@@ -83711,6 +89001,9 @@ export namespace Prisma {
   export type CustomerSumOrderByAggregateInput = {
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    loyaltyPoints?: SortOrder
+    birthMonth?: SortOrder
+    birthDay?: SortOrder
   }
 
   export type CustomerScalarRelationFilter = {
@@ -84073,6 +89366,11 @@ export namespace Prisma {
     attempts?: SortOrder
   }
 
+  export type LoyaltyLedgerNullableScalarRelationFilter = {
+    is?: LoyaltyLedgerWhereInput | null
+    isNot?: LoyaltyLedgerWhereInput | null
+  }
+
   export type DiscountCodeBusinessIdCodeCompoundUniqueInput = {
     businessId: string
     code: string
@@ -84087,6 +89385,7 @@ export namespace Prisma {
     type?: SortOrder
     value?: SortOrder
     active?: SortOrder
+    source?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
     perCustomerLimit?: SortOrder
@@ -84114,6 +89413,7 @@ export namespace Prisma {
     type?: SortOrder
     value?: SortOrder
     active?: SortOrder
+    source?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
     perCustomerLimit?: SortOrder
@@ -84132,6 +89432,7 @@ export namespace Prisma {
     type?: SortOrder
     value?: SortOrder
     active?: SortOrder
+    source?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
     perCustomerLimit?: SortOrder
@@ -85580,6 +90881,213 @@ export namespace Prisma {
     amountCents?: SortOrder
   }
 
+  export type LoyaltyRewardTierListRelationFilter = {
+    every?: LoyaltyRewardTierWhereInput
+    some?: LoyaltyRewardTierWhereInput
+    none?: LoyaltyRewardTierWhereInput
+  }
+
+  export type LoyaltyRewardTierOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type LoyaltyProgramCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    earnOnOrders?: SortOrder
+    pointsPerDollar?: SortOrder
+    signupEnabled?: SortOrder
+    signupBonus?: SortOrder
+    firstOrderEnabled?: SortOrder
+    firstOrderBonus?: SortOrder
+    birthdayEnabled?: SortOrder
+    birthdayBonus?: SortOrder
+    socialEnabled?: SortOrder
+    socialFollowBonus?: SortOrder
+    rewardCodeExpiryDays?: SortOrder
+  }
+
+  export type LoyaltyProgramAvgOrderByAggregateInput = {
+    pointsPerDollar?: SortOrder
+    signupBonus?: SortOrder
+    firstOrderBonus?: SortOrder
+    birthdayBonus?: SortOrder
+    socialFollowBonus?: SortOrder
+    rewardCodeExpiryDays?: SortOrder
+  }
+
+  export type LoyaltyProgramMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    earnOnOrders?: SortOrder
+    pointsPerDollar?: SortOrder
+    signupEnabled?: SortOrder
+    signupBonus?: SortOrder
+    firstOrderEnabled?: SortOrder
+    firstOrderBonus?: SortOrder
+    birthdayEnabled?: SortOrder
+    birthdayBonus?: SortOrder
+    socialEnabled?: SortOrder
+    socialFollowBonus?: SortOrder
+    rewardCodeExpiryDays?: SortOrder
+  }
+
+  export type LoyaltyProgramMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    earnOnOrders?: SortOrder
+    pointsPerDollar?: SortOrder
+    signupEnabled?: SortOrder
+    signupBonus?: SortOrder
+    firstOrderEnabled?: SortOrder
+    firstOrderBonus?: SortOrder
+    birthdayEnabled?: SortOrder
+    birthdayBonus?: SortOrder
+    socialEnabled?: SortOrder
+    socialFollowBonus?: SortOrder
+    rewardCodeExpiryDays?: SortOrder
+  }
+
+  export type LoyaltyProgramSumOrderByAggregateInput = {
+    pointsPerDollar?: SortOrder
+    signupBonus?: SortOrder
+    firstOrderBonus?: SortOrder
+    birthdayBonus?: SortOrder
+    socialFollowBonus?: SortOrder
+    rewardCodeExpiryDays?: SortOrder
+  }
+
+  export type LoyaltyProgramScalarRelationFilter = {
+    is?: LoyaltyProgramWhereInput
+    isNot?: LoyaltyProgramWhereInput
+  }
+
+  export type LoyaltyRewardTierCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    programId?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    pointsCost?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    minPurchase?: SortOrder
+    sortOrder?: SortOrder
+    active?: SortOrder
+  }
+
+  export type LoyaltyRewardTierAvgOrderByAggregateInput = {
+    pointsCost?: SortOrder
+    value?: SortOrder
+    minPurchase?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type LoyaltyRewardTierMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    programId?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    pointsCost?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    minPurchase?: SortOrder
+    sortOrder?: SortOrder
+    active?: SortOrder
+  }
+
+  export type LoyaltyRewardTierMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    programId?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    pointsCost?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    minPurchase?: SortOrder
+    sortOrder?: SortOrder
+    active?: SortOrder
+  }
+
+  export type LoyaltyRewardTierSumOrderByAggregateInput = {
+    pointsCost?: SortOrder
+    value?: SortOrder
+    minPurchase?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type LoyaltyLedgerBusinessIdSourceKeyCompoundUniqueInput = {
+    businessId: string
+    sourceKey: string
+  }
+
+  export type LoyaltyLedgerCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    points?: SortOrder
+    balanceAfter?: SortOrder
+    reason?: SortOrder
+    metadata?: SortOrder
+    sourceKey?: SortOrder
+    orderId?: SortOrder
+    discountCodeId?: SortOrder
+    actorUserId?: SortOrder
+  }
+
+  export type LoyaltyLedgerAvgOrderByAggregateInput = {
+    points?: SortOrder
+    balanceAfter?: SortOrder
+  }
+
+  export type LoyaltyLedgerMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    points?: SortOrder
+    balanceAfter?: SortOrder
+    reason?: SortOrder
+    sourceKey?: SortOrder
+    orderId?: SortOrder
+    discountCodeId?: SortOrder
+    actorUserId?: SortOrder
+  }
+
+  export type LoyaltyLedgerMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    points?: SortOrder
+    balanceAfter?: SortOrder
+    reason?: SortOrder
+    sourceKey?: SortOrder
+    orderId?: SortOrder
+    discountCodeId?: SortOrder
+    actorUserId?: SortOrder
+  }
+
+  export type LoyaltyLedgerSumOrderByAggregateInput = {
+    points?: SortOrder
+    balanceAfter?: SortOrder
+  }
+
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -86184,6 +91692,19 @@ export namespace Prisma {
     connect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
   }
 
+  export type LoyaltyProgramCreateNestedOneWithoutBusinessInput = {
+    create?: XOR<LoyaltyProgramCreateWithoutBusinessInput, LoyaltyProgramUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: LoyaltyProgramCreateOrConnectWithoutBusinessInput
+    connect?: LoyaltyProgramWhereUniqueInput
+  }
+
+  export type LoyaltyLedgerCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutBusinessInput, LoyaltyLedgerUncheckedCreateWithoutBusinessInput> | LoyaltyLedgerCreateWithoutBusinessInput[] | LoyaltyLedgerUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutBusinessInput | LoyaltyLedgerCreateOrConnectWithoutBusinessInput[]
+    createMany?: LoyaltyLedgerCreateManyBusinessInputEnvelope
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -86404,6 +91925,19 @@ export namespace Prisma {
     connectOrCreate?: DonationCreateOrConnectWithoutBusinessInput | DonationCreateOrConnectWithoutBusinessInput[]
     createMany?: DonationCreateManyBusinessInputEnvelope
     connect?: DonationWhereUniqueInput | DonationWhereUniqueInput[]
+  }
+
+  export type LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput = {
+    create?: XOR<LoyaltyProgramCreateWithoutBusinessInput, LoyaltyProgramUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: LoyaltyProgramCreateOrConnectWithoutBusinessInput
+    connect?: LoyaltyProgramWhereUniqueInput
+  }
+
+  export type LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutBusinessInput, LoyaltyLedgerUncheckedCreateWithoutBusinessInput> | LoyaltyLedgerCreateWithoutBusinessInput[] | LoyaltyLedgerUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutBusinessInput | LoyaltyLedgerCreateOrConnectWithoutBusinessInput[]
+    createMany?: LoyaltyLedgerCreateManyBusinessInputEnvelope
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -86871,6 +92405,30 @@ export namespace Prisma {
     deleteMany?: DonationScalarWhereInput | DonationScalarWhereInput[]
   }
 
+  export type LoyaltyProgramUpdateOneWithoutBusinessNestedInput = {
+    create?: XOR<LoyaltyProgramCreateWithoutBusinessInput, LoyaltyProgramUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: LoyaltyProgramCreateOrConnectWithoutBusinessInput
+    upsert?: LoyaltyProgramUpsertWithoutBusinessInput
+    disconnect?: LoyaltyProgramWhereInput | boolean
+    delete?: LoyaltyProgramWhereInput | boolean
+    connect?: LoyaltyProgramWhereUniqueInput
+    update?: XOR<XOR<LoyaltyProgramUpdateToOneWithWhereWithoutBusinessInput, LoyaltyProgramUpdateWithoutBusinessInput>, LoyaltyProgramUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type LoyaltyLedgerUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutBusinessInput, LoyaltyLedgerUncheckedCreateWithoutBusinessInput> | LoyaltyLedgerCreateWithoutBusinessInput[] | LoyaltyLedgerUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutBusinessInput | LoyaltyLedgerCreateOrConnectWithoutBusinessInput[]
+    upsert?: LoyaltyLedgerUpsertWithWhereUniqueWithoutBusinessInput | LoyaltyLedgerUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: LoyaltyLedgerCreateManyBusinessInputEnvelope
+    set?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    disconnect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    delete?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    update?: LoyaltyLedgerUpdateWithWhereUniqueWithoutBusinessInput | LoyaltyLedgerUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: LoyaltyLedgerUpdateManyWithWhereWithoutBusinessInput | LoyaltyLedgerUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -87309,6 +92867,30 @@ export namespace Prisma {
     update?: DonationUpdateWithWhereUniqueWithoutBusinessInput | DonationUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: DonationUpdateManyWithWhereWithoutBusinessInput | DonationUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: DonationScalarWhereInput | DonationScalarWhereInput[]
+  }
+
+  export type LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput = {
+    create?: XOR<LoyaltyProgramCreateWithoutBusinessInput, LoyaltyProgramUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: LoyaltyProgramCreateOrConnectWithoutBusinessInput
+    upsert?: LoyaltyProgramUpsertWithoutBusinessInput
+    disconnect?: LoyaltyProgramWhereInput | boolean
+    delete?: LoyaltyProgramWhereInput | boolean
+    connect?: LoyaltyProgramWhereUniqueInput
+    update?: XOR<XOR<LoyaltyProgramUpdateToOneWithWhereWithoutBusinessInput, LoyaltyProgramUpdateWithoutBusinessInput>, LoyaltyProgramUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutBusinessInput, LoyaltyLedgerUncheckedCreateWithoutBusinessInput> | LoyaltyLedgerCreateWithoutBusinessInput[] | LoyaltyLedgerUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutBusinessInput | LoyaltyLedgerCreateOrConnectWithoutBusinessInput[]
+    upsert?: LoyaltyLedgerUpsertWithWhereUniqueWithoutBusinessInput | LoyaltyLedgerUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: LoyaltyLedgerCreateManyBusinessInputEnvelope
+    set?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    disconnect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    delete?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    update?: LoyaltyLedgerUpdateWithWhereUniqueWithoutBusinessInput | LoyaltyLedgerUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: LoyaltyLedgerUpdateManyWithWhereWithoutBusinessInput | LoyaltyLedgerUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
@@ -88201,6 +93783,13 @@ export namespace Prisma {
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
+  export type LoyaltyLedgerCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutCustomerInput, LoyaltyLedgerUncheckedCreateWithoutCustomerInput> | LoyaltyLedgerCreateWithoutCustomerInput[] | LoyaltyLedgerUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutCustomerInput | LoyaltyLedgerCreateOrConnectWithoutCustomerInput[]
+    createMany?: LoyaltyLedgerCreateManyCustomerInputEnvelope
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+  }
+
   export type OrderUncheckedCreateNestedManyWithoutCustomerInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -88241,6 +93830,13 @@ export namespace Prisma {
     connectOrCreate?: SubscriptionCreateOrConnectWithoutCustomerInput | SubscriptionCreateOrConnectWithoutCustomerInput[]
     createMany?: SubscriptionCreateManyCustomerInputEnvelope
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
+  export type LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutCustomerInput, LoyaltyLedgerUncheckedCreateWithoutCustomerInput> | LoyaltyLedgerCreateWithoutCustomerInput[] | LoyaltyLedgerUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutCustomerInput | LoyaltyLedgerCreateOrConnectWithoutCustomerInput[]
+    createMany?: LoyaltyLedgerCreateManyCustomerInputEnvelope
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
   }
 
   export type UserUpdateOneWithoutCustomersNestedInput = {
@@ -88345,6 +93941,20 @@ export namespace Prisma {
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
   }
 
+  export type LoyaltyLedgerUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutCustomerInput, LoyaltyLedgerUncheckedCreateWithoutCustomerInput> | LoyaltyLedgerCreateWithoutCustomerInput[] | LoyaltyLedgerUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutCustomerInput | LoyaltyLedgerCreateOrConnectWithoutCustomerInput[]
+    upsert?: LoyaltyLedgerUpsertWithWhereUniqueWithoutCustomerInput | LoyaltyLedgerUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: LoyaltyLedgerCreateManyCustomerInputEnvelope
+    set?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    disconnect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    delete?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    update?: LoyaltyLedgerUpdateWithWhereUniqueWithoutCustomerInput | LoyaltyLedgerUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: LoyaltyLedgerUpdateManyWithWhereWithoutCustomerInput | LoyaltyLedgerUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
+  }
+
   export type OrderUncheckedUpdateManyWithoutCustomerNestedInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -88427,6 +94037,20 @@ export namespace Prisma {
     update?: SubscriptionUpdateWithWhereUniqueWithoutCustomerInput | SubscriptionUpdateWithWhereUniqueWithoutCustomerInput[]
     updateMany?: SubscriptionUpdateManyWithWhereWithoutCustomerInput | SubscriptionUpdateManyWithWhereWithoutCustomerInput[]
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutCustomerInput, LoyaltyLedgerUncheckedCreateWithoutCustomerInput> | LoyaltyLedgerCreateWithoutCustomerInput[] | LoyaltyLedgerUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutCustomerInput | LoyaltyLedgerCreateOrConnectWithoutCustomerInput[]
+    upsert?: LoyaltyLedgerUpsertWithWhereUniqueWithoutCustomerInput | LoyaltyLedgerUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: LoyaltyLedgerCreateManyCustomerInputEnvelope
+    set?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    disconnect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    delete?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    update?: LoyaltyLedgerUpdateWithWhereUniqueWithoutCustomerInput | LoyaltyLedgerUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: LoyaltyLedgerUpdateManyWithWhereWithoutCustomerInput | LoyaltyLedgerUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
   }
 
   export type CustomerCreateNestedOneWithoutShippingAddressesInput = {
@@ -88585,6 +94209,13 @@ export namespace Prisma {
     connect?: OrderShipmentWhereUniqueInput | OrderShipmentWhereUniqueInput[]
   }
 
+  export type LoyaltyLedgerCreateNestedManyWithoutOrderInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutOrderInput, LoyaltyLedgerUncheckedCreateWithoutOrderInput> | LoyaltyLedgerCreateWithoutOrderInput[] | LoyaltyLedgerUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutOrderInput | LoyaltyLedgerCreateOrConnectWithoutOrderInput[]
+    createMany?: LoyaltyLedgerCreateManyOrderInputEnvelope
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+  }
+
   export type OrderItemUncheckedCreateNestedManyWithoutOrderInput = {
     create?: XOR<OrderItemCreateWithoutOrderInput, OrderItemUncheckedCreateWithoutOrderInput> | OrderItemCreateWithoutOrderInput[] | OrderItemUncheckedCreateWithoutOrderInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutOrderInput | OrderItemCreateOrConnectWithoutOrderInput[]
@@ -88611,6 +94242,13 @@ export namespace Prisma {
     connectOrCreate?: OrderShipmentCreateOrConnectWithoutOrderInput | OrderShipmentCreateOrConnectWithoutOrderInput[]
     createMany?: OrderShipmentCreateManyOrderInputEnvelope
     connect?: OrderShipmentWhereUniqueInput | OrderShipmentWhereUniqueInput[]
+  }
+
+  export type LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutOrderInput, LoyaltyLedgerUncheckedCreateWithoutOrderInput> | LoyaltyLedgerCreateWithoutOrderInput[] | LoyaltyLedgerUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutOrderInput | LoyaltyLedgerCreateOrConnectWithoutOrderInput[]
+    createMany?: LoyaltyLedgerCreateManyOrderInputEnvelope
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
   }
 
   export type SubscriptionUpdateOneWithoutOrdersNestedInput = {
@@ -88717,6 +94355,20 @@ export namespace Prisma {
     deleteMany?: OrderShipmentScalarWhereInput | OrderShipmentScalarWhereInput[]
   }
 
+  export type LoyaltyLedgerUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutOrderInput, LoyaltyLedgerUncheckedCreateWithoutOrderInput> | LoyaltyLedgerCreateWithoutOrderInput[] | LoyaltyLedgerUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutOrderInput | LoyaltyLedgerCreateOrConnectWithoutOrderInput[]
+    upsert?: LoyaltyLedgerUpsertWithWhereUniqueWithoutOrderInput | LoyaltyLedgerUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: LoyaltyLedgerCreateManyOrderInputEnvelope
+    set?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    disconnect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    delete?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    update?: LoyaltyLedgerUpdateWithWhereUniqueWithoutOrderInput | LoyaltyLedgerUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: LoyaltyLedgerUpdateManyWithWhereWithoutOrderInput | LoyaltyLedgerUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
+  }
+
   export type OrderItemUncheckedUpdateManyWithoutOrderNestedInput = {
     create?: XOR<OrderItemCreateWithoutOrderInput, OrderItemUncheckedCreateWithoutOrderInput> | OrderItemCreateWithoutOrderInput[] | OrderItemUncheckedCreateWithoutOrderInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutOrderInput | OrderItemCreateOrConnectWithoutOrderInput[]
@@ -88771,6 +94423,20 @@ export namespace Prisma {
     update?: OrderShipmentUpdateWithWhereUniqueWithoutOrderInput | OrderShipmentUpdateWithWhereUniqueWithoutOrderInput[]
     updateMany?: OrderShipmentUpdateManyWithWhereWithoutOrderInput | OrderShipmentUpdateManyWithWhereWithoutOrderInput[]
     deleteMany?: OrderShipmentScalarWhereInput | OrderShipmentScalarWhereInput[]
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutOrderInput, LoyaltyLedgerUncheckedCreateWithoutOrderInput> | LoyaltyLedgerCreateWithoutOrderInput[] | LoyaltyLedgerUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutOrderInput | LoyaltyLedgerCreateOrConnectWithoutOrderInput[]
+    upsert?: LoyaltyLedgerUpsertWithWhereUniqueWithoutOrderInput | LoyaltyLedgerUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: LoyaltyLedgerCreateManyOrderInputEnvelope
+    set?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    disconnect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    delete?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+    update?: LoyaltyLedgerUpdateWithWhereUniqueWithoutOrderInput | LoyaltyLedgerUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: LoyaltyLedgerUpdateManyWithWhereWithoutOrderInput | LoyaltyLedgerUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
   }
 
   export type OrderCreateNestedOneWithoutShipmentsInput = {
@@ -88846,11 +94512,23 @@ export namespace Prisma {
     connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
   }
 
+  export type LoyaltyLedgerCreateNestedOneWithoutDiscountCodeInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedCreateWithoutDiscountCodeInput>
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutDiscountCodeInput
+    connect?: LoyaltyLedgerWhereUniqueInput
+  }
+
   export type OrderUncheckedCreateNestedManyWithoutDiscountCodeInput = {
     create?: XOR<OrderCreateWithoutDiscountCodeInput, OrderUncheckedCreateWithoutDiscountCodeInput> | OrderCreateWithoutDiscountCodeInput[] | OrderUncheckedCreateWithoutDiscountCodeInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutDiscountCodeInput | OrderCreateOrConnectWithoutDiscountCodeInput[]
     createMany?: OrderCreateManyDiscountCodeInputEnvelope
     connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
+  export type LoyaltyLedgerUncheckedCreateNestedOneWithoutDiscountCodeInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedCreateWithoutDiscountCodeInput>
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutDiscountCodeInput
+    connect?: LoyaltyLedgerWhereUniqueInput
   }
 
   export type BusinessUpdateOneRequiredWithoutDiscountCodesNestedInput = {
@@ -88875,6 +94553,16 @@ export namespace Prisma {
     deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
   }
 
+  export type LoyaltyLedgerUpdateOneWithoutDiscountCodeNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedCreateWithoutDiscountCodeInput>
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutDiscountCodeInput
+    upsert?: LoyaltyLedgerUpsertWithoutDiscountCodeInput
+    disconnect?: LoyaltyLedgerWhereInput | boolean
+    delete?: LoyaltyLedgerWhereInput | boolean
+    connect?: LoyaltyLedgerWhereUniqueInput
+    update?: XOR<XOR<LoyaltyLedgerUpdateToOneWithWhereWithoutDiscountCodeInput, LoyaltyLedgerUpdateWithoutDiscountCodeInput>, LoyaltyLedgerUncheckedUpdateWithoutDiscountCodeInput>
+  }
+
   export type OrderUncheckedUpdateManyWithoutDiscountCodeNestedInput = {
     create?: XOR<OrderCreateWithoutDiscountCodeInput, OrderUncheckedCreateWithoutDiscountCodeInput> | OrderCreateWithoutDiscountCodeInput[] | OrderUncheckedCreateWithoutDiscountCodeInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutDiscountCodeInput | OrderCreateOrConnectWithoutDiscountCodeInput[]
@@ -88887,6 +94575,16 @@ export namespace Prisma {
     update?: OrderUpdateWithWhereUniqueWithoutDiscountCodeInput | OrderUpdateWithWhereUniqueWithoutDiscountCodeInput[]
     updateMany?: OrderUpdateManyWithWhereWithoutDiscountCodeInput | OrderUpdateManyWithWhereWithoutDiscountCodeInput[]
     deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateOneWithoutDiscountCodeNestedInput = {
+    create?: XOR<LoyaltyLedgerCreateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedCreateWithoutDiscountCodeInput>
+    connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutDiscountCodeInput
+    upsert?: LoyaltyLedgerUpsertWithoutDiscountCodeInput
+    disconnect?: LoyaltyLedgerWhereInput | boolean
+    delete?: LoyaltyLedgerWhereInput | boolean
+    connect?: LoyaltyLedgerWhereUniqueInput
+    update?: XOR<XOR<LoyaltyLedgerUpdateToOneWithWhereWithoutDiscountCodeInput, LoyaltyLedgerUpdateWithoutDiscountCodeInput>, LoyaltyLedgerUncheckedUpdateWithoutDiscountCodeInput>
   }
 
   export type ProductVariantCreateNestedOneWithoutInventoryHistoryInput = {
@@ -89862,6 +95560,136 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutDonationsInput, BusinessUpdateWithoutDonationsInput>, BusinessUncheckedUpdateWithoutDonationsInput>
   }
 
+  export type BusinessCreateNestedOneWithoutLoyaltyProgramInput = {
+    create?: XOR<BusinessCreateWithoutLoyaltyProgramInput, BusinessUncheckedCreateWithoutLoyaltyProgramInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutLoyaltyProgramInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type LoyaltyRewardTierCreateNestedManyWithoutProgramInput = {
+    create?: XOR<LoyaltyRewardTierCreateWithoutProgramInput, LoyaltyRewardTierUncheckedCreateWithoutProgramInput> | LoyaltyRewardTierCreateWithoutProgramInput[] | LoyaltyRewardTierUncheckedCreateWithoutProgramInput[]
+    connectOrCreate?: LoyaltyRewardTierCreateOrConnectWithoutProgramInput | LoyaltyRewardTierCreateOrConnectWithoutProgramInput[]
+    createMany?: LoyaltyRewardTierCreateManyProgramInputEnvelope
+    connect?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+  }
+
+  export type LoyaltyRewardTierUncheckedCreateNestedManyWithoutProgramInput = {
+    create?: XOR<LoyaltyRewardTierCreateWithoutProgramInput, LoyaltyRewardTierUncheckedCreateWithoutProgramInput> | LoyaltyRewardTierCreateWithoutProgramInput[] | LoyaltyRewardTierUncheckedCreateWithoutProgramInput[]
+    connectOrCreate?: LoyaltyRewardTierCreateOrConnectWithoutProgramInput | LoyaltyRewardTierCreateOrConnectWithoutProgramInput[]
+    createMany?: LoyaltyRewardTierCreateManyProgramInputEnvelope
+    connect?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutLoyaltyProgramNestedInput = {
+    create?: XOR<BusinessCreateWithoutLoyaltyProgramInput, BusinessUncheckedCreateWithoutLoyaltyProgramInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutLoyaltyProgramInput
+    upsert?: BusinessUpsertWithoutLoyaltyProgramInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutLoyaltyProgramInput, BusinessUpdateWithoutLoyaltyProgramInput>, BusinessUncheckedUpdateWithoutLoyaltyProgramInput>
+  }
+
+  export type LoyaltyRewardTierUpdateManyWithoutProgramNestedInput = {
+    create?: XOR<LoyaltyRewardTierCreateWithoutProgramInput, LoyaltyRewardTierUncheckedCreateWithoutProgramInput> | LoyaltyRewardTierCreateWithoutProgramInput[] | LoyaltyRewardTierUncheckedCreateWithoutProgramInput[]
+    connectOrCreate?: LoyaltyRewardTierCreateOrConnectWithoutProgramInput | LoyaltyRewardTierCreateOrConnectWithoutProgramInput[]
+    upsert?: LoyaltyRewardTierUpsertWithWhereUniqueWithoutProgramInput | LoyaltyRewardTierUpsertWithWhereUniqueWithoutProgramInput[]
+    createMany?: LoyaltyRewardTierCreateManyProgramInputEnvelope
+    set?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    disconnect?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    delete?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    connect?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    update?: LoyaltyRewardTierUpdateWithWhereUniqueWithoutProgramInput | LoyaltyRewardTierUpdateWithWhereUniqueWithoutProgramInput[]
+    updateMany?: LoyaltyRewardTierUpdateManyWithWhereWithoutProgramInput | LoyaltyRewardTierUpdateManyWithWhereWithoutProgramInput[]
+    deleteMany?: LoyaltyRewardTierScalarWhereInput | LoyaltyRewardTierScalarWhereInput[]
+  }
+
+  export type LoyaltyRewardTierUncheckedUpdateManyWithoutProgramNestedInput = {
+    create?: XOR<LoyaltyRewardTierCreateWithoutProgramInput, LoyaltyRewardTierUncheckedCreateWithoutProgramInput> | LoyaltyRewardTierCreateWithoutProgramInput[] | LoyaltyRewardTierUncheckedCreateWithoutProgramInput[]
+    connectOrCreate?: LoyaltyRewardTierCreateOrConnectWithoutProgramInput | LoyaltyRewardTierCreateOrConnectWithoutProgramInput[]
+    upsert?: LoyaltyRewardTierUpsertWithWhereUniqueWithoutProgramInput | LoyaltyRewardTierUpsertWithWhereUniqueWithoutProgramInput[]
+    createMany?: LoyaltyRewardTierCreateManyProgramInputEnvelope
+    set?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    disconnect?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    delete?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    connect?: LoyaltyRewardTierWhereUniqueInput | LoyaltyRewardTierWhereUniqueInput[]
+    update?: LoyaltyRewardTierUpdateWithWhereUniqueWithoutProgramInput | LoyaltyRewardTierUpdateWithWhereUniqueWithoutProgramInput[]
+    updateMany?: LoyaltyRewardTierUpdateManyWithWhereWithoutProgramInput | LoyaltyRewardTierUpdateManyWithWhereWithoutProgramInput[]
+    deleteMany?: LoyaltyRewardTierScalarWhereInput | LoyaltyRewardTierScalarWhereInput[]
+  }
+
+  export type LoyaltyProgramCreateNestedOneWithoutTiersInput = {
+    create?: XOR<LoyaltyProgramCreateWithoutTiersInput, LoyaltyProgramUncheckedCreateWithoutTiersInput>
+    connectOrCreate?: LoyaltyProgramCreateOrConnectWithoutTiersInput
+    connect?: LoyaltyProgramWhereUniqueInput
+  }
+
+  export type LoyaltyProgramUpdateOneRequiredWithoutTiersNestedInput = {
+    create?: XOR<LoyaltyProgramCreateWithoutTiersInput, LoyaltyProgramUncheckedCreateWithoutTiersInput>
+    connectOrCreate?: LoyaltyProgramCreateOrConnectWithoutTiersInput
+    upsert?: LoyaltyProgramUpsertWithoutTiersInput
+    connect?: LoyaltyProgramWhereUniqueInput
+    update?: XOR<XOR<LoyaltyProgramUpdateToOneWithWhereWithoutTiersInput, LoyaltyProgramUpdateWithoutTiersInput>, LoyaltyProgramUncheckedUpdateWithoutTiersInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutLoyaltyLedgerInput = {
+    create?: XOR<BusinessCreateWithoutLoyaltyLedgerInput, BusinessUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutLoyaltyLedgerInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerCreateNestedOneWithoutLoyaltyLedgerInput = {
+    create?: XOR<CustomerCreateWithoutLoyaltyLedgerInput, CustomerUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutLoyaltyLedgerInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type OrderCreateNestedOneWithoutLoyaltyLedgerInput = {
+    create?: XOR<OrderCreateWithoutLoyaltyLedgerInput, OrderUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: OrderCreateOrConnectWithoutLoyaltyLedgerInput
+    connect?: OrderWhereUniqueInput
+  }
+
+  export type DiscountCodeCreateNestedOneWithoutLoyaltyLedgerInput = {
+    create?: XOR<DiscountCodeCreateWithoutLoyaltyLedgerInput, DiscountCodeUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: DiscountCodeCreateOrConnectWithoutLoyaltyLedgerInput
+    connect?: DiscountCodeWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutLoyaltyLedgerNestedInput = {
+    create?: XOR<BusinessCreateWithoutLoyaltyLedgerInput, BusinessUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutLoyaltyLedgerInput
+    upsert?: BusinessUpsertWithoutLoyaltyLedgerInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutLoyaltyLedgerInput, BusinessUpdateWithoutLoyaltyLedgerInput>, BusinessUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
+  export type CustomerUpdateOneRequiredWithoutLoyaltyLedgerNestedInput = {
+    create?: XOR<CustomerCreateWithoutLoyaltyLedgerInput, CustomerUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutLoyaltyLedgerInput
+    upsert?: CustomerUpsertWithoutLoyaltyLedgerInput
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutLoyaltyLedgerInput, CustomerUpdateWithoutLoyaltyLedgerInput>, CustomerUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
+  export type OrderUpdateOneWithoutLoyaltyLedgerNestedInput = {
+    create?: XOR<OrderCreateWithoutLoyaltyLedgerInput, OrderUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: OrderCreateOrConnectWithoutLoyaltyLedgerInput
+    upsert?: OrderUpsertWithoutLoyaltyLedgerInput
+    disconnect?: OrderWhereInput | boolean
+    delete?: OrderWhereInput | boolean
+    connect?: OrderWhereUniqueInput
+    update?: XOR<XOR<OrderUpdateToOneWithWhereWithoutLoyaltyLedgerInput, OrderUpdateWithoutLoyaltyLedgerInput>, OrderUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
+  export type DiscountCodeUpdateOneWithoutLoyaltyLedgerNestedInput = {
+    create?: XOR<DiscountCodeCreateWithoutLoyaltyLedgerInput, DiscountCodeUncheckedCreateWithoutLoyaltyLedgerInput>
+    connectOrCreate?: DiscountCodeCreateOrConnectWithoutLoyaltyLedgerInput
+    upsert?: DiscountCodeUpsertWithoutLoyaltyLedgerInput
+    disconnect?: DiscountCodeWhereInput | boolean
+    delete?: DiscountCodeWhereInput | boolean
+    connect?: DiscountCodeWhereUniqueInput
+    update?: XOR<XOR<DiscountCodeUpdateToOneWithWhereWithoutLoyaltyLedgerInput, DiscountCodeUpdateWithoutLoyaltyLedgerInput>, DiscountCodeUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -90310,6 +96138,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -90320,6 +96152,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutUserInput = {
@@ -90334,6 +96167,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -90344,6 +96181,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutUserInput = {
@@ -90597,6 +96435,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    loyaltyPoints?: IntFilter<"Customer"> | number
+    loyaltyJoinedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    birthMonth?: IntNullableFilter<"Customer"> | number | null
+    birthDay?: IntNullableFilter<"Customer"> | number | null
     deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     notes?: StringNullableFilter<"Customer"> | string | null
@@ -90774,6 +96616,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -90831,6 +96679,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -90859,6 +96709,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -90916,6 +96772,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -91009,6 +96867,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -91066,6 +96930,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -91094,6 +96960,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -91151,6 +97023,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -91573,6 +97447,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutBusinessInput = {
@@ -91613,6 +97488,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutBusinessInput = {
@@ -91637,6 +97513,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -91647,6 +97527,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBusinessInput = {
@@ -91661,6 +97542,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -91671,6 +97556,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBusinessInput = {
@@ -91798,6 +97684,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -91806,6 +97693,7 @@ export namespace Prisma {
     minPurchase?: number | null
     maxDiscount?: number | null
     orders?: OrderCreateNestedManyWithoutDiscountCodeInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedOneWithoutDiscountCodeInput
   }
 
   export type DiscountCodeUncheckedCreateWithoutBusinessInput = {
@@ -91816,6 +97704,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -91824,6 +97713,7 @@ export namespace Prisma {
     minPurchase?: number | null
     maxDiscount?: number | null
     orders?: OrderUncheckedCreateNestedManyWithoutDiscountCodeInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedOneWithoutDiscountCodeInput
   }
 
   export type DiscountCodeCreateOrConnectWithoutBusinessInput = {
@@ -92875,6 +98765,87 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type LoyaltyProgramCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    earnOnOrders?: boolean
+    pointsPerDollar?: number
+    signupEnabled?: boolean
+    signupBonus?: number
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: number
+    birthdayEnabled?: boolean
+    birthdayBonus?: number
+    socialEnabled?: boolean
+    socialFollowBonus?: number
+    rewardCodeExpiryDays?: number
+    tiers?: LoyaltyRewardTierCreateNestedManyWithoutProgramInput
+  }
+
+  export type LoyaltyProgramUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    earnOnOrders?: boolean
+    pointsPerDollar?: number
+    signupEnabled?: boolean
+    signupBonus?: number
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: number
+    birthdayEnabled?: boolean
+    birthdayBonus?: number
+    socialEnabled?: boolean
+    socialFollowBonus?: number
+    rewardCodeExpiryDays?: number
+    tiers?: LoyaltyRewardTierUncheckedCreateNestedManyWithoutProgramInput
+  }
+
+  export type LoyaltyProgramCreateOrConnectWithoutBusinessInput = {
+    where: LoyaltyProgramWhereUniqueInput
+    create: XOR<LoyaltyProgramCreateWithoutBusinessInput, LoyaltyProgramUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type LoyaltyLedgerCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    actorUserId?: string | null
+    customer: CustomerCreateNestedOneWithoutLoyaltyLedgerInput
+    order?: OrderCreateNestedOneWithoutLoyaltyLedgerInput
+    discountCode?: DiscountCodeCreateNestedOneWithoutLoyaltyLedgerInput
+  }
+
+  export type LoyaltyLedgerUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    orderId?: string | null
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
+  export type LoyaltyLedgerCreateOrConnectWithoutBusinessInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    create: XOR<LoyaltyLedgerCreateWithoutBusinessInput, LoyaltyLedgerUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type LoyaltyLedgerCreateManyBusinessInputEnvelope = {
+    data: LoyaltyLedgerCreateManyBusinessInput | LoyaltyLedgerCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -93221,6 +99192,7 @@ export namespace Prisma {
     type?: StringFilter<"DiscountCode"> | string
     value?: IntFilter<"DiscountCode"> | number
     active?: BoolFilter<"DiscountCode"> | boolean
+    source?: StringFilter<"DiscountCode"> | string
     usageLimit?: IntNullableFilter<"DiscountCode"> | number | null
     usageCount?: IntFilter<"DiscountCode"> | number
     perCustomerLimit?: IntNullableFilter<"DiscountCode"> | number | null
@@ -94057,6 +100029,88 @@ export namespace Prisma {
     message?: StringNullableFilter<"Donation"> | string | null
   }
 
+  export type LoyaltyProgramUpsertWithoutBusinessInput = {
+    update: XOR<LoyaltyProgramUpdateWithoutBusinessInput, LoyaltyProgramUncheckedUpdateWithoutBusinessInput>
+    create: XOR<LoyaltyProgramCreateWithoutBusinessInput, LoyaltyProgramUncheckedCreateWithoutBusinessInput>
+    where?: LoyaltyProgramWhereInput
+  }
+
+  export type LoyaltyProgramUpdateToOneWithWhereWithoutBusinessInput = {
+    where?: LoyaltyProgramWhereInput
+    data: XOR<LoyaltyProgramUpdateWithoutBusinessInput, LoyaltyProgramUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type LoyaltyProgramUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+    tiers?: LoyaltyRewardTierUpdateManyWithoutProgramNestedInput
+  }
+
+  export type LoyaltyProgramUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+    tiers?: LoyaltyRewardTierUncheckedUpdateManyWithoutProgramNestedInput
+  }
+
+  export type LoyaltyLedgerUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    update: XOR<LoyaltyLedgerUpdateWithoutBusinessInput, LoyaltyLedgerUncheckedUpdateWithoutBusinessInput>
+    create: XOR<LoyaltyLedgerCreateWithoutBusinessInput, LoyaltyLedgerUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type LoyaltyLedgerUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    data: XOR<LoyaltyLedgerUpdateWithoutBusinessInput, LoyaltyLedgerUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type LoyaltyLedgerUpdateManyWithWhereWithoutBusinessInput = {
+    where: LoyaltyLedgerScalarWhereInput
+    data: XOR<LoyaltyLedgerUpdateManyMutationInput, LoyaltyLedgerUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type LoyaltyLedgerScalarWhereInput = {
+    AND?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
+    OR?: LoyaltyLedgerScalarWhereInput[]
+    NOT?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
+    id?: StringFilter<"LoyaltyLedger"> | string
+    createdAt?: DateTimeFilter<"LoyaltyLedger"> | Date | string
+    businessId?: StringFilter<"LoyaltyLedger"> | string
+    customerId?: StringFilter<"LoyaltyLedger"> | string
+    type?: StringFilter<"LoyaltyLedger"> | string
+    points?: IntFilter<"LoyaltyLedger"> | number
+    balanceAfter?: IntFilter<"LoyaltyLedger"> | number
+    reason?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    metadata?: JsonNullableFilter<"LoyaltyLedger">
+    sourceKey?: StringFilter<"LoyaltyLedger"> | string
+    orderId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    discountCodeId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+    actorUserId?: StringNullableFilter<"LoyaltyLedger"> | string | null
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -94083,6 +100137,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94140,6 +100200,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -94168,6 +100230,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94225,6 +100293,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -94269,6 +100339,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94326,6 +100402,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -94354,6 +100432,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94411,6 +100495,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -94439,6 +100525,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94496,6 +100588,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -94524,6 +100618,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94581,6 +100681,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -94625,6 +100727,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94682,6 +100790,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -94710,6 +100820,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -94767,6 +100883,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -94832,6 +100950,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94889,6 +101013,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -94917,6 +101043,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -94974,6 +101106,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -95433,6 +101567,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -95490,6 +101630,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -95518,6 +101660,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -95575,6 +101723,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -96246,6 +102396,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -96303,6 +102459,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -96331,6 +102489,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -96388,6 +102552,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -96454,6 +102620,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -96511,6 +102683,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -96539,6 +102713,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -96596,6 +102776,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -96932,6 +103114,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -96989,6 +103177,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -97017,6 +103207,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97074,6 +103270,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -97170,6 +103368,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97227,6 +103431,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -97255,6 +103461,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97312,6 +103524,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -97473,6 +103687,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97530,6 +103750,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEventsInput = {
@@ -97558,6 +103780,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97615,6 +103843,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEventsInput = {
@@ -97659,6 +103889,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97716,6 +103952,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEventsInput = {
@@ -97744,6 +103982,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -97801,6 +104045,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutVideoSourcesInput = {
@@ -97829,6 +104075,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97886,6 +104138,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
@@ -97914,6 +104168,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -97971,6 +104231,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
@@ -98061,6 +104323,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98118,6 +104386,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
@@ -98146,6 +104416,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98203,6 +104479,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
@@ -98280,6 +104558,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98337,6 +104621,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideosInput = {
@@ -98365,6 +104651,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98422,6 +104714,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideosInput = {
@@ -98505,6 +104799,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98562,6 +104862,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideosInput = {
@@ -98590,6 +104892,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -98647,6 +104955,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductCreateWithoutImagesInput = {
@@ -98776,6 +105086,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98833,6 +105149,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -98861,6 +105179,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -98918,6 +105242,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -99069,6 +105395,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -99126,6 +105458,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -99154,6 +105488,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -99211,6 +105551,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -99282,6 +105624,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -99339,6 +105687,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -99367,6 +105717,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -99424,6 +105780,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -99469,6 +105827,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutCustomerInput = {
@@ -99509,6 +105868,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutCustomerInput = {
@@ -99817,6 +106177,46 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type LoyaltyLedgerCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    actorUserId?: string | null
+    business: BusinessCreateNestedOneWithoutLoyaltyLedgerInput
+    order?: OrderCreateNestedOneWithoutLoyaltyLedgerInput
+    discountCode?: DiscountCodeCreateNestedOneWithoutLoyaltyLedgerInput
+  }
+
+  export type LoyaltyLedgerUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    orderId?: string | null
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
+  export type LoyaltyLedgerCreateOrConnectWithoutCustomerInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    create: XOR<LoyaltyLedgerCreateWithoutCustomerInput, LoyaltyLedgerUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type LoyaltyLedgerCreateManyCustomerInputEnvelope = {
+    data: LoyaltyLedgerCreateManyCustomerInput | LoyaltyLedgerCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutCustomersInput = {
     update: XOR<UserUpdateWithoutCustomersInput, UserUncheckedUpdateWithoutCustomersInput>
     create: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
@@ -99903,6 +106303,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -99960,6 +106366,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -99988,6 +106396,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -100045,6 +106459,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -100164,6 +106580,22 @@ export namespace Prisma {
     data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutCustomerInput>
   }
 
+  export type LoyaltyLedgerUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    update: XOR<LoyaltyLedgerUpdateWithoutCustomerInput, LoyaltyLedgerUncheckedUpdateWithoutCustomerInput>
+    create: XOR<LoyaltyLedgerCreateWithoutCustomerInput, LoyaltyLedgerUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type LoyaltyLedgerUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    data: XOR<LoyaltyLedgerUpdateWithoutCustomerInput, LoyaltyLedgerUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type LoyaltyLedgerUpdateManyWithWhereWithoutCustomerInput = {
+    where: LoyaltyLedgerScalarWhereInput
+    data: XOR<LoyaltyLedgerUpdateManyMutationInput, LoyaltyLedgerUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type CustomerCreateWithoutShippingAddressesInput = {
     id?: string
     createdAt?: Date | string
@@ -100176,6 +106608,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -100186,6 +106622,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutShippingAddressesInput = {
@@ -100200,6 +106637,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -100210,6 +106651,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutShippingAddressesInput = {
@@ -100255,6 +106697,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutShippingAddressInput = {
@@ -100295,6 +106738,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutShippingAddressInput = {
@@ -100440,6 +106884,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -100450,6 +106898,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutShippingAddressesInput = {
@@ -100464,6 +106913,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -100474,6 +106927,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutShippingAddressInput = {
@@ -100639,6 +107093,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -100696,6 +107156,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -100724,6 +107186,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -100781,6 +107249,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -100800,6 +107270,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -100810,6 +107284,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutOrdersInput = {
@@ -100824,6 +107299,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -100834,6 +107313,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutOrdersInput = {
@@ -100892,6 +107372,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -100900,6 +107381,7 @@ export namespace Prisma {
     minPurchase?: number | null
     maxDiscount?: number | null
     business: BusinessCreateNestedOneWithoutDiscountCodesInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedOneWithoutDiscountCodeInput
   }
 
   export type DiscountCodeUncheckedCreateWithoutOrdersInput = {
@@ -100911,6 +107393,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -100918,6 +107401,7 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedOneWithoutDiscountCodeInput
   }
 
   export type DiscountCodeCreateOrConnectWithoutOrdersInput = {
@@ -101089,6 +107573,46 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type LoyaltyLedgerCreateWithoutOrderInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    actorUserId?: string | null
+    business: BusinessCreateNestedOneWithoutLoyaltyLedgerInput
+    customer: CustomerCreateNestedOneWithoutLoyaltyLedgerInput
+    discountCode?: DiscountCodeCreateNestedOneWithoutLoyaltyLedgerInput
+  }
+
+  export type LoyaltyLedgerUncheckedCreateWithoutOrderInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
+  export type LoyaltyLedgerCreateOrConnectWithoutOrderInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    create: XOR<LoyaltyLedgerCreateWithoutOrderInput, LoyaltyLedgerUncheckedCreateWithoutOrderInput>
+  }
+
+  export type LoyaltyLedgerCreateManyOrderInputEnvelope = {
+    data: LoyaltyLedgerCreateManyOrderInput | LoyaltyLedgerCreateManyOrderInput[]
+    skipDuplicates?: boolean
+  }
+
   export type SubscriptionUpsertWithoutOrdersInput = {
     update: XOR<SubscriptionUpdateWithoutOrdersInput, SubscriptionUncheckedUpdateWithoutOrdersInput>
     create: XOR<SubscriptionCreateWithoutOrdersInput, SubscriptionUncheckedCreateWithoutOrdersInput>
@@ -101237,6 +107761,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -101294,6 +107824,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -101322,6 +107854,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -101379,6 +107917,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -101404,6 +107944,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -101414,6 +107958,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutOrdersInput = {
@@ -101428,6 +107973,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -101438,6 +107987,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ShippingAddressUpsertWithoutOrdersInput = {
@@ -101508,6 +108058,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -101516,6 +108067,7 @@ export namespace Prisma {
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
     business?: BusinessUpdateOneRequiredWithoutDiscountCodesNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateOneWithoutDiscountCodeNestedInput
   }
 
   export type DiscountCodeUncheckedUpdateWithoutOrdersInput = {
@@ -101527,6 +108079,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -101534,6 +108087,7 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateOneWithoutDiscountCodeNestedInput
   }
 
   export type OrderItemUpsertWithWhereUniqueWithoutOrderInput = {
@@ -101614,6 +108168,22 @@ export namespace Prisma {
     orderId?: StringFilter<"OrderShipment"> | string
   }
 
+  export type LoyaltyLedgerUpsertWithWhereUniqueWithoutOrderInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    update: XOR<LoyaltyLedgerUpdateWithoutOrderInput, LoyaltyLedgerUncheckedUpdateWithoutOrderInput>
+    create: XOR<LoyaltyLedgerCreateWithoutOrderInput, LoyaltyLedgerUncheckedCreateWithoutOrderInput>
+  }
+
+  export type LoyaltyLedgerUpdateWithWhereUniqueWithoutOrderInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    data: XOR<LoyaltyLedgerUpdateWithoutOrderInput, LoyaltyLedgerUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type LoyaltyLedgerUpdateManyWithWhereWithoutOrderInput = {
+    where: LoyaltyLedgerScalarWhereInput
+    data: XOR<LoyaltyLedgerUpdateManyMutationInput, LoyaltyLedgerUncheckedUpdateManyWithoutOrderInput>
+  }
+
   export type OrderCreateWithoutShipmentsInput = {
     id?: string
     createdAt?: Date | string
@@ -101652,6 +108222,7 @@ export namespace Prisma {
     items?: OrderItemCreateNestedManyWithoutOrderInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutShipmentsInput = {
@@ -101692,6 +108263,7 @@ export namespace Prisma {
     items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutShipmentsInput = {
@@ -101748,6 +108320,7 @@ export namespace Prisma {
     items?: OrderItemUpdateManyWithoutOrderNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutShipmentsInput = {
@@ -101788,6 +108361,7 @@ export namespace Prisma {
     items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type ProductCreateWithoutOrderItemsInput = {
@@ -101970,6 +108544,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutItemsInput = {
@@ -102010,6 +108585,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutItemsInput = {
@@ -102220,6 +108796,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutItemsInput = {
@@ -102260,6 +108837,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type BusinessCreateWithoutDiscountCodesInput = {
@@ -102288,6 +108866,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -102345,6 +108929,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -102373,6 +108959,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -102430,6 +109022,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -102475,6 +109069,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutDiscountCodeInput = {
@@ -102515,6 +109110,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutDiscountCodeInput = {
@@ -102525,6 +109121,41 @@ export namespace Prisma {
   export type OrderCreateManyDiscountCodeInputEnvelope = {
     data: OrderCreateManyDiscountCodeInput | OrderCreateManyDiscountCodeInput[]
     skipDuplicates?: boolean
+  }
+
+  export type LoyaltyLedgerCreateWithoutDiscountCodeInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    actorUserId?: string | null
+    business: BusinessCreateNestedOneWithoutLoyaltyLedgerInput
+    customer: CustomerCreateNestedOneWithoutLoyaltyLedgerInput
+    order?: OrderCreateNestedOneWithoutLoyaltyLedgerInput
+  }
+
+  export type LoyaltyLedgerUncheckedCreateWithoutDiscountCodeInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    orderId?: string | null
+    actorUserId?: string | null
+  }
+
+  export type LoyaltyLedgerCreateOrConnectWithoutDiscountCodeInput = {
+    where: LoyaltyLedgerWhereUniqueInput
+    create: XOR<LoyaltyLedgerCreateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedCreateWithoutDiscountCodeInput>
   }
 
   export type BusinessUpsertWithoutDiscountCodesInput = {
@@ -102564,6 +109195,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -102621,6 +109258,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -102649,6 +109288,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -102706,6 +109351,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -102722,6 +109369,47 @@ export namespace Prisma {
   export type OrderUpdateManyWithWhereWithoutDiscountCodeInput = {
     where: OrderScalarWhereInput
     data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutDiscountCodeInput>
+  }
+
+  export type LoyaltyLedgerUpsertWithoutDiscountCodeInput = {
+    update: XOR<LoyaltyLedgerUpdateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedUpdateWithoutDiscountCodeInput>
+    create: XOR<LoyaltyLedgerCreateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedCreateWithoutDiscountCodeInput>
+    where?: LoyaltyLedgerWhereInput
+  }
+
+  export type LoyaltyLedgerUpdateToOneWithWhereWithoutDiscountCodeInput = {
+    where?: LoyaltyLedgerWhereInput
+    data: XOR<LoyaltyLedgerUpdateWithoutDiscountCodeInput, LoyaltyLedgerUncheckedUpdateWithoutDiscountCodeInput>
+  }
+
+  export type LoyaltyLedgerUpdateWithoutDiscountCodeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    order?: OrderUpdateOneWithoutLoyaltyLedgerNestedInput
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateWithoutDiscountCodeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProductVariantCreateWithoutInventoryHistoryInput = {
@@ -102929,6 +109617,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -102986,6 +109680,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -103014,6 +109710,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -103071,6 +109773,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -103116,6 +109820,7 @@ export namespace Prisma {
     items?: OrderItemCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutInventoryHistoryInput = {
@@ -103156,6 +109861,7 @@ export namespace Prisma {
     items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutInventoryHistoryInput = {
@@ -103440,6 +110146,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -103497,6 +110209,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -103525,6 +110239,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -103582,6 +110302,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -103633,6 +110355,7 @@ export namespace Prisma {
     items?: OrderItemUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -103673,6 +110396,7 @@ export namespace Prisma {
     items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type UserUpsertWithoutInventoryHistoryInput = {
@@ -103750,6 +110474,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -103807,6 +110537,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -103835,6 +110567,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -103892,6 +110630,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -104082,6 +110822,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104139,6 +110885,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -104167,6 +110915,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104224,6 +110978,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -104284,6 +111040,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104341,6 +111103,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -104369,6 +111133,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104426,6 +111196,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -104470,6 +111242,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104527,6 +111305,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -104555,6 +111335,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104612,6 +111398,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -104640,6 +111428,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104697,6 +111491,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -104725,6 +111521,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -104782,6 +111584,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -104826,6 +111630,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104883,6 +111693,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -104911,6 +111723,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -104968,6 +111786,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutEditorNotesInput = {
@@ -104996,6 +111816,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105053,6 +111879,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEditorNotesInput = {
@@ -105081,6 +111909,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105138,6 +111972,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEditorNotesInput = {
@@ -105225,6 +112061,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105282,6 +112124,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
@@ -105310,6 +112154,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105367,6 +112217,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutEditorNotesInput = {
@@ -105444,6 +112296,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105501,6 +112359,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -105529,6 +112389,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105586,6 +112452,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -105630,6 +112498,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105687,6 +112561,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -105715,6 +112591,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -105772,6 +112654,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -105800,6 +112684,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105857,6 +112747,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -105885,6 +112777,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -105942,6 +112840,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -106018,6 +112918,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106075,6 +112981,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -106103,6 +113011,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106160,6 +113074,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -106303,6 +113219,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106360,6 +113282,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -106388,6 +113312,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106445,6 +113375,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -106464,6 +113396,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -106474,6 +113410,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutTestimonialsInput = {
@@ -106488,6 +113425,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -106498,6 +113439,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutTestimonialsInput = {
@@ -106542,6 +113484,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106599,6 +113547,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -106627,6 +113577,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -106684,6 +113640,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -106709,6 +113667,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106719,6 +113681,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutTestimonialsInput = {
@@ -106733,6 +113696,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106743,6 +113710,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type BusinessCreateWithoutTestimonialInvitesInput = {
@@ -106771,6 +113739,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106828,6 +113802,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -106856,6 +113832,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -106913,6 +113895,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -106932,6 +113916,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -106942,6 +113930,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -106956,6 +113945,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -106966,6 +113959,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -107010,6 +114004,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -107067,6 +114067,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -107095,6 +114097,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -107152,6 +114160,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -107177,6 +114187,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107187,6 +114201,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -107201,6 +114216,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107211,6 +114230,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ProductCreateWithoutReviewsInput = {
@@ -107326,6 +114346,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -107336,6 +114360,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutReviewsInput = {
@@ -107350,6 +114375,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -107360,6 +114389,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutReviewsInput = {
@@ -107405,6 +114435,7 @@ export namespace Prisma {
     items?: OrderItemCreateNestedManyWithoutOrderInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutReviewsInput = {
@@ -107445,6 +114476,7 @@ export namespace Prisma {
     items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutReviewsInput = {
@@ -107608,6 +114640,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107618,6 +114654,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutReviewsInput = {
@@ -107632,6 +114669,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107642,6 +114683,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithoutReviewsInput = {
@@ -107693,6 +114735,7 @@ export namespace Prisma {
     items?: OrderItemUpdateManyWithoutOrderNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutReviewsInput = {
@@ -107733,6 +114776,7 @@ export namespace Prisma {
     items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type ReviewVoteUpsertWithWhereUniqueWithoutReviewInput = {
@@ -107901,6 +114945,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -107958,6 +115008,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -107986,6 +115038,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108043,6 +115101,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -108130,6 +115190,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108187,6 +115253,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -108215,6 +115283,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108272,6 +115346,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -108349,6 +115425,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108406,6 +115488,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -108434,6 +115518,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108491,6 +115581,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -108535,6 +115627,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108592,6 +115690,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -108620,6 +115720,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108677,6 +115783,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutZonesInput = {
@@ -108705,6 +115813,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108762,6 +115876,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -108790,6 +115906,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -108847,6 +115969,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -108913,6 +116037,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -108970,6 +116100,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -108998,6 +116130,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -109055,6 +116193,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -109258,6 +116398,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109315,6 +116461,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -109343,6 +116491,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109400,6 +116554,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -109551,6 +116707,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -109608,6 +116770,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -109636,6 +116800,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -109693,6 +116863,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuoteCalculatorsInput = {
@@ -109721,6 +116893,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109778,6 +116956,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteCalculatorsInput = {
@@ -109806,6 +116986,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -109863,6 +117049,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteCalculatorsInput = {
@@ -109959,6 +117147,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110016,6 +117210,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteCalculatorsInput = {
@@ -110044,6 +117240,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110101,6 +117303,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput = {
@@ -110234,6 +117438,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110291,6 +117501,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteSubmissionsInput = {
@@ -110319,6 +117531,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110376,6 +117594,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteSubmissionsInput = {
@@ -110467,6 +117687,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110524,6 +117750,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteSubmissionsInput = {
@@ -110552,6 +117780,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110609,6 +117843,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksConnectionInput = {
@@ -110637,6 +117873,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110694,6 +117936,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksConnectionInput = {
@@ -110722,6 +117966,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -110779,6 +118029,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksConnectionInput = {
@@ -110823,6 +118075,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110880,6 +118138,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksConnectionInput = {
@@ -110908,6 +118168,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -110965,6 +118231,8 @@ export namespace Prisma {
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksInvoicesInput = {
@@ -110993,6 +118261,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -111050,6 +118324,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksInvoicesInput = {
@@ -111078,6 +118354,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -111135,6 +118417,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksInvoicesInput = {
@@ -111226,6 +118510,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -111283,6 +118573,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput = {
@@ -111311,6 +118603,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -111368,6 +118666,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithoutQuickBooksInvoicesInput = {
@@ -111449,6 +118749,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -111506,6 +118812,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSubscriptionsInput = {
@@ -111534,6 +118842,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -111591,6 +118905,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSubscriptionsInput = {
@@ -111610,6 +118926,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -111620,6 +118940,7 @@ export namespace Prisma {
     testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutSubscriptionsInput = {
@@ -111634,6 +118955,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -111644,6 +118969,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutSubscriptionsInput = {
@@ -111874,6 +119200,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutSubscriptionInput = {
@@ -111914,6 +119241,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
     shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutSubscriptionInput = {
@@ -111963,6 +119291,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -112020,6 +119354,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSubscriptionsInput = {
@@ -112048,6 +119384,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -112105,6 +119447,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutSubscriptionsInput = {
@@ -112130,6 +119474,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112140,6 +119488,7 @@ export namespace Prisma {
     testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutSubscriptionsInput = {
@@ -112154,6 +119503,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112164,6 +119517,7 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ProductUpsertWithoutSubscriptionsInput = {
@@ -112411,6 +119765,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -112468,6 +119828,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDonationsInput = {
@@ -112496,6 +119858,12 @@ export namespace Prisma {
     maintenanceVariant?: string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -112553,6 +119921,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDonationsInput = {
@@ -112597,6 +119967,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -112654,6 +120030,8 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDonationsInput = {
@@ -112682,6 +120060,12 @@ export namespace Prisma {
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
     maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
     maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -112739,6 +120123,1352 @@ export namespace Prisma {
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutLoyaltyProgramInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutLoyaltyProgramInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutLoyaltyProgramInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutLoyaltyProgramInput, BusinessUncheckedCreateWithoutLoyaltyProgramInput>
+  }
+
+  export type LoyaltyRewardTierCreateWithoutProgramInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    pointsCost: number
+    type: string
+    value: number
+    minPurchase?: number | null
+    sortOrder?: number
+    active?: boolean
+  }
+
+  export type LoyaltyRewardTierUncheckedCreateWithoutProgramInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    pointsCost: number
+    type: string
+    value: number
+    minPurchase?: number | null
+    sortOrder?: number
+    active?: boolean
+  }
+
+  export type LoyaltyRewardTierCreateOrConnectWithoutProgramInput = {
+    where: LoyaltyRewardTierWhereUniqueInput
+    create: XOR<LoyaltyRewardTierCreateWithoutProgramInput, LoyaltyRewardTierUncheckedCreateWithoutProgramInput>
+  }
+
+  export type LoyaltyRewardTierCreateManyProgramInputEnvelope = {
+    data: LoyaltyRewardTierCreateManyProgramInput | LoyaltyRewardTierCreateManyProgramInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutLoyaltyProgramInput = {
+    update: XOR<BusinessUpdateWithoutLoyaltyProgramInput, BusinessUncheckedUpdateWithoutLoyaltyProgramInput>
+    create: XOR<BusinessCreateWithoutLoyaltyProgramInput, BusinessUncheckedCreateWithoutLoyaltyProgramInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutLoyaltyProgramInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutLoyaltyProgramInput, BusinessUncheckedUpdateWithoutLoyaltyProgramInput>
+  }
+
+  export type BusinessUpdateWithoutLoyaltyProgramInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutLoyaltyProgramInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type LoyaltyRewardTierUpsertWithWhereUniqueWithoutProgramInput = {
+    where: LoyaltyRewardTierWhereUniqueInput
+    update: XOR<LoyaltyRewardTierUpdateWithoutProgramInput, LoyaltyRewardTierUncheckedUpdateWithoutProgramInput>
+    create: XOR<LoyaltyRewardTierCreateWithoutProgramInput, LoyaltyRewardTierUncheckedCreateWithoutProgramInput>
+  }
+
+  export type LoyaltyRewardTierUpdateWithWhereUniqueWithoutProgramInput = {
+    where: LoyaltyRewardTierWhereUniqueInput
+    data: XOR<LoyaltyRewardTierUpdateWithoutProgramInput, LoyaltyRewardTierUncheckedUpdateWithoutProgramInput>
+  }
+
+  export type LoyaltyRewardTierUpdateManyWithWhereWithoutProgramInput = {
+    where: LoyaltyRewardTierScalarWhereInput
+    data: XOR<LoyaltyRewardTierUpdateManyMutationInput, LoyaltyRewardTierUncheckedUpdateManyWithoutProgramInput>
+  }
+
+  export type LoyaltyRewardTierScalarWhereInput = {
+    AND?: LoyaltyRewardTierScalarWhereInput | LoyaltyRewardTierScalarWhereInput[]
+    OR?: LoyaltyRewardTierScalarWhereInput[]
+    NOT?: LoyaltyRewardTierScalarWhereInput | LoyaltyRewardTierScalarWhereInput[]
+    id?: StringFilter<"LoyaltyRewardTier"> | string
+    createdAt?: DateTimeFilter<"LoyaltyRewardTier"> | Date | string
+    updatedAt?: DateTimeFilter<"LoyaltyRewardTier"> | Date | string
+    programId?: StringFilter<"LoyaltyRewardTier"> | string
+    businessId?: StringFilter<"LoyaltyRewardTier"> | string
+    label?: StringFilter<"LoyaltyRewardTier"> | string
+    pointsCost?: IntFilter<"LoyaltyRewardTier"> | number
+    type?: StringFilter<"LoyaltyRewardTier"> | string
+    value?: IntFilter<"LoyaltyRewardTier"> | number
+    minPurchase?: IntNullableFilter<"LoyaltyRewardTier"> | number | null
+    sortOrder?: IntFilter<"LoyaltyRewardTier"> | number
+    active?: BoolFilter<"LoyaltyRewardTier"> | boolean
+  }
+
+  export type LoyaltyProgramCreateWithoutTiersInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    earnOnOrders?: boolean
+    pointsPerDollar?: number
+    signupEnabled?: boolean
+    signupBonus?: number
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: number
+    birthdayEnabled?: boolean
+    birthdayBonus?: number
+    socialEnabled?: boolean
+    socialFollowBonus?: number
+    rewardCodeExpiryDays?: number
+    business: BusinessCreateNestedOneWithoutLoyaltyProgramInput
+  }
+
+  export type LoyaltyProgramUncheckedCreateWithoutTiersInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    earnOnOrders?: boolean
+    pointsPerDollar?: number
+    signupEnabled?: boolean
+    signupBonus?: number
+    firstOrderEnabled?: boolean
+    firstOrderBonus?: number
+    birthdayEnabled?: boolean
+    birthdayBonus?: number
+    socialEnabled?: boolean
+    socialFollowBonus?: number
+    rewardCodeExpiryDays?: number
+  }
+
+  export type LoyaltyProgramCreateOrConnectWithoutTiersInput = {
+    where: LoyaltyProgramWhereUniqueInput
+    create: XOR<LoyaltyProgramCreateWithoutTiersInput, LoyaltyProgramUncheckedCreateWithoutTiersInput>
+  }
+
+  export type LoyaltyProgramUpsertWithoutTiersInput = {
+    update: XOR<LoyaltyProgramUpdateWithoutTiersInput, LoyaltyProgramUncheckedUpdateWithoutTiersInput>
+    create: XOR<LoyaltyProgramCreateWithoutTiersInput, LoyaltyProgramUncheckedCreateWithoutTiersInput>
+    where?: LoyaltyProgramWhereInput
+  }
+
+  export type LoyaltyProgramUpdateToOneWithWhereWithoutTiersInput = {
+    where?: LoyaltyProgramWhereInput
+    data: XOR<LoyaltyProgramUpdateWithoutTiersInput, LoyaltyProgramUncheckedUpdateWithoutTiersInput>
+  }
+
+  export type LoyaltyProgramUpdateWithoutTiersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutLoyaltyProgramNestedInput
+  }
+
+  export type LoyaltyProgramUncheckedUpdateWithoutTiersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    earnOnOrders?: BoolFieldUpdateOperationsInput | boolean
+    pointsPerDollar?: IntFieldUpdateOperationsInput | number
+    signupEnabled?: BoolFieldUpdateOperationsInput | boolean
+    signupBonus?: IntFieldUpdateOperationsInput | number
+    firstOrderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    firstOrderBonus?: IntFieldUpdateOperationsInput | number
+    birthdayEnabled?: BoolFieldUpdateOperationsInput | boolean
+    birthdayBonus?: IntFieldUpdateOperationsInput | number
+    socialEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialFollowBonus?: IntFieldUpdateOperationsInput | number
+    rewardCodeExpiryDays?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type BusinessCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutLoyaltyLedgerInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutLoyaltyLedgerInput, BusinessUncheckedCreateWithoutLoyaltyLedgerInput>
+  }
+
+  export type CustomerCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    user?: UserCreateNestedOneWithoutCustomersInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    orders?: OrderCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    userId?: string | null
+    businessId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutLoyaltyLedgerInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutLoyaltyLedgerInput, CustomerUncheckedCreateWithoutLoyaltyLedgerInput>
+  }
+
+  export type OrderCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orderNumber: number
+    status?: string
+    paymentStatus?: string
+    fulfillmentStatus?: string
+    stripeSessionId?: string | null
+    stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subtotal: number
+    tax?: number
+    shipping?: number
+    discount?: number
+    total: number
+    customerEmail: string
+    customerName?: string | null
+    customerFirstName?: string | null
+    customerLastName?: string | null
+    customerPhone?: string | null
+    paymentMethod?: string
+    deliveryMethod?: string
+    refundReason?: string | null
+    refundAmountCents?: number | null
+    customerNote?: string | null
+    internalNote?: string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrdersInput
+    business: BusinessCreateNestedOneWithoutOrdersInput
+    customer?: CustomerCreateNestedOneWithoutOrdersInput
+    shippingAddress?: ShippingAddressCreateNestedOneWithoutOrdersInput
+    discountCode?: DiscountCodeCreateNestedOneWithoutOrdersInput
+    items?: OrderItemCreateNestedManyWithoutOrderInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutOrderInput
+    reviews?: ProductReviewCreateNestedManyWithoutOrderInput
+    shipments?: OrderShipmentCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderUncheckedCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
+    orderNumber: number
+    status?: string
+    paymentStatus?: string
+    fulfillmentStatus?: string
+    stripeSessionId?: string | null
+    stripePaymentIntentId?: string | null
+    stripeInvoiceId?: string | null
+    subscriptionId?: string | null
+    subtotal: number
+    tax?: number
+    shipping?: number
+    discount?: number
+    total: number
+    customerEmail: string
+    customerName?: string | null
+    customerFirstName?: string | null
+    customerLastName?: string | null
+    customerPhone?: string | null
+    paymentMethod?: string
+    deliveryMethod?: string
+    refundReason?: string | null
+    refundAmountCents?: number | null
+    customerNote?: string | null
+    internalNote?: string | null
+    businessId: string
+    customerId?: string | null
+    shippingAddressId?: string | null
+    discountCodeId?: string | null
+    items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutOrderInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutOrderInput
+    shipments?: OrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderCreateOrConnectWithoutLoyaltyLedgerInput = {
+    where: OrderWhereUniqueInput
+    create: XOR<OrderCreateWithoutLoyaltyLedgerInput, OrderUncheckedCreateWithoutLoyaltyLedgerInput>
+  }
+
+  export type DiscountCodeCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    code: string
+    type: string
+    value: number
+    active?: boolean
+    source?: string
+    usageLimit?: number | null
+    usageCount?: number
+    perCustomerLimit?: number | null
+    startsAt?: Date | string | null
+    expiresAt?: Date | string | null
+    minPurchase?: number | null
+    maxDiscount?: number | null
+    business: BusinessCreateNestedOneWithoutDiscountCodesInput
+    orders?: OrderCreateNestedManyWithoutDiscountCodeInput
+  }
+
+  export type DiscountCodeUncheckedCreateWithoutLoyaltyLedgerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    code: string
+    type: string
+    value: number
+    active?: boolean
+    source?: string
+    usageLimit?: number | null
+    usageCount?: number
+    perCustomerLimit?: number | null
+    startsAt?: Date | string | null
+    expiresAt?: Date | string | null
+    minPurchase?: number | null
+    maxDiscount?: number | null
+    orders?: OrderUncheckedCreateNestedManyWithoutDiscountCodeInput
+  }
+
+  export type DiscountCodeCreateOrConnectWithoutLoyaltyLedgerInput = {
+    where: DiscountCodeWhereUniqueInput
+    create: XOR<DiscountCodeCreateWithoutLoyaltyLedgerInput, DiscountCodeUncheckedCreateWithoutLoyaltyLedgerInput>
+  }
+
+  export type BusinessUpsertWithoutLoyaltyLedgerInput = {
+    update: XOR<BusinessUpdateWithoutLoyaltyLedgerInput, BusinessUncheckedUpdateWithoutLoyaltyLedgerInput>
+    create: XOR<BusinessCreateWithoutLoyaltyLedgerInput, BusinessUncheckedCreateWithoutLoyaltyLedgerInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutLoyaltyLedgerInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutLoyaltyLedgerInput, BusinessUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
+  export type BusinessUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+  }
+
+  export type CustomerUpsertWithoutLoyaltyLedgerInput = {
+    update: XOR<CustomerUpdateWithoutLoyaltyLedgerInput, CustomerUncheckedUpdateWithoutLoyaltyLedgerInput>
+    create: XOR<CustomerCreateWithoutLoyaltyLedgerInput, CustomerUncheckedCreateWithoutLoyaltyLedgerInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutLoyaltyLedgerInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutLoyaltyLedgerInput, CustomerUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
+  export type CustomerUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutCustomersNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    orders?: OrderUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type OrderUpsertWithoutLoyaltyLedgerInput = {
+    update: XOR<OrderUpdateWithoutLoyaltyLedgerInput, OrderUncheckedUpdateWithoutLoyaltyLedgerInput>
+    create: XOR<OrderCreateWithoutLoyaltyLedgerInput, OrderUncheckedCreateWithoutLoyaltyLedgerInput>
+    where?: OrderWhereInput
+  }
+
+  export type OrderUpdateToOneWithWhereWithoutLoyaltyLedgerInput = {
+    where?: OrderWhereInput
+    data: XOR<OrderUpdateWithoutLoyaltyLedgerInput, OrderUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
+  export type OrderUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orderNumber?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: StringFieldUpdateOperationsInput | string
+    fulfillmentStatus?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotal?: IntFieldUpdateOperationsInput | number
+    tax?: IntFieldUpdateOperationsInput | number
+    shipping?: IntFieldUpdateOperationsInput | number
+    discount?: IntFieldUpdateOperationsInput | number
+    total?: IntFieldUpdateOperationsInput | number
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
+    customerNote?: NullableStringFieldUpdateOperationsInput | string | null
+    internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrdersNestedInput
+    business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
+    customer?: CustomerUpdateOneWithoutOrdersNestedInput
+    shippingAddress?: ShippingAddressUpdateOneWithoutOrdersNestedInput
+    discountCode?: DiscountCodeUpdateOneWithoutOrdersNestedInput
+    items?: OrderItemUpdateManyWithoutOrderNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
+    reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
+    shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    orderNumber?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: StringFieldUpdateOperationsInput | string
+    fulfillmentStatus?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotal?: IntFieldUpdateOperationsInput | number
+    tax?: IntFieldUpdateOperationsInput | number
+    shipping?: IntFieldUpdateOperationsInput | number
+    discount?: IntFieldUpdateOperationsInput | number
+    total?: IntFieldUpdateOperationsInput | number
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
+    refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
+    customerNote?: NullableStringFieldUpdateOperationsInput | string | null
+    internalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
+    shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DiscountCodeUpsertWithoutLoyaltyLedgerInput = {
+    update: XOR<DiscountCodeUpdateWithoutLoyaltyLedgerInput, DiscountCodeUncheckedUpdateWithoutLoyaltyLedgerInput>
+    create: XOR<DiscountCodeCreateWithoutLoyaltyLedgerInput, DiscountCodeUncheckedCreateWithoutLoyaltyLedgerInput>
+    where?: DiscountCodeWhereInput
+  }
+
+  export type DiscountCodeUpdateToOneWithWhereWithoutLoyaltyLedgerInput = {
+    where?: DiscountCodeWhereInput
+    data: XOR<DiscountCodeUpdateWithoutLoyaltyLedgerInput, DiscountCodeUncheckedUpdateWithoutLoyaltyLedgerInput>
+  }
+
+  export type DiscountCodeUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    code?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    business?: BusinessUpdateOneRequiredWithoutDiscountCodesNestedInput
+    orders?: OrderUpdateManyWithoutDiscountCodeNestedInput
+  }
+
+  export type DiscountCodeUncheckedUpdateWithoutLoyaltyLedgerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    orders?: OrderUncheckedUpdateManyWithoutDiscountCodeNestedInput
   }
 
   export type SessionCreateManyUserInput = {
@@ -112791,6 +121521,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -112964,6 +121698,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112974,6 +121712,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutUserInput = {
@@ -112988,6 +121727,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112998,6 +121741,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutUserInput = {
@@ -113012,6 +121756,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113263,6 +122011,10 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
     notes?: string | null
@@ -113288,6 +122040,7 @@ export namespace Prisma {
     type: string
     value: number
     active?: boolean
+    source?: string
     usageLimit?: number | null
     usageCount?: number
     perCustomerLimit?: number | null
@@ -113663,6 +122416,21 @@ export namespace Prisma {
     message?: string | null
   }
 
+  export type LoyaltyLedgerCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    orderId?: string | null
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
   export type ProductUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113943,6 +122711,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutBusinessInput = {
@@ -113983,6 +122752,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateManyWithoutBusinessInput = {
@@ -114033,6 +122803,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114043,6 +122817,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBusinessInput = {
@@ -114057,6 +122832,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114067,6 +122846,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutBusinessInput = {
@@ -114081,6 +122861,10 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114128,6 +122912,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -114136,6 +122921,7 @@ export namespace Prisma {
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
     orders?: OrderUpdateManyWithoutDiscountCodeNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateOneWithoutDiscountCodeNestedInput
   }
 
   export type DiscountCodeUncheckedUpdateWithoutBusinessInput = {
@@ -114146,6 +122932,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -114154,6 +122941,7 @@ export namespace Prisma {
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
     orders?: OrderUncheckedUpdateManyWithoutDiscountCodeNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateOneWithoutDiscountCodeNestedInput
   }
 
   export type DiscountCodeUncheckedUpdateManyWithoutBusinessInput = {
@@ -114164,6 +122952,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     value?: IntFieldUpdateOperationsInput | number
     active?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
     perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
@@ -115285,6 +124074,51 @@ export namespace Prisma {
     donorName?: NullableStringFieldUpdateOperationsInput | string | null
     donorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LoyaltyLedgerUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    customer?: CustomerUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    order?: OrderUpdateOneWithoutLoyaltyLedgerNestedInput
+    discountCode?: DiscountCodeUpdateOneWithoutLoyaltyLedgerNestedInput
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ImageCreateManyProductInput = {
@@ -116506,6 +125340,21 @@ export namespace Prisma {
     merchantTermsUpdatedAt?: Date | string | null
   }
 
+  export type LoyaltyLedgerCreateManyCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    orderId?: string | null
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
   export type OrderUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -116544,6 +125393,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutCustomerInput = {
@@ -116584,6 +125434,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateManyWithoutCustomerInput = {
@@ -116987,6 +125838,51 @@ export namespace Prisma {
     merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type LoyaltyLedgerUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    order?: OrderUpdateOneWithoutLoyaltyLedgerNestedInput
+    discountCode?: DiscountCodeUpdateOneWithoutLoyaltyLedgerNestedInput
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type OrderCreateManyShippingAddressInput = {
     id?: string
     createdAt?: Date | string
@@ -117110,6 +126006,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutShippingAddressInput = {
@@ -117150,6 +126047,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateManyWithoutShippingAddressInput = {
@@ -117398,6 +126296,21 @@ export namespace Prisma {
     items?: NullableJsonNullValueInput | InputJsonValue
   }
 
+  export type LoyaltyLedgerCreateManyOrderInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId: string
+    type: string
+    points: number
+    balanceAfter: number
+    reason?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey: string
+    discountCodeId?: string | null
+    actorUserId?: string | null
+  }
+
   export type OrderItemUpdateWithoutOrderInput = {
     id?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -117583,6 +126496,51 @@ export namespace Prisma {
     items?: NullableJsonNullValueInput | InputJsonValue
   }
 
+  export type LoyaltyLedgerUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutLoyaltyLedgerNestedInput
+    discountCode?: DiscountCodeUpdateOneWithoutLoyaltyLedgerNestedInput
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LoyaltyLedgerUncheckedUpdateManyWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    points?: IntFieldUpdateOperationsInput | number
+    balanceAfter?: IntFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    sourceKey?: StringFieldUpdateOperationsInput | string
+    discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type OrderCreateManyDiscountCodeInput = {
     id?: string
     createdAt?: Date | string
@@ -117657,6 +126615,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutDiscountCodeInput = {
@@ -117697,6 +126656,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateManyWithoutDiscountCodeInput = {
@@ -118335,6 +127295,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutSubscriptionInput = {
@@ -118375,6 +127336,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutOrderNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutOrderNestedInput
     shipments?: OrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateManyWithoutSubscriptionInput = {
@@ -118411,6 +127373,62 @@ export namespace Prisma {
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     shippingAddressId?: NullableStringFieldUpdateOperationsInput | string | null
     discountCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LoyaltyRewardTierCreateManyProgramInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    pointsCost: number
+    type: string
+    value: number
+    minPurchase?: number | null
+    sortOrder?: number
+    active?: boolean
+  }
+
+  export type LoyaltyRewardTierUpdateWithoutProgramInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    pointsCost?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LoyaltyRewardTierUncheckedUpdateWithoutProgramInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    pointsCost?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LoyaltyRewardTierUncheckedUpdateManyWithoutProgramInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    pointsCost?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    value?: IntFieldUpdateOperationsInput | number
+    minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
   }
 
 

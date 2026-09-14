@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { isUniqueConstraintError } from "~/lib/prisma-errors";
 import {
   videoCreateSchema,
   videoReorderSchema,
@@ -20,18 +21,6 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-
-/** Prisma's unique-constraint-violation error code. */
-const P2002_UNIQUE_CONSTRAINT = "P2002";
-
-function isUniqueConstraintError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code: unknown }).code === P2002_UNIQUE_CONSTRAINT
-  );
-}
 
 export const videosRouter = createTRPCRouter({
   // ─── Admin: read ────────────────────────────────────────────────────────────

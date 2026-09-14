@@ -5581,6 +5581,12 @@
   margin: 0 0 0.85em;
 }
 
+/* Headings below carry a top margin so they breathe between paragraphs; the
+   first block in the note must not push itself off the column's flex gap. */
+.vii .vii-maintenance-body > :first-child {
+  margin-top: 0;
+}
+
 .vii .vii-maintenance-body > *:last-child {
   margin-bottom: 0;
 }
@@ -5601,12 +5607,47 @@
   text-underline-offset: 3px;
 }
 
+/* Rich-text headings. Tailwind preflight resets heading font-size to `inherit`,
+   so without an explicit size every heading the owner types in the editor
+   renders at the note's 15px body size. Sizes mirror `.vii .vii-prose`
+   (h2 clamp(22px, 2.8vw, 32px) / h3 clamp(18px, 2vw, 24px)).
+   Note: `h1` is included because the editor offers it — it is demoted to h2's
+   size here, but it is still an a11y duplicate of the page's own <h1>. That is
+   an accepted tradeoff: the owner's note is authored content and we would
+   rather render it legibly than drop the level. */
+.vii .vii-maintenance-body h1,
 .vii .vii-maintenance-body h2,
 .vii .vii-maintenance-body h3 {
   font-family: var(--font-serif);
   font-weight: 400;
   color: var(--vii-paper);
-  margin: 0 0 0.5em;
+}
+
+.vii .vii-maintenance-body h1,
+.vii .vii-maintenance-body h2 {
+  font-size: clamp(22px, 2.8vw, 32px);
+  line-height: 1.2;
+  margin: 1.1em 0 0.45em;
+}
+
+.vii .vii-maintenance-body h3 {
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.25;
+  margin: 1em 0 0.4em;
+}
+
+/* Deep levels drop out of the serif scale and become tracked sans labels —
+   at this size a smaller serif would read as broken rather than quiet. */
+.vii .vii-maintenance-body h4,
+.vii .vii-maintenance-body h5,
+.vii .vii-maintenance-body h6 {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--vii-tan);
+  margin: 1em 0 0.4em;
 }
 
 .vii .vii-maintenance-body ul,
@@ -5619,6 +5660,81 @@
 
 .vii .vii-maintenance-body li {
   margin-bottom: 0.3em;
+}
+
+/* Announcement flyer — a thin copper mat around the owner's artwork, so an
+   image with its own white edge still reads as framed on the navy. The
+   intrinsic ratio is the uploaded file's (see the page component); this only
+   caps the width. */
+.vii .vii-maintenance-flyer {
+  margin: 0;
+  width: 100%;
+  max-width: 420px;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--vii-copper-light) 45%, transparent);
+  background: color-mix(in srgb, var(--vii-paper) 6%, transparent);
+}
+
+.vii .vii-maintenance-flyer img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* When / where line — the overline's tracked-uppercase voice, one step wider. */
+.vii .vii-maintenance-when {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--vii-tan);
+  line-height: 1.8;
+  text-wrap: balance;
+}
+
+/* Countdown — `LaunchCountdown` ships structure only (role="timer" root,
+   [data-caption], [data-units], [data-unit] > [data-value] + [data-label]);
+   every colour and face comes from here. */
+.vii .vii-maintenance-countdown {
+  --maintenance-countdown-gap: clamp(16px, 3vw, 28px);
+}
+
+.vii .vii-maintenance-countdown [data-caption] {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--vii-tan);
+}
+
+.vii .vii-maintenance-countdown [data-value] {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1;
+  color: var(--vii-paper);
+  font-variant-numeric: tabular-nums;
+}
+
+.vii .vii-maintenance-countdown [data-label] {
+  margin-top: 6px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vii-tan);
+}
+
+/* Past the target the same class lands on a bare <p> ("Now open" /
+   "We're back") — give that state the headline's serif italic voice. */
+.vii p.vii-maintenance-countdown {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(18px, 2.4vw, 24px);
+  color: var(--vii-paper);
 }
 
 /* CTA — the ViiCtaLink language (tracked uppercase + copper underline) as a
@@ -5664,23 +5780,39 @@
   animation: vii-maintenance-rise 0.7s var(--vii-ease) both;
 }
 
+/* The column now runs up to nine direct children (overline, wordmark, h1,
+   name line, flyer, when line, countdown, note, CTA), so the stagger is
+   enumerated that far before flattening — an 0.08s step keeps the whole
+   sequence under a second. */
 .vii .vii-maintenance-col > *:nth-child(1) {
   animation-delay: 0.05s;
 }
 .vii .vii-maintenance-col > *:nth-child(2) {
-  animation-delay: 0.15s;
+  animation-delay: 0.13s;
 }
 .vii .vii-maintenance-col > *:nth-child(3) {
-  animation-delay: 0.25s;
+  animation-delay: 0.21s;
 }
 .vii .vii-maintenance-col > *:nth-child(4) {
-  animation-delay: 0.35s;
+  animation-delay: 0.29s;
 }
 .vii .vii-maintenance-col > *:nth-child(5) {
+  animation-delay: 0.37s;
+}
+.vii .vii-maintenance-col > *:nth-child(6) {
   animation-delay: 0.45s;
 }
-.vii .vii-maintenance-col > *:nth-child(n + 6) {
-  animation-delay: 0.55s;
+.vii .vii-maintenance-col > *:nth-child(7) {
+  animation-delay: 0.53s;
+}
+.vii .vii-maintenance-col > *:nth-child(8) {
+  animation-delay: 0.61s;
+}
+.vii .vii-maintenance-col > *:nth-child(9) {
+  animation-delay: 0.69s;
+}
+.vii .vii-maintenance-col > *:nth-child(n + 10) {
+  animation-delay: 0.75s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7521,6 +7653,179 @@
   outline-offset: 2px;
 }
 
+/* ── Maintenance / coming-soon takeover — owner-editable fields on
+   `wealth-maintenance-page.tsx` (mirrors the vii maintenance CSS block).
+   The page itself supplies `--wealth-surface-3` (near-white) as its
+   background, so the merchant note, flyer mat and countdown below stay on
+   the quiet paper-toned register rather than reusing vii's dark canvas. ── */
+
+/* Merchant rich-text note. */
+.wealth .wealth-maintenance-body {
+  max-width: 52ch;
+  margin: 0 auto;
+  font-family: var(--font-wealth-body);
+  font-size: 17px;
+  line-height: 25.5px;
+  color: var(--wealth-ink);
+}
+
+.wealth .wealth-maintenance-body p {
+  margin: 0 0 0.85em;
+}
+
+/* Headings below carry a top margin so they breathe between paragraphs; the
+   first block in the note must not push itself off the column's flex gap. */
+.wealth .wealth-maintenance-body > :first-child {
+  margin-top: 0;
+}
+
+.wealth .wealth-maintenance-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.wealth .wealth-maintenance-body strong {
+  color: var(--wealth-ink);
+  font-weight: 700;
+}
+
+.wealth .wealth-maintenance-body a {
+  color: var(--wealth-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--wealth-primary);
+  padding-bottom: 1px;
+}
+
+/* Rich-text headings. Tailwind preflight resets heading font-size to
+   `inherit`, so without an explicit size every heading the owner types in
+   the editor renders at the note's 17px body size (same bug `.vii
+   .vii-maintenance-body` fixes). Font follows the page's own italic PT Sans
+   h1/`.wealth-section-heading` voice, not the Jost `.wealth-h1` one. */
+.wealth .wealth-maintenance-body h1,
+.wealth .wealth-maintenance-body h2,
+.wealth .wealth-maintenance-body h3,
+.wealth .wealth-maintenance-body h4 {
+  font-family: var(--font-wealth-sub);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--wealth-ink);
+}
+
+.wealth .wealth-maintenance-body h1 {
+  font-size: 28px;
+  margin: 1.1em 0 0.45em;
+}
+
+.wealth .wealth-maintenance-body h2 {
+  font-size: 22px;
+  margin: 1.1em 0 0.45em;
+}
+
+.wealth .wealth-maintenance-body h3 {
+  font-size: 18px;
+  margin: 1em 0 0.4em;
+}
+
+.wealth .wealth-maintenance-body h4 {
+  font-size: 16px;
+  margin: 1em 0 0.4em;
+}
+
+.wealth .wealth-maintenance-body ul,
+.wealth .wealth-maintenance-body ol {
+  margin: 0 0 0.85em;
+  padding-left: 1.2em;
+  text-align: left;
+  display: inline-block;
+}
+
+.wealth .wealth-maintenance-body li {
+  margin-bottom: 0.3em;
+}
+
+/* Announcement flyer — a hairline-bordered mat around the owner's artwork on
+   `--wealth-surface` (the site's general light-gray card surface, one step
+   darker than the page's own `--wealth-surface-3` background so the mat
+   reads as a distinct frame rather than disappearing into the page). No
+   `--wealth-surface-1` token exists; `--wealth-surface` is the lightest one
+   available besides `-2`/`-3`. The intrinsic ratio is the uploaded file's
+   (see the page component); this only caps the width. Square corners, per
+   the template's `--radius: 0px`. */
+.wealth .wealth-maintenance-flyer {
+  margin: 0;
+  width: 100%;
+  max-width: 420px;
+  padding: 6px;
+  border: 1px solid var(--wealth-hairline);
+  background: var(--wealth-surface);
+}
+
+.wealth .wealth-maintenance-flyer img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* When / where line — the eyebrow's tracked-uppercase mono voice, in ink
+   rather than the eyebrow's muted tone since this line carries real
+   scheduling information. */
+.wealth .wealth-maintenance-when {
+  margin: 0;
+  font-family: var(--font-wealth-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1.9px;
+  text-transform: uppercase;
+  color: var(--wealth-ink);
+  line-height: 1.8;
+  text-wrap: balance;
+}
+
+/* Countdown — `LaunchCountdown` ships structure only (role="timer" root,
+   [data-caption], [data-units], [data-unit] > [data-value] + [data-label]);
+   every colour and face comes from here. */
+.wealth .wealth-maintenance-countdown {
+  --maintenance-countdown-gap: clamp(16px, 3vw, 28px);
+}
+
+.wealth .wealth-maintenance-countdown [data-caption] {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-wealth-mono);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 1.9px;
+  text-transform: uppercase;
+  color: var(--wealth-eyebrow);
+}
+
+.wealth .wealth-maintenance-countdown [data-value] {
+  font-family: var(--font-wealth-mono);
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1;
+  color: var(--wealth-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.wealth .wealth-maintenance-countdown [data-label] {
+  margin-top: 6px;
+  font-family: var(--font-wealth-mono);
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--wealth-muted);
+}
+
+/* Past the target the same class lands on a bare <p> ("Now open" /
+   "We're back") — give that state the headline's italic PT Sans voice. */
+.wealth p.wealth-maintenance-countdown {
+  margin: 0;
+  font-family: var(--font-wealth-sub);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--wealth-ink);
+}
+
 /* ── Eyebrow — mono uppercase overline, used for group labels & mini-heads ── */
 .wealth-eyebrow {
   display: inline-block;
@@ -8108,6 +8413,136 @@
   font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--olive-ink-soft);
+}
+
+/* ── Maintenance / coming-soon takeover — owner-editable fields on
+   `olive-maintenance-page.tsx` (mirrors the vii maintenance CSS block). The
+   overline/when-line reuse `.olive-label` as-is (no new rule needed); the
+   rest is scoped to the `olive-card` this renders inside. ── */
+
+/* Merchant rich-text note — a copy of `.olive-caption` above, plus heading,
+   paragraph, list and link rules Tailwind preflight otherwise strips (it
+   resets heading font-size to `inherit`, so without these every heading the
+   owner types in the editor would render at the note's small caption size,
+   same bug `.vii .vii-maintenance-body` fixes). */
+.olive .olive-maintenance-body {
+  font-family: var(--olive-font-body);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--olive-ink-soft);
+}
+
+.olive .olive-maintenance-body h1,
+.olive .olive-maintenance-body h2 {
+  font-family: var(--olive-font-display);
+  font-weight: 300;
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  line-height: 1.2;
+  color: var(--olive-ink);
+  margin: 1.1em 0 0.4em;
+}
+
+.olive .olive-maintenance-body h3,
+.olive .olive-maintenance-body h4 {
+  font-family: var(--olive-font-display);
+  font-weight: 400;
+  font-size: 1.0625rem;
+  margin: 1em 0 0.4em;
+  color: var(--olive-ink);
+}
+
+.olive .olive-maintenance-body > :first-child {
+  margin-top: 0;
+}
+
+.olive .olive-maintenance-body p {
+  margin: 0 0 0.85em;
+}
+
+.olive .olive-maintenance-body ul,
+.olive .olive-maintenance-body ol {
+  text-align: left;
+  display: inline-block;
+  padding-left: 1.2em;
+  margin: 0 0 0.85em;
+}
+
+.olive .olive-maintenance-body a {
+  color: var(--olive-leaf);
+  text-decoration: underline;
+  text-decoration-color: var(--olive-sage-bright);
+  text-underline-offset: 2px;
+}
+
+.olive .olive-maintenance-body a:hover {
+  text-decoration-color: var(--olive-leaf);
+}
+
+/* Announcement flyer — capped to the card body's usable width, framed in
+   the card's own hairline + radius tokens so it reads as part of the same
+   surface system as `.olive-card`/`.olive-prose img`. */
+.olive .olive-maintenance-flyer {
+  margin: 0;
+  width: 100%;
+  max-width: 360px;
+  border: 1px solid var(--olive-hairline);
+  border-radius: var(--olive-card-radius);
+  overflow: hidden;
+}
+
+.olive .olive-maintenance-flyer img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Countdown — `LaunchCountdown` ships structure only (role="timer" root,
+   [data-caption], [data-units], [data-unit] > [data-value] + [data-label]);
+   every colour and face comes from here. [data-caption] mirrors
+   `.olive-label` exactly. */
+.olive .olive-maintenance-countdown {
+  --maintenance-countdown-gap: clamp(16px, 3vw, 28px);
+}
+
+.olive .olive-maintenance-countdown [data-caption] {
+  display: block;
+  margin-bottom: 0.625rem;
+  font-family: var(--olive-font-display);
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--olive-ink-soft);
+}
+
+.olive .olive-maintenance-countdown [data-value] {
+  font-family: var(--olive-font-display);
+  font-weight: 300;
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+  line-height: 1;
+  color: var(--olive-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.olive .olive-maintenance-countdown [data-label] {
+  margin-top: 0.375rem;
+  font-family: var(--olive-font-display);
+  font-weight: 400;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--olive-ink-soft);
+}
+
+/* Past the target the same class lands on a bare <p> ("Now open" /
+   "We're back") — give that state the headline's light display voice. */
+.olive p.olive-maintenance-countdown {
+  margin: 0;
+  font-family: var(--olive-font-display);
+  font-weight: 300;
+  font-size: 1.25rem;
+  color: var(--olive-ink);
 }
 
 .olive .olive-price {

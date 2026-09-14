@@ -93,6 +93,11 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
         message={m.message}
         cta={m.scope === "business" ? m.cta : null}
         businessName={business.name}
+        overline={m.scope === "business" ? m.overline : null}
+        headline={m.scope === "business" ? m.headline : null}
+        image={m.scope === "business" ? m.image : null}
+        location={m.scope === "business" ? m.location : null}
+        launch={m.scope === "business" ? m.launch : null}
       />
     );
   }

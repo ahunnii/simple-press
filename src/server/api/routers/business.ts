@@ -3,14 +3,22 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
 import { TEMPLATES } from "~/lib/constants";
 import { emailOverridesSchema } from "~/lib/email/customization";
+import { parseZonedDateTime } from "~/lib/events/normalize";
 import {
   getPlatformMaintenance,
   maintenanceCtaSchema,
+  maintenanceHeadlineSchema,
+  maintenanceImageSchema,
+  maintenanceLocationSchema,
   maintenanceMessageSchema,
+  maintenanceOverlineSchema,
+  maintenanceWallClockSchema,
   normalizeMaintenanceMessage,
+  normalizeMaintenanceText,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
@@ -184,6 +192,12 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant: true,
         maintenanceMessage: true,
         maintenanceCta: true,
+        maintenanceOverline: true,
+        maintenanceHeadline: true,
+        maintenanceImage: true,
+        maintenanceLaunchAt: true,
+        maintenanceLaunchEndAt: true,
+        maintenanceLocation: true,
         products: {
           where: { published: true },
           include: {
@@ -222,13 +236,21 @@ export const businessRouter = createTRPCRouter({
         sc.customFields = sc.previewCustomFields;
       }
     }
-    // Never ship the raw draft field to clients.
+    // Never ship the raw draft field to clients — nor the raw maintenance
+    // columns, which are stripped here so only the resolved `maintenance`
+    // object built below can reach a renderer.
     const {
       stripeAccountId,
       maintenanceMode,
       maintenanceVariant,
       maintenanceMessage,
       maintenanceCta,
+      maintenanceOverline,
+      maintenanceHeadline,
+      maintenanceImage,
+      maintenanceLaunchAt,
+      maintenanceLaunchEndAt,
+      maintenanceLocation,
       ...rest
     } = businessData;
     const { siteContent, ...restWithoutSiteContent } = rest;
@@ -244,8 +266,15 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant,
         maintenanceMessage: maintenanceMessage ?? null,
         maintenanceCta: maintenanceCta ?? null,
+        maintenanceOverline: maintenanceOverline ?? null,
+        maintenanceHeadline: maintenanceHeadline ?? null,
+        maintenanceImage: maintenanceImage ?? null,
+        maintenanceLaunchAt: maintenanceLaunchAt ?? null,
+        maintenanceLaunchEndAt: maintenanceLaunchEndAt ?? null,
+        maintenanceLocation: maintenanceLocation ?? null,
         phoneNumber: businessData.phoneNumber ?? null,
         supportEmail: businessData.supportEmail ?? null,
+        timeZone: businessData.timeZone,
       },
     });
 
@@ -732,6 +761,14 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant: z.enum(["maintenance", "coming_soon"]),
         maintenanceMessage: maintenanceMessageSchema.nullish(),
         maintenanceCta: maintenanceCtaSchema.nullish(),
+        maintenanceOverline: maintenanceOverlineSchema.nullish(),
+        maintenanceHeadline: maintenanceHeadlineSchema.nullish(),
+        maintenanceImage: maintenanceImageSchema.nullish(),
+        // Wall clock in the business's own time zone, as emitted by
+        // `<input type="datetime-local">` — never a UTC instant.
+        maintenanceLaunchAt: maintenanceWallClockSchema.nullish(),
+        maintenanceLaunchEndAt: maintenanceWallClockSchema.nullish(),
+        maintenanceLocation: maintenanceLocationSchema.nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -739,36 +776,94 @@ export const businessRouter = createTRPCRouter({
         input.maintenanceMessage ?? null,
       );
 
+      // A save is authoritative: every field the form owns is written on every
+      // save, so `undefined` (field omitted) clears just like an explicit null.
+      // Otherwise clearing the flyer or the launch date would silently no-op.
+      const overline = normalizeMaintenanceText(input.maintenanceOverline);
+      const headline = normalizeMaintenanceText(input.maintenanceHeadline);
+      const location = normalizeMaintenanceText(input.maintenanceLocation);
+      const image = input.maintenanceImage ?? null;
+      const launchAtInput = input.maintenanceLaunchAt ?? null;
+      const launchEndAtInput = input.maintenanceLaunchEndAt ?? null;
+
+      const business = await ctx.db.business.findUnique({
+        where: { id: ctx.businessId },
+        select: { phoneNumber: true, supportEmail: true, timeZone: true },
+      });
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       if (
         input.maintenanceCta?.type === "call" &&
-        !input.maintenanceCta.value
+        !input.maintenanceCta.value &&
+        !business.phoneNumber?.trim()
       ) {
-        const business = await ctx.db.business.findUnique({
-          where: { id: ctx.businessId },
-          select: { phoneNumber: true },
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Add a phone number in Settings or enter one here",
         });
-        if (!business?.phoneNumber?.trim()) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Add a phone number in Settings or enter one here",
-          });
-        }
       }
 
       if (
         input.maintenanceCta?.type === "email" &&
-        !input.maintenanceCta.value
+        !input.maintenanceCta.value &&
+        !business.supportEmail?.trim()
       ) {
-        const business = await ctx.db.business.findUnique({
-          where: { id: ctx.businessId },
-          select: { supportEmail: true },
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Add a support email in Settings or enter one here",
         });
-        if (!business?.supportEmail?.trim()) {
+      }
+
+      // The schema already limits this to an http(s) URL; pin it to the
+      // business's own upload prefix as well so the flyer can only ever be a
+      // file this tenant uploaded, never a hotlink to somewhere else.
+      if (image !== null) {
+        const allowedPrefix = `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${ctx.businessId}/`;
+        if (!image.startsWith(allowedPrefix)) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Add a support email in Settings or enter one here",
+            message: "Upload the image through the flyer field",
           });
         }
+      }
+
+      if (launchAtInput === null && launchEndAtInput !== null) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Add a start date before an end time",
+        });
+      }
+
+      let launchAt: Date | null = null;
+      let launchEndAt: Date | null = null;
+      try {
+        launchAt = launchAtInput
+          ? parseZonedDateTime(launchAtInput, business.timeZone)
+          : null;
+        launchEndAt = launchEndAtInput
+          ? parseZonedDateTime(launchEndAtInput, business.timeZone)
+          : null;
+      } catch {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Enter a valid launch date and time",
+        });
+      }
+
+      if (
+        launchAt &&
+        launchEndAt &&
+        launchEndAt.getTime() <= launchAt.getTime()
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Launch end must be after the start",
+        });
       }
 
       await ctx.db.business.update({
@@ -782,6 +877,12 @@ export const businessRouter = createTRPCRouter({
           maintenanceCta: input.maintenanceCta
             ? (input.maintenanceCta as Prisma.InputJsonValue)
             : Prisma.DbNull,
+          maintenanceOverline: overline,
+          maintenanceHeadline: headline,
+          maintenanceImage: image,
+          maintenanceLaunchAt: launchAt,
+          maintenanceLaunchEndAt: launchEndAt,
+          maintenanceLocation: location,
         },
       });
       return { success: true };
@@ -795,8 +896,15 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant: true,
         maintenanceMessage: true,
         maintenanceCta: true,
+        maintenanceOverline: true,
+        maintenanceHeadline: true,
+        maintenanceImage: true,
+        maintenanceLaunchAt: true,
+        maintenanceLaunchEndAt: true,
+        maintenanceLocation: true,
         phoneNumber: true,
         supportEmail: true,
+        timeZone: true,
       },
     });
     if (!business) {

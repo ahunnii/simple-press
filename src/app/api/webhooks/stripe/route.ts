@@ -7,6 +7,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import type { PoolDeductionResult } from "~/lib/inventory";
 import type { ReservationEntry } from "~/lib/inventory/reservation";
+import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { getBusinessUrl } from "~/lib/business-url";
 import { createOrderFromCheckout } from "~/lib/checkout/create-order";
@@ -29,6 +30,7 @@ import {
 import { deductPoolInventory } from "~/lib/inventory";
 import { releaseReservation } from "~/lib/inventory/reservation";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
+import { awardPointsForPaidOrder } from "~/lib/loyalty/order-hooks";
 import { stripeClient } from "~/lib/stripe/client";
 import {
   handleInvoicePaid,
@@ -365,21 +367,59 @@ export async function POST(req: NextRequest) {
         // notes and InventoryHistory records.
         const orderNumber = order.orderNumber;
 
-        // Update customer metrics
+        // Update customer metrics.
+        //
+        // The post-increment `orderCount` is read back into
+        // `customerOrderCountAfter` because the loyalty earn step below needs
+        // it to decide whether this is the customer's first order. It stays
+        // null when this update failed (or there is no customer row), and the
+        // hook falls back to the pre-increment value it already holds.
+        let customerOrderCountAfter: number | null = null;
         if (customer) {
           try {
-            await db.customer.update({
+            const metricsUpdate = await db.customer.update({
               where: { id: customer.id },
               data: {
                 totalSpent: { increment: order.total },
                 orderCount: { increment: 1 },
               },
+              select: { orderCount: true },
             });
+            customerOrderCountAfter = metricsUpdate.orderCount;
           } catch (customerError) {
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "customer-metrics");
               scope.setTag("businessId", businessId);
               Sentry.captureException(customerError);
+            });
+          }
+        }
+
+        // Loyalty points (flag- and program-gated inside the helper). Non-fatal,
+        // same convention as customer-metrics above: a points failure must never
+        // block order creation, inventory deduction or the emails below. The
+        // helper is idempotent on its ledger `sourceKey`, so a replayed webhook
+        // that somehow got past the guard above awards nothing twice.
+        let loyaltyEarn: OrderEarnResult | null = null;
+        if (customer) {
+          try {
+            loyaltyEarn = await awardPointsForPaidOrder(db, {
+              businessId: business.id,
+              order: {
+                id: order.id,
+                subtotal: order.subtotal,
+                discount: order.discount,
+              },
+              customer: {
+                id: customer.id,
+                orderCount: customerOrderCountAfter ?? customer.orderCount + 1,
+              },
+            });
+          } catch (loyaltyError) {
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "loyalty-award");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(loyaltyError);
             });
           }
         }
@@ -955,6 +995,17 @@ export async function POST(req: NextRequest) {
                 customDomain: business.customDomain,
                 domainStatus: business.domainStatus,
               },
+              // Only when points were actually awarded — `loyalty` absent
+              // means the email renders exactly as it did before this feature.
+              ...(loyaltyEarn &&
+              loyaltyEarn.earned + loyaltyEarn.firstOrderBonus > 0
+                ? {
+                    loyalty: {
+                      earned: loyaltyEarn.earned + loyaltyEarn.firstOrderBonus,
+                      balance: loyaltyEarn.balance,
+                    },
+                  }
+                : {}),
               orderId: order.id,
               idempotencyKey: `order-confirmation-${session.id}`,
             });
