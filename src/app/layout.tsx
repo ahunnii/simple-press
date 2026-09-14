@@ -80,7 +80,14 @@ export async function generateMetadata() {
       ? { verification: verificationTags }
       : {}),
     icons: [
-      { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },
+      // Not `??`: the branding form can persist an empty string here
+      // (Reset → Save), and an empty href must still fall back to the default.
+      {
+        rel: "icon",
+        url: business.siteContent?.faviconUrl?.trim()
+          ? business.siteContent.faviconUrl
+          : "/favicon.ico",
+      },
     ],
   } as Metadata;
 }
