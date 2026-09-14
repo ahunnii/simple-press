@@ -1,15 +1,15 @@
-import { cache } from "react";
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
-import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { eventCutoff } from "~/lib/events/format";
-import { loadSeoBusiness } from "~/lib/seo";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
-  buildBreadcrumbSchema,
-  buildEventSchema,
-} from "~/lib/structured-data";
+  buildPageMetadata,
+  getCachedBusiness,
+  loadSeoBusiness,
+} from "~/lib/seo";
+import { buildBreadcrumbSchema, buildEventSchema } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
@@ -33,9 +33,7 @@ export default async function EventDetailPage({ params }: Props) {
   const { isEnabled } = await getBusinessFlags();
   if (!isEnabled("events")) notFound();
 
-  const business = await api.business
-    .simplifiedGet()
-    .catch(rethrowTrpcForErrorBoundary);
+  const business = await getCachedBusiness().catch(rethrowTrpcForErrorBoundary);
   if (!business) notFound();
 
   const event = await getCachedEvent(slug).catch(rethrowTrpcForErrorBoundary);
@@ -82,33 +80,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!event) return { title: "Event Not Found" };
 
-  const title = event.name;
-  const description = event.blurb ?? undefined;
-
-  const ogImage =
-    event.coverImage ??
-    business?.siteContent?.ogImage ??
-    business?.siteContent?.logoUrl ??
-    "/placeholder.svg";
-
-  return {
-    title,
-    description,
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, `/events/${slug}`),
-      },
-    }),
-    openGraph: {
-      title,
-      description,
-      images: [ogImage],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
-  };
+  // Event has no per-record SEO columns, so there is no `entity` to pass.
+  return buildPageMetadata({
+    business,
+    path: `/events/${slug}`,
+    title: event.name,
+    description: event.blurb,
+    ogImage: event.coverImage,
+    ogImageAlt: event.name,
+  });
 }

@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
+import {
+  buildPageMetadata,
+  getCachedBusiness,
+  loadSeoBusiness,
+  preferNonBlank,
+} from "~/lib/seo";
 import {
   buildBreadcrumbSchema,
   buildCollectionSchema,
@@ -16,7 +21,7 @@ type Props = {
 
 export default async function CollectionPage({ params }: Props) {
   const { slug } = await params;
-  const business = await api.business.simplifiedGet();
+  const business = await getCachedBusiness();
   if (!business) notFound();
 
   const collection = await api.collections
@@ -52,7 +57,7 @@ export default async function CollectionPage({ params }: Props) {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const business = await api.business.simplifiedGet();
+  const business = await loadSeoBusiness("/collections/[slug]");
 
   if (!business) {
     return { title: "Collection Not Found" };
@@ -64,51 +69,23 @@ export async function generateMetadata({ params }: Props) {
       return { title: "Collection Not Found" };
     }
 
-    const title =
-      collection.metaTitle ?? `${collection.name} | ${business.name}`;
-    const description =
-      collection.metaDescription ??
-      collection.description ??
-      `Shop ${collection.name} at ${business.name}`;
-
-    // Build OG/Twitter images: prefer per-collection ogImage (with dimensions),
-    // fall back to site OG image / logo (S1, S4).
-    const ogImages = collection.ogImage
-      ? [
-          {
-            url: collection.ogImage,
-            width: 1200,
-            height: 630,
-            alt: collection.name,
-          },
-        ]
-      : (business.siteContent?.ogImage ?? business.siteContent?.logoUrl)
-        ? [
-            business.siteContent.ogImage ??
-              business.siteContent.logoUrl ??
-              "/placeholder.svg",
-          ]
-        : undefined;
-
-    return {
-      title,
-      description,
-      keywords: collection.metaKeywords ?? undefined,
-      alternates: {
-        canonical: getCanonicalUrl(business, `/collections/${slug}`),
+    return buildPageMetadata({
+      business,
+      path: `/collections/${slug}`,
+      // Bare name — `buildPageMetadata` appends the brand suffix itself.
+      title: collection.name,
+      description: preferNonBlank(
+        collection.description,
+        `Shop ${collection.name} at ${business.name}`,
+      ),
+      keywords: collection.metaKeywords,
+      entity: {
+        title: collection.metaTitle,
+        description: collection.metaDescription,
+        ogImage: collection.ogImage,
       },
-      openGraph: {
-        title,
-        description,
-        images: ogImages,
-      },
-      twitter: {
-        card: "summary_large_image" as const,
-        title,
-        description,
-        images: ogImages,
-      },
-    };
+      ogImageAlt: collection.name,
+    });
   } catch {
     return { title: "Collection Not Found" };
   }

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { loadSeoBusiness } from "~/lib/seo";
+import {
+  buildPageMetadata,
+  getCachedBusiness,
+  loadSeoBusiness,
+} from "~/lib/seo";
 import {
   buildBlogPostingSchema,
   buildBreadcrumbSchema,
@@ -32,7 +35,7 @@ export default async function PageView({ params }: Props) {
   const { isEnabled } = await getBusinessFlags();
   if (!isEnabled("blog")) notFound();
 
-  const business = await api.business.simplifiedGet();
+  const business = await getCachedBusiness();
   if (!business) notFound();
 
   const relatedPostsRaw = await api.content
@@ -98,35 +101,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!page) return { title: "Page Not Found" };
 
-  const title = !!page.metaTitle ? page.metaTitle : page.title;
-  const description = !!page.metaDescription
-    ? page.metaDescription
-    : (page.excerpt ?? "");
-
-  const ogImage =
-    page.ogImage ??
-    business?.siteContent?.ogImage ??
-    business?.siteContent?.logoUrl ??
-    "/placeholder.svg";
-
-  return {
-    title,
-    description,
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, `/blog/${slug}`),
-      },
-    }),
-    openGraph: {
-      title,
-      description,
-      images: [ogImage],
+  return buildPageMetadata({
+    business,
+    path: `/blog/${slug}`,
+    title: page.title,
+    description: page.excerpt,
+    keywords: page.metaKeywords,
+    entity: {
+      title: page.metaTitle,
+      description: page.metaDescription,
+      ogImage: page.ogImage,
     },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
-  };
+    // Featured image — the helper falls back to the site OG image / logo.
+    ogImage: page.image,
+    article: { publishedAt: page.publishedAt, updatedAt: page.updatedAt },
+  });
 }

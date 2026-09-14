@@ -176,10 +176,21 @@ model Business {
   timeZone String @default("America/Detroit")
 
   // Contact & Legal
-  ownerEmail      String
-  supportEmail    String?
-  phoneNumber     String?
-  businessAddress String?
+  ownerEmail        String
+  supportEmail      String?
+  phoneNumber       String?
+  // Display string rendered by every template footer/contact page. When the
+  // structured parts below are set, `business.updateGeneral` recomputes this
+  // from them (`formatBusinessAddress`); legacy free text survives untouched
+  // until the owner fills the parts. Never read the parts for display.
+  businessAddress   String?
+  // Structured address parts — feed LocalBusiness JSON-LD `PostalAddress`
+  // (`buildLocalBusinessSchema`) and the SEO scorecard's local-address check.
+  // Country is emitted as the constant "US". DDL: prisma/manual/2026-09-14-seo-brand-address.sql
+  addressStreet     String?
+  addressCity       String?
+  addressState      String?
+  addressPostalCode String?
 
   // Integrations
   stripeAccountId             String? @unique
@@ -314,6 +325,11 @@ model SiteContent {
   metaKeywords    String?
   ogImage         String?
   faviconUrl      String?
+  // Short brand used as the " | Brand" suffix on every page title
+  // (`renderSeoTitle` in src/lib/seo/title.ts). Null → Business.name. Lets a
+  // long-named store ("Detroit Pollinator Company") shorten only the suffix.
+  // Written only by business.updateSeo. DDL: prisma/manual/2026-09-14-seo-brand-address.sql
+  seoBrandName    String?
 
   // Per-route meta overrides for storefront pages that have no DB row of their
   // own (/about, /contact, /shop, /blog, /collections, /services, /testimonials,

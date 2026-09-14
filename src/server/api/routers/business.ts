@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
+import { formatBusinessAddress, hasAddressParts } from "~/lib/address/format";
 import { checkBusiness } from "~/lib/check-business";
 import { TEMPLATES } from "~/lib/constants";
 import { emailOverridesSchema } from "~/lib/email/customization";
@@ -38,6 +39,19 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
+/**
+ * A structured-address column: absent stays absent (Prisma no-op), and a
+ * blank string the owner cleared becomes `null` rather than `""` — so
+ * `hasAddressParts` / the JSON-LD builders see one empty representation.
+ */
+function normalizeAddressPart(
+  value: string | undefined,
+): string | null | undefined {
+  if (value === undefined) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 export const businessRouter = createTRPCRouter({
   simplifiedGet: publicProcedure.query(async ({ ctx }) => {
     const business = await checkBusiness();
@@ -63,6 +77,13 @@ export const businessRouter = createTRPCRouter({
         name: true,
         templateId: true,
         businessAddress: true,
+        // Structured address parts. Public by design — they render in the
+        // LocalBusiness / Organization JSON-LD `PostalAddress` alongside the
+        // already-public `businessAddress` display string.
+        addressStreet: true,
+        addressCity: true,
+        addressState: true,
+        addressPostalCode: true,
         businessHours: true,
         timeZone: true,
         supportEmail: true,
@@ -100,6 +121,9 @@ export const businessRouter = createTRPCRouter({
             metaTitle: true,
             metaDescription: true,
             metaKeywords: true,
+            // Short brand used as the `<title>` suffix — see
+            // `resolveSeoBrand` in `~/lib/seo/title`.
+            seoBrandName: true,
             ogImage: true,
             // Read by `generateMetadata` in the root layout (verification
             // tokens) and in each static storefront route (per-route title /
@@ -989,7 +1013,14 @@ export const businessRouter = createTRPCRouter({
         name: z.string(),
         ownerEmail: z.string().email(),
         supportEmail: z.string().email(),
+        // Legacy single-line address. Still accepted so callers that have not
+        // moved to the structured parts keep working; when any part below is
+        // set, it is recomputed from them instead.
         businessAddress: z.string().optional(),
+        addressStreet: z.string().optional(),
+        addressCity: z.string().optional(),
+        addressState: z.string().optional(),
+        addressPostalCode: z.string().optional(),
         phoneNumber: z.string().optional(),
         sendAbandonedCheckoutEmails: z.boolean().optional(),
         timeZone: z.string().optional(),
@@ -1002,10 +1033,21 @@ export const businessRouter = createTRPCRouter({
         ownerEmail,
         supportEmail,
         businessAddress,
+        addressStreet,
+        addressCity,
+        addressState,
+        addressPostalCode,
         phoneNumber,
         sendAbandonedCheckoutEmails,
         timeZone,
       } = input;
+
+      const addressParts = {
+        street: addressStreet,
+        city: addressCity,
+        state: addressState,
+        postalCode: addressPostalCode,
+      };
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -1013,7 +1055,18 @@ export const businessRouter = createTRPCRouter({
           name,
           ownerEmail,
           supportEmail,
-          businessAddress,
+          // The structured parts are the source of truth once the owner has
+          // filled in any of them: the single-line display string every
+          // template footer renders is derived from them, so the two can
+          // never drift. With all four blank, whatever the caller sent as
+          // `businessAddress` stands (and `undefined` leaves it untouched).
+          businessAddress: hasAddressParts(addressParts)
+            ? formatBusinessAddress(addressParts)
+            : businessAddress,
+          addressStreet: normalizeAddressPart(addressStreet),
+          addressCity: normalizeAddressPart(addressCity),
+          addressState: normalizeAddressPart(addressState),
+          addressPostalCode: normalizeAddressPart(addressPostalCode),
           phoneNumber,
           sendAbandonedCheckoutEmails,
           timeZone,
@@ -1153,6 +1206,7 @@ export const businessRouter = createTRPCRouter({
         metaTitle: z.string().optional(),
         metaDescription: z.string().optional(),
         metaKeywords: z.string().optional(),
+        seoBrandName: z.string().trim().max(60).optional(),
         ogImage: z.string().optional(),
         localBusinessEnabled: z.boolean().optional(),
         allowAiCrawlers: z.boolean().optional(),
@@ -1166,6 +1220,7 @@ export const businessRouter = createTRPCRouter({
         metaTitle,
         metaDescription,
         metaKeywords,
+        seoBrandName,
         ogImage,
         localBusinessEnabled,
         allowAiCrawlers,
@@ -1173,7 +1228,7 @@ export const businessRouter = createTRPCRouter({
         siteVerification,
       } = input;
 
-      // The four meta strings above map to nullable `String?` columns, where an
+      // The five meta strings above map to nullable `String?` columns, where an
       // absent key is already a no-op, so they can be passed through unguarded.
       // These two are Json columns: `undefined` is a no-op but `null` is a type
       // error (Prisma wants `Prisma.JsonNull`), so they are only spread in when
@@ -1198,6 +1253,7 @@ export const businessRouter = createTRPCRouter({
                 metaTitle,
                 metaDescription,
                 metaKeywords,
+                seoBrandName,
                 ogImage,
                 ...jsonPatch,
               },
@@ -1205,6 +1261,7 @@ export const businessRouter = createTRPCRouter({
                 metaTitle,
                 metaDescription,
                 metaKeywords,
+                seoBrandName,
                 ogImage,
                 ...jsonPatch,
               },

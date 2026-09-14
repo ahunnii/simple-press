@@ -18,7 +18,7 @@ type StyleProps = {
 };
 
 type Props = {
-  images: { url: string }[];
+  images: { url: string; altText?: string | null }[];
   productName: string;
   styleProps?: StyleProps;
   enableLightbox?: boolean;
@@ -126,7 +126,11 @@ export function ProductGalleryHorizontal({
         )}
         <Image
           src={mainSrc}
-          alt={productName}
+          alt={
+            images[selectedImage]?.altText?.trim()
+              ? (images[selectedImage]?.altText ?? "")
+              : productName
+          }
           fill
           className={isContain ? "object-contain" : "object-cover"}
           priority
@@ -238,7 +242,11 @@ export function ProductGalleryHorizontal({
             >
               <Image
                 src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                alt={productName}
+                alt={
+                  images[selectedImage]?.altText?.trim()
+                    ? (images[selectedImage]?.altText ?? "")
+                    : productName
+                }
                 width={1200}
                 height={1200}
                 className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"

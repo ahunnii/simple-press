@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Info, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -18,6 +18,12 @@ import { DISCOUNT_PERCENTAGE_MAX_ERROR } from "~/lib/validators/discounts";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -260,6 +266,7 @@ export function LoyaltySettings({ initial }: Props) {
             </Button>
             <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
             <div className="hidden min-w-0 items-center gap-2 sm:flex">
+              <h1 className="text-base font-medium">Rewards Program</h1>
               <span
                 className={`admin-status-badge ${
                   isDirty ? "isDirty" : "isPublished"
@@ -308,9 +315,50 @@ export function LoyaltySettings({ initial }: Props) {
         <div className="admin-container">
           <div className="space-y-6">
             <p className="text-muted-foreground text-sm">
-              Changes apply to future orders only — points already awarded are
-              never recalculated.
+              Let customers earn points on orders and bonuses, then redeem
+              them for single-use discount codes. Changes apply to future
+              orders only — points already awarded are never recalculated.
             </p>
+
+            {!initial.flags.loyalty && (
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>
+                  The Rewards Program feature is turned off
+                </AlertTitle>
+                <AlertDescription>
+                  Turn it on in Features to let customers earn and redeem
+                  points.
+                </AlertDescription>
+                <AlertAction>
+                  <Button variant="outline" asChild size="xs">
+                    <Link href="/admin/settings/features">
+                      Settings → Features
+                    </Link>
+                  </Button>
+                </AlertAction>
+              </Alert>
+            )}
+
+            {initial.flags.loyalty && !initial.flags.coupons && (
+              <Alert variant="warning">
+                <Info className="h-4 w-4" />
+                <AlertTitle>
+                  Redeeming rewards needs Discount Codes turned on
+                </AlertTitle>
+                <AlertDescription>
+                  Customers can earn points but can&apos;t redeem them until
+                  you enable it.
+                </AlertDescription>
+                <AlertAction>
+                  <Button variant="outline" asChild size="xs">
+                    <Link href="/admin/settings/features">
+                      Settings → Features
+                    </Link>
+                  </Button>
+                </AlertAction>
+              </Alert>
+            )}
 
             {/* Earning on orders */}
             <Card>

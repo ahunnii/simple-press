@@ -6,6 +6,7 @@ import { DefaultSignUpPage } from "~/app/(storefront)/_templates/default/auth/de
 
 export const metadata = {
   title: "Sign Up",
+  robots: { index: false, follow: false },
 };
 
 type Props = {

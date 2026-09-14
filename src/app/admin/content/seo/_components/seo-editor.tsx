@@ -26,6 +26,8 @@ import type {
   StaticSeoRouteKey,
 } from "~/lib/validators/site-seo";
 import { env } from "~/env";
+import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
+import { renderSeoTitle } from "~/lib/seo/title";
 import { cn } from "~/lib/utils";
 import {
   normalizeVerificationToken,
@@ -85,6 +87,9 @@ type Props = {
     metaTitle: string | null;
     metaDescription: string | null;
     metaKeywords: string | null;
+    // Short brand suffix override for every rendered `<title>` — see
+    // `resolveSeoBrand` in `~/lib/seo/title`.
+    seoBrandName: string | null;
     ogImage: string | null;
     faviconUrl: string | null;
     // Raw Json columns — always read through `parsePageMeta` /
@@ -163,6 +168,7 @@ const seoFormSchema = z.object({
   metaTitle: z.string().nullable().optional(),
   metaDescription: z.string().nullable().optional(),
   metaKeywords: z.string().nullable().optional(),
+  seoBrandName: z.string().nullable().optional(),
   ogImage: z.string().nullable().optional(),
   ogImageFile: z.instanceof(File).optional().nullable(),
   localBusinessEnabled: z.boolean(),
@@ -214,6 +220,7 @@ const TAB_FOR_FIELD = {
   metaTitle: "store",
   metaDescription: "store",
   metaKeywords: "store",
+  seoBrandName: "store",
   ogImage: "store",
   ogImageFile: "store",
   pageMeta: "pages",
@@ -293,6 +300,7 @@ function buildFormValues(args: {
     metaTitle: string | null | undefined;
     metaDescription: string | null | undefined;
     metaKeywords: string | null | undefined;
+    seoBrandName: string | null | undefined;
     ogImage: string | null | undefined;
     pageMeta: unknown;
     siteVerification: unknown;
@@ -319,6 +327,7 @@ function buildFormValues(args: {
     metaTitle: args.siteContent.metaTitle ?? "",
     metaDescription: args.siteContent.metaDescription ?? "",
     metaKeywords: args.siteContent.metaKeywords ?? "",
+    seoBrandName: args.siteContent.seoBrandName ?? "",
     ogImage: args.siteContent.ogImage ?? "",
     ogImageFile: null,
     localBusinessEnabled: args.localBusinessEnabled,
@@ -496,6 +505,7 @@ export function SEOEditor({
             metaTitle: data.siteContent?.metaTitle,
             metaDescription: data.siteContent?.metaDescription,
             metaKeywords: data.siteContent?.metaKeywords,
+            seoBrandName: data.siteContent?.seoBrandName,
             ogImage: data.siteContent?.ogImage,
             pageMeta: data.siteContent?.pageMeta,
             siteVerification: data.siteContent?.siteVerification,
@@ -597,6 +607,7 @@ export function SEOEditor({
       metaTitle: data.metaTitle ?? undefined,
       metaDescription: data.metaDescription ?? undefined,
       metaKeywords: data.metaKeywords ?? undefined,
+      seoBrandName: data.seoBrandName ?? undefined,
       ogImage: ogImageUrl,
       localBusinessEnabled: data.localBusinessEnabled,
       allowAiCrawlers: data.allowAiCrawlers,
@@ -634,10 +645,24 @@ export function SEOEditor({
   // never falls through and `||` trips the lint rule.
   const storeTitle = form.watch("metaTitle");
   const storeDescription = form.watch("metaDescription");
-  const storeTitleLength = storeTitle?.length ?? 0;
   const storeDescriptionLength = storeDescription?.length ?? 0;
   const inheritedDescription = firstFilled([storeDescription], "");
   const watchedOgImageFile = form.watch("ogImageFile");
+
+  // The brand every rendered `<title>` gets suffixed with — reacts live to the
+  // "Short name for page titles" field so every counter and preview on this
+  // page updates the instant the owner types, without waiting for a save.
+  // `firstNonBlank` (not `??`-on-the-raw-field) is required here: the field
+  // defaults to `""`, which is not nullish.
+  const watchedSeoBrandName = form.watch("seoBrandName");
+  const brand = firstNonBlank(watchedSeoBrandName) ?? business.name;
+
+  // Rendered length — what Google actually shows, not the raw field — with
+  // the same fallback `buildPageMetadata` uses when the field is blank.
+  const storeTitleLength = renderSeoTitle(
+    preferNonBlank(storeTitle, business.name),
+    brand,
+  ).length;
 
   // Per-page rows: only routes whose feature is on. A row hidden here keeps its
   // form state, so its stored values still survive the save.
@@ -658,15 +683,17 @@ export function SEOEditor({
   const previewRow =
     previewRoute === undefined ? undefined : pageMetaValues[previewRoute.key];
 
-  // Mirrors `buildPageMetadata`: an owner-written per-page title ships verbatim,
-  // a blank one inherits the built-in page name plus the "| Store" suffix from
-  // the root layout's title template.
+  // Mirrors `buildPageMetadata` — and, since 2026-09-14, `renderSeoTitle`
+  // itself: an owner-written per-page title ships verbatim (still suffixed
+  // with the brand unless it already contains it), a blank one inherits the
+  // built-in page name, and every route's rendered "<title> | brand" is what
+  // gets shown here, exactly as Google will see it.
   const previewTitle =
     previewRoute === undefined
-      ? firstFilled([storeTitle], business.name)
-      : firstFilled(
-          [previewRow?.title],
-          `${previewRoute.label} | ${business.name}`,
+      ? renderSeoTitle(preferNonBlank(storeTitle, business.name), brand)
+      : renderSeoTitle(
+          preferNonBlank(previewRow?.title, previewRoute.label),
+          brand,
         );
 
   const previewDescription =
@@ -841,8 +868,33 @@ export function SEOEditor({
                               length={storeTitleLength}
                               max={TITLE_LIMIT}
                               optimal="50-60"
-                              hint={`leave blank to use “${business.name}”`}
+                              hint={`includes " | ${brand}" — leave blank to use “${business.name}”`}
                             />
+                          }
+                          descriptionClassName="text-xs text-muted-foreground"
+                        />
+
+                        <InputFormField
+                          form={form}
+                          name="seoBrandName"
+                          label="Short name for page titles"
+                          placeholder={business.name}
+                          description={
+                            <>
+                              <CharCount
+                                length={watchedSeoBrandName?.length ?? 0}
+                                max={TITLE_LIMIT}
+                                optimal="15-30"
+                              />
+                              <span className="mt-1 block">
+                                Added to the end of every page title as &ldquo;
+                                | Name&rdquo;. Shorten it if your business name
+                                is long.
+                              </span>
+                              <span className="mt-1 block">
+                                Example: {renderSeoTitle("Shop", brand)}
+                              </span>
+                            </>
                           }
                           descriptionClassName="text-xs text-muted-foreground"
                         />
@@ -993,13 +1045,21 @@ export function SEOEditor({
                                   form={form}
                                   name={`pageMeta.${route.key}.title`}
                                   label="Page title"
-                                  placeholder={`${route.label} | ${business.name}`}
+                                  placeholder={`${route.label} | ${brand}`}
                                   description={
                                     <CharCount
-                                      length={row.title.length}
+                                      length={
+                                        renderSeoTitle(
+                                          preferNonBlank(
+                                            row.title,
+                                            route.label,
+                                          ),
+                                          brand,
+                                        ).length
+                                      }
                                       max={TITLE_LIMIT}
                                       optimal="50-60"
-                                      hint="blank keeps the page name shown above"
+                                      hint={`includes " | ${brand}" — blank keeps the page name shown above`}
                                     />
                                   }
                                   descriptionClassName="text-xs text-muted-foreground"

@@ -24,4 +24,5 @@ export default async function SignupCompletePage() {
 
 export const metadata = {
   title: "Signup Complete",
+  robots: { index: false, follow: false },
 };

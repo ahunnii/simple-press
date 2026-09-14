@@ -25,4 +25,5 @@ export default async function ForgotPasswordPage({ searchParams }: Props) {
 
 export const metadata = {
   title: "Forgot your password?",
+  robots: { index: false, follow: false },
 };

@@ -54,6 +54,7 @@ export default async function AdminDashboardPage() {
       customFields: true,
       metaTitle: true,
       metaDescription: true,
+      seoBrandName: true,
       ogImage: true,
       faviconUrl: true,
       pageMeta: true,

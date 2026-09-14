@@ -34,6 +34,9 @@ export function DefaultProductCard({ product }: Props) {
   });
 
   const productImage = product.images[0]?.url ?? "/placeholder.svg";
+  const productImageAlt = product.images[0]?.altText?.trim()
+    ? (product.images[0]?.altText ?? "")
+    : product.name;
 
   return (
     // Relative wrapper keeps the wishlist button a sibling of the card link
@@ -45,7 +48,7 @@ export function DefaultProductCard({ product }: Props) {
           {productImage ? (
             <Image
               src={productImage}
-              alt={product.name}
+              alt={productImageAlt}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-[1.015]"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

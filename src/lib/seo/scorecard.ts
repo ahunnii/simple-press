@@ -5,6 +5,8 @@ import type { Prisma } from "generated/prisma";
 import type { ChecklistItem, ChecklistSummary } from "~/lib/admin/checklist";
 import { summarizeChecklist } from "~/lib/admin/checklist";
 import { parseBusinessHours } from "~/lib/business-hours";
+import { preferNonBlank } from "~/lib/seo/blank";
+import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import {
   parsePageMeta,
   parseSiteVerification,
@@ -77,17 +79,27 @@ export type SeoScorecard = ChecklistSummary & {
 };
 
 export type BusinessForScorecard = {
+  /** Fallback title text and the default title-suffix brand — see `meta-title` below. */
+  name: string;
   domainStatus: string;
   allowAiCrawlers: boolean;
   localBusinessEnabled: boolean;
+  /** Legacy free-text address — still scored, but the structured columns below win. */
   businessAddress: string | null;
   phoneNumber: string | null;
   businessHours: unknown;
+  /** Structured `PostalAddress` columns — see `local-address` below. */
+  addressStreet: string | null;
+  addressCity: string | null;
+  addressState: string | null;
+  addressPostalCode: string | null;
 };
 
 export type SiteContentForScorecard = {
   metaTitle: string | null;
   metaDescription: string | null;
+  /** Title-suffix override — see `resolveSeoBrand` in `~/lib/seo/title`. */
+  seoBrandName?: string | null;
   ogImage: string | null;
   faviconUrl: string | null;
   /** Raw JSON columns — run through `parsePageMeta` / `parseSiteVerification`. */
@@ -404,11 +416,19 @@ export async function computeSeoScorecard({
   );
 
   // ── Search listing ─────────────────────────────────────────────────────────
-  const metaTitle = lengthBand(
-    siteContent?.metaTitle,
-    META_TITLE_MIN,
-    META_TITLE_MAX,
+  // The check is "did the owner write a title" — blank stays 0 no matter how
+  // the fallback would render. Once something is written, band on the
+  // RENDERED "title | brand" length (what Google actually shows in the
+  // result), not the raw field — mirrors `renderSeoTitle` in `~/lib/seo/title`,
+  // which is what every storefront `<title>` now goes through.
+  const metaTitleWritten = isNonBlank(siteContent?.metaTitle);
+  const renderedMetaTitle = renderSeoTitle(
+    preferNonBlank(siteContent?.metaTitle, business.name),
+    resolveSeoBrand({ name: business.name, siteContent }),
   );
+  const metaTitle = metaTitleWritten
+    ? lengthBand(renderedMetaTitle, META_TITLE_MIN, META_TITLE_MAX)
+    : { score: 0, detail: "Not set" };
   const metaDescription = lengthBand(
     siteContent?.metaDescription,
     META_DESCRIPTION_MIN,
@@ -528,14 +548,29 @@ export async function computeSeoScorecard({
   // gap would contradict the app's own advice.
   if (business.localBusinessEnabled) {
     const hasHours = parseBusinessHours(business.businessHours).length > 0;
+    // Full credit for the structured columns the JSON-LD builder actually
+    // reads city/state/ZIP off of; half credit for the legacy free-text
+    // field alone (still displayed, but not machine-parseable into
+    // PostalAddress parts); nothing when neither is set.
+    const hasStructuredAddress =
+      isNonBlank(business.addressCity) &&
+      isNonBlank(business.addressState) &&
+      isNonBlank(business.addressPostalCode);
+    const hasLegacyAddress = isNonBlank(business.businessAddress);
+    const addressScore = hasStructuredAddress ? 1 : hasLegacyAddress ? 0.5 : 0;
+    const addressDetail = hasStructuredAddress
+      ? "Emitted as a structured PostalAddress in your LocalBusiness schema"
+      : hasLegacyAddress
+        ? "Add city, state and ZIP so search engines can place you on a map"
+        : "Not set";
     groups.push(
       toGroup("local", "Local presence", [
         {
           key: "local-address",
           label: "Street address",
           href: "/admin/settings/general",
-          score: binary(isNonBlank(business.businessAddress)),
-          detail: "Emitted as PostalAddress in your LocalBusiness schema",
+          score: addressScore,
+          detail: addressDetail,
         },
         {
           key: "local-phone",

@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import type { CollectionFormData } from "~/lib/validators/collections";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
+import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { collectionFormSchema } from "~/lib/validators/collections";
 import { api } from "~/trpc/react";
@@ -120,6 +122,14 @@ export function CollectionForm({ collection }: Props) {
   const utils = api.useUtils();
 
   const siteHost = useSiteHost();
+  const { data: businessInfo } = api.business.simplifiedGet.useQuery();
+  // The title-suffix brand — `seoBrandName` when the owner set one, else the
+  // business name. Used to render every meta-title counter and preview the
+  // same way the storefront `<title>` actually renders.
+  const brand = resolveSeoBrand({
+    name: businessInfo?.name ?? "",
+    siteContent: businessInfo?.siteContent,
+  });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<CollectionFormTab>("basics");
 
@@ -430,9 +440,16 @@ export function CollectionForm({ collection }: Props) {
     [saveAttempted, formErrors],
   );
 
+  // SEO preview values. Title is rendered through `renderSeoTitle`, exactly
+  // as the storefront `<title>` will, including the " | brand" suffix.
+  // Description is untouched by this pass — `||` is intentional there so a
+  // cleared "" falls through to the next candidate.
+  const seoPreviewTitle = renderSeoTitle(
+    firstNonBlank(form.watch("metaTitle"), form.watch("name")) ??
+      "Collection Name",
+    brand,
+  );
   /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-  const seoPreviewTitle =
-    form.watch("metaTitle") || form.watch("name") || "Collection Name";
   const seoPreviewDesc =
     form.watch("metaDescription") ||
     form.watch("description") ||
@@ -449,7 +466,12 @@ export function CollectionForm({ collection }: Props) {
     watchedName.trim() !== collection.name &&
     nameDerivedSlug !== watchedSlug;
 
-  const metaTitleLength = form.watch("metaTitle")?.length ?? 0;
+  // Rendered length ("title | brand"), not the raw field — matches what
+  // Google will actually show.
+  const metaTitleLength = renderSeoTitle(
+    preferNonBlank(form.watch("metaTitle"), watchedName),
+    brand,
+  ).length;
   const metaDescriptionLength = form.watch("metaDescription")?.length ?? 0;
 
   return (
@@ -812,13 +834,14 @@ export function CollectionForm({ collection }: Props) {
                           description={
                             <span
                               className={
-                                metaTitleLength > 70
+                                metaTitleLength > 60
                                   ? "text-destructive"
                                   : undefined
                               }
                             >
-                              {metaTitleLength}/70 characters — aim for 50–60.
-                              Leave blank to use the collection name.
+                              {metaTitleLength}/60 characters including &quot; |{" "}
+                              {brand}&quot; — aim for 50–60. Leave blank to use
+                              the collection name.
                             </span>
                           }
                           descriptionClassName="text-xs text-muted-foreground"
