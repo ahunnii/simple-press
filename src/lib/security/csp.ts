@@ -31,6 +31,56 @@ const SENTRY_CSP_REPORT_URI =
 
 export const CSP_REPORT_ONLY_HEADER = "Content-Security-Policy-Report-Only";
 
+export const HSTS_HEADER = "Strict-Transport-Security";
+
+/** Two years, the value the HSTS preload list requires as a minimum. */
+export const HSTS_MAX_AGE_SECONDS = 63072000;
+
+/**
+ * Builds the `Strict-Transport-Security` value for the host that served the
+ * response.
+ *
+ * `includeSubDomains` is only ever sent for the platform apex and its own
+ * subdomains (`simplepress.co`, `shop.simplepress.co`, `platform.simplepress.co`),
+ * which are all HTTPS and all ours. A tenant's CUSTOM domain gets a plain
+ * `max-age`: sending `includeSubDomains` from `coolbusiness.com` would make
+ * every browser that visited the store force HTTPS on `*.coolbusiness.com`
+ * for two years — including an owner's unrelated plain-http services on that
+ * domain, which we neither own nor can see. Deliberately no `preload` (a
+ * one-way door for the whole apex).
+ *
+ * Returns `null` when no platform domain is known or the host is a
+ * localhost form (browsers ignore HSTS over plain HTTP anyway, and a stray
+ * header on `*.localhost` would only confuse local debugging).
+ */
+export function buildHsts(
+  hostname: string,
+  platformDomain: string | null | undefined = process.env
+    .NEXT_PUBLIC_PLATFORM_DOMAIN,
+): string | null {
+  const host = hostname
+    .trim()
+    .toLowerCase()
+    .replace(/:\d+$/, "")
+    .replace(/\.$/, "");
+  const platform = platformDomain?.trim().toLowerCase() ?? "";
+
+  if (!host || !platform) return null;
+  if (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host === "127.0.0.1" ||
+    platform.includes("localhost")
+  ) {
+    return null;
+  }
+
+  const isPlatformHost = host === platform || host.endsWith(`.${platform}`);
+  return isPlatformHost
+    ? `max-age=${HSTS_MAX_AGE_SECONDS}; includeSubDomains`
+    : `max-age=${HSTS_MAX_AGE_SECONDS}`;
+}
+
 export interface BuildCspOptions {
   /** Dev build: relaxes eval + localhost/HMR origins. Defaults to `NODE_ENV !== "production"`. */
   dev?: boolean;

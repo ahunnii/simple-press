@@ -3,8 +3,10 @@ import { NextResponse } from "next/server";
 
 import {
   buildCsp,
+  buildHsts,
   CSP_REPORT_ONLY_HEADER,
   generateNonce,
+  HSTS_HEADER,
 } from "~/lib/security/csp";
 
 export async function middleware(req: NextRequest) {
@@ -52,12 +54,19 @@ export async function middleware(req: NextRequest) {
   // On the preview/staging deployment, keep the whole environment out of search
   // indexes (it serves a clone of prod data on preview.<platform-domain>).
   const isPreviewEnv = process.env.IS_PREVIEW_ENV === "true";
+  // HSTS is per-host, not a static header: `includeSubDomains` only for the
+  // platform apex + its subdomains, plain `max-age` on tenant custom domains
+  // (see `buildHsts`). Null on localhost / unknown platform domain.
+  const hstsHeader = buildHsts(hostname);
   const finalize = (res: NextResponse) => {
     if (isPreviewEnv) {
       res.headers.set("X-Robots-Tag", "noindex, nofollow");
     }
     if (cspHeader) {
       res.headers.set(CSP_REPORT_ONLY_HEADER, cspHeader);
+    }
+    if (hstsHeader) {
+      res.headers.set(HSTS_HEADER, hstsHeader);
     }
     return res;
   };

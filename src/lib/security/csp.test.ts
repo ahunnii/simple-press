@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildCsp,
+  buildHsts,
   CSP_REPORT_ONLY_HEADER,
   generateNonce,
+  HSTS_HEADER,
+  HSTS_MAX_AGE_SECONDS,
   resolveStorageOrigin,
 } from "./csp";
 
@@ -229,5 +232,53 @@ describe("buildCsp", () => {
 
   it("produces a header value with no characters that break header parsing", () => {
     expect(prod()).not.toMatch(/[\r\n]/);
+  });
+});
+
+describe("buildHsts", () => {
+  const platform = "simplepress.co";
+  const withSub = `max-age=${HSTS_MAX_AGE_SECONDS}; includeSubDomains`;
+  const bare = `max-age=${HSTS_MAX_AGE_SECONDS}`;
+
+  it("exports the standard header name", () => {
+    expect(HSTS_HEADER).toBe("Strict-Transport-Security");
+  });
+
+  it("includes subdomains for the platform apex and its subdomains", () => {
+    expect(buildHsts("simplepress.co", platform)).toBe(withSub);
+    expect(buildHsts("shop.simplepress.co", platform)).toBe(withSub);
+    expect(buildHsts("platform.simplepress.co", platform)).toBe(withSub);
+    expect(buildHsts("deep.shop.simplepress.co", platform)).toBe(withSub);
+  });
+
+  it("never includes subdomains for a tenant custom domain", () => {
+    expect(buildHsts("coolbusiness.com", platform)).toBe(bare);
+    expect(buildHsts("www.coolbusiness.com", platform)).toBe(bare);
+    expect(buildHsts("finallyresults.com", platform)).toBe(bare);
+  });
+
+  it("does not treat a look-alike domain as the platform", () => {
+    expect(buildHsts("simplepress.co.evil.com", platform)).toBe(bare);
+    expect(buildHsts("notsimplepress.co", platform)).toBe(bare);
+  });
+
+  it("ignores port, case and a trailing dot", () => {
+    expect(buildHsts("SHOP.SimplePress.CO:443", platform)).toBe(withSub);
+    expect(buildHsts("coolbusiness.com:8443", platform)).toBe(bare);
+    expect(buildHsts("shop.simplepress.co.", platform)).toBe(withSub);
+  });
+
+  it("returns null on localhost hosts and when no platform domain is known", () => {
+    expect(buildHsts("localhost:3000", platform)).toBeNull();
+    expect(buildHsts("shop.localhost:3000", platform)).toBeNull();
+    expect(buildHsts("127.0.0.1", platform)).toBeNull();
+    expect(buildHsts("shop.simplepress.co", "")).toBeNull();
+    expect(buildHsts("shop.simplepress.co", null)).toBeNull();
+    expect(buildHsts("shop.simplepress.co", "localhost")).toBeNull();
+    expect(buildHsts("", platform)).toBeNull();
+  });
+
+  it("never emits preload", () => {
+    expect(buildHsts("simplepress.co", platform)).not.toMatch(/preload/i);
   });
 });
