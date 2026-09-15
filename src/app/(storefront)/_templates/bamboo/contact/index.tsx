@@ -62,7 +62,61 @@ const contactMapData: TemplateField[] = [
   },
 ];
 
-export const bambooContactData = [...contactPageData, ...contactMapData];
+const contactFaqData: TemplateField[] = [
+  {
+    key: "bamboo.contact.faq-heading",
+    label: "FAQ Heading",
+    description: "Heading above the frequently-asked-questions accordion.",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    defaultValue: "Frequently Asked Questions",
+  },
+  {
+    key: "bamboo.contact.faq-lede",
+    label: "FAQ Lede",
+    description:
+      "Optional supporting line under the heading. Leave blank to hide.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "bamboo.contact.faq",
+    label: "Questions",
+    description:
+      "Shown as an accordion below the contact form, up to 10. Leave empty to use the built-in defaults.",
+    type: "list",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    minItems: 0,
+    maxItems: 10,
+    itemSchema: [
+      {
+        key: "question",
+        label: "Question",
+        type: "text",
+        placeholder: "e.g. Do you ship outside Michigan?",
+      },
+      {
+        key: "answer",
+        label: "Answer",
+        type: "textarea",
+        placeholder: "Your answer",
+      },
+    ],
+  },
+];
+
+export const bambooContactData = [
+  ...contactPageData,
+  ...contactMapData,
+  ...contactFaqData,
+];
 
 export const bambooContactFieldGroups: TemplateFieldGroup[] = [
   {
@@ -78,5 +132,13 @@ export const bambooContactFieldGroups: TemplateFieldGroup[] = [
     description: "Interactive map shown below the contact form",
     icon: "📍",
     columns: 2,
+  },
+  {
+    id: "contact.faq",
+    title: "FAQ",
+    description:
+      "Frequently asked questions shown at the bottom of the contact page",
+    icon: "❓",
+    columns: 1,
   },
 ];

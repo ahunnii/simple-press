@@ -30,7 +30,7 @@ export function BambooAccountLayout({ children, heading, breadcrumb }: Props) {
       <section className="bg-secondary">
         <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
           <FadeIn direction="up">
-            <p className="text-primary mb-2 text-sm font-semibold tracking-wider uppercase">
+            <p className="mb-2 text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
               Account
             </p>
             <h1 className="font-heading text-foreground text-4xl font-bold">

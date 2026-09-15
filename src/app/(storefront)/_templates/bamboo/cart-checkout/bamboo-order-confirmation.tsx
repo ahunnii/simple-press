@@ -134,7 +134,7 @@ export function BambooOrderConfirmation({ business }: Props) {
         <h1
           ref={confirmedHeadingRef}
           tabIndex={-1}
-          className="font-heading text-foreground text-3xl font-bold tracking-tight outline-none md:text-4xl lg:text-5xl"
+          className="font-serif text-foreground text-3xl font-bold tracking-tight outline-none md:text-4xl lg:text-5xl"
         >
           Order Confirmed!
         </h1>
@@ -154,7 +154,7 @@ export function BambooOrderConfirmation({ business }: Props) {
               <Package className="text-primary size-5" />
             </div>
             <div className="flex-1">
-              <h2 className="text-foreground mb-3 text-xl font-semibold">
+              <h2 className="font-serif text-foreground mb-3 text-2xl font-bold tracking-tight md:text-3xl">
                 What happens next?
               </h2>
               <ul className="text-muted-foreground space-y-2">

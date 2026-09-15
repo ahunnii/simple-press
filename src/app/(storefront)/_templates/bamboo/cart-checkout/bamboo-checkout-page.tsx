@@ -16,7 +16,7 @@ export async function BambooCheckoutPage({
       <PageTransition>
         <div className="flex min-h-[50vh] flex-1 items-center justify-center bg-[var(--bam-forest)] p-4">
           <div className="max-w-md text-center">
-            <h1 className="font-heading mb-4 text-2xl font-bold text-[var(--bam-cream)]">
+            <h1 className="font-serif mb-4 text-2xl font-bold tracking-tight text-[var(--bam-cream)]">
               Checkout Unavailable
             </h1>
             <p className="text-[var(--bam-cream)]/70">

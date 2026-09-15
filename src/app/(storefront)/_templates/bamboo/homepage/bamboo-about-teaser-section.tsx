@@ -54,7 +54,7 @@ export function BambooAboutTeaserSection({ customFields }: Props) {
             ) : null}
 
             <h2
-              className="text-foreground font-serif text-4xl leading-tight font-bold text-balance md:text-5xl"
+              className="text-foreground font-serif text-4xl leading-tight font-bold tracking-tight text-balance md:text-5xl"
               {...fieldAttr("bamboo.homepage.about-teaser-heading")}
             >
               {f["bamboo.homepage.about-teaser-heading"] ?? ""}

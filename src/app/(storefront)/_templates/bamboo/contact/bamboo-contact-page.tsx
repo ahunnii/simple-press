@@ -3,11 +3,17 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { parseTemplateListRows } from "~/lib/template-fields";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import {
+  BambooAccordion,
+  BambooAccordionItem,
+} from "../shared/bamboo-accordion";
 import { BambooMap } from "../shared/bamboo-map";
 import { BambooPageHero } from "../shared/bamboo-page-hero";
 import { BambooContactForm } from "./bamboo-contact-form";
@@ -15,9 +21,48 @@ import { BambooContactForm } from "./bamboo-contact-form";
 // Eyebrow-over-serif-h2 rhythm (docs/templates/bamboo/design.md "Section
 // rhythm"). These labels are decorative -- not bound to any field.
 const eyebrowClass =
-  "mb-3 block text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase";
+  "mb-3 block text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase";
 const iconCircleClass =
   "flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--bam-gold)]/40";
+
+// Built-in example FAQ, used when the owner hasn't configured any rows.
+const DEFAULT_FAQ: TemplateListRow[] = [
+  {
+    _id: "default-faq-1",
+    question: "What makes bamboo tissue different from regular paper products?",
+    answer:
+      "Bamboo fiber is naturally soft and strong without the heavy chemical processing traditional paper relies on, so you get a premium feel with a lighter footprint.",
+  },
+  {
+    _id: "default-faq-2",
+    question: "Is bamboo tissue septic-safe and biodegradable?",
+    answer:
+      "Yes -- our bamboo paper products break down readily and are safe for septic systems, unlike many tree-based alternatives.",
+  },
+  {
+    _id: "default-faq-3",
+    question: "Do you ship outside Michigan?",
+    answer:
+      "We ship nationwide from our home base in Detroit, with tracking on every order.",
+  },
+  {
+    _id: "default-faq-4",
+    question: "Do you offer subscriptions or bulk and wholesale pricing?",
+    answer:
+      "Yes -- reach out to our team and we'll set you up with recurring delivery or a bulk and wholesale arrangement that fits your needs.",
+  },
+  {
+    _id: "default-faq-5",
+    question: "What if I'm not happy with my order?",
+    answer:
+      "Your satisfaction matters to us -- reach out and we'll make it right.",
+  },
+];
+
+function readString(row: TemplateListRow, key: string): string {
+  const value = row[key];
+  return typeof value === "string" ? value : "";
+}
 
 export function BambooContactPage({
   business,
@@ -30,7 +75,15 @@ export function BambooContactPage({
     "bamboo.contact.map-heading",
     "bamboo.global.map-lat",
     "bamboo.global.map-lng",
+    "bamboo.contact.faq-heading",
+    "bamboo.contact.faq-lede",
   ]);
+
+  const customFields = business?.siteContent?.customFields as
+    | Record<string, unknown>
+    | undefined;
+  const faqRows = parseTemplateListRows(customFields?.["bamboo.contact.faq"]);
+  const faq = faqRows.length > 0 ? faqRows : DEFAULT_FAQ;
 
   const email = business?.supportEmail?.trim();
   const location = business?.businessAddress?.trim();
@@ -174,6 +227,52 @@ export function BambooContactPage({
             </div>
           </section>
         )}
+
+      {isSectionVisible(
+        business?.siteContent?.customFields,
+        "bamboo",
+        "contact.faq",
+      ) && (
+        <section
+          {...sectionGroupAttr("contact", "faq")}
+          className="mx-auto max-w-7xl px-4 py-20 md:py-28 lg:px-8"
+        >
+          <FadeIn direction="up">
+            <div className="mb-12 text-center">
+              <span className={eyebrowClass + " text-center"}>Answers</span>
+              <h2 className="text-foreground font-serif text-4xl font-bold tracking-tight md:text-5xl">
+                <span
+                  className="text-balance"
+                  {...fieldAttr("bamboo.contact.faq-heading")}
+                >
+                  {f["bamboo.contact.faq-heading"]}
+                </span>
+              </h2>
+              {f["bamboo.contact.faq-lede"] ? (
+                <p
+                  className="text-muted-foreground mx-auto mt-4 max-w-2xl"
+                  {...fieldAttr("bamboo.contact.faq-lede")}
+                >
+                  {f["bamboo.contact.faq-lede"]}
+                </p>
+              ) : null}
+            </div>
+          </FadeIn>
+          <FadeIn direction="up" delay={0.1}>
+            <BambooAccordion className="mx-auto max-w-3xl">
+              {faq.map((row, i) => (
+                <BambooAccordionItem
+                  key={row._id ?? `faq-${i}`}
+                  id={row._id ?? `faq-${i}`}
+                  title={readString(row, "question")}
+                >
+                  {readString(row, "answer")}
+                </BambooAccordionItem>
+              ))}
+            </BambooAccordion>
+          </FadeIn>
+        </section>
+      )}
     </PageTransition>
   );
 }

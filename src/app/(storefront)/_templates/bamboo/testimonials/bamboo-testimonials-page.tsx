@@ -89,7 +89,7 @@ export async function BambooTestimonialsPage({
             >
               {testimonials.map((t) => (
                 <StaggerItem key={t.id}>
-                  <Card className="h-full rounded-2xl border-[var(--bam-hairline)] bg-card transition-shadow hover:shadow-md">
+                  <Card className="bg-card h-full rounded-2xl border-[var(--bam-hairline)] transition-shadow hover:shadow-md">
                     <CardContent className="flex h-full flex-col p-8">
                       <Quote
                         className="mb-4 h-8 w-8 text-[var(--bam-forest)]/30"
@@ -151,7 +151,7 @@ export async function BambooTestimonialsPage({
 
           <FadeIn className="mt-14 text-center">
             <div className="mx-auto max-w-2xl rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] px-8 py-12">
-              <h2 className="font-serif text-2xl font-bold">
+              <h2 className="font-serif text-2xl font-bold tracking-tight md:text-3xl">
                 Share Your Experience
               </h2>
               <p className="text-muted-foreground mt-2">

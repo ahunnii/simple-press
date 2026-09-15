@@ -31,7 +31,7 @@ export async function BambooShopPage({
         <div className="mx-auto max-w-7xl">
           <FadeIn className="mx-auto max-w-3xl text-center">
             <div {...sectionGroupAttr("products", "listing")}>
-              <p className="font-sans text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
+              <p className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
                 Shop
               </p>
               <h1 className="text-foreground font-serif mt-3 text-4xl font-bold tracking-tight md:text-5xl">
@@ -43,7 +43,7 @@ export async function BambooShopPage({
                 </span>
               </h1>
               <p
-                className="text-muted-foreground mt-4 font-sans text-lg"
+                className="text-muted-foreground mt-4 text-lg"
                 {...fieldAttr("bamboo.products.listing-intro")}
               >
                 {f["bamboo.products.listing-intro"]}
@@ -53,7 +53,7 @@ export async function BambooShopPage({
 
           {business.products?.length === 0 ? (
             <div className="py-16 text-center">
-              <h2 className="text-muted-foreground font-sans text-lg">
+              <h2 className="text-muted-foreground text-lg">
                 No products available at this time.
               </h2>
             </div>
