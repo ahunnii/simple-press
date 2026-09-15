@@ -1,14 +1,23 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { env } from "~/env";
 import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { isQuickBooksConfigured } from "~/lib/quickbooks/config";
 import { buildAuthorizeUrl } from "~/lib/quickbooks/oauth";
-import { createSignedOAuthState } from "~/lib/stripe/oauth-state";
+import {
+  createSignedOAuthState,
+  isAllowedReturnUrl,
+} from "~/lib/stripe/oauth-state";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
+
+const quickBooksConnectStateSchema = z.object({
+  businessId: z.string().min(1).max(64),
+  returnUrl: z.string().min(1).max(2048),
+});
 
 // app/api/quickbooks/connect/state/route.ts
 //
@@ -34,18 +43,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as {
-    businessId?: string;
-    returnUrl?: string;
-  };
-
-  const { businessId, returnUrl } = body;
-  if (!businessId || !returnUrl) {
+  const body: unknown = await request.json();
+  const parsed = quickBooksConnectStateSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json(
       { error: "Missing businessId or returnUrl" },
       { status: 400 },
     );
   }
+
+  const { businessId, returnUrl } = parsed.data;
 
   if (!isQuickBooksConfigured()) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
@@ -66,13 +73,26 @@ export async function POST(request: NextRequest) {
 
   const business = await db.business.findUnique({
     where: { id: businessId },
-    select: { featureFlags: true },
+    select: {
+      featureFlags: true,
+      subdomain: true,
+      customDomain: true,
+      domainStatus: true,
+    },
   });
   if (!business) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   if (!resolveFlags(business.featureFlags).isEnabled("quickbooks")) {
     return NextResponse.json({ error: "feature_disabled" }, { status: 403 });
+  }
+
+  if (
+    !isAllowedReturnUrl(returnUrl, business, {
+      allowInsecureLocalhost: process.env.NODE_ENV !== "production",
+    })
+  ) {
+    return NextResponse.json({ error: "Invalid return URL" }, { status: 400 });
   }
 
   const state = createSignedOAuthState(

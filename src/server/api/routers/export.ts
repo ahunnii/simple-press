@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import Papa from "papaparse";
 import z from "zod";
 
+import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
 import {
   buildOrderListWhere,
   ORDER_FULFILLMENT_DEFAULT,
@@ -208,7 +209,10 @@ export const exportRouter = createTRPCRouter({
         };
       });
 
-      const csv = Papa.unparse(rows, { quotes: true, header: true });
+      const csv = Papa.unparse(sanitizeCsvRows(rows), {
+        quotes: true,
+        header: true,
+      });
 
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },

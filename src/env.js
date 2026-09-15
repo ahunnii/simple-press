@@ -64,7 +64,25 @@ export const env = createEnv({
         : z.string().url().optional(),
     // Comma-separated proxy IPs that may append X-Forwarded-For (Coolify/Traefik).
     // When set, rate-limit IP helpers take the rightmost untrusted hop.
-    TRUSTED_PROXY_IPS: z.string().optional(),
+    //
+    // REQUIRED in production (preview deployments excepted): without it the IP
+    // helpers can only fall back to the rightmost X-Forwarded-For entry, which
+    // is the true client IP only when exactly one proxy fronts the app. Listing
+    // the real proxy addresses is what makes client-IP rate limiting
+    // unspoofable — see resolveClientIp in src/lib/rate-limit.ts.
+    TRUSTED_PROXY_IPS:
+      process.env.NODE_ENV === "production" &&
+      process.env.IS_PREVIEW_ENV !== "true"
+        ? z
+            .string({
+              required_error:
+                "TRUSTED_PROXY_IPS must list the reverse proxy IP(s) that front this app (comma-separated). Client-IP rate limiting is spoofable via X-Forwarded-For without it.",
+            })
+            .min(
+              1,
+              "TRUSTED_PROXY_IPS must list the reverse proxy IP(s) that front this app (comma-separated). Client-IP rate limiting is spoofable via X-Forwarded-For without it.",
+            )
+        : z.string().optional(),
 
     // Shared secret for the /api/cron endpoint (Bearer token). Optional: when
     // unset, the cron endpoint refuses all requests.

@@ -215,11 +215,22 @@ export const loyaltyActionLimiter = makeLazy({
 /**
  * Extract a best-effort client IP from request headers.
  *
+ * `X-Forwarded-For` is a list that grows left-to-right: the LEFTMOST entry is
+ * whatever the client sent us and is therefore fully attacker-controlled — a
+ * client that rotates it walks away from every limiter keyed on this value. The
+ * RIGHTMOST entry is the one appended by the last proxy in front of the app, so
+ * it is the only entry we can attribute to our own infrastructure.
+ *
  * When `TRUSTED_PROXY_IPS` is configured, take the rightmost address that is
- * not in the trusted-proxy set (the first untrusted hop from the right). That
- * is the real client when Traefik/Coolify appends rather than replaces
- * `X-Forwarded-For`. Without trusted proxies configured, keep the historical
- * leftmost behaviour and document that Coolify must be verified — see
+ * NOT in the trusted-proxy set (the first untrusted hop from the right). That
+ * is the real client when Traefik/Coolify appends rather than replaces the
+ * header, and it is correct for any number of known proxies.
+ *
+ * Without trusted proxies configured, fall back to the rightmost entry, then
+ * `x-real-ip`, then `"unknown"`. The rightmost entry is only the true client
+ * when EXACTLY ONE proxy fronts the app (otherwise it is the second-to-last
+ * proxy, which merely over-groups rather than allowing a bypass) — which is why
+ * `TRUSTED_PROXY_IPS` is required in production by `src/env.js`. See
  * `docs/followup/trusted-proxy-ip-spoofing.md`.
  */
 function resolveClientIp(headers: Headers): string {
@@ -247,7 +258,14 @@ function resolveClientIp(headers: Headers): string {
     return "unknown";
   }
 
-  return xffParts[0] ?? headers.get("x-real-ip")?.trim() ?? "unknown";
+  // Never `xffParts[0]` — that entry is supplied by the client.
+  const rightmost = xffParts[xffParts.length - 1];
+  if (rightmost) return rightmost;
+
+  const realIp = headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+
+  return "unknown";
 }
 
 /**

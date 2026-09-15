@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Script from "next/script";
 
 import { env } from "~/env";
@@ -130,6 +131,12 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const business = await checkBusiness();
 
+  // CSP nonce minted per-request by `src/middleware.ts`. Next stamps its own
+  // inline scripts automatically; this one is ours, so it needs it explicitly.
+  // Reading headers() costs nothing here — `checkBusiness()` above already
+  // resolves the tenant from the Host header, so this layout is dynamic anyway.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   // Decide which Umami website ID (if any) to inject.
   let umamiWebsiteId: string | undefined;
   if (business) {
@@ -149,7 +156,12 @@ export default async function RootLayout({
       <body>
         <Providers>
           {umamiWebsiteId && (
-            <Script defer src="/umami.js" data-website-id={umamiWebsiteId} />
+            <Script
+              defer
+              src="/umami.js"
+              data-website-id={umamiWebsiteId}
+              nonce={nonce}
+            />
           )}
           <TooltipProvider>
             <TRPCReactProvider>

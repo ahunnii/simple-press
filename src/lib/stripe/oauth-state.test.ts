@@ -1,7 +1,11 @@
 import { createHmac } from "crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createSignedOAuthState, verifySignedOAuthState } from "./oauth-state";
+import {
+  createSignedOAuthState,
+  isAllowedReturnUrl,
+  verifySignedOAuthState,
+} from "./oauth-state";
 
 const SECRET = "test-hash-secret";
 
@@ -207,4 +211,192 @@ describe("createSignedOAuthState / verifySignedOAuthState", () => {
   // equal-length strings (rather than relying on the separate length
   // short-circuit, which is covered on its own by the truncated-signature
   // test).
+});
+
+describe("isAllowedReturnUrl", () => {
+  const PLATFORM_DOMAIN = "simplepress.co";
+
+  const business = {
+    subdomain: "shop",
+    customDomain: null as string | null,
+    domainStatus: null as string | null,
+  };
+
+  it("allows the business's own platform subdomain", () => {
+    expect(
+      isAllowedReturnUrl(
+        "https://shop.simplepress.co/admin/settings/integrations",
+        business,
+        { platformDomain: PLATFORM_DOMAIN },
+      ),
+    ).toBe(true);
+  });
+
+  it("allows the bare platform domain", () => {
+    expect(
+      isAllowedReturnUrl("https://simplepress.co/x", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(true);
+  });
+
+  it("allows an ACTIVE custom domain", () => {
+    expect(
+      isAllowedReturnUrl(
+        "https://www.shop-custom.com/admin",
+        {
+          ...business,
+          customDomain: "www.shop-custom.com",
+          domainStatus: "ACTIVE",
+        },
+        { platformDomain: PLATFORM_DOMAIN },
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects a custom domain that is not yet ACTIVE (PENDING_DNS)", () => {
+    expect(
+      isAllowedReturnUrl(
+        "https://www.shop-custom.com/admin",
+        {
+          ...business,
+          customDomain: "www.shop-custom.com",
+          domainStatus: "PENDING_DNS",
+        },
+        { platformDomain: PLATFORM_DOMAIN },
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects a custom domain when domainStatus was never selected (fails closed)", () => {
+    expect(
+      isAllowedReturnUrl(
+        "https://www.shop-custom.com/admin",
+        {
+          subdomain: business.subdomain,
+          customDomain: "www.shop-custom.com",
+          // domainStatus intentionally omitted
+        },
+        { platformDomain: PLATFORM_DOMAIN },
+      ),
+    ).toBe(false);
+  });
+
+  it("is case-insensitive on the hostname", () => {
+    expect(
+      isAllowedReturnUrl("https://SHOP.SimplePress.CO/", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects an unrelated host", () => {
+    expect(
+      isAllowedReturnUrl("https://evil.com/", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects a host that merely has the allowed host as a subdomain prefix (suffix attack)", () => {
+    expect(
+      isAllowedReturnUrl("https://shop.simplepress.co.evil.com/", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects a host with the allowed value only in the query string", () => {
+    expect(
+      isAllowedReturnUrl("https://evil.com/?x=shop.simplepress.co", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects userinfo smuggling a trusted-looking host in front of the real one", () => {
+    expect(
+      isAllowedReturnUrl("https://shop.simplepress.co@evil.com/", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects http in production (no allowInsecureLocalhost)", () => {
+    expect(
+      isAllowedReturnUrl("http://shop.simplepress.co/", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("allows http://<sub>.localhost only when allowInsecureLocalhost is true", () => {
+    expect(
+      isAllowedReturnUrl("http://shop.localhost:3000/admin", business, {
+        platformDomain: PLATFORM_DOMAIN,
+        allowInsecureLocalhost: true,
+      }),
+    ).toBe(true);
+
+    expect(
+      isAllowedReturnUrl("http://shop.localhost:3000/admin", business, {
+        platformDomain: PLATFORM_DOMAIN,
+        allowInsecureLocalhost: false,
+      }),
+    ).toBe(false);
+
+    expect(
+      isAllowedReturnUrl("http://shop.localhost:3000/admin", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects a javascript: URL", () => {
+    expect(
+      isAllowedReturnUrl("javascript:alert(1)", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects a protocol-relative URL", () => {
+    expect(
+      isAllowedReturnUrl("//evil.com", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects an unparseable string without throwing", () => {
+    expect(() =>
+      isAllowedReturnUrl("not a url", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).not.toThrow();
+    expect(
+      isAllowedReturnUrl("not a url", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects a different tenant's subdomain", () => {
+    expect(
+      isAllowedReturnUrl("https://other-shop.simplepress.co/admin", business, {
+        platformDomain: PLATFORM_DOMAIN,
+      }),
+    ).toBe(false);
+  });
+
+  it("defaults platformDomain to env.NEXT_PUBLIC_PLATFORM_DOMAIN when not passed", () => {
+    // tests/helpers/test-env.ts sets NEXT_PUBLIC_PLATFORM_DOMAIN to
+    // "simplepress.test" for the unit test project.
+    expect(
+      isAllowedReturnUrl("https://shop.simplepress.test/admin", business),
+    ).toBe(true);
+    expect(
+      isAllowedReturnUrl("https://shop.simplepress.co/admin", business),
+    ).toBe(false);
+  });
 });

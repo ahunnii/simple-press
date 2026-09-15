@@ -45,6 +45,16 @@ type EmbedFrameProps = {
  * - All other embeds use a fixed pixel height (defaults to `DEFAULT_EMBED_HEIGHT`).
  * - Returns `null` when `src` fails HTTPS validation.
  *
+ * Same-origin re-check: `sanitizeEmbedSrc` already rejects the platform
+ * domain (see `isPlatformHost`), but a tenant's *custom* domain isn't known
+ * to that isomorphic check. On mount, this component re-validates `src`
+ * against the actual `window.location.hostname` via `blockedHosts` so an
+ * embed can never share an origin with the page rendering it (see the
+ * SECURITY NOTE on `EMBED_SANDBOX`). To avoid a hydration mismatch, the
+ * server/first-paint render always uses the platform-only check; the iframe
+ * itself is withheld (behind the loading skeleton) until that client-side
+ * re-check has run.
+ *
  * Engagement tracking:
  * - When the window loses focus and `document.activeElement` is this iframe,
  *   the visitor clicked into the frame → fires `embed-engaged`.
@@ -62,9 +72,29 @@ export function EmbedFrame({
   maxWidth,
   fill = false,
 }: EmbedFrameProps) {
+  // Platform-only check — identical on server and first client render, so
+  // this never causes a hydration mismatch.
   const safeSrc = sanitizeEmbedSrc(src);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loaded, setLoaded] = useState(false);
+  // Whether the client-side same-origin re-check (against the real
+  // window.location.hostname) has completed for the current `safeSrc`.
+  const [originChecked, setOriginChecked] = useState(false);
+  // Set to `false` when the re-check finds the src shares an origin with the
+  // current page; the iframe is never mounted in that case.
+  const [originSafe, setOriginSafe] = useState(true);
+
+  useEffect(() => {
+    setOriginChecked(false);
+    setOriginSafe(true);
+    if (!safeSrc || typeof window === "undefined") return;
+
+    const rechecked = sanitizeEmbedSrc(safeSrc, {
+      blockedHosts: [window.location.hostname],
+    });
+    setOriginSafe(rechecked !== null);
+    setOriginChecked(true);
+  }, [safeSrc]);
 
   useEffect(() => {
     // Timestamp (ms) when the user last clicked into this frame; null when idle.
@@ -106,7 +136,17 @@ export function EmbedFrame({
 
   if (!safeSrc) return null;
 
-  const loadingOverlay = !loaded && (
+  // Once the client-side same-origin re-check has run and found a conflict,
+  // render nothing — the iframe below is never mounted with a same-origin
+  // src (see the SECURITY NOTE on `EMBED_SANDBOX`).
+  if (originChecked && !originSafe) return null;
+
+  // Show the loading skeleton until the iframe has fired `onLoad` AND the
+  // origin re-check has completed. Withholding the iframe element itself
+  // (not just its opacity) until `originChecked` is what keeps a same-origin
+  // custom-domain src from ever being mounted in the DOM.
+  const canMountIframe = originChecked && originSafe;
+  const loadingOverlay = (!loaded || !canMountIframe) && (
     <>
       <Skeleton className="absolute inset-0 h-full w-full" />
       <div className="text-muted-foreground absolute inset-0 flex items-center justify-center gap-2 text-sm">
@@ -132,20 +172,22 @@ export function EmbedFrame({
         style={{ aspectRatio: ratioCss }}
       >
         {loadingOverlay}
-        <iframe
-          ref={iframeRef}
-          src={safeSrc}
-          title={title}
-          sandbox={EMBED_SANDBOX}
-          referrerPolicy="no-referrer"
-          loading="lazy"
-          data-embed-title={title}
-          onLoad={() => setLoaded(true)}
-          className={cn(
-            "absolute inset-0 h-full w-full border-0 transition-opacity duration-300",
-            loaded ? "opacity-100" : "opacity-0",
-          )}
-        />
+        {canMountIframe && (
+          <iframe
+            ref={iframeRef}
+            src={safeSrc}
+            title={title}
+            sandbox={EMBED_SANDBOX}
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            data-embed-title={title}
+            onLoad={() => setLoaded(true)}
+            className={cn(
+              "absolute inset-0 h-full w-full border-0 transition-opacity duration-300",
+              loaded ? "opacity-100" : "opacity-0",
+            )}
+          />
+        )}
       </div>
     ) : (
       <div
@@ -153,20 +195,22 @@ export function EmbedFrame({
         style={{ height: height ?? DEFAULT_EMBED_HEIGHT }}
       >
         {loadingOverlay}
-        <iframe
-          ref={iframeRef}
-          src={safeSrc}
-          title={title}
-          sandbox={EMBED_SANDBOX}
-          referrerPolicy="no-referrer"
-          loading="lazy"
-          data-embed-title={title}
-          onLoad={() => setLoaded(true)}
-          className={cn(
-            "h-full w-full border-0 transition-opacity duration-300",
-            loaded ? "opacity-100" : "opacity-0",
-          )}
-        />
+        {canMountIframe && (
+          <iframe
+            ref={iframeRef}
+            src={safeSrc}
+            title={title}
+            sandbox={EMBED_SANDBOX}
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            data-embed-title={title}
+            onLoad={() => setLoaded(true)}
+            className={cn(
+              "h-full w-full border-0 transition-opacity duration-300",
+              loaded ? "opacity-100" : "opacity-0",
+            )}
+          />
+        )}
       </div>
     );
 

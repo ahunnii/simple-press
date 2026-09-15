@@ -4,6 +4,7 @@ import slugify from "slugify";
 
 import type { ParsedProduct } from "./csv-parser";
 import { contentAddressedKey, putStoredObject } from "~/lib/s3/put";
+import { safeFetch } from "~/lib/safe-fetch";
 import { db } from "~/server/db";
 
 export type ImportOptions = {
@@ -57,59 +58,44 @@ const IMPORT_IMAGE_FETCH_TIMEOUT_MS = 15_000;
  * import on the same source images is idempotent and doesn't duplicate
  * storage). Returns the rehosted public URL, or `null` if anything about the
  * download/upload failed — callers should skip the image, not fail the import.
+ * WooCommerce stores commonly serve media over plain http, so allowHttp is set.
  */
 async function rehostProductImage(
   businessId: string,
   sourceUrl: string,
 ): Promise<string | null> {
-  let parsed: URL;
   try {
-    parsed = new URL(sourceUrl);
-  } catch {
-    return null;
-  }
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    return null;
-  }
+    const result = await safeFetch(sourceUrl, {
+      allowHttp: true,
+      maxBytes: IMPORT_IMAGE_MAX_BYTES,
+      timeoutMs: IMPORT_IMAGE_FETCH_TIMEOUT_MS,
+    });
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      IMPORT_IMAGE_FETCH_TIMEOUT_MS,
-    );
+    const contentType = result.contentType?.split(";")[0]?.trim().toLowerCase();
 
-    let res: Response;
-    try {
-      res = await fetch(parsed.href, { signal: controller.signal });
-    } finally {
-      clearTimeout(timeout);
-    }
-
-    if (!res.ok) return null;
-
-    const contentType = res.headers
-      .get("content-type")
-      ?.split(";")[0]
-      ?.trim()
-      .toLowerCase();
-
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.length === 0 || buf.length > IMPORT_IMAGE_MAX_BYTES) return null;
+    if (!result.bytes || result.bytes.length === 0) return null;
 
     let ext = contentType
       ? IMPORT_IMAGE_CONTENT_TYPE_EXT[contentType]
       : undefined;
+
+    // If no recognized content-type, try to infer from the URL path.
     if (!ext) {
-      const pathExt = path.extname(parsed.pathname).toLowerCase();
-      ext = IMPORT_IMAGE_ALLOWED_EXTS.has(pathExt) ? pathExt : undefined;
+      try {
+        const url = new URL(sourceUrl);
+        const pathExt = path.extname(url.pathname).toLowerCase();
+        ext = IMPORT_IMAGE_ALLOWED_EXTS.has(pathExt) ? pathExt : undefined;
+      } catch {
+        // If URL parsing fails here too, fall back to undefined
+      }
     }
+
     if (!ext) return null;
 
-    const key = contentAddressedKey(businessId, "image", buf, ext);
+    const key = contentAddressedKey(businessId, "image", result.bytes, ext);
     return await putStoredObject({
       key,
-      body: buf,
+      body: result.bytes,
       contentType: contentType ?? "application/octet-stream",
     });
   } catch (error) {

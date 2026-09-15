@@ -8,10 +8,17 @@ import {
   MERCHANT_TERMS_VERSION,
   PLATFORM_TERMS_VERSION,
 } from "~/lib/legal/policy-versions";
-import { consumeOnboardingDraft } from "~/lib/onboarding/draft";
+import {
+  consumeOnboardingDraft,
+  ONBOARDING_DRAFT_COOKIE,
+} from "~/lib/onboarding/draft";
 import { signPartnerRequest } from "~/lib/partner-auth";
 import { authLimiter, getClientIp } from "~/lib/rate-limit";
 import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
+import {
+  FREE_TEMPLATE_IDS,
+  onboardingRequestSchema,
+} from "~/lib/validators/onboarding";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
 
@@ -123,32 +130,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const rawBody = (await req.json()) as {
-      resumeFromDraft?: boolean;
-      email?: string;
-      password?: string;
-      name?: string;
-      businessName?: string;
-      subdomain?: string;
-      customDomain?: string;
-      templateId?: string;
-      heroTitle?: string;
-      heroSubtitle?: string;
-      aboutText?: string;
-      primaryColor?: string;
-      /** Invitation code — required for the standard (non-artisan) signup flow. */
-      invitationCode?: string | null;
-      /** Artisanal Futures token — present only for the artisan onboarding flow. */
-      aftoken?: string | null;
-      /**
-       * Explicit acceptance of the platform ToS + Privacy Policy (the account)
-       * AND the Seller & Merchant Agreement + Acceptable Use Policy (the store).
-       * Must be literally `true`; a checkbox that only exists in React is not
-       * evidence of anything, so this is required here too. The TIMESTAMP is
-       * never taken from the client — see the transaction below.
-       */
-      acceptedTerms?: unknown;
-    };
+    // Validated via `onboardingRequestSchema` (see `~/lib/validators/onboarding`
+    // for the full contract: length caps on every text field, `templateId`
+    // restricted to the free/generic template list, and a CSS-safe
+    // `primaryColor`). A malformed body — wrong types, an over-length field, a
+    // non-free templateId — is refused here rather than surfacing as a 500
+    // later (e.g. `slugify()`/`.trim()` on a non-string) or silently writing an
+    // unvalidated `templateId`/`primaryColor` to the database.
+    const parsedBody = onboardingRequestSchema.safeParse(await req.json());
+    if (!parsedBody.success) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+    const rawBody = parsedBody.data;
 
     // Verify the caller is authenticated up front — draft resume and body
     // paths both need a verified session.
@@ -166,9 +159,28 @@ export async function POST(req: NextRequest) {
     // After email verification, the wizard body is gone — resume from the
     // signed draft saved before signup. The draft is single-use and bound
     // to the session email.
-    let formData = rawBody;
+    //
+    // `templateId` is widened to a plain `string` here (vs. the schema's
+    // narrow free-template enum) because `OnboardingDraftPayload.templateId`
+    // is typed as `string` — it was already enum-validated at draft-save time
+    // by `onboardingDraftSchema`, just under a type the draft module doesn't
+    // re-export. The runtime guarantee is unaffected: both this path and the
+    // direct-body path are enum-checked before reaching here, and the
+    // `finalTemplateId` assertion right before `business.create` below is the
+    // last line of defense regardless of which path supplied the value.
+    let formData: Omit<typeof rawBody, "templateId"> & {
+      templateId?: string;
+    } = rawBody;
+    let consumedDraft = false;
     if (rawBody.resumeFromDraft === true) {
-      const draft = await consumeOnboardingDraft(session.user.email);
+      // The draft is bound to the browser that created it (see the draft
+      // route): without the matching `sp_onboarding_draft` cookie the draft is
+      // treated as absent, so a draft planted by someone who merely knew this
+      // email can never dictate this store's details.
+      const draft = await consumeOnboardingDraft(
+        session.user.email,
+        req.cookies.get(ONBOARDING_DRAFT_COOKIE)?.value ?? null,
+      );
       if (!draft) {
         return NextResponse.json(
           {
@@ -179,6 +191,7 @@ export async function POST(req: NextRequest) {
         );
       }
       formData = { ...draft, resumeFromDraft: undefined };
+      consumedDraft = true;
     }
 
     const {
@@ -362,6 +375,15 @@ export async function POST(req: NextRequest) {
       slug = `${baseSlug}-${counter}`;
     }
 
+    // Last line of defense regardless of which path (direct body, already
+    // enum-validated by `onboardingRequestSchema`, or a resumed draft, already
+    // enum-validated by `onboardingDraftSchema` at save time) supplied
+    // `templateId` — a non-free/commercial template id can never be persisted.
+    let finalTemplateId = withFallback(templateId, "modern");
+    if (!FREE_TEMPLATE_IDS.includes(finalTemplateId)) {
+      finalTemplateId = "modern";
+    }
+
     // The user was already created via better-auth signUpEmail on the client
     // before this route is called (see StoreCustomizationStep) — verified
     // above via getSession(). Create business + site content in a transaction.
@@ -377,7 +399,7 @@ export async function POST(req: NextRequest) {
           subdomain,
           customDomain,
           domainStatus: customDomain ? "PENDING_DNS" : "NONE",
-          templateId: withFallback(templateId, "modern"),
+          templateId: finalTemplateId,
           ownerEmail: email,
           status: "active",
           onboardingComplete: false,
@@ -456,11 +478,22 @@ export async function POST(req: NextRequest) {
 
     const redirectUrl = `${subdomainUrl}/auth/signup-complete`;
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       redirectUrl,
       businessId: business.id,
     });
+    if (consumedDraft) {
+      // Draft row is gone — retire the secret that pointed at it.
+      response.cookies.set(ONBOARDING_DRAFT_COOKIE, "", {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 0,
+      });
+    }
+    return response;
   } catch (error) {
     // Rate-limit rejections are handled up-front (see the guard at the top of
     // this handler); anything reaching here is an unexpected failure.

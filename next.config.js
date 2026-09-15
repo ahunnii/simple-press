@@ -60,6 +60,23 @@ const config = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          // 2 years, subdomains included, deliberately WITHOUT `preload` —
+          // preload submission is a one-way door for the whole apex domain and
+          // every tenant subdomain under it, so it stays an explicit decision.
+          //
+          // Coolify/Traefik may also emit HSTS in front of the app. A duplicate
+          // header is harmless (browsers honour the first), but the two can
+          // disagree on max-age, so after deploying check:
+          //   curl -sI https://<platform-domain> | grep -i strict-transport
+          // Ignored entirely over plain HTTP, so localhost dev is unaffected.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains",
+          },
+          // NOTE: Content-Security-Policy is deliberately NOT set here. It
+          // carries a per-request nonce, so it is built in `src/middleware.ts`
+          // (see `src/lib/security/csp.ts`). Static headers here are shared by
+          // every response and could not carry one.
         ],
       },
     ];

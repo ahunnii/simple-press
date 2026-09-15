@@ -1,26 +1,23 @@
 "use client";
 
 import { useMemo } from "react";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
-import TextAlign from "@tiptap/extension-text-align";
-import { TextStyle } from "@tiptap/extension-text-style";
-import Underline from "@tiptap/extension-underline";
+import { getSchema } from "@tiptap/core";
 import { generateHTML } from "@tiptap/html";
-import StarterKit from "@tiptap/starter-kit";
 import { ExternalLink, Images } from "lucide-react";
 
+import { sanitizeEmbedSrc } from "~/lib/embed";
 import {
   coerceQuoteDensity,
   coerceQuoteHeight,
   coerceQuoteLayout,
   coerceQuoteWidth,
 } from "~/lib/quote/quote-display";
+import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
+import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
 import { api } from "~/trpc/react";
 import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
 import { QuoteCalculator } from "~/components/ui/minimal-tiptap/extensions/quote-calculator";
-import { TableKit } from "~/components/ui/minimal-tiptap/extensions/table";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { GalleryRenderer } from "~/components/gallery-renderer";
@@ -37,31 +34,25 @@ type TiptapRendererProps = {
 
 const ALLOWED_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
 
+/**
+ * The node/mark half lives in `~/lib/tiptap/renderer-extensions` so a node
+ * test can build the same schema; the three custom nodes are appended here
+ * because their React node views can't be imported outside the browser build.
+ */
 const extensions = [
-  // StarterKit now bundles its own `link` and `underline`, so registering the
-  // standalone extensions alongside it made TipTap log
-  // `Duplicate extension names found: ['link', 'underline']` on every page that
-  // renders rich text. Turning StarterKit's copies off keeps the configured
-  // Link below (with the nofollow/protocol allowlist) authoritative instead of
-  // leaving which one wins to registration order.
-  StarterKit.configure({ link: false, underline: false }),
-  Link.configure({
-    HTMLAttributes: {
-      rel: "noopener noreferrer nofollow",
-    },
-    protocols: ["http", "https", "mailto", "tel"],
-  }),
-  Image,
-  Underline,
-  TextStyle,
-  TextAlign.configure({
-    types: ["heading", "paragraph"],
-  }),
+  ...RENDERER_BASE_EXTENSIONS,
   Gallery,
   Embed,
   QuoteCalculator,
-  TableKit,
 ];
+
+/**
+ * Derived once. This is what makes `sanitizeTiptapDoc`'s allowlist the exact
+ * set of nodes, marks and attrs this renderer can actually render — including
+ * `gallery`, `embed` and `quoteCalculator`, which the custom dispatch below
+ * handles and which would otherwise be dropped as unknown.
+ */
+const schema = getSchema(extensions);
 
 /** Renders a single gallery by id (for storefront page content). */
 function GalleryBlock({ galleryId }: { galleryId: string }) {
@@ -142,6 +133,17 @@ function isTiptapDoc(value: unknown): value is TiptapDoc {
   return value.content.every(isContentNode);
 }
 
+/**
+ * Client-side belt-and-braces pass over the generated markup.
+ *
+ * The `typeof window` early-return is no longer a hole: the server path is
+ * covered by `sanitizeTiptapDoc`, which runs on the JSON *before*
+ * `generateHTML` on both sides, so server and client render from identical
+ * input and this pass has nothing left to find. (It used to be the only
+ * sanitizer in the pipeline, which meant SSR output was never cleaned at all
+ * — `@tiptap/html` resolves to `dist/server/index.js` under SSR, so the
+ * server render succeeded and skipped straight past this function.)
+ */
 function sanitizeGeneratedHtml(html: string): string {
   if (typeof window === "undefined") return html;
   const parser = new DOMParser();
@@ -217,11 +219,16 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
   const embedsEnabled = isEnabled("embeds");
 
   const elements = useMemo(() => {
-    if (!isTiptapDoc(content)) {
+    // Sanitize the JSON once, up front, against the renderer's own schema.
+    // Everything below — the custom gallery/quote/embed dispatch as well as
+    // the `generateHTML` fallback — reads from the result, so the server and
+    // the client are rendering byte-identical input.
+    const sanitized = sanitizeTiptapDoc(content, schema);
+    if (!isTiptapDoc(sanitized)) {
       return [];
     }
 
-    const nodes = content.content;
+    const nodes = sanitized.content;
     return nodes.map((node, index) => {
       if (isGalleryNode(node) && node.attrs.galleryId) {
         return (
@@ -273,10 +280,26 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
           const linkLabel =
             // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so blank/whitespace labels also fall back
             triggerLabel?.trim() || title.trim() || "View content";
+          // The iframe path runs `src` through `sanitizeEmbedSrc`; this
+          // fallback used to put the raw stored value straight into an
+          // `href`, which is the one place an embed's src is rendered as a
+          // navigable link. A src the embed rules refuse still shows its
+          // label, just not as something clickable.
+          const linkHref = sanitizeEmbedSrc(src);
+          if (!linkHref) {
+            return (
+              <span
+                key={`embed-${index}`}
+                className="border-input bg-muted text-muted-foreground my-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium"
+              >
+                {linkLabel}
+              </span>
+            );
+          }
           return (
             <a
               key={`embed-${index}`}
-              href={src}
+              href={linkHref}
               target="_blank"
               rel="noopener noreferrer"
               className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring my-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium shadow-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"

@@ -1,8 +1,20 @@
 import Papa from "papaparse";
 
+import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
+
 // ============================================
 // Shared helpers
 // ============================================
+
+/**
+ * These CSV builders feed the WordPress/WooCommerce importer, so every row
+ * is sanitized in "wordpress" mode: `=`/`@`/tab/CR-prefixed cells are
+ * escaped with a leading `'` (formula injection in whatever spreadsheet app
+ * an admin opens the export in before importing), but `+`/`-` are left
+ * alone — the importer has no spreadsheet-formula concept, so a `'` prefix
+ * here would land as a literal character in the imported field.
+ */
+const WORDPRESS_MODE = { mode: "wordpress" as const };
 
 /** Money is always passed to these builders in cents (Int/Float, matching Prisma). */
 const centsToDollars = (cents: number) => (cents / 100).toFixed(2);
@@ -138,7 +150,10 @@ export function buildOrdersCsv(orders: OrderForExport[]): string {
     Tracking: formatTracking(order.shipments),
   }));
 
-  return Papa.unparse(rows, { quotes: true, header: true });
+  return Papa.unparse(sanitizeCsvRows(rows, WORDPRESS_MODE), {
+    quotes: true,
+    header: true,
+  });
 }
 
 export function buildOrderItemsCsv(orders: OrderForExport[]): string {
@@ -156,7 +171,10 @@ export function buildOrderItemsCsv(orders: OrderForExport[]): string {
     })),
   );
 
-  return Papa.unparse(rows, { quotes: true, header: true });
+  return Papa.unparse(sanitizeCsvRows(rows, WORDPRESS_MODE), {
+    quotes: true,
+    header: true,
+  });
 }
 
 // ============================================
@@ -204,7 +222,10 @@ export function buildCustomersCsv(customers: CustomerForExport[]): string {
     "Created At": formatDate(c.createdAt),
   }));
 
-  return Papa.unparse(rows, { quotes: true, header: true });
+  return Papa.unparse(sanitizeCsvRows(rows, WORDPRESS_MODE), {
+    quotes: true,
+    header: true,
+  });
 }
 
 export function buildCustomerAddressesCsv(
@@ -227,7 +248,10 @@ export function buildCustomerAddressesCsv(
     })),
   );
 
-  return Papa.unparse(rows, { quotes: true, header: true });
+  return Papa.unparse(sanitizeCsvRows(rows, WORDPRESS_MODE), {
+    quotes: true,
+    header: true,
+  });
 }
 
 // ============================================
@@ -271,7 +295,10 @@ export function buildDiscountsCsv(discounts: DiscountForExport[]): string {
     "Max Discount": d.maxDiscount != null ? centsToDollars(d.maxDiscount) : "",
   }));
 
-  return Papa.unparse(rows, { quotes: true, header: true });
+  return Papa.unparse(sanitizeCsvRows(rows, WORDPRESS_MODE), {
+    quotes: true,
+    header: true,
+  });
 }
 
 // ============================================
@@ -309,5 +336,8 @@ export function buildReviewsCsv(reviews: ReviewForExport[]): string {
     "Review Date": formatDate(r.reviewDate),
   }));
 
-  return Papa.unparse(rows, { quotes: true, header: true });
+  return Papa.unparse(sanitizeCsvRows(rows, WORDPRESS_MODE), {
+    quotes: true,
+    header: true,
+  });
 }

@@ -1,20 +1,50 @@
 import { z } from "zod";
 
+import { isSafeHref, SAFE_HREF_MESSAGE, safeHrefSchema } from "~/lib/safe-href";
+
+/**
+ * A social profile link. `.url()` used to be the only guard here, and it is
+ * not a scheme guard — Zod accepts `javascript:` and `data:` as valid URLs
+ * (see `~/lib/safe-href`). The scheme allowlist replaces it, and the extra
+ * `http(s)` refine preserves the old field's meaning: a social profile is
+ * always an absolute web address, never a relative path, so the admin form's
+ * "must be a valid URL" expectation still holds.
+ *
+ * This runs on SAVE only. Legacy rows that already hold something else are
+ * filtered at read time by `resolveSocialLinks` (`~/lib/social-links`).
+ */
+const socialUrlSchema = safeHrefSchema.refine(
+  (v) => v === "" || /^https?:\/\//i.test(v),
+  { message: "Must be an http(s) URL" },
+);
+
 const socialLinksSchema = z
   .object({
-    instagram: z.string().url().optional().nullable().or(z.literal("")),
-    facebook: z.string().url().optional().nullable().or(z.literal("")),
-    twitter: z.string().url().optional().nullable().or(z.literal("")),
-    linkedin: z.string().url().optional().nullable().or(z.literal("")),
-    tiktok: z.string().url().optional().nullable().or(z.literal("")),
-    pinterest: z.string().url().optional().nullable().or(z.literal("")),
-    youtube: z.string().url().optional().nullable().or(z.literal("")),
+    instagram: socialUrlSchema.optional().nullable().or(z.literal("")),
+    facebook: socialUrlSchema.optional().nullable().or(z.literal("")),
+    twitter: socialUrlSchema.optional().nullable().or(z.literal("")),
+    linkedin: socialUrlSchema.optional().nullable().or(z.literal("")),
+    tiktok: socialUrlSchema.optional().nullable().or(z.literal("")),
+    pinterest: socialUrlSchema.optional().nullable().or(z.literal("")),
+    youtube: socialUrlSchema.optional().nullable().or(z.literal("")),
   })
   .optional();
 
+/**
+ * Navigation destinations are deliberately looser than social links: a nav
+ * item legitimately points at `/shop` or `#contact`, so only the scheme is
+ * constrained. The 500-char cap is the field's own (`safeHrefSchema` caps at
+ * 2048), so the rule is applied via `isSafeHref` rather than by extending it.
+ */
+const navHrefSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .refine(isSafeHref, { message: SAFE_HREF_MESSAGE });
+
 const navChildSchema = z.object({
   label: z.string().max(100),
-  href: z.string().max(500),
+  href: navHrefSchema,
   external: z.boolean().optional(),
 });
 
@@ -22,7 +52,7 @@ const navigationItemsSchema = z
   .array(
     z.object({
       label: z.string().max(100),
-      href: z.string().max(500),
+      href: navHrefSchema,
       external: z.boolean().optional(),
       children: z.array(navChildSchema).optional(),
     }),
@@ -45,7 +75,7 @@ export const siteContentSchema = z
     heroSubtitle: z.string().max(500).optional(),
     heroImageUrl: z.string().url().optional().or(z.literal("")),
     heroButtonText: z.string().max(100).optional(),
-    heroButtonLink: z.string().max(500).optional(),
+    heroButtonLink: navHrefSchema.optional(),
 
     // About Section
     aboutTitle: z.string().max(255).optional(),

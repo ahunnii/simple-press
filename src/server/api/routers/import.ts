@@ -52,34 +52,14 @@ export const importRouter = createTRPCRouter({
   getImport: ownerAdminProcedure
     .input(z.object({ importId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const importRecord = await ctx.db.productImport.findUnique({
-        where: { id: input.importId },
-        include: {
-          business: { select: { id: true } },
-        },
+      const importRecord = await ctx.db.productImport.findFirst({
+        where: { id: input.importId, businessId: ctx.businessId },
       });
 
       if (!importRecord) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Import not found",
-        });
-      }
-
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { memberships: true },
-      });
-
-      if (
-        !user?.memberships.some(
-          (m) => m.businessId === importRecord.business.id,
-        )
-      ) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
         });
       }
 
@@ -175,22 +155,10 @@ export const importRouter = createTRPCRouter({
     }),
 
   getImportHistory: ownerAdminProcedure
-    .input(z.object({ businessId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { memberships: true },
-      });
-
-      if (!user?.memberships.some((m) => m.businessId === input.businessId)) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
+    .input(z.object({}))
+    .query(async ({ ctx }) => {
       const imports = await ctx.db.productImport.findMany({
-        where: { businessId: input.businessId },
+        where: { businessId: ctx.businessId },
         orderBy: { createdAt: "desc" },
         take: 10,
       });

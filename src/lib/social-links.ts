@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 
+import { safeHref } from "~/lib/safe-href";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { LinkedinIcon } from "~/components/icons/linkedin-icon";
@@ -100,15 +101,21 @@ export const SOCIAL_NETWORKS: SocialNetworkDef[] = [
  * Parses the raw `SiteContent.socialLinks` JSON and returns only the
  * networks the owner has actually filled in, in canonical order. Safe
  * against `null`/`undefined`/malformed JSON — always returns an array.
+ *
+ * Values go through `safeHref` (`~/lib/safe-href`): the column predates the
+ * scheme allowlist that `socialLinksSchema` now enforces on save, so a legacy
+ * row can still hold a `javascript:`/`data:` value that every template
+ * renders straight into an `<a href>`. An unsafe value drops the network
+ * entirely rather than rendering a dead icon.
  */
 export function resolveSocialLinks(raw: unknown): ResolvedSocialLink[] {
   if (!raw || typeof raw !== "object") return [];
   const links = raw as Record<string, unknown>;
   const resolved: ResolvedSocialLink[] = [];
   for (const network of SOCIAL_NETWORKS) {
-    const url = links[network.key];
-    if (typeof url === "string" && url.trim().length > 0) {
-      resolved.push({ ...network, url: url.trim() });
+    const url = safeHref(links[network.key]);
+    if (url !== null) {
+      resolved.push({ ...network, url });
     }
   }
   return resolved;

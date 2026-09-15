@@ -93,6 +93,21 @@ export async function POST(req: Request) {
   const errorContext: Record<string, unknown> = {};
 
   try {
+    // Throttle BEFORE reading/parsing the body: `getClientIp` only reads
+    // headers, so an unauthenticated caller is rejected before we ever buffer
+    // or JSON-parse an arbitrarily large request body.
+    try {
+      await donationCheckoutLimiter.consume(getClientIp(req));
+    } catch {
+      // Not reported: a 429 is the limiter working as designed. Donation forms
+      // are a card-testing target precisely because they are short, public and
+      // repeatable, so this limiter earns its keep.
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const parsed = donationCheckoutBodySchema.safeParse(await req.json());
     if (!parsed.success) {
       // The highest-value report here: `parsed.error` is otherwise discarded
@@ -109,18 +124,6 @@ export async function POST(req: Request) {
     }
 
     const body = parsed.data;
-
-    try {
-      await donationCheckoutLimiter.consume(getClientIp(req));
-    } catch {
-      // Not reported: a 429 is the limiter working as designed. Donation forms
-      // are a card-testing target precisely because they are short, public and
-      // repeatable, so this limiter earns its keep.
-      return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        { status: 429 },
-      );
-    }
 
     const domain = getCurrentDomain(req.headers);
     const business = await getBusinessByDomain(domain);

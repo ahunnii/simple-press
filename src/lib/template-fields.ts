@@ -17,6 +17,7 @@ import {
   sanitizeEmbedSrc,
 } from "~/lib/embed";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
+import { safeHref } from "~/lib/safe-href";
 import {
   animatedBambooData,
   animatedBambooFieldGroups,
@@ -170,6 +171,42 @@ function newListRowId(index: number): string {
   return `row-${index}-${Date.now()}`;
 }
 
+/**
+ * Row keys the templates render as an `href`.
+ *
+ * Hardcoded rather than derived from the row's `itemSchema` because
+ * `parseTemplateListRows` is handed the raw stored array and never sees the
+ * schema. These are the link keys actually in use across the template
+ * registries (`key: "href" | "url" | "link"`), plus the three CTA spellings a
+ * new template is likely to reach for. A key not listed here is treated as
+ * ordinary text — add it here when a template starts rendering it as a link.
+ */
+const LINK_ROW_KEYS = [
+  "href",
+  "url",
+  "link",
+  "linkUrl",
+  "ctaUrl",
+  "buttonUrl",
+] as const;
+
+/**
+ * Replaces unsafe link values in a stored list row with `""`.
+ *
+ * List rows live inside `customFields`, which is `z.any()` on the wire, so
+ * this read-time pass is the only guard those values get. Non-link keys and
+ * non-string values are left exactly as they were — the row's shape and every
+ * other key round-trip untouched.
+ */
+function scrubRowLinks(row: TemplateListRow): TemplateListRow {
+  for (const key of LINK_ROW_KEYS) {
+    const value = row[key];
+    if (typeof value !== "string" || value.trim() === "") continue;
+    if (safeHref(value) === null) row[key] = "";
+  }
+  return row;
+}
+
 export function parseTemplateListRows(raw: unknown): TemplateListRow[] {
   if (!Array.isArray(raw)) return [];
   return raw.map((item, index) => {
@@ -180,7 +217,7 @@ export function parseTemplateListRows(raw: unknown): TemplateListRow[] {
     if (typeof row._id !== "string" || !row._id) {
       row._id = newListRowId(index);
     }
-    return row;
+    return scrubRowLinks(row);
   });
 }
 
@@ -286,7 +323,12 @@ export function parseTemplateIconListRows(
 
   const out: GenericIconRow[] = [];
   for (const row of raw) {
-    const parsed = genericIconRowSchema.safeParse(row);
+    // Structurally a no-op today — `GenericIconRow` has no link key — but the
+    // scrub runs here too so a link key added to the icon row later is
+    // covered by the same rule as every other list row.
+    const parsed = genericIconRowSchema.safeParse(
+      isObjectRecord(row) ? scrubRowLinks({ ...row }) : row,
+    );
     if (!parsed.success) continue;
     const { icon, title, description } = parsed.data;
     const Icon = getLucideTemplateIcon(icon) ?? Leaf;

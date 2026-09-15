@@ -7,7 +7,10 @@ import { isQuickBooksConfigured } from "~/lib/quickbooks/config";
 import { QBO_REALM_MISMATCH_ERROR } from "~/lib/quickbooks/constants";
 import { redactTokenBearingError } from "~/lib/quickbooks/errors";
 import { exchangeCode, fetchCompanyInfo } from "~/lib/quickbooks/oauth";
-import { verifySignedOAuthState } from "~/lib/stripe/oauth-state";
+import {
+  isAllowedReturnUrl,
+  verifySignedOAuthState,
+} from "~/lib/stripe/oauth-state";
 import { QBO_OPEN_INVOICE_STATUSES } from "~/lib/validators/quickbooks";
 import { db } from "~/server/db";
 
@@ -70,6 +73,26 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // Every branch below redirects to `returnUrl` (success, `?error=`, no code,
+  // no realm, not configured, token exchange failure, ...), so it must be
+  // re-validated against the business's actual allowed hosts BEFORE any of
+  // them run — the signature on the state only proves who minted it, not
+  // that `returnUrl` itself was ever safe. See `isAllowedReturnUrl`'s
+  // docblock in `~/lib/stripe/oauth-state.ts`.
+  const returnUrlBusiness = await db.business.findUnique({
+    where: { id: businessId },
+    select: { subdomain: true, customDomain: true, domainStatus: true },
+  });
+
+  if (
+    !returnUrlBusiness ||
+    !isAllowedReturnUrl(returnUrl, returnUrlBusiness, {
+      allowInsecureLocalhost: process.env.NODE_ENV !== "production",
+    })
+  ) {
+    return NextResponse.json({ error: "Invalid return URL" }, { status: 400 });
+  }
+
   // Handle user cancellation or errors from Intuit
   if (error) {
     const redirectUrl = new URL(returnUrl);
@@ -103,15 +126,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Verify business still exists
-    const business = await db.business.findUnique({
-      where: { id: businessId },
-      select: { id: true },
-    });
-
-    if (!business) {
-      throw new Error("Business not found");
-    }
+    // Business existence was already confirmed above (`returnUrlBusiness`) as
+    // part of validating `returnUrl`.
 
     // Exchange authorization code for the token set (throws on failure)
     const tokens = await exchangeCode(code);

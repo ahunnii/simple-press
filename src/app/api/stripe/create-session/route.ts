@@ -150,6 +150,22 @@ export async function POST(req: NextRequest) {
   const errorContext: Record<string, unknown> = {};
 
   try {
+    // Throttle BEFORE reading/parsing the body: `getClientIp` only reads
+    // headers, so an unauthenticated caller is rejected before we ever buffer
+    // or JSON-parse an arbitrarily large request body.
+    try {
+      await checkoutLimiter.consume(getClientIp(req));
+    } catch {
+      // Deliberately NOT reported: a 429 is the limiter working as designed.
+      // It is per-IP shopper traffic, never a symptom of a broken store, and
+      // capturing it would generate exactly the flood the limiter exists to
+      // absorb.
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const parsed = checkoutSessionSchema.safeParse(await req.json());
     if (!parsed.success) {
       // The highest-value report in this handler. `parsed.error` is otherwise
@@ -179,19 +195,6 @@ export async function POST(req: NextRequest) {
     const body = parsed.data;
     const { items, customerInfo, discountCodeId } = body;
     errorContext.cartItemCount = items.length;
-
-    try {
-      await checkoutLimiter.consume(getClientIp(req));
-    } catch {
-      // Deliberately NOT reported: a 429 is the limiter working as designed.
-      // It is per-IP shopper traffic, never a symptom of a broken store, and
-      // capturing it would generate exactly the flood the limiter exists to
-      // absorb.
-      return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        { status: 429 },
-      );
-    }
 
     const domain = getCurrentDomain(req.headers);
     const business = await getBusinessByDomain(domain);

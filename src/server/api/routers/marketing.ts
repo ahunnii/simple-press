@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { z } from "zod";
 
 import { getBusinessUrl } from "~/lib/business-url";
+import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
 import { sendMarketingBroadcast } from "~/lib/email/templates";
 import { createUnsubscribeToken } from "~/lib/email/unsubscribe-token";
 
@@ -77,7 +78,10 @@ export const marketingRouter = createTRPCRouter({
       "Customer Since": c.createdAt.toISOString(),
     }));
 
-    const csv = Papa.unparse(rows, { quotes: true, header: true });
+    const csv = Papa.unparse(sanitizeCsvRows(rows), {
+      quotes: true,
+      header: true,
+    });
 
     const business = await ctx.db.business.findUnique({
       where: { id: businessId },

@@ -2,28 +2,31 @@ import dns from "node:dns/promises";
 import net from "node:net";
 
 /**
- * SSRF-hardened fetch helper for downloading partner-supplied logo images.
+ * SSRF-hardened fetch helper for downloading URLs with server-side validation.
  *
- * The AF partner-provisioning flow (docs/integrations/artisanal-futures-provisioning.md,
- * item B3) has the server issue an outbound HTTPS request to a `logoUrl` sent by
- * a partner API. Even though the partner API is trusted, we never want the
- * server tricked into hitting internal/metadata endpoints (e.g.
- * 169.254.169.254, localhost, RFC1918 ranges). This module validates the URL,
- * resolves the host, and refuses any address that maps to a private/reserved
- * range. It also caps the response size and time, and refuses redirects (a
- * common SSRF bypass).
+ * Even when URLs come from trusted sources (partner APIs, admin-entered import
+ * sources), we never want the server tricked into hitting internal/metadata
+ * endpoints (e.g. 169.254.169.254, localhost, RFC1918 ranges). This module
+ * validates the URL, resolves the host, and refuses any address that maps to a
+ * private/reserved range. It also caps the response size and time, and refuses
+ * redirects (a common SSRF bypass).
  *
- * Ported from artisanal-futures-site's `src/server/lib/safe-fetch.ts`, with
- * two deliberate deviations for this use case:
- *   - https-only (no plain http, no insecure-TLS fallback) — the partner's
- *     logo storage is a trusted host, not an arbitrary admin-entered URL, so
- *     there's no need to tolerate misconfigured certificates.
- *   - returns raw bytes + content-type rather than text, since the payload is
- *     an image, not JSON/HTML.
+ * Originally ported from artisanal-futures-site's `src/server/lib/safe-fetch.ts`,
+ * with deliberate deviations for different use cases:
+ *   - https-only by default; set `allowHttp: true` to accept plain http (used
+ *     by WooCommerce product imports, where many storefronts serve media over
+ *     plain http rather than https).
+ *   - returns raw bytes + content-type rather than text, since the primary
+ *     payload is images, not JSON/HTML.
+ *
+ * ALL security checks apply regardless of scheme: DNS resolution to a public IP,
+ * no credentials, no redirects, byte cap, timeout. For http, only the default
+ * port 80 is allowed (or explicitly configured default); non-default ports are
+ * rejected the same way they are for https.
  *
  * Residual risk: there is a small TOCTOU window between the DNS resolution
  * done here and the resolution performed by `fetch` itself. Given the host
- * comes from an authenticated partner API call (not arbitrary user input) and
+ * typically comes from authenticated/admin input (not arbitrary user input) and
  * redirects are refused, this is an acceptable trade-off.
  */
 
@@ -94,24 +97,41 @@ function isBlockedAddress(ip: string): boolean {
   return true; // unknown format → block
 }
 
-/** Validate scheme/credentials and return a normalized URL, or throw. */
-export function assertPublicHttpsUrl(rawUrl: string): URL {
+/**
+ * Validate scheme/credentials and return a normalized URL, or throw.
+ * When allowHttp is true, accepts both http and https; when false (default),
+ * only accepts https. In either case, only the default port for the scheme
+ * is allowed (443 for https, 80 for http).
+ */
+export function assertPublicHttpsUrl(rawUrl: string, allowHttp = false): URL {
   let url: URL;
   try {
     url = new URL(rawUrl);
   } catch {
     throw new SafeFetchError("Invalid URL.");
   }
-  if (url.protocol !== "https:") {
+
+  const isHttp = url.protocol === "http:";
+  const isHttps = url.protocol === "https:";
+
+  if (isHttp && !allowHttp) {
     throw new SafeFetchError("Only https URLs are allowed.");
   }
+  if (!isHttp && !isHttps) {
+    throw new SafeFetchError("Only http and https URLs are allowed.");
+  }
+
   if (url.username || url.password) {
     throw new SafeFetchError("URLs with embedded credentials are not allowed.");
   }
-  // Only allow the default port (none, or 443) to avoid probing internal services.
-  if (url.port && url.port !== "443") {
+
+  // Only allow the default port for the scheme to avoid probing internal services.
+  // http defaults to 80, https defaults to 443.
+  const defaultPort = isHttp ? "80" : "443";
+  if (url.port && url.port !== defaultPort) {
     throw new SafeFetchError("Only standard web ports are allowed.");
   }
+
   return url;
 }
 
@@ -154,6 +174,7 @@ export async function assertHostResolvesPublic(
 export type SafeFetchOptions = {
   timeoutMs?: number;
   maxBytes?: number;
+  allowHttp?: boolean;
 };
 
 export type SafeFetchResult = {
@@ -163,17 +184,22 @@ export type SafeFetchResult = {
 
 /**
  * Fetch a URL as raw bytes with SSRF protections, a timeout, and a size cap.
- * Refuses non-https URLs, private/reserved addresses, redirects, and
- * non-2xx responses.
+ * By default refuses non-https URLs, private/reserved addresses, redirects, and
+ * non-2xx responses. Set `allowHttp: true` to accept http URLs (still validates
+ * all other security checks: DNS resolution to public IP, no credentials, no
+ * redirects, byte cap, timeout).
  */
 export async function safeFetch(
   rawUrl: string,
   options: SafeFetchOptions = {},
 ): Promise<SafeFetchResult> {
-  const { timeoutMs = DEFAULT_TIMEOUT_MS, maxBytes = DEFAULT_MAX_BYTES } =
-    options;
+  const {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    maxBytes = DEFAULT_MAX_BYTES,
+    allowHttp = false,
+  } = options;
 
-  const url = assertPublicHttpsUrl(rawUrl);
+  const url = assertPublicHttpsUrl(rawUrl, allowHttp);
   await assertHostResolvesPublic(url.hostname);
 
   const controller = new AbortController();

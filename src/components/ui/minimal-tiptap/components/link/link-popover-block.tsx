@@ -7,6 +7,7 @@ import {
 
 import { Separator } from "~/components/ui/separator";
 
+import { sanitizeUrl } from "../../utils";
 import { ToolbarButton } from "../toolbar-button";
 
 interface LinkPopoverBlockProps {
@@ -37,7 +38,10 @@ export const LinkPopoverBlock: React.FC<LinkPopoverBlockProps> = ({
   );
 
   const handleOpenLink = React.useCallback(() => {
-    window.open(url, "_blank", "noopener,noreferrer");
+    const sanitized = sanitizeUrl(url);
+    if (sanitized) {
+      window.open(sanitized, "_blank", "noopener,noreferrer");
+    }
   }, [url]);
 
   return (
