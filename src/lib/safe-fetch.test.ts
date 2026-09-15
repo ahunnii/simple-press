@@ -138,4 +138,79 @@ describe("safeFetch", () => {
       safeFetch("https://user:pass@example.com/logo.png"),
     ).rejects.toThrow(/credentials/i);
   });
+
+  describe("allowHttp option", () => {
+    it("rejects http:// URLs by default", async () => {
+      await expect(safeFetch("http://example.com/logo.png")).rejects.toThrow(
+        SafeFetchError,
+      );
+      await expect(safeFetch("http://example.com/logo.png")).rejects.toThrow(
+        /https/i,
+      );
+    });
+
+    it("accepts http:// URLs with allowHttp: true", async () => {
+      mockPublicDns();
+      const body = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+      vi.stubGlobal(
+        "fetch",
+        mockFetchResponse({
+          headers: { "content-type": "image/jpeg" },
+          body,
+        }),
+      );
+
+      const result = await safeFetch("http://example.com/logo.png", {
+        allowHttp: true,
+      });
+
+      expect(result.contentType).toBe("image/jpeg");
+      expect(Buffer.from(result.bytes)).toEqual(Buffer.from(body));
+    });
+
+    it("rejects http with non-default port even with allowHttp: true", async () => {
+      await expect(
+        safeFetch("http://example.com:8080/logo.png", { allowHttp: true }),
+      ).rejects.toThrow(/standard web ports/i);
+    });
+
+    it("rejects http to private IPv4 with allowHttp: true", async () => {
+      await expect(
+        safeFetch("http://10.0.0.5/logo.png", { allowHttp: true }),
+      ).rejects.toThrow(/private|reserved/i);
+    });
+
+    it("rejects http to cloud metadata endpoint with allowHttp: true", async () => {
+      await expect(
+        safeFetch("http://169.254.169.254/latest/meta-data/", {
+          allowHttp: true,
+        }),
+      ).rejects.toThrow(/private|reserved/i);
+    });
+
+    it("rejects http with embedded credentials even with allowHttp: true", async () => {
+      await expect(
+        safeFetch("http://user:pw@example.com/logo.png", { allowHttp: true }),
+      ).rejects.toThrow(/credentials/i);
+    });
+
+    it("accepts http with default port 80 explicitly specified", async () => {
+      mockPublicDns();
+      const body = new Uint8Array([1, 2, 3]);
+      vi.stubGlobal(
+        "fetch",
+        mockFetchResponse({
+          headers: { "content-type": "image/png" },
+          body,
+        }),
+      );
+
+      const result = await safeFetch("http://example.com:80/logo.png", {
+        allowHttp: true,
+      });
+
+      expect(result.contentType).toBe("image/png");
+      expect(Buffer.from(result.bytes)).toEqual(Buffer.from(body));
+    });
+  });
 });

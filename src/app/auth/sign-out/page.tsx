@@ -12,4 +12,5 @@ export default async function AuthPage() {
 
 export const metadata = {
   title: "Sign Out",
+  robots: { index: false, follow: false },
 };

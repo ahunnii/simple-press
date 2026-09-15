@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
+import {
+  buildPageMetadata,
+  firstNonBlank,
+  getCachedBusiness,
+  preferNonBlank,
+} from "~/lib/seo";
 import {
   buildBreadcrumbSchema,
   buildWebPageSchema,
@@ -17,7 +22,7 @@ type Props = {
 
 export default async function PageView({ params }: Props) {
   const { slug } = await params;
-  const business = await api.business.simplifiedGet();
+  const business = await getCachedBusiness();
   if (!business) notFound();
 
   const page = await api.content.getPageBySlug({
@@ -33,8 +38,10 @@ export default async function PageView({ params }: Props) {
 
   const t = getTemplate(business.templateId);
 
-  const pageTitle = page.metaTitle ?? page.title;
-  const pageDescription = page.metaDescription ?? page.excerpt ?? undefined;
+  // Blank-aware: a cleared `metaTitle` comes back as "" and must fall through
+  // to the real title rather than feed an empty `name` into the JSON-LD.
+  const pageTitle = preferNonBlank(page.metaTitle, page.title);
+  const pageDescription = firstNonBlank(page.metaDescription, page.excerpt);
 
   const webPageSchema = buildWebPageSchema(business, {
     type: "WebPage",
@@ -60,40 +67,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const [page, business] = await Promise.all([
     api.content.getPageBySlug({ slug }),
-    api.business.simplifiedGet(),
+    getCachedBusiness(),
   ]);
 
   if (!page || page.type === "blog") return { title: "Page Not Found" };
 
-  const title = !!page.metaTitle ? page.metaTitle : page.title;
-  const description = !!page.metaDescription
-    ? page.metaDescription
-    : (page.excerpt ?? undefined);
-
-  const ogImage =
-    page.ogImage ??
-    business?.siteContent?.ogImage ??
-    business?.siteContent?.logoUrl ??
-    undefined;
-
-  return {
-    title,
-    description,
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, `/${slug}`),
-      },
-    }),
-    openGraph: {
-      title,
-      description: description ?? "",
-      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
+  return buildPageMetadata({
+    business,
+    path: `/${slug}`,
+    title: page.title,
+    description: page.excerpt,
+    keywords: page.metaKeywords,
+    entity: {
+      title: page.metaTitle,
+      description: page.metaDescription,
+      ogImage: page.ogImage,
     },
-    twitter: {
-      card: "summary_large_image" as const,
-      title,
-      description: description ?? "",
-      ...(ogImage && { images: [ogImage] }),
-    },
-  };
+  });
 }

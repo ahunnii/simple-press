@@ -1,0 +1,37 @@
+-- 2026-08-26-quickbooks-billing-address.sql — 2026-08-26
+--
+-- Additive DDL for the QuickBooks invoicing billing-address snapshot (F10):
+-- one new nullable column on QuickBooksInvoice.
+--
+-- Covers:
+--   * QuickBooksInvoice."billingAddress" — the customer's billing address
+--     snapshot, stored as a JSON string {line1,line2?,city,state,zip} and
+--     sent to Intuit as `BillAddr` on the QBO Customer (at create time) and
+--     on the Invoice itself. It is an `/// @encrypted` field in
+--     schema.prisma, exactly like customerName/customerEmail/customerPhone,
+--     so its ciphertext must NEVER appear in a `where` clause.
+--
+-- Hand-apply only. Nothing runs this automatically; there is no migration
+-- file backing it. Strictly additive — one ADD COLUMN, no DROP, no data
+-- rewrite, no index change. Safe to run against a live database.
+--
+--   psql "$DATABASE_URL" -f prisma/manual/2026-08-26-quickbooks-billing-address.sql
+--
+-- Idempotent: the statement is guarded with IF NOT EXISTS, so a second run
+-- is a no-op.
+--
+-- CHECKLIST: apply this to staging/prod BEFORE deploying the billing-address
+-- change. Prisma's generated client will select this column on every
+-- QuickBooksInvoice read once it ships; against a database missing it, every
+-- /admin/invoices read and the invoice cron throw.
+--
+-- NOTE: nullable with no DEFAULT by design — this matches what
+-- `prisma db push` emits for an optional String field. Existing rows keep a
+-- NULL billing address (they were issued before the field existed) and the
+-- issue path treats NULL as "no address to send", never as an empty one.
+
+-- ----------------------------------------------------------------------------
+-- QuickBooksInvoice: billing address snapshot (encrypted JSON)
+-- ----------------------------------------------------------------------------
+
+ALTER TABLE "QuickBooksInvoice" ADD COLUMN IF NOT EXISTS "billingAddress" TEXT;

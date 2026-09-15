@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
+import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
+import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -166,6 +168,14 @@ export function BlogPostEditor({
   const router = useRouter();
   const utils = api.useUtils();
   const siteHost = useSiteHost();
+  const { data: businessInfo } = api.business.simplifiedGet.useQuery();
+  // The title-suffix brand — `seoBrandName` when the owner set one, else the
+  // business name. Used to render every meta-title counter and preview the
+  // same way the storefront `<title>` actually renders.
+  const brand = resolveSeoBrand({
+    name: businessInfo?.name ?? "",
+    siteContent: businessInfo?.siteContent,
+  });
   const formRef = useRef<HTMLFormElement>(null);
   const imageFileInputRef = useRef<HTMLInputElement | null>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -465,13 +475,23 @@ export function BlogPostEditor({
     watchedTitle.trim() !== page.title &&
     titleDerivedSlug !== watchedSlug;
 
-  const metaTitleLength = form.watch("metaTitle")?.length ?? 0;
+  // Rendered length ("title | brand"), not the raw field — matches what
+  // Google will actually show.
+  const metaTitleLength = renderSeoTitle(
+    preferNonBlank(form.watch("metaTitle"), watchedTitle),
+    brand,
+  ).length;
   const metaDescriptionLength = form.watch("metaDescription")?.length ?? 0;
 
-  // SEO preview values — || is intentional so empty string falls back
+  // SEO preview values. Title is rendered through `renderSeoTitle`, exactly
+  // as the storefront `<title>` will, including the " | brand" suffix.
+  // Description is untouched by this pass — `||` is intentional there so a
+  // cleared "" falls through to the next candidate.
+  const seoPreviewTitle = renderSeoTitle(
+    firstNonBlank(form.watch("metaTitle"), form.watch("title")) ?? "Post Title",
+    brand,
+  );
   /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-  const seoPreviewTitle =
-    form.watch("metaTitle") || form.watch("title") || "Post Title";
   const seoPreviewDesc =
     form.watch("metaDescription") ||
     form.watch("excerpt") ||
@@ -851,8 +871,8 @@ export function BlogPostEditor({
                                   : undefined
                               }
                             >
-                              {metaTitleLength}/60 characters — leave blank to
-                              use the post title
+                              {metaTitleLength}/60 characters including &quot; |{" "}
+                              {brand}&quot; — leave blank to use the post title
                             </span>
                           }
                           descriptionClassName="text-xs text-muted-foreground"

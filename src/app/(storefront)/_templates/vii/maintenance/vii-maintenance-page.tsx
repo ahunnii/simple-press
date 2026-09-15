@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import type { MaintenancePageTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { resolveThemeVars } from "~/lib/template-themes";
+import { LaunchCountdown } from "~/components/maintenance/launch-countdown";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { ViiOverline } from "../shared/vii-overline";
@@ -43,15 +44,25 @@ const COPY = {
 /**
  * ViiMaintenancePage — the Skinbar VII maintenance / coming-soon takeover.
  *
- * A full-height navy canvas with one centered editorial column: copper
- * overline, logo (or italic serif wordmark), serif italic headline, the
- * merchant's rich-text note and a single call-to-action. Every foreground
- * token is the light-on-navy variant (`--vii-paper` / `--vii-tan` /
- * `--vii-copper-light`) since the whole screen sits on `--vii-navy`.
+ * A full-height navy canvas with one centered editorial column, in order:
+ * copper overline (owner value or the variant default), logo (or italic serif
+ * wordmark), serif italic headline (owner value or the variant default), the
+ * business name line, an optional announcement flyer, an optional
+ * date/time · location line, an optional live countdown to the launch
+ * instant, the merchant's rich-text note and a single call-to-action.
+ * Every foreground token is the light-on-navy variant (`--vii-paper` /
+ * `--vii-tan` / `--vii-copper-light`) since the whole screen sits on
+ * `--vii-navy`.
+ *
+ * Every date string is pre-formatted server-side in the shop's time zone by
+ * `resolveMaintenanceLaunch` (`~/lib/maintenance-config.ts`) — nothing here
+ * formats a date. `LaunchCountdown` is the one client component on the
+ * screen; it is hydration-safe by contract (see its header), so this page
+ * stays a server component and paints before hydration.
  *
  * Entrance motion is pure CSS (`.vii-maintenance-col` stagger in
- * `globals.css`) — this stays a server component so the screen paints with no
- * hydration.
+ * `globals.css`), which keys off direct-child position — keep these elements
+ * direct children of the column.
  */
 export function ViiMaintenancePage({
   business,
@@ -67,6 +78,15 @@ export function ViiMaintenancePage({
     businessName,
   );
   const cta = maintenance.cta;
+
+  // Owner-authored values win; `null` means "no owner value" → variant default.
+  const overline = maintenance.overline ?? copy.overline;
+  const heading = maintenance.headline ?? copy.heading;
+
+  const flyerUrl = maintenance.image;
+  const launch = maintenance.launch;
+  const locationText = maintenance.location;
+  const isComingSoon = maintenance.variant === "coming_soon";
 
   return (
     <div
@@ -98,7 +118,7 @@ export function ViiMaintenancePage({
         }}
       >
         <ViiOverline tone="dark" align="center">
-          {copy.overline}
+          {overline}
         </ViiOverline>
 
         {/* Wordmark — mirrors the header's logo/italic-serif pattern
@@ -144,7 +164,7 @@ export function ViiMaintenancePage({
             margin: 0,
           }}
         >
-          {copy.heading}
+          {heading}
         </h1>
 
         {/* The wordmark already carries the name when there's no logo, so the
@@ -162,6 +182,47 @@ export function ViiMaintenancePage({
           >
             {businessName}
           </p>
+        ) : null}
+
+        {/* Announcement flyer. Intrinsic sizing (`height: auto`) rather than
+            `fill`: the owner can upload any aspect ratio and we must not crop
+            an image whose whole point is the text printed on it. */}
+        {flyerUrl ? (
+          <figure className="vii-maintenance-flyer">
+            <Image
+              src={flyerUrl}
+              alt={maintenance.headline ?? "Grand opening flyer"}
+              width={840}
+              height={1050}
+              sizes="(max-width: 480px) 100vw, 420px"
+              style={{ width: "100%", height: "auto", display: "block" }}
+            />
+          </figure>
+        ) : null}
+
+        {/* When / where. Both halves are optional, so the middot separator is
+            emitted only when there is something on either side of it. */}
+        {launch !== null || locationText !== null ? (
+          <p className="vii-maintenance-when">
+            {launch ? (
+              <time dateTime={launch.dateTimeAttr}>
+                {launch.dateText}
+                {launch.timeText ? ` · ${launch.timeText}` : ""}
+              </time>
+            ) : null}
+            {launch && locationText ? " · " : null}
+            {locationText ? <span>{locationText}</span> : null}
+          </p>
+        ) : null}
+
+        {launch ? (
+          <LaunchCountdown
+            targetIso={launch.startAt}
+            label={isComingSoon ? "Opening in" : "Back in"}
+            pastLabel={isComingSoon ? "Now open" : "We're back"}
+            className="vii-maintenance-countdown"
+            unitClassName="vii-maintenance-countdown-unit"
+          />
         ) : null}
 
         {maintenance.message ? (

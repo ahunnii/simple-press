@@ -1,12 +1,28 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import {
+  buildCsp,
+  buildHsts,
+  CSP_REPORT_ONLY_HEADER,
+  generateNonce,
+  HSTS_HEADER,
+} from "~/lib/security/csp";
+
 export async function middleware(req: NextRequest) {
   const hostname = req.headers.get("host") ?? "";
   const pathname = req.nextUrl.pathname;
 
   // Build a mutable headers copy; set x-sp-preview when ?__preview=1 is present.
   const requestHeaders = new Headers(req.headers);
+  // Strip the headers we own before (re)deriving them, so a client cannot hand
+  // a server component a forged value: `x-sp-preview` must come from the query
+  // string alone, `x-nonce`/CSP must come from this middleware alone. Next
+  // reads `content-security-policy` in preference to the report-only variant
+  // when extracting the nonce for its inline scripts, so both are cleared.
+  requestHeaders.delete("x-sp-preview");
+  requestHeaders.delete("x-nonce");
+  requestHeaders.delete("content-security-policy");
   // Always expose the current path (incl. query string) to server components via
   // a header, so canonical-host redirects can preserve search params.
   requestHeaders.set("x-pathname", `${pathname}${req.nextUrl.search}`);
@@ -14,12 +30,43 @@ export async function middleware(req: NextRequest) {
     requestHeaders.set("x-sp-preview", "1");
   }
 
+  // Content-Security-Policy, REPORT-ONLY. Violations go to Sentry; nothing is
+  // ever blocked. Wrapped defensively: a failure here must degrade to "no CSP
+  // on this request", never to a 500.
+  //
+  // The policy is set on the REQUEST headers as well as the response because
+  // Next only stamps its own inline framework scripts with the nonce when it
+  // finds one on an incoming CSP request header. Verified in Next 15.5.9
+  // (`server/app-render/app-render.js`): it reads
+  // `headers['content-security-policy'] || headers['content-security-policy-report-only']`,
+  // so the report-only header alone is enough — no enforcing header is needed
+  // anywhere in the chain.
+  let cspHeader: string | null = null;
+  try {
+    const nonce = generateNonce();
+    cspHeader = buildCsp(nonce);
+    requestHeaders.set("x-nonce", nonce);
+    requestHeaders.set(CSP_REPORT_ONLY_HEADER, cspHeader);
+  } catch {
+    cspHeader = null;
+  }
+
   // On the preview/staging deployment, keep the whole environment out of search
   // indexes (it serves a clone of prod data on preview.<platform-domain>).
   const isPreviewEnv = process.env.IS_PREVIEW_ENV === "true";
+  // HSTS is per-host, not a static header: `includeSubDomains` only for the
+  // platform apex + its subdomains, plain `max-age` on tenant custom domains
+  // (see `buildHsts`). Null on localhost / unknown platform domain.
+  const hstsHeader = buildHsts(hostname);
   const finalize = (res: NextResponse) => {
     if (isPreviewEnv) {
       res.headers.set("X-Robots-Tag", "noindex, nofollow");
+    }
+    if (cspHeader) {
+      res.headers.set(CSP_REPORT_ONLY_HEADER, cspHeader);
+    }
+    if (hstsHeader) {
+      res.headers.set(HSTS_HEADER, hstsHeader);
     }
     return res;
   };

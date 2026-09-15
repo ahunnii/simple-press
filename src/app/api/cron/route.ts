@@ -10,6 +10,8 @@
 //   5. archivePastEvents   — flip isArchived on events whose end (or start) has passed
 //   6. videoSync           — pull YouTube channel/playlist feeds into the Video cache
 //   7. quickbooksInvoiceSync — sync payment status for QuickBooks-issued invoices
+//   8. subscriptionSync    — re-derive due Subscription rows from Stripe
+//   9. loyaltyBirthday      — award birthday points to customers whose month/day is today (business time zone)
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401 — and logs a one-time
@@ -32,6 +34,7 @@ import { sendBackInStockEmail } from "~/lib/email/templates";
 import { archivePastEvents } from "~/lib/events/archive";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
+import { awardBirthdayPoints } from "~/lib/loyalty/birthday";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
 import { syncSubscriptions } from "~/lib/subscriptions/sync";
@@ -352,6 +355,16 @@ const JOBS: readonly CronJob[] = [
     key: "subscriptionSync",
     name: "subscription-sync",
     run: () => syncSubscriptions(db),
+  },
+  // Loyalty birthday bonus: awards each customer whose month/day matches
+  // today in the business's time zone, once per calendar year (ledger
+  // sourceKey `birthday:<customerId>:<year>` makes the 15-min tick idempotent).
+  // Flag-gated per business inside the helper; steady state for a tenant
+  // without a birthday rule is zero rows from one SELECT.
+  {
+    key: "loyaltyBirthday",
+    name: "loyalty-birthday",
+    run: () => awardBirthdayPoints(db),
   },
 ];
 

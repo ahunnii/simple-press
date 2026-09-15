@@ -11,6 +11,7 @@ import { ElegantCheckoutForm } from "~/app/(storefront)/_templates/elegant/cart-
 import { HappyBambooCheckoutForm } from "~/app/(storefront)/_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-form";
 import { ModernCheckoutForm } from "~/app/(storefront)/_templates/modern/cart-checkout/modern-checkout-form";
 import { NoiseCheckoutForm } from "~/app/(storefront)/_templates/noise/cart-checkout/noise-checkout-form";
+import { OliveCheckoutForm } from "~/app/(storefront)/_templates/olive/cart-checkout/olive-checkout-form";
 import { PinkCheckoutForm } from "~/app/(storefront)/_templates/pink/cart-checkout/pink-checkout-form";
 import { PollenCheckoutForm } from "~/app/(storefront)/_templates/pollen/cart-checkout/pollen-checkout-form";
 import { SledgeCheckoutForm } from "~/app/(storefront)/_templates/sledge/cart-checkout/sledge-checkout-form";
@@ -141,6 +142,7 @@ const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["elegant", ElegantCheckoutForm],
   ["pollen", PollenCheckoutForm],
   ["noise", NoiseCheckoutForm],
+  ["olive", OliveCheckoutForm],
   ["dark-trend", DarkTrendCheckoutForm],
   ["sledge", SledgeCheckoutForm],
   ["pink", PinkCheckoutForm],

@@ -227,3 +227,43 @@ describe("eventCreateSchema coverVideo", () => {
     expect(result.success).toBe(false);
   });
 });
+
+/**
+ * `linkQrEnabled` is the per-event opt-in to render `externalUrl` as a
+ * scannable QR code on the storefront. It defaults to `false` so every event
+ * that predates the feature (and every store-transfer manifest exported before
+ * 2026-09-14) parses unchanged, and there is deliberately no cross-field
+ * refinement against `externalUrl` — the flag is inert without a link, so
+ * clearing the link later must never turn into a save error.
+ */
+describe("eventCreateSchema linkQrEnabled", () => {
+  const base = { name: "Test Event", startAt: "2026-08-07T12:00" };
+
+  it("defaults to false when omitted", () => {
+    const result = eventCreateSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.linkQrEnabled).toBe(false);
+    }
+  });
+
+  it("round-trips true", () => {
+    const result = eventCreateSchema.safeParse({
+      ...base,
+      externalUrl: "https://example.com/tickets",
+      linkQrEnabled: true,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.linkQrEnabled).toBe(true);
+    }
+  });
+
+  it("accepts true with no link at all (the flag is inert, not invalid)", () => {
+    const result = eventCreateSchema.safeParse({
+      ...base,
+      linkQrEnabled: true,
+    });
+    expect(result.success).toBe(true);
+  });
+});

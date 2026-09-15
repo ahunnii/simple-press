@@ -24,6 +24,8 @@ import {
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { getEffectivePrice } from "~/lib/prices";
+import { firstNonBlank } from "~/lib/seo/blank";
+import { resolveVariantPrice } from "~/lib/variant-price";
 import { youtubeEmbedUrl, youtubeWatchUrl } from "~/lib/youtube/parse";
 
 // ---------------------------------------------------------------------------
@@ -40,6 +42,8 @@ interface CanonicalBusiness {
 
 interface BusinessForOrganization extends CanonicalBusiness {
   name: string;
+  phoneNumber?: string | null;
+  supportEmail?: string | null;
   siteContent?: {
     logoUrl?: string | null;
     socialLinks?: unknown;
@@ -143,6 +147,14 @@ function toAbsoluteUrl(url: string | null | undefined): string | undefined {
 }
 
 /**
+ * Trim a value and return it only when non-blank; otherwise `undefined` so
+ * callers can spread it away with `...(nonBlank(v) ? { key: v } : {})`.
+ */
+function nonBlank(value: string | null | undefined): string | undefined {
+  return firstNonBlank(value);
+}
+
+/**
  * Parse socialLinks JSON into an array of URL strings for sameAs.
  * The DB schema stores this as `{ instagram?: string, facebook?: string, twitter?: string, ... }`.
  */
@@ -175,8 +187,11 @@ export type BuildProductSchemaOptions = {
  *
  * Includes:
  * - name, description, sku, brand
- * - image (first product image, absolute URL)
- * - offers (Offer with price, priceCurrency, availability, url)
+ * - image (every product image, absolute URLs, as an array)
+ * - offers — a single Offer (price/priceCurrency/availability/url) for a
+ *   product with 0-1 variants or with ≥2 variants all priced the same; an
+ *   AggregateOffer (lowPrice/highPrice/offerCount) when ≥2 variants have
+ *   different effective prices
  * - aggregateRating — ONLY when reviewCount > 0 (Google rejects zero-review ratings)
  */
 export function buildProductSchema(
@@ -187,7 +202,9 @@ export function buildProductSchema(
 ): Record<string, unknown> {
   const includeReviews = options.includeReviews ?? true;
   const canonicalUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
-  const firstImage = toAbsoluteUrl(product.images[0]?.url);
+  const images = product.images
+    .map((i) => toAbsoluteUrl(i.url))
+    .filter((url): url is string => Boolean(url));
 
   // Prices in the DB are stored in cents. Use the same effective-price
   // resolution as the rest of the app (variant-aware — a variant price of
@@ -202,6 +219,35 @@ export function buildProductSchema(
     })),
   });
 
+  // Every variant's own effective price (0/null inherits the base price —
+  // same rule as getEffectivePrice/getAvailability), used to decide whether
+  // this product needs an AggregateOffer (a real price range) instead of a
+  // single Offer.
+  const variantPriceCents = (product.variants ?? []).map((v) =>
+    resolveVariantPrice(v.price, product.price),
+  );
+  const hasPriceRange =
+    variantPriceCents.length >= 2 &&
+    Math.min(...variantPriceCents) !== Math.max(...variantPriceCents);
+
+  const offers: Record<string, unknown> = hasPriceRange
+    ? {
+        "@type": "AggregateOffer",
+        lowPrice: (Math.min(...variantPriceCents) / 100).toFixed(2),
+        highPrice: (Math.max(...variantPriceCents) / 100).toFixed(2),
+        offerCount: variantPriceCents.length,
+        priceCurrency: "USD",
+        availability: getAvailability(product),
+        url: canonicalUrl,
+      }
+    : {
+        "@type": "Offer",
+        price: (effectivePriceCents / 100).toFixed(2),
+        priceCurrency: "USD",
+        availability: getAvailability(product),
+        url: canonicalUrl,
+      };
+
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -211,13 +257,7 @@ export function buildProductSchema(
       "@type": "Brand",
       name: business.name,
     },
-    offers: {
-      "@type": "Offer",
-      price: (effectivePriceCents / 100).toFixed(2),
-      priceCurrency: "USD",
-      availability: getAvailability(product),
-      url: canonicalUrl,
-    },
+    offers,
   };
 
   if (product.description) {
@@ -228,8 +268,8 @@ export function buildProductSchema(
     schema.sku = product.sku;
   }
 
-  if (firstImage) {
-    schema.image = firstImage;
+  if (images.length > 0) {
+    schema.image = images;
   }
 
   // AggregateRating is only valid when reviewCount > 0
@@ -289,6 +329,14 @@ export function buildOrganizationSchema(
   const logoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
   if (logoUrl) {
     schema.logo = logoUrl;
+  }
+
+  if (business.phoneNumber) {
+    schema.telephone = business.phoneNumber;
+  }
+
+  if (business.supportEmail) {
+    schema.email = business.supportEmail;
   }
 
   const sameAs = parseSameAs(business.siteContent?.socialLinks);
@@ -466,6 +514,16 @@ export function buildCollectionSchema(
 interface BusinessForLocalBusiness extends CanonicalBusiness {
   name: string;
   businessAddress?: string | null;
+  /**
+   * Structured address parts (Business.addressStreet/City/State/PostalCode).
+   * When any part is non-blank these take priority over the legacy free-text
+   * `businessAddress` field — see the emission rule in
+   * buildLocalBusinessSchema below.
+   */
+  addressStreet?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressPostalCode?: string | null;
   phoneNumber?: string | null;
   supportEmail?: string | null;
   businessHours?: unknown;
@@ -502,7 +560,21 @@ export function buildLocalBusinessSchema(
     schema.email = business.supportEmail;
   }
 
-  if (business.businessAddress) {
+  const streetAddress = nonBlank(business.addressStreet);
+  const addressLocality = nonBlank(business.addressCity);
+  const addressRegion = nonBlank(business.addressState);
+  const postalCode = nonBlank(business.addressPostalCode);
+
+  if (streetAddress || addressLocality || addressRegion || postalCode) {
+    schema.address = {
+      "@type": "PostalAddress",
+      ...(streetAddress ? { streetAddress } : {}),
+      ...(addressLocality ? { addressLocality } : {}),
+      ...(addressRegion ? { addressRegion } : {}),
+      ...(postalCode ? { postalCode } : {}),
+      addressCountry: "US",
+    };
+  } else if (business.businessAddress) {
     schema.address = {
       "@type": "PostalAddress",
       streetAddress: business.businessAddress,
@@ -660,13 +732,18 @@ export function buildWebPageSchema(
  * Build a schema.org BlogPosting object for a blog post detail page.
  *
  * Includes headline, description, image, datePublished/dateModified,
- * author (Organization), and mainEntityOfPage.
+ * author (Organization), publisher (Organization, with logo when the
+ * business has an absolute logo URL), and mainEntityOfPage.
  */
 export function buildBlogPostingSchema(
   page: PageForBlogPosting,
-  business: CanonicalBusiness & { name: string },
+  business: CanonicalBusiness & {
+    name: string;
+    siteContent?: { logoUrl?: string | null } | null;
+  },
 ): Record<string, unknown> {
   const canonicalUrl = getCanonicalUrl(business, `/blog/${page.slug}`);
+  const publisherLogoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -677,6 +754,13 @@ export function buildBlogPostingSchema(
     author: {
       "@type": "Organization",
       name: business.name,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: business.name,
+      ...(publisherLogoUrl
+        ? { logo: { "@type": "ImageObject", url: publisherLogoUrl } }
+        : {}),
     },
     mainEntityOfPage: {
       "@type": "WebPage",
@@ -784,6 +868,10 @@ export function buildEventSchema(
     schema.location = {
       "@type": "Place",
       name: event.location,
+      // schema.org allows a plain Text value for Place.address, and Google's
+      // Event rich-result requires an address — the owner only enters one
+      // free-text location field, so it doubles as both name and address.
+      address: event.location,
     };
   }
 

@@ -26,4 +26,5 @@ export default async function ResetPasswordPage({ searchParams }: Props) {
 
 export const metadata = {
   title: "Reset Password",
+  robots: { index: false, follow: false },
 };

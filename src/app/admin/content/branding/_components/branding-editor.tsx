@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import type { BrandingFormSchema } from "~/lib/validators/homepage";
 import { getAvailableTemplates } from "~/lib/template-ownership";
+import { getStoredPath } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import { brandingFormSchema } from "~/lib/validators/homepage";
 import { api } from "~/trpc/react";
@@ -172,16 +173,26 @@ export function BrandingEditor({ business, siteContent }: Props) {
 
   const handleSubmit = async (data: BrandingFormSchema) => {
     let logoUrl: string | undefined = data.logoUrl ?? undefined;
-    let faviconUrl: string | undefined = data.faviconUrl ?? undefined;
+    // `handleReset` seeds this with "" for a store that has no favicon, and the
+    // server schema accepts "" — so an empty value would write "" over the null
+    // the platform favicon falls back from. Same treatment as `primaryColor`.
+    let faviconUrl: string | undefined =
+      data.faviconUrl === null || data.faviconUrl === ""
+        ? undefined
+        : data.faviconUrl;
 
     const logoFile = data.logoFile;
     if (logoFile instanceof File) {
       try {
         const response = await logoUploader.upload(logoFile);
-        const fileLocation =
-          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
-          "";
-        if (fileLocation) logoUrl = fileLocation;
+        const fileLocation = getStoredPath(response.file);
+        if (!fileLocation) {
+          // Falling through would report success while silently saving nothing
+          // — same guard as `src/lib/avatar-upload.ts:28-38`.
+          toast.error("Logo upload succeeded but returned no URL");
+          return;
+        }
+        logoUrl = fileLocation;
       } catch {
         toast.error("Failed to upload logo.");
         return;
@@ -192,13 +203,18 @@ export function BrandingEditor({ business, siteContent }: Props) {
     if (tempFaviconFile instanceof File) {
       try {
         const response = await faviconUploader.upload(tempFaviconFile);
-        const fileLocation =
-          (response.file.objectInfo.metadata?.pathName as string | undefined) ??
-          "";
-
-        if (fileLocation) faviconUrl = fileLocation;
+        const fileLocation = getStoredPath(response.file);
+        if (!fileLocation) {
+          toast.error("Favicon upload succeeded but returned no URL");
+          return;
+        }
+        // The S3 key is fixed per business (`{businessId}/favicon{ext}`), so a
+        // re-upload returns a byte-identical URL and browsers keep serving the
+        // old icon — see `src/lib/avatar-upload.ts:40-44`. Safe: `normalizeUrl`
+        // (media usage) and `rewriteUrl` (store transfer) strip the query first.
+        faviconUrl = `${fileLocation}?v=${Date.now()}`;
       } catch {
-        toast.error("Failed to upload logo.");
+        toast.error("Failed to upload favicon.");
         return;
       }
     }
@@ -446,7 +462,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
                     form={form}
                     name="faviconFile"
                     label="Favicon"
-                    description="The small icon shown in browser tabs. Recommended: 32x32px or 16x16px .ico or .png. Defaults to SimplePress's favicon if no favicon is uploaded."
+                    description="The small icon shown in browser tabs. Recommended: 32x32px or 16x16px .ico, .png, or .svg. Defaults to SimplePress's favicon if no favicon is uploaded."
                     existingPreviewUrl={siteContent.faviconUrl ?? undefined}
                     inputRef={faviconFileInputRef}
                     className="col-span-1"

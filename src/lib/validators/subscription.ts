@@ -42,13 +42,13 @@ export type ProductSubscriptionFields = z.infer<
 // `subscriptionCheckoutBodySchema` below. Keep this in sync if checkout.ts's
 // address shape ever changes.
 const subscriptionShippingAddressSchema = z.object({
-  line1: z.string().min(1),
-  line2: z.string().optional().nullable(),
-  city: z.string().min(1),
-  state: z.string().min(1),
-  postalCode: z.string().min(1),
-  country: z.string().min(1),
-  phone: z.string().optional().nullable(),
+  line1: z.string().min(1).max(200),
+  line2: z.string().max(200).optional().nullable(),
+  city: z.string().min(1).max(120),
+  state: z.string().min(1).max(120),
+  postalCode: z.string().min(1).max(120),
+  country: z.string().min(1).max(120),
+  phone: z.string().max(40).optional().nullable(),
 });
 
 // Note: `email` intentionally matches checkout.ts's `checkoutCustomerInfoSchema`
@@ -58,9 +58,9 @@ const subscriptionShippingAddressSchema = z.object({
 // `z.string()` (no minimum length) but the Subscribe flow has no cart-side
 // pre-validation to lean on, so this schema requires a non-empty name itself.
 const subscriptionCustomerInfoSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(1),
-  phone: z.string().optional().nullable(),
+  email: z.string().email().max(320),
+  name: z.string().min(1).max(200),
+  phone: z.string().max(40).optional().nullable(),
   shippingAddress: subscriptionShippingAddressSchema.optional().nullable(),
 });
 
@@ -71,8 +71,8 @@ const subscriptionCustomerInfoSchema = z.object({
  * parameters are always server-derived (see the plan's security invariants).
  */
 export const subscriptionCheckoutBodySchema = z.object({
-  productId: z.string().min(1),
-  variantId: z.string().optional().nullable(),
+  productId: z.string().min(1).max(64),
+  variantId: z.string().max(64).optional().nullable(),
   intervalKey: subscriptionIntervalKeySchema,
   quantity: z.number().int().min(1).max(50),
   deliveryMethod: z.enum(["ship", "pickup"]),

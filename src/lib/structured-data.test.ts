@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { buildEventSchema, buildVideoObjectSchema } from "./structured-data";
+import {
+  buildBlogPostingSchema,
+  buildEventSchema,
+  buildLocalBusinessSchema,
+  buildOrganizationSchema,
+  buildProductSchema,
+  buildVideoObjectSchema,
+} from "./structured-data";
 
 const business = {
   subdomain: "testshop",
@@ -151,6 +158,7 @@ describe("buildEventSchema", () => {
     expect(schema.location).toEqual({
       "@type": "Place",
       name: "123 Main St, Detroit, MI",
+      address: "123 Main St, Detroit, MI",
     });
   });
 
@@ -243,5 +251,272 @@ describe("buildVideoObjectSchema", () => {
     });
 
     expect(schema.uploadDate).toBe("2026-06-01T12:00:00.000Z");
+  });
+});
+
+const baseProduct = {
+  name: "Test Product",
+  slug: "test-product",
+  price: 1000,
+  images: [],
+  averageRating: null,
+  reviewCount: 0,
+  trackInventory: false,
+  inventoryQty: 0,
+  allowBackorders: false,
+};
+
+describe("buildProductSchema", () => {
+  it("emits an array of every absolute product image URL", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        images: [
+          { url: "https://storage.simplepress.test/business-sites/biz1/a.jpg" },
+          { url: "https://storage.simplepress.test/business-sites/biz1/b.jpg" },
+          { url: "/relative/not-absolute.jpg" },
+        ],
+      },
+      business,
+    );
+
+    expect(schema.image).toEqual([
+      "https://storage.simplepress.test/business-sites/biz1/a.jpg",
+      "https://storage.simplepress.test/business-sites/biz1/b.jpg",
+    ]);
+  });
+
+  it("omits image entirely when there are no usable image URLs", () => {
+    const schema = buildProductSchema(
+      { ...baseProduct, images: [{ url: "/relative/only.jpg" }] },
+      business,
+    );
+
+    expect(schema).not.toHaveProperty("image");
+  });
+
+  it("emits a single Offer when there is only one variant", () => {
+    const schema = buildProductSchema(
+      { ...baseProduct, variants: [{ price: 1500, inventoryQty: 5 }] },
+      business,
+    );
+
+    expect(schema.offers).toEqual({
+      "@type": "Offer",
+      price: "15.00",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: expect.any(String) as string,
+    });
+  });
+
+  it("emits a single Offer when multiple variants all resolve to the same effective price", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        price: 1000,
+        variants: [
+          { price: 1000, inventoryQty: 5 },
+          { price: 0, inventoryQty: 5 }, // 0 inherits the base price (1000)
+        ],
+      },
+      business,
+    );
+
+    expect(schema.offers).toMatchObject({
+      "@type": "Offer",
+      price: "10.00",
+    });
+  });
+
+  it("emits an AggregateOffer with the correct low/high prices when variant prices differ", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        price: 1000,
+        variants: [
+          { price: 1000, inventoryQty: 5 },
+          { price: 1500, inventoryQty: 5 },
+          { price: 1200, inventoryQty: 5 },
+        ],
+      },
+      business,
+    );
+
+    expect(schema.offers).toEqual({
+      "@type": "AggregateOffer",
+      lowPrice: "10.00",
+      highPrice: "15.00",
+      offerCount: 3,
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: expect.any(String) as string,
+    });
+  });
+
+  it("treats a variant price of 0 as inheriting the base price when computing the AggregateOffer range", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        price: 1000,
+        variants: [
+          { price: 0, inventoryQty: 5 }, // inherits 1000
+          { price: 1500, inventoryQty: 5 },
+        ],
+      },
+      business,
+    );
+
+    expect(schema.offers).toMatchObject({
+      "@type": "AggregateOffer",
+      lowPrice: "10.00",
+      highPrice: "15.00",
+    });
+  });
+});
+
+describe("buildLocalBusinessSchema", () => {
+  it("emits a full PostalAddress from structured parts, including addressCountry US", () => {
+    const schema = buildLocalBusinessSchema({
+      ...business,
+      addressStreet: "123 Main St",
+      addressCity: "Detroit",
+      addressState: "MI",
+      addressPostalCode: "48201",
+    });
+
+    expect(schema.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "123 Main St",
+      addressLocality: "Detroit",
+      addressRegion: "MI",
+      postalCode: "48201",
+      addressCountry: "US",
+    });
+  });
+
+  it("includes only the non-blank structured parts", () => {
+    const schema = buildLocalBusinessSchema({
+      ...business,
+      addressStreet: "123 Main St",
+      addressCity: "  ", // blank after trim
+      addressState: null,
+      addressPostalCode: undefined,
+    });
+
+    expect(schema.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "123 Main St",
+      addressCountry: "US",
+    });
+  });
+
+  it("falls back to the legacy free-text businessAddress as streetAddress when no structured parts are set", () => {
+    const schema = buildLocalBusinessSchema({
+      ...business,
+      businessAddress: "456 Legacy Ave, Ferndale, MI",
+    });
+
+    expect(schema.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "456 Legacy Ave, Ferndale, MI",
+    });
+  });
+
+  it("prefers structured parts over the legacy businessAddress when both are present", () => {
+    const schema = buildLocalBusinessSchema({
+      ...business,
+      businessAddress: "456 Legacy Ave, Ferndale, MI",
+      addressStreet: "123 Main St",
+      addressCity: "Detroit",
+    });
+
+    expect(schema.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "123 Main St",
+      addressLocality: "Detroit",
+      addressCountry: "US",
+    });
+  });
+
+  it("omits address entirely when neither structured parts nor businessAddress are set", () => {
+    const schema = buildLocalBusinessSchema(business);
+
+    expect(schema).not.toHaveProperty("address");
+  });
+});
+
+describe("buildBlogPostingSchema", () => {
+  const page = {
+    title: "How We Do It",
+    slug: "how-we-do-it",
+    createdAt: new Date("2026-06-01T12:00:00.000Z"),
+    updatedAt: new Date("2026-06-02T12:00:00.000Z"),
+  };
+
+  it("emits a publisher Organization with the business name", () => {
+    const schema = buildBlogPostingSchema(page, business);
+
+    expect(schema.publisher).toMatchObject({
+      "@type": "Organization",
+      name: business.name,
+    });
+  });
+
+  it("includes publisher.logo only when the business has an absolute logo URL", () => {
+    const schema = buildBlogPostingSchema(page, {
+      ...business,
+      siteContent: {
+        logoUrl:
+          "https://storage.simplepress.test/business-sites/biz1/logo.png",
+      },
+    });
+
+    expect(schema.publisher).toEqual({
+      "@type": "Organization",
+      name: business.name,
+      logo: {
+        "@type": "ImageObject",
+        url: "https://storage.simplepress.test/business-sites/biz1/logo.png",
+      },
+    });
+  });
+
+  it("omits publisher.logo when the logo URL is relative (not absolute)", () => {
+    const schema = buildBlogPostingSchema(page, {
+      ...business,
+      siteContent: { logoUrl: "/relative/logo.png" },
+    });
+
+    expect(schema.publisher).toEqual({
+      "@type": "Organization",
+      name: business.name,
+    });
+  });
+
+  it("omits publisher.logo when there is no siteContent at all", () => {
+    const schema = buildBlogPostingSchema(page, business);
+
+    expect(schema.publisher).not.toHaveProperty("logo");
+  });
+});
+
+describe("buildOrganizationSchema", () => {
+  it("emits telephone and email when both are set", () => {
+    const schema = buildOrganizationSchema({
+      ...business,
+      phoneNumber: "313-555-0100",
+      supportEmail: "hello@testshop.com",
+    });
+
+    expect(schema.telephone).toBe("313-555-0100");
+    expect(schema.email).toBe("hello@testshop.com");
+  });
+
+  it("omits telephone and email when neither is set", () => {
+    const schema = buildOrganizationSchema(business);
+
+    expect(schema).not.toHaveProperty("telephone");
+    expect(schema).not.toHaveProperty("email");
   });
 });

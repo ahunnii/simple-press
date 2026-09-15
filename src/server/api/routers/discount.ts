@@ -34,7 +34,9 @@ export const discountRouter = createTRPCRouter({
       // (perCustomerLimit, minPurchase, maxDiscount) and any future field out
       // of the RSC payload; the detail page reads those through `getById`.
       return ctx.db.discountCode.findMany({
-        where: { businessId },
+        // Exclude loyalty-minted codes (source: "loyalty") — they surface
+        // per customer on the loyalty admin card, not in this owner-created list.
+        where: { businessId, source: "manual" },
         select: {
           id: true,
           code: true,

@@ -3,18 +3,53 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BookUser, Lock, Package, Repeat, Settings } from "lucide-react";
+import {
+  Bell,
+  BookUser,
+  Gift,
+  Lock,
+  Package,
+  Repeat,
+  Settings,
+} from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
+/**
+ * `flag` optionally gates a nav item behind a storefront feature flag
+ * (Subscriptions → `"subscriptions"`, Rewards → `"loyalty"`); omitted (or
+ * `undefined`) means always-on. Mirrors the same shape/filter used by
+ * `OliveAccountLayout`'s `NAV_ITEMS`.
+ */
 const BASE_NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  { href: "/account/subscriptions", label: "Subscriptions", icon: Repeat },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
+  { href: "/account/orders", label: "Orders", icon: Package, flag: undefined },
+  {
+    href: "/account/subscriptions",
+    label: "Subscriptions",
+    icon: Repeat,
+    flag: "subscriptions",
+  },
+  {
+    href: "/account/settings",
+    label: "Settings",
+    icon: Settings,
+    flag: undefined,
+  },
+  { href: "/account/security", label: "Security", icon: Lock, flag: undefined },
+  {
+    href: "/account/address-book",
+    label: "Address Book",
+    icon: BookUser,
+    flag: undefined,
+  },
+  {
+    href: "/account/preferences",
+    label: "Preferences",
+    icon: Bell,
+    flag: undefined,
+  },
+  { href: "/account/rewards", label: "Rewards", icon: Gift, flag: "loyalty" },
 ] as const;
 
 type Props = {
@@ -27,9 +62,7 @@ export function DefaultAccountLayout({ children, heading }: Props) {
   const flags = useStorefrontFlags();
 
   const NAV_ITEMS = BASE_NAV_ITEMS.filter(
-    (item) =>
-      item.href !== "/account/subscriptions" ||
-      flags.isEnabled("subscriptions"),
+    (item) => !item.flag || flags.isEnabled(item.flag),
   );
 
   return (

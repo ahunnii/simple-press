@@ -1,8 +1,9 @@
 "use client";
 
 import type { Content } from "@tiptap/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUploadFile } from "@better-upload/client";
 import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,6 +62,37 @@ type UpdateInput = RouterInputs["business"]["updateMaintenanceMode"];
 /** Empty doc handed to the editor when there's no saved message yet. */
 const EMPTY_TIPTAP_DOC: TiptapJSON = { type: "doc", content: [] };
 
+/** Matches the `image` route's own cap in `src/app/api/upload/route.ts`. */
+const MAX_IMAGE_BYTES = 1024 * 1024 * 5;
+
+function isImageFile(file: File): boolean {
+  return (
+    file.type.startsWith("image/") ||
+    /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(file.name)
+  );
+}
+
+/**
+ * Local copy of the `useObjectUrl` helper in
+ * `~/components/inputs/image-upload-form-field.tsx` — that one isn't exported,
+ * and this form deliberately doesn't use `ImageUploadFormField` itself (that
+ * component is React Hook Form bound; this form is plain `useState` because of
+ * its hand-rolled dirty snapshot and offline-confirmation dialog).
+ */
+function useObjectUrl(file: File | null): string | null {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file || !isImageFile(file)) {
+      setUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+  return url;
+}
+
 /**
  * `MinimalTiptapEditor`'s `onChange` is typed as TipTap's loose `Content`
  * (string | doc | array | null). With `output="json"` it always hands back a
@@ -87,6 +119,16 @@ type Props = {
   initialMaintenanceVariant: Variant;
   initialMaintenanceMessage: TiptapJSON | null;
   initialMaintenanceCta: MaintenanceCtaInput | null;
+  initialOverline: string;
+  initialHeadline: string;
+  initialLocation: string;
+  /** Persisted flyer URL, or `null` when none is saved. */
+  initialImage: string | null;
+  /** `"YYYY-MM-DDTHH:mm"` in the business's zone, or `""` when unset. */
+  initialLaunchStart: string;
+  initialLaunchEnd: string;
+  /** `Business.timeZone` — the zone the launch inputs are read in, shown to the owner. */
+  timeZone: string;
   businessPhoneNumber: string | null;
   businessSupportEmail: string | null;
 };
@@ -96,6 +138,13 @@ export function AvailabilityEditor({
   initialMaintenanceVariant,
   initialMaintenanceMessage,
   initialMaintenanceCta,
+  initialOverline,
+  initialHeadline,
+  initialLocation,
+  initialImage,
+  initialLaunchStart,
+  initialLaunchEnd,
+  timeZone,
   businessPhoneNumber,
   businessSupportEmail,
 }: Props) {
@@ -116,6 +165,22 @@ export function AvailabilityEditor({
   const [ctaLabel, setCtaLabel] = useState(initialMaintenanceCta?.label ?? "");
   const [ctaValue, setCtaValue] = useState(initialMaintenanceCta?.value ?? "");
 
+  const [overline, setOverline] = useState(initialOverline);
+  const [headline, setHeadline] = useState(initialHeadline);
+  const [location, setLocation] = useState(initialLocation);
+  const [launchStart, setLaunchStart] = useState(initialLaunchStart);
+  const [launchEnd, setLaunchEnd] = useState(initialLaunchEnd);
+
+  // Two separate pieces of flyer state: `imageUrl` is what's persisted (set to
+  // `null` by Remove), `imageFile` is a picked-but-not-yet-uploaded File. The
+  // upload deliberately happens at save time, not at pick time, so abandoning
+  // the form never leaves an orphan object in S3.
+  const [imageUrl, setImageUrl] = useState<string | null>(initialImage);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const previewUrl = useObjectUrl(imageFile);
+  const displayedImage = previewUrl ?? imageUrl;
+
   // Last-saved snapshot. This form is plain `useState` rather than React Hook
   // Form, so there is no `formState.isDirty` to lean on — the snapshot gives us
   // the same signal for `useDirtyForm` (and tells us whether a save is about to
@@ -127,6 +192,14 @@ export function AvailabilityEditor({
       normalizeMaintenanceMessage(initialMaintenanceMessage),
     ),
     maintenanceCta: ctaKey(initialMaintenanceCta),
+    // Text fields are snapshotted trimmed because that's what gets sent —
+    // adding trailing whitespace shouldn't count as an unsaved change.
+    overline: initialOverline.trim(),
+    headline: initialHeadline.trim(),
+    location: initialLocation.trim(),
+    launchStart: initialLaunchStart,
+    launchEnd: initialLaunchEnd,
+    imageUrl: initialImage,
   });
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -156,9 +229,38 @@ export function AvailabilityEditor({
     maintenanceMode !== savedState.maintenanceMode ||
     maintenanceVariant !== savedState.maintenanceVariant ||
     JSON.stringify(normalizedMessage) !== savedState.maintenanceMessage ||
-    ctaKey(cta) !== savedState.maintenanceCta;
+    ctaKey(cta) !== savedState.maintenanceCta ||
+    overline.trim() !== savedState.overline ||
+    headline.trim() !== savedState.headline ||
+    location.trim() !== savedState.location ||
+    launchStart !== savedState.launchStart ||
+    launchEnd !== savedState.launchEnd ||
+    imageUrl !== savedState.imageUrl ||
+    // A staged file is always unsaved work, even if the persisted URL is
+    // unchanged (picking a replacement leaves `imageUrl` alone until save).
+    imageFile !== null;
 
   useDirtyForm(isDirty);
+
+  const imageUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "Image upload failed.");
+    },
+  });
+
+  // Best-effort S3 cleanup when the save that would have referenced an upload
+  // fails. Not blocking or user-visible — the caller's error path already ran.
+  const discardUploadsMutation = api.upload.discardUploads.useMutation({
+    onError: (err, variables) => {
+      console.warn(
+        "Failed to discard uploaded files; objects may be orphaned in S3:",
+        variables.urls,
+        err,
+      );
+    },
+  });
 
   const updateMutation = api.business.updateMaintenanceMode.useMutation({
     onSuccess: () => {
@@ -170,7 +272,36 @@ export function AvailabilityEditor({
     },
   });
 
-  function handleSave() {
+  // The flyer upload runs inside the save, so "busy" is either half of it.
+  const isSaving = updateMutation.isPending || imageUploader.isPending;
+
+  function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    if (!file) return;
+
+    // Same two rules the `image` upload route enforces server-side — checked
+    // here so a bad pick fails instantly instead of after a round trip.
+    if (!isImageFile(file)) {
+      toast.error("Choose an image file — JPG, PNG or WebP");
+      event.target.value = "";
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error("Images must be 5MB or smaller");
+      event.target.value = "";
+      return;
+    }
+
+    setImageFile(file);
+  }
+
+  function handleRemoveImage() {
+    setImageFile(null);
+    setImageUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  async function handleSave() {
     // Light client-side checks first so the obvious mistakes don't need a
     // round trip; the server's zod schema stays authoritative.
     if (cta) {
@@ -193,11 +324,52 @@ export function AvailabilityEditor({
       }
     }
 
+    // Both launch inputs are the same fixed `YYYY-MM-DDTHH:mm` shape, so a
+    // plain lexicographic compare orders them correctly — no Date parsing (and
+    // therefore no ambient-time-zone reading) needed. The server re-checks both
+    // of these against the business's own zone.
+    if (launchEnd && !launchStart) {
+      toast.error("Add a start date before an end time");
+      return;
+    }
+    if (launchEnd && launchStart && launchEnd <= launchStart) {
+      toast.error("Launch end must be after the start");
+      return;
+    }
+
+    // Upload last, once every cheap check has passed: a rejected form should
+    // never have put an object in S3 in the first place.
+    let uploadedUrl: string | null = null;
+    if (imageFile) {
+      try {
+        const response = await imageUploader.upload(imageFile);
+        const pathname =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+        if (!pathname) {
+          toast.error("Failed to upload image.");
+          return;
+        }
+        uploadedUrl = pathname;
+      } catch {
+        toast.error("Failed to upload image.");
+        return;
+      }
+    }
+
+    const finalImage = uploadedUrl ?? imageUrl;
+
     const nextSaved = {
       maintenanceMode,
       maintenanceVariant,
       maintenanceMessage: JSON.stringify(normalizedMessage),
       maintenanceCta: ctaKey(cta),
+      overline: overline.trim(),
+      headline: headline.trim(),
+      location: location.trim(),
+      launchStart,
+      launchEnd,
+      imageUrl: finalImage,
     };
 
     updateMutation.mutate(
@@ -207,11 +379,28 @@ export function AvailabilityEditor({
         maintenanceMessage:
           normalizedMessage as UpdateInput["maintenanceMessage"],
         maintenanceCta: cta,
+        maintenanceOverline: overline.trim() || null,
+        maintenanceHeadline: headline.trim() || null,
+        maintenanceLocation: location.trim() || null,
+        maintenanceImage: finalImage,
+        maintenanceLaunchAt: launchStart || null,
+        maintenanceLaunchEndAt: launchEnd || null,
       },
       {
         onSuccess: () => {
+          setImageUrl(finalImage);
+          setImageFile(null);
+          // The staged File is now persisted; clearing the input lets the owner
+          // re-pick the same file later and still get a change event.
+          if (fileInputRef.current) fileInputRef.current.value = "";
           setSavedState(nextSaved);
           setConfirmOpen(false);
+        },
+        onError: () => {
+          // The object reached S3 but nothing references it now.
+          if (uploadedUrl) {
+            discardUploadsMutation.mutate({ urls: [uploadedUrl] });
+          }
         },
       },
     );
@@ -269,7 +458,7 @@ export function AvailabilityEditor({
               id="maintenance-mode-switch"
               checked={maintenanceMode}
               onCheckedChange={setMaintenanceMode}
-              disabled={updateMutation.isPending}
+              disabled={isSaving}
             />
           </div>
 
@@ -317,6 +506,203 @@ export function AvailabilityEditor({
                 </RadioGroup>
               </div>
 
+              {/* Overline */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="maintenance-overline"
+                  className="text-sm font-medium"
+                >
+                  Overline{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <Input
+                  id="maintenance-overline"
+                  value={overline}
+                  onChange={(e) => setOverline(e.target.value)}
+                  maxLength={80}
+                  placeholder={
+                    maintenanceVariant === "coming_soon"
+                      ? "Grand opening"
+                      : "Temporarily closed"
+                  }
+                  disabled={isSaving}
+                />
+                <p className="text-muted-foreground text-xs">
+                  Small label shown above the headline. Leave blank to use the
+                  default.
+                </p>
+              </div>
+
+              {/* Headline */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="maintenance-headline"
+                  className="text-sm font-medium"
+                >
+                  Headline{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <Input
+                  id="maintenance-headline"
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                  maxLength={160}
+                  placeholder={
+                    maintenanceVariant === "coming_soon"
+                      ? "Something beautiful is on its way."
+                      : "We'll be back shortly."
+                  }
+                  disabled={isSaving}
+                />
+                <p className="text-muted-foreground text-xs">
+                  The large heading on the page. Leave blank to use the default.
+                </p>
+              </div>
+
+              {/* Launch date & time */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Launch date &amp; time{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="maintenance-launch-start"
+                      className="text-muted-foreground text-xs font-normal"
+                    >
+                      Starts
+                    </Label>
+                    <Input
+                      id="maintenance-launch-start"
+                      type="datetime-local"
+                      value={launchStart}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setLaunchStart(next);
+                        // An end with no start is rejected server-side, so
+                        // clearing the start clears the end along with it
+                        // rather than leaving an orphan the owner can't see.
+                        if (!next) setLaunchEnd("");
+                      }}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="maintenance-launch-end"
+                      className="text-muted-foreground text-xs font-normal"
+                    >
+                      Ends (optional)
+                    </Label>
+                    <Input
+                      id="maintenance-launch-end"
+                      type="datetime-local"
+                      value={launchEnd}
+                      min={launchStart || undefined}
+                      onChange={(e) => setLaunchEnd(e.target.value)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  Times are in {timeZone}. When set, the page shows the date and
+                  a live countdown. The countdown reaching zero does not turn
+                  maintenance mode off — come back here and switch it off when
+                  you open.
+                </p>
+              </div>
+
+              {/* Location */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="maintenance-location"
+                  className="text-sm font-medium"
+                >
+                  Location{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <Input
+                  id="maintenance-location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  maxLength={200}
+                  placeholder="8632 W. McNichols Rd, Detroit, MI"
+                  disabled={isSaving}
+                />
+                <p className="text-muted-foreground text-xs">
+                  Shown next to the date. Leave blank to hide.
+                </p>
+              </div>
+
+              {/* Flyer image */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="maintenance-image"
+                  className="text-sm font-medium"
+                >
+                  Flyer image{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <input
+                  ref={fileInputRef}
+                  id="maintenance-image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                  disabled={isSaving}
+                />
+                {displayedImage && (
+                  <div>
+                    {/* eslint-disable-next-line @next/next/no-img-element --
+                        an arbitrary S3 URL (or a blob: preview of a file that
+                        hasn't been uploaded yet); next/image's loader buys
+                        nothing here and would need a remote-pattern entry per
+                        storage host. */}
+                    <img
+                      src={displayedImage}
+                      alt="Flyer preview"
+                      className="max-h-64 rounded-md border object-contain"
+                    />
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isSaving}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {displayedImage ? "Replace image" : "Upload image"}
+                  </Button>
+                  {displayedImage && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={isSaving}
+                      onClick={handleRemoveImage}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  Optional. JPG, PNG or WebP up to 5MB. Shown above your message
+                  on the page.
+                </p>
+              </div>
+
               {/* Custom message */}
               <div className="space-y-2">
                 <Label
@@ -336,13 +722,12 @@ export function AvailabilityEditor({
                   className="w-full"
                   editorContentClassName="min-h-[160px] p-4"
                   editorClassName="focus:outline-hidden"
-                  editable={!updateMutation.isPending}
+                  editable={!isSaving}
                 />
                 <p className="text-muted-foreground text-xs">
-                  Shown below the default heading and subtext on the
-                  maintenance/coming-soon screen. Basic formatting is supported.
-                  Leave blank to show just the default copy for the selected
-                  display type above.
+                  Shown below the headline — and below the flyer and launch date
+                  when you add them. Headings, lists and links are supported.
+                  Leave blank to show just the headline.
                 </p>
               </div>
 
@@ -366,7 +751,7 @@ export function AvailabilityEditor({
                       // whenever the button type changes.
                       setCtaValue("");
                     }}
-                    disabled={updateMutation.isPending}
+                    disabled={isSaving}
                   >
                     <SelectTrigger id="cta-type" className="w-full sm:w-72">
                       <SelectValue />
@@ -399,7 +784,7 @@ export function AvailabilityEditor({
                         value={ctaLabel}
                         onChange={(e) => setCtaLabel(e.target.value)}
                         maxLength={80}
-                        disabled={updateMutation.isPending}
+                        disabled={isSaving}
                       />
                     </div>
 
@@ -441,7 +826,7 @@ export function AvailabilityEditor({
                         }
                         value={ctaValue}
                         onChange={(e) => setCtaValue(e.target.value)}
-                        disabled={updateMutation.isPending}
+                        disabled={isSaving}
                       />
                       {ctaType === "call" &&
                         !businessPhoneNumber &&
@@ -486,17 +871,17 @@ export function AvailabilityEditor({
             <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <AlertDialogTrigger asChild>
                 <Button
-                  disabled={updateMutation.isPending}
+                  disabled={isSaving}
                   onClick={(e) => {
                     // Only a save that takes the storefront offline opens the
                     // dialog; every other save goes straight through.
                     if (!willTakeStorefrontOffline) {
                       e.preventDefault();
-                      handleSave();
+                      void handleSave();
                     }
                   }}
                 >
-                  {updateMutation.isPending ? "Saving..." : "Save changes"}
+                  {isSaving ? "Saving..." : "Save changes"}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -515,22 +900,20 @@ export function AvailabilityEditor({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={updateMutation.isPending}>
+                  <AlertDialogCancel disabled={isSaving}>
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    disabled={updateMutation.isPending}
+                    disabled={isSaving}
                     onClick={(e) => {
                       // Keep the dialog open while the mutation runs — the
                       // `onSuccess` handler closes it.
                       e.preventDefault();
-                      handleSave();
+                      void handleSave();
                     }}
                   >
-                    {updateMutation.isPending
-                      ? "Saving..."
-                      : "Take storefront offline"}
+                    {isSaving ? "Saving..." : "Take storefront offline"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

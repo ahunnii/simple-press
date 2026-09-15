@@ -126,7 +126,7 @@ export function coerceEmbedDisplayMode(
  * third-party HTTPS URLs — video players, maps, booking widgets, forms, etc.
  * via EmbedFrame / the `iframe` template field type).
  *
- * SECURITY NOTE — accepted risk, intentionally NOT changed here:
+ * SECURITY NOTE:
  * `allow-scripts` + `allow-same-origin` together are a well-known sandbox
  * weakening: if the framed document's origin is the SAME as the origin it's
  * embedded on, `allow-same-origin` stops the browser from forcing that frame
@@ -140,13 +140,18 @@ export function coerceEmbedDisplayMode(
  * Maps, Calendly, Typeform, booking widgets like Vagaro, and other
  * third-party tools commonly read their own cookies/localStorage (auth,
  * CSRF tokens, saved form state, booking session) and simply render blank or
- * fail to load without it. `sanitizeEmbedSrc` still restricts embeds to
- * well-formed absolute HTTPS URLs (no `javascript:`/`data:`/relative), which
- * covers the common injection vectors; it does not currently block a src
- * that happens to share an origin with the embedding page. If that narrower
- * gap needs closing, prefer rejecting same-origin/platform-domain embed URLs
- * at validation time (`sanitizeEmbedSrc` / the `iframe` field parser) over
- * removing `allow-same-origin` here.
+ * fail to load without it.
+ *
+ * The same-origin gap is closed at validation time instead of by removing
+ * `allow-same-origin`: `sanitizeEmbedSrc` rejects the platform domain and any
+ * of its subdomains (`isPlatformHost`, checked against
+ * `NEXT_PUBLIC_PLATFORM_DOMAIN` by default), `localhost`/`127.0.0.1`/`[::1]`
+ * and `*.localhost` unconditionally, and any caller-supplied `blockedHosts`
+ * (used by `EmbedFrame` at render time to also reject the *current* page's
+ * own hostname, which covers custom domains the isomorphic platform-domain
+ * check can't know about). Combined with the existing absolute-HTTPS-only
+ * check, an embed src can never share an origin with the page that renders
+ * it.
  */
 export const EMBED_SANDBOX =
   "allow-scripts allow-same-origin allow-forms allow-popups";
@@ -155,15 +160,65 @@ export const EMBED_SANDBOX =
 export const DEFAULT_EMBED_HEIGHT = 600;
 
 /**
- * Validates that `src` is an absolute HTTPS URL.
+ * Returns `true` when `hostname` is the platform's own domain or a subdomain
+ * of it (e.g. a tenant's `<shop>.<platform>` subdomain, or a deeper
+ * subdomain of that).
+ *
+ * `hostname` is lowercased and a single trailing dot is stripped before
+ * comparing. `platformDomain` defaults to `NEXT_PUBLIC_PLATFORM_DOMAIN`
+ * (also trimmed + lowercased); when it can't be resolved to a non-empty
+ * value this returns `false` rather than throwing. Uses the same
+ * exact-match-or-dot-suffix technique as `isVideoEmbed` to avoid false
+ * positives like `evilplatform.com` matching `platform.com`.
+ */
+export function isPlatformHost(
+  hostname: string,
+  platformDomain?: string,
+): boolean {
+  const domain = (platformDomain ?? process.env.NEXT_PUBLIC_PLATFORM_DOMAIN)
+    ?.trim()
+    .toLowerCase();
+  if (!domain) return false;
+
+  const host = hostname.toLowerCase().replace(/\.$/, "");
+  return host === domain || host.endsWith(`.${domain}`);
+}
+
+/**
+ * Validates that `src` is an absolute HTTPS URL that does not point back at
+ * the embedding platform itself.
  *
  * Returns the normalised `href` when valid, or `null` for http:, javascript:,
- * data:, relative URLs, and anything else that cannot be parsed.
+ * data:, relative URLs, anything else that cannot be parsed, the platform
+ * domain / any of its subdomains (see `isPlatformHost`), `localhost` /
+ * `127.0.0.1` / `[::1]` / any `*.localhost` host, or a host listed in
+ * `opts.blockedHosts` (exact match, case-insensitive — e.g. the current
+ * page's own hostname, for a runtime same-origin check custom domains need
+ * that this isomorphic function alone can't perform).
  */
-export function sanitizeEmbedSrc(src: string): string | null {
+export function sanitizeEmbedSrc(
+  src: string,
+  opts?: { blockedHosts?: readonly string[]; platformDomain?: string },
+): string | null {
   try {
     const url = new URL(src);
-    return url.protocol === "https:" ? url.href : null;
+    if (url.protocol !== "https:") return null;
+
+    const host = url.hostname.toLowerCase();
+
+    if (isPlatformHost(host, opts?.platformDomain)) return null;
+
+    if (host === "localhost" || host.endsWith(".localhost")) return null;
+    if (host === "127.0.0.1" || host === "[::1]" || host === "::1") {
+      return null;
+    }
+
+    const blockedHosts = opts?.blockedHosts;
+    if (blockedHosts?.some((blocked) => blocked.toLowerCase() === host)) {
+      return null;
+    }
+
+    return url.href;
   } catch {
     return null;
   }
@@ -305,8 +360,13 @@ export type ParsedEmbedInput = { src: string; width?: number; height?: number };
  * - The extracted src is run through `normalizeVideoUrl` then `sanitizeEmbedSrc`.
  * - Returns `null` when the src is invalid or cannot be sanitized.
  * - `width` and `height` are only included when parsed as finite positive numbers.
+ * - `opts` is forwarded to `sanitizeEmbedSrc` unchanged (e.g. to pass an
+ *   explicit `platformDomain` in tests, or `blockedHosts`).
  */
-export function parseEmbedInput(input: string): ParsedEmbedInput | null {
+export function parseEmbedInput(
+  input: string,
+  opts?: { blockedHosts?: readonly string[]; platformDomain?: string },
+): ParsedEmbedInput | null {
   const trimmed = input.trim();
 
   let rawSrc: string;
@@ -337,7 +397,7 @@ export function parseEmbedInput(input: string): ParsedEmbedInput | null {
   }
 
   const normalized = normalizeVideoUrl(rawSrc);
-  const safeSrc = sanitizeEmbedSrc(normalized);
+  const safeSrc = sanitizeEmbedSrc(normalized, opts);
   if (!safeSrc) return null;
 
   const result: ParsedEmbedInput = { src: safeSrc };

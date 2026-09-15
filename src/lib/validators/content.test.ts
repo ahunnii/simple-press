@@ -48,3 +48,66 @@ describe("siteContentSchema — templateId is not accepted", () => {
     });
   });
 });
+
+/**
+ * Link fields used to be guarded by `z.string().url()` (social links) or by
+ * nothing at all (`navigationItems.href`, `heroButtonLink`). `.url()` is not a
+ * scheme guard — Zod 3.25 accepts `javascript:` and `data:` — so the only
+ * thing stopping stored XSS on ~40 storefront render sites was React 19's
+ * `javascript:` rewrite of JSX `href` props. See `~/lib/safe-href`.
+ */
+describe("siteContentSchema — link fields are scheme-guarded", () => {
+  it.each(["javascript:alert(1)", "data:text/html;base64,AAA", "ftp://x"])(
+    "refuses %s as a social link",
+    (bad) => {
+      expect(
+        siteContentSchema.safeParse({ socialLinks: { instagram: bad } })
+          .success,
+      ).toBe(false);
+    },
+  );
+
+  it("still refuses a relative social link (a profile is always absolute)", () => {
+    expect(
+      siteContentSchema.safeParse({ socialLinks: { instagram: "/instagram" } })
+        .success,
+    ).toBe(false);
+  });
+
+  it("still accepts an empty social link so owners can clear one", () => {
+    expect(siteContentSchema.parse({ socialLinks: { instagram: "" } })).toEqual(
+      { socialLinks: { instagram: "" } },
+    );
+  });
+
+  it.each(["javascript:alert(1)", "java\tscript:alert(1)", "vbscript:x"])(
+    "refuses %s as a navigation href",
+    (bad) => {
+      expect(
+        siteContentSchema.safeParse({
+          navigationItems: [{ label: "Shop", href: bad }],
+        }).success,
+      ).toBe(false);
+    },
+  );
+
+  it("accepts the relative hrefs navigation actually uses", () => {
+    const parsed = siteContentSchema.parse({
+      navigationItems: [
+        { label: "Shop", href: "/shop" },
+        { label: "Contact", href: "#contact", children: [] },
+        { label: "Blog", href: "https://example.com/blog", external: true },
+      ],
+      heroButtonLink: "/collections/new",
+    });
+
+    expect(parsed.navigationItems?.[0]?.href).toBe("/shop");
+    expect(parsed.heroButtonLink).toBe("/collections/new");
+  });
+
+  it("refuses an unsafe heroButtonLink", () => {
+    expect(
+      siteContentSchema.safeParse({ heroButtonLink: "javascript:1" }).success,
+    ).toBe(false);
+  });
+});

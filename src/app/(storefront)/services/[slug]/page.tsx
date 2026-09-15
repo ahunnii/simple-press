@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { loadSeoBusiness } from "~/lib/seo";
+import {
+  buildPageMetadata,
+  getCachedBusiness,
+  loadSeoBusiness,
+} from "~/lib/seo";
 import {
   buildBreadcrumbSchema,
   buildServiceSchema,
@@ -21,7 +24,7 @@ type Props = {
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
 
-  const business = await api.business.simplifiedGet();
+  const business = await getCachedBusiness();
   if (!business) notFound();
 
   // Gate: services feature must be enabled
@@ -74,36 +77,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!service) return { title: "Service Not Found" };
 
-  const title = service.metaTitle ?? service.name;
-  const description =
-    service.metaDescription ?? service.description ?? undefined;
-
-  const ogImage =
-    service.ogImage ??
-    service.image ??
-    business?.siteContent?.ogImage ??
-    business?.siteContent?.logoUrl ??
-    "/placeholder.svg";
-
-  return {
-    title,
-    description,
-    keywords: service.metaKeywords ?? undefined,
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, `/services/${slug}`),
-      },
-    }),
-    openGraph: {
-      title,
-      description,
-      images: [ogImage],
+  return buildPageMetadata({
+    business,
+    path: `/services/${slug}`,
+    title: service.name,
+    description: service.description,
+    keywords: service.metaKeywords,
+    entity: {
+      title: service.metaTitle,
+      description: service.metaDescription,
+      ogImage: service.ogImage,
     },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
-  };
+    ogImage: service.image,
+    ogImageAlt: service.name,
+  });
 }

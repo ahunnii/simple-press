@@ -40,6 +40,8 @@ type OrderConfirmationEmailProps = {
   introText?: string;
   /** When provided, a "Manage your subscription" link is shown in the email. */
   subscriptionManageUrl?: string;
+  /** When present with earned > 0, a "You earned N points" block is shown after the order totals. */
+  loyalty?: { earned: number; balance: number; rewardsUrl: string };
 };
 
 export default function OrderConfirmationEmail({
@@ -62,6 +64,7 @@ export default function OrderConfirmationEmail({
   trackingUrl,
   orderStatusUrl,
   subscriptionManageUrl,
+  loyalty,
 }: OrderConfirmationEmailProps) {
   const isPickup = deliveryMethod === "pickup";
   const formatPrice = (cents: number) => {
@@ -168,6 +171,19 @@ export default function OrderConfirmationEmail({
           </Column>
         </Row>
       </Section>
+
+      {/* Loyalty Rewards Section */}
+      {loyalty && loyalty.earned > 0 && (
+        <Section style={loyaltySection}>
+          <Text style={loyaltyNote}>
+            You earned {loyalty.earned} points on this order — your balance
+            is {loyalty.balance}.{" "}
+            <a href={loyalty.rewardsUrl} style={statusLink}>
+              View your rewards
+            </a>
+          </Text>
+        </Section>
+      )}
 
       {/* Delivery Section — branches on pickup vs. ship */}
       {isPickup ? (
@@ -406,6 +422,20 @@ const subscriptionSection = {
 };
 
 const subscriptionNote = {
+  fontSize: "14px",
+  lineHeight: "20px",
+  color: "#0c4a6e",
+  margin: "0",
+};
+
+const loyaltySection = {
+  marginBottom: "24px",
+  padding: "12px 16px",
+  backgroundColor: "#f0f9ff",
+  borderRadius: "6px",
+};
+
+const loyaltyNote = {
   fontSize: "14px",
   lineHeight: "20px",
   color: "#0c4a6e",

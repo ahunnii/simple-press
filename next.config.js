@@ -60,6 +60,17 @@ const config = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          // NOTE: Strict-Transport-Security is deliberately NOT set here either.
+          // Whether `includeSubDomains` is appropriate depends on the HOST —
+          // it is right for the platform apex + tenant subdomains, but wrong
+          // on a tenant's custom domain (it would force HTTPS on every other
+          // subdomain that business runs, for two years). Static headers can't
+          // see the host, so HSTS is built per-request in `src/middleware.ts`
+          // (`buildHsts` in `src/lib/security/csp.ts`).
+          // NOTE: Content-Security-Policy is deliberately NOT set here. It
+          // carries a per-request nonce, so it is built in `src/middleware.ts`
+          // (see `src/lib/security/csp.ts`). Static headers here are shared by
+          // every response and could not carry one.
         ],
       },
     ];

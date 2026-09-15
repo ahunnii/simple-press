@@ -5,6 +5,7 @@ import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import * as React from "react";
 import { uploadFile } from "@better-upload/client";
 
+import { getStoredPath } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import {
   FormControl,
@@ -25,9 +26,9 @@ const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
  * descriptions, announcements, policies, etc.) so CMS richtext images no
  * longer get stored as base64 data URIs in the DB.
  *
- * Note: the "image" route's `onBeforeUpload` returns metadata under the
- * lowercase `pathname` key (other /api/upload routes use `pathName` —
- * the casing is inconsistent across routes, so this must match exactly).
+ * Note: @better-upload/server lowercases every objectInfo.metadata key on
+ * the wire, so every /api/upload route resolves to `metadata.pathname`;
+ * read it via getStoredPath() rather than by hand.
  * The route already scopes the upload to the caller's business via
  * `checkBusiness()` / membership check server-side — no businessId needs
  * to be threaded through here.
@@ -39,7 +40,7 @@ export async function uploadRichTextImage(file: File): Promise<string> {
     file,
   });
 
-  const url = result.file.objectInfo.metadata?.pathname as string | undefined;
+  const url = getStoredPath(result.file);
 
   if (!url) {
     throw new Error("Upload succeeded but no file URL was returned.");

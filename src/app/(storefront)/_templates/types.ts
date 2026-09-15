@@ -1,5 +1,5 @@
-import type { Session } from "~/server/better-auth/config";
 import type { StorefrontMaintenance } from "~/lib/maintenance";
+import type { Session } from "~/server/better-auth/config";
 import type { RouterOutputs } from "~/trpc/react";
 
 export type DefaultHomepageTemplateProps = {
@@ -149,6 +149,11 @@ export type AccountAddressBookPageProps = {
 export type AccountPreferencesPageProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   customer: RouterOutputs["customer"]["getMyProfile"];
+};
+
+export type RewardsPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  rewards: RouterOutputs["loyalty"]["getMine"];
 };
 
 export type MaintenancePageTemplateProps = {

@@ -4,7 +4,10 @@ import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 import { stripeClient } from "~/lib/stripe/client";
-import { verifySignedOAuthState } from "~/lib/stripe/oauth-state";
+import {
+  isAllowedReturnUrl,
+  verifySignedOAuthState,
+} from "~/lib/stripe/oauth-state";
 import { db } from "~/server/db";
 
 export async function GET(request: NextRequest) {
@@ -32,6 +35,24 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // Every branch below redirects to `returnUrl` (success, `?error=`, token
+  // exchange failure, ...), so it must be re-validated against the business's
+  // actual allowed hosts BEFORE any of them run — the signature on the state
+  // only proves who minted it, not that `returnUrl` itself was ever safe.
+  const returnUrlBusiness = await db.business.findUnique({
+    where: { id: businessId },
+    select: { subdomain: true, customDomain: true, domainStatus: true },
+  });
+
+  if (
+    !returnUrlBusiness ||
+    !isAllowedReturnUrl(returnUrl, returnUrlBusiness, {
+      allowInsecureLocalhost: process.env.NODE_ENV !== "production",
+    })
+  ) {
+    return NextResponse.json({ error: "Invalid return URL" }, { status: 400 });
+  }
+
   // Handle user cancellation or errors
   if (error) {
     const redirectUrl = new URL(returnUrl);
@@ -52,14 +73,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Verify business still exists
-    const business = await db.business.findUnique({
-      where: { id: businessId },
-    });
-
-    if (!business) {
-      throw new Error("Business not found");
-    }
+    // Business existence was already confirmed above (`returnUrlBusiness`) as
+    // part of validating `returnUrl`.
 
     // Exchange authorization code for connected account ID
     const response = await stripeClient.oauth.token({

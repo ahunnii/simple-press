@@ -3,14 +3,23 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { env } from "~/env";
+import { formatBusinessAddress, hasAddressParts } from "~/lib/address/format";
 import { checkBusiness } from "~/lib/check-business";
 import { TEMPLATES } from "~/lib/constants";
 import { emailOverridesSchema } from "~/lib/email/customization";
+import { parseZonedDateTime } from "~/lib/events/normalize";
 import {
   getPlatformMaintenance,
   maintenanceCtaSchema,
+  maintenanceHeadlineSchema,
+  maintenanceImageSchema,
+  maintenanceLocationSchema,
   maintenanceMessageSchema,
+  maintenanceOverlineSchema,
+  maintenanceWallClockSchema,
   normalizeMaintenanceMessage,
+  normalizeMaintenanceText,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
@@ -29,6 +38,19 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+
+/**
+ * A structured-address column: absent stays absent (Prisma no-op), and a
+ * blank string the owner cleared becomes `null` rather than `""` — so
+ * `hasAddressParts` / the JSON-LD builders see one empty representation.
+ */
+function normalizeAddressPart(
+  value: string | undefined,
+): string | null | undefined {
+  if (value === undefined) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
 
 export const businessRouter = createTRPCRouter({
   simplifiedGet: publicProcedure.query(async ({ ctx }) => {
@@ -55,6 +77,13 @@ export const businessRouter = createTRPCRouter({
         name: true,
         templateId: true,
         businessAddress: true,
+        // Structured address parts. Public by design — they render in the
+        // LocalBusiness / Organization JSON-LD `PostalAddress` alongside the
+        // already-public `businessAddress` display string.
+        addressStreet: true,
+        addressCity: true,
+        addressState: true,
+        addressPostalCode: true,
         businessHours: true,
         timeZone: true,
         supportEmail: true,
@@ -92,6 +121,9 @@ export const businessRouter = createTRPCRouter({
             metaTitle: true,
             metaDescription: true,
             metaKeywords: true,
+            // Short brand used as the `<title>` suffix — see
+            // `resolveSeoBrand` in `~/lib/seo/title`.
+            seoBrandName: true,
             ogImage: true,
             // Read by `generateMetadata` in the root layout (verification
             // tokens) and in each static storefront route (per-route title /
@@ -184,6 +216,12 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant: true,
         maintenanceMessage: true,
         maintenanceCta: true,
+        maintenanceOverline: true,
+        maintenanceHeadline: true,
+        maintenanceImage: true,
+        maintenanceLaunchAt: true,
+        maintenanceLaunchEndAt: true,
+        maintenanceLocation: true,
         products: {
           where: { published: true },
           include: {
@@ -222,13 +260,21 @@ export const businessRouter = createTRPCRouter({
         sc.customFields = sc.previewCustomFields;
       }
     }
-    // Never ship the raw draft field to clients.
+    // Never ship the raw draft field to clients — nor the raw maintenance
+    // columns, which are stripped here so only the resolved `maintenance`
+    // object built below can reach a renderer.
     const {
       stripeAccountId,
       maintenanceMode,
       maintenanceVariant,
       maintenanceMessage,
       maintenanceCta,
+      maintenanceOverline,
+      maintenanceHeadline,
+      maintenanceImage,
+      maintenanceLaunchAt,
+      maintenanceLaunchEndAt,
+      maintenanceLocation,
       ...rest
     } = businessData;
     const { siteContent, ...restWithoutSiteContent } = rest;
@@ -244,8 +290,15 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant,
         maintenanceMessage: maintenanceMessage ?? null,
         maintenanceCta: maintenanceCta ?? null,
+        maintenanceOverline: maintenanceOverline ?? null,
+        maintenanceHeadline: maintenanceHeadline ?? null,
+        maintenanceImage: maintenanceImage ?? null,
+        maintenanceLaunchAt: maintenanceLaunchAt ?? null,
+        maintenanceLaunchEndAt: maintenanceLaunchEndAt ?? null,
+        maintenanceLocation: maintenanceLocation ?? null,
         phoneNumber: businessData.phoneNumber ?? null,
         supportEmail: businessData.supportEmail ?? null,
+        timeZone: businessData.timeZone,
       },
     });
 
@@ -732,6 +785,14 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant: z.enum(["maintenance", "coming_soon"]),
         maintenanceMessage: maintenanceMessageSchema.nullish(),
         maintenanceCta: maintenanceCtaSchema.nullish(),
+        maintenanceOverline: maintenanceOverlineSchema.nullish(),
+        maintenanceHeadline: maintenanceHeadlineSchema.nullish(),
+        maintenanceImage: maintenanceImageSchema.nullish(),
+        // Wall clock in the business's own time zone, as emitted by
+        // `<input type="datetime-local">` — never a UTC instant.
+        maintenanceLaunchAt: maintenanceWallClockSchema.nullish(),
+        maintenanceLaunchEndAt: maintenanceWallClockSchema.nullish(),
+        maintenanceLocation: maintenanceLocationSchema.nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -739,36 +800,94 @@ export const businessRouter = createTRPCRouter({
         input.maintenanceMessage ?? null,
       );
 
+      // A save is authoritative: every field the form owns is written on every
+      // save, so `undefined` (field omitted) clears just like an explicit null.
+      // Otherwise clearing the flyer or the launch date would silently no-op.
+      const overline = normalizeMaintenanceText(input.maintenanceOverline);
+      const headline = normalizeMaintenanceText(input.maintenanceHeadline);
+      const location = normalizeMaintenanceText(input.maintenanceLocation);
+      const image = input.maintenanceImage ?? null;
+      const launchAtInput = input.maintenanceLaunchAt ?? null;
+      const launchEndAtInput = input.maintenanceLaunchEndAt ?? null;
+
+      const business = await ctx.db.business.findUnique({
+        where: { id: ctx.businessId },
+        select: { phoneNumber: true, supportEmail: true, timeZone: true },
+      });
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       if (
         input.maintenanceCta?.type === "call" &&
-        !input.maintenanceCta.value
+        !input.maintenanceCta.value &&
+        !business.phoneNumber?.trim()
       ) {
-        const business = await ctx.db.business.findUnique({
-          where: { id: ctx.businessId },
-          select: { phoneNumber: true },
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Add a phone number in Settings or enter one here",
         });
-        if (!business?.phoneNumber?.trim()) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Add a phone number in Settings or enter one here",
-          });
-        }
       }
 
       if (
         input.maintenanceCta?.type === "email" &&
-        !input.maintenanceCta.value
+        !input.maintenanceCta.value &&
+        !business.supportEmail?.trim()
       ) {
-        const business = await ctx.db.business.findUnique({
-          where: { id: ctx.businessId },
-          select: { supportEmail: true },
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Add a support email in Settings or enter one here",
         });
-        if (!business?.supportEmail?.trim()) {
+      }
+
+      // The schema already limits this to an http(s) URL; pin it to the
+      // business's own upload prefix as well so the flyer can only ever be a
+      // file this tenant uploaded, never a hotlink to somewhere else.
+      if (image !== null) {
+        const allowedPrefix = `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${ctx.businessId}/`;
+        if (!image.startsWith(allowedPrefix)) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Add a support email in Settings or enter one here",
+            message: "Upload the image through the flyer field",
           });
         }
+      }
+
+      if (launchAtInput === null && launchEndAtInput !== null) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Add a start date before an end time",
+        });
+      }
+
+      let launchAt: Date | null = null;
+      let launchEndAt: Date | null = null;
+      try {
+        launchAt = launchAtInput
+          ? parseZonedDateTime(launchAtInput, business.timeZone)
+          : null;
+        launchEndAt = launchEndAtInput
+          ? parseZonedDateTime(launchEndAtInput, business.timeZone)
+          : null;
+      } catch {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Enter a valid launch date and time",
+        });
+      }
+
+      if (
+        launchAt &&
+        launchEndAt &&
+        launchEndAt.getTime() <= launchAt.getTime()
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Launch end must be after the start",
+        });
       }
 
       await ctx.db.business.update({
@@ -782,6 +901,12 @@ export const businessRouter = createTRPCRouter({
           maintenanceCta: input.maintenanceCta
             ? (input.maintenanceCta as Prisma.InputJsonValue)
             : Prisma.DbNull,
+          maintenanceOverline: overline,
+          maintenanceHeadline: headline,
+          maintenanceImage: image,
+          maintenanceLaunchAt: launchAt,
+          maintenanceLaunchEndAt: launchEndAt,
+          maintenanceLocation: location,
         },
       });
       return { success: true };
@@ -795,8 +920,15 @@ export const businessRouter = createTRPCRouter({
         maintenanceVariant: true,
         maintenanceMessage: true,
         maintenanceCta: true,
+        maintenanceOverline: true,
+        maintenanceHeadline: true,
+        maintenanceImage: true,
+        maintenanceLaunchAt: true,
+        maintenanceLaunchEndAt: true,
+        maintenanceLocation: true,
         phoneNumber: true,
         supportEmail: true,
+        timeZone: true,
       },
     });
     if (!business) {
@@ -881,7 +1013,14 @@ export const businessRouter = createTRPCRouter({
         name: z.string(),
         ownerEmail: z.string().email(),
         supportEmail: z.string().email(),
+        // Legacy single-line address. Still accepted so callers that have not
+        // moved to the structured parts keep working; when any part below is
+        // set, it is recomputed from them instead.
         businessAddress: z.string().optional(),
+        addressStreet: z.string().optional(),
+        addressCity: z.string().optional(),
+        addressState: z.string().optional(),
+        addressPostalCode: z.string().optional(),
         phoneNumber: z.string().optional(),
         sendAbandonedCheckoutEmails: z.boolean().optional(),
         timeZone: z.string().optional(),
@@ -894,10 +1033,21 @@ export const businessRouter = createTRPCRouter({
         ownerEmail,
         supportEmail,
         businessAddress,
+        addressStreet,
+        addressCity,
+        addressState,
+        addressPostalCode,
         phoneNumber,
         sendAbandonedCheckoutEmails,
         timeZone,
       } = input;
+
+      const addressParts = {
+        street: addressStreet,
+        city: addressCity,
+        state: addressState,
+        postalCode: addressPostalCode,
+      };
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -905,7 +1055,18 @@ export const businessRouter = createTRPCRouter({
           name,
           ownerEmail,
           supportEmail,
-          businessAddress,
+          // The structured parts are the source of truth once the owner has
+          // filled in any of them: the single-line display string every
+          // template footer renders is derived from them, so the two can
+          // never drift. With all four blank, whatever the caller sent as
+          // `businessAddress` stands (and `undefined` leaves it untouched).
+          businessAddress: hasAddressParts(addressParts)
+            ? formatBusinessAddress(addressParts)
+            : businessAddress,
+          addressStreet: normalizeAddressPart(addressStreet),
+          addressCity: normalizeAddressPart(addressCity),
+          addressState: normalizeAddressPart(addressState),
+          addressPostalCode: normalizeAddressPart(addressPostalCode),
           phoneNumber,
           sendAbandonedCheckoutEmails,
           timeZone,
@@ -1045,6 +1206,7 @@ export const businessRouter = createTRPCRouter({
         metaTitle: z.string().optional(),
         metaDescription: z.string().optional(),
         metaKeywords: z.string().optional(),
+        seoBrandName: z.string().trim().max(60).optional(),
         ogImage: z.string().optional(),
         localBusinessEnabled: z.boolean().optional(),
         allowAiCrawlers: z.boolean().optional(),
@@ -1058,6 +1220,7 @@ export const businessRouter = createTRPCRouter({
         metaTitle,
         metaDescription,
         metaKeywords,
+        seoBrandName,
         ogImage,
         localBusinessEnabled,
         allowAiCrawlers,
@@ -1065,7 +1228,7 @@ export const businessRouter = createTRPCRouter({
         siteVerification,
       } = input;
 
-      // The four meta strings above map to nullable `String?` columns, where an
+      // The five meta strings above map to nullable `String?` columns, where an
       // absent key is already a no-op, so they can be passed through unguarded.
       // These two are Json columns: `undefined` is a no-op but `null` is a type
       // error (Prisma wants `Prisma.JsonNull`), so they are only spread in when
@@ -1090,6 +1253,7 @@ export const businessRouter = createTRPCRouter({
                 metaTitle,
                 metaDescription,
                 metaKeywords,
+                seoBrandName,
                 ogImage,
                 ...jsonPatch,
               },
@@ -1097,6 +1261,7 @@ export const businessRouter = createTRPCRouter({
                 metaTitle,
                 metaDescription,
                 metaKeywords,
+                seoBrandName,
                 ogImage,
                 ...jsonPatch,
               },

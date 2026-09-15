@@ -108,6 +108,7 @@ import { DefaultAddressBookFallback } from "./default/account/default-address-bo
 import { DefaultOrderDetailPage } from "./default/account/default-order-detail-page";
 import { DefaultOrdersPage } from "./default/account/default-orders-page";
 import { DefaultPreferencesFallback } from "./default/account/default-preferences-fallback";
+import { DefaultRewardsFallback } from "./default/account/default-rewards-fallback";
 import { DefaultSubscriptionsPage } from "./default/account/default-subscriptions-page";
 import { DefaultBlogPage } from "./default/blog/default-blog-page";
 import { DefaultBlogPostPage } from "./default/blog/default-blog-post-page";
@@ -222,6 +223,33 @@ import { NoiseGenericPage } from "./noise/noise-generic-page";
 import { NoiseProductPage } from "./noise/products/noise-product-page";
 import { NoiseShopPage } from "./noise/shop/noise-shop-page";
 import { NoiseTestimonialsPage } from "./noise/testimonials/noise-testimonials-page";
+// ---------------------------------------------------------------------------
+// Olive Mode
+// ---------------------------------------------------------------------------
+import { OliveAboutPage } from "./olive/about/olive-about-page";
+import { OliveAccountSecurityPage } from "./olive/account/olive-account-security-page";
+import { OliveAccountSettingsPage } from "./olive/account/olive-account-settings-page";
+import { OliveAddressBookPage } from "./olive/account/olive-address-book-page";
+import { OliveOrderDetailPage } from "./olive/account/olive-order-detail-page";
+import { OliveOrdersPage } from "./olive/account/olive-orders-page";
+import { OlivePreferencesPage } from "./olive/account/olive-preferences-page";
+import { OliveRewardsPage } from "./olive/account/olive-rewards-page";
+import { OliveSubscriptionsPage } from "./olive/account/olive-subscriptions-page";
+import { OliveBlogPage } from "./olive/blog/olive-blog-page";
+import { OliveBlogPostPage } from "./olive/blog/olive-blog-post-page";
+import { OliveCartPage } from "./olive/cart-checkout/olive-cart-page";
+import { OliveCheckoutPage } from "./olive/cart-checkout/olive-checkout-page";
+import { OliveCheckoutUnavailable } from "./olive/cart-checkout/olive-checkout-unavailable";
+import { OliveOrderSuccessPage } from "./olive/cart-checkout/olive-order-success-page";
+import { OliveCollectionPage } from "./olive/collections/olive-collection-page";
+import { OliveCollectionsPage } from "./olive/collections/olive-collections-page";
+import { OliveContactPage } from "./olive/contact/olive-contact-page";
+import { OliveGenericPage } from "./olive/generic/olive-generic-page";
+import { OliveLayout } from "./olive/layout/olive-layout";
+import { OliveMaintenancePage } from "./olive/maintenance/olive-maintenance-page";
+import { OliveProductPage } from "./olive/products/olive-product-page";
+import { OliveShopPage } from "./olive/shop/olive-shop-page";
+import { OliveTestimonialsPage } from "./olive/testimonials/olive-testimonials-page";
 import { PinkAboutPage } from "./pink/about/pink-about-page";
 import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
 import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
@@ -239,6 +267,7 @@ import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
 import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
 import { PinkContactPage } from "./pink/contact/pink-contact-page";
 import { PinkDonatePage } from "./pink/donate/pink-donate-page";
+import { PinkEventPage } from "./pink/events/pink-event-page";
 import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
 import { PinkGenericPage } from "./pink/generic/pink-generic-page";
 import { PinkLayout } from "./pink/layout/pink-layout";
@@ -283,27 +312,6 @@ import { RelocationGenericPage } from "./relocation/generic/relocation-generic-p
 import { RelocationLayout } from "./relocation/layout/relocation-layout";
 import { RelocationServicesPage } from "./relocation/services/relocation-services-page";
 import { RelocationTestimonialsPage } from "./relocation/testimonials/relocation-testimonials-page";
-
-// ---------------------------------------------------------------------------
-// Detroit Community Wealth Fund
-// ---------------------------------------------------------------------------
-import { WealthAboutPage } from "./wealth/about/wealth-about-page";
-import { WealthAccountSecurityPage } from "./wealth/account/wealth-account-security-page";
-import { WealthAccountSettingsPage } from "./wealth/account/wealth-account-settings-page";
-import { WealthAddressBookPage } from "./wealth/account/wealth-address-book-page";
-import { WealthOrderDetailPage } from "./wealth/account/wealth-order-detail-page";
-import { WealthOrdersPage } from "./wealth/account/wealth-orders-page";
-import { WealthPreferencesPage } from "./wealth/account/wealth-preferences-page";
-import { WealthSubscriptionsPage } from "./wealth/account/wealth-subscriptions-page";
-import { WealthBlogPage } from "./wealth/blog/wealth-blog-page";
-import { WealthBlogPostPage } from "./wealth/blog/wealth-blog-post-page";
-import { WealthContactPage } from "./wealth/contact/wealth-contact-page";
-import { WealthDonatePage } from "./wealth/donate/wealth-donate-page";
-import { WealthGenericPage } from "./wealth/generic/wealth-generic-page";
-import { WealthLayout } from "./wealth/layout/wealth-layout";
-import { WealthMaintenancePage } from "./wealth/maintenance/wealth-maintenance-page";
-import { WealthServicesIndexPage } from "./wealth/services/wealth-services-index-page";
-import { WealthTestimonialsPage } from "./wealth/testimonials/wealth-testimonials-page";
 // ---------------------------------------------------------------------------
 // Sledge
 // ---------------------------------------------------------------------------
@@ -353,6 +361,26 @@ import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
 import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
+// ---------------------------------------------------------------------------
+// Detroit Community Wealth Fund
+// ---------------------------------------------------------------------------
+import { WealthAboutPage } from "./wealth/about/wealth-about-page";
+import { WealthAccountSecurityPage } from "./wealth/account/wealth-account-security-page";
+import { WealthAccountSettingsPage } from "./wealth/account/wealth-account-settings-page";
+import { WealthAddressBookPage } from "./wealth/account/wealth-address-book-page";
+import { WealthOrderDetailPage } from "./wealth/account/wealth-order-detail-page";
+import { WealthOrdersPage } from "./wealth/account/wealth-orders-page";
+import { WealthPreferencesPage } from "./wealth/account/wealth-preferences-page";
+import { WealthSubscriptionsPage } from "./wealth/account/wealth-subscriptions-page";
+import { WealthBlogPage } from "./wealth/blog/wealth-blog-page";
+import { WealthBlogPostPage } from "./wealth/blog/wealth-blog-post-page";
+import { WealthContactPage } from "./wealth/contact/wealth-contact-page";
+import { WealthDonatePage } from "./wealth/donate/wealth-donate-page";
+import { WealthGenericPage } from "./wealth/generic/wealth-generic-page";
+import { WealthLayout } from "./wealth/layout/wealth-layout";
+import { WealthMaintenancePage } from "./wealth/maintenance/wealth-maintenance-page";
+import { WealthServicesIndexPage } from "./wealth/services/wealth-services-index-page";
+import { WealthTestimonialsPage } from "./wealth/testimonials/wealth-testimonials-page";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -401,6 +429,7 @@ export type TemplateComponentSet = {
   OrderDetailPage: AnyComponent;
   OrdersPage: AnyComponent;
   PreferencesPage: AnyComponent;
+  RewardsPage: AnyComponent;
   SubscriptionsPage: AnyComponent;
   // Optional — only some templates implement this
   ServicesPage?: AnyComponent;
@@ -445,6 +474,7 @@ const defaultEntry: TemplateComponentSet = {
   OrderDetailPage: DefaultOrderDetailPage,
   OrdersPage: DefaultOrdersPage,
   PreferencesPage: DefaultPreferencesFallback,
+  RewardsPage: DefaultRewardsFallback,
   SubscriptionsPage: DefaultSubscriptionsPage,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
@@ -634,6 +664,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     ContactPage: PinkContactPage,
     DonatePage: PinkDonatePage,
     EventsPage: PinkEventsIndexPage,
+    EventPage: PinkEventPage,
     VideosPage: PinkVideosPage,
     GenericPage: PinkGenericPage,
     ProductPage: PinkProductPage,
@@ -711,6 +742,32 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: NoisePreferencesPage,
   },
 
+  olive: {
+    Layout: OliveLayout,
+    AboutPage: OliveAboutPage,
+    BlogPage: OliveBlogPage,
+    BlogPostPage: OliveBlogPostPage,
+    CartPage: OliveCartPage,
+    CheckoutPage: OliveCheckoutPage,
+    CheckoutUnavailable: OliveCheckoutUnavailable,
+    OrderSuccessPage: OliveOrderSuccessPage,
+    CollectionPage: OliveCollectionPage,
+    CollectionsPage: OliveCollectionsPage,
+    ContactPage: OliveContactPage,
+    GenericPage: OliveGenericPage,
+    ProductPage: OliveProductPage,
+    ShopPage: OliveShopPage,
+    TestimonialsPage: OliveTestimonialsPage,
+    AccountSettingsPage: OliveAccountSettingsPage,
+    AccountSecurityPage: OliveAccountSecurityPage,
+    AddressBookPage: OliveAddressBookPage,
+    OrderDetailPage: OliveOrderDetailPage,
+    OrdersPage: OliveOrdersPage,
+    PreferencesPage: OlivePreferencesPage,
+    RewardsPage: OliveRewardsPage,
+    SubscriptionsPage: OliveSubscriptionsPage,
+    MaintenancePage: OliveMaintenancePage,
+  },
   pollen: {
     Layout: PollenLayout,
     AboutPage: PollenAboutPage,

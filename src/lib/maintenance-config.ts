@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { eventDateTimeAttr, formatEventDateParts } from "~/lib/events/format";
 
 /**
  * Client-safe maintenance-mode config: schemas, types, and pure resolvers
@@ -210,4 +211,131 @@ export function normalizeMaintenanceMessage(value: unknown): TiptapJSON | null {
   }
 
   return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Editable maintenance / coming-soon page
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// The four storefront renderers, the countdown component and the admin form all
+// build on the exports below — these shapes are the contract between them.
+//
+// Two rules make the whole thing safe:
+//
+//  1. Raw columns never reach the client. `resolveStorefrontMaintenance` (in
+//     `~/lib/maintenance.ts`) is the only thing that reads them; renderers get
+//     the resolved object and nothing else.
+//  2. All date/time formatting happens ONCE, here, on the server, against the
+//     shop's `Business.timeZone`. Every renderer and the client countdown
+//     receive the *same* strings. Nothing downstream may call `toLocaleString`
+//     / `toLocaleDateString` / `toLocaleTimeString` / `getHours()` — those read
+//     the ambient zone, which is the server's during the RSC render and the
+//     viewer's after hydration, i.e. a hydration mismatch that only reproduces
+//     for people in the wrong time zone. See the header of
+//     `~/lib/events/format.ts` for the long version.
+
+/** Small eyebrow above the headline ("Opening soon", "We'll be right back"). */
+export const maintenanceOverlineSchema = z.string().trim().max(80);
+
+/** The big line on the maintenance / coming-soon screen. */
+export const maintenanceHeadlineSchema = z.string().trim().max(160);
+
+/** Free-text venue / address line shown beside the launch date. */
+export const maintenanceLocationSchema = z.string().trim().max(200);
+
+/**
+ * Flyer / hero image URL. Only http(s) — the router additionally pins it to the
+ * business's own upload prefix so this can't be used to hotlink or to smuggle a
+ * `javascript:`/`data:` URL past the renderers.
+ */
+export const maintenanceImageSchema = z
+  .string()
+  .trim()
+  .url()
+  .max(500)
+  .refine((u) => /^https?:\/\//i.test(u), "Must be an http(s) URL");
+
+/**
+ * Exactly what `<input type="datetime-local">` emits: a bare wall clock with no
+ * zone attached. The router interprets it in `Business.timeZone` via
+ * `parseZonedDateTime` — never as UTC, and never in the browser's zone.
+ */
+export const maintenanceWallClockSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Enter a valid date and time");
+
+/**
+ * Normalizes an owner-editable text column: trims, and collapses "" (and any
+ * non-string, e.g. a JSON column that never got set) to `null`.
+ *
+ * `null` is meaningful downstream — it means "no owner value, fall back to the
+ * template's own default copy" — so blank and unset must not be distinguishable.
+ */
+export function normalizeMaintenanceText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed === "" ? null : trimmed;
+}
+
+/**
+ * A launch date resolved for display. Every field is a plain string so the whole
+ * object can cross the RSC boundary into the client countdown untouched.
+ */
+export type ResolvedMaintenanceLaunch = {
+  /** ISO instant, serializable to client components. */
+  startAt: string;
+  endAt: string | null;
+  /** e.g. "Sat, Sep 26" */
+  dateText: string;
+  /** e.g. "12:00 – 7:00 PM"; null only for all-day inputs, which this never builds. */
+  timeText: string | null;
+  /** Value for `<time dateTime={…}>`. */
+  dateTimeAttr: string;
+};
+
+/**
+ * Resolves the stored launch window into display strings in the shop's zone.
+ *
+ * Returns `null` when there is no usable start (`null`/`undefined`/unparseable).
+ * An `endAt` that is invalid, or not strictly after `startAt`, is treated as
+ * absent rather than rejected — a half-filled window should still render the
+ * start, not blank the whole section.
+ *
+ * `opts.referenceDate` is forwarded to `formatEventDateParts` as "what year is
+ * it" for year suppression; tests pass a fixed date so the expected strings
+ * don't drift on New Year's Day.
+ */
+export function resolveMaintenanceLaunch(
+  startAt: Date | string | null | undefined,
+  endAt: Date | string | null | undefined,
+  timeZone: string,
+  opts?: { referenceDate?: Date },
+): ResolvedMaintenanceLaunch | null {
+  if (startAt === null || startAt === undefined) return null;
+
+  const start = startAt instanceof Date ? startAt : new Date(startAt);
+  if (Number.isNaN(start.getTime())) return null;
+
+  let end: Date | null = null;
+  if (endAt !== null && endAt !== undefined) {
+    const parsedEnd = endAt instanceof Date ? endAt : new Date(endAt);
+    if (
+      !Number.isNaN(parsedEnd.getTime()) &&
+      parsedEnd.getTime() > start.getTime()
+    ) {
+      end = parsedEnd;
+    }
+  }
+
+  const input = { startAt: start, endAt: end, allDay: false };
+  const parts = formatEventDateParts(input, timeZone, opts);
+
+  return {
+    startAt: start.toISOString(),
+    endAt: end ? end.toISOString() : null,
+    dateText: parts.date,
+    timeText: parts.time,
+    dateTimeAttr: eventDateTimeAttr(input, timeZone),
+  };
 }

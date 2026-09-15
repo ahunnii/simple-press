@@ -1,12 +1,16 @@
 import { z } from "zod";
 
+import { safeHrefSchema } from "~/lib/safe-href";
+
 const tiptapContent = z.record(z.string(), z.unknown()).nullable(); // matches pageContentSchema usage
 
 export const bannerConfigSchema = z.object({
   enabled: z.boolean().default(false),
   version: z.string().min(1),
   content: tiptapContent,
-  linkUrl: z.string().trim().max(2048).nullish(),
+  // Rendered as the banner's `href`. `safeHrefSchema` keeps the same trim +
+  // 2048 cap and adds the scheme allowlist (`~/lib/safe-href`).
+  linkUrl: safeHrefSchema.nullish(),
   linkLabel: z.string().trim().max(120).nullish(),
   bgColor: z.string().trim().max(32).nullish(),
   textColor: z.string().trim().max(32).nullish(),
@@ -21,7 +25,8 @@ export const popupConfigSchema = z.object({
   imagePath: z.string().trim().nullish(), // pathname from /api/upload
   imageAlt: z.string().trim().max(200).nullish(),
   content: tiptapContent, // text mode
-  ctaUrl: z.string().trim().max(2048).nullish(),
+  // Rendered as the popup CTA's `href` — same guard as `bannerConfigSchema.linkUrl`.
+  ctaUrl: safeHrefSchema.nullish(),
   ctaLabel: z.string().trim().max(120).nullish(),
 });
 export type PopupConfig = z.infer<typeof popupConfigSchema>;

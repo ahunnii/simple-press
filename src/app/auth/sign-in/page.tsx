@@ -34,4 +34,5 @@ export default async function SignInPage({ searchParams }: Props) {
 
 export const metadata = {
   title: "Sign In",
+  robots: { index: false, follow: false },
 };

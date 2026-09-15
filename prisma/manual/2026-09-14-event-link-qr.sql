@@ -1,0 +1,37 @@
+-- 2026-09-14-event-link-qr.sql — 2026-09-14
+--
+-- Additive DDL for the per-event "show the link as a scannable QR code" opt-in:
+-- one new non-nullable boolean column on Event.
+--
+-- Covers:
+--   * Event."linkQrEnabled" — owner opt-in; when true the storefront renders
+--     `Event."externalUrl"` as a scannable QR code beside the link. Inert when
+--     `externalUrl` is NULL, so there is no cross-column constraint and an
+--     owner who later clears the link never hits a save error.
+--
+-- Hand-apply only. Nothing runs this automatically; there is no migration
+-- file backing it. Strictly additive — one ADD COLUMN, no DROP, no data
+-- rewrite, no index change. Safe to run against a live database.
+--
+--   psql "$DATABASE_URL" -f prisma/manual/2026-09-14-event-link-qr.sql
+--
+-- Idempotent: the statement is guarded with IF NOT EXISTS, so a second run
+-- is a no-op.
+--
+-- CHECKLIST: apply this to staging/prod BEFORE deploying the event link-QR
+-- feature. Prisma's generated client selects this column on every Event read
+-- once it ships; against a database missing it, the storefront events pages,
+-- the admin Events list/form, the sitemap and the store-transfer export all
+-- throw.
+--
+-- NOTE: NOT NULL with DEFAULT false by design — this matches what
+-- `prisma db push` emits for `Boolean @default(false)`. Existing rows are
+-- backfilled to false by the DEFAULT (they predate the feature), which is the
+-- opt-out state: nothing changes on any storefront until an owner flips the
+-- switch.
+
+-- ----------------------------------------------------------------------------
+-- Event: per-event QR-code opt-in for the outbound link
+-- ----------------------------------------------------------------------------
+
+ALTER TABLE "Event" ADD COLUMN IF NOT EXISTS "linkQrEnabled" BOOLEAN NOT NULL DEFAULT false;

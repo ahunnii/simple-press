@@ -6,8 +6,11 @@ import { TriangleAlert } from "lucide-react";
 
 import type { serviceFormSchema } from "~/lib/validators/services";
 import type { RouterOutputs } from "~/trpc/react";
+import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
+import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { getServiceTemplatesForStorefront } from "~/lib/service-templates";
 import { cn } from "~/lib/utils";
+import { api } from "~/trpc/react";
 import { useSiteHost } from "~/hooks/use-site-host";
 import { Button } from "~/components/ui/button";
 import {
@@ -278,22 +281,43 @@ export function ServiceSeoFields({
   disabled,
 }: SeoProps) {
   const siteHost = useSiteHost();
+  const { data: businessInfo } = api.business.simplifiedGet.useQuery();
+  // The title-suffix brand — `seoBrandName` when the owner set one, else the
+  // business name. Used to render the meta-title counter and preview the
+  // same way the storefront `<title>` actually renders.
+  const brand = resolveSeoBrand({
+    name: businessInfo?.name ?? "",
+    siteContent: businessInfo?.siteContent,
+  });
 
   const watchedSlug = form.watch("slug") ?? "";
 
+  // SEO preview values. Title is rendered through `renderSeoTitle`, exactly
+  // as the storefront `<title>` will, including the " | brand" suffix.
+  // Description is untouched by this pass — `||` is intentional there so a
+  // cleared "" falls through to the next candidate.
+  const seoPreviewTitle = renderSeoTitle(
+    firstNonBlank(form.watch("metaTitle"), form.watch("name")) ??
+      "Service Name",
+    brand,
+  );
   /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-  const seoPreviewTitle =
-    form.watch("metaTitle") || form.watch("name") || "Service Name";
   const seoPreviewDesc =
     form.watch("metaDescription") ||
     form.watch("description") ||
     "Your service description will appear here in search results.";
   /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 
-  // Counters mirror the validator caps (70 / 200) rather than the older
-  // 60 / 160 display numbers — turning the copy red at a length the schema
-  // happily accepts trained owners to ignore it.
-  const metaTitleLength = form.watch("metaTitle")?.length ?? 0;
+  // Description counter still mirrors the validator cap (200) rather than the
+  // 160 display number — turning the copy red at a length the schema happily
+  // accepts trained owners to ignore it. Title is different: it now measures
+  // the RENDERED "title | brand" length against 60, the number that matches
+  // what Google actually shows, since `renderSeoTitle` is what every
+  // storefront `<title>` goes through.
+  const metaTitleLength = renderSeoTitle(
+    preferNonBlank(form.watch("metaTitle"), form.watch("name") ?? ""),
+    brand,
+  ).length;
   const metaDescriptionLength = form.watch("metaDescription")?.length ?? 0;
 
   const existingOgImage = ogImageRemoved
@@ -351,11 +375,11 @@ export function ServiceSeoFields({
               description={
                 <span
                   className={
-                    metaTitleLength > 70 ? "text-destructive" : undefined
+                    metaTitleLength > 60 ? "text-destructive" : undefined
                   }
                 >
-                  {metaTitleLength}/70 characters — aim for 50–60. Leave blank
-                  to use the service name.
+                  {metaTitleLength}/60 characters including &quot; | {brand}
+                  &quot; — aim for 50–60. Leave blank to use the service name.
                 </span>
               }
               descriptionClassName="text-xs text-muted-foreground"

@@ -1,6 +1,8 @@
 import type { Prisma } from "generated/prisma";
 import { z } from "zod";
 
+import { isSafeHref, SAFE_HREF_MESSAGE } from "~/lib/safe-href";
+
 /**
  * The accepted values for the admin Orders list's filter params.
  *
@@ -512,6 +514,10 @@ export const fulfillmentFormSchema = z
         trackingUrl: z
           .string()
           .url("Invalid tracking URL")
+          // `.url()` is not a scheme guard (Zod accepts `javascript:`), and
+          // this value is rendered as a link in the shipped email and on the
+          // customer's order page. See `~/lib/safe-href`.
+          .refine(isSafeHref, { message: SAFE_HREF_MESSAGE })
           .optional()
           .or(z.literal("")),
         // Per-item quantities for this package (used when shipAllRemaining

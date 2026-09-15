@@ -1,6 +1,7 @@
 "use client";
 
 import type { ResolvedDonationHandle } from "~/lib/donation-handles";
+import { cn } from "~/lib/utils";
 import { CashAppIcon } from "~/components/icons/cashapp-icon";
 import { VenmoIcon } from "~/components/icons/venmo-icon";
 import { BrandedQrCode } from "~/components/shared/branded-qr-code";
@@ -29,11 +30,7 @@ function HandleCard({
         <p className="mt-0.5 text-sm text-[#6b6b6b]">{handle.displayHandle}</p>
       </div>
 
-      <BrandedQrCode
-        value={handle.url}
-        logoUrl={logoUrl}
-        className="size-44"
-      />
+      <BrandedQrCode value={handle.url} logoUrl={logoUrl} className="size-44" />
 
       <a
         href={handle.url}
@@ -51,7 +48,8 @@ function HandleCard({
 /**
  * Venmo/Cash App cards — one per handle the owner has configured, each with
  * a deep link and a scannable QR code. Rendered by `DefaultDonatePage` only
- * when `resolveDonationHandles(business)` is non-empty.
+ * when `resolveDonationHandles(business)` is non-empty. With a single handle,
+ * the card is centered and width-constrained instead of half of a 2-up grid.
  */
 export function DefaultDonateOtherWays({
   handles,
@@ -60,8 +58,17 @@ export function DefaultDonateOtherWays({
   handles: ResolvedDonationHandle[];
   logoUrl?: string | null;
 }) {
+  const single = handles.length === 1;
+
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    // One handle → a single centered card instead of a half-empty 2-up.
+    <div
+      className={cn(
+        single
+          ? "mx-auto w-full max-w-[22rem]"
+          : "grid grid-cols-1 gap-6 sm:grid-cols-2",
+      )}
+    >
       {handles.map((handle) => (
         <HandleCard key={handle.key} handle={handle} logoUrl={logoUrl} />
       ))}

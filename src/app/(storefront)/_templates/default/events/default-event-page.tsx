@@ -6,6 +6,7 @@ import { eventDateTimeAttr, formatEventDate } from "~/lib/events/format";
 import { PageTransition } from "~/components/page-animations";
 import { EventFlierLightbox } from "~/app/(storefront)/_components/events/event-flier-lightbox";
 import { EventFlierVideo } from "~/app/(storefront)/_components/events/event-flier-video";
+import { EventLinkQr } from "~/app/(storefront)/_components/events/event-link-qr";
 
 /**
  * Single-event detail page for the Default template. Deliberately no
@@ -13,6 +14,7 @@ import { EventFlierVideo } from "~/app/(storefront)/_components/events/event-fli
  * the other Default pages, this one ships without editor sections.
  */
 export function DefaultEventPage({
+  business,
   event,
   timeZone,
   isPast,
@@ -75,9 +77,7 @@ export function DefaultEventPage({
                 {event.name}
               </h1>
               {event.location && (
-                <p className="text-[15px] text-[#6b6b6b]">
-                  {event.location}
-                </p>
+                <p className="text-[15px] text-[#6b6b6b]">{event.location}</p>
               )}
               {event.blurb && (
                 <p className="max-w-[560px] text-[16px] leading-relaxed whitespace-pre-line text-[#6b6b6b]">
@@ -101,6 +101,14 @@ export function DefaultEventPage({
                   </a>
                 )}
               </div>
+              <EventLinkQr
+                event={event}
+                logoUrl={business.siteContent?.logoUrl}
+                size="lg"
+                className="mt-4"
+                tileClassName="rounded-(--radius) border border-[#e8e8e8]"
+                captionClassName="text-xs text-[#6b6b6b]"
+              />
             </div>
           </div>
         </div>

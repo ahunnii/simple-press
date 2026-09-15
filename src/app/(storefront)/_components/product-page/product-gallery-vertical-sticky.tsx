@@ -18,7 +18,7 @@ type StyleProps = {
 };
 
 type Props = {
-  images: { url: string }[];
+  images: { url: string; altText?: string | null }[];
   productName: string;
   styleProps?: StyleProps;
   enableLightbox?: boolean;
@@ -110,7 +110,11 @@ export function ProductGalleryVertical({
               >
                 <Image
                   src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                  alt={productName}
+                  alt={
+                    images[selectedImage]?.altText?.trim()
+                      ? (images[selectedImage]?.altText ?? "")
+                      : productName
+                  }
                   fill
                   className="object-cover"
                   priority
@@ -137,7 +141,11 @@ export function ProductGalleryVertical({
               >
                 <Image
                   src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                  alt={productName}
+                  alt={
+                    images[selectedImage]?.altText?.trim()
+                      ? (images[selectedImage]?.altText ?? "")
+                      : productName
+                  }
                   fill
                   className="object-cover"
                   priority
@@ -196,7 +204,11 @@ export function ProductGalleryVertical({
               >
                 <Image
                   src={image.url}
-                  alt={`${productName} ${index + 1}`}
+                  alt={
+                    image.altText?.trim()
+                      ? image.altText
+                      : `${productName} ${index + 1}`
+                  }
                   fill
                   className="object-cover"
                   sizes="64px"
@@ -231,7 +243,11 @@ export function ProductGalleryVertical({
             >
               <Image
                 src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                alt={productName}
+                alt={
+                  images[selectedImage]?.altText?.trim()
+                    ? (images[selectedImage]?.altText ?? "")
+                    : productName
+                }
                 width={1200}
                 height={1200}
                 className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"

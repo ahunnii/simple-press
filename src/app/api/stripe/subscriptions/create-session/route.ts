@@ -155,6 +155,19 @@ export async function POST(req: Request) {
   const errorContext: Record<string, unknown> = {};
 
   try {
+    // Throttle BEFORE reading/parsing the body: `getClientIp` only reads
+    // headers, so an unauthenticated caller is rejected before we ever buffer
+    // or JSON-parse an arbitrarily large request body.
+    try {
+      await subscriptionCheckoutLimiter.consume(getClientIp(req));
+    } catch {
+      // Not reported: a 429 is the limiter working as designed.
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const parsed = subscriptionCheckoutBodySchema.safeParse(
       withTrimmedEmail(await req.json()),
     );
@@ -173,16 +186,6 @@ export async function POST(req: Request) {
 
     const body = parsed.data;
     const { customerInfo } = body;
-
-    try {
-      await subscriptionCheckoutLimiter.consume(getClientIp(req));
-    } catch {
-      // Not reported: a 429 is the limiter working as designed.
-      return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        { status: 429 },
-      );
-    }
 
     const domain = getCurrentDomain(req.headers);
     const business = await getBusinessByDomain(domain);

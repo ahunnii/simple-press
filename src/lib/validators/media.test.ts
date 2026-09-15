@@ -13,6 +13,9 @@ import {
   MEDIA_USAGE_DEFAULT,
   MEDIA_USAGE_VALUES,
   mediaBulkDeleteInput,
+  mediaDeleteInput,
+  mediaDownloadInput,
+  storageKeySchema,
 } from "./media";
 
 /**
@@ -164,6 +167,110 @@ describe("getMediaSearchFields", () => {
 });
 
 /**
+ * `storageKeySchema` closes the path-traversal hole where a key like
+ * `bizA/../bizB/file.jpg` would pass the router's
+ * `key.startsWith(`${businessId}/`)` prefix check but resolve to a different
+ * tenant's object once `..` segments are normalized by `new URL()` before
+ * signing.
+ */
+describe("storageKeySchema", () => {
+  it("accepts a normal generated key", () => {
+    const result = storageKeySchema.safeParse(
+      "biz_123/images/9f8a7b6c-name.jpg",
+    );
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a real uniqueKey()-shaped key", () => {
+    expect(
+      storageKeySchema.safeParse("biz_123/image-a1b2c3d4e5f60718.png").success,
+    ).toBe(true);
+  });
+
+  it("accepts a real contentAddressedKey()-shaped testimonial key", () => {
+    expect(
+      storageKeySchema.safeParse("biz_123/testimonials/1234abcd5678ef90.jpg")
+        .success,
+    ).toBe(true);
+  });
+
+  it("rejects a key with a .. path segment", () => {
+    expect(storageKeySchema.safeParse("bizA/../bizB/file.jpg").success).toBe(
+      false,
+    );
+  });
+
+  it("rejects a key ending in a .. segment", () => {
+    expect(storageKeySchema.safeParse("bizA/..").success).toBe(false);
+  });
+
+  it("rejects a bare ..", () => {
+    expect(storageKeySchema.safeParse("..").success).toBe(false);
+  });
+
+  it("rejects a percent-encoded traversal attempt", () => {
+    expect(
+      storageKeySchema.safeParse("bizA/%2e%2e/bizB/file.jpg").success,
+    ).toBe(false);
+  });
+
+  it("rejects a key containing a backslash", () => {
+    expect(storageKeySchema.safeParse("bizA\\..\\bizB\\file.jpg").success).toBe(
+      false,
+    );
+  });
+
+  it("rejects a key with a leading slash", () => {
+    expect(storageKeySchema.safeParse("/bizA/file.jpg").success).toBe(false);
+  });
+
+  it("rejects a key with an empty path segment", () => {
+    expect(storageKeySchema.safeParse("bizA//file.jpg").success).toBe(false);
+  });
+
+  it("rejects a key containing a NUL byte", () => {
+    expect(storageKeySchema.safeParse("bizA/file\x00.jpg").success).toBe(false);
+  });
+
+  it("rejects a key containing other control characters", () => {
+    expect(storageKeySchema.safeParse("bizA/file\r\n.jpg").success).toBe(false);
+  });
+
+  it("rejects an empty string", () => {
+    expect(storageKeySchema.safeParse("").success).toBe(false);
+  });
+
+  it("rejects a key over 1024 characters", () => {
+    const longKey = `bizA/${"a".repeat(1020)}.jpg`;
+    expect(storageKeySchema.safeParse(longKey).success).toBe(false);
+  });
+});
+
+describe("mediaDeleteInput / mediaDownloadInput", () => {
+  it("accepts a normal key with an optional businessId", () => {
+    expect(
+      mediaDeleteInput.safeParse({
+        key: "biz_123/images/uuid-name.jpg",
+        businessId: "biz_456",
+      }).success,
+    ).toBe(true);
+    expect(
+      mediaDownloadInput.safeParse({ key: "biz_123/images/uuid-name.jpg" })
+        .success,
+    ).toBe(true);
+  });
+
+  it("rejects a traversal key", () => {
+    expect(
+      mediaDeleteInput.safeParse({ key: "bizA/../bizB/file.jpg" }).success,
+    ).toBe(false);
+    expect(
+      mediaDownloadInput.safeParse({ key: "bizA/../bizB/file.jpg" }).success,
+    ).toBe(false);
+  });
+});
+
+/**
  * `mediaBulkDeleteInput` caps a single bulk-delete call at
  * `ADMIN_BULK_DELETE_LIMIT` keys, mirroring every other admin bulk-delete
  * schema (see `discountBulkDeleteSchema` in `./discounts`).
@@ -210,6 +317,14 @@ describe("mediaBulkDeleteInput", () => {
   it("rejects an empty-string key", () => {
     const result = mediaBulkDeleteInput.safeParse({ keys: [""] });
     expect(result.success).toBe(false);
+  });
+
+  it("rejects a list containing a traversal key", () => {
+    expect(
+      mediaBulkDeleteInput.safeParse({
+        keys: ["biz123/image-abcd1234.jpg", "bizA/../bizB/file.jpg"],
+      }).success,
+    ).toBe(false);
   });
 });
 

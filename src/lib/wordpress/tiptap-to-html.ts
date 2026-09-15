@@ -1,3 +1,4 @@
+import { getSchema } from "@tiptap/core";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import { TableKit } from "@tiptap/extension-table";
@@ -6,6 +7,8 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { generateHTML } from "@tiptap/html/server";
 import StarterKit from "@tiptap/starter-kit";
+
+import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
 
 /**
  * Server-side TipTap document -> HTML serializer for the WordPress export.
@@ -73,6 +76,12 @@ const SERVER_EXTENSIONS = [
   }),
   TableKit,
 ];
+
+/**
+ * ProseMirror schema derived from `SERVER_EXTENSIONS` — the node/mark/attr
+ * allowlist `sanitizeTiptapDoc` enforces before every `generateHTML` call.
+ */
+const SERVER_SCHEMA = getSchema(SERVER_EXTENSIONS);
 
 function isContentNode(value: unknown): value is ContentNode {
   return value != null && typeof value === "object" && !Array.isArray(value);
@@ -266,16 +275,25 @@ export function tiptapToHtml(
       continue;
     }
 
+    // Sanitize the JSON against this module's own schema BEFORE serializing.
+    // `sanitizeHtml` below is a regex pass over the output and was the only
+    // guard here; this makes the node/mark/attr allowlist schema-derived, and
+    // shares the exact rules the storefront renderer applies. It runs
+    // per-node, after the gallery/embed/quote branches above, because those
+    // three nodes are handled by hand here and are deliberately absent from
+    // `SERVER_EXTENSIONS` — sanitizing the whole document up front would drop
+    // them before their handlers ever ran.
+    const safeDoc = sanitizeTiptapDoc(
+      { type: "doc", content: [node] },
+      SERVER_SCHEMA,
+    );
+    if (!safeDoc?.content?.length) {
+      warnings.push(`Skipped unknown node type: ${node.type ?? "unknown"}`);
+      continue;
+    }
+
     try {
-      fragments.push(
-        generateHTML(
-          {
-            type: "doc",
-            content: [node] as TiptapDoc["content"],
-          },
-          SERVER_EXTENSIONS,
-        ),
-      );
+      fragments.push(generateHTML(safeDoc, SERVER_EXTENSIONS));
     } catch {
       warnings.push(`Skipped unknown node type: ${node.type ?? "unknown"}`);
     }

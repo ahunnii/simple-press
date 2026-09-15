@@ -200,6 +200,10 @@ exports.Prisma.BusinessScalarFieldEnum = {
   supportEmail: 'supportEmail',
   phoneNumber: 'phoneNumber',
   businessAddress: 'businessAddress',
+  addressStreet: 'addressStreet',
+  addressCity: 'addressCity',
+  addressState: 'addressState',
+  addressPostalCode: 'addressPostalCode',
   stripeAccountId: 'stripeAccountId',
   stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
   stripeChargesEnabled: 'stripeChargesEnabled',
@@ -210,6 +214,12 @@ exports.Prisma.BusinessScalarFieldEnum = {
   maintenanceVariant: 'maintenanceVariant',
   maintenanceMessage: 'maintenanceMessage',
   maintenanceCta: 'maintenanceCta',
+  maintenanceOverline: 'maintenanceOverline',
+  maintenanceHeadline: 'maintenanceHeadline',
+  maintenanceImage: 'maintenanceImage',
+  maintenanceLaunchAt: 'maintenanceLaunchAt',
+  maintenanceLaunchEndAt: 'maintenanceLaunchEndAt',
+  maintenanceLocation: 'maintenanceLocation',
   umamiWebsiteId: 'umamiWebsiteId',
   umamiEnabled: 'umamiEnabled',
   status: 'status',
@@ -257,6 +267,7 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   metaKeywords: 'metaKeywords',
   ogImage: 'ogImage',
   faviconUrl: 'faviconUrl',
+  seoBrandName: 'seoBrandName',
   pageMeta: 'pageMeta',
   siteVerification: 'siteVerification',
   logoUrl: 'logoUrl',
@@ -422,6 +433,7 @@ exports.Prisma.EventScalarFieldEnum = {
   location: 'location',
   externalUrl: 'externalUrl',
   externalUrlLabel: 'externalUrlLabel',
+  linkQrEnabled: 'linkQrEnabled',
   priceLabel: 'priceLabel',
   published: 'published',
   sortOrder: 'sortOrder',
@@ -486,6 +498,10 @@ exports.Prisma.CustomerScalarFieldEnum = {
   acceptsMarketing: 'acceptsMarketing',
   totalSpent: 'totalSpent',
   orderCount: 'orderCount',
+  loyaltyPoints: 'loyaltyPoints',
+  loyaltyJoinedAt: 'loyaltyJoinedAt',
+  birthMonth: 'birthMonth',
+  birthDay: 'birthDay',
   deletionRequestedAt: 'deletionRequestedAt',
   anonymizedAt: 'anonymizedAt',
   notes: 'notes',
@@ -592,6 +608,7 @@ exports.Prisma.DiscountCodeScalarFieldEnum = {
   type: 'type',
   value: 'value',
   active: 'active',
+  source: 'source',
   usageLimit: 'usageLimit',
   usageCount: 'usageCount',
   perCustomerLimit: 'perCustomerLimit',
@@ -1002,6 +1019,55 @@ exports.Prisma.DonationScalarFieldEnum = {
   message: 'message'
 };
 
+exports.Prisma.LoyaltyProgramScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  earnOnOrders: 'earnOnOrders',
+  pointsPerDollar: 'pointsPerDollar',
+  signupEnabled: 'signupEnabled',
+  signupBonus: 'signupBonus',
+  firstOrderEnabled: 'firstOrderEnabled',
+  firstOrderBonus: 'firstOrderBonus',
+  birthdayEnabled: 'birthdayEnabled',
+  birthdayBonus: 'birthdayBonus',
+  socialEnabled: 'socialEnabled',
+  socialFollowBonus: 'socialFollowBonus',
+  rewardCodeExpiryDays: 'rewardCodeExpiryDays'
+};
+
+exports.Prisma.LoyaltyRewardTierScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  programId: 'programId',
+  businessId: 'businessId',
+  label: 'label',
+  pointsCost: 'pointsCost',
+  type: 'type',
+  value: 'value',
+  minPurchase: 'minPurchase',
+  sortOrder: 'sortOrder',
+  active: 'active'
+};
+
+exports.Prisma.LoyaltyLedgerScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  type: 'type',
+  points: 'points',
+  balanceAfter: 'balanceAfter',
+  reason: 'reason',
+  metadata: 'metadata',
+  sourceKey: 'sourceKey',
+  orderId: 'orderId',
+  discountCodeId: 'discountCodeId',
+  actorUserId: 'actorUserId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1097,7 +1163,10 @@ exports.Prisma.ModelName = {
   QuickBooksConnection: 'QuickBooksConnection',
   QuickBooksInvoice: 'QuickBooksInvoice',
   Subscription: 'Subscription',
-  Donation: 'Donation'
+  Donation: 'Donation',
+  LoyaltyProgram: 'LoyaltyProgram',
+  LoyaltyRewardTier: 'LoyaltyRewardTier',
+  LoyaltyLedger: 'LoyaltyLedger'
 };
 
 /**

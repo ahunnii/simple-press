@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 
+import { getCanonicalBaseUrl } from "~/lib/canonical";
 import { businessHostFilter } from "~/lib/domain-utils";
 import { db } from "~/server/db";
 
@@ -18,6 +19,25 @@ const AI_CRAWLERS = [
   "Applebot-Extended",
 ];
 
+/**
+ * Shared disallow list for both the `*` rule and every AI-crawler rule below.
+ * Hoisted so the two rule sets can never drift from each other.
+ */
+const DISALLOWED_PATHS = [
+  "/admin",
+  "/api",
+  "/platform",
+  "/cart",
+  "/checkout",
+  "/account",
+  "/order",
+  "/auth",
+  "/wishlist",
+  "/subscribe",
+  "/subscriptions",
+  "/editor",
+];
+
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
@@ -27,7 +47,12 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       ...businessHostFilter(host),
       status: "active",
     },
-    select: { allowAiCrawlers: true },
+    select: {
+      allowAiCrawlers: true,
+      subdomain: true,
+      customDomain: true,
+      domainStatus: true,
+    },
   });
 
   const aiCrawlerRules: MetadataRoute.Robots["rules"] = AI_CRAWLERS.map(
@@ -36,15 +61,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       ...(business === null || business.allowAiCrawlers
         ? {
             allow: "/",
-            disallow: [
-              "/admin",
-              "/api",
-              "/platform",
-              "/cart",
-              "/checkout",
-              "/account",
-              "/order",
-            ],
+            disallow: DISALLOWED_PATHS,
           }
         : { disallow: "/" }),
     }),
@@ -55,18 +72,13 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       {
         userAgent: "*",
         allow: "/",
-        disallow: [
-          "/admin",
-          "/api",
-          "/platform",
-          "/cart",
-          "/checkout",
-          "/account",
-          "/order",
-        ],
+        disallow: DISALLOWED_PATHS,
       },
       ...aiCrawlerRules,
     ],
-    sitemap: `https://${host}/sitemap.xml`,
+    sitemap:
+      business !== null
+        ? `${getCanonicalBaseUrl(business)}/sitemap.xml`
+        : `https://${host}/sitemap.xml`,
   };
 }

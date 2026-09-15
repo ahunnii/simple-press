@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+
 import type { RouterOutputs } from "~/trpc/react";
 import { eventDateTimeAttr, formatEventDateParts } from "~/lib/events/format";
+import { EventLinkQr } from "~/app/(storefront)/_components/events/event-link-qr";
 
 import { PinkEventFlier } from "./pink-event-flier";
 
@@ -19,6 +21,8 @@ type Props = {
    * link with no accessible name.
    */
   linkLabel: string;
+  /** `SiteContent.logoUrl` — knocked out of the ticket-stub QR's center. */
+  logoUrl?: string | null;
   /** Set on the first row of cards — the fliers are above the fold. */
   priority?: boolean;
 };
@@ -32,12 +36,16 @@ type Props = {
  * Anatomy (design.md → Shared component inventory): 3:4 flier, then a meta
  * block hung under the same `1px solid var(--pink-ink)` rule the product card
  * uses — date, name (links to event detail page), blurb, a label line for
- * where/how much, and the event's own outbound link.
+ * where/how much, and the event's own outbound link. When the owner has
+ * switched the link's QR on, a "ticket stub" row follows that link — a softer
+ * `--pink-line` hairline, then the QR beside a two-line caption — so the card
+ * ends the way a torn-off stub does.
  */
 export function PinkEventCard({
   event,
   timeZone,
   linkLabel,
+  logoUrl,
   priority = false,
 }: Props) {
   // The one date formatter. Never `toLocale*` — the shop's zone has to be
@@ -85,7 +93,7 @@ export function PinkEventCard({
         >
           <Link
             href={`/events/${event.slug}`}
-            className="hover:underline underline-offset-4"
+            className="underline-offset-4 hover:underline"
           >
             {event.name}
           </Link>
@@ -102,19 +110,51 @@ export function PinkEventCard({
 
         {meta && <p className="pink-label">{meta}</p>}
 
+        {/* `mt-auto` moves to the wrapper so the button and its optional stub
+            travel together, keeping cards bottom-aligned across the grid. */}
         {event.externalUrl && (
-          <a
-            href={event.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            // Every card's link reads the same out of context, so the name is
-            // qualified with the event. The visible text stays the first words
-            // of the accessible name (WCAG 2.5.3, Label in Name).
-            aria-label={`${linkLabel} — ${event.name}`}
-            className="pink-btn pink-btn-ghost pink-btn-sm mt-auto self-start"
-          >
-            {linkLabel}
-          </a>
+          <div className="mt-auto flex flex-col gap-4">
+            <a
+              href={event.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              // Every card's link reads the same out of context, so the name is
+              // qualified with the event. The visible text stays the first words
+              // of the accessible name (WCAG 2.5.3, Label in Name).
+              aria-label={`${linkLabel} — ${event.name}`}
+              className="pink-btn pink-btn-ghost pink-btn-sm self-start"
+            >
+              {linkLabel}
+            </a>
+
+            {/* The stub's hairline is `--pink-line`, not the `--pink-ink` rule
+                above — that heavier one belongs to the meta block alone. It
+                rides on the figure itself so nothing bordered renders when the
+                owner leaves the QR off and `EventLinkQr` returns null. */}
+            <EventLinkQr
+              event={event}
+              logoUrl={logoUrl}
+              size="sm"
+              className="pt-4"
+              style={{ borderTop: "1px solid var(--pink-line)" }}
+              tileStyle={{
+                background: "var(--pink-white)",
+                border: "1px solid var(--pink-line)",
+              }}
+              captionClassName="flex flex-col gap-1"
+              caption={
+                <>
+                  <span className="pink-label">Scan to open</span>
+                  <span
+                    className="text-[0.8125rem] leading-[1.5]"
+                    style={{ color: "var(--pink-muted)" }}
+                  >
+                    {linkLabel}
+                  </span>
+                </>
+              }
+            />
+          </div>
         )}
       </div>
     </article>

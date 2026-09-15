@@ -7,6 +7,8 @@ import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
 import FinalQuoteEmail from "~/emails/final-quote";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
+import LoyaltyBirthdayEmail from "~/emails/loyalty-birthday";
+import LoyaltyRewardRedeemedEmail from "~/emails/loyalty-reward-redeemed";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
@@ -490,6 +492,38 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             productName: "Sample T-Shirt",
             variantName: "Medium / Blue",
             adminProductUrl: `${businessUrl}/admin/products/sample`,
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+          }),
+      },
+      {
+        key: "loyalty-reward-redeemed",
+        label: "Loyalty Reward Redeemed",
+        build: () =>
+          LoyaltyRewardRedeemedEmail({
+            customerName: "Jane Smith",
+            code: "RWD-7F3K9Q",
+            rewardLabel: "$5 Reward",
+            rewardDescription: "$5.00 off",
+            expiresAt: "October 15, 2026",
+            minPurchase: "$25.00",
+            pointsSpent: 500,
+            balance: 120,
+            shopUrl: businessUrl,
+            rewardsUrl: `${businessUrl}/account/rewards`,
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+          }),
+      },
+      {
+        key: "loyalty-birthday",
+        label: "Loyalty Birthday Bonus",
+        build: () =>
+          LoyaltyBirthdayEmail({
+            customerName: "Jane Smith",
+            points: 100,
+            balance: 350,
+            rewardsUrl: `${businessUrl}/account/rewards`,
             businessName: business.name,
             businessLogoUrl: logoUrl,
           }),

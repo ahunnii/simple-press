@@ -1,6 +1,8 @@
 import type { Image, Product, ProductVariant } from "generated/prisma";
 import Papa from "papaparse";
 
+import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
+
 type ProductWithRelations = Product & {
   images: Image[];
   variants: ProductVariant[];
@@ -96,8 +98,10 @@ export function exportToWooCommerceCSV(
     }
   }
 
-  // Convert to CSV
-  const csv = Papa.unparse(rows, {
+  // Convert to CSV. WooCommerce import mode: `+`/`-` are left alone (SKUs,
+  // prices, and quantities frequently start with them and are not
+  // spreadsheet formulas), but `=`/`@`/tab/CR-prefixed cells are escaped.
+  const csv = Papa.unparse(sanitizeCsvRows(rows, { mode: "wordpress" }), {
     quotes: true,
     header: true,
   });

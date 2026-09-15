@@ -84,6 +84,12 @@ export interface ExportedBusiness {
   maintenanceVariant: string;
   maintenanceMessage: unknown; // TipTap JSON doc
   maintenanceCta: unknown; // MaintenanceCta JSON
+  maintenanceOverline: string | null;
+  maintenanceHeadline: string | null;
+  maintenanceImage: string | null;
+  maintenanceLaunchAt: string | null; // ISO instant
+  maintenanceLaunchEndAt: string | null;
+  maintenanceLocation: string | null;
   // SEO
   localBusinessEnabled: boolean;
   allowAiCrawlers: boolean;
@@ -365,6 +371,8 @@ export interface ExportedEvent {
   location: string | null;
   externalUrl: string | null;
   externalUrlLabel: string | null;
+  /** Added 2026-09-14 — manifests exported before then lack it; the validator defaults it to false. */
+  linkQrEnabled: boolean;
   priceLabel: string | null;
   published: boolean;
   sortOrder: number;

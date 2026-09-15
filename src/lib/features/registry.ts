@@ -317,6 +317,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     // connected Stripe account must still be able to enable this. The
     // Stripe checkout lane is guarded separately in its own route.
   },
+  loyalty: {
+    key: "loyalty",
+    label: "Rewards Program",
+    description:
+      "Customers earn points on orders, birthdays, and social follows and redeem them for single-use discount codes at checkout. Redeeming needs Discount Codes turned on. Turning this off pauses earning and redeeming; balances are kept.",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    dependsOn: ["customerAccounts", "orders"],
+  },
 };
 
 // Ordered category labels for display

@@ -3,21 +3,24 @@ import { Geist } from "next/font/google";
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Script from "next/script";
 
 import { env } from "~/env";
 import { getCanonicalBaseUrl } from "~/lib/canonical";
 import { checkBusiness } from "~/lib/check-business";
+import { getCachedBusiness } from "~/lib/seo";
+import { firstNonBlank } from "~/lib/seo/blank";
+import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { parseSiteVerification } from "~/lib/validators/site-seo";
 import { TRPCReactProvider } from "~/trpc/react";
-import { api } from "~/trpc/server";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
 
 import { Providers } from "../providers/providers";
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet();
+  const business = await getCachedBusiness();
   if (!business) {
     return {
       title: "SimplePress",
@@ -26,12 +29,22 @@ export async function generateMetadata() {
     };
   }
   const canonicalBase = getCanonicalBaseUrl(business);
-  const ogTitle = business.siteContent?.metaTitle ?? business.name;
-  const ogDescription = business.siteContent?.metaDescription ?? "";
-  const ogImage =
-    business.siteContent?.ogImage ??
-    business.siteContent?.logoUrl ??
-    "/placeholder.svg";
+
+  // The brand suffix every `<title>` carries — `seoBrandName` when the owner
+  // has set a short form, else the business name. See `~/lib/seo/title`.
+  const brand = resolveSeoBrand(business);
+
+  // Un-suffixed: `og:site_name` already carries the brand, so repeating it in
+  // `og:title` just burns characters in every share card.
+  const ogTitle =
+    firstNonBlank(business.siteContent?.metaTitle) ?? business.name;
+  const ogDescription = firstNonBlank(business.siteContent?.metaDescription);
+  // No `/placeholder.svg` fallback: a share card with a real image or none at
+  // all beats one advertising a missing asset.
+  const ogImage = firstNonBlank(
+    business.siteContent?.ogImage,
+    business.siteContent?.logoUrl,
+  );
 
   // Search-engine ownership tokens. Emit a key only when the owner has actually
   // saved that token — an empty `<meta>` is worse than no tag at all, since
@@ -51,11 +64,16 @@ export async function generateMetadata() {
   return {
     metadataBase: new URL(canonicalBase),
     title: {
-      template: `%s | ${business.name}`,
-      default: business.siteContent?.metaTitle ?? business.name,
+      // Fallback for any route that doesn't go through `buildPageMetadata`;
+      // that helper ships `{ absolute }` and applies the same suffix itself.
+      template: `%s | ${brand}`,
+      // `renderSeoTitle` drops the suffix when the title already contains the
+      // brand, so a store with no `metaTitle` and no `seoBrandName` gets a
+      // homepage title of just its name rather than "Name | Name".
+      default: renderSeoTitle(ogTitle, brand),
     },
     description:
-      business.siteContent?.metaDescription ??
+      firstNonBlank(business.siteContent?.metaDescription) ??
       "The simplest way to get started with your online business.",
     keywords:
       business.siteContent?.metaKeywords
@@ -65,22 +83,40 @@ export async function generateMetadata() {
       canonical: canonicalBase,
     },
     openGraph: {
+      type: "website",
       title: ogTitle,
-      description: ogDescription,
-      images: [ogImage],
+      siteName: business.name,
+      // Omitted rather than emitted blank — an empty `og:description` is worse
+      // than none, since scrapers prefer a present-but-empty tag over the
+      // page's own text.
+      ...(ogDescription !== undefined ? { description: ogDescription } : {}),
+      ...(ogImage !== undefined
+        ? {
+            images: [
+              { url: ogImage, width: 1200, height: 630, alt: business.name },
+            ],
+          }
+        : {}),
       url: canonicalBase,
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
-      description: ogDescription,
-      images: [ogImage],
+      ...(ogDescription !== undefined ? { description: ogDescription } : {}),
+      ...(ogImage !== undefined ? { images: [ogImage] } : {}),
     },
     ...(Object.keys(verificationTags).length > 0
       ? { verification: verificationTags }
       : {}),
     icons: [
-      { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },
+      // Not `??`: the branding form can persist an empty string here
+      // (Reset → Save), and an empty href must still fall back to the default.
+      {
+        rel: "icon",
+        url: business.siteContent?.faviconUrl?.trim()
+          ? business.siteContent.faviconUrl
+          : "/favicon.ico",
+      },
     ],
   } as Metadata;
 }
@@ -94,6 +130,12 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const business = await checkBusiness();
+
+  // CSP nonce minted per-request by `src/middleware.ts`. Next stamps its own
+  // inline scripts automatically; this one is ours, so it needs it explicitly.
+  // Reading headers() costs nothing here — `checkBusiness()` above already
+  // resolves the tenant from the Host header, so this layout is dynamic anyway.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   // Decide which Umami website ID (if any) to inject.
   let umamiWebsiteId: string | undefined;
@@ -114,7 +156,12 @@ export default async function RootLayout({
       <body>
         <Providers>
           {umamiWebsiteId && (
-            <Script defer src="/umami.js" data-website-id={umamiWebsiteId} />
+            <Script
+              defer
+              src="/umami.js"
+              data-website-id={umamiWebsiteId}
+              nonce={nonce}
+            />
           )}
           <TooltipProvider>
             <TRPCReactProvider>

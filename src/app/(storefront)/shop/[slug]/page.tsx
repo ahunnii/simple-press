@@ -1,8 +1,13 @@
 import { cache } from "react";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import {
+  buildPageMetadata,
+  firstNonBlank,
+  getCachedBusiness,
+  loadSeoBusiness,
+} from "~/lib/seo";
 import {
   buildBreadcrumbSchema,
   buildProductSchema,
@@ -28,7 +33,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
 
   // Find business
-  const business = await api.business.simplifiedGet();
+  const business = await getCachedBusiness();
   if (!business) notFound();
   // Find product
   const product = await getCachedProduct(slug);
@@ -37,9 +42,11 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  // Canonicalize id-based URLs (e.g. from old saved carts) to the slug URL
+  // Canonicalize id-based URLs (e.g. from old saved carts) to the slug URL.
+  // 308, not 307: the id form is never the canonical address of a product, so
+  // crawlers and clients should stop asking for it.
   if (product.slug !== slug) {
-    redirect(`/shop/${product.slug}`);
+    permanentRedirect(`/shop/${product.slug}`);
   }
 
   const { isEnabled } = await getBusinessFlags();
@@ -77,41 +84,27 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const [product, business] = await Promise.all([
     getCachedProduct(slug),
-    api.business.simplifiedGet(),
+    loadSeoBusiness("/shop/[slug]"),
   ]);
 
   if (!product) return { title: "Product Not Found" };
 
-  const title = !!product.metaTitle?.trim()
-    ? product.metaTitle.trim()
-    : product.name;
-  const description = !!product.metaDescription?.trim()
-    ? product.metaDescription.trim()
-    : product.description;
-
-  const ogImages = product.ogImage
-    ? [{ url: product.ogImage, width: 1200, height: 630, alt: product.name }]
-    : undefined;
-
-  return {
-    title,
-    description,
-    keywords: product.metaKeywords ?? undefined,
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, `/shop/${product.slug}`),
-      },
-    }),
-    openGraph: {
-      title,
-      description: description ?? "",
-      images: ogImages,
+  return buildPageMetadata({
+    business,
+    path: `/shop/${product.slug}`,
+    title: product.name,
+    // The excerpt is the short, share-shaped copy; the long description is the
+    // fallback only when it is blank.
+    description: firstNonBlank(product.excerpt, product.description),
+    keywords: product.metaKeywords,
+    entity: {
+      title: product.metaTitle,
+      description: product.metaDescription,
+      ogImage: product.ogImage,
     },
-    twitter: {
-      card: "summary_large_image" as const,
-      title,
-      description: description ?? "",
-      images: ogImages,
-    },
-  };
+    // The product photo is the natural share image, ahead of the site-wide
+    // OG image / logo the helper falls back to.
+    ogImage: product.images[0]?.url,
+    ogImageAlt: product.name,
+  });
 }

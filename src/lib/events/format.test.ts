@@ -5,6 +5,7 @@ import {
   eventDateTimeAttr,
   formatEventDate,
   formatEventDateParts,
+  formatEventLeaf,
   isSameDayInZone,
 } from "./format";
 
@@ -575,5 +576,49 @@ describe("isSameDayInZone", () => {
         DETROIT,
       ),
     ).toBe(false);
+  });
+});
+
+describe("formatEventLeaf", () => {
+  it("returns the long weekday, long month, and bare day of the start", () => {
+    // 2026-08-15 19:00 EDT — Saturday.
+    expect(
+      formatEventLeaf(
+        { startAt: d("2026-08-15T23:00:00.000Z"), endAt: null, allDay: false },
+        DETROIT,
+      ),
+    ).toEqual({ weekday: "Saturday", month: "August", day: "15" });
+  });
+
+  it("resolves the calendar day in the business zone, not UTC", () => {
+    // The same instant is already Sunday the 16th in Tokyo.
+    expect(
+      formatEventLeaf(
+        { startAt: d("2026-08-15T23:00:00.000Z"), endAt: null, allDay: false },
+        TOKYO,
+      ),
+    ).toEqual({ weekday: "Sunday", month: "August", day: "16" });
+  });
+
+  it("leads with the first day of a multi-day range", () => {
+    expect(
+      formatEventLeaf(
+        {
+          startAt: d("2026-08-15T04:00:00.000Z"),
+          endAt: d("2026-08-17T03:59:59.999Z"),
+          allDay: true,
+        },
+        DETROIT,
+      ),
+    ).toEqual({ weekday: "Saturday", month: "August", day: "15" });
+  });
+
+  it("accepts an ISO string for startAt", () => {
+    expect(
+      formatEventLeaf(
+        { startAt: "2026-12-31T20:00:00.000Z", endAt: null, allDay: false },
+        LONDON,
+      ),
+    ).toEqual({ weekday: "Thursday", month: "December", day: "31" });
   });
 });

@@ -5,6 +5,8 @@ import { ArrowRight } from "lucide-react";
 import type { MaintenancePageTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { resolveThemeVars } from "~/lib/template-themes";
+import { cn } from "~/lib/utils";
+import { LaunchCountdown } from "~/components/maintenance/launch-countdown";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 /*
@@ -61,19 +63,51 @@ const COPY = {
  * navy canvas: centered DCWF logo, a thin primary-green rule, italic PT Sans
  * headline, and the merchant's rich-text note in Titillium body copy — all
  * on `--wealth-surface-3`, per design.md's "Account / Maintenance" note.
+ *
+ * Owner-editable fields (mirroring vii-maintenance-page.tsx): an optional
+ * overline/headline override, an announcement flyer image, a when/where
+ * line, and a live countdown to `maintenance.launch`. Every date string
+ * arrives pre-formatted from `resolveMaintenanceLaunch` — nothing here
+ * formats a date. `LaunchCountdown` is the one client component on the
+ * screen (hydration-safe by contract), so this stays a server component.
  */
-export function WealthMaintenancePage({ business, maintenance }: MaintenancePageTemplateProps) {
+export function WealthMaintenancePage({
+  business,
+  maintenance,
+}: MaintenancePageTemplateProps) {
   const copy = COPY[maintenance.variant];
-  const themeVars = resolveThemeVars("wealth", business.siteContent?.customFields);
+  const themeVars = resolveThemeVars(
+    "wealth",
+    business.siteContent?.customFields,
+  );
 
   const businessName = business.name;
-  const logoUrl = business.siteContent?.logoUrl ?? "/templates/wealth/images/logo.png";
-  const logoAlt = resolveLogoAlt(business.siteContent?.logoAltText, businessName);
+  const logoUrl =
+    business.siteContent?.logoUrl ?? "/templates/wealth/images/logo.png";
+  const logoAlt = resolveLogoAlt(
+    business.siteContent?.logoAltText,
+    businessName,
+  );
   const cta = maintenance.cta;
+
+  // Owner-authored values win; `null` means "no owner value" → variant default.
+  const overline = maintenance.overline ?? copy.overline;
+  const heading = maintenance.headline ?? copy.heading;
+
+  const flyerUrl = maintenance.image;
+  const launch = maintenance.launch;
+  const locationText = maintenance.location;
+  const isComingSoon = maintenance.variant === "coming_soon";
 
   return (
     <div
-      className={`${fontTitilliumWeb.variable} ${fontJost.variable} ${fontPTSans.variable} ${fontRobotoMono.variable} wealth`}
+      className={cn(
+        fontTitilliumWeb.variable,
+        fontJost.variable,
+        fontPTSans.variable,
+        fontRobotoMono.variable,
+        "wealth",
+      )}
       style={{
         fontFamily: "var(--font-wealth-body)",
         minHeight: "100dvh",
@@ -99,13 +133,6 @@ export function WealthMaintenancePage({ business, maintenance }: MaintenancePage
           gap: 24,
         }}
       >
-        <div style={{ position: "relative", height: 64, width: 200 }}>
-          <Image src={logoUrl} alt={logoAlt} fill sizes="200px" priority className="object-contain" />
-        </div>
-
-        {/* Thin primary-green rule */}
-        <div aria-hidden="true" style={{ width: 60, height: 2, background: "var(--wealth-primary)" }} />
-
         <p
           style={{
             fontFamily: "var(--font-wealth-mono)",
@@ -117,8 +144,25 @@ export function WealthMaintenancePage({ business, maintenance }: MaintenancePage
             margin: 0,
           }}
         >
-          {copy.overline}
+          {overline}
         </p>
+
+        <div style={{ position: "relative", height: 64, width: 200 }}>
+          <Image
+            src={logoUrl}
+            alt={logoAlt}
+            fill
+            sizes="200px"
+            priority
+            className="object-contain"
+          />
+        </div>
+
+        {/* Thin primary-green rule */}
+        <div
+          aria-hidden="true"
+          style={{ width: 60, height: 2, background: "var(--wealth-primary)" }}
+        />
 
         <h1
           style={{
@@ -133,27 +177,63 @@ export function WealthMaintenancePage({ business, maintenance }: MaintenancePage
             margin: 0,
           }}
         >
-          {copy.heading}
+          {heading}
         </h1>
 
+        {/* Announcement flyer. Intrinsic sizing (`height: auto`) rather than
+            `fill`: the owner can upload any aspect ratio and we must not crop
+            an image whose whole point is the text printed on it. */}
+        {flyerUrl ? (
+          <figure className="wealth-maintenance-flyer">
+            <Image
+              src={flyerUrl}
+              alt={maintenance.headline ?? "Grand opening flyer"}
+              width={840}
+              height={1050}
+              sizes="(max-width: 480px) 100vw, 420px"
+              style={{ width: "100%", height: "auto", display: "block" }}
+            />
+          </figure>
+        ) : null}
+
+        {/* When / where. Both halves are optional, so the middot separator is
+            emitted only when there is something on either side of it. */}
+        {launch !== null || locationText !== null ? (
+          <p className="wealth-maintenance-when">
+            {launch ? (
+              <time dateTime={launch.dateTimeAttr}>
+                {launch.dateText}
+                {launch.timeText ? ` · ${launch.timeText}` : ""}
+              </time>
+            ) : null}
+            {launch && locationText ? " · " : null}
+            {locationText ? <span>{locationText}</span> : null}
+          </p>
+        ) : null}
+
+        {launch ? (
+          <LaunchCountdown
+            targetIso={launch.startAt}
+            label={isComingSoon ? "Opening in" : "Back in"}
+            pastLabel={isComingSoon ? "Now open" : "We're back"}
+            className="wealth-maintenance-countdown"
+          />
+        ) : null}
+
         {maintenance.message ? (
-          <div
-            style={{
-              fontFamily: "var(--font-wealth-body)",
-              fontSize: 17,
-              lineHeight: "25.5px",
-              color: "var(--wealth-ink)",
-            }}
-          >
-            <TiptapRenderer content={maintenance.message} />
-          </div>
+          <TiptapRenderer
+            content={maintenance.message}
+            className="wealth-maintenance-body"
+          />
         ) : null}
 
         {cta ? (
           <a
             href={cta.href}
             className="wealth-btn-mono wealth-btn-ledge wealth-btn-ledge--accent"
-            {...(cta.type === "external" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            {...(cta.type === "external"
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
           >
             {cta.label}
             <ArrowRight aria-hidden="true" style={{ width: 14, height: 14 }} />

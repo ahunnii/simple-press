@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { GeneralBusinessFormSchema } from "~/lib/validators/general-business";
 import type { RouterOutputs } from "~/trpc/react";
+import { formatBusinessAddress } from "~/lib/address/format";
+import { firstNonBlank } from "~/lib/seo/blank";
 import { COMMON_TIME_ZONES } from "~/lib/time-zones";
 import { cn } from "~/lib/utils";
 import { generalBusinessFormSchema } from "~/lib/validators/general-business";
@@ -41,11 +43,41 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { InputFormField } from "~/components/inputs/input-form-field";
-import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWith"]>;
 };
+
+// The four structured columns are new; `businessAddress` is the pre-existing
+// free-text field they replace. Until an owner fills in any of the four
+// parts, the DB still only has the old single-line string — surface it in
+// the Street field so the owner isn't staring at a blank form and doesn't
+// lose what they already typed. See `~/lib/address/format`.
+type AddressSource = {
+  addressStreet: string | null;
+  addressCity: string | null;
+  addressState: string | null;
+  addressPostalCode: string | null;
+  businessAddress: string | null;
+};
+
+function addressDefaults(source: AddressSource) {
+  const legacyStreet =
+    !source.addressStreet &&
+    !source.addressCity &&
+    !source.addressState &&
+    !source.addressPostalCode &&
+    source.businessAddress
+      ? source.businessAddress
+      : "";
+
+  return {
+    addressStreet: source.addressStreet ?? legacyStreet,
+    addressCity: source.addressCity ?? "",
+    addressState: source.addressState ?? "",
+    addressPostalCode: source.addressPostalCode ?? "",
+  };
+}
 
 export function GeneralSettings({ business }: Props) {
   const router = useRouter();
@@ -64,12 +96,29 @@ export function GeneralSettings({ business }: Props) {
       ownerEmail: business.ownerEmail ?? "",
       phoneNumber: business.phoneNumber ?? "",
       supportEmail: business.supportEmail ?? "",
-      businessAddress: business.businessAddress ?? "",
+      ...addressDefaults(business),
       slug: business.slug ?? "",
       sendAbandonedCheckoutEmails:
         business.sendAbandonedCheckoutEmails ?? false,
       timeZone: business.timeZone ?? "America/Detroit",
     },
+  });
+
+  const [watchedStreet, watchedCity, watchedState, watchedPostalCode] =
+    useWatch({
+      control: form.control,
+      name: [
+        "addressStreet",
+        "addressCity",
+        "addressState",
+        "addressPostalCode",
+      ],
+    });
+  const addressPreview = formatBusinessAddress({
+    street: watchedStreet,
+    city: watchedCity,
+    state: watchedState,
+    postalCode: watchedPostalCode,
   });
 
   //Mutations
@@ -81,8 +130,8 @@ export function GeneralSettings({ business }: Props) {
         name: data.business.name,
         ownerEmail: data.business.ownerEmail,
         supportEmail: data.business.supportEmail ?? "",
-        businessAddress: data.business.businessAddress ?? "",
         phoneNumber: data.business.phoneNumber ?? "",
+        ...addressDefaults(data.business),
         slug: data.business.slug,
         sendAbandonedCheckoutEmails:
           data.business.sendAbandonedCheckoutEmails ?? false,
@@ -104,7 +153,10 @@ export function GeneralSettings({ business }: Props) {
       name: data.name,
       ownerEmail: data.ownerEmail,
       supportEmail: data.supportEmail ?? undefined,
-      businessAddress: data.businessAddress ?? undefined,
+      addressStreet: firstNonBlank(data.addressStreet),
+      addressCity: firstNonBlank(data.addressCity),
+      addressState: firstNonBlank(data.addressState),
+      addressPostalCode: firstNonBlank(data.addressPostalCode),
       phoneNumber: data.phoneNumber ?? undefined,
       sendAbandonedCheckoutEmails: data.sendAbandonedCheckoutEmails,
       timeZone: data.timeZone,
@@ -117,8 +169,8 @@ export function GeneralSettings({ business }: Props) {
         name: business.name,
         ownerEmail: business.ownerEmail,
         supportEmail: business.supportEmail ?? undefined,
-        businessAddress: business.businessAddress ?? undefined,
         phoneNumber: business.phoneNumber ?? undefined,
+        ...addressDefaults(business),
         sendAbandonedCheckoutEmails:
           business.sendAbandonedCheckoutEmails ?? false,
         timeZone: business.timeZone ?? "America/Detroit",
@@ -302,16 +354,47 @@ export function GeneralSettings({ business }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Business Address</CardTitle>
-                <CardDescription>Public business address</CardDescription>
+                <CardDescription>
+                  Split out so search engines can show your location. Your
+                  storefront displays it as one line.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <TextareaFormField
-                  form={form}
-                  name="businessAddress"
-                  label="Business Address"
-                  description="Public business address. Customers will see this address on your storefront."
-                  placeholder="123 Main St, Detroit, MI, USA"
-                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <InputFormField
+                    form={form}
+                    name="addressStreet"
+                    label="Street Address"
+                    placeholder="123 Main St"
+                  />
+                  <InputFormField
+                    form={form}
+                    name="addressCity"
+                    label="City"
+                    placeholder="Detroit"
+                    className="sm:col-span-1"
+                  />
+                  <InputFormField
+                    form={form}
+                    name="addressState"
+                    label="State"
+                    placeholder="MI"
+                    className="sm:col-span-1"
+                  />
+                  <InputFormField
+                    form={form}
+                    name="addressPostalCode"
+                    label="ZIP"
+                    placeholder="48201"
+                    className="sm:col-span-1"
+                  />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  Shown on your site as:{" "}
+                  <span className="text-foreground font-medium">
+                    {addressPreview || "—"}
+                  </span>
+                </p>
               </CardContent>
             </Card>
           </div>

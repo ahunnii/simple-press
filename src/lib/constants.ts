@@ -15,6 +15,7 @@ export const TEMPLATE_IDS = {
   PINK: "pink",
   RELOCATION: "relocation",
   WEALTH: "wealth",
+  OLIVE: "olive",
 } as const;
 
 export const TEMPLATES = [
@@ -129,6 +130,13 @@ export const TEMPLATES = [
     description:
       "1:1 recreation of detroitcommunitywealth.org — quiet sage-and-paper nonprofit site with overlap heroes, programs, donate, and co-op directory (no shop or checkout)",
     previewImage: "/templates/wealth-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.OLIVE,
+    name: "Olive Mode",
+    description:
+      "Detroit women's boutique (Olive Mode) — white swatch-book cards, photo-led grids, sage-green cover footer, Josefin Sans + Figtree",
+    previewImage: "/templates/olive-preview.png",
   },
 ] as const;
 

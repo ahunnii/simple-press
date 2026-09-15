@@ -307,6 +307,42 @@ export function formatEventDateParts(
   return { date: dateText, time: `${timeText}${zone}` };
 }
 
+const LEAF_FORMATTERS = new Map<string, Intl.DateTimeFormat>();
+
+function leafFormatter(timeZone: string): Intl.DateTimeFormat {
+  const cached = LEAF_FORMATTERS.get(timeZone);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(LOCALE, {
+    timeZone,
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  LEAF_FORMATTERS.set(timeZone, formatter);
+  return formatter;
+}
+
+/**
+ * The three words a tear-off calendar leaf carries — long weekday, long
+ * month, and the bare day number — for the event's START, in the business
+ * zone. Used by detail pages that lead with the date as a display object
+ * (pink's event page); everything else formats through `formatEventDate` /
+ * `formatEventDateParts`, which own range and year rules. A multi-day event
+ * still leads with its first day here; the full range is the caller's job to
+ * show beside it.
+ */
+export function formatEventLeaf(
+  e: EventDateInput,
+  timeZone: string,
+): { weekday: string; month: string; day: string } {
+  const parts = leafFormatter(timeZone).formatToParts(toDate(e.startAt));
+  return {
+    weekday: part(parts, "weekday"),
+    month: part(parts, "month"),
+    day: part(parts, "day"),
+  };
+}
+
 /**
  * Machine-readable value for `<time dateTime={…}>`.
  *

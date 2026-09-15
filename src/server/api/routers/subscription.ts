@@ -11,6 +11,7 @@ import {
   subscriptionLookupLimiter,
   subscriptionManageLimiter,
 } from "~/lib/rate-limit";
+import { isAllowedReturnUrl } from "~/lib/stripe/oauth-state";
 import {
   cancelSubscription,
   pauseSubscription,
@@ -377,8 +378,23 @@ export const subscriptionRouter = createTRPCRouter({
           id: true,
           stripeAccountId: true,
           stripePortalConfigurationId: true,
+          subdomain: true,
+          customDomain: true,
+          domainStatus: true,
         },
       });
+
+      if (
+        !business ||
+        !isAllowedReturnUrl(input.returnUrl, business, {
+          allowInsecureLocalhost: process.env.NODE_ENV !== "production",
+        })
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid return URL",
+        });
+      }
 
       try {
         const url = await createPaymentMethodUpdateUrl(ctx.db, {

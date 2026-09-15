@@ -60,4 +60,5 @@ export default async function AcceptInvitePage({ searchParams }: Props) {
 
 export const metadata = {
   title: "Accept Team Invitation",
+  robots: { index: false, follow: false },
 };

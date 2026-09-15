@@ -43,7 +43,8 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 - [ ] Align types: add variants to edit page / shared types to avoid casting
 - [ ] Need to switch Float to Int for priceInCents
 
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+stripe listen --forward-to localhost:3000/api/webhooks/stripe --forward-connect-to localhost:3000/api/webhooks/stripe
+# --forward-connect-to is required: charges (one-time and subscriptions) are direct charges on the connected account, so their events are Connect events. See scripts/e2e-stripe.sh.
 
 ## License
 
