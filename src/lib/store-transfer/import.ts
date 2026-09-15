@@ -1135,6 +1135,7 @@ export async function importStoreBundle(args: {
         location: event.location ?? null,
         externalUrl: event.externalUrl ?? null,
         externalUrlLabel: event.externalUrlLabel ?? null,
+        linkQrEnabled: event.linkQrEnabled ?? false,
         priceLabel: event.priceLabel ?? null,
         published: event.published,
         sortOrder: event.sortOrder,

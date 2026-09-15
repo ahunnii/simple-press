@@ -667,6 +667,9 @@ model Event {
   location         String? // free-text venue or address line
   externalUrl      String? // optional outbound link (Eventbrite, FB event, signup form)
   externalUrlLabel String?
+  // Owner opt-in: the storefront renders externalUrl as a scannable QR beside
+  // the link. Inert when externalUrl is null.
+  linkQrEnabled    Boolean @default(false)
   priceLabel       String? // display-only ("$45 per person", "Free"). Never charges anyone,
   // and never emitted as schema.org `offers`.
 

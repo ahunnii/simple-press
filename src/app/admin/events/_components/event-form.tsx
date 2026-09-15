@@ -146,6 +146,7 @@ export function EventForm({ event, timeZone }: Props) {
       location: event?.location ?? "",
       externalUrl: event?.externalUrl ?? "",
       externalUrlLabel: event?.externalUrlLabel ?? "",
+      linkQrEnabled: event?.linkQrEnabled ?? false,
       priceLabel: event?.priceLabel ?? "",
       // New events start published, matching the rest of the admin (products,
       // collections, services) — an owner adding a date almost always intends
@@ -242,6 +243,7 @@ export function EventForm({ event, timeZone }: Props) {
         location: data.location ?? "",
         externalUrl: data.externalUrl ?? "",
         externalUrlLabel: data.externalUrlLabel ?? "",
+        linkQrEnabled: data.linkQrEnabled,
         priceLabel: data.priceLabel ?? "",
         published: data.published,
       });
@@ -360,6 +362,7 @@ export function EventForm({ event, timeZone }: Props) {
       location: data.location,
       externalUrl: data.externalUrl,
       externalUrlLabel: data.externalUrlLabel,
+      linkQrEnabled: data.linkQrEnabled ?? false,
       priceLabel: data.priceLabel,
       published: data.published ?? true,
     };
@@ -377,6 +380,10 @@ export function EventForm({ event, timeZone }: Props) {
   };
 
   const watchedAllDay = form.watch("allDay") ?? false;
+  // The QR switch is only meaningful with a link to encode — an event with no
+  // `externalUrl` renders nothing on the storefront, so the control is disabled
+  // (rather than hidden) and says why, instead of silently doing nothing.
+  const hasExternalUrl = (form.watch("externalUrl") ?? "").trim() !== "";
 
   /**
    * Flipping "all day" must not leave a malformed value sitting in the other
@@ -452,7 +459,10 @@ export function EventForm({ event, timeZone }: Props) {
     {
       label: "View on storefront",
       icon: ExternalLink,
-      href: "/events",
+      // An unpublished event 404s on the storefront (the public queries filter
+      // on `published`), so only a live event links to its own detail page —
+      // a draft falls back to the index. Same gate the product form uses.
+      href: event?.published ? `/events/${event.slug}` : "/events",
     },
     {
       label: "Reset",
@@ -862,6 +872,31 @@ export function EventForm({ event, timeZone }: Props) {
                           />
                         </FormControl>
                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="linkQrEnabled"
+                    render={({ field }) => (
+                      <FormItem className="flex w-full flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel>Show a scannable QR code</FormLabel>
+                          <FormDescription>
+                            {hasExternalUrl
+                              ? "Shoppers on your events page can scan it to open the link on their phone — useful when the page is up on a screen at the venue."
+                              : "Add a link above to enable this."}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? false}
+                            onCheckedChange={field.onChange}
+                            disabled={!hasExternalUrl}
+                            aria-label="Show a scannable QR code for this event's link"
+                          />
+                        </FormControl>
                       </FormItem>
                     )}
                   />

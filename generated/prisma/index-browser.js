@@ -433,6 +433,7 @@ exports.Prisma.EventScalarFieldEnum = {
   location: 'location',
   externalUrl: 'externalUrl',
   externalUrlLabel: 'externalUrlLabel',
+  linkQrEnabled: 'linkQrEnabled',
   priceLabel: 'priceLabel',
   published: 'published',
   sortOrder: 'sortOrder',

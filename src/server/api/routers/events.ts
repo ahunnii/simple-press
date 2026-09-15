@@ -162,6 +162,7 @@ export const eventsRouter = createTRPCRouter({
           location: input.location,
           externalUrl: input.externalUrl,
           externalUrlLabel: input.externalUrlLabel,
+          linkQrEnabled: input.linkQrEnabled,
           priceLabel: input.priceLabel,
           published: input.published,
           sortOrder: (maxSort?.sortOrder ?? 0) + 1,

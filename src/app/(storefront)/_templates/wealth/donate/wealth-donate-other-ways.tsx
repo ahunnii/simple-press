@@ -1,6 +1,7 @@
 "use client";
 
 import type { ResolvedDonationHandle } from "~/lib/donation-handles";
+import { cn } from "~/lib/utils";
 import { CashAppIcon } from "~/components/icons/cashapp-icon";
 import { VenmoIcon } from "~/components/icons/venmo-icon";
 import { BrandedQrCode } from "~/components/shared/branded-qr-code";
@@ -28,7 +29,10 @@ function HandleCard({
     >
       <span
         className="grid h-12 w-12 place-items-center"
-        style={{ background: "var(--wealth-paper)", color: "var(--wealth-primary)" }}
+        style={{
+          background: "var(--wealth-paper)",
+          color: "var(--wealth-primary)",
+        }}
       >
         <Icon className="h-5 w-5" />
       </span>
@@ -36,7 +40,10 @@ function HandleCard({
         <p className="wealth-section-heading" style={{ fontSize: "16px" }}>
           {handle.label}
         </p>
-        <p className="mt-0.5 text-[14px]" style={{ color: "var(--wealth-muted)" }}>
+        <p
+          className="mt-0.5 text-[14px]"
+          style={{ color: "var(--wealth-muted)" }}
+        >
           {handle.displayHandle}
         </p>
       </div>
@@ -61,7 +68,8 @@ function HandleCard({
  * `WealthDonatePage` only when `resolveDonationHandles(business)` is
  * non-empty, mirroring `PinkDonateOtherWays`/`DefaultDonateOtherWays`.
  * Restyled square/wealth-toned: `--wealth-surface` tile, mono-caps outline
- * ledge button instead of pink's ghost button.
+ * ledge button instead of pink's ghost button. With a single handle, the
+ * card is centered and width-constrained instead of half of a 2-up grid.
  */
 export function WealthDonateOtherWays({
   handles,
@@ -70,8 +78,17 @@ export function WealthDonateOtherWays({
   handles: ResolvedDonationHandle[];
   logoUrl?: string | null;
 }) {
+  const single = handles.length === 1;
+
   return (
-    <div className="grid grid-cols-1 gap-[var(--wealth-gutter)] sm:grid-cols-2">
+    // One handle → a single centered card instead of a half-empty 2-up.
+    <div
+      className={cn(
+        single
+          ? "mx-auto w-full max-w-[24rem]"
+          : "grid grid-cols-1 gap-[var(--wealth-gutter)] sm:grid-cols-2",
+      )}
+    >
       {handles.map((handle) => (
         <HandleCard key={handle.key} handle={handle} logoUrl={logoUrl} />
       ))}

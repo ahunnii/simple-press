@@ -110,6 +110,80 @@ const eventsListData: TemplateField[] = [
   },
 ];
 
+// ── events.detail ─────────────────────────────────────────────────────────
+//
+// Chrome around ONE event on its own page (`/events/<slug>`): the calendar
+// leaf's row labels, the past-event badge, the QR caption and the back link.
+// The event itself (name, date, flier, blurb, link) is the DB record. These
+// carry `page: "events"` because the editor previews the events page, not an
+// individual event; the hotspot is on the detail route.
+
+const eventsDetailData: TemplateField[] = [
+  {
+    key: "pink.events.detail-when-label",
+    label: "“When” Label",
+    description: "Row label beside the full date on an event's page.",
+    type: "text",
+    page: "events",
+    group: "events.detail",
+    gridColumn: "col-span-1",
+    defaultValue: "When",
+  },
+  {
+    key: "pink.events.detail-where-label",
+    label: "“Where” Label",
+    description:
+      "Row label beside the location. The row hides when an event has no location.",
+    type: "text",
+    page: "events",
+    group: "events.detail",
+    gridColumn: "col-span-1",
+    defaultValue: "Where",
+  },
+  {
+    key: "pink.events.detail-cost-label",
+    label: "“Cost” Label",
+    description:
+      "Row label beside the price line. The row hides when an event has no price set.",
+    type: "text",
+    page: "events",
+    group: "events.detail",
+    gridColumn: "col-span-1",
+    defaultValue: "Cost",
+  },
+  {
+    key: "pink.events.detail-past-badge",
+    label: "Past Event Badge",
+    description: "Small ink badge on the calendar leaf once an event is over.",
+    type: "text",
+    page: "events",
+    group: "events.detail",
+    gridColumn: "col-span-1",
+    defaultValue: "This one’s over",
+  },
+  {
+    key: "pink.events.detail-scan-label",
+    label: "QR Caption",
+    description:
+      "Caps line beside the QR code on events where you turned on “Show a scannable QR code”.",
+    type: "text",
+    page: "events",
+    group: "events.detail",
+    gridColumn: "col-span-1",
+    defaultValue: "Scan to open",
+  },
+  {
+    key: "pink.events.detail-back-label",
+    label: "Back Link",
+    description: "Link back to the events page, shown after the details.",
+    type: "text",
+    page: "events",
+    group: "events.detail",
+    gridColumn: "col-span-1",
+    defaultValue: "All events",
+  },
+];
+
 // ── events.cta ────────────────────────────────────────────────────────────
 
 const eventsCtaData: TemplateField[] = [
@@ -186,6 +260,7 @@ const eventsCtaData: TemplateField[] = [
 export const pinkEventsData: TemplateField[] = [
   ...eventsHeaderData,
   ...eventsListData,
+  ...eventsDetailData,
   ...eventsCtaData,
 ];
 
@@ -202,6 +277,14 @@ export const pinkEventsFieldGroups: TemplateFieldGroup[] = [
     title: "Events List",
     description: "Flier hint, the default link label, and the empty-state copy",
     icon: "🎫",
+    columns: 2,
+  },
+  {
+    id: "events.detail",
+    title: "Event Page",
+    description:
+      "Labels on each event's own page — the calendar leaf rows, the past badge, the QR caption and the back link",
+    icon: "📅",
     columns: 2,
   },
   {
@@ -234,12 +317,24 @@ export const pinkEventsSections: TemplateSection[] = [
     links: [SECTION_LINKS.events],
   },
   {
+    id: "events.detail",
+    page: "events",
+    title: "Event Page",
+    description:
+      "Row labels, past badge, QR caption and back link on each event's own page",
+    groupIds: ["events.detail"],
+    order: 2,
+    hideable: false,
+    links: [SECTION_LINKS.events],
+  },
+  {
     id: "events.cta",
     page: "events",
     title: "Closing Call to Action",
-    description: "Closing CTA panel with an optional 2-up image pair",
+    description:
+      "Closing CTA panel with an optional 2-up image pair — also closes each event's own page",
     groupIds: ["events.cta"],
-    order: 2,
+    order: 3,
     hideable: true,
   },
 ];

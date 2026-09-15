@@ -8,6 +8,7 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 import { EventFlierLightbox } from "~/app/(storefront)/_components/events/event-flier-lightbox";
 import { EventFlierVideo } from "~/app/(storefront)/_components/events/event-flier-video";
+import { EventLinkQr } from "~/app/(storefront)/_components/events/event-link-qr";
 
 import { resolveFields } from "..";
 
@@ -147,7 +148,7 @@ export async function DefaultEventsPage({
                       <h2 className="font-serif text-[26px] font-medium tracking-[-0.015em]">
                         <Link
                           href={`/events/${event.slug}`}
-                          className="hover:underline underline-offset-4"
+                          className="underline-offset-4 hover:underline"
                         >
                           {event.name}
                         </Link>
@@ -179,6 +180,14 @@ export async function DefaultEventsPage({
                           </a>
                         )}
                       </div>
+                      <EventLinkQr
+                        event={event}
+                        logoUrl={business.siteContent?.logoUrl}
+                        size="sm"
+                        className="mt-3"
+                        tileClassName="rounded-(--radius) border border-[#e8e8e8]"
+                        captionClassName="text-xs text-[#6b6b6b]"
+                      />
                     </div>
                   </article>
                 );

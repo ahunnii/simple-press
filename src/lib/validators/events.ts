@@ -93,6 +93,11 @@ const eventFormObjectSchema = z.object({
     .max(60, "Link label must be 60 characters or fewer")
     .optional()
     .nullable(),
+  // Deliberately no cross-field refinement against `externalUrl`: the flag is
+  // inert when there is no link (the storefront simply renders nothing), so an
+  // owner who later clears the link doesn't get a save error on a field they
+  // aren't even looking at.
+  linkQrEnabled: z.boolean().default(false),
   priceLabel: z
     .string()
     .max(60, "Price label must be 60 characters or fewer")

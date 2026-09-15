@@ -132,6 +132,7 @@ export async function PinkEventsIndexPage({
                         "Details & tickets",
                       ) ?? "Details & tickets"
                     }
+                    logoUrl={business.siteContent?.logoUrl}
                     priority={i < 3}
                   />
                 </PinkReveal>

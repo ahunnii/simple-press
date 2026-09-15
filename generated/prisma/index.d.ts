@@ -25689,6 +25689,7 @@ export namespace Prisma {
     location: string | null
     externalUrl: string | null
     externalUrlLabel: string | null
+    linkQrEnabled: boolean | null
     priceLabel: string | null
     published: boolean | null
     sortOrder: number | null
@@ -25711,6 +25712,7 @@ export namespace Prisma {
     location: string | null
     externalUrl: string | null
     externalUrlLabel: string | null
+    linkQrEnabled: boolean | null
     priceLabel: string | null
     published: boolean | null
     sortOrder: number | null
@@ -25733,6 +25735,7 @@ export namespace Prisma {
     location: number
     externalUrl: number
     externalUrlLabel: number
+    linkQrEnabled: number
     priceLabel: number
     published: number
     sortOrder: number
@@ -25765,6 +25768,7 @@ export namespace Prisma {
     location?: true
     externalUrl?: true
     externalUrlLabel?: true
+    linkQrEnabled?: true
     priceLabel?: true
     published?: true
     sortOrder?: true
@@ -25787,6 +25791,7 @@ export namespace Prisma {
     location?: true
     externalUrl?: true
     externalUrlLabel?: true
+    linkQrEnabled?: true
     priceLabel?: true
     published?: true
     sortOrder?: true
@@ -25809,6 +25814,7 @@ export namespace Prisma {
     location?: true
     externalUrl?: true
     externalUrlLabel?: true
+    linkQrEnabled?: true
     priceLabel?: true
     published?: true
     sortOrder?: true
@@ -25918,6 +25924,7 @@ export namespace Prisma {
     location: string | null
     externalUrl: string | null
     externalUrlLabel: string | null
+    linkQrEnabled: boolean
     priceLabel: string | null
     published: boolean
     sortOrder: number
@@ -25959,6 +25966,7 @@ export namespace Prisma {
     location?: boolean
     externalUrl?: boolean
     externalUrlLabel?: boolean
+    linkQrEnabled?: boolean
     priceLabel?: boolean
     published?: boolean
     sortOrder?: boolean
@@ -25982,6 +25990,7 @@ export namespace Prisma {
     location?: boolean
     externalUrl?: boolean
     externalUrlLabel?: boolean
+    linkQrEnabled?: boolean
     priceLabel?: boolean
     published?: boolean
     sortOrder?: boolean
@@ -26005,6 +26014,7 @@ export namespace Prisma {
     location?: boolean
     externalUrl?: boolean
     externalUrlLabel?: boolean
+    linkQrEnabled?: boolean
     priceLabel?: boolean
     published?: boolean
     sortOrder?: boolean
@@ -26028,6 +26038,7 @@ export namespace Prisma {
     location?: boolean
     externalUrl?: boolean
     externalUrlLabel?: boolean
+    linkQrEnabled?: boolean
     priceLabel?: boolean
     published?: boolean
     sortOrder?: boolean
@@ -26035,7 +26046,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type EventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "blurb" | "coverImage" | "coverVideo" | "startAt" | "endAt" | "allDay" | "location" | "externalUrl" | "externalUrlLabel" | "priceLabel" | "published" | "sortOrder" | "isArchived" | "businessId", ExtArgs["result"]["event"]>
+  export type EventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "blurb" | "coverImage" | "coverVideo" | "startAt" | "endAt" | "allDay" | "location" | "externalUrl" | "externalUrlLabel" | "linkQrEnabled" | "priceLabel" | "published" | "sortOrder" | "isArchived" | "businessId", ExtArgs["result"]["event"]>
   export type EventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -26066,6 +26077,7 @@ export namespace Prisma {
       location: string | null
       externalUrl: string | null
       externalUrlLabel: string | null
+      linkQrEnabled: boolean
       priceLabel: string | null
       published: boolean
       sortOrder: number
@@ -26509,6 +26521,7 @@ export namespace Prisma {
     readonly location: FieldRef<"Event", 'String'>
     readonly externalUrl: FieldRef<"Event", 'String'>
     readonly externalUrlLabel: FieldRef<"Event", 'String'>
+    readonly linkQrEnabled: FieldRef<"Event", 'Boolean'>
     readonly priceLabel: FieldRef<"Event", 'String'>
     readonly published: FieldRef<"Event", 'Boolean'>
     readonly sortOrder: FieldRef<"Event", 'Int'>
@@ -73288,6 +73301,7 @@ export namespace Prisma {
     location: 'location',
     externalUrl: 'externalUrl',
     externalUrlLabel: 'externalUrlLabel',
+    linkQrEnabled: 'linkQrEnabled',
     priceLabel: 'priceLabel',
     published: 'published',
     sortOrder: 'sortOrder',
@@ -76107,6 +76121,7 @@ export namespace Prisma {
     location?: StringNullableFilter<"Event"> | string | null
     externalUrl?: StringNullableFilter<"Event"> | string | null
     externalUrlLabel?: StringNullableFilter<"Event"> | string | null
+    linkQrEnabled?: BoolFilter<"Event"> | boolean
     priceLabel?: StringNullableFilter<"Event"> | string | null
     published?: BoolFilter<"Event"> | boolean
     sortOrder?: IntFilter<"Event"> | number
@@ -76130,6 +76145,7 @@ export namespace Prisma {
     location?: SortOrderInput | SortOrder
     externalUrl?: SortOrderInput | SortOrder
     externalUrlLabel?: SortOrderInput | SortOrder
+    linkQrEnabled?: SortOrder
     priceLabel?: SortOrderInput | SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
@@ -76157,6 +76173,7 @@ export namespace Prisma {
     location?: StringNullableFilter<"Event"> | string | null
     externalUrl?: StringNullableFilter<"Event"> | string | null
     externalUrlLabel?: StringNullableFilter<"Event"> | string | null
+    linkQrEnabled?: BoolFilter<"Event"> | boolean
     priceLabel?: StringNullableFilter<"Event"> | string | null
     published?: BoolFilter<"Event"> | boolean
     sortOrder?: IntFilter<"Event"> | number
@@ -76180,6 +76197,7 @@ export namespace Prisma {
     location?: SortOrderInput | SortOrder
     externalUrl?: SortOrderInput | SortOrder
     externalUrlLabel?: SortOrderInput | SortOrder
+    linkQrEnabled?: SortOrder
     priceLabel?: SortOrderInput | SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
@@ -76210,6 +76228,7 @@ export namespace Prisma {
     location?: StringNullableWithAggregatesFilter<"Event"> | string | null
     externalUrl?: StringNullableWithAggregatesFilter<"Event"> | string | null
     externalUrlLabel?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    linkQrEnabled?: BoolWithAggregatesFilter<"Event"> | boolean
     priceLabel?: StringNullableWithAggregatesFilter<"Event"> | string | null
     published?: BoolWithAggregatesFilter<"Event"> | boolean
     sortOrder?: IntWithAggregatesFilter<"Event"> | number
@@ -82426,6 +82445,7 @@ export namespace Prisma {
     location?: string | null
     externalUrl?: string | null
     externalUrlLabel?: string | null
+    linkQrEnabled?: boolean
     priceLabel?: string | null
     published?: boolean
     sortOrder?: number
@@ -82448,6 +82468,7 @@ export namespace Prisma {
     location?: string | null
     externalUrl?: string | null
     externalUrlLabel?: string | null
+    linkQrEnabled?: boolean
     priceLabel?: string | null
     published?: boolean
     sortOrder?: number
@@ -82470,6 +82491,7 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    linkQrEnabled?: BoolFieldUpdateOperationsInput | boolean
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -82492,6 +82514,7 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    linkQrEnabled?: BoolFieldUpdateOperationsInput | boolean
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -82514,6 +82537,7 @@ export namespace Prisma {
     location?: string | null
     externalUrl?: string | null
     externalUrlLabel?: string | null
+    linkQrEnabled?: boolean
     priceLabel?: string | null
     published?: boolean
     sortOrder?: number
@@ -82536,6 +82560,7 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    linkQrEnabled?: BoolFieldUpdateOperationsInput | boolean
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -82557,6 +82582,7 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    linkQrEnabled?: BoolFieldUpdateOperationsInput | boolean
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -88806,6 +88832,7 @@ export namespace Prisma {
     location?: SortOrder
     externalUrl?: SortOrder
     externalUrlLabel?: SortOrder
+    linkQrEnabled?: SortOrder
     priceLabel?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
@@ -88832,6 +88859,7 @@ export namespace Prisma {
     location?: SortOrder
     externalUrl?: SortOrder
     externalUrlLabel?: SortOrder
+    linkQrEnabled?: SortOrder
     priceLabel?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
@@ -88854,6 +88882,7 @@ export namespace Prisma {
     location?: SortOrder
     externalUrl?: SortOrder
     externalUrlLabel?: SortOrder
+    linkQrEnabled?: SortOrder
     priceLabel?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
@@ -98428,6 +98457,7 @@ export namespace Prisma {
     location?: string | null
     externalUrl?: string | null
     externalUrlLabel?: string | null
+    linkQrEnabled?: boolean
     priceLabel?: string | null
     published?: boolean
     sortOrder?: number
@@ -98449,6 +98479,7 @@ export namespace Prisma {
     location?: string | null
     externalUrl?: string | null
     externalUrlLabel?: string | null
+    linkQrEnabled?: boolean
     priceLabel?: string | null
     published?: boolean
     sortOrder?: number
@@ -99803,6 +99834,7 @@ export namespace Prisma {
     location?: StringNullableFilter<"Event"> | string | null
     externalUrl?: StringNullableFilter<"Event"> | string | null
     externalUrlLabel?: StringNullableFilter<"Event"> | string | null
+    linkQrEnabled?: BoolFilter<"Event"> | boolean
     priceLabel?: StringNullableFilter<"Event"> | string | null
     published?: BoolFilter<"Event"> | boolean
     sortOrder?: IntFilter<"Event"> | number
@@ -122946,6 +122978,7 @@ export namespace Prisma {
     location?: string | null
     externalUrl?: string | null
     externalUrlLabel?: string | null
+    linkQrEnabled?: boolean
     priceLabel?: string | null
     published?: boolean
     sortOrder?: number
@@ -124242,6 +124275,7 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    linkQrEnabled?: BoolFieldUpdateOperationsInput | boolean
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -124263,6 +124297,7 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    linkQrEnabled?: BoolFieldUpdateOperationsInput | boolean
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -124284,6 +124319,7 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
     externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    linkQrEnabled?: BoolFieldUpdateOperationsInput | boolean
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number

@@ -361,6 +361,9 @@ const exportedEventSchema = z.object({
   location: nullableString.optional(),
   externalUrl: nullableString.optional(),
   externalUrlLabel: nullableString.optional(),
+  // Added 2026-09-14 — optional with a default so manifests exported before
+  // the event link-QR flag existed still parse. Same rule as `slug` above.
+  linkQrEnabled: z.boolean().optional().default(false),
   priceLabel: nullableString.optional(),
   published: z.boolean(),
   sortOrder: z.number(),

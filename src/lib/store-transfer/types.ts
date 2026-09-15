@@ -371,6 +371,8 @@ export interface ExportedEvent {
   location: string | null;
   externalUrl: string | null;
   externalUrlLabel: string | null;
+  /** Added 2026-09-14 — manifests exported before then lack it; the validator defaults it to false. */
+  linkQrEnabled: boolean;
   priceLabel: string | null;
   published: boolean;
   sortOrder: number;
