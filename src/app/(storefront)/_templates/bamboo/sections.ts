@@ -244,5 +244,14 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       groupIds: ["global.authentication"],
       order: 2,
     },
+    {
+      id: "global.pageHero",
+      page: "global",
+      title: "Page Hero Background",
+      description:
+        "Site-wide background photo for the top hero band of interior pages (contact, blog, about, and other pages). Contact, blog, and about can each override it in their own sections.",
+      groupIds: ["global.pageHero"],
+      order: 3,
+    },
   ],
 };

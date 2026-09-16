@@ -71,7 +71,15 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
     "bamboo.about.cta-button-text",
     "bamboo.about.cta-secondary-button-link",
     "bamboo.about.cta-secondary-button-text",
+    "bamboo.about.hero-bg-image",
+    "bamboo.global.page-hero-bg-image",
   ]);
+
+  // A cleared override saves as "" and must also fall back to the global
+  // field, not just null/undefined.
+  const heroBgImage =
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+    f["bamboo.about.hero-bg-image"] || f["bamboo.global.page-hero-bg-image"];
 
   const nationwideList = parseTemplateIconListRows(
     getListFieldValue(
@@ -110,6 +118,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
         ledeFieldKey="bamboo.about.hero-intro"
         image={f["bamboo.about.hero-image"]}
         imagePriority
+        bgImage={heroBgImage}
       />
 
       {/* Mission -- text + image staggered */}

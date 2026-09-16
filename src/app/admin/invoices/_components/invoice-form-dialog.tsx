@@ -470,7 +470,7 @@ export function InvoiceFormDialog({
                   value={String(form.depositPreset)}
                   onValueChange={handleDepositPresetChange}
                   aria-labelledby="invoice-deposit-preset-label"
-                  className="flex-wrap"
+                  className="w-full"
                   disabled={isPending}
                 >
                   {depositPresets.map((preset) => (
@@ -478,11 +478,14 @@ export function InvoiceFormDialog({
                       key={preset.percent}
                       value={String(preset.percent)}
                       aria-label={`${preset.percent}% deposit, ${formatPrice(preset.amountCents)}`}
+                      className="flex-1"
                     >
                       {preset.percent}% · {formatPrice(preset.amountCents)}
                     </ToggleGroupItem>
                   ))}
-                  <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
+                  <ToggleGroupItem value="custom" className="flex-1">
+                    Custom
+                  </ToggleGroupItem>
                 </ToggleGroup>
               </div>
             )}

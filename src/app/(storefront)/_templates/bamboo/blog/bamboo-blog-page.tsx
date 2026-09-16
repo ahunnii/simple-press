@@ -36,11 +36,18 @@ export function BambooBlogPage({ pages, customFields }: Props) {
     "bamboo.blog.listing-title",
     "bamboo.blog.listing-intro",
     "bamboo.blog.listing-image",
+    "bamboo.blog.hero-bg-image",
+    "bamboo.global.page-hero-bg-image",
   ]);
 
   const pageTitle = f["bamboo.blog.listing-title"];
   const pageIntro = f["bamboo.blog.listing-intro"];
   const blogImage = f["bamboo.blog.listing-image"];
+  // A cleared override saves as "" and must also fall back to the global
+  // field, not just null/undefined.
+  const heroBgImage =
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+    f["bamboo.blog.hero-bg-image"] || f["bamboo.global.page-hero-bg-image"];
 
   const [query, setQuery] = useState("");
 
@@ -143,6 +150,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
         ledeFieldKey="bamboo.blog.listing-intro"
         image={blogImage}
         imagePriority
+        bgImage={heroBgImage}
       >
         <div className="mt-8 max-w-md">
           <InputGroup>

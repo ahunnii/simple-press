@@ -22,6 +22,14 @@ type Props = {
   /** Arch portrait URL. Null/undefined renders the text-only variant. */
   image?: string | null;
   imagePriority?: boolean;
+  /**
+   * Optional full-bleed background photo behind the whole hero band.
+   * Resolution order (caller's responsibility): per-page override field ||
+   * global `bamboo.global.page-hero-bg-image` field || "". Empty/null
+   * renders today's flat `bg-[var(--bam-cream-deep)]` band, byte-identical
+   * to before this prop existed.
+   */
+  bgImage?: string | null;
   /** Spread of `sectionGroupAttr(...)` for the preview overlay. */
   sectionAttrs?: Record<string, string>;
   /** Extra content under the lede (e.g. the blog page's search box). */
@@ -39,6 +47,19 @@ type Props = {
  *
  * The portrait is a raw `<img>` rather than `next/image` because field URLs
  * are arbitrary merchant input, matching `blog/bamboo-blog-page.tsx`.
+ *
+ * Two independent background modes coexist here:
+ * - `image` (the arch portrait, signature moment #5) — always renders in its
+ *   own right-column frame, above everything else.
+ * - `bgImage` (added for the interior variant, signature moment #6) — an
+ *   optional full-bleed photo behind the whole band. Callers resolve
+ *   `perPage || global || ""` themselves and pass the merged string; this
+ *   component only checks for non-empty. Unlike the homepage's directional
+ *   scrim, this uses one FLAT translucent wash (`/90` — see
+ *   docs/bamboo-accessibility.md) because interior text layouts vary
+ *   (centered, left+arch, left+search box) and one wash needs one contrast
+ *   measurement to cover all of them. An arch portrait may be set at the
+ *   same time as `bgImage` — it renders above the wash, unaffected.
  */
 export function BambooPageHero({
   eyebrow,
@@ -50,10 +71,12 @@ export function BambooPageHero({
   ledeFieldKey,
   image,
   imagePriority,
+  bgImage,
   sectionAttrs,
   children,
   className,
 }: Props) {
+  const hasBg = (bgImage ?? "").length > 0;
   const eyebrowBlock = eyebrow ? (
     <p
       className="mb-3 text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase"
@@ -99,9 +122,53 @@ export function BambooPageHero({
   return (
     <section
       {...sectionAttrs}
-      className={cn("bg-[var(--bam-cream-deep)]", className)}
+      className={cn(
+        "bg-[var(--bam-cream-deep)]",
+        hasBg && "relative isolate overflow-hidden",
+        className,
+      )}
     >
-      <div className="mx-auto max-w-7xl px-4 py-20 md:py-28 lg:px-8">
+      {hasBg && (
+        <>
+          {/* Raw `<img>`, not `next/image`: the URL is arbitrary merchant
+              input and next/image's remotePatterns allowlist 500s on unknown
+              hosts (same reason as `homepage/bamboo-hero-section.tsx`). The
+              section keeps its cream-deep background as the loading/error
+              fallback. No `fieldAttr` here — image fields refresh the
+              preview iframe through draft-save, not textContent-patching. */}
+          <img
+            src={bgImage ?? ""}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            fetchPriority="high"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+          />
+          {/* Flat translucent wash, not the homepage's directional gradient:
+              interior layouts vary (centered, left+arch, left+search box),
+              so one flat wash keeps one contrast measurement valid across
+              all of them. /90 per docs/bamboo-accessibility.md — the gold
+              eyebrow token has no headroom, so the wash floor was raised
+              from the originally proposed /85. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 z-[1] bg-[var(--bam-cream-deep)]/90"
+          />
+          {/* Bottom fade to the band's OWN color — every caller already
+              knows what sits below (form, article grid, page body), so this
+              stays generic rather than needing per-page knowledge. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 z-[1] h-10 bg-gradient-to-t from-[var(--bam-cream-deep)] to-transparent md:h-14"
+          />
+        </>
+      )}
+      <div
+        className={cn(
+          "mx-auto max-w-7xl px-4 py-20 md:py-28 lg:px-8",
+          hasBg && "relative z-[2]",
+        )}
+      >
         {image ? (
           <div className="flex flex-col items-center gap-12 md:flex-row">
             <FadeIn

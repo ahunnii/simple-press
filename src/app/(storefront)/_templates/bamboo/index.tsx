@@ -118,6 +118,20 @@ const globalAuthenticationData: TemplateField[] = [
   },
 ];
 
+const globalPageHeroData: TemplateField[] = [
+  {
+    key: "bamboo.global.page-hero-bg-image",
+    label: "Page Hero Background",
+    description:
+      "Optional full-bleed background photo behind the top hero band of interior pages (contact, blog, about, and other pages) under a translucent wash. Leave blank for the flat band. Contact, blog, and about can each override this with their own image below their hero fields.",
+    type: "image",
+    page: "global",
+    group: "global.pageHero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+];
+
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.location",
@@ -140,6 +154,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "🔐",
     columns: 2,
   },
+  {
+    id: "global.pageHero",
+    title: "Page Hero Background",
+    description:
+      "Optional background photo for the top hero band of interior pages.",
+    icon: "🖼️",
+  },
   ...bambooHomepageFieldGroups,
   ...bambooAboutFieldGroups,
   ...bambooBlogFieldGroups,
@@ -161,6 +182,7 @@ export const bambooData = {
     ...globalLocationData,
     ...globalBrandingData,
     ...globalAuthenticationData,
+    ...globalPageHeroData,
   ],
 };
 
