@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
@@ -87,6 +87,15 @@ export function CheckoutForm({
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  // The select content portals to document.body by default, which escapes
+  // the .bamboo scope class — every var(--bam-*) token and font variable
+  // would resolve to nothing. Portal into the template wrapper instead so
+  // the dropdown inherits tokens, fonts, and any owner theme overrides.
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setContainer(document.querySelector<HTMLElement>("div.bamboo"));
+  }, []);
 
   const wrappedHandleSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
@@ -228,7 +237,7 @@ export function CheckoutForm({
             {discountCodeLabel && discountAmount > 0 && (
               <p className="text-sm text-green-700" role="status">
                 Code{" "}
-                <span className="font-mono font-semibold">
+                <span className="font-semibold tabular-nums">
                   {discountCodeLabel}
                 </span>{" "}
                 applied.
@@ -389,7 +398,7 @@ export function CheckoutForm({
                     >
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent container={container}>
                       {getRegionOptions(country).map((opt) => (
                         <SelectItem key={opt.code} value={opt.code}>
                           {opt.name}
@@ -431,7 +440,7 @@ export function CheckoutForm({
                     >
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent container={container}>
                       {allowedCountries.map((c: SupportedCountry) => (
                         <SelectItem key={c} value={c}>
                           {COUNTRY_LABELS[c]}
@@ -450,7 +459,7 @@ export function CheckoutForm({
       <div className="w-full shrink-0 lg:w-80">
         <div className="sticky top-20 space-y-4">
           <div className="rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] p-6">
-            <h2 className="font-heading text-[var(--bam-forest-deep)] text-lg font-semibold">
+            <h2 className="font-heading text-lg font-semibold text-[var(--bam-forest-deep)]">
               Order Summary
             </h2>
             <div className="mt-4 flex flex-col gap-4">
@@ -480,15 +489,15 @@ export function CheckoutForm({
                         {item.productName}
                       </p>
                       {item.variantName && (
-                        <p className="text-[var(--bam-forest)]/70 text-xs">
+                        <p className="text-xs text-[var(--bam-forest)]/70">
                           {item.variantName}
                         </p>
                       )}
-                      <p className="text-[var(--bam-forest)]/70 text-xs">
+                      <p className="text-xs text-[var(--bam-forest)]/70">
                         Qty: {item.quantity}
                       </p>
                     </div>
-                    <span className="text-[var(--bam-forest-deep)] text-sm font-medium">
+                    <span className="text-sm font-medium text-[var(--bam-forest-deep)]">
                       {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
@@ -497,9 +506,7 @@ export function CheckoutForm({
 
               <div className="space-y-2 border-t border-[var(--bam-hairline)] pt-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[var(--bam-forest)]/75">
-                    Subtotal
-                  </span>
+                  <span className="text-[var(--bam-forest)]/75">Subtotal</span>
                   <span className="text-[var(--bam-forest-deep)]">
                     {formatPrice(subtotal)}
                   </span>
@@ -511,15 +518,13 @@ export function CheckoutForm({
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-[var(--bam-forest)]/75">
-                    Shipping
-                  </span>
+                  <span className="text-[var(--bam-forest)]/75">Shipping</span>
                   <span className="text-[var(--bam-forest-deep)]">
                     {deliveryMethod === "pickup" ? (
                       "In-store pickup (free)"
                     ) : shippingCalculating ? (
                       <span
-                        className="text-[var(--bam-forest)]/75 inline-flex items-center gap-1.5"
+                        className="inline-flex items-center gap-1.5 text-[var(--bam-forest)]/75"
                         aria-live="polite"
                       >
                         <Loader2
@@ -541,7 +546,7 @@ export function CheckoutForm({
                   <span>Estimated total</span>
                   <span>{formatPrice(finalTotal)}</span>
                 </div>
-                <p className="text-[var(--bam-forest)]/70 text-xs">
+                <p className="text-xs text-[var(--bam-forest)]/70">
                   Tax and final total are confirmed on Stripe Checkout.
                 </p>
               </div>
@@ -562,9 +567,7 @@ export function CheckoutForm({
             aria-busy={isProcessing || shippingCalculating}
             className="w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
             size="lg"
-            style={
-              primaryColor ? { backgroundColor: primaryColor } : undefined
-            }
+            style={primaryColor ? { backgroundColor: primaryColor } : undefined}
           >
             {isProcessing ? (
               <>

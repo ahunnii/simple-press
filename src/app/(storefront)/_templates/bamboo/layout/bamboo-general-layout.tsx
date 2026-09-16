@@ -19,7 +19,7 @@ const fontSans = Outfit({
 const fontSerif = Spectral({
   subsets: ["latin"],
   variable: "--font-bam-serif",
-  weight: ["400", "700"],
+  weight: ["400", "600", "700"],
   display: "swap",
 });
 

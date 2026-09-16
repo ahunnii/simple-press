@@ -55,7 +55,7 @@ export function BambooSectionHeading({
 
       <h2
         className={cn(
-          "mt-2 font-serif text-4xl font-bold text-balance md:text-5xl",
+          "mt-2 font-serif text-4xl font-bold tracking-tight text-balance md:text-5xl",
           onForest ? "text-[var(--bam-cream)]" : "text-foreground",
         )}
         {...fieldAttr(headingFieldKey)}

@@ -83,6 +83,41 @@ const globalBrandingData: TemplateField[] = [
   },
 ];
 
+const globalAuthenticationData: TemplateField[] = [
+  {
+    key: "bamboo.global.authentication-image",
+    label: "Authentication Image",
+    description: "Image shown behind the sign-in and sign-up panel.",
+    type: "image",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "bamboo.global.logo-size-width",
+    label: "Logo Size Width",
+    description: "Width of the logo on the sign-in and sign-up screens (pixels).",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+    placeholder: "80",
+  },
+  {
+    key: "bamboo.global.logo-size-height",
+    label: "Logo Size Height",
+    description: "Height of the logo on the sign-in and sign-up screens (pixels).",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+    placeholder: "80",
+  },
+];
+
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.location",
@@ -97,6 +132,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     title: "Branding",
     description: "Navigation wordmark and the footer's bottom-bar note.",
     icon: "🖋️",
+  },
+  {
+    id: "global.authentication",
+    title: "Authentication",
+    description: "Image and logo size on the sign-in and sign-up screens.",
+    icon: "🔐",
+    columns: 2,
   },
   ...bambooHomepageFieldGroups,
   ...bambooAboutFieldGroups,
@@ -118,6 +160,7 @@ export const bambooData = {
     ...bambooProductsData,
     ...globalLocationData,
     ...globalBrandingData,
+    ...globalAuthenticationData,
   ],
 };
 

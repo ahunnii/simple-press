@@ -65,7 +65,7 @@ export function BambooBlogPostPage({
               </Link>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <h1 className="text-foreground font-serif text-3xl leading-tight font-bold md:text-4xl lg:text-5xl">
+              <h1 className="text-foreground font-serif text-3xl leading-tight font-bold tracking-tight md:text-4xl lg:text-5xl">
                 {page.title}
               </h1>
             </FadeIn>
@@ -181,7 +181,7 @@ export function BambooBlogPostPage({
         <section className="bg-[var(--bam-cream-deep)] py-16 md:py-20">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="mb-10">
-              <h2 className="text-foreground font-heading text-2xl font-bold tracking-tight md:text-3xl">
+              <h2 className="text-foreground font-serif text-2xl font-bold tracking-tight md:text-3xl">
                 You might also like
               </h2>
             </FadeIn>

@@ -44,7 +44,7 @@ export function BambooCartContents({ business }: Props) {
             >
               <ShoppingBag className="text-primary size-8" />
             </div>
-            <h1 className="text-foreground font-heading mt-6 text-2xl font-bold">
+            <h1 className="text-foreground font-serif mt-6 text-2xl font-bold tracking-tight">
               Your cart is empty
             </h1>
             <p className="text-muted-foreground mx-auto mt-2 max-w-md">

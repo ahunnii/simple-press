@@ -77,7 +77,7 @@ const activeRule = (
 
 /** Smaller sans styling for expanded child links. */
 const childLinkBase =
-  "block py-2 pl-1 font-sans text-lg transition-colors";
+  "block py-2 pl-1 text-lg transition-colors";
 const childLinkIdle = "text-[var(--bam-cream)]/85 hover:text-[var(--bam-gold-soft)]";
 const childLinkActive = "text-[var(--bam-gold-soft)]";
 
@@ -305,7 +305,7 @@ export function BambooMobileNav({
                 aria-label={`Wishlist with ${wishlistCount} items`}
                 style={fadeUpStyle(links.length)}
                 className={cn(
-                  "bamboo-mobile-nav-item flex items-center gap-2.5 py-3 font-sans text-lg transition-colors",
+                  "bamboo-mobile-nav-item flex items-center gap-2.5 py-3 text-lg transition-colors",
                   pathname === "/wishlist"
                     ? "text-[var(--bam-gold-soft)]"
                     : "text-[var(--bam-cream)] hover:text-[var(--bam-gold-soft)]",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
 
 import type { SortOption } from "~/hooks/use-shop-filters";
@@ -43,6 +44,15 @@ export function BambooShopClient({ products }: Props) {
     clearFilters,
   } = useShopFilters(products, { pageSize: 12 });
 
+  // The select content portals to document.body by default, which escapes
+  // the .bamboo scope class — every var(--bam-*) token and font variable
+  // would resolve to nothing. Portal into the template wrapper instead so
+  // the dropdown inherits tokens, fonts, and any owner theme overrides.
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setContainer(document.querySelector<HTMLElement>("div.bamboo"));
+  }, []);
+
   return (
     <div className="mt-10">
       {/* Controls */}
@@ -62,7 +72,7 @@ export function BambooShopClient({ products }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <label className="text-muted-foreground flex cursor-pointer items-center gap-2 font-sans text-sm">
+          <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={inStockOnly}
@@ -79,7 +89,7 @@ export function BambooShopClient({ products }: Props) {
             <SelectTrigger className="bg-card w-48" aria-label="Sort products">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent container={container}>
               {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(
                 ([value, label]) => (
                   <SelectItem key={value} value={value}>
@@ -115,7 +125,7 @@ export function BambooShopClient({ products }: Props) {
             type="button"
             onClick={() => setActiveCollectionId(null)}
             aria-pressed={!activeCollectionId}
-            className={`rounded-full border px-4 py-1.5 font-sans text-xs font-medium transition-colors ${
+            className={`rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
               !activeCollectionId
                 ? "border-[var(--bam-forest)] bg-[var(--bam-forest)] text-[var(--bam-cream)]"
                 : "text-muted-foreground border-[var(--bam-hairline)] hover:border-[var(--bam-gold)]/40 hover:text-[var(--bam-forest-deep)]"
@@ -133,7 +143,7 @@ export function BambooShopClient({ products }: Props) {
                 )
               }
               aria-pressed={activeCollectionId === col.id}
-              className={`rounded-full border px-4 py-1.5 font-sans text-xs font-medium transition-colors ${
+              className={`rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
                 activeCollectionId === col.id
                   ? "border-[var(--bam-forest)] bg-[var(--bam-forest)] text-[var(--bam-cream)]"
                   : "text-muted-foreground border-[var(--bam-hairline)] hover:border-[var(--bam-gold)]/40 hover:text-[var(--bam-forest-deep)]"
@@ -146,7 +156,7 @@ export function BambooShopClient({ products }: Props) {
       )}
 
       {/* Result count */}
-      <p role="status" className="text-muted-foreground mt-4 font-sans text-sm">
+      <p role="status" className="text-muted-foreground mt-4 text-sm">
         {filtered.length === products.length
           ? `${products.length} ${products.length === 1 ? "product" : "products"}`
           : `${filtered.length} of ${products.length} products`}
@@ -155,10 +165,7 @@ export function BambooShopClient({ products }: Props) {
       {/* Product grid. The sr-only h2 keeps the outline h1 → h2 → card h3. */}
       <h2 className="sr-only">Products</h2>
       {paginated.length === 0 ? (
-        <p
-          role="status"
-          className="text-muted-foreground py-16 text-center font-sans"
-        >
+        <p role="status" className="text-muted-foreground py-16 text-center">
           No products match your filters.{" "}
           <button
             type="button"
@@ -197,7 +204,7 @@ export function BambooShopClient({ products }: Props) {
             Previous
           </Button>
           <span
-            className="text-muted-foreground font-sans text-sm"
+            className="text-muted-foreground text-sm"
             aria-live="polite"
             aria-label={`Page ${currentPage} of ${totalPages}`}
           >

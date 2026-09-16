@@ -32,11 +32,11 @@ export function BambooCollectionsPage({
           {...sectionGroupAttr("collections", "listing")}
           className="bg-[var(--bam-cream-deep)] px-4 py-16 text-center sm:px-6 md:py-24 lg:px-8"
         >
-          <p className="font-sans text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
+          <p className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
             Collections
           </p>
           <h1
-            className="font-serif text-foreground mt-3 text-4xl font-bold md:text-5xl"
+            className="font-serif text-foreground mt-3 text-4xl font-bold tracking-tight md:text-5xl"
             {...fieldAttr("bamboo.collections.listing-title")}
           >
             {f["bamboo.collections.listing-title"]}
@@ -59,7 +59,7 @@ export function BambooCollectionsPage({
                 className="text-[var(--bam-forest)] h-5 w-5"
                 aria-hidden="true"
               />
-              <h2 className="font-heading text-foreground text-2xl font-bold md:text-3xl">
+              <h2 className="font-serif text-foreground text-2xl font-bold tracking-tight md:text-3xl">
                 All Collections
               </h2>
             </div>

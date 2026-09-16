@@ -55,10 +55,19 @@ function SelectContent({
   children,
   position = "item-aligned",
   align = "center",
+  container,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Content>) {
+}: React.ComponentProps<typeof SelectPrimitive.Content> & {
+  /**
+   * Portal target. Templates that scope their design tokens and font
+   * variables to a wrapper class must portal the select content INTO that
+   * wrapper — the default document.body portal escapes the scope and
+   * renders the dropdown with unstyled tokens.
+   */
+  container?: HTMLElement | null;
+}) {
   return (
-    <SelectPrimitive.Portal>
+    <SelectPrimitive.Portal container={container ?? undefined}>
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(

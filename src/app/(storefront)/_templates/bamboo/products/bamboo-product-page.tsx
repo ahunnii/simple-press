@@ -168,7 +168,7 @@ export function BambooProductPage({
             bamboo's own empty state and is preserved as-is. */}
         <div className="mb-20">
           <FadeIn direction="up">
-            <h2 className="text-[var(--bam-forest-deep)] font-heading text-2xl font-bold md:text-3xl">
+            <h2 className="text-[var(--bam-forest-deep)] font-serif text-2xl font-bold tracking-tight md:text-3xl">
               You Might Also Like
             </h2>
           </FadeIn>

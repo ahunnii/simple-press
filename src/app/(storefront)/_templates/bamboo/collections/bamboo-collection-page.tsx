@@ -62,7 +62,7 @@ export function BambooCollectionPage({
                 </FadeIn>
 
                 <FadeIn delay={0.15}>
-                  <h1 className="font-heading mb-4 max-w-2xl text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+                  <h1 className="font-serif mb-4 max-w-2xl text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
                     {collection.name}
                   </h1>
                 </FadeIn>
@@ -93,7 +93,7 @@ export function BambooCollectionPage({
                   {products.length}{" "}
                   {products.length === 1 ? "Product" : "Products"}
                 </Badge>
-                <h1 className="font-heading text-foreground text-4xl font-bold md:text-5xl">
+                <h1 className="font-serif text-foreground text-4xl font-bold tracking-tight md:text-5xl">
                   {collection.name}
                 </h1>
                 {collection.description && (
@@ -135,7 +135,7 @@ export function BambooCollectionPage({
                     className="text-[var(--bam-forest)] h-5 w-5"
                     aria-hidden="true"
                   />
-                  <h2 className="font-heading text-foreground text-2xl font-bold md:text-3xl">
+                  <h2 className="font-serif text-foreground text-2xl font-bold tracking-tight md:text-3xl">
                     Products in This Collection
                   </h2>
                 </div>
@@ -189,7 +189,7 @@ export function BambooCollectionPage({
           <div className="bg-[var(--bam-cream-deep)] py-16 md:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <FadeIn className="mb-8">
-                <h2 className="font-heading text-foreground text-2xl font-bold md:text-3xl">
+                <h2 className="font-serif text-foreground text-2xl font-bold tracking-tight md:text-3xl">
                   Explore Other Collections
                 </h2>
               </FadeIn>

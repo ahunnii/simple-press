@@ -160,7 +160,7 @@ export function BambooCartDrawer({ shippingConfig }: BambooCartDrawerProps) {
         {/* Band 1 — forest header */}
         <div className="bg-[var(--bam-forest)] pt-12 pr-14 pb-5 pl-5">
           <SheetTitle className="flex flex-col gap-0.5 text-left font-normal text-[var(--bam-cream)]">
-            <span className="font-sans text-xs font-medium tracking-widest text-[var(--bam-gold-soft)] uppercase">
+            <span className="text-xs font-semibold tracking-widest text-[var(--bam-gold-soft)] uppercase">
               Your Basket
             </span>
             <span className="font-heading text-xl">

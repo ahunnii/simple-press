@@ -94,7 +94,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                 Stories &amp; Insights
               </span>
               <h1
-                className="text-foreground mt-3 font-serif text-4xl font-bold md:text-5xl"
+                className="text-foreground mt-3 font-serif text-4xl font-bold tracking-tight md:text-5xl"
                 {...fieldAttr("bamboo.blog.listing-title")}
               >
                 {pageTitle ?? "Blog"}
@@ -177,7 +177,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
         <section className="py-20">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="mb-8" delay={0.1}>
-              <span className="text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
+              <span className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
                 Latest post
               </span>
             </FadeIn>
@@ -234,7 +234,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
         <section className="bg-[var(--bam-cream-deep)] py-20">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="mb-12">
-              <h2 className="text-foreground font-serif text-2xl font-bold md:text-3xl">
+              <h2 className="text-foreground font-serif text-2xl font-bold tracking-tight md:text-3xl">
                 {isSearching ? "Search results" : "More articles"}
               </h2>
             </FadeIn>

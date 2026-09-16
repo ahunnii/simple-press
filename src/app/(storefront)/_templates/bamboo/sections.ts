@@ -155,6 +155,16 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       order: 1,
       hideable: true,
     },
+    {
+      id: "contact.faq",
+      page: "contact",
+      title: "FAQ",
+      description:
+        "Common questions answered at the bottom of the contact page.",
+      groupIds: ["contact.faq"],
+      order: 2,
+      hideable: true,
+    },
 
     // Collections
     {
@@ -224,6 +234,15 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       description: "Short note shown in the footer's bottom bar.",
       groupIds: ["global.branding"],
       order: 1,
+    },
+    {
+      id: "global.authentication",
+      page: "global",
+      title: "Sign-in Screens",
+      description:
+        "Background image and logo size on the sign-in and sign-up screens.",
+      groupIds: ["global.authentication"],
+      order: 2,
     },
   ],
 };
