@@ -77,7 +77,15 @@ export function BambooContactPage({
     "bamboo.global.map-lng",
     "bamboo.contact.faq-heading",
     "bamboo.contact.faq-lede",
+    "bamboo.contact.hero-bg-image",
+    "bamboo.global.page-hero-bg-image",
   ]);
+
+  // A cleared override saves as "" and must also fall back to the global
+  // field, not just null/undefined.
+  const heroBgImage =
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+    f["bamboo.contact.hero-bg-image"] || f["bamboo.global.page-hero-bg-image"];
 
   const customFields = business?.siteContent?.customFields as
     | Record<string, unknown>
@@ -138,6 +146,7 @@ export function BambooContactPage({
         ledeFieldKey="bamboo.contact.subheader"
         image={f["bamboo.contact.hero-image"]}
         imagePriority
+        bgImage={heroBgImage}
       />
 
       <section className="mx-auto max-w-7xl px-4 py-20 md:py-28 lg:px-8">

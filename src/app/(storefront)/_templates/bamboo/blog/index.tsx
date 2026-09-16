@@ -37,6 +37,17 @@ const blogPageData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "bamboo.blog.hero-bg-image",
+    label: "Blog Hero Background (override)",
+    description:
+      "Overrides the site-wide Page Hero Background for this page only. Blank = use the site-wide image, or the flat band if none is set.",
+    type: "image",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
     key: "bamboo.blog.post-cta-heading",
     label: "Blog post — CTA heading",
     description: "Call-to-action box at the end of each blog post",

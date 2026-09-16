@@ -5,13 +5,28 @@ import { BambooPageHero } from "~/app/(storefront)/_templates/bamboo/shared/bamb
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { resolveFields } from ".";
+
 type Props = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 };
-export function BambooGenericPage({ page }: Props) {
+export function BambooGenericPage({ business, page }: Props) {
+  // Generic CMS pages are dynamic DB records, so they can't have a static
+  // per-page override field like contact/blog/about do -- only the
+  // site-wide global key applies here.
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "bamboo.global.page-hero-bg-image",
+  ]);
+  const heroBgImage = f["bamboo.global.page-hero-bg-image"];
+
   return (
     <PageTransition>
-      <BambooPageHero title={page.title} lede={page.excerpt} />
+      <BambooPageHero
+        title={page.title}
+        lede={page.excerpt}
+        bgImage={heroBgImage}
+      />
 
       <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
         <FadeIn direction="up">
