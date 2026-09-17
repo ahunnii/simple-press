@@ -19,11 +19,14 @@ const CONTACT_PHONE_MAX_LENGTH = 32;
 /**
  * Must stay >= the largest per-template `messageMaxLength` passed to
  * `contactFormSchema` below (grep templates for `useContactForm({
- * messageMaxLength` — currently 600, from the pink template's contact and
- * table-request forms). A smaller server cap would reject a submission the
- * client-side form itself allowed through.
+ * messageMaxLength`). Raised from 600 to 1000 for the dream template's
+ * Estimate Quote form, which composes structured event answers (date, time,
+ * location, setting, colors, draping/throne/full-decor choices, photo link)
+ * into `message` ahead of the free-text theme description. Exported so that
+ * form can size its live budget from the same constant. A smaller server cap
+ * would reject a submission the client-side form itself allowed through.
  */
-const CONTACT_MESSAGE_MAX_LENGTH = 600;
+export const CONTACT_MESSAGE_MAX_LENGTH = 1000;
 
 export const contactSchema = z.object({
   name: z

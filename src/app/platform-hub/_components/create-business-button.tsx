@@ -42,6 +42,7 @@ const TEMPLATES = [
   { id: "relocation", label: "Handy Relocations" },
   { id: "wealth", label: "Detroit Community Wealth Fund" },
   { id: "olive", label: "Olive Mode" },
+  { id: "dream", label: "Dream Your Theme" },
 ];
 
 const defaultValues: CreateBusinessFormData = {

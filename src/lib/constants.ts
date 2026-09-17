@@ -16,6 +16,7 @@ export const TEMPLATE_IDS = {
   RELOCATION: "relocation",
   WEALTH: "wealth",
   OLIVE: "olive",
+  DREAM: "dream",
 } as const;
 
 export const TEMPLATES = [
@@ -130,6 +131,13 @@ export const TEMPLATES = [
     description:
       "1:1 recreation of detroitcommunitywealth.org — quiet sage-and-paper nonprofit site with overlap heroes, programs, donate, and co-op directory (no shop or checkout)",
     previewImage: "/templates/wealth-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.DREAM,
+    name: "Dream Your Theme",
+    description:
+      "Dreamy event-decor site — logo hero with drifting clouds, alternating service rows, masonry gallery, and an Estimate Quote request (no shop or checkout)",
+    previewImage: "/templates/dream-preview.png",
   },
   {
     id: TEMPLATE_IDS.OLIVE,

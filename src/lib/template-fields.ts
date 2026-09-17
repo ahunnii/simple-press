@@ -77,6 +77,10 @@ import {
   wealthData,
   wealthFieldGroups,
 } from "~/app/(storefront)/_templates/wealth";
+import {
+  dreamData,
+  dreamFieldGroups,
+} from "~/app/(storefront)/_templates/dream";
 
 export type TemplatePage =
   | "homepage"
@@ -506,6 +510,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...pinkFieldGroups,
   ...relocationFieldGroups,
   ...wealthFieldGroups,
+  ...dreamFieldGroups,
   ...oliveFieldGroups,
 
   ...defaultTemplateFieldGroups,
@@ -527,6 +532,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...pinkData,
   ...relocationData,
   ...wealthData,
+  ...dreamData,
   ...oliveData,
 
   ...defaultTemplateData,

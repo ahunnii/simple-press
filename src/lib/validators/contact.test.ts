@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { contactFormSchema, contactSchema } from "./contact";
+import {
+  CONTACT_MESSAGE_MAX_LENGTH,
+  contactFormSchema,
+  contactSchema,
+} from "./contact";
 
 /**
  * `contactSchema` is the wire schema behind the `contact.send` tRPC mutation
@@ -58,7 +62,7 @@ describe("contactSchema", () => {
   it("rejects a message over the server cap (an unbounded string can no longer reach the owner's inbox)", () => {
     const result = contactSchema.safeParse({
       ...base,
-      message: "a".repeat(601),
+      message: "a".repeat(CONTACT_MESSAGE_MAX_LENGTH + 1),
     });
     expect(result.success).toBe(false);
   });
@@ -66,16 +70,16 @@ describe("contactSchema", () => {
   it("accepts a message at the server cap", () => {
     const result = contactSchema.safeParse({
       ...base,
-      message: "a".repeat(600),
+      message: "a".repeat(CONTACT_MESSAGE_MAX_LENGTH),
     });
     expect(result.success).toBe(true);
   });
 
-  it("the server message cap is >= every template's client-side messageMaxLength (currently 600, from pink)", () => {
+  it("the server message cap is >= every template's client-side messageMaxLength (currently 1000, from dream's Estimate Quote form)", () => {
     // If a template ever raises its own client-side cap above the server's,
     // a legitimate submission the form allowed through would be silently
     // rejected server-side. Guards the two from drifting apart unnoticed.
-    const largestKnownTemplateCap = 600;
+    const largestKnownTemplateCap = 1000;
     const probe = contactSchema.safeParse({
       ...base,
       message: "a".repeat(largestKnownTemplateCap),

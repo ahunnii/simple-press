@@ -23,6 +23,7 @@ import { relocationSections } from "~/app/(storefront)/_templates/relocation/sec
 import { sledgeSections } from "~/app/(storefront)/_templates/sledge/sections";
 import { viiSections } from "~/app/(storefront)/_templates/vii/sections";
 import { wealthSections } from "~/app/(storefront)/_templates/wealth/sections";
+import { dreamSections } from "~/app/(storefront)/_templates/dream/sections";
 
 // `SectionLink` / `SECTION_LINKS` live in the leaf module `~/lib/section-links`
 // (every template's `sections.ts` reads the catalog at module-init time, and
@@ -86,6 +87,7 @@ export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
   ...buildersSections,
   ...relocationSections,
   ...wealthSections,
+  ...dreamSections,
   ...oliveSections,
 };
 

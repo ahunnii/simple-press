@@ -382,6 +382,22 @@ import { WealthMaintenancePage } from "./wealth/maintenance/wealth-maintenance-p
 import { WealthServicesIndexPage } from "./wealth/services/wealth-services-index-page";
 import { WealthTestimonialsPage } from "./wealth/testimonials/wealth-testimonials-page";
 
+// Dream Your Theme
+import { DreamAboutPage } from "./dream/about/dream-about-page";
+import { DreamAccountSecurityPage } from "./dream/account/dream-account-security-page";
+import { DreamAccountSettingsPage } from "./dream/account/dream-account-settings-page";
+import { DreamAddressBookPage } from "./dream/account/dream-address-book-page";
+import { DreamOrderDetailPage } from "./dream/account/dream-order-detail-page";
+import { DreamOrdersPage } from "./dream/account/dream-orders-page";
+import { DreamPreferencesPage } from "./dream/account/dream-preferences-page";
+import { DreamSubscriptionsPage } from "./dream/account/dream-subscriptions-page";
+import { DreamContactPage } from "./dream/contact/dream-contact-page";
+import { DreamGenericPage } from "./dream/generic/dream-generic-page";
+import { DreamMaintenancePage } from "./dream/maintenance/dream-maintenance-page";
+import { DreamServicesIndexPage } from "./dream/services/dream-services-index-page";
+import { DreamTestimonialsPage } from "./dream/testimonials/dream-testimonials-page";
+import { DreamLayout } from "./dream/layout/dream-layout";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -717,6 +733,25 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrdersPage: WealthOrdersPage,
     PreferencesPage: WealthPreferencesPage,
     SubscriptionsPage: WealthSubscriptionsPage,
+  },
+  // Dream Your Theme — service archetype (event decor / rentals / draping):
+  // no commerce slots (Default fallback); blog/faq/events/videos/donate also
+  // fall back to Default by scope.
+  dream: {
+    Layout: DreamLayout,
+    AboutPage: DreamAboutPage,
+    ContactPage: DreamContactPage,
+    GenericPage: DreamGenericPage,
+    TestimonialsPage: DreamTestimonialsPage,
+    ServicesIndexPage: DreamServicesIndexPage,
+    MaintenancePage: DreamMaintenancePage,
+    AccountSettingsPage: DreamAccountSettingsPage,
+    AccountSecurityPage: DreamAccountSecurityPage,
+    AddressBookPage: DreamAddressBookPage,
+    OrderDetailPage: DreamOrderDetailPage,
+    OrdersPage: DreamOrdersPage,
+    PreferencesPage: DreamPreferencesPage,
+    SubscriptionsPage: DreamSubscriptionsPage,
   },
 
   noise: {
