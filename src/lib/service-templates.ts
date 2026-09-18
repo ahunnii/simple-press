@@ -29,6 +29,7 @@ import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/serv
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
 import { wealthServiceTemplateDefs } from "~/app/(storefront)/_templates/wealth/services/service-pages/fields";
+import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
 
 // ─── Core type ───────────────────────────────────────────────────────────────
 
@@ -107,6 +108,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   vii: viiServiceTemplateDefs,
   pink: pinkServiceTemplateDefs,
   wealth: wealthServiceTemplateDefs,
+  dream: dreamServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -125,6 +127,8 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...pollenServiceTemplateDefs,
       ...viiServiceTemplateDefs,
       ...pinkServiceTemplateDefs,
+      ...wealthServiceTemplateDefs,
+      ...dreamServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

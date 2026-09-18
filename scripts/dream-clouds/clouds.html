@@ -1,0 +1,167 @@
+<!doctype html><html><head><meta charset="utf-8"><!-- Dream Your Theme cloud sprite recipe. Rendered once by scripts/generate-dream-clouds.ts into public/templates/dream/clouds/. Recipe (design.md → Motion / Cloud system, revised 2026-09-17, iteration 5): keeps iteration 4's organic geometry exactly — 6 large soft-edged ellipses (radial gradients fading to 0 over their outer ~35%) bottom-anchored and overlapping so the top edge is lumpy and the bottom stays flatter but still soft, plus 3–4 mound ellipses centered ABOVE the cluster's nominal top line so they read as bulging cumulus tops, not discs. NEW this round: the user could not see iteration 4's pure-white clouds against the sky, so each body ellipse gets a companion cool-tint ellipse hugging its lower rim (`#e1e9f3`-class color, min channel floor 218 — never below `#dae4f0`) — mounds and the top two-thirds stay pure `#ffffff`→`#f7f9fc`. This is the middle ground between the v0 shaded-sphere storm clouds and v4's invisible pure white. A feGaussianBlur (≥6px sharp / ≥14px `-soft`) runs BEFORE the alpha-shaping table so the tint blends smoothly into the white with no hard edge; the table rebuilds a solid ≥.95-alpha core with a long soft rim. Seeded fractal-noise displacement stays, low scale. Every shape stays ≥8% inside the 1600×640 canvas. Same stage ids/aspect. Trailing wisps still feather off the two ends only, undyed. No blue-grey/grey tones beyond the specified cool-tint floor, no shaded-sphere lighting, no solid pill (see Rejected alternatives). --><style>
+body{margin:0;background:transparent}
+.sky{background:linear-gradient(180deg,#dcecfb 0%,#eef4fa 55%,#fff7ee 100%);padding:24px;display:grid;gap:24px}
+.stage{width:1600px;height:640px;position:relative}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.label{position:absolute;left:8px;top:8px;font:14px system-ui;color:#555}
+</style></head><body><div class="sky" id="sky"></div>
+<script>
+function rng(seed){let s=seed>>>0||1;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+// Non-wisp clouds: an organic ellipse-cluster body. x0/w = body span (tails
+// reach further, clamped to the canvas margin below); cyBottom = the
+// body's flatter underside baseline; Hbody = core band thickness. All
+// spans keep ≥8% (≥128px / ≥51px) clear of the 1600×640 canvas edge once
+// tails + mound bulge + blur fringe are accounted for.
+const specs=[
+ {id:1,seed:3,  x0:340, w:900, cyBottom:550, Hbody:275, disp:9},
+ {id:2,seed:11, x0:310, w:940, cyBottom:560, Hbody:290, disp:11},
+ {id:3,seed:19, x0:380, w:800, cyBottom:540, Hbody:254, disp:8},
+ {id:4,seed:27, x0:320, w:920, cyBottom:564, Hbody:287, disp:10},
+ {id:5,seed:41, x0:400, w:760, cyBottom:536, Hbody:244, disp:9},
+ {id:'w1',wisp:true,seed:5, anchors:[[380,140,120],[740,130,165],[1120,135,155],[1440,145,95]], disp:60, count:120},
+ {id:'w2',wisp:true,seed:23,anchors:[[280,145,100],[620,132,155],[980,124,165],[1330,140,125]], disp:70, count:120},
+];
+// White-only soft-edged gradient shared by every cluster/mound/tail ellipse:
+// solid core out to ~65% radius, then fades to 0 over the outer ~35% — no
+// shape in this recipe ever has a hard geometric edge, and no grey stop.
+function puffColor(id){
+  return `<radialGradient id="${id}" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#ffffff" stop-opacity="1"/>
+    <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.97"/>
+    <stop offset="0.65" stop-color="#ffffff" stop-opacity="0.85"/>
+    <stop offset="0.82" stop-color="#f7f9fc" stop-opacity="0.35"/>
+    <stop offset="1" stop-color="#f7f9fc" stop-opacity="0"/>
+  </radialGradient>`;
+}
+// Subtle cool underside tint — hugs the lower rim of each body ellipse only
+// (never the mounds/top). Kept inside the design.md floor (#e1e9f3-class,
+// min channel ≥218, never below #dae4f0); blended by the same blur pass as
+// the white body so the transition is soft, not a grey band.
+function coolColor(id){
+  return `<radialGradient id="${id}" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#e1e9f3" stop-opacity="0.75"/>
+    <stop offset="0.55" stop-color="#e1e9f3" stop-opacity="0.5"/>
+    <stop offset="1" stop-color="#e1e9f3" stop-opacity="0"/>
+  </radialGradient>`;
+}
+const expanded=[];
+for(const c of specs){ expanded.push(c); if(!c.wisp) expanded.push({...c,id:c.id+'-soft',soft:true}); }
+const sky=document.getElementById('sky');
+for(const c of expanded){
+  const H=c.wisp?260:640, r=rng(c.seed);
+  let defs=puffColor('g'+c.id)+(c.wisp?'':coolColor('cool'+c.id));
+  let shapes='';
+  if(c.wisp){
+    // Thin trailing wisp: scattered elongated puffs along the whole length
+    // (this sprite IS the wispy floor/horizon streak, not a cumulus body).
+    const puffs=[];
+    for(let i=0;i<c.count;i++){
+      const a=c.anchors[Math.floor(r()*c.anchors.length)];
+      const ang=r()*Math.PI*2;
+      const d=a[2]*r()*0.85;
+      const x=a[0]+Math.cos(ang)*d*1.7;
+      const y=a[1]+Math.sin(ang)*d*0.22;
+      const rad=a[2]*(0.22+r()*0.3);
+      puffs.push({x,y,rad});
+    }
+    const left=c.anchors[0], right=c.anchors[c.anchors.length-1];
+    for(let i=0;i<24;i++){
+      const fromLeft=i%2===0;
+      const a=fromLeft?left:right;
+      const dir=fromLeft?-1:1;
+      const reach=a[2]*(0.9+r()*1.7);
+      const x=a[0]+dir*reach;
+      const y=a[1]+(r()-0.5)*a[2]*0.4;
+      const rad=a[2]*(0.06+r()*0.11);
+      puffs.push({x,y,rad});
+    }
+    for(const p of puffs){
+      const rx=p.rad*3.4, ry=rx/4.6;
+      shapes+=`<ellipse cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="url(#g${c.id})"/>`;
+    }
+  } else {
+    // Organic cumulus cluster: 6 large soft ellipses, bottom-anchored so
+    // undersides roughly align (flatter, still soft) while radii vary so
+    // the top edge is lumpy — no two neighbors the same height. 3–4 bigger
+    // mounds are centered ABOVE that nominal top line so they read as
+    // bulging cumulus tops, not internal discs.
+    const bottomY=c.cyBottom;
+    const N=6;
+    const anchors=[];
+    for(let i=0;i<N;i++){
+      // Inset the end anchors 6% in from the body span so each ellipse's
+      // own radius doesn't push the geometric edge close to the canvas
+      // margin before blur/displacement spread it further outward.
+      const fx=0.06+(i/(N-1))*0.88;
+      const cx=c.x0+fx*c.w+(r()-0.5)*c.w*0.02;
+      const ry=(c.Hbody/2)*(0.72+r()*0.62);
+      const spacing=c.w/(N-1);
+      const rx=spacing*(0.58+r()*0.18);
+      const cy=bottomY-ry+(r()-0.5)*c.Hbody*0.08;
+      anchors.push({cx,cy,ry,rx});
+      shapes+=`<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="url(#g${c.id})"/>`;
+    }
+    // Cool underside tint: one companion ellipse per body anchor, hugging
+    // its lower rim only (shifted down, flattened) so the shading reads on
+    // the bottom third of the cluster while the mounds/top stay white.
+    anchors.forEach((a)=>{
+      const underCy=a.cy+a.ry*0.5;
+      const underRy=a.ry*0.52;
+      const underRx=a.rx*0.9;
+      shapes+=`<ellipse cx="${a.cx.toFixed(1)}" cy="${underCy.toFixed(1)}" rx="${underRx.toFixed(1)}" ry="${underRy.toFixed(1)}" fill="url(#cool${c.id})"/>`;
+    });
+    // Mounds sit directly on top of a subset of the INNER body anchors
+    // (never the two end ones, which already taper into the tails) so
+    // each mound overlaps and merges with the lobe beneath it instead of
+    // floating as a separate disconnected bump.
+    const moundCount=3+(c.seed%2);
+    const innerIdx=[1,2,3,4];
+    for(let i=0;i<moundCount;i++){
+      const idx=innerIdx[Math.round(i*(innerIdx.length-1)/Math.max(1,moundCount-1))];
+      const a=anchors[idx];
+      const rad=a.ry*(1.1+r()*0.4);
+      const cx=a.cx+(r()-0.5)*a.rx*0.15;
+      const cy=a.cy-a.ry*(0.5+r()*0.3);
+      shapes+=`<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${rad.toFixed(1)}" ry="${(rad*0.9).toFixed(1)}" fill="url(#g${c.id})"/>`;
+    }
+    // Trailing wisps off the two ends only — reach clamped so nothing runs
+    // past the ≥8%-margin canvas edge.
+    const leftX=c.x0, rightX=c.x0+c.w;
+    // Extra-generous margin (beyond the 8% floor) to absorb the outward
+    // spread from the blur + displacement filter chain applied after these
+    // coordinates are chosen.
+    const marginX=1600*0.17;
+    const leftRoom=Math.max(0, leftX-marginX), rightRoom=Math.max(0, (1600-marginX)-rightX);
+    for(let i=0;i<14;i++){
+      const fromLeft=i%2===0;
+      const dir=fromLeft?-1:1;
+      const baseX=fromLeft?leftX:rightX;
+      const room=fromLeft?leftRoom:rightRoom;
+      const reach=Math.min(room, c.Hbody*(0.3+r()*0.9));
+      const x=baseX+dir*reach;
+      const y=bottomY-c.Hbody*0.4+(r()-0.5)*c.Hbody*0.4;
+      const rad=c.Hbody*(0.07+r()*0.11);
+      const rxp=rad*2.4, ryp=rxp/3.2;
+      shapes+=`<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${rxp.toFixed(1)}" ry="${ryp.toFixed(1)}" fill="url(#g${c.id})"/>`;
+    }
+  }
+  const blurDens=c.wisp?6:(c.soft?15:7);
+  const blurFinal=c.wisp?0.5:(c.soft?3:1);
+  const stage=document.createElement('div');stage.className='stage';const k=c.soft?0.625:0.875; stage.style.height=Math.round(H*k)+'px';stage.style.width=Math.round(1600*k)+'px';stage.dataset.id=c.id;
+  stage.innerHTML=`<svg viewBox="0 0 1600 ${H}" xmlns="http://www.w3.org/2000/svg"><defs>${defs}
+  <filter id="f${c.id}" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.010" numOctaves="4" seed="${c.seed}" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="${c.disp}" xChannelSelector="R" yChannelSelector="G" result="disp"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.03 0.03" numOctaves="2" seed="${c.seed+100}" result="fineN"/>
+    <feDisplacementMap in="disp" in2="fineN" scale="6" xChannelSelector="R" yChannelSelector="G" result="disp2"/>
+    <feGaussianBlur in="disp2" stdDeviation="${blurDens}" result="dens"/>
+    <feComponentTransfer in="dens" result="body"><feFuncA type="table" tableValues="${c.wisp?'0 0 0.05 0.16 0.34 0.52 0.66 0.72':'0 0 0.04 0.14 0.34 0.62 0.88 1'}"/></feComponentTransfer>
+    <feTurbulence type="fractalNoise" baseFrequency="0.018 0.018" numOctaves="3" seed="${c.seed+50}" result="fine"/>
+    <feColorMatrix in="fine" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.22 0 0 0 0.90" result="fineA"/>
+    <feComposite in="body" in2="fineA" operator="in" result="textured"/>
+    <feGaussianBlur in="textured" stdDeviation="${blurFinal}"/>
+  </filter></defs>
+  <g filter="url(#f${c.id})">${shapes}</g></svg><span class="label">${c.id}</span>`;
+  sky.appendChild(stage);
+}
+</script></body></html>

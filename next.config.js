@@ -108,6 +108,14 @@ const withSentry = withSentryConfig(config, {
   // Upload a larger set of source maps for prettier stack traces (increases build time)
   widenClientFileUpload: true,
 
+  // Source maps are only useful if they can be uploaded, which needs
+  // SENTRY_AUTH_TOKEN. Without it (local builds), generating `hidden-source-map`
+  // output for every server chunk (~90MB of .map files for ~220MB of server JS)
+  // pushes the webpack compile past Node's default ~4.5GB V8 heap and the build
+  // dies with "JavaScript heap out of memory". Skip generation when it would be
+  // thrown away anyway; builds with a token behave exactly as before.
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+
   // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
   // This can increase your server load as well as your hosting bill.
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-

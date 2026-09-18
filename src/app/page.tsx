@@ -50,6 +50,10 @@ import { ViiHomepage } from "./(storefront)/_templates/vii/homepage/vii-homepage
 import { ViiLayout } from "./(storefront)/_templates/vii/layout/vii-layout";
 import { WealthHomepage } from "./(storefront)/_templates/wealth/homepage/wealth-homepage";
 import { WealthLayout } from "./(storefront)/_templates/wealth/layout/wealth-layout";
+import { DreamHomepage } from "./(storefront)/_templates/dream/homepage/dream-homepage";
+import { DreamLayout } from "./(storefront)/_templates/dream/layout/dream-layout";
+import { UmscHomepage } from "./(storefront)/_templates/umsc/homepage/umsc-homepage";
+import { UmscLayout } from "./(storefront)/_templates/umsc/layout/umsc-layout";
 
 // Next 15: searchParams is a Promise.
 type Props = {
@@ -120,6 +124,8 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       sledge: SledgeHomepage,
       vii: ViiHomepage,
       wealth: WealthHomepage,
+      dream: DreamHomepage,
+      umsc: UmscHomepage,
       olive: OliveHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
@@ -141,6 +147,8 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       sledge: SledgeLayout,
       vii: ViiLayout,
       wealth: WealthLayout,
+      dream: DreamLayout,
+      umsc: UmscLayout,
       olive: OliveLayout,
     }[business.templateId] ?? DefaultLayout;
 

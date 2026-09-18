@@ -24,6 +24,7 @@ import { PINK_SERVICE_COMPONENTS } from "../pink/services/service-pages/componen
 import { POLLEN_SERVICE_COMPONENTS } from "../pollen/services/service-pages/components";
 import { VII_SERVICE_COMPONENTS } from "../vii/services/service-pages/components";
 import { WEALTH_SERVICE_COMPONENTS } from "../wealth/services/service-pages/components";
+import { DREAM_SERVICE_COMPONENTS } from "../dream/services/service-pages/components";
 import { ServiceTemplateOne } from "./service-one/service-one-page";
 import { ServiceTemplateThree } from "./service-three/service-three-page";
 import { ServiceTemplateTwo } from "./service-two/service-two-page";
@@ -61,6 +62,7 @@ export const SERVICE_TEMPLATE_COMPONENTS: Record<
   ...BUILDERS_SERVICE_COMPONENTS,
   ...PINK_SERVICE_COMPONENTS,
   ...WEALTH_SERVICE_COMPONENTS,
+  ...DREAM_SERVICE_COMPONENTS,
 };
 
 /**

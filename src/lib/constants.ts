@@ -16,6 +16,8 @@ export const TEMPLATE_IDS = {
   RELOCATION: "relocation",
   WEALTH: "wealth",
   OLIVE: "olive",
+  DREAM: "dream",
+  UMSC: "umsc",
 } as const;
 
 export const TEMPLATES = [
@@ -130,6 +132,20 @@ export const TEMPLATES = [
     description:
       "1:1 recreation of detroitcommunitywealth.org — quiet sage-and-paper nonprofit site with overlap heroes, programs, donate, and co-op directory (no shop or checkout)",
     previewImage: "/templates/wealth-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.DREAM,
+    name: "Dream Your Theme",
+    description:
+      "Dreamy event-decor site — logo hero with drifting clouds, alternating service rows, masonry gallery, and an Estimate Quote request (no shop or checkout)",
+    previewImage: "/templates/dream-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.UMSC,
+    name: "Unique Monique",
+    description:
+      "Calm candle-bar storefront — black/gold header, full-height video-or-photo hero with a thin serif headline, cream product shop (candles, soaps, body care, home care), custom-order request",
+    previewImage: "/templates/umsc-preview.png",
   },
   {
     id: TEMPLATE_IDS.OLIVE,

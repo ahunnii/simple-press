@@ -1152,7 +1152,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/ahunn/Projects/sites/simple-press/generated/prisma",
+      "value": "/Users/ahunn/Projects/simplepress/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -1166,7 +1166,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/ahunn/Projects/sites/simple-press/prisma/schema.prisma",
+    "sourceFilePath": "/Users/ahunn/Projects/simplepress/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -1180,6 +1180,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {

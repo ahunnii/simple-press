@@ -79,6 +79,19 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Olive Mode",
     subdomains: ["olivemode", "demo"],
   },
+  // Dream Your Theme — event decor / rentals / draping (Selest). "demo" is
+  // included so runtime QA can point the demo business at this template.
+  dream: {
+    label: "Dream Your Theme",
+    subdomains: ["dreamyourtheme", "demo"],
+  },
+  // Unique Monique Scented Candles — handmade candles / soaps / body care /
+  // home care (Detroit). "demo" is included so runtime QA can point the demo
+  // business at this template.
+  umsc: {
+    label: "Unique Monique",
+    subdomains: ["uniquemonique", "demo"],
+  },
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {
