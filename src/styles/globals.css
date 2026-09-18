@@ -9643,7 +9643,7 @@
   --dream-peach: #f6e6d7; /* 2026-09-17: ~15% less luminance (was #fff7f0) */
   --dream-halo: rgba(255, 247, 226, 0.61); /* 2026-09-17: was .72 */
   /* Stops of `--dream-placeholder`, the warm photo-placeholder gradient
-     used by the hero orbit photos' empty state (design.md palette table). */
+     used by the hero shelf photos' empty state (design.md palette table). */
   --dream-cream: #fff9ed;
   --dream-gold-warm: #f2d287;
   --dream-rose-warm: #de827d;
@@ -9661,7 +9661,7 @@
   --dream-error: #a8322f;
   --dream-success: #2f6b3d;
   /* Warm photo-placeholder gradient (design.md: "cream 0% → gold-warm 36% →
-     rose-warm 72% → ink 130%") — the hero orbit photos' empty state. No
+     rose-warm 72% → ink 130%") — the hero shelf photos' empty state. No
      runtime filter; the highlight ellipse is a second gradient layer added
      where this is consumed (`.dream-image-fallback[data-tone="warm"]`). */
   --dream-placeholder: linear-gradient(
@@ -10157,11 +10157,20 @@
   position: relative;
   overflow: hidden;
   display: flex;
+  /* Column, bottom-aligned: the protected center stack rides the free space
+     (its own `margin-block: auto`) and the photo shelf rests on the hero
+     floor. `min-height` is 82vh/800 max (was 92vh/860) because the shelf
+     adds height — hero + shelf must still fit a 1440×900 fold under the
+     106px topbar+header. */
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: clamp(560px, 92vh, 860px);
-  padding: calc(var(--dream-header-h-mobile) + 24px) var(--dream-gutter)
-    var(--dream-section-pad-y);
+  justify-content: flex-end;
+  /* Shelf frame height — read by the balloon layer's bottom edge (below)
+     and the shelf photos, so the two never disagree. 160 mobile / 200
+     desktop / 168 on short desktop viewports (see the max-height step). */
+  --dream-shelf-h: 160px;
+  min-height: clamp(560px, 82vh, 800px);
+  padding: calc(var(--dream-header-h-mobile) + 24px) var(--dream-gutter) 0;
   /* Homepage hero ground (design.md "Homepage hero ground", restored from
      the reference `index.html` 2026-09-17): a cream halo behind the logo
      over blue sky melting into warm peach — never a flat white. */
@@ -10183,6 +10192,7 @@
 
 @media (min-width: 960px) {
   .dream .dream-hero {
+    --dream-shelf-h: 200px;
     padding-top: calc(var(--dream-header-h) + 8px);
   }
 }
@@ -10190,13 +10200,17 @@
 .dream .dream-hero-safe {
   position: relative;
   /* z-index map (hero layer stack, back to front): clouds 0 < balloons 1 <
-     orbit 2 < safe 3. */
+     shelf 2 < safe 3. */
   z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
   max-width: 640px;
-  margin: 0 auto;
+  /* `margin-block: auto` (not `margin: 0 auto`): the hero column is
+     bottom-aligned, so auto block margins split the free space above and
+     below this stack — it centres in whatever room the shelf leaves, and
+     the shelf's own `margin-top` is the minimum gap. */
+  margin: auto;
   text-align: center;
 }
 
@@ -10215,12 +10229,13 @@
   margin-bottom: 20px;
 }
 
-.dream .dream-hero-safe > .dream-btn {
-  margin-bottom: 12px;
-}
-
-.dream .dream-hero-safe > .dream-btn:last-child {
-  margin-bottom: 0;
+/* The two CTAs share one centred row (they wrap to two lines on narrow
+   phones rather than overflowing the veil). */
+.dream .dream-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
 }
 
 .dream .dream-hero-safe::before {
@@ -10240,8 +10255,45 @@
 }
 
 @media (min-width: 960px) {
+  /* 200px, not the pre-shelf 320px: measured, 320 pushes the shelf below
+     the 1440×900 fold. */
   .dream .dream-hero-logo {
-    width: 320px;
+    width: 200px;
+  }
+}
+
+/* Short desktop viewports (the 1280×800 / 1366×768 laptop class): the
+   200px logo + 200px shelf overshoot an 800px fold by ~75px, so step the
+   logo, the shelf frames, the shelf gap and the top padding down together — the shelf's
+   bottom edge must sit inside the first viewport (design.md Hero §1:
+   "rests on the hero floor", not "is cut by the fold"). The center stack's
+   type is untouched. */
+@media (min-width: 960px) and (max-height: 840px) {
+  .dream .dream-hero {
+    --dream-shelf-h: 160px;
+    padding-top: var(--dream-header-h);
+  }
+
+  .dream .dream-hero-logo {
+    width: 160px;
+  }
+
+  .dream .dream-hero-shelf {
+    margin-top: 20px;
+  }
+
+  .dream .dream-hero-safe > .dream-hero-lede {
+    margin-bottom: 16px;
+  }
+
+  /* 160px-tall 4:5 frames are only 128px wide — keep the caption chip on
+     one line instead of wrapping into a two-line block over the photo. */
+  .dream .dream-hero-shelf-photo .dream-photo-caption {
+    left: 12px;
+    bottom: 12px;
+    padding: 5px 11px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 }
 
@@ -10251,130 +10303,119 @@
   color: var(--dream-soft);
 }
 
-.dream .dream-hero-orbit {
-  position: absolute;
-  top: 50%;
-  width: 300px;
-  transform: translateY(-50%);
+/* ── Hero shelf — the drifting filmstrip on the hero floor ──
+   Mobile: a plain horizontally scrollable row, full-bleed. Desktop
+   (≥960px): a transform-only marquee. The track holds the six frames
+   TWICE (the second copy is `.is-dup`, `aria-hidden`, and display:none
+   below 960px), so drifting it to `translateX(-50%)` — exactly one copy's
+   width — loops seamlessly. See `dream-homepage-hero.tsx`. */
+/* The balloon layer stops at the shelf's top edge (+ the shelf gap): the
+   balloons start at bottom:-100px INSIDE this clipped box and fade in over
+   their first 8%, so they surface just above the shelf instead of popping
+   out of a tile edge or a tile gap (design.md Motion: balloons sit below
+   the shelf and text, side lanes only). */
+.dream .dream-hero .dream-balloons {
+  bottom: calc(var(--dream-shelf-h) + 44px);
+}
+
+.dream .dream-hero-shelf {
+  position: relative;
   /* z-index map (hero layer stack, back to front): clouds 0 < balloons 1 <
-     orbit 2 < safe 3. */
+     shelf 2 < safe 3. */
   z-index: 2;
+  /* Full-bleed: stretch to the hero's content box, then cancel the hero
+     gutter on both sides. (`width: 100vw` + `calc(50% - 50vw)` mis-centres
+     here because the hero is a centring flex column.) */
+  align-self: stretch;
+  width: auto;
+  margin: 36px calc(-1 * var(--dream-gutter)) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* `proximity`, not `mandatory`: a mandatory snap scrolls the strip past
+     its own left padding on first paint and eats the gutter. */
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--dream-gutter);
+  padding: 0 var(--dream-gutter) 8px;
 }
 
-.dream .dream-hero-orbit--left {
-  left: var(--dream-gutter);
-}
-
-.dream .dream-hero-orbit--right {
-  right: var(--dream-gutter);
-}
-
-/* Orbit stack — the collage offset (design.md: "Left column nudged down
-   18px, right up 12px so the board reads collaged, not tabular") lives on
-   this inner wrapper, not on `.dream-hero-orbit` itself, because the latter
-   is the element `dream-rise-orbit` animates (its `to` keyframe resolves to
-   `translateY(-50%)`); offsetting it directly would fight the animation's
-   own transform on every frame. */
-.dream .dream-hero-orbit-stack {
+.dream .dream-hero-shelf-track {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  width: max-content;
 }
 
-/* `.dream-hero-orbit`'s own `translateY(-50%)` (base, and the
-   `dream-rise-orbit` animation's `to` state) already supplies the "-50%"
-   half of design.md's `translateY(calc(-50% + 18px))` / `calc(-50% - 12px)`
-   — this stack only adds the remaining pixel offset on top of it. */
-.dream .dream-hero-orbit-stack--left {
-  transform: translateY(18px);
+/* Height-driven frames: `DreamPhoto`'s inline `aspect-ratio` supplies each
+   one's width, so the mixed 3:2 / 4:5 / 1:1 shapes stay on one baseline. */
+.dream .dream-hero-shelf-photo {
+  flex: 0 0 auto;
+  height: var(--dream-shelf-h);
+  width: auto;
+  margin-right: 18px;
+  scroll-snap-align: start;
+  box-shadow: var(--dream-shadow-card);
 }
 
-.dream .dream-hero-orbit-stack--right {
-  transform: translateY(-12px);
+/* `.dream-image-fallback`'s 220px floor is sized for full-width tiles; the
+   shelf frames are shorter than that, so it must shrink to the frame or the
+   placeholder's centred content sits low behind `overflow: hidden`. */
+.dream .dream-hero-shelf-photo .dream-image-fallback {
+  min-height: 0;
 }
 
-/* Small orbit photo (design.md: "small photo (70% width, centered...)"). */
-.dream .dream-hero-photo-sm {
-  width: 70%;
-  margin: 0 auto;
-  border-radius: var(--dream-radius-photo-sm);
+.dream .dream-hero-shelf-photo.is-dup {
+  display: none;
 }
 
-@media (max-width: 1200px) {
-  .dream .dream-hero-orbit {
-    display: none;
-  }
-}
-
-/* Mobile orbit reflow (finish-review "Orbit slots + mobile"): below 1200px
-   the desktop absolute-positioned orbit columns are hidden (above), but
-   their two CARDS (not photos — `.dream-hero-lanes .dream-photo` stays
-   hidden) reflow into a 2-up row under the CTAs instead of disappearing
-   entirely. `.dream-hero-lanes`/`--left`/`--right` are additional classes
-   on the same `.dream-hero-orbit`/`--left`/`--right` elements (see
-   `dream-homepage-hero.tsx`), so this only needs to win the cascade for
-   elements that carry both. */
-@media (max-width: 1200px) {
-  .dream .dream-hero {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "safe safe"
-      "left right";
-    row-gap: 32px;
-    column-gap: 16px;
-    align-items: start;
+@media (min-width: 960px) {
+  .dream .dream-hero-shelf {
+    overflow: hidden;
+    scroll-snap-type: none;
+    padding: 0;
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
   }
 
-  .dream .dream-hero-safe {
-    grid-area: safe;
+  .dream .dream-hero-shelf-track {
+    animation: dream-shelf-drift 60s linear infinite;
   }
 
-  .dream .dream-hero-orbit.dream-hero-lanes {
+  .dream .dream-hero-shelf:hover .dream-hero-shelf-track {
+    animation-play-state: paused;
+  }
+
+  /* `data-paused` is set by `useDreamAmbient` when the shelf scrolls out of
+     view — same attribute the cloud/balloon layers use. */
+  .dream .dream-hero-shelf[data-paused] .dream-hero-shelf-track {
+    animation-play-state: paused;
+  }
+
+  .dream .dream-hero-shelf-photo {
+    height: var(--dream-shelf-h);
+  }
+
+  .dream .dream-hero-shelf-photo.is-dup {
     display: block;
-    position: static;
-    width: auto;
-    top: auto;
-    left: auto;
-    right: auto;
-    transform: none;
-  }
-
-  /* The collage offset is desktop-only (design.md's uneven orbit reads as
-     collaged at ≥1200px; mobile is a tidy 2-up row) — reset the inner
-     stack's own translateY along with the outer orbit's, above. */
-  .dream .dream-hero-orbit-stack {
-    transform: none;
-  }
-
-  .dream .dream-hero-lanes--left {
-    grid-area: left;
-  }
-
-  .dream .dream-hero-lanes--right {
-    grid-area: right;
-  }
-
-  .dream .dream-hero-lanes .dream-photo {
-    display: none;
-  }
-
-  .dream .dream-hero-lanes .dream-card {
-    padding: 18px;
-  }
-
-  .dream-js .dream-hero-orbit.dream-hero-lanes {
-    animation: dream-rise var(--dream-dur-entrance) var(--dream-ease) both;
-    animation-delay: 240ms;
   }
 }
 
-/* Hero entrance — gated on .dream-js: logo, then headline/lede/CTA at
-   +120ms, then orbit columns at +240ms. Content is fully visible without
+/* Hero entrance — gated on .dream-js: logo, then headline/lede/CTA row at
+   +120ms, then the photo shelf at +240ms. Content is fully visible without
    JS (no .dream-js class means none of these rules match). */
 .dream-js .dream-hero-safe > .dream-h1,
 .dream-js .dream-hero-safe > .dream-hero-lede,
-.dream-js .dream-hero-safe > .dream-btn {
+.dream-js .dream-hero-safe > .dream-hero-ctas {
   animation: dream-rise var(--dream-dur-entrance) var(--dream-ease) both;
 }
 
@@ -10388,12 +10429,12 @@
 
 .dream-js .dream-hero-safe > .dream-h1,
 .dream-js .dream-hero-safe > .dream-hero-lede,
-.dream-js .dream-hero-safe > .dream-btn {
+.dream-js .dream-hero-safe > .dream-hero-ctas {
   animation-delay: 120ms;
 }
 
-.dream-js .dream-hero-orbit {
-  animation: dream-rise-orbit var(--dream-dur-entrance) var(--dream-ease) both;
+.dream-js .dream-hero-shelf {
+  animation: dream-rise var(--dream-dur-entrance) var(--dream-ease) both;
   animation-delay: 240ms;
 }
 
@@ -10807,9 +10848,59 @@
     color var(--dream-dur-hover) var(--dream-ease-out);
 }
 
-.dream .dream-header-link:hover {
+.dream .dream-header-link:hover,
+.dream .dream-header-link[aria-current="page"],
+.dream .dream-header-link[data-active="true"] {
   color: var(--dream-ink);
   background-size: 100% 1px;
+}
+
+/* Dropdown trigger: `background-color`, never the `background` shorthand — the
+   shorthand would wipe `.dream-header-link`'s gradient underline. */
+.dream .dream-header-dropdown-wrap {
+  position: relative;
+}
+
+.dream .dream-header-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 0 2px;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.dream .dream-header-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  min-width: 180px;
+  margin-top: 12px;
+  padding: 8px;
+  background: var(--dream-paper);
+  border: 1px solid var(--dream-line);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.dream .dream-header-dropdown-link {
+  display: block;
+  padding: 8px 12px;
+  font-family: var(--font-dream-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dream-soft);
+  text-decoration: none;
+  transition:
+    color var(--dream-dur-hover) var(--dream-ease-out),
+    background-color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-header-dropdown-link:hover,
+.dream .dream-header-dropdown-link[aria-current="page"] {
+  color: var(--dream-ink);
+  background-color: var(--dream-sky);
 }
 
 .dream .dream-header-logo {
@@ -10832,6 +10923,10 @@
   display: none;
 }
 
+.dream .dream-header-signin {
+  display: none;
+}
+
 .dream .dream-header-hamburger {
   display: flex;
   align-items: center;
@@ -10844,10 +10939,13 @@
 }
 
 @media (min-width: 960px) {
+  /* Single row: logo + nav left, account slot + CTA pushed right by the
+     right cell's `margin-left:auto`. */
   .dream .dream-header-inner {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
     align-items: center;
+    justify-content: flex-start;
+    gap: 32px;
     height: var(--dream-header-h);
   }
 
@@ -10855,12 +10953,8 @@
     display: flex;
   }
 
-  .dream .dream-header-cell--left {
-    justify-content: flex-start;
-  }
-
   .dream .dream-header-cell--right {
-    justify-content: flex-end;
+    margin-left: auto;
     gap: 20px;
   }
 
@@ -10873,6 +10967,10 @@
   }
 
   .dream .dream-header-user {
+    display: inline-flex;
+  }
+
+  .dream .dream-header-signin {
     display: inline-flex;
   }
 
@@ -10968,6 +11066,47 @@
   color: var(--dream-rose);
 }
 
+.dream .dream-nav-overlay-item--toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.dream .dream-nav-overlay-sublist {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.dream .dream-nav-overlay-subitem {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 0;
+  font-family: var(--font-dream-body);
+  font-size: 18px;
+  color: var(--dream-soft);
+  text-decoration: none;
+}
+
+.dream .dream-nav-overlay-subitem:hover,
+.dream .dream-nav-overlay-subitem[data-active="true"] {
+  color: var(--dream-rose);
+}
+
+/* Spacing/centering only — the `ul` itself carries `.dream-social-links`. */
+.dream .dream-nav-overlay-social {
+  margin-top: 24px;
+  justify-content: center;
+}
+
 .dream .dream-nav-overlay-bottom {
   display: flex;
   flex-shrink: 0;
@@ -10986,8 +11125,46 @@
 
 .dream .dream-nav-overlay-account {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.dream .dream-nav-overlay-account-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-dream-body);
+  font-size: 14px;
+  color: var(--dream-ink);
+}
+
+.dream .dream-nav-overlay-account-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 4px 20px;
+}
+
+.dream .dream-nav-overlay-account-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-family: var(--font-dream-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dream-soft);
+  text-decoration: none;
+  transition: color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-nav-overlay-account-link:hover {
+  color: var(--dream-rose);
 }
 
 .dream .dream-nav-overlay-account-skeleton {
@@ -11111,6 +11288,46 @@
   color: var(--dream-soft);
 }
 
+.dream .dream-social-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dream .dream-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--dream-line);
+  color: var(--dream-soft);
+  background: transparent;
+  transition:
+    color var(--dream-dur-hover) var(--dream-ease-out),
+    border-color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-social-link:hover {
+  color: var(--dream-rose);
+  border-color: var(--dream-rose);
+}
+
+@media (pointer: coarse) {
+  .dream .dream-social-link {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.dream .dream-footer-social {
+  margin-top: 12px;
+}
+
 /* ── Scroll-reveal — armed only once useDreamReveal adds `.dream-js` to the
    scope root. Without JS the class is never set, so `.dream-reveal` content
    stays fully visible (progressive enhancement, no blank sections). Single
@@ -11181,14 +11398,14 @@
   }
 }
 
-@keyframes dream-rise-orbit {
+/* Hero shelf marquee: one copy's width of travel. The track renders the six
+   frames twice, so -50% lands on an identical frame — no visible restart. */
+@keyframes dream-shelf-drift {
   from {
-    opacity: 0;
-    transform: translateY(calc(-50% + 10px));
+    transform: translateX(0);
   }
   to {
-    opacity: 1;
-    transform: translateY(-50%);
+    transform: translateX(-50%);
   }
 }
 
@@ -11199,12 +11416,20 @@
    container's `overflow: hidden` never clips a visibly-opaque balloon at
    either edge. `translateX` drifts sideways via each color's own `--bx`
    (±40px) and `rotate` turns from -2deg to 8deg over the same span. */
+/* Opacity stays 0 through the first 10% (≈105px of the 1050px rise): the
+   balloon starts at bottom:-100px inside a layer that is clipped at the
+   shelf's top edge, and balloon + string are ~90px tall, so the whole
+   balloon is inside the layer before it becomes visible — no hard cut
+   along the layer's bottom line (2026-09-18 finish review). */
 @keyframes dream-balloon-rise {
   0% {
     opacity: 0;
     transform: translateY(0) translateX(0) rotate(-2deg);
   }
-  8% {
+  10% {
+    opacity: 0;
+  }
+  16% {
     opacity: 0.6;
   }
   55% {
@@ -11297,16 +11522,16 @@
   .dream-js .dream-hero-logo,
   .dream-js .dream-hero-safe > .dream-h1,
   .dream-js .dream-hero-safe > .dream-hero-lede,
-  .dream-js .dream-hero-safe > .dream-btn {
+  .dream-js .dream-hero-safe > .dream-hero-ctas,
+  .dream-js .dream-hero-shelf {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
 
-  .dream-js .dream-hero-orbit {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: translateY(-50%) !important;
+  /* The shelf stays put and stays scrollable — no drift. */
+  .dream .dream-hero-shelf-track {
+    animation: none;
   }
 
   .dream .dream-btn:hover,
@@ -11323,16 +11548,6 @@
     transform: none;
     transition: opacity 120ms linear;
     transition-delay: 0ms;
-  }
-}
-
-/* Reduced motion + mobile orbit reflow: the general reduced-motion rule
-   above forces `translateY(-50%)` for the desktop absolutely-positioned
-   orbit; at the mobile breakpoint `.dream-hero-lanes` is `position: static`
-   (no `top: 50%` to counter), so that transform must be cleared here. */
-@media (prefers-reduced-motion: reduce) and (max-width: 1200px) {
-  .dream-js .dream-hero-orbit.dream-hero-lanes {
-    transform: none !important;
   }
 }
 
@@ -11355,13 +11570,27 @@
   --umsc-cream-on-black: #e7dccb; /* ledes/body on black surfaces */
   --umsc-purple: #3d184e; /* New/Sale badge fill, wishlist heart, focus ring, open-accordion marker */
   --umsc-line: rgba(24, 20, 17, 0.13); /* hairlines, card borders on light */
-  --umsc-line-gold: rgba(199, 154, 40, 0.35); /* rules on black, logo ring, image frames */
+  --umsc-line-gold: rgba(
+    199,
+    154,
+    40,
+    0.35
+  ); /* rules on black, logo ring, image frames */
   /* Derived — compute, don't hardcode */
   --umsc-hairline: color-mix(in srgb, var(--umsc-ink) 12%, transparent);
   /* Hero readability scrim — two static layers (never purple). Consumers set
      `background-image: var(--umsc-scrim), var(--umsc-scrim-bottom);` */
-  --umsc-scrim: linear-gradient(90deg, rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 0.42) 50%, rgba(5, 5, 5, 0.22));
-  --umsc-scrim-bottom: linear-gradient(0deg, rgba(5, 5, 5, 0.7), transparent 45%);
+  --umsc-scrim: linear-gradient(
+    90deg,
+    rgba(5, 5, 5, 0.7),
+    rgba(5, 5, 5, 0.42) 50%,
+    rgba(5, 5, 5, 0.22)
+  );
+  --umsc-scrim-bottom: linear-gradient(
+    0deg,
+    rgba(5, 5, 5, 0.7),
+    transparent 45%
+  );
   /* Semantic state colors — constant across the palette */
   --umsc-error: #a8322f;
   --umsc-success: #2f6b3d;
@@ -11375,7 +11604,8 @@
   --umsc-section-pad-x: clamp(20px, 6vw, 80px);
   --umsc-container: 1280px;
   /* Fonts — map to the next/font variables umsc-layout.tsx loads */
-  --font-serif: var(--font-umsc-serif), "Marcellus", Georgia, "Times New Roman", serif;
+  --font-serif:
+    var(--font-umsc-serif), "Marcellus", Georgia, "Times New Roman", serif;
   --font-sans: var(--font-umsc-sans), "Work Sans", sans-serif;
   background: var(--umsc-paper);
   color: var(--umsc-ink);
@@ -11895,7 +12125,9 @@
   border-top-color: var(--umsc-line);
 }
 
-.umsc .umsc-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.umsc
+  .umsc-account
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
 .umsc .umsc-account textarea,
 .umsc .umsc-account [data-slot="select-trigger"] {
   background: var(--umsc-paper);
@@ -11904,7 +12136,11 @@
   color: var(--umsc-ink);
 }
 
-.umsc .umsc-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):focus-visible,
+.umsc
+  .umsc-account
+  input:not([type="checkbox"]):not([type="radio"]):not(
+    [type="submit"]
+  ):focus-visible,
 .umsc .umsc-account textarea:focus-visible,
 .umsc .umsc-account [data-slot="select-trigger"]:focus-visible {
   border-color: var(--umsc-purple);
@@ -11953,5 +12189,3 @@
     transition: none;
   }
 }
-
-

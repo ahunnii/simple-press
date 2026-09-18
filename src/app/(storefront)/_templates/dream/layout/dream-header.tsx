@@ -2,35 +2,43 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Menu } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import type { DreamNavItem } from "./dream-nav-overlay";
+import type { DreamNavItem } from "../lib/nav";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { UserButton } from "~/components/auth/user/user-button";
 
+import { isDreamNavActive, resolveDreamNav } from "../lib/nav";
 import { resolveDreamFields } from "../lib/resolve-fields";
 import { DreamNavOverlay } from "./dream-nav-overlay";
 
 /**
- * Sticky translucent header (design.md "Chrome › Header"): desktop grid
- * `1fr auto 1fr` — Services · Gallery left, mini logo centered, About +
- * Estimate Quote pill right (UserButton before the pill when signed in).
- * Below 960px collapses to logo left / hamburger right, opening
- * `DreamNavOverlay`. The breakpoint and grid/flex switch live in the scoped
- * `.dream-header-*` CSS in globals.css, not Tailwind responsive classes, so
- * the 960px number lives in exactly one place.
+ * Sticky translucent header (design.md "Chrome › Header"). Desktop is a single
+ * flex row: logo then the Admin → Content → Navigation links on the left, and
+ * — pushed right by `margin-left:auto` — the account slot ("Sign in" when
+ * logged out, `UserButton` when signed in) followed by the Estimate Quote CTA
+ * pill. Nav entries with children open a hover/click dropdown.
+ *
+ * Below 960px only the logo and the hamburger show; the hamburger opens
+ * `DreamNavOverlay`. The breakpoint and the mobile/desktop flex switch live in
+ * the scoped `.dream-header-*` CSS in globals.css, not Tailwind responsive
+ * classes, so the 960px number lives in exactly one place.
  */
 export function DreamHeader({
   business,
   initialSession,
 }: DefaultHeaderTemplateProps) {
   const [open, setOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession(
     initialSession ?? null,
   );
@@ -45,11 +53,9 @@ export function DreamHeader({
     | Record<string, string>
     | undefined;
   const f = resolveDreamFields(customFields, [
-    "dream.global.gallery-link-url",
     "dream.global.header-cta-label",
     "dream.global.header-cta-url",
   ]);
-  const galleryUrl = f["dream.global.gallery-link-url"] ?? "/#gallery";
   const ctaLabel = f["dream.global.header-cta-label"] ?? "Estimate Quote";
   const ctaUrl = f["dream.global.header-cta-url"] ?? "/contact";
 
@@ -65,11 +71,95 @@ export function DreamHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  const navItems: DreamNavItem[] = [
-    { label: "Services", href: "/services" },
-    { label: "Gallery", href: galleryUrl },
-    { label: "About", href: "/about" },
-  ];
+  const navItems = resolveDreamNav(business?.siteContent?.navigationItems);
+
+  const renderNavItem = (item: DreamNavItem, i: number) => {
+    if (item.children?.length) {
+      const childActive = item.children.some((child) =>
+        isDreamNavActive(pathname, child.href),
+      );
+      const active = childActive || isDreamNavActive(pathname, item.href);
+      const dropdownId = `dream-nav-dropdown-${i}`;
+      const isOpen = openDropdown === i;
+
+      return (
+        <div
+          key={item.href + item.label}
+          className="dream-header-dropdown-wrap"
+          onMouseEnter={() => setOpenDropdown(i)}
+          onMouseLeave={() => setOpenDropdown(null)}
+          onBlur={(e) => {
+            // Close once focus has left the wrapper entirely.
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+              setOpenDropdown(null);
+            }
+          }}
+          onKeyDown={(e) => {
+            // Escape closes but leaves focus on the trigger inside the wrapper.
+            if (e.key === "Escape" && openDropdown === i) {
+              e.stopPropagation();
+              setOpenDropdown(null);
+            }
+          }}
+        >
+          <button
+            type="button"
+            className="dream-header-link dream-header-dropdown-trigger"
+            aria-haspopup="true"
+            aria-expanded={isOpen}
+            aria-controls={dropdownId}
+            data-active={active ? "true" : undefined}
+            onClick={() => setOpenDropdown(isOpen ? null : i)}
+          >
+            {item.label}
+            <ChevronDown className="h-3 w-3" aria-hidden="true" />
+          </button>
+
+          {isOpen ? (
+            <div id={dropdownId} className="dream-header-dropdown" role="group">
+              {item.children.map((child) => {
+                const childIsActive = isDreamNavActive(pathname, child.href);
+                return (
+                  <Link
+                    key={child.href + child.label}
+                    href={child.href}
+                    target={child.external ? "_blank" : undefined}
+                    rel={child.external ? "noopener noreferrer" : undefined}
+                    aria-current={childIsActive ? "page" : undefined}
+                    onClick={() => setOpenDropdown(null)}
+                    className="dream-header-dropdown-link"
+                  >
+                    {child.label}
+                    {child.external ? (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
+    const active = isDreamNavActive(pathname, item.href);
+    return (
+      <Link
+        key={item.href + item.label}
+        href={item.href}
+        target={item.external ? "_blank" : undefined}
+        rel={item.external ? "noopener noreferrer" : undefined}
+        aria-current={active ? "page" : undefined}
+        data-active={active ? "true" : undefined}
+        className="dream-header-link"
+      >
+        {item.label}
+        {item.external ? (
+          <span className="sr-only"> (opens in new tab)</span>
+        ) : null}
+      </Link>
+    );
+  };
 
   return (
     <>
@@ -78,17 +168,6 @@ export function DreamHeader({
         {...sectionGroupAttr("global", "branding")}
       >
         <div className="dream-header-inner">
-          <div className="dream-header-cell dream-header-cell--left">
-            <nav className="dream-header-links" aria-label="Primary">
-              <Link href="/services" className="dream-header-link">
-                Services
-              </Link>
-              <Link href={galleryUrl} className="dream-header-link">
-                Gallery
-              </Link>
-            </nav>
-          </div>
-
           <Link
             href="/"
             aria-label={`${businessName} — Home`}
@@ -103,13 +182,13 @@ export function DreamHeader({
             />
           </Link>
 
-          <div className="dream-header-cell dream-header-cell--right">
-            <nav className="dream-header-links" aria-label="Secondary">
-              <Link href="/about" className="dream-header-link">
-                About
-              </Link>
+          <div className="dream-header-cell dream-header-cell--left">
+            <nav className="dream-header-links" aria-label="Primary">
+              {navItems.map(renderNavItem)}
             </nav>
+          </div>
 
+          <div className="dream-header-cell dream-header-cell--right">
             {!isPending && session?.user ? (
               <UserButton
                 size="icon"
@@ -136,6 +215,15 @@ export function DreamHeader({
                     : []),
                 ]}
               />
+            ) : null}
+
+            {accountsEnabled && !isPending && !session?.user ? (
+              <Link
+                href={`${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signIn}`}
+                className="dream-header-link dream-header-signin"
+              >
+                Sign in
+              </Link>
             ) : null}
 
             <Link
@@ -171,6 +259,7 @@ export function DreamHeader({
         logoAlt={logoAlt}
         ctaLabel={ctaLabel}
         ctaUrl={ctaUrl}
+        socialLinks={business?.siteContent?.socialLinks}
         initialSession={initialSession}
         accountsEnabled={accountsEnabled}
         ordersEnabled={ordersEnabled}

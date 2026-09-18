@@ -66,8 +66,12 @@ function sprite(name: string, soft?: boolean): string {
  * (design.md → Motion / Cloud system, "Hero preset (revised 2026-09-17, a
  * few more clouds)": 7 clouds + 2 wisps total). The two reference near
  * clouds stay first in the array so `DreamClouds`' default `eager={2}`
- * keeps loading exactly them. Vertical positions now spread 8–88% down the
- * hero; durations 26–48s (near→far). `rest` values (the parked position
+ * keeps loading exactly them. Durations 26–48s (near→far). Vertical
+ * positions were re-tuned for the Sky shelf hero (2026-09-18): the sharp
+ * near clouds sit high (4–8%), the soft far layers hold the 30–51%
+ * mid-band, and the two floor wisps (66% / 70%) plus the one sharp low
+ * cloud (90%) sit just above the photo shelf — nothing sharp crosses the
+ * headline. `rest` values (the parked position
  * under reduced motion) keep every cloud's [rest, rest+w] span clear of
  * the protected center 640px column at 1440px wide (x ∈ [400, 1040]).
  * Negative delays are chosen so at first paint 4 clouds are solidly in
@@ -80,7 +84,7 @@ const hero: DreamCloudSprite[] = [
   {
     sprite: sprite("cloud-1"),
     w: 540,
-    top: "8%",
+    top: "4%",
     op: 0.95,
     dur: 26,
     delay: -10,
@@ -90,7 +94,7 @@ const hero: DreamCloudSprite[] = [
   {
     sprite: sprite("cloud-3"),
     w: 620,
-    top: "25%",
+    top: "8%",
     op: 0.85,
     dur: 32,
     delay: -24,
@@ -112,7 +116,7 @@ const hero: DreamCloudSprite[] = [
   {
     sprite: sprite("cloud-2", true),
     w: 960,
-    top: "75%",
+    top: "40%",
     op: 0.65,
     dur: 44,
     delay: -50,
@@ -124,7 +128,7 @@ const hero: DreamCloudSprite[] = [
   {
     sprite: sprite("wisp-1"),
     w: 620,
-    top: "84%",
+    top: "66%",
     op: 0.6,
     dur: 52,
     delay: -30,
@@ -147,7 +151,7 @@ const hero: DreamCloudSprite[] = [
   {
     sprite: sprite("cloud-2"),
     w: 480,
-    top: "62%",
+    top: "90%",
     op: 0.7,
     dur: 30,
     delay: -7,
@@ -159,7 +163,7 @@ const hero: DreamCloudSprite[] = [
   {
     sprite: sprite("cloud-1", true),
     w: 680,
-    top: "40%",
+    top: "30%",
     op: 0.5,
     dur: 48,
     delay: -22,
@@ -170,7 +174,7 @@ const hero: DreamCloudSprite[] = [
   {
     sprite: sprite("wisp-2"),
     w: 560,
-    top: "88%",
+    top: "70%",
     op: 0.45,
     dur: 58,
     delay: -5,
