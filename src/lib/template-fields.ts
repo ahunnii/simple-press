@@ -81,6 +81,7 @@ import {
   dreamData,
   dreamFieldGroups,
 } from "~/app/(storefront)/_templates/dream";
+import { umscData, umscFieldGroups } from "~/app/(storefront)/_templates/umsc";
 
 export type TemplatePage =
   | "homepage"
@@ -511,6 +512,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...relocationFieldGroups,
   ...wealthFieldGroups,
   ...dreamFieldGroups,
+  ...umscFieldGroups,
   ...oliveFieldGroups,
 
   ...defaultTemplateFieldGroups,
@@ -533,6 +535,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...relocationData,
   ...wealthData,
   ...dreamData,
+  ...umscData,
   ...oliveData,
 
   ...defaultTemplateData,

@@ -397,6 +397,30 @@ import { DreamMaintenancePage } from "./dream/maintenance/dream-maintenance-page
 import { DreamServicesIndexPage } from "./dream/services/dream-services-index-page";
 import { DreamTestimonialsPage } from "./dream/testimonials/dream-testimonials-page";
 import { DreamLayout } from "./dream/layout/dream-layout";
+// Unique Monique
+import { UmscAboutPage } from "./umsc/about/umsc-about-page";
+import { UmscAccountSecurityPage } from "./umsc/account/umsc-account-security-page";
+import { UmscAccountSettingsPage } from "./umsc/account/umsc-account-settings-page";
+import { UmscAddressBookPage } from "./umsc/account/umsc-address-book-page";
+import { UmscOrderDetailPage } from "./umsc/account/umsc-order-detail-page";
+import { UmscOrdersPage } from "./umsc/account/umsc-orders-page";
+import { UmscPreferencesPage } from "./umsc/account/umsc-preferences-page";
+import { UmscRewardsPage } from "./umsc/account/umsc-rewards-page";
+import { UmscSubscriptionsPage } from "./umsc/account/umsc-subscriptions-page";
+import { UmscCartPage } from "./umsc/cart-checkout/umsc-cart-page";
+import { UmscCheckoutPage } from "./umsc/cart-checkout/umsc-checkout-page";
+import { UmscCheckoutUnavailable } from "./umsc/cart-checkout/umsc-checkout-unavailable";
+import { UmscOrderSuccessPage } from "./umsc/cart-checkout/umsc-order-success-page";
+import { UmscCollectionPage } from "./umsc/collections/umsc-collection-page";
+import { UmscCollectionsPage } from "./umsc/collections/umsc-collections-page";
+import { UmscContactPage } from "./umsc/contact/umsc-contact-page";
+import { UmscFaqPage } from "./umsc/faq/umsc-faq-page";
+import { UmscGenericPage } from "./umsc/generic/umsc-generic-page";
+import { UmscLayout } from "./umsc/layout/umsc-layout";
+import { UmscMaintenancePage } from "./umsc/maintenance/umsc-maintenance-page";
+import { UmscProductPage } from "./umsc/products/umsc-product-page";
+import { UmscShopPage } from "./umsc/shop/umsc-shop-page";
+import { UmscTestimonialsPage } from "./umsc/testimonials/umsc-testimonials-page";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -752,6 +776,33 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrdersPage: DreamOrdersPage,
     PreferencesPage: DreamPreferencesPage,
     SubscriptionsPage: DreamSubscriptionsPage,
+  },
+  // Unique Monique — retail archetype (candles / soaps / body care / home care).
+  // Blog, events, videos, donate and services fall back to Default by scope.
+  umsc: {
+    Layout: UmscLayout,
+    AboutPage: UmscAboutPage,
+    ContactPage: UmscContactPage,
+    ShopPage: UmscShopPage,
+    ProductPage: UmscProductPage,
+    CollectionsPage: UmscCollectionsPage,
+    CollectionPage: UmscCollectionPage,
+    CartPage: UmscCartPage,
+    CheckoutPage: UmscCheckoutPage,
+    CheckoutUnavailable: UmscCheckoutUnavailable,
+    OrderSuccessPage: UmscOrderSuccessPage,
+    TestimonialsPage: UmscTestimonialsPage,
+    FaqPage: UmscFaqPage,
+    GenericPage: UmscGenericPage,
+    AccountSettingsPage: UmscAccountSettingsPage,
+    AccountSecurityPage: UmscAccountSecurityPage,
+    AddressBookPage: UmscAddressBookPage,
+    OrdersPage: UmscOrdersPage,
+    OrderDetailPage: UmscOrderDetailPage,
+    PreferencesPage: UmscPreferencesPage,
+    SubscriptionsPage: UmscSubscriptionsPage,
+    RewardsPage: UmscRewardsPage,
+    MaintenancePage: UmscMaintenancePage,
   },
 
   noise: {

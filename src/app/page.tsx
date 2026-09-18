@@ -52,6 +52,8 @@ import { WealthHomepage } from "./(storefront)/_templates/wealth/homepage/wealth
 import { WealthLayout } from "./(storefront)/_templates/wealth/layout/wealth-layout";
 import { DreamHomepage } from "./(storefront)/_templates/dream/homepage/dream-homepage";
 import { DreamLayout } from "./(storefront)/_templates/dream/layout/dream-layout";
+import { UmscHomepage } from "./(storefront)/_templates/umsc/homepage/umsc-homepage";
+import { UmscLayout } from "./(storefront)/_templates/umsc/layout/umsc-layout";
 
 // Next 15: searchParams is a Promise.
 type Props = {
@@ -123,6 +125,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       vii: ViiHomepage,
       wealth: WealthHomepage,
       dream: DreamHomepage,
+      umsc: UmscHomepage,
       olive: OliveHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
@@ -145,6 +148,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       vii: ViiLayout,
       wealth: WealthLayout,
       dream: DreamLayout,
+      umsc: UmscLayout,
       olive: OliveLayout,
     }[business.templateId] ?? DefaultLayout;
 

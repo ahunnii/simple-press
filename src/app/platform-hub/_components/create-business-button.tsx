@@ -43,6 +43,7 @@ const TEMPLATES = [
   { id: "wealth", label: "Detroit Community Wealth Fund" },
   { id: "olive", label: "Olive Mode" },
   { id: "dream", label: "Dream Your Theme" },
+  { id: "umsc", label: "Unique Monique" },
 ];
 
 const defaultValues: CreateBusinessFormData = {

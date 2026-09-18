@@ -11335,3 +11335,623 @@
     transform: none !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Unique Monique (umsc) — design tokens. Scoped to .umsc so they never bleed
+   into other templates. Palette/type/chrome/motion authority:
+   docs/templates/umsc/design.md.
+   ══════════════════════════════════════════════════════════════════════════ */
+.umsc {
+  /* Brand colors — design.md "Palette" */
+  --umsc-black: #050505; /* announcement bar, header, footer, hero ground, custom band */
+  --umsc-ink: #181411; /* headings, body, prices on light */
+  --umsc-muted: #665d54; /* secondary text, product type line, captions */
+  --umsc-paper: #fffaf2; /* page ground */
+  --umsc-white: #fffefd; /* card faces, inputs */
+  --umsc-cream: #f4eadc; /* alternating bands (story, faq), review cards */
+  --umsc-gold: #c79a28; /* pill fills, hairline-gold rules, stars, focus on black — never text on light */
+  --umsc-gold-ink: #765716; /* text-grade gold: prices, "Shop →" links, active nav on light */
+  --umsc-gold-soft: #e6c76b; /* text/links/wordmark on black */
+  --umsc-cream-on-black: #e7dccb; /* ledes/body on black surfaces */
+  --umsc-purple: #3d184e; /* New/Sale badge fill, wishlist heart, focus ring, open-accordion marker */
+  --umsc-line: rgba(24, 20, 17, 0.13); /* hairlines, card borders on light */
+  --umsc-line-gold: rgba(199, 154, 40, 0.35); /* rules on black, logo ring, image frames */
+  /* Derived — compute, don't hardcode */
+  --umsc-hairline: color-mix(in srgb, var(--umsc-ink) 12%, transparent);
+  /* Hero readability scrim — two static layers (never purple). Consumers set
+     `background-image: var(--umsc-scrim), var(--umsc-scrim-bottom);` */
+  --umsc-scrim: linear-gradient(90deg, rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 0.42) 50%, rgba(5, 5, 5, 0.22));
+  --umsc-scrim-bottom: linear-gradient(0deg, rgba(5, 5, 5, 0.7), transparent 45%);
+  /* Semantic state colors — constant across the palette */
+  --umsc-error: #a8322f;
+  --umsc-success: #2f6b3d;
+  /* Shape */
+  --radius: 0.2rem;
+  --umsc-radius-pill: 999px;
+  /* Motion — one shared exponential ease-out is the template's signature curve */
+  --umsc-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Layout scale */
+  --umsc-section-pad-y: clamp(56px, 8vw, 96px);
+  --umsc-section-pad-x: clamp(20px, 6vw, 80px);
+  --umsc-container: 1280px;
+  /* Fonts — map to the next/font variables umsc-layout.tsx loads */
+  --font-serif: var(--font-umsc-serif), "Marcellus", Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-umsc-sans), "Work Sans", sans-serif;
+  background: var(--umsc-paper);
+  color: var(--umsc-ink);
+}
+
+.umsc h1,
+.umsc h2,
+.umsc h3 {
+  text-wrap: balance;
+}
+
+.umsc p {
+  text-wrap: pretty;
+}
+
+/* Tabular numerals in money/cart/checkout/orders per design.md "Typography → Numerals" */
+.umsc .umsc-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Themed browser surfaces — design.md "Browser surfaces" ── */
+.umsc ::selection {
+  background: var(--umsc-gold-soft);
+  color: var(--umsc-ink);
+}
+
+.umsc {
+  caret-color: var(--umsc-gold-ink);
+}
+
+.umsc *:focus-visible {
+  outline: 2px solid var(--umsc-purple);
+  outline-offset: 2px;
+}
+
+.umsc .umsc-black-surface :focus-visible,
+.umsc .umsc-announcement-bar :focus-visible,
+.umsc .umsc-platform-banner :focus-visible,
+.umsc .umsc-hero :focus-visible,
+.umsc .umsc-header :focus-visible,
+.umsc .umsc-nav-dialog :focus-visible,
+.umsc footer :focus-visible {
+  outline-color: var(--umsc-gold);
+}
+
+.umsc a {
+  text-underline-offset: 0.18em;
+}
+
+/* Thin cream scrollbar inside the mobile nav dialog and any cart panel */
+.umsc .umsc-nav-dialog,
+.umsc .umsc-cart-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--umsc-line-gold) transparent;
+}
+
+.umsc .umsc-nav-dialog::-webkit-scrollbar,
+.umsc .umsc-cart-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.umsc .umsc-nav-dialog::-webkit-scrollbar-thumb,
+.umsc .umsc-cart-panel::-webkit-scrollbar-thumb {
+  background: var(--umsc-line-gold);
+  border-radius: 999px;
+}
+
+/* ── Scroll-reveal system — armed only once useUmscReveal adds `.umsc-js` to
+   the scope root. Without JS the base rule never applies, so content stays
+   fully visible (progressive enhancement — never a blank section). ── */
+.umsc.umsc-js .umsc-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.55s var(--umsc-ease),
+    transform 0.55s var(--umsc-ease);
+}
+
+.umsc.umsc-js .umsc-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.umsc.umsc-js .umsc-reveal-group .umsc-reveal-item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s var(--umsc-ease),
+    transform 0.5s var(--umsc-ease);
+}
+
+.umsc.umsc-js .umsc-reveal-group.is-visible .umsc-reveal-item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Generic gold-hairline "draw" used by the hero handoff and any band that
+   opens with a rule scaling in from the left (design.md "Custom band"). */
+.umsc.umsc-js .umsc-hairline-draw {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s var(--umsc-ease);
+}
+
+.umsc.umsc-js .umsc-hairline-draw.is-visible {
+  transform: scaleX(1);
+}
+
+/* ── Hero — the one authored moment (design.md "Motion → Hero") ── */
+.umsc .umsc-hero-scrim {
+  background-image: var(--umsc-scrim), var(--umsc-scrim-bottom);
+  pointer-events: none;
+}
+
+@keyframes umsc-film {
+  0% {
+    transform: scale(1.02) translateX(-12px);
+  }
+  100% {
+    transform: scale(1.07) translateX(12px);
+  }
+}
+
+.umsc .umsc-hero-film {
+  /* Continuous drift reads smoother with a symmetric ease on `alternate`
+     than the template's asymmetric exponential ease-out. */
+  animation: umsc-film 24s ease-in-out infinite alternate;
+}
+
+/* Entrance: gated on `.umsc-js` so the hero is fully visible pre-hydration.
+   Each element's `transition-delay` (set inline: 0/100/200ms) staggers the
+   headline → lede → buttons sequence. */
+.umsc.umsc-js .umsc-hero-rise {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.7s var(--umsc-ease),
+    transform 0.7s var(--umsc-ease);
+}
+
+.umsc.umsc-js .umsc-hero-rise[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* The bottom-edge hairline draws in last, handing off to the section below. */
+.umsc.umsc-js .umsc-hero-hairline {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.9s var(--umsc-ease);
+  transition-delay: 0.3s;
+}
+
+.umsc.umsc-js .umsc-hero-hairline[data-visible="true"] {
+  transform: scaleX(1);
+}
+
+/* ── Header — solid black, sticky, shrinks 88→72px on scroll (padding
+   transition lives inline via Tailwind's `transition-[padding]`); sliding
+   gold underline on nav links. ── */
+.umsc .umsc-nav-link {
+  position: relative;
+}
+
+.umsc .umsc-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: var(--umsc-gold);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.22s var(--umsc-ease);
+}
+
+.umsc .umsc-nav-link:hover,
+.umsc .umsc-nav-link:focus-visible,
+.umsc .umsc-nav-link[data-current="true"] {
+  color: var(--umsc-gold-soft);
+}
+
+.umsc .umsc-nav-link:hover::after,
+.umsc .umsc-nav-link:focus-visible::after,
+.umsc .umsc-nav-link[data-current="true"]::after {
+  transform: scaleX(1);
+}
+
+/* Cart badge — pulses once when the count increases (`data-bump` toggled by
+   umsc-header.tsx for 320ms). */
+@keyframes umsc-pulse {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.umsc .umsc-cart-badge[data-bump="true"] {
+  animation: umsc-pulse 0.32s var(--umsc-ease);
+}
+
+/* Mobile nav dialog — slides in from the right; links stagger via nth-child. */
+@keyframes umsc-nav-dialog-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.umsc .umsc-nav-dialog {
+  animation: umsc-nav-dialog-in 0.32s var(--umsc-ease);
+}
+
+/* ── Buttons — gold pill / ghost pill / gold-ink link (design.md "Shared
+   component inventory → UmscButton") ── */
+/* Font-family utilities. Tailwind's `font-(family-name:…)` collides with
+   `font-<weight>` inside tailwind-merge (it classifies the arbitrary value as a
+   weight and drops one), so families ride these plain scoped classes. */
+.umsc .umsc-serif {
+  font-family: var(--font-serif);
+}
+.umsc .umsc-sans {
+  font-family: var(--font-sans);
+}
+
+/* Gold-ink links fail 4.5:1 on black — lift to gold-soft on black surfaces. */
+.umsc .umsc-black-surface .umsc-btn-link,
+.umsc .umsc-page-hero .umsc-btn-link,
+.umsc .umsc-hero .umsc-btn-link {
+  color: var(--umsc-gold-soft);
+}
+
+.umsc .umsc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition:
+    transform 0.2s var(--umsc-ease),
+    background-color 0.2s var(--umsc-ease),
+    color 0.2s var(--umsc-ease),
+    box-shadow 0.2s var(--umsc-ease);
+}
+
+.umsc .umsc-btn:hover,
+.umsc .umsc-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -18px rgba(5, 5, 5, 0.5);
+}
+
+.umsc .umsc-btn-gold,
+.umsc .umsc-btn-ghost {
+  min-height: 44px; /* craft floor: 44px targets (reviewer A) */
+  padding: 12px 28px;
+  border-radius: var(--umsc-radius-pill);
+}
+
+.umsc .umsc-btn-gold {
+  background: var(--umsc-gold);
+  color: var(--umsc-black);
+}
+
+.umsc .umsc-btn-gold:hover,
+.umsc .umsc-btn-gold:focus-visible {
+  background: var(--umsc-gold-ink);
+  color: var(--umsc-white);
+}
+
+.umsc .umsc-btn-ghost {
+  background: transparent;
+  border-color: currentColor;
+  color: var(--umsc-ink);
+}
+
+.umsc .umsc-btn-ghost:hover,
+.umsc .umsc-btn-ghost:focus-visible {
+  background: var(--umsc-gold-ink);
+  border-color: var(--umsc-gold-ink);
+  color: var(--umsc-white);
+}
+
+.umsc .umsc-btn-ghost-onblack {
+  color: var(--umsc-cream-on-black);
+}
+
+.umsc .umsc-btn-ghost-onblack:hover,
+.umsc .umsc-btn-ghost-onblack:focus-visible {
+  background: var(--umsc-gold);
+  border-color: var(--umsc-gold);
+  color: var(--umsc-black);
+}
+
+.umsc .umsc-btn-link {
+  padding: 0;
+  color: var(--umsc-gold-ink);
+}
+
+.umsc .umsc-btn-link:hover,
+.umsc .umsc-btn-link:focus-visible {
+  transform: none;
+  box-shadow: none;
+  color: var(--umsc-ink);
+}
+
+.umsc .umsc-btn-link .umsc-btn-link-arrow {
+  transition: transform 0.2s var(--umsc-ease);
+}
+
+.umsc .umsc-btn-link:hover .umsc-btn-link-arrow,
+.umsc .umsc-btn-link:focus-visible .umsc-btn-link-arrow {
+  transform: translateX(4px);
+}
+
+/* ── Product card (design.md "UmscProductCard") ── */
+.umsc .umsc-product-card-img {
+  transition: transform 0.5s var(--umsc-ease);
+}
+
+.umsc .umsc-product-card:hover .umsc-product-card-img,
+.umsc .umsc-product-card:focus-within .umsc-product-card-img {
+  transform: scale(1.03);
+}
+
+.umsc .umsc-product-card-add {
+  border-radius: 999px;
+  color: var(--umsc-ink);
+}
+
+/* ── Collection door — "Shop →" arrow nudges 4px right on hover ── */
+.umsc .umsc-door-arrow {
+  display: inline-block;
+  transition: transform 0.2s var(--umsc-ease);
+}
+
+.umsc a:hover .umsc-door-arrow,
+.umsc a:focus-visible .umsc-door-arrow {
+  transform: translateX(4px);
+}
+
+/* ── Accordion (design.md "UmscAccordion") — grid-rows height transition,
+   plus rotates to minus, purple marker on the open row. ── */
+.umsc .umsc-accordion {
+  border-top: 1px solid var(--umsc-hairline);
+}
+
+.umsc .umsc-accordion-row {
+  position: relative;
+  border-bottom: 1px solid var(--umsc-hairline);
+  padding-left: 14px;
+}
+
+.umsc .umsc-accordion-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.2s var(--umsc-ease);
+}
+
+.umsc .umsc-accordion-row[data-open]::before {
+  background: var(--umsc-purple);
+}
+
+.umsc .umsc-accordion-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--umsc-ink);
+  text-align: left;
+}
+
+.umsc .umsc-accordion-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.umsc .umsc-accordion-icon-h,
+.umsc .umsc-accordion-icon-v {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: var(--umsc-gold-ink);
+  transform: translate(-50%, -50%);
+}
+
+.umsc .umsc-accordion-icon-h {
+  width: 14px;
+  height: 1.5px;
+}
+
+.umsc .umsc-accordion-icon-v {
+  width: 1.5px;
+  height: 14px;
+  transition: transform 0.2s var(--umsc-ease);
+}
+
+.umsc .umsc-accordion-row[data-open] .umsc-accordion-icon-v {
+  transform: translate(-50%, -50%) rotate(90deg);
+  opacity: 0;
+}
+
+.umsc .umsc-accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s var(--umsc-ease);
+}
+
+.umsc .umsc-accordion-row[data-open] .umsc-accordion-panel {
+  grid-template-rows: 1fr;
+}
+
+.umsc .umsc-accordion-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.umsc .umsc-accordion-row[data-open] .umsc-accordion-panel-inner {
+  padding-bottom: 20px;
+}
+
+.umsc .umsc-accordion-panel-inner > * {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--umsc-muted);
+}
+
+/* ── Account section — bridge umsc tokens onto shadcn variables so shared
+   account content (better-auth-ui cards, AddressBookContent) is on-brand:
+   white cards, hairlines, black primary, purple ring. Structurally mirrors
+   the `.vii-account` bridge. Scoped to `.umsc-account` (the outermost
+   wrapper of a future UmscAccountLayout). ── */
+.umsc .umsc-account {
+  --background: var(--umsc-paper);
+  --foreground: var(--umsc-ink);
+  --card: var(--umsc-white);
+  --card-foreground: var(--umsc-ink);
+  --popover: var(--umsc-white);
+  --popover-foreground: var(--umsc-ink);
+  --primary: var(--umsc-black);
+  --primary-foreground: var(--umsc-paper);
+  --secondary: var(--umsc-cream);
+  --secondary-foreground: var(--umsc-ink);
+  --muted: var(--umsc-cream);
+  --muted-foreground: var(--umsc-muted);
+  --accent: var(--umsc-cream);
+  --accent-foreground: var(--umsc-ink);
+  --destructive: var(--umsc-error);
+  --border: var(--umsc-line);
+  --input: var(--umsc-line);
+  --ring: var(--umsc-purple);
+  --radius: 0.2rem;
+  font-family: var(--font-sans);
+}
+
+.umsc .umsc-account [data-slot="card"] {
+  background: var(--umsc-white);
+  border: 1px solid var(--umsc-line);
+  border-radius: 0.2rem;
+  box-shadow: none;
+}
+
+.umsc .umsc-account h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--umsc-ink);
+}
+
+.umsc .umsc-account [data-slot="item"] {
+  border-color: var(--umsc-line);
+}
+
+.umsc .umsc-account [data-slot="item-separator"] {
+  background: var(--umsc-line);
+}
+
+.umsc .umsc-account [data-slot="field-label"] {
+  color: var(--umsc-muted);
+}
+
+.umsc .umsc-account [data-slot="card-footer"] {
+  border-top-color: var(--umsc-line);
+}
+
+.umsc .umsc-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.umsc .umsc-account textarea,
+.umsc .umsc-account [data-slot="select-trigger"] {
+  background: var(--umsc-paper);
+  border: 1px solid var(--umsc-line);
+  border-radius: 0.2rem;
+  color: var(--umsc-ink);
+}
+
+.umsc .umsc-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):focus-visible,
+.umsc .umsc-account textarea:focus-visible,
+.umsc .umsc-account [data-slot="select-trigger"]:focus-visible {
+  border-color: var(--umsc-purple);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--umsc-purple);
+}
+
+/* ── Reduced motion (WCAG 2.3.3) — every animation above rendered settled;
+   hover transforms and stagger off; accordion snaps. ── */
+@media (prefers-reduced-motion: reduce) {
+  .umsc-js .umsc-reveal,
+  .umsc-js .umsc-reveal-group .umsc-reveal-item,
+  .umsc-js .umsc-hairline-draw,
+  .umsc-js .umsc-hero-rise,
+  .umsc-js .umsc-hero-hairline {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .umsc-hero-film {
+    animation: none;
+    transform: none;
+  }
+
+  .umsc-nav-dialog {
+    animation: none;
+  }
+
+  .umsc .umsc-btn:hover,
+  .umsc .umsc-btn:focus-visible,
+  .umsc .umsc-product-card:hover .umsc-product-card-img,
+  .umsc .umsc-product-card:focus-within .umsc-product-card-img,
+  .umsc a:hover .umsc-door-arrow,
+  .umsc a:focus-visible .umsc-door-arrow {
+    transform: none;
+  }
+
+  .umsc .umsc-cart-badge[data-bump="true"] {
+    animation: none;
+  }
+
+  .umsc .umsc-accordion-panel,
+  .umsc .umsc-accordion-icon-v,
+  .umsc .umsc-accordion-row::before {
+    transition: none;
+  }
+}
+
+
