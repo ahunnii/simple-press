@@ -103,9 +103,9 @@ export type Event = $Result.DefaultSelection<Prisma.$EventPayload>
  * ("channel" | "playlist") rather than an enum to keep this additive and to avoid
  * a migration if a third feed shape ever shows up.
  * 
- * `autoPublish` decides only what `Video.published` is set to at INSERT time for
- * videos discovered through this source. Flipping it later does not retroactively
- * publish or unpublish anything — see the ownership note on `Video`.
+ * `autoPublish` and `publishRules` both decide only what `Video.published` is set to
+ * at INSERT time for videos discovered through this source. Flipping them later does
+ * not retroactively publish or unpublish anything — see the ownership note on `Video`.
  */
 export type VideoSource = $Result.DefaultSelection<Prisma.$VideoSourcePayload>
 /**
@@ -120,7 +120,7 @@ export type VideoSource = $Result.DefaultSelection<Prisma.$VideoSourcePayload>
  * SYNC-OWNED  (cron, rewritten on EVERY run):
  * title, description, thumbnailUrl, channelTitle, publishedAt
  * OWNER-OWNED (admin UI only, written by the cron ONLY at first insert):
- * titleOverride, descriptionOverride, thumbnailOverride, published, sortOrder
+ * titleOverride, descriptionOverride, thumbnailOverride, published, hiddenByRule, sortOrder
  * 
  * The sync upsert MUST list only the sync-owned columns in its `update` clause.
  * Renders resolve through the overrides — `titleOverride ?? title`,
@@ -26988,6 +26988,7 @@ export namespace Prisma {
     label: number
     enabled: number
     autoPublish: number
+    publishRules: number
     lastSyncedAt: number
     lastSyncError: number
     businessId: number
@@ -27032,6 +27033,7 @@ export namespace Prisma {
     label?: true
     enabled?: true
     autoPublish?: true
+    publishRules?: true
     lastSyncedAt?: true
     lastSyncError?: true
     businessId?: true
@@ -27119,6 +27121,7 @@ export namespace Prisma {
     label: string | null
     enabled: boolean
     autoPublish: boolean
+    publishRules: JsonValue | null
     lastSyncedAt: Date | null
     lastSyncError: string | null
     businessId: string
@@ -27150,6 +27153,7 @@ export namespace Prisma {
     label?: boolean
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: boolean
     lastSyncedAt?: boolean
     lastSyncError?: boolean
     businessId?: boolean
@@ -27167,6 +27171,7 @@ export namespace Prisma {
     label?: boolean
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: boolean
     lastSyncedAt?: boolean
     lastSyncError?: boolean
     businessId?: boolean
@@ -27182,6 +27187,7 @@ export namespace Prisma {
     label?: boolean
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: boolean
     lastSyncedAt?: boolean
     lastSyncError?: boolean
     businessId?: boolean
@@ -27197,12 +27203,13 @@ export namespace Prisma {
     label?: boolean
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: boolean
     lastSyncedAt?: boolean
     lastSyncError?: boolean
     businessId?: boolean
   }
 
-  export type VideoSourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "kind" | "externalId" | "label" | "enabled" | "autoPublish" | "lastSyncedAt" | "lastSyncError" | "businessId", ExtArgs["result"]["videoSource"]>
+  export type VideoSourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "kind" | "externalId" | "label" | "enabled" | "autoPublish" | "publishRules" | "lastSyncedAt" | "lastSyncError" | "businessId", ExtArgs["result"]["videoSource"]>
   export type VideoSourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     videos?: boolean | VideoSource$videosArgs<ExtArgs>
@@ -27230,6 +27237,7 @@ export namespace Prisma {
       label: string | null
       enabled: boolean
       autoPublish: boolean
+      publishRules: Prisma.JsonValue | null
       lastSyncedAt: Date | null
       lastSyncError: string | null
       businessId: string
@@ -27666,6 +27674,7 @@ export namespace Prisma {
     readonly label: FieldRef<"VideoSource", 'String'>
     readonly enabled: FieldRef<"VideoSource", 'Boolean'>
     readonly autoPublish: FieldRef<"VideoSource", 'Boolean'>
+    readonly publishRules: FieldRef<"VideoSource", 'Json'>
     readonly lastSyncedAt: FieldRef<"VideoSource", 'DateTime'>
     readonly lastSyncError: FieldRef<"VideoSource", 'String'>
     readonly businessId: FieldRef<"VideoSource", 'String'>
@@ -28141,6 +28150,7 @@ export namespace Prisma {
     descriptionOverride: string | null
     thumbnailOverride: string | null
     published: boolean | null
+    hiddenByRule: boolean | null
     sortOrder: number | null
     sourceId: string | null
     businessId: string | null
@@ -28160,6 +28170,7 @@ export namespace Prisma {
     descriptionOverride: string | null
     thumbnailOverride: string | null
     published: boolean | null
+    hiddenByRule: boolean | null
     sortOrder: number | null
     sourceId: string | null
     businessId: string | null
@@ -28179,6 +28190,7 @@ export namespace Prisma {
     descriptionOverride: number
     thumbnailOverride: number
     published: number
+    hiddenByRule: number
     sortOrder: number
     sourceId: number
     businessId: number
@@ -28208,6 +28220,7 @@ export namespace Prisma {
     descriptionOverride?: true
     thumbnailOverride?: true
     published?: true
+    hiddenByRule?: true
     sortOrder?: true
     sourceId?: true
     businessId?: true
@@ -28227,6 +28240,7 @@ export namespace Prisma {
     descriptionOverride?: true
     thumbnailOverride?: true
     published?: true
+    hiddenByRule?: true
     sortOrder?: true
     sourceId?: true
     businessId?: true
@@ -28246,6 +28260,7 @@ export namespace Prisma {
     descriptionOverride?: true
     thumbnailOverride?: true
     published?: true
+    hiddenByRule?: true
     sortOrder?: true
     sourceId?: true
     businessId?: true
@@ -28352,6 +28367,7 @@ export namespace Prisma {
     descriptionOverride: string | null
     thumbnailOverride: string | null
     published: boolean
+    hiddenByRule: boolean
     sortOrder: number
     sourceId: string | null
     businessId: string
@@ -28390,6 +28406,7 @@ export namespace Prisma {
     descriptionOverride?: boolean
     thumbnailOverride?: boolean
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: boolean
     sourceId?: boolean
     businessId?: boolean
@@ -28411,6 +28428,7 @@ export namespace Prisma {
     descriptionOverride?: boolean
     thumbnailOverride?: boolean
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: boolean
     sourceId?: boolean
     businessId?: boolean
@@ -28432,6 +28450,7 @@ export namespace Prisma {
     descriptionOverride?: boolean
     thumbnailOverride?: boolean
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: boolean
     sourceId?: boolean
     businessId?: boolean
@@ -28453,12 +28472,13 @@ export namespace Prisma {
     descriptionOverride?: boolean
     thumbnailOverride?: boolean
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: boolean
     sourceId?: boolean
     businessId?: boolean
   }
 
-  export type VideoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "youtubeId" | "title" | "description" | "thumbnailUrl" | "channelTitle" | "publishedAt" | "titleOverride" | "descriptionOverride" | "thumbnailOverride" | "published" | "sortOrder" | "sourceId" | "businessId", ExtArgs["result"]["video"]>
+  export type VideoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "youtubeId" | "title" | "description" | "thumbnailUrl" | "channelTitle" | "publishedAt" | "titleOverride" | "descriptionOverride" | "thumbnailOverride" | "published" | "hiddenByRule" | "sortOrder" | "sourceId" | "businessId", ExtArgs["result"]["video"]>
   export type VideoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     source?: boolean | Video$sourceArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -28492,6 +28512,7 @@ export namespace Prisma {
       descriptionOverride: string | null
       thumbnailOverride: string | null
       published: boolean
+      hiddenByRule: boolean
       sortOrder: number
       sourceId: string | null
       businessId: string
@@ -28933,6 +28954,7 @@ export namespace Prisma {
     readonly descriptionOverride: FieldRef<"Video", 'String'>
     readonly thumbnailOverride: FieldRef<"Video", 'String'>
     readonly published: FieldRef<"Video", 'Boolean'>
+    readonly hiddenByRule: FieldRef<"Video", 'Boolean'>
     readonly sortOrder: FieldRef<"Video", 'Int'>
     readonly sourceId: FieldRef<"Video", 'String'>
     readonly businessId: FieldRef<"Video", 'String'>
@@ -73321,6 +73343,7 @@ export namespace Prisma {
     label: 'label',
     enabled: 'enabled',
     autoPublish: 'autoPublish',
+    publishRules: 'publishRules',
     lastSyncedAt: 'lastSyncedAt',
     lastSyncError: 'lastSyncError',
     businessId: 'businessId'
@@ -73343,6 +73366,7 @@ export namespace Prisma {
     descriptionOverride: 'descriptionOverride',
     thumbnailOverride: 'thumbnailOverride',
     published: 'published',
+    hiddenByRule: 'hiddenByRule',
     sortOrder: 'sortOrder',
     sourceId: 'sourceId',
     businessId: 'businessId'
@@ -76248,6 +76272,7 @@ export namespace Prisma {
     label?: StringNullableFilter<"VideoSource"> | string | null
     enabled?: BoolFilter<"VideoSource"> | boolean
     autoPublish?: BoolFilter<"VideoSource"> | boolean
+    publishRules?: JsonNullableFilter<"VideoSource">
     lastSyncedAt?: DateTimeNullableFilter<"VideoSource"> | Date | string | null
     lastSyncError?: StringNullableFilter<"VideoSource"> | string | null
     businessId?: StringFilter<"VideoSource"> | string
@@ -76264,6 +76289,7 @@ export namespace Prisma {
     label?: SortOrderInput | SortOrder
     enabled?: SortOrder
     autoPublish?: SortOrder
+    publishRules?: SortOrderInput | SortOrder
     lastSyncedAt?: SortOrderInput | SortOrder
     lastSyncError?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -76284,6 +76310,7 @@ export namespace Prisma {
     label?: StringNullableFilter<"VideoSource"> | string | null
     enabled?: BoolFilter<"VideoSource"> | boolean
     autoPublish?: BoolFilter<"VideoSource"> | boolean
+    publishRules?: JsonNullableFilter<"VideoSource">
     lastSyncedAt?: DateTimeNullableFilter<"VideoSource"> | Date | string | null
     lastSyncError?: StringNullableFilter<"VideoSource"> | string | null
     businessId?: StringFilter<"VideoSource"> | string
@@ -76300,6 +76327,7 @@ export namespace Prisma {
     label?: SortOrderInput | SortOrder
     enabled?: SortOrder
     autoPublish?: SortOrder
+    publishRules?: SortOrderInput | SortOrder
     lastSyncedAt?: SortOrderInput | SortOrder
     lastSyncError?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -76320,6 +76348,7 @@ export namespace Prisma {
     label?: StringNullableWithAggregatesFilter<"VideoSource"> | string | null
     enabled?: BoolWithAggregatesFilter<"VideoSource"> | boolean
     autoPublish?: BoolWithAggregatesFilter<"VideoSource"> | boolean
+    publishRules?: JsonNullableWithAggregatesFilter<"VideoSource">
     lastSyncedAt?: DateTimeNullableWithAggregatesFilter<"VideoSource"> | Date | string | null
     lastSyncError?: StringNullableWithAggregatesFilter<"VideoSource"> | string | null
     businessId?: StringWithAggregatesFilter<"VideoSource"> | string
@@ -76342,6 +76371,7 @@ export namespace Prisma {
     descriptionOverride?: StringNullableFilter<"Video"> | string | null
     thumbnailOverride?: StringNullableFilter<"Video"> | string | null
     published?: BoolFilter<"Video"> | boolean
+    hiddenByRule?: BoolFilter<"Video"> | boolean
     sortOrder?: IntFilter<"Video"> | number
     sourceId?: StringNullableFilter<"Video"> | string | null
     businessId?: StringFilter<"Video"> | string
@@ -76363,6 +76393,7 @@ export namespace Prisma {
     descriptionOverride?: SortOrderInput | SortOrder
     thumbnailOverride?: SortOrderInput | SortOrder
     published?: SortOrder
+    hiddenByRule?: SortOrder
     sortOrder?: SortOrder
     sourceId?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -76388,6 +76419,7 @@ export namespace Prisma {
     descriptionOverride?: StringNullableFilter<"Video"> | string | null
     thumbnailOverride?: StringNullableFilter<"Video"> | string | null
     published?: BoolFilter<"Video"> | boolean
+    hiddenByRule?: BoolFilter<"Video"> | boolean
     sortOrder?: IntFilter<"Video"> | number
     sourceId?: StringNullableFilter<"Video"> | string | null
     businessId?: StringFilter<"Video"> | string
@@ -76409,6 +76441,7 @@ export namespace Prisma {
     descriptionOverride?: SortOrderInput | SortOrder
     thumbnailOverride?: SortOrderInput | SortOrder
     published?: SortOrder
+    hiddenByRule?: SortOrder
     sortOrder?: SortOrder
     sourceId?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -76436,6 +76469,7 @@ export namespace Prisma {
     descriptionOverride?: StringNullableWithAggregatesFilter<"Video"> | string | null
     thumbnailOverride?: StringNullableWithAggregatesFilter<"Video"> | string | null
     published?: BoolWithAggregatesFilter<"Video"> | boolean
+    hiddenByRule?: BoolWithAggregatesFilter<"Video"> | boolean
     sortOrder?: IntWithAggregatesFilter<"Video"> | number
     sourceId?: StringNullableWithAggregatesFilter<"Video"> | string | null
     businessId?: StringWithAggregatesFilter<"Video"> | string
@@ -82599,6 +82633,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
     business: BusinessCreateNestedOneWithoutVideoSourcesInput
@@ -82614,6 +82649,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
     businessId: string
@@ -82629,6 +82665,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutVideoSourcesNestedInput
@@ -82644,6 +82681,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -82659,6 +82697,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
     businessId: string
@@ -82673,6 +82712,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -82686,6 +82726,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -82705,6 +82746,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     source?: VideoSourceCreateNestedOneWithoutVideosInput
     business: BusinessCreateNestedOneWithoutVideosInput
@@ -82724,6 +82766,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     sourceId?: string | null
     businessId: string
@@ -82743,6 +82786,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     source?: VideoSourceUpdateOneWithoutVideosNestedInput
     business?: BusinessUpdateOneRequiredWithoutVideosNestedInput
@@ -82762,6 +82806,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -82781,6 +82826,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     sourceId?: string | null
     businessId: string
@@ -82800,6 +82846,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
   }
 
@@ -82817,6 +82864,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -88909,6 +88957,7 @@ export namespace Prisma {
     label?: SortOrder
     enabled?: SortOrder
     autoPublish?: SortOrder
+    publishRules?: SortOrder
     lastSyncedAt?: SortOrder
     lastSyncError?: SortOrder
     businessId?: SortOrder
@@ -88966,6 +89015,7 @@ export namespace Prisma {
     descriptionOverride?: SortOrder
     thumbnailOverride?: SortOrder
     published?: SortOrder
+    hiddenByRule?: SortOrder
     sortOrder?: SortOrder
     sourceId?: SortOrder
     businessId?: SortOrder
@@ -88989,6 +89039,7 @@ export namespace Prisma {
     descriptionOverride?: SortOrder
     thumbnailOverride?: SortOrder
     published?: SortOrder
+    hiddenByRule?: SortOrder
     sortOrder?: SortOrder
     sourceId?: SortOrder
     businessId?: SortOrder
@@ -89008,6 +89059,7 @@ export namespace Prisma {
     descriptionOverride?: SortOrder
     thumbnailOverride?: SortOrder
     published?: SortOrder
+    hiddenByRule?: SortOrder
     sortOrder?: SortOrder
     sourceId?: SortOrder
     businessId?: SortOrder
@@ -98510,6 +98562,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     source?: VideoSourceCreateNestedOneWithoutVideosInput
   }
@@ -98528,6 +98581,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     sourceId?: string | null
   }
@@ -98551,6 +98605,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
     videos?: VideoCreateNestedManyWithoutSourceInput
@@ -98565,6 +98620,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
     videos?: VideoUncheckedCreateNestedManyWithoutSourceInput
@@ -99875,6 +99931,7 @@ export namespace Prisma {
     descriptionOverride?: StringNullableFilter<"Video"> | string | null
     thumbnailOverride?: StringNullableFilter<"Video"> | string | null
     published?: BoolFilter<"Video"> | boolean
+    hiddenByRule?: BoolFilter<"Video"> | boolean
     sortOrder?: IntFilter<"Video"> | number
     sourceId?: StringNullableFilter<"Video"> | string | null
     businessId?: StringFilter<"Video"> | string
@@ -99908,6 +99965,7 @@ export namespace Prisma {
     label?: StringNullableFilter<"VideoSource"> | string | null
     enabled?: BoolFilter<"VideoSource"> | boolean
     autoPublish?: BoolFilter<"VideoSource"> | boolean
+    publishRules?: JsonNullableFilter<"VideoSource">
     lastSyncedAt?: DateTimeNullableFilter<"VideoSource"> | Date | string | null
     lastSyncError?: StringNullableFilter<"VideoSource"> | string | null
     businessId?: StringFilter<"VideoSource"> | string
@@ -104555,6 +104613,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     business: BusinessCreateNestedOneWithoutVideosInput
   }
@@ -104573,6 +104632,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     businessId: string
   }
@@ -104817,6 +104877,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
     business: BusinessCreateNestedOneWithoutVideoSourcesInput
@@ -104831,6 +104892,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
     businessId: string
@@ -105060,6 +105122,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutVideoSourcesNestedInput
@@ -105074,6 +105137,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -122999,6 +123063,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     sourceId?: string | null
   }
@@ -123012,6 +123077,7 @@ export namespace Prisma {
     label?: string | null
     enabled?: boolean
     autoPublish?: boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: Date | string | null
     lastSyncError?: string | null
   }
@@ -124340,6 +124406,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     source?: VideoSourceUpdateOneWithoutVideosNestedInput
   }
@@ -124358,6 +124425,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -124376,6 +124444,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -124389,6 +124458,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
     videos?: VideoUpdateManyWithoutSourceNestedInput
@@ -124403,6 +124473,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
     videos?: VideoUncheckedUpdateManyWithoutSourceNestedInput
@@ -124417,6 +124488,7 @@ export namespace Prisma {
     label?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    publishRules?: NullableJsonNullValueInput | InputJsonValue
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -125856,6 +125928,7 @@ export namespace Prisma {
     descriptionOverride?: string | null
     thumbnailOverride?: string | null
     published?: boolean
+    hiddenByRule?: boolean
     sortOrder?: number
     businessId: string
   }
@@ -125874,6 +125947,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     business?: BusinessUpdateOneRequiredWithoutVideosNestedInput
   }
@@ -125892,6 +125966,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
   }
@@ -125910,6 +125985,7 @@ export namespace Prisma {
     descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
+    hiddenByRule?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
   }

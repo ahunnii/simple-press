@@ -1201,6 +1201,7 @@ export async function importStoreBundle(args: {
             label: source.label ?? null,
             enabled: source.enabled,
             autoPublish: source.autoPublish,
+            publishRules: source.publishRules ?? Prisma.DbNull,
           },
         });
         newId = existing.id;
@@ -1214,6 +1215,7 @@ export async function importStoreBundle(args: {
             label: source.label ?? null,
             enabled: source.enabled,
             autoPublish: source.autoPublish,
+            publishRules: source.publishRules ?? Prisma.DbNull,
           },
         });
         newId = created.id;
@@ -1267,6 +1269,7 @@ export async function importStoreBundle(args: {
         published: video.published,
         sortOrder: video.sortOrder,
         sourceId: resolvedSourceId,
+        hiddenByRule: video.hiddenByRule,
       };
 
       if (existing) {

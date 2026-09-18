@@ -450,6 +450,7 @@ exports.Prisma.VideoSourceScalarFieldEnum = {
   label: 'label',
   enabled: 'enabled',
   autoPublish: 'autoPublish',
+  publishRules: 'publishRules',
   lastSyncedAt: 'lastSyncedAt',
   lastSyncError: 'lastSyncError',
   businessId: 'businessId'
@@ -469,6 +470,7 @@ exports.Prisma.VideoScalarFieldEnum = {
   descriptionOverride: 'descriptionOverride',
   thumbnailOverride: 'thumbnailOverride',
   published: 'published',
+  hiddenByRule: 'hiddenByRule',
   sortOrder: 'sortOrder',
   sourceId: 'sourceId',
   businessId: 'businessId'

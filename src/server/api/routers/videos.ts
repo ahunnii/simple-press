@@ -1,8 +1,11 @@
+import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { PublishRules } from "~/lib/youtube/publish-rules";
 import { isUniqueConstraintError } from "~/lib/prisma-errors";
 import {
+  parseStoredPublishRules,
   videoCreateSchema,
   videoReorderSchema,
   videoSourceCreateSchema,
@@ -11,6 +14,7 @@ import {
 } from "~/lib/validators/videos";
 import { fetchVideoOembed } from "~/lib/youtube/oembed";
 import { parseSourceInput, parseYouTubeVideoId } from "~/lib/youtube/parse";
+import { evaluatePublishRules, hasAnyRule } from "~/lib/youtube/publish-rules";
 import { publishedVideoWhere } from "~/lib/youtube/query";
 import { resolveChannelHandle } from "~/lib/youtube/resolve-channel";
 import { syncOneSource } from "~/lib/youtube/sync";
@@ -21,6 +25,30 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+
+/**
+ * Normalizes an incoming `publishRules` value to Prisma's update semantics
+ * for the `Json?` column:
+ *
+ *   undefined                     → undefined  (key omitted — leave alone)
+ *   null / empty rule set         → Prisma.DbNull  (write NULL)
+ *   a rule set with any clause    → the object itself
+ *
+ * Plain `null` is a Prisma RUNTIME error for a `Json?` field — Prisma only
+ * accepts `Prisma.DbNull`/`Prisma.JsonNull` there, not the JS literal — so
+ * this can't be `?? null` like the string-override fields in
+ * `~/lib/validators/videos`. An all-empty parsed rule set (every clause
+ * cleared in the admin form) is collapsed to NULL too, per the `"none"` state
+ * in `parseStoredPublishRules` — a saved-then-cleared rule set must read back
+ * identically to a column that was never touched.
+ */
+function toPublishRulesWrite(
+  value: PublishRules | null | undefined,
+): Prisma.InputJsonValue | typeof Prisma.DbNull | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || !hasAnyRule(value)) return Prisma.DbNull;
+  return value;
+}
 
 export const videosRouter = createTRPCRouter({
   // ─── Admin: read ────────────────────────────────────────────────────────────
@@ -52,6 +80,7 @@ export const videosRouter = createTRPCRouter({
           channelTitle: true,
           publishedAt: true,
           published: true,
+          hiddenByRule: true,
           sortOrder: true,
           sourceId: true,
         },
@@ -165,7 +194,15 @@ export const videosRouter = createTRPCRouter({
 
       return ctx.db.video.update({
         where: { id },
-        data: updates,
+        // Publishing by hand clears the "Hidden by rule" badge — see the
+        // `hiddenByRule` docblock on the Video model in schema.prisma.
+        // Manually UNpublishing does NOT set it: `hiddenByRule` means
+        // specifically "the sync rules rejected this at insert", not "not
+        // currently published".
+        data: {
+          ...updates,
+          ...(updates.published === true ? { hiddenByRule: false } : {}),
+        },
       });
     }),
 
@@ -247,6 +284,7 @@ export const videosRouter = createTRPCRouter({
             externalId,
             label: input.label,
             autoPublish: input.autoPublish,
+            publishRules: toPublishRulesWrite(input.publishRules),
           },
         });
       } catch (error) {
@@ -281,7 +319,10 @@ export const videosRouter = createTRPCRouter({
 
       return ctx.db.videoSource.update({
         where: { id },
-        data: updates,
+        data: {
+          ...updates,
+          publishRules: toPublishRulesWrite(updates.publishRules),
+        },
       });
     }),
 
@@ -350,6 +391,108 @@ export const videosRouter = createTRPCRouter({
               : "Sync failed. See the source's error details.",
         });
       }
+    }),
+
+  /**
+   * Re-evaluates a source's CURRENT `publishRules` against its EXISTING
+   * videos and flips `published`/`hiddenByRule` to match — the owner just
+   * edited a rule set and wants it applied retroactively, not only to future
+   * syncs. Manual adds (`sourceId: null`) and videos on other sources are
+   * never touched (the `where` below is scoped to `source.id`).
+   *
+   * Deliberately the ONE place other than insert-time sync that writes
+   * `published`/`hiddenByRule` from rule evaluation — everywhere else,
+   * "rules only act at insert" (see the VideoSource model comment in
+   * schema.prisma). This is safe specifically because it's owner-triggered
+   * (the owner clicks a button after editing rules, sees a dry-run preview
+   * first), not something sync does silently on a timer. It sets `published`
+   * from the verdict alone, independent of `autoPublish` — the admin UI
+   * hides this action entirely when the source has no rules configured.
+   */
+  reapplyRules: ownerAdminProcedure
+    .use(featureGate("videos"))
+    .input(
+      z.object({ sourceId: z.string(), dryRun: z.boolean().default(false) }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const source = await ctx.db.videoSource.findUnique({
+        where: { id: input.sourceId, businessId },
+        select: {
+          id: true,
+          publishRules: true,
+          business: { select: { timeZone: true } },
+        },
+      });
+
+      if (!source) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Source not found" });
+      }
+
+      const stored = parseStoredPublishRules(source.publishRules);
+      if (stored.kind === "invalid") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "This source's publish rules could not be read — open Rules and save them again.",
+        });
+      }
+      const rules = stored.kind === "rules" ? stored.rules : null;
+      const timeZone = source.business.timeZone;
+
+      const videos = await ctx.db.video.findMany({
+        where: { businessId, sourceId: source.id },
+        select: {
+          id: true,
+          title: true,
+          publishedAt: true,
+          published: true,
+          hiddenByRule: true,
+        },
+      });
+
+      const toPublish: string[] = [];
+      const toHide: string[] = [];
+
+      for (const v of videos) {
+        // Evaluated against YouTube's own `title` — never `titleOverride` —
+        // per the doctrine in `~/lib/youtube/publish-rules`: a rule describes
+        // what the creator actually uploads, not what this app displays it as.
+        const { publish } = evaluatePublishRules(
+          rules,
+          { title: v.title, publishedAt: v.publishedAt },
+          { timeZone },
+        );
+
+        if (publish && (!v.published || v.hiddenByRule)) {
+          toPublish.push(v.id);
+        } else if (!publish && (v.published || !v.hiddenByRule)) {
+          toHide.push(v.id);
+        }
+      }
+
+      const counts = {
+        total: videos.length,
+        published: toPublish.length,
+        hidden: toHide.length,
+        unchanged: videos.length - toPublish.length - toHide.length,
+      };
+
+      if (input.dryRun) return counts;
+
+      await ctx.db.$transaction([
+        ctx.db.video.updateMany({
+          where: { id: { in: toPublish }, businessId },
+          data: { published: true, hiddenByRule: false },
+        }),
+        ctx.db.video.updateMany({
+          where: { id: { in: toHide }, businessId },
+          data: { published: false, hiddenByRule: true },
+        }),
+      ]);
+
+      return counts;
     }),
 
   // ─── Public: storefront reads ────────────────────────────────────────────────

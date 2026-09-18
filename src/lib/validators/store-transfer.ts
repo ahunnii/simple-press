@@ -12,6 +12,7 @@ import { z } from "zod";
 
 import type { StoreTransferManifest } from "~/lib/store-transfer/types";
 import { STORE_TRANSFER_FORMAT_VERSION } from "~/lib/store-transfer/types";
+import { publishRulesSchema } from "~/lib/validators/videos";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -377,6 +378,7 @@ const exportedVideoSourceSchema = z.object({
   label: nullableString.optional(),
   enabled: z.boolean(),
   autoPublish: z.boolean(),
+  publishRules: publishRulesSchema.nullable().optional().default(null),
 });
 
 const exportedVideoSchema = z.object({
@@ -393,6 +395,7 @@ const exportedVideoSchema = z.object({
   published: z.boolean(),
   sortOrder: z.number(),
   exportSourceId: nullableString.optional(),
+  hiddenByRule: z.boolean().optional().default(false),
 });
 
 // ─── Content block ────────────────────────────────────────────────────────────

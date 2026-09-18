@@ -35,6 +35,9 @@ const { fetchChannelFeed, fetchPlaylistFeed } =
 const mockChannelFeed = vi.mocked(fetchChannelFeed);
 const mockPlaylistFeed = vi.mocked(fetchPlaylistFeed);
 
+const { captureMessage } = await import("@sentry/nextjs");
+const mockCaptureMessage = vi.mocked(captureMessage);
+
 // ── fixtures ────────────────────────────────────────────────────────────────
 
 type SourceRow = {
@@ -45,6 +48,8 @@ type SourceRow = {
   autoPublish: boolean;
   enabled: boolean;
   lastSyncedAt: Date | null;
+  publishRules: unknown;
+  business: { timeZone: string };
 };
 
 type VideoRow = { businessId: string; youtubeId: string };
@@ -60,6 +65,8 @@ function makeSource(overrides: Partial<SourceRow> = {}): SourceRow {
     autoPublish: true,
     enabled: true,
     lastSyncedAt: null,
+    publishRules: null,
+    business: { timeZone: "America/Detroit" },
     ...overrides,
   };
 }
@@ -297,6 +304,7 @@ describe("create payload", () => {
 
       const create = harness.upsertCalls()[0]!.create;
       expect(create.published).toBe(autoPublish);
+      expect(create.hiddenByRule).toBe(false);
       expect(create.sourceId).toBe("src_1");
       expect(create.businessId).toBe("biz_1");
       expect(create.youtubeId).toBe("dQw4w9WgXcQ");
@@ -353,6 +361,144 @@ describe("create payload", () => {
     const counts = await syncOneSource(harness.db, "src_1");
 
     expect(counts).toEqual({ added: 1, updated: 1 });
+  });
+});
+
+// ── publish rules ───────────────────────────────────────────────────────────
+
+describe("publish rules at insert", () => {
+  const includeBambooHour = {
+    version: 1,
+    titleInclude: ["Bamboo Hour"],
+    titleExclude: [],
+    weekdays: [],
+  };
+
+  it("inserts a video that misses titleInclude as a hidden draft", async () => {
+    const harness = makeDb({
+      sources: [makeSource({ publishRules: includeBambooHour })],
+    });
+    mockChannelFeed.mockResolvedValue([
+      makeEntry({ title: "Guest spot on Other Show" }),
+    ]);
+
+    await syncOneSource(harness.db, "src_1");
+
+    const create = harness.upsertCalls()[0]!.create;
+    expect(create.published).toBe(false);
+    expect(create.hiddenByRule).toBe(true);
+  });
+
+  it("publishes a video that satisfies titleInclude", async () => {
+    const harness = makeDb({
+      sources: [makeSource({ publishRules: includeBambooHour })],
+    });
+    mockChannelFeed.mockResolvedValue([
+      makeEntry({ title: "Bamboo Hour #12" }),
+    ]);
+
+    await syncOneSource(harness.db, "src_1");
+
+    const create = harness.upsertCalls()[0]!.create;
+    expect(create.published).toBe(true);
+    expect(create.hiddenByRule).toBe(false);
+  });
+
+  it("never publishes past autoPublish: false, and does not mark it rule-hidden", async () => {
+    const harness = makeDb({
+      sources: [
+        makeSource({ autoPublish: false, publishRules: includeBambooHour }),
+      ],
+    });
+    mockChannelFeed.mockResolvedValue([
+      makeEntry({ title: "Bamboo Hour #12" }),
+    ]);
+
+    await syncOneSource(harness.db, "src_1");
+
+    const create = harness.upsertCalls()[0]!.create;
+    expect(create.published).toBe(false);
+    // The rules passed — it is unpublished because the SOURCE says so.
+    expect(create.hiddenByRule).toBe(false);
+  });
+
+  it("evaluates the weekday rule in the business's time zone", async () => {
+    // 2026-07-31T02:30Z is Thu 22:30 in America/Detroit, but Fri 11:30 in Tokyo.
+    const thursdayOnly = {
+      version: 1,
+      titleInclude: [],
+      titleExclude: [],
+      weekdays: ["thu"],
+    };
+    const entry = makeEntry({
+      publishedAt: new Date("2026-07-31T02:30:00Z"),
+    });
+
+    const detroit = makeDb({
+      sources: [makeSource({ publishRules: thursdayOnly })],
+    });
+    mockChannelFeed.mockResolvedValue([entry]);
+    await syncOneSource(detroit.db, "src_1");
+
+    const detroitCreate = detroit.upsertCalls()[0]!.create;
+    expect(detroitCreate.published).toBe(true);
+    expect(detroitCreate.hiddenByRule).toBe(false);
+
+    const tokyo = makeDb({
+      sources: [
+        makeSource({
+          publishRules: thursdayOnly,
+          business: { timeZone: "Asia/Tokyo" },
+        }),
+      ],
+    });
+    mockChannelFeed.mockResolvedValue([entry]);
+    await syncOneSource(tokyo.db, "src_1");
+
+    const tokyoCreate = tokyo.upsertCalls()[0]!.create;
+    expect(tokyoCreate.published).toBe(false);
+    expect(tokyoCreate.hiddenByRule).toBe(true);
+  });
+
+  it("fails closed on unreadable stored rules and reports it once", async () => {
+    const harness = makeDb({
+      sources: [makeSource({ publishRules: { version: 99 } })],
+    });
+    mockChannelFeed.mockResolvedValue([makeEntry()]);
+
+    await syncOneSource(harness.db, "src_1");
+
+    const create = harness.upsertCalls()[0]!.create;
+    expect(create.published).toBe(false);
+    expect(create.hiddenByRule).toBe(true);
+
+    expect(mockCaptureMessage).toHaveBeenCalledTimes(1);
+    expect(mockCaptureMessage.mock.calls[0]![1]).toMatchObject({
+      level: "warning",
+    });
+  });
+
+  it("leaves an existing video's publish state alone, rules or no rules", async () => {
+    const harness = makeDb({
+      sources: [makeSource({ publishRules: includeBambooHour })],
+      existingVideos: [{ businessId: "biz_1", youtubeId: "dQw4w9WgXcQ" }],
+    });
+    mockChannelFeed.mockResolvedValue([
+      makeEntry({ title: "Guest spot on Other Show" }),
+    ]);
+
+    await syncOneSource(harness.db, "src_1");
+
+    const update = harness.upsertCalls()[0]!.update;
+    expect(Object.keys(update).sort()).toEqual([
+      "channelTitle",
+      "description",
+      "publishedAt",
+      "thumbnailUrl",
+      "title",
+    ]);
+    expect(update).not.toHaveProperty("published");
+    expect(update).not.toHaveProperty("hiddenByRule");
   });
 });
 

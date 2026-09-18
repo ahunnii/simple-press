@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import {
   AlertTriangle,
+  Filter,
+  ListChecks,
   ListVideo,
   Loader2,
   Pencil,
@@ -16,7 +18,19 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { DayCode } from "~/lib/business-hours";
+import type { PublishRules } from "~/lib/youtube/publish-rules";
 import type { RouterOutputs } from "~/trpc/react";
+import { DAY_CODES } from "~/lib/business-hours";
+import { parseStoredPublishRules } from "~/lib/validators/videos";
+import {
+  DAY_CODE_LABELS,
+  describePublishRules,
+  emptyPublishRules,
+  hasAnyRule,
+  MAX_RULE_PHRASES,
+  parsePhraseList,
+} from "~/lib/youtube/publish-rules";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import {
@@ -43,10 +57,30 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 
 import { AdminEmpty } from "../../_components/admin-empty";
 
 type Source = RouterOutputs["videos"]["listSources"][number];
+
+/** Preview counts from a dry-run `reapplyRules` call. */
+type ReapplyPreview = {
+  total: number;
+  published: number;
+  hidden: number;
+  unchanged: number;
+};
+
+/** Full day names for `ToggleGroupItem`'s `aria-label`, keyed by `DayCode`. */
+const DAY_CODE_FULL_NAMES: Record<DayCode, string> = {
+  mon: "Monday",
+  tue: "Tuesday",
+  wed: "Wednesday",
+  thu: "Thursday",
+  fri: "Friday",
+  sat: "Saturday",
+  sun: "Sunday",
+};
 
 type Props = {
   sources: RouterOutputs["videos"]["listSources"];
@@ -60,6 +94,12 @@ export function VideoSourcesClient({ sources }: Props) {
   const [editing, setEditing] = useState<Source | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Source | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [rulesTarget, setRulesTarget] = useState<Source | null>(null);
+  const [reapplyTarget, setReapplyTarget] = useState<Source | null>(null);
+  const [reapplyPreview, setReapplyPreview] = useState<ReapplyPreview | null>(
+    null,
+  );
+  const [reapplyingId, setReapplyingId] = useState<string | null>(null);
 
   const toggleMutation = api.videos.updateSource.useMutation({
     onSuccess: () => {
@@ -108,6 +148,48 @@ export function VideoSourcesClient({ sources }: Props) {
     syncMutation.mutate(source.id);
   };
 
+  // No global onSuccess/onError here (unlike the mutations above) — this one
+  // mutation drives two different flows (a silent dry-run preview and an
+  // explicit confirmed run) that need different side effects, so each call
+  // site below handles its own result via `mutateAsync`.
+  const reapplyMutation = api.videos.reapplyRules.useMutation();
+
+  const openReapply = (source: Source) => {
+    setReapplyTarget(source);
+    setReapplyPreview(null);
+    reapplyMutation
+      .mutateAsync({ sourceId: source.id, dryRun: true })
+      .then(setReapplyPreview)
+      .catch((err: unknown) => {
+        toast.error(
+          err instanceof Error ? err.message : "Couldn't preview rules",
+        );
+        setReapplyTarget(null);
+      });
+  };
+
+  const handleReapplyConfirm = () => {
+    if (!reapplyTarget) return;
+    const source = reapplyTarget;
+    setReapplyingId(source.id);
+    reapplyMutation
+      .mutateAsync({ sourceId: source.id, dryRun: false })
+      .then((counts) => {
+        toast.success(
+          `Rules applied — ${counts.published} published, ${counts.hidden} moved to drafts, ${counts.unchanged} unchanged`,
+        );
+        void utils.videos.invalidate();
+        router.refresh();
+        setReapplyTarget(null);
+      })
+      .catch((err: unknown) => {
+        toast.error(
+          err instanceof Error ? err.message : "Couldn't apply rules",
+        );
+      })
+      .finally(() => setReapplyingId(null));
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -135,6 +217,12 @@ export function VideoSourcesClient({ sources }: Props) {
             from other people&apos;s videos, so new finds land as drafts for you
             to review first. Turn it <strong>on</strong> for your own channel,
             where everything is fair game to show right away.
+          </p>
+          <p>
+            Add <strong>publish rules</strong> to a channel that mixes your own
+            shows with guest spots elsewhere — only videos matching the rules go
+            live; everything else waits in Drafts marked &ldquo;Hidden by
+            rule&rdquo;.
           </p>
         </AlertDescription>
       </Alert>
@@ -171,6 +259,9 @@ export function VideoSourcesClient({ sources }: Props) {
               onToggleAutoPublish={(autoPublish) =>
                 toggleMutation.mutate({ id: source.id, autoPublish })
               }
+              onEditRules={() => setRulesTarget(source)}
+              onReapplyRules={() => openReapply(source)}
+              isReapplying={reapplyingId === source.id}
             />
           ))}
         </div>
@@ -182,6 +273,53 @@ export function VideoSourcesClient({ sources }: Props) {
         onOpenChange={(open) => !open && setEditing(null)}
         source={editing ?? undefined}
       />
+
+      <PublishRulesDialog
+        open={!!rulesTarget}
+        onOpenChange={(open) => !open && setRulesTarget(null)}
+        source={rulesTarget ?? undefined}
+        onReapply={openReapply}
+      />
+
+      <AlertDialog
+        open={!!reapplyTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReapplyTarget(null);
+            setReapplyPreview(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Re-apply rules to{" "}
+              {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- see SourceRow's displayLabel comment */}
+              {reapplyTarget?.label ||
+                (reapplyTarget?.kind === "playlist"
+                  ? "Untitled playlist"
+                  : "Untitled channel")}
+              ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {!reapplyPreview
+                ? "Counting…"
+                : `${reapplyPreview.total} videos from this source will be checked against the rules: ${reapplyPreview.published} will be published, ${reapplyPreview.hidden} will move to Drafts, ${reapplyPreview.unchanged} stay as they are. Videos you added by hand are not affected.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reapplyingId !== null}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReapplyConfirm}
+              disabled={!reapplyPreview || reapplyingId !== null}
+            >
+              {reapplyingId ? "Applying…" : "Re-apply"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={!!deleteTarget}
@@ -230,6 +368,9 @@ function SourceRow({
   onDelete,
   onToggleEnabled,
   onToggleAutoPublish,
+  onEditRules,
+  onReapplyRules,
+  isReapplying,
 }: {
   source: Source;
   isSyncing: boolean;
@@ -239,6 +380,9 @@ function SourceRow({
   onDelete: () => void;
   onToggleEnabled: (enabled: boolean) => void;
   onToggleAutoPublish: (autoPublish: boolean) => void;
+  onEditRules: () => void;
+  onReapplyRules: () => void;
+  isReapplying: boolean;
 }) {
   // `||`, not `??` — an owner-cleared label round-trips through the update
   // mutation as `""` (see SourceFormDialog), and `??` would let that falsy-
@@ -248,6 +392,11 @@ function SourceRow({
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- see comment above
   const displayLabel = source.label || fallbackLabel;
   const videoCount = source._count.videos;
+
+  const stored = parseStoredPublishRules(source.publishRules);
+  const summary = describePublishRules(
+    stored.kind === "rules" ? stored.rules : null,
+  );
 
   return (
     <Card>
@@ -298,6 +447,16 @@ function SourceRow({
                 <RefreshCw className="h-4 w-4" />
               )}
               <span className="ml-2 hidden sm:inline">Sync now</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onEditRules}
+              aria-label={`Edit publish rules for ${displayLabel}`}
+            >
+              <Filter className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">Rules</span>
             </Button>
             <Button
               type="button"
@@ -355,6 +514,39 @@ function SourceRow({
             <Label htmlFor={`autopublish-${source.id}`} className="text-sm">
               Auto-publish new videos
             </Label>
+          </div>
+
+          <div className="flex basis-full items-center gap-3 sm:basis-auto">
+            {stored.kind === "invalid" ? (
+              <>
+                <Badge variant="warning">Rules need re-saving</Badge>
+                <p className="text-muted-foreground text-xs">
+                  Open Rules and save again.
+                </p>
+              </>
+            ) : (
+              <p className="text-muted-foreground text-xs">
+                {summary
+                  ? `Rules: ${summary}`
+                  : "No publish rules — every new video follows Auto-publish."}
+              </p>
+            )}
+            {summary && videoCount > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onReapplyRules}
+                disabled={isReapplying}
+              >
+                {isReapplying ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ListChecks className="h-4 w-4" />
+                )}
+                <span className="ml-2">Re-apply rules</span>
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -584,6 +776,268 @@ function SourceFormDialog({
             </Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Edits a source's `publishRules`. Text fields hold raw comma-separated
+ * strings (not string[]) while open, same as `SourceFormDialog` holds plain
+ * strings for its inputs — parsing into `parsePhraseList` output only happens
+ * on save, so the owner can type a trailing comma or extra whitespace without
+ * it being silently rewritten out from under their cursor.
+ */
+function PublishRulesDialog({
+  open,
+  onOpenChange,
+  source,
+  onReapply,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  source?: Source;
+  onReapply: (source: Source) => void;
+}) {
+  const utils = api.useUtils();
+  const router = useRouter();
+
+  const [titleInclude, setTitleInclude] = useState("");
+  const [titleExclude, setTitleExclude] = useState("");
+  const [weekdays, setWeekdays] = useState<DayCode[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Same re-seed pattern as `SourceFormDialog`: this dialog instance stays
+  // mounted between opens, so re-sync from `source` every time it opens
+  // rather than only on mount — otherwise editing source A's rules then
+  // opening source B would still show A's stale fields.
+  useEffect(() => {
+    if (open) {
+      const stored = parseStoredPublishRules(source?.publishRules);
+      const rules = stored.kind === "rules" ? stored.rules : null;
+      setTitleInclude(rules?.titleInclude.join(", ") ?? "");
+      setTitleExclude(rules?.titleExclude.join(", ") ?? "");
+      setWeekdays(rules?.weekdays ?? []);
+      setError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, source?.id]);
+
+  const updateMutation = api.videos.updateSource.useMutation({
+    onError: (err) => {
+      setError(err.message || "Couldn't save changes — please try again.");
+    },
+  });
+
+  const isPending = updateMutation.isPending;
+  const includePhrases = parsePhraseList(titleInclude);
+  const excludePhrases = parsePhraseList(titleExclude);
+  const tooManyPhrases =
+    includePhrases.length > MAX_RULE_PHRASES ||
+    excludePhrases.length > MAX_RULE_PHRASES;
+  // "Clear rules" only makes sense when there is something stored to clear.
+  const hadStoredRules =
+    parseStoredPublishRules(source?.publishRules).kind === "rules";
+
+  const handleOpenChange = (next: boolean) => {
+    if (isPending) return;
+    onOpenChange(next);
+  };
+
+  const handleSave = () => {
+    if (!source) return;
+    setError(null);
+
+    if (tooManyPhrases) {
+      setError(`At most ${MAX_RULE_PHRASES} phrases per field.`);
+      return;
+    }
+
+    const rules: PublishRules = {
+      ...emptyPublishRules(),
+      titleInclude: includePhrases,
+      titleExclude: excludePhrases,
+      weekdays,
+    };
+
+    updateMutation.mutate(
+      { id: source.id, publishRules: rules },
+      {
+        onSuccess: () => {
+          void utils.videos.invalidate();
+          router.refresh();
+          onOpenChange(false);
+          const count = source._count.videos;
+          toast.success(
+            "Rules saved",
+            count > 0 && hasAnyRule(rules)
+              ? {
+                  action: {
+                    label: `Re-apply to ${count} videos`,
+                    onClick: () => onReapply(source),
+                  },
+                }
+              : undefined,
+          );
+        },
+      },
+    );
+  };
+
+  const handleClear = () => {
+    if (!source) return;
+    setError(null);
+
+    updateMutation.mutate(
+      { id: source.id, publishRules: null },
+      {
+        onSuccess: () => {
+          toast.success("Rules cleared");
+          void utils.videos.invalidate();
+          router.refresh();
+          onOpenChange(false);
+        },
+      },
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Publish rules</DialogTitle>
+          <DialogDescription>
+            Only videos matching every rule below are auto-published from this
+            source; the rest land as drafts.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="rules-title-include">
+              Title must contain any of
+            </Label>
+            <Input
+              id="rules-title-include"
+              placeholder="Bamboo Hour, Studio Session"
+              value={titleInclude}
+              onChange={(e) => {
+                setTitleInclude(e.target.value);
+                if (error) setError(null);
+              }}
+              disabled={isPending}
+            />
+            <p className="text-muted-foreground text-xs">
+              Separate phrases with commas. Not case-sensitive. Matched against
+              the YouTube title, not your custom title.
+            </p>
+            {includePhrases.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {includePhrases.map((phrase) => (
+                  <Badge key={phrase} variant="secondary">
+                    {phrase}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="rules-title-exclude">
+              Title must not contain any of
+            </Label>
+            <Input
+              id="rules-title-exclude"
+              placeholder="Trailer, Guest on"
+              value={titleExclude}
+              onChange={(e) => {
+                setTitleExclude(e.target.value);
+                if (error) setError(null);
+              }}
+              disabled={isPending}
+            />
+            <p className="text-muted-foreground text-xs">
+              Separate phrases with commas. Not case-sensitive. Matched against
+              the YouTube title, not your custom title.
+            </p>
+            {excludePhrases.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {excludePhrases.map((phrase) => (
+                  <Badge key={phrase} variant="secondary">
+                    {phrase}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Only videos published on</Label>
+            <ToggleGroup
+              type="multiple"
+              variant="outline"
+              value={weekdays}
+              onValueChange={(v) => setWeekdays(v as DayCode[])}
+              disabled={isPending}
+            >
+              {DAY_CODES.map((code) => (
+                <ToggleGroupItem
+                  key={code}
+                  value={code}
+                  aria-label={DAY_CODE_FULL_NAMES[code]}
+                >
+                  {DAY_CODE_LABELS[code]}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            <p className="text-muted-foreground text-xs">
+              Counted in your store&apos;s time zone (Settings → General). Leave
+              every day off to allow any day.
+            </p>
+          </div>
+
+          <p className="text-muted-foreground text-xs">
+            All rules must match. Videos that don&apos;t match are still saved
+            as drafts marked &ldquo;Hidden by rule&rdquo;, so you can publish
+            them by hand.
+          </p>
+
+          {error && (
+            <p role="alert" className="text-destructive text-sm">
+              {error}
+            </p>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+          {hadStoredRules && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleClear}
+              disabled={isPending}
+            >
+              Clear rules
+            </Button>
+          )}
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={isPending || tooManyPhrases}
+          >
+            {isPending ? "Saving…" : "Save rules"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

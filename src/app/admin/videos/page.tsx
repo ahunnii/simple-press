@@ -1,5 +1,6 @@
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
+  HIDDEN_BY_RULE_BADGE,
   resolveVideoTitle,
   videoSourceBadgeText,
 } from "~/lib/validators/videos";
@@ -52,6 +53,7 @@ export default async function AdminVideosPage({ searchParams }: Props) {
         v,
         v.sourceId ? sourceById.get(v.sourceId) : undefined,
       ),
+      v.hiddenByRule && !v.published ? HIDDEN_BY_RULE_BADGE : null,
     ]),
   );
 

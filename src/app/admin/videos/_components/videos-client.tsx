@@ -40,6 +40,7 @@ import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
 import {
+  HIDDEN_BY_RULE_BADGE,
   resolveVideoThumbnail,
   resolveVideoTitle,
   videoSourceBadgeText,
@@ -430,7 +431,7 @@ export function VideosClient({
               <AdminEmpty
                 icon={Youtube}
                 title="No drafts"
-                description="Videos synced from a playlist you haven't set to auto-publish land here for review before they go live."
+                description="Videos synced from a playlist you haven't set to auto-publish — or that a source's publish rules hid — land here for review before they go live."
               />
             )
           ) : rowsProp.length === 0 ? (
@@ -729,6 +730,12 @@ function SortableVideoRow({
                   {videoSourceBadgeText(video, source)}
                 </Badge>
               ) : null}
+              {/* Only on drafts — the server clears the flag when the owner publishes, and a published row must never show it. */}
+              {!video.published && video.hiddenByRule && (
+                <Badge variant="warning" className="text-xs">
+                  {HIDDEN_BY_RULE_BADGE}
+                </Badge>
+              )}
             </div>
 
             {/* Below md the Channel/Date columns are hidden — reflow them
