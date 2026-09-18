@@ -11830,6 +11830,64 @@
   animation: umsc-nav-dialog-in 0.32s var(--umsc-ease);
 }
 
+/* Mobile nav dialog — account block (sign in / account links) pinned above
+   the phone and CTA. Plain anchors only — see umsc-nav-dialog-account.tsx. */
+.umsc .umsc-nav-dialog-account {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-block: 16px;
+  margin-bottom: 8px;
+  border-top: 1px solid var(--umsc-line-gold);
+}
+
+.umsc .umsc-nav-dialog-account-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--umsc-cream-on-black);
+}
+
+/* UserAvatar's fallback initials use `text-muted-foreground!` (shadcn light
+   ink) — lift them to cream so they read on the black dialog. */
+.umsc .umsc-nav-dialog-account-user [class*="text-muted-foreground"] {
+  color: var(--umsc-cream-on-black) !important;
+}
+
+.umsc .umsc-nav-dialog-account-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.umsc .umsc-nav-dialog-account-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--umsc-cream-on-black);
+  text-decoration: none;
+  transition: color 0.2s var(--umsc-ease);
+}
+
+.umsc .umsc-nav-dialog-account-link:hover,
+.umsc .umsc-nav-dialog-wishlist-link:hover {
+  color: var(--umsc-gold-soft);
+}
+
+.umsc .umsc-nav-dialog-account-skeleton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--umsc-line-gold);
+}
+
 /* ── Buttons — gold pill / ghost pill / gold-ink link (design.md "Shared
    component inventory → UmscButton") ── */
 /* Font-family utilities. Tailwind's `font-(family-name:…)` collides with

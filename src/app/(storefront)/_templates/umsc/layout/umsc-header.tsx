@@ -8,6 +8,7 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -85,6 +86,7 @@ export function UmscHeader({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
+  const accountsEnabled = isStorefrontEnabled("customerAccounts");
 
   const DEFAULT_NAV_LINKS: UmscNavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
@@ -259,7 +261,7 @@ export function UmscHeader({
           </nav>
 
           <div className="flex items-center gap-5">
-            {isStorefrontEnabled("customerAccounts") && (
+            {accountsEnabled && (
               <div className="hidden min-[960px]:block">
                 {isPending ? (
                   <div className="size-7 animate-pulse rounded-full bg-[var(--umsc-line-gold)]" />
@@ -287,7 +289,7 @@ export function UmscHeader({
                   />
                 ) : (
                   <Link
-                    href="/auth/sign-in"
+                    href={`${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signIn}`}
                     aria-label="Sign in to your account"
                     className="-m-2 flex items-center justify-center p-2 text-[var(--umsc-cream)]"
                   >
@@ -363,6 +365,10 @@ export function UmscHeader({
         brand={brand}
         phone={phone || undefined}
         triggerRef={hamburgerRef}
+        initialSession={initialSession}
+        accountsEnabled={accountsEnabled}
+        wishlistEnabled={isStorefrontEnabled("wishlist")}
+        wishlistCount={wishlistCount}
       />
     </>
   );

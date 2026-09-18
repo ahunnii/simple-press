@@ -3,11 +3,13 @@
 import { useEffect, useId, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Phone, X } from "lucide-react";
+import { ChevronDown, Heart, Phone, X } from "lucide-react";
 
 import type { UmscNavLink } from "./umsc-header";
+import type { Session } from "~/server/better-auth/config";
 
 import { UmscButton } from "../shared/umsc-button";
+import { UmscNavDialogAccount } from "./umsc-nav-dialog-account";
 
 type Props = {
   open: boolean;
@@ -17,14 +19,22 @@ type Props = {
   brand: React.ReactNode;
   phone?: string;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
+  initialSession?: Session | null;
+  accountsEnabled: boolean;
+  /** `wishlist` storefront flag — the link is omitted entirely when off. */
+  wishlistEnabled: boolean;
+  wishlistCount?: number;
 };
 
 /**
  * UmscNavDialog — full-screen black mobile menu. Slides in from the right
  * (`.umsc-nav-dialog` in globals.css), focus-trapped with inert siblings and
  * a body scroll lock, Marcellus 30px links, and a gold pill "Custom order"
- * pinned at the bottom. Closes on route change, Escape, or the X button, and
- * returns focus to the trigger (`triggerRef`, the header's hamburger button).
+ * pinned at the bottom. An account block (sign in / account links) and, when
+ * the `wishlist` flag is on, a wishlist link are pinned above the phone number
+ * and CTA. Closes on route change, Escape, or the X
+ * button, and returns focus to the trigger (`triggerRef`, the header's
+ * hamburger button).
  */
 export function UmscNavDialog({
   open,
@@ -34,6 +44,10 @@ export function UmscNavDialog({
   brand,
   phone,
   triggerRef,
+  initialSession,
+  accountsEnabled,
+  wishlistEnabled,
+  wishlistCount = 0,
 }: Props) {
   const pathname = usePathname();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -200,6 +214,34 @@ export function UmscNavDialog({
       </nav>
 
       <div className="shrink-0 px-6 py-6">
+        <UmscNavDialogAccount
+          initialSession={initialSession}
+          accountsEnabled={accountsEnabled}
+          onClose={onClose}
+        />
+        {wishlistEnabled && (
+          <Link
+            href="/wishlist"
+            onClick={onClose}
+            aria-label={
+              wishlistCount > 0
+                ? `View wishlist, ${wishlistCount} items`
+                : "View wishlist"
+            }
+            className="umsc-nav-dialog-wishlist-link umsc-sans mb-2 flex min-h-[44px] items-center gap-2 text-[14px] text-[var(--umsc-cream-on-black)] no-underline"
+          >
+            <Heart className="size-4" strokeWidth={1.5} aria-hidden="true" />
+            Wishlist
+            {wishlistCount > 0 && (
+              <span
+                aria-hidden="true"
+                className="umsc-sans flex size-4 items-center justify-center rounded-full bg-[var(--umsc-gold)] text-[9px] font-semibold text-[var(--umsc-black)]"
+              >
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
+        )}
         {phone && (
           <a
             href={`tel:${phone.replace(/\s/g, "")}`}
