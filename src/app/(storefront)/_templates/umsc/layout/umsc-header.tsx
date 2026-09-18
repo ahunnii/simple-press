@@ -106,6 +106,8 @@ export function UmscHeader({
   const g = resolveFields(customFields, [
     "umsc.global.header-tagline",
     "umsc.global.customer-service-phone",
+    "umsc.global.nav-cta-label",
+    "umsc.global.nav-cta-url",
   ]);
   const tagline = g["umsc.global.header-tagline"] ?? "Home essentials";
   // Business-record-first, field-as-override — same rule `umsc-footer.tsx`
@@ -114,6 +116,13 @@ export function UmscHeader({
   const phone =
     (g["umsc.global.customer-service-phone"] ?? "").trim() ||
     (business?.phoneNumber ?? "");
+
+  // Mobile-menu pill. `resolveFields` already trims and falls back to the
+  // declared default, so an owner-cleared label arrives as "" and hides the
+  // pill; an unsafe/cleared URL collapses to "" and falls back to contact.
+  const navCtaLabel = g["umsc.global.nav-cta-label"] ?? "";
+  const navCtaUrl =
+    (g["umsc.global.nav-cta-url"] ?? "") || "/contact?type=custom";
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
@@ -369,6 +378,8 @@ export function UmscHeader({
         accountsEnabled={accountsEnabled}
         wishlistEnabled={isStorefrontEnabled("wishlist")}
         wishlistCount={wishlistCount}
+        ctaLabel={navCtaLabel}
+        ctaUrl={navCtaUrl}
       />
     </>
   );

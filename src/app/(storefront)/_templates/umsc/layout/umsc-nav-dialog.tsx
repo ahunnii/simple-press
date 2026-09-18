@@ -24,13 +24,17 @@ type Props = {
   /** `wishlist` storefront flag — the link is omitted entirely when off. */
   wishlistEnabled: boolean;
   wishlistCount?: number;
+  /** Pinned gold pill (`umsc.global.nav-cta-*`). Empty label hides it. */
+  ctaLabel: string;
+  ctaUrl: string;
 };
 
 /**
  * UmscNavDialog — full-screen black mobile menu. Slides in from the right
  * (`.umsc-nav-dialog` in globals.css), focus-trapped with inert siblings and
- * a body scroll lock, Marcellus 30px links, and a gold pill "Custom order"
- * pinned at the bottom. An account block (sign in / account links) and, when
+ * a body scroll lock, Marcellus 30px links, and an owner-editable gold pill
+ * (`umsc.global.nav-cta-label` / `-url`, default "Custom order") pinned at
+ * the bottom — cleared label hides it. An account block (sign in / account links) and, when
  * the `wishlist` flag is on, a wishlist link are pinned above the phone number
  * and CTA. Closes on route change, Escape, or the X
  * button, and returns focus to the trigger (`triggerRef`, the header's
@@ -48,6 +52,8 @@ export function UmscNavDialog({
   accountsEnabled,
   wishlistEnabled,
   wishlistCount = 0,
+  ctaLabel,
+  ctaUrl,
 }: Props) {
   const pathname = usePathname();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -251,15 +257,18 @@ export function UmscNavDialog({
             {phone}
           </a>
         )}
-        <UmscButton
-          as="link"
-          href="/contact?type=custom"
-          variant="gold"
-          showArrow={false}
-          className="w-full justify-center"
-        >
-          Custom order
-        </UmscButton>
+        {ctaLabel ? (
+          <UmscButton
+            as="link"
+            href={ctaUrl}
+            variant="gold"
+            showArrow={false}
+            fieldKey="umsc.global.nav-cta-label"
+            className="w-full justify-center"
+          >
+            {ctaLabel}
+          </UmscButton>
+        ) : null}
       </div>
     </div>
   );
