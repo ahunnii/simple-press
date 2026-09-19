@@ -46,7 +46,7 @@ const aboutHeroData: TemplateField[] = [
   },
 ];
 
-// ─── Story — portrait + pull-quote + two paragraphs + CTA — NOT hideable ───
+// ─── Story — portrait + pull-quote + rich-text story + CTA — NOT hideable ──
 
 const aboutStoryData: TemplateField[] = [
   {
@@ -91,26 +91,15 @@ const aboutStoryData: TemplateField[] = [
     defaultValue: "a theme.",
   },
   {
-    key: "dream.about.story-paragraph-1",
-    label: "Story — Paragraph 1",
-    description: "First paragraph of Selest's story.",
-    type: "textarea",
+    key: "dream.about.story-body",
+    label: "Selest's Story (rich text)",
+    description:
+      "The story itself — as many paragraphs as you like. Bold, links and lists all render.",
+    type: "richtext",
     page: "about",
     group: "about.story",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Selest is an event designer, not a planner. Give her the shape of your day and she'll build a world around it — drape by drape, chair by chair, until the space matches what you imagined.",
-  },
-  {
-    key: "dream.about.story-paragraph-2",
-    label: "Story — Paragraph 2",
-    description: "Second paragraph of Selest's story.",
-    type: "textarea",
-    page: "about",
-    group: "about.story",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "The best part of the job, she says, is watching guests walk in and see their theme for the first time. That's the smile she's designing for.",
+    defaultValue: "",
   },
   {
     key: "dream.about.story-cta-label",
@@ -299,7 +288,7 @@ export const dreamAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.story",
     title: "Selest's Story",
-    description: "Portrait, pull-quote, two paragraphs, and a closing CTA",
+    description: "Portrait, pull-quote, story, and a closing CTA",
     icon: "🌸",
     columns: 2,
   },

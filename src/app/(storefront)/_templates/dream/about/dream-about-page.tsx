@@ -2,6 +2,7 @@ import type { DefaultAboutPageTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { getRichTextFieldValue } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
 import { DreamPageHero } from "../shared/dream-page-hero";
@@ -17,8 +18,6 @@ const FIELD_KEYS = [
   "dream.about.story-portrait-alt",
   "dream.about.story-quote-lead",
   "dream.about.story-quote-accent",
-  "dream.about.story-paragraph-1",
-  "dream.about.story-paragraph-2",
   "dream.about.story-cta-label",
   "dream.about.story-cta-url",
   "dream.about.consultation-heading",
@@ -46,6 +45,10 @@ export function DreamAboutPage({ business }: DefaultAboutPageTemplateProps) {
     | Record<string, unknown>
     | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
+  const storyBody = getRichTextFieldValue(
+    customFields,
+    "dream.about.story-body",
+  );
 
   const businessName = business.name ?? "";
   const logoUrl =
@@ -95,8 +98,7 @@ export function DreamAboutPage({ business }: DefaultAboutPageTemplateProps) {
         portraitAlt={f["dream.about.story-portrait-alt"] ?? ""}
         quoteLead={f["dream.about.story-quote-lead"] ?? ""}
         quoteAccent={f["dream.about.story-quote-accent"] ?? ""}
-        paragraph1={f["dream.about.story-paragraph-1"] ?? ""}
-        paragraph2={f["dream.about.story-paragraph-2"] ?? ""}
+        storyBody={storyBody}
         ctaLabel={f["dream.about.story-cta-label"] ?? ""}
         ctaUrl={f["dream.about.story-cta-url"] ?? "/contact"}
       />
