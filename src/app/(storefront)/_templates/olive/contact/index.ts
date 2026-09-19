@@ -137,6 +137,76 @@ const contactFaqData: TemplateField[] = [
   },
 ];
 
+// ─── Promo ────────────────────────────────────────────────────────────────────
+
+const contactPromoData: TemplateField[] = [
+  {
+    key: "olive.contact.promo-takeover",
+    label: "Full-Photo Takeover",
+    description:
+      "On: the promo photo fills the width of the page with the copy on a card in its corner. Off: a photo-and-text band. Needs a photo to take effect.",
+    type: "boolean",
+    page: "contact",
+    group: "contact.promo",
+    gridColumn: "col-span-full",
+    defaultValue: "false",
+  },
+  {
+    key: "olive.contact.promo-image",
+    label: "Promo Photo",
+    description:
+      "The photograph for the promo. Leave blank for a copy-only band.",
+    type: "image",
+    page: "contact",
+    group: "contact.promo",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "olive.contact.promo-heading",
+    label: "Promo Heading",
+    description:
+      "Heading of the promo. Leave heading and text blank to hide the whole section.",
+    type: "text",
+    page: "contact",
+    group: "contact.promo",
+    gridColumn: "col-span-1",
+    defaultValue: "Earn points every time you shop",
+  },
+  {
+    key: "olive.contact.promo-body",
+    label: "Promo Text",
+    description: "A line or two under the promo heading.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.promo",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Join our rewards program and collect points on every order, your birthday and a follow. Trade them for money off at checkout.",
+  },
+  {
+    key: "olive.contact.promo-button-label",
+    label: "Promo Button Label",
+    description: "Label of the promo button. Leave blank to hide the button.",
+    type: "text",
+    page: "contact",
+    group: "contact.promo",
+    gridColumn: "col-span-1",
+    defaultValue: "Join rewards",
+  },
+  {
+    key: "olive.contact.promo-button-link",
+    label: "Promo Button Link",
+    description:
+      "Where the promo button goes — the rewards page by default, but it can point anywhere.",
+    type: "url",
+    page: "contact",
+    group: "contact.promo",
+    gridColumn: "col-span-1",
+    defaultValue: "/account/rewards",
+  },
+];
+
 // ─── Map ──────────────────────────────────────────────────────────────────────
 
 const contactMapData: TemplateField[] = [
@@ -181,6 +251,7 @@ export const oliveContactData: TemplateField[] = [
   ...contactHeroData,
   ...contactMainData,
   ...contactFaqData,
+  ...contactPromoData,
   ...contactMapData,
 ];
 
@@ -206,6 +277,14 @@ export const oliveContactFieldGroups: TemplateFieldGroup[] = [
     description: "Heading and a question/answer accordion",
     icon: "❓",
     columns: 1,
+  },
+  {
+    id: "contact.promo",
+    title: "Promo",
+    description:
+      "Photo-and-text band, or a full-photo takeover, between the FAQ and the map — the rewards program by default, but it can point anywhere",
+    icon: "🎁",
+    columns: 2,
   },
   {
     id: "contact.map",
@@ -245,12 +324,22 @@ export const oliveContactSections: TemplateSection[] = [
     hideable: true,
   },
   {
+    id: "contact.promo",
+    page: "contact",
+    title: "Promo",
+    description:
+      "Promo band or full-photo takeover between the FAQ and the map",
+    groupIds: ["contact.promo"],
+    order: 3,
+    hideable: true,
+  },
+  {
     id: "contact.map",
     page: "contact",
     title: "Map",
     description: "Location map with view/directions links",
     groupIds: ["contact.map"],
-    order: 3,
+    order: 4,
     hideable: true,
   },
 ];

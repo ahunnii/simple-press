@@ -77,14 +77,28 @@ const shopIntroData: TemplateField[] = [
 ];
 
 // ─── Shop: Promo band ────────────────────────────────────────────────────────
-// Two tiles on the sage wash below the grid — a photograph and a short pitch.
+// Two tiles on the sage wash below the grid — a photograph and a short pitch —
+// or, with the takeover switch on and a real photo uploaded, the photograph
+// running the full width of the page with the copy on a card in its corner.
 // Hideable: a store that has nothing to cross-sell should not invent one.
 
 const shopPromoData: TemplateField[] = [
   {
+    key: "olive.shop.promo-takeover",
+    label: "Full-Photo Takeover",
+    description:
+      "On: the promo photo fills the width of the page with the copy on a card in its corner. Off: a photo-and-text band. Needs a photo to take effect.",
+    type: "boolean",
+    page: "shop",
+    group: "shop.promo",
+    gridColumn: "col-span-full",
+    defaultValue: "false",
+  },
+  {
     key: "olive.shop.promo-image",
     label: "Promo Photo",
-    description: "The photograph in the left tile of the promo band.",
+    description:
+      "The photograph in the promo band — the left tile, or the whole band with the takeover switch on.",
     type: "image",
     page: "shop",
     group: "shop.promo",
@@ -154,7 +168,7 @@ export const oliveShopFieldGroups: TemplateFieldGroup[] = [
     id: "shop.promo",
     title: "Promo Band",
     description:
-      "Photo-and-text band on the sage wash below the product grid — a place to point shoppers at collections or a sister line",
+      "Photo-and-text band on the sage wash below the product grid, or a full-photo takeover with the copy on a card in its corner — the button can point anywhere: rewards, a collection, an event",
     icon: "🌿",
     columns: 2,
   },
@@ -175,7 +189,8 @@ export const oliveShopSections: TemplateSection[] = [
     id: "shop.promo",
     page: "shop",
     title: "Promo Band",
-    description: "Photo-and-text band below the product grid",
+    description:
+      "Photo-and-text band below the product grid, or an optional full-photo takeover — the button can point anywhere: rewards, a collection, an event",
     groupIds: ["shop.promo"],
     order: 1,
     hideable: true,

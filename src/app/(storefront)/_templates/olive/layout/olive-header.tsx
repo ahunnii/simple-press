@@ -9,6 +9,7 @@ import { ChevronDown, Heart, Menu, Search, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { OliveNavCollection, OliveNavLink } from "./olive-nav-overlay";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
@@ -397,7 +398,7 @@ export function OliveHeader({
                   />
                 ) : (
                   <Link
-                    href="/auth/sign-in"
+                    href={`${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signIn}`}
                     className="olive-icon-btn"
                     aria-label="Sign in to your account"
                   >

@@ -183,7 +183,7 @@ export const oliveAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.cta",
     title: "Where to Next",
-    description: "Three photo tiles linking elsewhere on the site",
+    description: "Up to three photo tiles linking elsewhere on the site",
     icon: "🔗",
     columns: 1,
   },
@@ -230,7 +230,7 @@ export const oliveAboutSections: TemplateSection[] = [
     id: "about.cta",
     page: "about",
     title: "Where to Next",
-    description: "Three photo tiles linking elsewhere on the site",
+    description: "Up to three photo tiles linking elsewhere on the site",
     groupIds: ["about.cta"],
     order: 4,
     hideable: true,

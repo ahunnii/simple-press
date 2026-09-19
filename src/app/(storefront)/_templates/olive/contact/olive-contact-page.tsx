@@ -5,7 +5,12 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
-import { OliveAccordion, OliveAccordionItem, OliveSection } from "../shared";
+import {
+  OliveAccordion,
+  OliveAccordionItem,
+  OlivePromoSection,
+  OliveSection,
+} from "../shared";
 import { OliveContactMain } from "./olive-contact-main";
 import { OliveContactMap } from "./olive-contact-map";
 
@@ -69,6 +74,12 @@ export function OliveContactPage({
     "olive.contact.info-hours-heading",
     "olive.contact.info-hours-body",
     "olive.contact.faq-heading",
+    "olive.contact.promo-takeover",
+    "olive.contact.promo-image",
+    "olive.contact.promo-heading",
+    "olive.contact.promo-body",
+    "olive.contact.promo-button-label",
+    "olive.contact.promo-button-link",
     "olive.contact.map-heading",
     "olive.contact.map-lat",
     "olive.contact.map-lng",
@@ -159,6 +170,23 @@ export function OliveContactPage({
           </OliveAccordion>
         </OliveSection>
       )}
+
+      {isSectionVisible(customFields, "olive", "contact.promo") ? (
+        <OlivePromoSection
+          takeover={f["olive.contact.promo-takeover"] === "true"}
+          image={f["olive.contact.promo-image"] ?? "/placeholder.svg"}
+          heading={f["olive.contact.promo-heading"] ?? ""}
+          body={f["olive.contact.promo-body"] ?? ""}
+          buttonLabel={f["olive.contact.promo-button-label"] ?? ""}
+          buttonLink={f["olive.contact.promo-button-link"] ?? ""}
+          tone="sage-tint"
+          id="olive-promo-contact"
+          sectionAttrs={sectionGroupAttr("contact", "promo")}
+          headingFieldKey="olive.contact.promo-heading"
+          bodyFieldKey="olive.contact.promo-body"
+          buttonLabelFieldKey="olive.contact.promo-button-label"
+        />
+      ) : null}
 
       {isSectionVisible(customFields, "olive", "contact.map") && hasCoords && (
         <OliveContactMap

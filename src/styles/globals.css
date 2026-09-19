@@ -8751,11 +8751,11 @@
   background: var(--olive-hairline);
 }
 
-/* ── Mobile nav: one full-screen white card wiping in from the right ────── */
+/* ── Mobile nav: one full-screen white card wiping in from the left ───── */
 
 .olive .olive-nav-overlay {
   background: var(--olive-white);
-  transform: translateX(100%);
+  transform: translateX(-100%);
   transition: transform 320ms var(--olive-ease);
 }
 
@@ -8764,7 +8764,7 @@
 }
 
 .olive .olive-nav-overlay[data-state="closing"] {
-  transform: translateX(100%);
+  transform: translateX(-100%);
   transition: transform 240ms cubic-bezier(0.4, 0, 1, 1);
 }
 
@@ -8799,6 +8799,62 @@
 
 .olive .olive-nav-overlay-sublink:hover {
   color: var(--olive-leaf);
+}
+
+/* Mobile nav — account section. Plain anchors only, see
+   olive-nav-overlay-account.tsx. */
+.olive .olive-nav-overlay-account {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.olive .olive-nav-overlay-account-user {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--olive-font-body);
+  font-size: 0.9375rem;
+  color: var(--olive-ink);
+}
+
+.olive .olive-nav-overlay-account-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .olive .olive-nav-overlay-account-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.olive .olive-nav-overlay-account-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 44px;
+  font-family: var(--olive-font-body);
+  font-size: 0.9375rem;
+  line-height: 1.3;
+  color: var(--olive-ink);
+  text-decoration: none;
+  transition: color 160ms var(--olive-ease);
+}
+
+.olive .olive-nav-overlay-account-link:hover {
+  color: var(--olive-leaf);
+}
+
+.olive .olive-nav-overlay-account-skeleton {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--olive-paper);
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */
@@ -11826,10 +11882,10 @@
   animation: umsc-pulse 0.32s var(--umsc-ease);
 }
 
-/* Mobile nav dialog — slides in from the right; links stagger via nth-child. */
+/* Mobile nav dialog — slides in from the left; links stagger via nth-child. */
 @keyframes umsc-nav-dialog-in {
   from {
-    transform: translateX(100%);
+    transform: translateX(-100%);
   }
   to {
     transform: translateX(0);

@@ -30,7 +30,7 @@ type Props = {
 };
 
 /**
- * UmscNavDialog — full-screen black mobile menu. Slides in from the right
+ * UmscNavDialog — full-screen black mobile menu. Slides in from the left
  * (`.umsc-nav-dialog` in globals.css), focus-trapped with inert siblings and
  * a body scroll lock, Marcellus 30px links, and an owner-editable gold pill
  * (`umsc.global.nav-cta-label` / `-url`, default "Custom order") pinned at

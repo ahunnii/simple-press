@@ -54,6 +54,18 @@ function readString(row: TemplateListRow, key: string): string {
   return typeof value === "string" ? value : "";
 }
 
+function ctaGridClass(count: number): string {
+  if (count === 1) return "grid grid-cols-1 gap-3 sm:mx-auto sm:max-w-[40rem]";
+  if (count === 2) return "grid grid-cols-1 gap-3 sm:grid-cols-2";
+  return "grid grid-cols-1 gap-3 sm:grid-cols-3";
+}
+
+function ctaSizes(count: number): string {
+  if (count === 1) return "(max-width: 640px) 100vw, 640px";
+  if (count === 2) return "(max-width: 640px) 100vw, 50vw";
+  return "(max-width: 640px) 100vw, 33vw";
+}
+
 export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, unknown>
@@ -71,7 +83,11 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const story = storyRows.length > 0 ? storyRows : DEFAULT_STORY;
 
   const ctaRows = parseTemplateListRows(customFields?.["olive.about.cta"]);
-  const ctaTiles = ctaRows.length > 0 ? ctaRows : DEFAULT_CTA_TILES;
+  const labelledCtaRows = ctaRows.filter(
+    (row) => readString(row, "label").trim().length > 0,
+  );
+  const ctaTiles =
+    labelledCtaRows.length > 0 ? labelledCtaRows : DEFAULT_CTA_TILES;
 
   return (
     <>
@@ -125,10 +141,8 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
           tone="paper"
           {...sectionGroupAttr("about", "cta")}
         >
-          <OliveRevealGroup
-            fan
-            className="grid grid-cols-1 gap-3 sm:grid-cols-3"
-          >
+          {/* Grid sizes adapt to tile count: 1 tile centers at 640px, 2 tiles split 50/50, 3+ tiles split into thirds */}
+          <OliveRevealGroup fan className={ctaGridClass(ctaTiles.length)}>
             {ctaTiles.map((row, i) => {
               const image = readString(row, "image");
               const label = readString(row, "label");
@@ -145,6 +159,7 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
                     alt={label}
                     label={label}
                     href={link}
+                    sizes={ctaSizes(ctaTiles.length)}
                   />
                 </div>
               );
