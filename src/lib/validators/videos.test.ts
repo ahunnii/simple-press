@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 
+import { PUBLISH_RULES_VERSION } from "~/lib/youtube/publish-rules";
+
 import {
+  parseStoredPublishRules,
+  publishRulesSchema,
   resolveVideoThumbnail,
   resolveVideoTitle,
   videoSourceBadgeText,
+  videoSourceCreateSchema,
+  videoSourceUpdateSchema,
   videoUpdateSchema,
 } from "./videos";
 
@@ -182,5 +188,177 @@ describe("videoSourceBadgeText", () => {
 
   it("returns null when the claimed source is missing — the badge renders nothing, so search must match nothing", () => {
     expect(videoSourceBadgeText({ sourceId: "src_1" }, undefined)).toBeNull();
+  });
+});
+
+describe("publishRulesSchema", () => {
+  it("trims and dedupes phrases case-insensitively, keeping the first casing", () => {
+    const parsed = publishRulesSchema.parse({
+      version: PUBLISH_RULES_VERSION,
+      titleInclude: [" Bamboo Hour ", "bamboo hour", "Bamboo Hour"],
+    });
+
+    expect(parsed.titleInclude).toEqual(["Bamboo Hour"]);
+  });
+
+  it("defaults missing arrays to []", () => {
+    const parsed = publishRulesSchema.parse({
+      version: PUBLISH_RULES_VERSION,
+    });
+
+    expect(parsed.titleInclude).toEqual([]);
+    expect(parsed.titleExclude).toEqual([]);
+    expect(parsed.weekdays).toEqual([]);
+  });
+
+  it("rejects 21 phrases", () => {
+    const tooMany = Array.from({ length: 21 }, (_, i) => `phrase ${i}`);
+
+    expect(() =>
+      publishRulesSchema.parse({
+        version: PUBLISH_RULES_VERSION,
+        titleInclude: tooMany,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a 101-character phrase", () => {
+    expect(() =>
+      publishRulesSchema.parse({
+        version: PUBLISH_RULES_VERSION,
+        titleInclude: ["a".repeat(101)],
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a blank phrase", () => {
+    expect(() =>
+      publishRulesSchema.parse({
+        version: PUBLISH_RULES_VERSION,
+        titleInclude: ["  "],
+      }),
+    ).toThrow();
+  });
+
+  it("rejects an invalid weekday code", () => {
+    expect(() =>
+      publishRulesSchema.parse({
+        version: PUBLISH_RULES_VERSION,
+        weekdays: ["monday"],
+      }),
+    ).toThrow();
+  });
+
+  it("dedupes repeated weekday codes", () => {
+    const parsed = publishRulesSchema.parse({
+      version: PUBLISH_RULES_VERSION,
+      weekdays: ["tue", "tue"],
+    });
+
+    expect(parsed.weekdays).toEqual(["tue"]);
+  });
+
+  it("rejects a version other than the current one", () => {
+    expect(() =>
+      publishRulesSchema.parse({
+        version: 2,
+      }),
+    ).toThrow();
+  });
+});
+
+describe("parseStoredPublishRules", () => {
+  it("treats null as no rules", () => {
+    expect(parseStoredPublishRules(null)).toEqual({ kind: "none" });
+  });
+
+  it("treats undefined as no rules", () => {
+    expect(parseStoredPublishRules(undefined)).toEqual({ kind: "none" });
+  });
+
+  it("treats a valid but all-empty rule set as no rules", () => {
+    expect(
+      parseStoredPublishRules({
+        version: 1,
+        titleInclude: [],
+        titleExclude: [],
+        weekdays: [],
+      }),
+    ).toEqual({ kind: "none" });
+  });
+
+  it("parses a real rule set", () => {
+    const result = parseStoredPublishRules({
+      version: PUBLISH_RULES_VERSION,
+      titleInclude: ["Bamboo Hour"],
+      titleExclude: [],
+      weekdays: ["tue", "thu"],
+    });
+
+    expect(result).toEqual({
+      kind: "rules",
+      rules: {
+        version: PUBLISH_RULES_VERSION,
+        titleInclude: ["Bamboo Hour"],
+        titleExclude: [],
+        weekdays: ["tue", "thu"],
+      },
+    });
+  });
+
+  it("treats an unknown version as invalid", () => {
+    expect(parseStoredPublishRules({ version: 99 })).toEqual({
+      kind: "invalid",
+    });
+  });
+
+  it("treats non-object garbage as invalid", () => {
+    expect(parseStoredPublishRules("garbage")).toEqual({ kind: "invalid" });
+  });
+});
+
+describe("videoSourceUpdateSchema — publishRules follows the emptyToNull doctrine", () => {
+  it("omitting publishRules yields undefined, not null", () => {
+    const parsed = videoSourceUpdateSchema.parse({ id: "src_1" });
+
+    expect(parsed.publishRules).toBeUndefined();
+  });
+
+  it("publishRules: null stays null", () => {
+    const parsed = videoSourceUpdateSchema.parse({
+      id: "src_1",
+      publishRules: null,
+    });
+
+    expect(parsed.publishRules).toBeNull();
+  });
+
+  it("a valid publishRules object round-trips", () => {
+    const parsed = videoSourceUpdateSchema.parse({
+      id: "src_1",
+      publishRules: {
+        version: PUBLISH_RULES_VERSION,
+        titleInclude: ["Trailer"],
+        titleExclude: [],
+        weekdays: ["mon"],
+      },
+    });
+
+    expect(parsed.publishRules).toEqual({
+      version: PUBLISH_RULES_VERSION,
+      titleInclude: ["Trailer"],
+      titleExclude: [],
+      weekdays: ["mon"],
+    });
+  });
+});
+
+describe("videoSourceCreateSchema — publishRules is optional", () => {
+  it("accepts input without publishRules", () => {
+    const parsed = videoSourceCreateSchema.parse({
+      input: "https://www.youtube.com/@example",
+    });
+
+    expect(parsed.publishRules).toBeUndefined();
   });
 });

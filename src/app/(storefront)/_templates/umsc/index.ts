@@ -69,6 +69,27 @@ const globalBrandingData: TemplateField[] = [
     defaultValue: "Home essentials",
   },
   {
+    key: "umsc.global.nav-cta-label",
+    label: "Mobile Menu Button Text",
+    description:
+      "Gold button pinned at the bottom of the mobile navigation menu. Leave blank to hide the button.",
+    type: "text",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: "Custom order",
+  },
+  {
+    key: "umsc.global.nav-cta-url",
+    label: "Mobile Menu Button URL",
+    description: "URL the mobile menu button points to.",
+    type: "url",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: "/contact?type=custom",
+  },
+  {
     key: "umsc.global.footer-tagline",
     label: "Footer Tagline",
     description:

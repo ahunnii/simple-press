@@ -8,6 +8,7 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -85,6 +86,7 @@ export function UmscHeader({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
+  const accountsEnabled = isStorefrontEnabled("customerAccounts");
 
   const DEFAULT_NAV_LINKS: UmscNavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
@@ -104,6 +106,8 @@ export function UmscHeader({
   const g = resolveFields(customFields, [
     "umsc.global.header-tagline",
     "umsc.global.customer-service-phone",
+    "umsc.global.nav-cta-label",
+    "umsc.global.nav-cta-url",
   ]);
   const tagline = g["umsc.global.header-tagline"] ?? "Home essentials";
   // Business-record-first, field-as-override — same rule `umsc-footer.tsx`
@@ -112,6 +116,13 @@ export function UmscHeader({
   const phone =
     (g["umsc.global.customer-service-phone"] ?? "").trim() ||
     (business?.phoneNumber ?? "");
+
+  // Mobile-menu pill. `resolveFields` already trims and falls back to the
+  // declared default, so an owner-cleared label arrives as "" and hides the
+  // pill; an unsafe/cleared URL collapses to "" and falls back to contact.
+  const navCtaLabel = g["umsc.global.nav-cta-label"] ?? "";
+  const navCtaUrl =
+    (g["umsc.global.nav-cta-url"] ?? "") || "/contact?type=custom";
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
@@ -259,7 +270,7 @@ export function UmscHeader({
           </nav>
 
           <div className="flex items-center gap-5">
-            {isStorefrontEnabled("customerAccounts") && (
+            {accountsEnabled && (
               <div className="hidden min-[960px]:block">
                 {isPending ? (
                   <div className="size-7 animate-pulse rounded-full bg-[var(--umsc-line-gold)]" />
@@ -287,7 +298,7 @@ export function UmscHeader({
                   />
                 ) : (
                   <Link
-                    href="/auth/sign-in"
+                    href={`${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signIn}`}
                     aria-label="Sign in to your account"
                     className="-m-2 flex items-center justify-center p-2 text-[var(--umsc-cream)]"
                   >
@@ -363,6 +374,12 @@ export function UmscHeader({
         brand={brand}
         phone={phone || undefined}
         triggerRef={hamburgerRef}
+        initialSession={initialSession}
+        accountsEnabled={accountsEnabled}
+        wishlistEnabled={isStorefrontEnabled("wishlist")}
+        wishlistCount={wishlistCount}
+        ctaLabel={navCtaLabel}
+        ctaUrl={navCtaUrl}
       />
     </>
   );

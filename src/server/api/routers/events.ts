@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { DbClient } from "~/server/db";
+import { resolveTimeZone } from "~/lib/business/resolve-time-zone";
 import { normalizeEventDates } from "~/lib/events/normalize";
 import { upcomingEventWhere } from "~/lib/events/query";
 import { generateEventSlug } from "~/lib/slug";
@@ -22,26 +22,12 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
-/** Matches `Business.timeZone`'s column default in schema.prisma. */
-const DEFAULT_TIME_ZONE = "America/Detroit";
-
-/**
- * `create`/`update` normalize the admin form's wall-clock strings in the
- * shop's own zone, not the server's — "2026-08-15T19:00" is a different UTC
- * instant in America/Detroit than in America/Los_Angeles, and the shop's zone
- * is the authority on which one the owner meant. The fallback only matters if
- * a row somehow lacks a value; the column itself is non-null with a default.
- */
-async function resolveTimeZone(
-  db: DbClient,
-  businessId: string,
-): Promise<string> {
-  const business = await db.business.findUnique({
-    where: { id: businessId },
-    select: { timeZone: true },
-  });
-  return business?.timeZone ?? DEFAULT_TIME_ZONE;
-}
+// `create`/`update` normalize the admin form's wall-clock strings in the
+// shop's own zone, not the server's — "2026-08-15T19:00" is a different UTC
+// instant in America/Detroit than in America/Los_Angeles, and the shop's zone
+// is the authority on which one the owner meant. See
+// `~/lib/business/resolve-time-zone` for the resolution itself (shared with
+// `videos.ts`'s weekday publish-rule evaluation).
 
 export const eventsRouter = createTRPCRouter({
   // ─── Admin: read ────────────────────────────────────────────────────────────

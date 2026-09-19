@@ -1,6 +1,14 @@
 import { z } from "zod";
 
+import type { PublishRules } from "~/lib/youtube/publish-rules";
+import { DAY_CODES } from "~/lib/business-hours";
 import { parseSourceInput, parseYouTubeVideoId } from "~/lib/youtube/parse";
+import {
+  hasAnyRule,
+  MAX_RULE_PHRASE_LENGTH,
+  MAX_RULE_PHRASES,
+  PUBLISH_RULES_VERSION,
+} from "~/lib/youtube/publish-rules";
 
 // ─── Video ────────────────────────────────────────────────────────────────
 
@@ -142,6 +150,15 @@ export function videoSourceBadgeText(
   return source.label ?? (source.kind === "playlist" ? "Playlist" : "Channel");
 }
 
+/**
+ * Badge text the admin list renders on a draft video with `hiddenByRule`
+ * set. Exported as a constant, per this file's "search what the row
+ * renders" rule (see `videoSourceBadgeText` above), so the list's search
+ * predicate matches this exact string rather than hardcoding it a second
+ * time and risking drift.
+ */
+export const HIDDEN_BY_RULE_BADGE = "Hidden by rule";
+
 // ─── Reorder ──────────────────────────────────────────────────────────────
 
 export const videoReorderSchema = z.object({
@@ -152,6 +169,94 @@ export const videoReorderSchema = z.object({
 });
 
 export type VideoReorderData = z.infer<typeof videoReorderSchema>;
+
+// ─── Publish rules ────────────────────────────────────────────────────────
+
+/**
+ * "Bamboo Hour", "bamboo hour", "Bamboo Hour" → keep only the first —
+ * case-insensitive dedupe that preserves the first occurrence's casing. Kept
+ * as its own small function (rather than reusing `parsePhraseList` from
+ * `publish-rules.ts`) because that helper also splits on commas, and a
+ * phrase here has already arrived as one array element from the admin form
+ * — splitting it again would break a phrase that legitimately contains one.
+ */
+function dedupePhrasesCaseInsensitive(phrases: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const phrase of phrases) {
+    const key = phrase.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(phrase);
+  }
+
+  return result;
+}
+
+const phraseList = z
+  .array(
+    z
+      .string()
+      .trim()
+      .min(1, "Phrases can't be blank")
+      .max(
+        MAX_RULE_PHRASE_LENGTH,
+        `Phrases must be ${MAX_RULE_PHRASE_LENGTH} characters or fewer`,
+      ),
+  )
+  .max(MAX_RULE_PHRASES, `At most ${MAX_RULE_PHRASES} phrases`)
+  .default([])
+  .transform(dedupePhrasesCaseInsensitive);
+
+/**
+ * Validates the shape of `VideoSource.publishRules` (`Json?`). This schema is
+ * the ONLY writer of that column. The SEMANTICS of these fields — how they
+ * gate a synced video's publish state, how they're summarized for the owner
+ * — live entirely in `src/lib/youtube/publish-rules.ts`, not here; this file
+ * only owns validation and normalization on the way into storage.
+ */
+export const publishRulesSchema = z.object({
+  version: z.literal(PUBLISH_RULES_VERSION),
+  titleInclude: phraseList,
+  titleExclude: phraseList,
+  weekdays: z
+    .array(z.enum(DAY_CODES))
+    .default([])
+    .transform((days) => [...new Set(days)]),
+}) satisfies z.ZodType<PublishRules, z.ZodTypeDef, unknown>;
+
+export type PublishRulesInput = z.input<typeof publishRulesSchema>;
+
+/**
+ * Three states for reading `VideoSource.publishRules` back out of storage,
+ * deliberately NOT collapsed into a boolean or a bare nullable `PublishRules`:
+ *
+ * - `"none"` — nothing configured: either the column is `NULL`, or it holds a
+ *   rule set every clause of which is empty (`hasAnyRule` false). A rule set
+ *   the owner saved and then fully cleared must behave identically to a
+ *   column that was never touched.
+ * - `"rules"` — a valid, non-empty rule set ready to evaluate.
+ * - `"invalid"` — the stored JSON failed `publishRulesSchema` (a version
+ *   bump, hand-edited data, whatever). Callers MUST fail CLOSED on this: the
+ *   sync engine inserts the video as a hidden draft rather than guessing at
+ *   intent, and the `reapplyRules` router procedure refuses to re-apply a
+ *   rule set it can't read rather than silently treating "unreadable" the
+ *   same as "no rules" (which would auto-publish everything).
+ */
+export type StoredPublishRules =
+  | { kind: "none" }
+  | { kind: "rules"; rules: PublishRules }
+  | { kind: "invalid" };
+
+export function parseStoredPublishRules(raw: unknown): StoredPublishRules {
+  if (raw === null || raw === undefined) return { kind: "none" };
+
+  const parsed = publishRulesSchema.safeParse(raw);
+  if (!parsed.success) return { kind: "invalid" };
+  if (!hasAnyRule(parsed.data)) return { kind: "none" };
+  return { kind: "rules", rules: parsed.data };
+}
 
 // ─── Video source (channel / playlist) ───────────────────────────────────
 
@@ -168,6 +273,7 @@ export const videoSourceCreateSchema = z.object({
     .max(120, "Label must be 120 characters or fewer")
     .optional(),
   autoPublish: z.boolean().default(true),
+  publishRules: publishRulesSchema.nullable().optional(),
 });
 
 export type VideoSourceCreateData = z.infer<typeof videoSourceCreateSchema>;
@@ -180,6 +286,11 @@ export const videoSourceUpdateSchema = z.object({
     .optional(),
   enabled: z.boolean().optional(),
   autoPublish: z.boolean().optional(),
+  // Same doctrine as `emptyToNull` above: `undefined` = key omitted, leave
+  // the column alone; `null` = owner cleared the rules, write NULL;
+  // an object = replace wholesale. The router maps `null` AND an all-empty
+  // parsed object (see `hasAnyRule`) to `Prisma.DbNull`.
+  publishRules: publishRulesSchema.nullable().optional(),
 });
 
 export type VideoSourceUpdateData = z.infer<typeof videoSourceUpdateSchema>;

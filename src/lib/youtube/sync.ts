@@ -16,7 +16,7 @@
  *   SYNC-OWNED   title, description, thumbnailUrl, channelTitle, publishedAt
  *                → rewritten by this module on EVERY run.
  *   OWNER-OWNED  titleOverride, descriptionOverride, thumbnailOverride,
- *                published, sortOrder (and sourceId)
+ *                published, sortOrder, hiddenByRule (and sourceId)
  *                → seeded by this module at first insert, then owned by the
  *                  admin UI forever after.
  *
@@ -41,10 +41,13 @@
  */
 import * as Sentry from "@sentry/nextjs";
 
+import type { StoredPublishRules } from "~/lib/validators/videos";
 import type { ParsedFeedEntry } from "~/lib/youtube/feed";
 import type { DbClient } from "~/server/db";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { parseStoredPublishRules } from "~/lib/validators/videos";
 import { fetchChannelFeed, fetchPlaylistFeed } from "~/lib/youtube/feed";
+import { evaluatePublishRules } from "~/lib/youtube/publish-rules";
 
 /**
  * Minimum age of `lastSyncedAt` before a source is eligible for another sweep.
@@ -70,6 +73,8 @@ export const OWNER_OWNED_COLUMNS = [
   "thumbnailOverride",
   "published",
   "sortOrder",
+  // Seeded from the source's publish rules at insert; owner action only thereafter.
+  "hiddenByRule",
   // Not strictly owner-*edited*, but equally off-limits to `update`: a video
   // added by hand has `sourceId: null`, and adopting it into a feed would
   // change what deleting that feed does to it (SetNull → the owner's manual
@@ -101,6 +106,10 @@ type SyncableSource = {
   externalId: string;
   businessId: string;
   autoPublish: boolean;
+  /** Prisma `JsonValue | null` — parsed once per source by `parseStoredPublishRules`. */
+  publishRules: unknown;
+  /** The zone weekday rules are evaluated in. */
+  business: { timeZone: string };
 };
 
 const SOURCE_SELECT = {
@@ -109,6 +118,8 @@ const SOURCE_SELECT = {
   externalId: true,
   businessId: true,
   autoPublish: true,
+  publishRules: true,
+  business: { select: { timeZone: true } },
 } as const;
 
 export type SyncCounts = { added: number; updated: number };
@@ -129,16 +140,46 @@ function buildSyncUpdate(entry: ParsedFeedEntry): SyncOwnedFields {
   };
 }
 
+/** The one moment rules matter: published/hiddenByRule for a row that does not exist yet. */
+type InsertPublishDecision = { published: boolean; hiddenByRule: boolean };
+
+function decideInsertPublish(
+  source: Pick<SyncableSource, "autoPublish">,
+  rules: StoredPublishRules,
+  entry: ParsedFeedEntry,
+  timeZone: string,
+): InsertPublishDecision {
+  // FAIL CLOSED: the column is only ever written through the zod schema, so
+  // "invalid" means hand-edited data we can't read. Silently publishing a
+  // guest appearance is the irreversible failure; a hidden draft is not.
+  if (rules.kind === "invalid") return { published: false, hiddenByRule: true };
+
+  const verdict = evaluatePublishRules(
+    rules.kind === "rules" ? rules.rules : null,
+    { title: entry.title, publishedAt: entry.publishedAt },
+    { timeZone },
+  );
+
+  // Rules can only HIDE — they never publish past an `autoPublish: false`
+  // source.
+  return {
+    published: source.autoPublish && verdict.publish,
+    hiddenByRule: !verdict.publish,
+  };
+}
+
 /**
  * The payload for a row that does not exist yet. This is the one and only
- * moment the sync is allowed to write owner-owned columns: `published` is
- * seeded from the source's `autoPublish`, `sortOrder` is appended to the end of
- * the business's list. Both belong to the owner from here on.
+ * moment the sync is allowed to write owner-owned columns: `published` and
+ * `hiddenByRule` come from `decideInsertPublish` (the source's `autoPublish`
+ * gated by its publish rules), `sortOrder` is appended to the end of the
+ * business's list. All of them belong to the owner from here on.
  */
 function buildInsertPayload(
   entry: ParsedFeedEntry,
   source: SyncableSource,
   sortOrder: number,
+  decision: InsertPublishDecision,
 ) {
   return {
     businessId: source.businessId,
@@ -151,7 +192,8 @@ function buildInsertPayload(
     channelTitle: entry.channelTitle,
     publishedAt: entry.publishedAt,
     // Owner-owned — seeded here, never written again.
-    published: source.autoPublish,
+    published: decision.published,
+    hiddenByRule: decision.hiddenByRule,
     sortOrder,
   };
 }
@@ -190,6 +232,20 @@ async function syncSourceRow(
   try {
     const entries = await fetchFeedFor(source);
 
+    // Parsed once per source, not once per entry.
+    const rules = parseStoredPublishRules(source.publishRules);
+    const timeZone = source.business.timeZone;
+    if (rules.kind === "invalid") {
+      Sentry.captureMessage(
+        "VideoSource.publishRules failed validation; inserting new videos as hidden drafts",
+        {
+          level: "warning",
+          tags: { "youtube.sync": "rules" },
+          extra: { sourceId: source.id, businessId: source.businessId },
+        },
+      );
+    }
+
     let added = 0;
     let updated = 0;
 
@@ -226,13 +282,19 @@ async function syncSourceRow(
           },
           // ── `create` and `update` are built by two SEPARATE functions, and
           // that separation is deliberate and load-bearing. `create` seeds the
-          // owner-owned columns (published, sortOrder, sourceId) exactly once;
-          // `update` carries ONLY the five sync-owned columns. Merging them —
+          // owner-owned columns (published, hiddenByRule, sortOrder,
+          // sourceId) exactly once; `update` carries ONLY the five sync-owned
+          // columns. Merging them —
           // e.g. `const data = {...}; create: data, update: data` — would make
           // every cron tick silently revert the owner's unpublishes, custom
           // titles, and manual ordering, with no error and no failing test.
           // See the module docblock and the `Video` docblock in schema.prisma.
-          create: buildInsertPayload(entry, source, nextSortOrder),
+          create: buildInsertPayload(
+            entry,
+            source,
+            nextSortOrder,
+            decideInsertPublish(source, rules, entry, timeZone),
+          ),
           update: buildSyncUpdate(entry),
         });
 

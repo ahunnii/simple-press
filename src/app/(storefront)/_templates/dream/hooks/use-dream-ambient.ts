@@ -19,11 +19,12 @@ import { usePathname } from "next/navigation";
  *    already parked at `--rest` by the scoped
  *    `@media (prefers-reduced-motion: reduce)` CSS, so there is nothing to
  *    observe or pause.
- * 3. Otherwise observes every `.dream-clouds` / `.dream-balloons` element
- *    with an IntersectionObserver (5% threshold) and toggles `data-paused`
- *    — the CSS rule `[data-paused] .dream-cloud { animation-play-state:
- *    paused }` does the actual pausing, so this hook only ever flips an
- *    attribute.
+ * 3. Otherwise observes every `.dream-clouds` / `.dream-balloons` /
+ *    `.dream-hero-shelf` element with an IntersectionObserver (5%
+ *    threshold) and toggles `data-paused` — CSS rules like `[data-paused]
+ *    .dream-cloud { animation-play-state: paused }` (and the shelf
+ *    marquee's own equivalent) do the actual pausing, so this hook only
+ *    ever flips an attribute.
  */
 export function useDreamAmbient(): void {
   const pathname = usePathname();
@@ -40,7 +41,7 @@ export function useDreamAmbient(): void {
     }
 
     const targets = document.querySelectorAll<HTMLElement>(
-      ".dream-clouds, .dream-balloons",
+      ".dream-clouds, .dream-balloons, .dream-hero-shelf",
     );
     if (targets.length === 0) return;
 

@@ -27,22 +27,24 @@ const FIELD_KEYS = [
   "dream.homepage.hero-cta-url",
   "dream.homepage.hero-cta-secondary-label",
   "dream.homepage.hero-cta-secondary-url",
-  "dream.homepage.hero-left-card-title",
-  "dream.homepage.hero-left-card-body",
-  "dream.homepage.hero-left-photo",
-  "dream.homepage.hero-left-photo-alt",
-  "dream.homepage.hero-left-photo-caption",
-  "dream.homepage.hero-left-photo-small",
-  "dream.homepage.hero-left-photo-small-alt",
-  "dream.homepage.hero-left-photo-small-caption",
-  "dream.homepage.hero-right-card-title",
-  "dream.homepage.hero-right-card-body",
-  "dream.homepage.hero-right-photo",
-  "dream.homepage.hero-right-photo-alt",
-  "dream.homepage.hero-right-photo-caption",
-  "dream.homepage.hero-right-photo-small",
-  "dream.homepage.hero-right-photo-small-alt",
-  "dream.homepage.hero-right-photo-small-caption",
+  "dream.homepage.hero-shelf-photo-1",
+  "dream.homepage.hero-shelf-photo-1-alt",
+  "dream.homepage.hero-shelf-photo-1-caption",
+  "dream.homepage.hero-shelf-photo-2",
+  "dream.homepage.hero-shelf-photo-2-alt",
+  "dream.homepage.hero-shelf-photo-2-caption",
+  "dream.homepage.hero-shelf-photo-3",
+  "dream.homepage.hero-shelf-photo-3-alt",
+  "dream.homepage.hero-shelf-photo-3-caption",
+  "dream.homepage.hero-shelf-photo-4",
+  "dream.homepage.hero-shelf-photo-4-alt",
+  "dream.homepage.hero-shelf-photo-4-caption",
+  "dream.homepage.hero-shelf-photo-5",
+  "dream.homepage.hero-shelf-photo-5-alt",
+  "dream.homepage.hero-shelf-photo-5-caption",
+  "dream.homepage.hero-shelf-photo-6",
+  "dream.homepage.hero-shelf-photo-6-alt",
+  "dream.homepage.hero-shelf-photo-6-caption",
   // What We Do
   "dream.homepage.what-we-do-heading",
   "dream.homepage.what-we-do-lede",
@@ -156,31 +158,50 @@ export async function DreamHomepage({
               f["dream.homepage.hero-cta-secondary-label"] ?? "",
             ctaSecondaryUrl:
               f["dream.homepage.hero-cta-secondary-url"] ?? "#what-we-do",
-            leftCardTitle: f["dream.homepage.hero-left-card-title"] ?? "",
-            leftCardBody: f["dream.homepage.hero-left-card-body"] ?? "",
-            leftPhoto:
-              f["dream.homepage.hero-left-photo"] ?? "/placeholder.svg",
-            leftPhotoAlt: f["dream.homepage.hero-left-photo-alt"] ?? "",
-            leftPhotoCaption: f["dream.homepage.hero-left-photo-caption"] ?? "",
-            leftPhotoSmall:
-              f["dream.homepage.hero-left-photo-small"] ?? "/placeholder.svg",
-            leftPhotoSmallAlt:
-              f["dream.homepage.hero-left-photo-small-alt"] ?? "",
-            leftPhotoSmallCaption:
-              f["dream.homepage.hero-left-photo-small-caption"] ?? "",
-            rightCardTitle: f["dream.homepage.hero-right-card-title"] ?? "",
-            rightCardBody: f["dream.homepage.hero-right-card-body"] ?? "",
-            rightPhoto:
-              f["dream.homepage.hero-right-photo"] ?? "/placeholder.svg",
-            rightPhotoAlt: f["dream.homepage.hero-right-photo-alt"] ?? "",
-            rightPhotoCaption:
-              f["dream.homepage.hero-right-photo-caption"] ?? "",
-            rightPhotoSmall:
-              f["dream.homepage.hero-right-photo-small"] ?? "/placeholder.svg",
-            rightPhotoSmallAlt:
-              f["dream.homepage.hero-right-photo-small-alt"] ?? "",
-            rightPhotoSmallCaption:
-              f["dream.homepage.hero-right-photo-small-caption"] ?? "",
+            shelf: [
+              {
+                src:
+                  f["dream.homepage.hero-shelf-photo-1"] ?? "/placeholder.svg",
+                alt: f["dream.homepage.hero-shelf-photo-1-alt"] ?? "",
+                caption: f["dream.homepage.hero-shelf-photo-1-caption"] ?? "",
+                captionFieldKey: "dream.homepage.hero-shelf-photo-1-caption",
+              },
+              {
+                src:
+                  f["dream.homepage.hero-shelf-photo-2"] ?? "/placeholder.svg",
+                alt: f["dream.homepage.hero-shelf-photo-2-alt"] ?? "",
+                caption: f["dream.homepage.hero-shelf-photo-2-caption"] ?? "",
+                captionFieldKey: "dream.homepage.hero-shelf-photo-2-caption",
+              },
+              {
+                src:
+                  f["dream.homepage.hero-shelf-photo-3"] ?? "/placeholder.svg",
+                alt: f["dream.homepage.hero-shelf-photo-3-alt"] ?? "",
+                caption: f["dream.homepage.hero-shelf-photo-3-caption"] ?? "",
+                captionFieldKey: "dream.homepage.hero-shelf-photo-3-caption",
+              },
+              {
+                src:
+                  f["dream.homepage.hero-shelf-photo-4"] ?? "/placeholder.svg",
+                alt: f["dream.homepage.hero-shelf-photo-4-alt"] ?? "",
+                caption: f["dream.homepage.hero-shelf-photo-4-caption"] ?? "",
+                captionFieldKey: "dream.homepage.hero-shelf-photo-4-caption",
+              },
+              {
+                src:
+                  f["dream.homepage.hero-shelf-photo-5"] ?? "/placeholder.svg",
+                alt: f["dream.homepage.hero-shelf-photo-5-alt"] ?? "",
+                caption: f["dream.homepage.hero-shelf-photo-5-caption"] ?? "",
+                captionFieldKey: "dream.homepage.hero-shelf-photo-5-caption",
+              },
+              {
+                src:
+                  f["dream.homepage.hero-shelf-photo-6"] ?? "/placeholder.svg",
+                alt: f["dream.homepage.hero-shelf-photo-6-alt"] ?? "",
+                caption: f["dream.homepage.hero-shelf-photo-6-caption"] ?? "",
+                captionFieldKey: "dream.homepage.hero-shelf-photo-6-caption",
+              },
+            ],
           }}
         />
 

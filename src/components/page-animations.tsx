@@ -1,8 +1,46 @@
 "use client";
 
 import type { HTMLMotionProps } from "motion/react";
-import { type ReactNode } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import type { ReactNode } from "react";
+import { useSyncExternalStore } from "react";
+import { motion } from "motion/react";
+
+import { cn } from "~/lib/utils";
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function subscribeToReducedMotion(callback: () => void) {
+  const mediaQueryList = window.matchMedia(REDUCED_MOTION_QUERY);
+  mediaQueryList.addEventListener("change", callback);
+  return () => mediaQueryList.removeEventListener("change", callback);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
+function getReducedMotionServerSnapshot() {
+  return false;
+}
+
+/**
+ * Hydration-safe replacement for motion's `useReducedMotion`.
+ *
+ * Motion's own hook (`useState(prefersReducedMotion.current)`) seeds its
+ * state synchronously from `matchMedia` on the client but starts as `null`
+ * on the server, so a reduced-motion visitor gets `opacity:0` (etc.) from
+ * SSR and `opacity:1` on the client's first render — a hydration mismatch.
+ * `useSyncExternalStore`'s server snapshot (`false`) is used for the
+ * hydration render, matching SSR exactly, then React re-renders with the
+ * real client value immediately after.
+ */
+function usePrefersReducedMotion(): boolean {
+  return useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot,
+  );
+}
 
 interface FadeInProps extends HTMLMotionProps<"div"> {
   children: ReactNode;
@@ -20,7 +58,7 @@ export function FadeIn({
   className,
   ...props
 }: FadeInProps) {
-  const shouldReduce = useReducedMotion();
+  const shouldReduce = usePrefersReducedMotion();
   const directionMap = {
     up: { y: 24 },
     down: { y: -24 },
@@ -43,7 +81,7 @@ export function FadeIn({
         delay: shouldReduce ? 0 : delay,
         ease: [0.21, 0.47, 0.32, 0.98],
       }}
-      className={className}
+      className={cn("sp-motion", className)}
       {...props}
     >
       {children}
@@ -62,7 +100,7 @@ export function StaggerContainer({
   className,
   staggerDelay = 0.1,
 }: StaggerContainerProps) {
-  const shouldReduce = useReducedMotion();
+  const shouldReduce = usePrefersReducedMotion();
   return (
     <motion.div
       initial="hidden"
@@ -90,7 +128,7 @@ export function StaggerItem({
   children: ReactNode;
   className?: string;
 }) {
-  const shouldReduce = useReducedMotion();
+  const shouldReduce = usePrefersReducedMotion();
   return (
     <motion.div
       variants={{
@@ -104,7 +142,7 @@ export function StaggerItem({
           },
         },
       }}
-      className={className}
+      className={cn("sp-motion", className)}
     >
       {children}
     </motion.div>
@@ -120,7 +158,7 @@ export function ScaleIn({
   delay?: number;
   className?: string;
 }) {
-  const shouldReduce = useReducedMotion();
+  const shouldReduce = usePrefersReducedMotion();
   return (
     <motion.div
       initial={
@@ -133,7 +171,7 @@ export function ScaleIn({
         delay: shouldReduce ? 0 : delay,
         ease: [0.21, 0.47, 0.32, 0.98],
       }}
-      className={className}
+      className={cn("sp-motion", className)}
     >
       {children}
     </motion.div>
@@ -147,13 +185,13 @@ export function PageTransition({
   children: ReactNode;
   className?: string;
 }) {
-  const shouldReduce = useReducedMotion();
+  const shouldReduce = usePrefersReducedMotion();
   return (
     <motion.div
       initial={shouldReduce ? { opacity: 1 } : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: shouldReduce ? 0 : 0.4, ease: "easeOut" }}
-      className={className}
+      className={cn("sp-motion", className)}
     >
       {children}
     </motion.div>

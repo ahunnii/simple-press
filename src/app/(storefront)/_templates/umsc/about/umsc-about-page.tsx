@@ -74,8 +74,12 @@ export async function UmscAboutPage({
   const values = parsedValues.length > 0 ? parsedValues : DEFAULT_VALUES;
 
   const galleryId = f["umsc.about.community-gallery"]?.trim() ?? "";
+  // GalleryFieldSelect stores the literal string "none" when the owner
+  // picks "None" (template-field-widgets.tsx ~line 984-989) — guard it here
+  // so we don't query the gallery table for a gallery literally named "none".
+  const hasGallery = galleryId !== "" && galleryId !== "none";
   const gallery =
-    galleryId && isEnabled("galleries")
+    hasGallery && isEnabled("galleries")
       ? await db.gallery.findUnique({
           where: { id: galleryId, businessId: business.id },
           include: { images: { orderBy: { sortOrder: "asc" } } },

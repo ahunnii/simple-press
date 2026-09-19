@@ -3,14 +3,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
+import type { DreamNavItem } from "../lib/nav";
 import type { Session } from "~/server/better-auth/config";
-import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
-import { UserButton } from "~/components/auth/user/user-button";
 
-export type DreamNavItem = { label: string; href: string };
+import { isDreamNavActive } from "../lib/nav";
+import { DreamSocialLinks } from "../shared/dream-social-links";
+import { DreamNavOverlayAccount } from "./dream-nav-overlay-account";
 
 type DreamNavOverlayProps = {
   open: boolean;
@@ -23,6 +23,8 @@ type DreamNavOverlayProps = {
   logoAlt: string;
   ctaLabel: string;
   ctaUrl: string;
+  /** Raw `business.siteContent.socialLinks` JSON — parsed by `DreamSocialLinks`. */
+  socialLinks: unknown;
   initialSession?: Session | null;
   accountsEnabled: boolean;
   ordersEnabled: boolean;
@@ -39,9 +41,9 @@ const EXIT_MS = 180;
  *
  * Focus trap / inert-siblings / scroll-lock / escape / entrance-arming
  * mechanics structurally copied from `wealth/layout/wealth-nav-overlay.tsx`
- * (itself copied from `vii/layout/vii-header.tsx`'s mobile dialog),
- * simplified to a flat link list — dream's nav has no grouped/accordion
- * items.
+ * (itself copied from `vii/layout/vii-header.tsx`'s mobile dialog). Nav items
+ * that carry children (Admin → Content → Navigation) render as an in-place
+ * accordion; the social row and the account list sit below the link list.
  */
 export function DreamNavOverlay({
   open,
@@ -53,29 +55,18 @@ export function DreamNavOverlay({
   logoAlt,
   ctaLabel,
   ctaUrl,
+  socialLinks,
   initialSession,
   accountsEnabled,
   ordersEnabled,
 }: DreamNavOverlayProps) {
   const pathname = usePathname();
-  const { data: session, isPending } = useHydratedSession(
-    initialSession ?? null,
-  );
-
-  const showAdminLink =
-    session?.user?.platformRole === "PLATFORM_ADMIN" ||
-    !!session?.session?.membershipId;
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
 
-  const isActive = (href: string) => {
-    if (!href || href === "#") return false;
-    return href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
-  };
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   // ── Presence + entrance/exit phases ────────────────────────────────────
   const [present, setPresent] = useState(open);
@@ -85,6 +76,8 @@ export function DreamNavOverlay({
     if (open) {
       setPresent(true);
       setState("enter");
+      // Every open starts with all accordions collapsed.
+      setExpanded(null);
       return undefined;
     }
     if (wasOpenRef.current) {
@@ -237,11 +230,81 @@ export function DreamNavOverlay({
       <nav className="dream-nav-overlay-nav" aria-label="Primary navigation">
         <ul className="dream-nav-overlay-list">
           {items.map((item, i) => {
-            const active = isActive(item.href);
+            if (item.children?.length) {
+              const childActive = item.children.some((child) =>
+                isDreamNavActive(pathname, child.href),
+              );
+              const active =
+                childActive || isDreamNavActive(pathname, item.href);
+              const isOpen = expanded === i;
+              const sublistId = `dream-nav-overlay-sublist-${i}`;
+
+              return (
+                <li key={item.href + item.label}>
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={sublistId}
+                    onClick={() => setExpanded(isOpen ? null : i)}
+                    className="dream-nav-overlay-line dream-nav-overlay-item dream-nav-overlay-item--toggle"
+                    style={{ "--i": i + 1 } as React.CSSProperties}
+                    data-active={active ? "true" : undefined}
+                  >
+                    {item.label}
+                    <ChevronDown
+                      className={`h-5 w-5 shrink-0 transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  {isOpen ? (
+                    <ul id={sublistId} className="dream-nav-overlay-sublist">
+                      {item.children.map((child) => {
+                        const childIsActive = isDreamNavActive(
+                          pathname,
+                          child.href,
+                        );
+                        return (
+                          <li key={child.href + child.label}>
+                            <Link
+                              href={child.href}
+                              target={child.external ? "_blank" : undefined}
+                              rel={
+                                child.external
+                                  ? "noopener noreferrer"
+                                  : undefined
+                              }
+                              onClick={onClose}
+                              aria-current={childIsActive ? "page" : undefined}
+                              data-active={childIsActive ? "true" : undefined}
+                              className="dream-nav-overlay-subitem"
+                            >
+                              {child.label}
+                              {child.external ? (
+                                <span className="sr-only">
+                                  {" "}
+                                  (opens in new tab)
+                                </span>
+                              ) : null}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            }
+
+            const active = isDreamNavActive(pathname, item.href);
             return (
               <li key={item.href + item.label}>
                 <Link
                   href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
                   onClick={onClose}
                   aria-current={active ? "page" : undefined}
                   className="dream-nav-overlay-line dream-nav-overlay-item"
@@ -249,58 +312,32 @@ export function DreamNavOverlay({
                   data-active={active ? "true" : undefined}
                 >
                   {item.label}
+                  {item.external ? (
+                    <span className="sr-only"> (opens in new tab)</span>
+                  ) : null}
                 </Link>
               </li>
             );
           })}
         </ul>
+
+        <DreamSocialLinks
+          socialLinks={socialLinks}
+          className="dream-nav-overlay-line dream-nav-overlay-social"
+          style={{ "--i": items.length + 1 } as React.CSSProperties}
+        />
       </nav>
 
       <div
         className="dream-nav-overlay-line dream-nav-overlay-bottom"
-        style={{ "--i": items.length + 1 } as React.CSSProperties}
+        style={{ "--i": items.length + 2 } as React.CSSProperties}
       >
-        {accountsEnabled ? (
-          <div className="dream-nav-overlay-account">
-            {isPending ? (
-              <div className="dream-nav-overlay-account-skeleton" />
-            ) : session?.user ? (
-              <UserButton
-                size="icon"
-                className="h-auto w-auto rounded-full p-0"
-                avatarClassName="size-8"
-                links={[
-                  ...(ordersEnabled
-                    ? [
-                        {
-                          icon: <IconPackage className="h-4 w-4" />,
-                          label: "Orders",
-                          href: "/account/orders",
-                        },
-                      ]
-                    : []),
-                  ...(showAdminLink
-                    ? [
-                        {
-                          icon: <IconLayoutDashboard className="h-4 w-4" />,
-                          label: "Admin",
-                          href: "/admin",
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            ) : (
-              <Link
-                href="/auth/sign-in"
-                onClick={onClose}
-                className="dream-link"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        ) : null}
+        <DreamNavOverlayAccount
+          initialSession={initialSession}
+          accountsEnabled={accountsEnabled}
+          ordersEnabled={ordersEnabled}
+          onClose={onClose}
+        />
         <Link
           href={ctaUrl}
           onClick={onClose}

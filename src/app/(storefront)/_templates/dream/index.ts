@@ -11,7 +11,7 @@ import {
   dreamTestimonialsFieldGroups,
 } from "./testimonials";
 
-// ─── Global: Branding (topbar + header nav + footer) ─────────────────────────
+// ─── Global: Branding (topbar + header CTA + footer) ─────────────────────────
 // Chrome (dream-topbar/header/footer) reads these keys through
 // `resolveDreamFields` in ./lib/resolve-fields.ts. The `defaultValue`s below
 // are sourced from that file's DREAM_FIELD_DEFAULTS record so the editor's
@@ -72,17 +72,6 @@ const globalBrandingData: TemplateField[] = [
     group: "global.branding",
     gridColumn: "col-span-1",
     defaultValue: d("dream.global.header-cta-url"),
-  },
-  {
-    key: "dream.global.gallery-link-url",
-    label: "Gallery Link",
-    description:
-      "Where the header/footer Gallery link points to (defaults to the homepage gallery section).",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: d("dream.global.gallery-link-url"),
   },
   {
     key: "dream.global.footer-signoff",
@@ -157,16 +146,6 @@ const globalBrandingData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: d("dream.global.contact-hours"),
   },
-  {
-    key: "dream.global.contact-instagram",
-    label: "Instagram URL",
-    description: "Shown in the footer contact column. Leave blank to hide.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: d("dream.global.contact-instagram"),
-  },
 ];
 
 // ─── Global: Authentication (sign-in / sign-up screens, Default fallback) ────
@@ -233,7 +212,7 @@ export const dreamFieldGroups = {
       id: "global.branding",
       title: "Topbar, Navigation & Footer",
       description:
-        "Announcement bar, header CTA, gallery link, and the footer's brand/contact copy — shown on every page.",
+        "Announcement bar, header CTA, and the footer's brand/contact copy — shown on every page. Nav links are managed in Content → Navigation; social links in Content → Branding.",
       icon: "🏷️",
       columns: 2,
     } satisfies TemplateFieldGroup,

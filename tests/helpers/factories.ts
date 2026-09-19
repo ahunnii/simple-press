@@ -1,4 +1,4 @@
-import type { Prisma } from "generated/prisma";
+import { Prisma } from "generated/prisma";
 
 import { db } from "./db";
 
@@ -462,6 +462,14 @@ export function createVideoSource(
     autoPublish?: boolean;
     lastSyncedAt?: Date | null;
     lastSyncError?: string | null;
+    /**
+     * Omit to leave the column NULL (the schema default). Pass an object to
+     * store it as-is via `Prisma.InputJsonValue` — null/undefined write
+     * `Prisma.DbNull` rather than the JS literal, since Prisma rejects plain
+     * `null` for a `Json?` column at runtime (same rule the router's
+     * `toPublishRulesWrite` follows).
+     */
+    publishRules?: unknown;
   } = {},
 ) {
   return db.videoSource.create({
@@ -474,6 +482,10 @@ export function createVideoSource(
       autoPublish: opts.autoPublish ?? true,
       lastSyncedAt: opts.lastSyncedAt ?? null,
       lastSyncError: opts.lastSyncError ?? null,
+      publishRules:
+        opts.publishRules == null
+          ? Prisma.DbNull
+          : (opts.publishRules as Prisma.InputJsonValue),
     },
   });
 }
@@ -491,6 +503,7 @@ export function createVideo(
     descriptionOverride?: string | null;
     thumbnailOverride?: string | null;
     published?: boolean;
+    hiddenByRule?: boolean;
     sortOrder?: number;
     sourceId?: string | null;
   } = {},
@@ -508,6 +521,7 @@ export function createVideo(
       descriptionOverride: opts.descriptionOverride ?? null,
       thumbnailOverride: opts.thumbnailOverride ?? null,
       published: opts.published ?? true,
+      hiddenByRule: opts.hiddenByRule ?? false,
       sortOrder: opts.sortOrder ?? 0,
       sourceId: opts.sourceId ?? null,
     },

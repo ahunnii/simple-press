@@ -114,6 +114,43 @@ describe("videos", () => {
         code: "NOT_FOUND",
       });
     });
+
+    it("getAll rows carry hiddenByRule; publishing a hidden draft clears it, but manually unpublishing a normal video never sets it", async () => {
+      const business = await videosBusiness({
+        subdomain: "videos-hidden-badge",
+      });
+      const owner = await createOwnerUser(business.id);
+      reqHost.value = "videos-hidden-badge.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      const hiddenDraft = await createVideo(business.id, {
+        published: false,
+        hiddenByRule: true,
+      });
+      const normalPublished = await createVideo(business.id, {
+        published: true,
+        hiddenByRule: false,
+      });
+
+      const republished = await caller.videos.update({
+        id: hiddenDraft.id,
+        published: true,
+      });
+      expect(republished.published).toBe(true);
+      expect(republished.hiddenByRule).toBe(false);
+
+      const unpublished = await caller.videos.update({
+        id: normalPublished.id,
+        published: false,
+      });
+      expect(unpublished.published).toBe(false);
+      expect(unpublished.hiddenByRule).toBe(false);
+
+      const all = await caller.videos.getAll();
+      const map = new Map(all.map((v) => [v.id, v.hiddenByRule]));
+      expect(map.get(hiddenDraft.id)).toBe(false);
+      expect(map.get(normalPublished.id)).toBe(false);
+    });
   });
 
   describe("video source CRUD", () => {
@@ -164,6 +201,88 @@ describe("videos", () => {
       const stillThere = await db.video.findUnique({ where: { id: video.id } });
       expect(stillThere).not.toBeNull();
       expect(stillThere?.sourceId).toBeNull();
+    });
+
+    it("persists publishRules on createSource and round-trips through listSources", async () => {
+      const business = await videosBusiness({
+        subdomain: "videos-rules-create",
+      });
+      const owner = await createOwnerUser(business.id);
+      reqHost.value = "videos-rules-create.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      const rules = {
+        version: 1 as const,
+        titleInclude: ["Bamboo Hour"],
+        titleExclude: [],
+        weekdays: [],
+      };
+
+      const created = await caller.videos.createSource({
+        input: "https://www.youtube.com/channel/UC1111111111111111111111",
+        autoPublish: true,
+        publishRules: rules,
+      });
+      expect(created.publishRules).toEqual(rules);
+
+      const listed = await caller.videos.listSources();
+      expect(listed[0]?.publishRules).toEqual(rules);
+    });
+
+    it("updateSource: null clears publishRules, an all-empty rule set also clears it, and updating only label leaves rules intact", async () => {
+      const business = await videosBusiness({
+        subdomain: "videos-rules-update",
+      });
+      const owner = await createOwnerUser(business.id);
+      reqHost.value = "videos-rules-update.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      const source = await createVideoSource(business.id);
+      const rules = {
+        version: 1 as const,
+        titleInclude: ["Foo"],
+        titleExclude: [],
+        weekdays: [],
+      };
+
+      const withRules = await caller.videos.updateSource({
+        id: source.id,
+        publishRules: rules,
+      });
+      expect(withRules.publishRules).toEqual(rules);
+
+      const labelOnly = await caller.videos.updateSource({
+        id: source.id,
+        label: "Renamed Only",
+      });
+      expect(labelOnly.label).toBe("Renamed Only");
+      expect(labelOnly.publishRules).toEqual(rules);
+
+      const emptied = await caller.videos.updateSource({
+        id: source.id,
+        publishRules: {
+          version: 1,
+          titleInclude: [],
+          titleExclude: [],
+          weekdays: [],
+        },
+      });
+      expect(emptied.publishRules).toBeNull();
+
+      await caller.videos.updateSource({
+        id: source.id,
+        publishRules: {
+          version: 1,
+          titleInclude: ["Bar"],
+          titleExclude: [],
+          weekdays: [],
+        },
+      });
+      const nulled = await caller.videos.updateSource({
+        id: source.id,
+        publishRules: null,
+      });
+      expect(nulled.publishRules).toBeNull();
     });
   });
 
@@ -227,6 +346,39 @@ describe("videos", () => {
       });
       expect(stillSource?.label).toBe("B's channel");
     });
+
+    it("404s reapplyRules against another business's source and leaves its videos untouched", async () => {
+      const businessA = await videosBusiness({ subdomain: "videos-reapply-a" });
+      const businessB = await videosBusiness({ subdomain: "videos-reapply-b" });
+      const ownerA = await createOwnerUser(businessA.id);
+
+      const foreignSource = await createVideoSource(businessB.id, {
+        publishRules: {
+          version: 1,
+          titleInclude: ["X"],
+          titleExclude: [],
+          weekdays: [],
+        },
+      });
+      const foreignVideo = await createVideo(businessB.id, {
+        title: "Unrelated",
+        published: true,
+        sourceId: foreignSource.id,
+      });
+
+      reqHost.value = "videos-reapply-a.simplepress.test";
+      const callerA = createTestCaller({ userId: ownerA.id });
+
+      await expect(
+        callerA.videos.reapplyRules({ sourceId: foreignSource.id }),
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+      const stillForeign = await db.video.findUnique({
+        where: { id: foreignVideo.id },
+      });
+      expect(stillForeign?.published).toBe(true);
+      expect(stillForeign?.hiddenByRule).toBe(false);
+    });
   });
 
   describe("syncNow", () => {
@@ -262,6 +414,173 @@ describe("videos", () => {
         code: "BAD_REQUEST",
         message: expect.stringContaining("feed request failed: 404"),
       });
+    });
+  });
+
+  // `~/lib/youtube/sync` is mocked at the top of this file, so insert-time
+  // rule evaluation (what a NEW synced video gets published as) is covered
+  // by sync.test.ts, not here. These tests exercise the OTHER consumer of
+  // publish rules: retroactively re-evaluating videos that already exist.
+  describe("reapplyRules", () => {
+    it("dry-runs and then applies rule verdicts to a source's videos, leaving manual adds and other sources untouched", async () => {
+      const business = await videosBusiness({ subdomain: "videos-reapply" });
+      const owner = await createOwnerUser(business.id);
+      reqHost.value = "videos-reapply.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      const source = await createVideoSource(business.id, {
+        publishRules: {
+          version: 1,
+          titleInclude: ["Bamboo Hour"],
+          titleExclude: [],
+          weekdays: [],
+        },
+      });
+      const otherSource = await createVideoSource(business.id);
+
+      const matchingDraft = await createVideo(business.id, {
+        title: "Bamboo Hour Ep 1",
+        published: false,
+        sourceId: source.id,
+      });
+      const nonMatchingPublished = await createVideo(business.id, {
+        title: "Unrelated Clip",
+        published: true,
+        sourceId: source.id,
+      });
+      const matchingPublished = await createVideo(business.id, {
+        title: "Bamboo Hour Ep 2",
+        published: true,
+        sourceId: source.id,
+      });
+      const manualAdd = await createVideo(business.id, {
+        title: "Unrelated Manual",
+        published: true,
+        sourceId: null,
+      });
+      const otherSourceVideo = await createVideo(business.id, {
+        title: "Unrelated Other Source",
+        published: true,
+        sourceId: otherSource.id,
+      });
+
+      const dryRun = await caller.videos.reapplyRules({
+        sourceId: source.id,
+        dryRun: true,
+      });
+      expect(dryRun).toEqual({
+        total: 3,
+        published: 1,
+        hidden: 1,
+        unchanged: 1,
+      });
+
+      // Nothing changed by the dry run.
+      const draftAfterDryRun = await db.video.findUnique({
+        where: { id: matchingDraft.id },
+      });
+      expect(draftAfterDryRun?.published).toBe(false);
+      const publishedAfterDryRun = await db.video.findUnique({
+        where: { id: nonMatchingPublished.id },
+      });
+      expect(publishedAfterDryRun?.published).toBe(true);
+
+      const real = await caller.videos.reapplyRules({ sourceId: source.id });
+      expect(real).toEqual({ total: 3, published: 1, hidden: 1, unchanged: 1 });
+
+      const flippedOn = await db.video.findUnique({
+        where: { id: matchingDraft.id },
+      });
+      expect(flippedOn?.published).toBe(true);
+      expect(flippedOn?.hiddenByRule).toBe(false);
+
+      const flippedOff = await db.video.findUnique({
+        where: { id: nonMatchingPublished.id },
+      });
+      expect(flippedOff?.published).toBe(false);
+      expect(flippedOff?.hiddenByRule).toBe(true);
+
+      const untouchedMatching = await db.video.findUnique({
+        where: { id: matchingPublished.id },
+      });
+      expect(untouchedMatching?.published).toBe(true);
+      expect(untouchedMatching?.hiddenByRule).toBe(false);
+
+      const untouchedManual = await db.video.findUnique({
+        where: { id: manualAdd.id },
+      });
+      expect(untouchedManual?.published).toBe(true);
+      expect(untouchedManual?.hiddenByRule).toBe(false);
+
+      const untouchedOther = await db.video.findUnique({
+        where: { id: otherSourceVideo.id },
+      });
+      expect(untouchedOther?.published).toBe(true);
+      expect(untouchedOther?.hiddenByRule).toBe(false);
+    });
+
+    it("evaluates weekday rules in the business's own time zone", async () => {
+      const business = await videosBusiness({
+        subdomain: "videos-reapply-weekday",
+        timeZone: "America/Detroit",
+      });
+      const owner = await createOwnerUser(business.id);
+      reqHost.value = "videos-reapply-weekday.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      const source = await createVideoSource(business.id, {
+        publishRules: {
+          version: 1,
+          titleInclude: [],
+          titleExclude: [],
+          weekdays: ["thu"],
+        },
+      });
+      // 2026-07-31T02:30:00Z is Thursday in America/Detroit (UTC-4 in July)
+      // but already Friday in UTC — this is the whole point of the test.
+      const video = await createVideo(business.id, {
+        publishedAt: new Date("2026-07-31T02:30:00Z"),
+        published: false,
+        sourceId: source.id,
+      });
+
+      await caller.videos.reapplyRules({ sourceId: source.id });
+      const afterThu = await db.video.findUnique({ where: { id: video.id } });
+      expect(afterThu?.published).toBe(true);
+      expect(afterThu?.hiddenByRule).toBe(false);
+
+      await caller.videos.updateSource({
+        id: source.id,
+        publishRules: {
+          version: 1,
+          titleInclude: [],
+          titleExclude: [],
+          weekdays: ["fri"],
+        },
+      });
+      await caller.videos.reapplyRules({ sourceId: source.id });
+      const afterFri = await db.video.findUnique({ where: { id: video.id } });
+      expect(afterFri?.published).toBe(false);
+      expect(afterFri?.hiddenByRule).toBe(true);
+    });
+
+    it("rejects with BAD_REQUEST when the stored publishRules JSON fails validation", async () => {
+      const business = await videosBusiness({
+        subdomain: "videos-reapply-invalid",
+      });
+      const owner = await createOwnerUser(business.id);
+      reqHost.value = "videos-reapply-invalid.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      const source = await createVideoSource(business.id);
+      await db.videoSource.update({
+        where: { id: source.id },
+        data: { publishRules: { version: 99 } },
+      });
+
+      await expect(
+        caller.videos.reapplyRules({ sourceId: source.id }),
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
     });
   });
 

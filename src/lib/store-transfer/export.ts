@@ -34,6 +34,7 @@ import type {
   ExportedVideoSource,
   StoreTransferContent,
 } from "~/lib/store-transfer/types";
+import { parseStoredPublishRules } from "~/lib/validators/videos";
 import { db } from "~/server/db";
 
 // ─── DTO Mappers ──────────────────────────────────────────────────────────────
@@ -406,6 +407,7 @@ function mapEvent(
 function mapVideoSource(
   s: Awaited<ReturnType<typeof fetchVideoSources>>[number],
 ): ExportedVideoSource {
+  const stored = parseStoredPublishRules(s.publishRules);
   return {
     exportId: s.id,
     kind: s.kind,
@@ -413,6 +415,7 @@ function mapVideoSource(
     label: s.label,
     enabled: s.enabled,
     autoPublish: s.autoPublish,
+    publishRules: stored.kind === "rules" ? stored.rules : null,
   };
 }
 
@@ -433,6 +436,7 @@ function mapVideo(
     published: v.published,
     sortOrder: v.sortOrder,
     exportSourceId: v.sourceId,
+    hiddenByRule: v.hiddenByRule,
   };
 }
 
@@ -845,6 +849,7 @@ async function fetchVideoSources(businessId: string) {
       label: true,
       enabled: true,
       autoPublish: true,
+      publishRules: true,
     },
     orderBy: { createdAt: "asc" },
   });
@@ -867,6 +872,7 @@ async function fetchVideos(businessId: string) {
       published: true,
       sortOrder: true,
       sourceId: true,
+      hiddenByRule: true,
     },
     orderBy: { sortOrder: "asc" },
   });

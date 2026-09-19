@@ -5,8 +5,9 @@ import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
+import { resolveDreamNav } from "../lib/nav";
 import { resolveDreamFields } from "../lib/resolve-fields";
-import { DreamLink } from "../shared/dream-link";
+import { DreamSocialLinks } from "../shared/dream-social-links";
 
 const FIELD_KEYS = [
   "dream.global.footer-signoff",
@@ -16,17 +17,18 @@ const FIELD_KEYS = [
   "dream.global.contact-email",
   "dream.global.contact-phone",
   "dream.global.contact-hours",
-  "dream.global.contact-instagram",
-  "dream.global.gallery-link-url",
+  "dream.global.header-cta-label",
+  "dream.global.header-cta-url",
 ];
 
 /**
  * Paper footer, hairline top rule, three columns (design.md "Chrome ›
  * Footer"): brand (mini logo + script sign-off + service area), links
- * (Services, Gallery, About, Estimate Quote, Testimonials), contact
- * (email, phone, hours, Instagram — each hidden when blank). Policy links
- * row falls back to `/platform/policies/*` when no merchant Page exists,
- * mirroring `wealth-footer.tsx`.
+ * (mirrors Admin → Content → Navigation top-level items via
+ * `resolveDreamNav`, plus the header CTA), contact (email, phone, hours,
+ * then the Branding social icon row — each hidden when blank/unset). Policy
+ * links row falls back to `/platform/policies/*` when no merchant Page
+ * exists, mirroring `wealth-footer.tsx`.
  */
 export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
   const name = business?.name ?? "";
@@ -42,8 +44,9 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
   const email = f["dream.global.contact-email"] ?? "";
   const phone = f["dream.global.contact-phone"] ?? "";
   const hours = f["dream.global.contact-hours"] ?? "";
-  const instagram = f["dream.global.contact-instagram"] ?? "";
-  const galleryUrl = f["dream.global.gallery-link-url"] ?? "/#gallery";
+  const ctaLabel = f["dream.global.header-cta-label"] ?? "Estimate Quote";
+  const ctaUrl = f["dream.global.header-cta-url"] ?? "/contact";
+  const navItems = resolveDreamNav(business?.siteContent?.navigationItems);
 
   const logoUrl =
     business?.siteContent?.logoUrl ?? "/templates/dream/images/logo.webp";
@@ -111,20 +114,22 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
           className="dream-footer-col dream-footer-col--links"
           aria-label="Footer"
         >
-          <Link href="/services" className="dream-footer-link">
-            Services
-          </Link>
-          <Link href={galleryUrl} className="dream-footer-link">
-            Gallery
-          </Link>
-          <Link href="/about" className="dream-footer-link">
-            About
-          </Link>
-          <Link href="/contact" className="dream-footer-link">
-            Estimate Quote
-          </Link>
-          <Link href="/testimonials" className="dream-footer-link">
-            Testimonials
+          {navItems.map((item) => (
+            <Link
+              key={item.href + item.label}
+              href={item.href}
+              className="dream-footer-link"
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
+            >
+              {item.label}
+              {item.external ? (
+                <span className="sr-only"> (opens in new tab)</span>
+              ) : null}
+            </Link>
+          ))}
+          <Link href={ctaUrl} className="dream-footer-link">
+            {ctaLabel}
           </Link>
         </nav>
 
@@ -148,11 +153,10 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
             </p>
           ) : null}
           {hours ? <p>{hours}</p> : null}
-          {instagram ? (
-            <p>
-              <DreamLink href={instagram}>Instagram</DreamLink>
-            </p>
-          ) : null}
+          <DreamSocialLinks
+            socialLinks={business?.siteContent?.socialLinks}
+            className="dream-footer-social"
+          />
         </div>
       </div>
 

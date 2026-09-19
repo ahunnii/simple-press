@@ -70,6 +70,12 @@ export const SECTION_LINKS = {
     description: "Manage the YouTube videos shown on your site.",
     featureKey: "videos",
   },
+  galleries: {
+    label: "Galleries",
+    href: "/admin/galleries",
+    description: "Create a gallery and upload the photos that appear here.",
+    featureKey: "galleries",
+  },
   reviews: {
     label: "Product reviews",
     href: "/admin/reviews",

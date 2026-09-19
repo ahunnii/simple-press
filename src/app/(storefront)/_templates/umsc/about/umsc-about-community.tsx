@@ -1,46 +1,40 @@
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { GalleryRenderer } from "~/components/gallery-renderer";
 
 import { UmscHeading } from "../shared/umsc-heading";
-import { UmscReveal } from "../shared/umsc-reveal";
+import { UmscGallery, type UmscGalleryData } from "../shared/umsc-gallery";
 import { UmscSection } from "../shared/umsc-section";
-
-type GalleryData = {
-  name?: string;
-  description?: string | null;
-  layout: string;
-  columns: number;
-  gap: number;
-  showCaptions: boolean;
-  enableLightbox: boolean;
-  aspectRatio?: string | null;
-  captionStyle?: string | null;
-  images: Array<{
-    id: string;
-    url: string;
-    altText?: string | null;
-    caption?: string | null;
-  }>;
-};
+import { UmscAboutCommunityPlaceholder } from "./umsc-about-community-placeholder";
 
 type Props = {
   heading: string;
-  gallery: GalleryData | null;
+  gallery: UmscGalleryData | null;
 };
 
 /**
- * UmscAboutCommunity — design.md "About #5": h2 + a `gallery` field forced
- * to a 4→2 grid layout (her market/customer photos). Hideable
- * (about.community); the page component only renders this when a gallery
- * with photos is actually picked — "empty = hidden" per design.md, unlike
- * homepage sections that design a visible empty state.
+ * UmscAboutCommunity — design.md "About #5": h2 + the owner's Admin →
+ * Galleries pick (her market/customer photos), rendered through the
+ * umsc-native `UmscGallery` (`../shared/umsc-gallery`), which honors the
+ * owner's layout/aspect/caption/lightbox settings — carousel and justified
+ * fall back to the square grid, and the 16px shelf gap is fixed regardless
+ * of the stored `gap` value. Cream band (`tone="cream"`), so it no longer
+ * sits paper-on-paper directly under Values (`umsc-about-values.tsx`, also
+ * `tone="paper"`). Hideable (`about.community`).
+ *
+ * "Empty = hidden" per design.md: when no gallery is picked, or the picked
+ * gallery has no photos, this renders nothing on the public site. That
+ * leaves an owner browsing a fresh store with no on-page hotspot for this
+ * section's panel, so the same empty case instead renders
+ * `UmscAboutCommunityPlaceholder`, which is itself a no-op outside the
+ * editor preview iframe.
  */
 export function UmscAboutCommunity({ heading, gallery }: Props) {
-  if (!gallery || gallery.images.length === 0) return null;
+  if (!gallery || gallery.images.length === 0) {
+    return <UmscAboutCommunityPlaceholder heading={heading} />;
+  }
 
   return (
     <UmscSection
-      tone="paper"
+      tone="cream"
       aria-label="Our customers, our community"
       sectionAttrs={sectionGroupAttr("about", "community")}
     >
@@ -51,9 +45,7 @@ export function UmscAboutCommunity({ heading, gallery }: Props) {
       >
         {heading}
       </UmscHeading>
-      <UmscReveal>
-        <GalleryRenderer gallery={{ ...gallery, layout: "grid", columns: 4 }} />
-      </UmscReveal>
+      <UmscGallery gallery={gallery} label={heading} />
     </UmscSection>
   );
 }

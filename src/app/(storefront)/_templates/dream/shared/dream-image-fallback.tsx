@@ -10,7 +10,7 @@ type DreamImageFallbackProps = {
    * border — for fallbacks that need to carry weight against a busier
    * background. `warm`: the `--dream-placeholder` gradient with a soft
    * highlight ellipse and NO logo mark (design.md: "Empty state = the warm
-   * placeholder" — the hero orbit photos' empty state, matching the
+   * placeholder" — the hero shelf photos' empty state, matching the
    * reference `index.html`'s tiles, which carry no mark).
    */
   tone?: "sky" | "paper" | "warm";

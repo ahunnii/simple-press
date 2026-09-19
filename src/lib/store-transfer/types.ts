@@ -14,6 +14,8 @@
  *     umamiWebsiteId, umamiEnabled)
  */
 
+import type { PublishRules } from "~/lib/youtube/publish-rules";
+
 // ─── Format version ───────────────────────────────────────────────────────────
 
 export const STORE_TRANSFER_FORMAT_VERSION = 2 as const;
@@ -386,6 +388,8 @@ export interface ExportedVideoSource {
   label: string | null;
   enabled: boolean;
   autoPublish: boolean;
+  /** Added 2026-09-18 — manifests exported before then lack it; the validator defaults it to null. */
+  publishRules: PublishRules | null;
   // lastSyncedAt / lastSyncError excluded — sync bookkeeping, not content.
 }
 
@@ -409,6 +413,8 @@ export interface ExportedVideo {
   sortOrder: number;
   /** exportId of the source ExportedVideoSource, or null for a manual add. */
   exportSourceId: string | null;
+  /** Added 2026-09-18 — defaults to false on older manifests. */
+  hiddenByRule: boolean;
 }
 
 export interface ExportedShippingRate {

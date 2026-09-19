@@ -701,9 +701,9 @@ model Event {
 /// ("channel" | "playlist") rather than an enum to keep this additive and to avoid
 /// a migration if a third feed shape ever shows up.
 ///
-/// `autoPublish` decides only what `Video.published` is set to at INSERT time for
-/// videos discovered through this source. Flipping it later does not retroactively
-/// publish or unpublish anything — see the ownership note on `Video`.
+/// `autoPublish` and `publishRules` both decide only what `Video.published` is set to
+/// at INSERT time for videos discovered through this source. Flipping them later does
+/// not retroactively publish or unpublish anything — see the ownership note on `Video`.
 model VideoSource {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -714,6 +714,14 @@ model VideoSource {
   label       String? // owner-facing name
   enabled     Boolean @default(true)
   autoPublish Boolean @default(true)
+  // Optional rule set gating `autoPublish` for NEW videos from this source:
+  // title include/exclude phrases and weekdays (in the business's time zone),
+  // validated by `publishRulesSchema` in src/lib/validators/videos.ts and
+  // evaluated by src/lib/youtube/publish-rules.ts. NULL = no rules. Like
+  // `autoPublish`, this only affects `Video.published` at INSERT time; the
+  // owner-triggered `videos.reapplyRules` is the one deliberate exception.
+  // DDL: prisma/manual/2026-09-18-video-publish-rules.sql
+  publishRules Json?
 
   // Bookkeeping written by the cron sync. `lastSyncError` holds the last failure
   // message (feed 404, network error, malformed XML) so the owner can see why a
@@ -744,7 +752,7 @@ model VideoSource {
 ///   SYNC-OWNED  (cron, rewritten on EVERY run):
 ///     title, description, thumbnailUrl, channelTitle, publishedAt
 ///   OWNER-OWNED (admin UI only, written by the cron ONLY at first insert):
-///     titleOverride, descriptionOverride, thumbnailOverride, published, sortOrder
+///     titleOverride, descriptionOverride, thumbnailOverride, published, hiddenByRule, sortOrder
 ///
 /// The sync upsert MUST list only the sync-owned columns in its `update` clause.
 /// Renders resolve through the overrides — `titleOverride ?? title`,
@@ -792,6 +800,12 @@ model Video {
   thumbnailOverride   String?
   // Seeded from the source's `autoPublish` at insert; owner-controlled thereafter.
   published           Boolean @default(true)
+  // True when the sync inserted this row as a draft because the source's
+  // `publishRules` rejected it (drives the "Hidden by rule" badge in the admin
+  // Drafts tab). Sync-seeded at insert, never sync-updated: cleared when the
+  // owner publishes the video, rewritten by `videos.reapplyRules`.
+  // DDL: prisma/manual/2026-09-18-video-publish-rules.sql
+  hiddenByRule        Boolean @default(false)
   // Manual ordering; storefront lists fall back to `publishedAt` desc within a tie.
   sortOrder           Int     @default(0)
 
