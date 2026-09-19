@@ -4,8 +4,8 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
+import { OlivePromoSection } from "../shared";
 import { OliveShopClient } from "./olive-shop-client";
-import { OliveShopPromo } from "./olive-shop-promo";
 
 /**
  * OliveShopPage — the swatch grid, and the page the whole template is built
@@ -27,6 +27,7 @@ export function OliveShopPage({ business }: DefaultProductsPageTemplateProps) {
     "olive.shop.empty-body",
     "olive.shop.no-results-heading",
     "olive.shop.no-results-body",
+    "olive.shop.promo-takeover",
     "olive.shop.promo-heading",
     "olive.shop.promo-body",
     "olive.shop.promo-image",
@@ -52,15 +53,19 @@ export function OliveShopPage({ business }: DefaultProductsPageTemplateProps) {
       />
 
       {isSectionVisible(customFields, "olive", "shop.promo") ? (
-        <OliveShopPromo
+        <OlivePromoSection
+          takeover={f["olive.shop.promo-takeover"] === "true"}
           image={f["olive.shop.promo-image"] ?? "/placeholder.svg"}
           heading={f["olive.shop.promo-heading"] ?? ""}
           body={f["olive.shop.promo-body"] ?? ""}
           buttonLabel={f["olive.shop.promo-button-label"] ?? ""}
           buttonLink={f["olive.shop.promo-button-link"] ?? ""}
+          tone="sage-tint"
+          id="olive-shop-promo-heading"
           sectionAttrs={sectionGroupAttr("shop", "promo")}
           headingFieldKey="olive.shop.promo-heading"
           bodyFieldKey="olive.shop.promo-body"
+          buttonLabelFieldKey="olive.shop.promo-button-label"
         />
       ) : null}
     </>

@@ -13,7 +13,7 @@ import { formatDate } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 
 import { resolveFields } from "..";
-import { hasOliveImage } from "../shared";
+import { hasOliveImage, OlivePromoSection } from "../shared";
 import { OliveBandSection } from "./olive-band-section";
 import { OliveBlogSection } from "./olive-blog-section";
 import { OliveCategorySection } from "./olive-category-section";
@@ -49,9 +49,10 @@ function rowLink(row: Record<string, unknown>, fallback: string): string {
 /**
  * Olive Mode's homepage — the swatch book opened on the counter.
  *
- * Nine sections in the order design.md sets: the hero swatch card, the fanned
- * category cards, two big tiles, the swatch grid of new arrivals, the sage
- * cover band, the feed, the press strip, one customer quote, the journal.
+ * Ten sections in the order design.md sets: the hero swatch card, the fanned
+ * category cards, two big tiles, the swatch grid of new arrivals, the promo
+ * band or takeover, the sage cover band, the feed, the press strip, one
+ * customer quote, the journal.
  *
  * Everything a shopper reads is either an owner field (resolved here, passed
  * down as props) or real store data. Sections that would otherwise invent
@@ -88,6 +89,12 @@ export async function OliveHomepage({
     "olive.homepage.rail-link",
     "olive.homepage.rail-empty-heading",
     "olive.homepage.rail-empty-body",
+    "olive.homepage.promo-takeover",
+    "olive.homepage.promo-image",
+    "olive.homepage.promo-heading",
+    "olive.homepage.promo-body",
+    "olive.homepage.promo-button-label",
+    "olive.homepage.promo-button-link",
     "olive.homepage.band-heading",
     "olive.homepage.band-body",
     "olive.homepage.band-cta-label",
@@ -277,6 +284,23 @@ export async function OliveHomepage({
             sectionAttrs={sectionGroupAttr("homepage", "productRail")}
             headingFieldKey="olive.homepage.rail-heading"
             linkLabelFieldKey="olive.homepage.rail-link-label"
+          />
+        ) : null}
+
+        {isSectionVisible(customFields, "olive", "homepage.promo") ? (
+          <OlivePromoSection
+            takeover={f["olive.homepage.promo-takeover"] === "true"}
+            image={f["olive.homepage.promo-image"] ?? "/placeholder.svg"}
+            heading={f["olive.homepage.promo-heading"] ?? ""}
+            body={f["olive.homepage.promo-body"] ?? ""}
+            buttonLabel={f["olive.homepage.promo-button-label"] ?? ""}
+            buttonLink={f["olive.homepage.promo-button-link"] ?? ""}
+            tone="paper"
+            id="olive-promo-homepage"
+            sectionAttrs={sectionGroupAttr("homepage", "promo")}
+            headingFieldKey="olive.homepage.promo-heading"
+            bodyFieldKey="olive.homepage.promo-body"
+            buttonLabelFieldKey="olive.homepage.promo-button-label"
           />
         ) : null}
 

@@ -43,6 +43,7 @@ export {
   type OliveCardVariant,
 } from "./olive-product-card";
 export { OliveProductGrid, type OliveGridColumns } from "./olive-product-grid";
+export { OlivePromoSection, type OlivePromoTone } from "./olive-promo-section";
 export { OliveQuantityStepper } from "./olive-quantity-stepper";
 export { OliveReveal, OliveRevealGroup } from "./olive-reveal";
 export { OliveSection, type OliveSectionTone } from "./olive-section";

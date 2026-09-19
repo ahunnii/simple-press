@@ -4,10 +4,11 @@ import type { TemplateSection } from "~/lib/template-sections";
 /**
  * Olive Mode — homepage fields, groups and curated sections.
  *
- * Nine sections, in render order: the hero swatch card, the category fan, two
- * mood tiles, the swatch grid of new arrivals, the sage cover band, the feed,
- * the press strip, one customer quote and the journal teaser. Group ids and
- * default copy come straight from docs/templates/olive/design.md § Homepage.
+ * Ten sections, in render order: the hero swatch card, the category fan, two
+ * mood tiles, the swatch grid of new arrivals, the promo band or takeover,
+ * the sage cover band, the feed, the press strip, one customer quote and the
+ * journal teaser. Group ids and default copy come straight from
+ * docs/templates/olive/design.md § Homepage.
  *
  * Every user-visible string on the page is a default in this file. Lists have
  * no default rows (the platform has no mechanism for one), so each list-backed
@@ -261,6 +262,76 @@ const homepageProductRailData: TemplateField[] = [
   },
 ];
 
+// ─── 4b. Promo ────────────────────────────────────────────────────────────────
+
+const homepagePromoData: TemplateField[] = [
+  {
+    key: "olive.homepage.promo-takeover",
+    label: "Full-Photo Takeover",
+    description:
+      "On: the promo photo fills the width of the page with the copy on a card in its corner. Off: a photo-and-text band. Needs a photo to take effect.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.promo",
+    gridColumn: "col-span-full",
+    defaultValue: "false",
+  },
+  {
+    key: "olive.homepage.promo-image",
+    label: "Promo Photo",
+    description:
+      "The photograph for the promo. Leave blank for a copy-only band.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.promo",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "olive.homepage.promo-heading",
+    label: "Promo Heading",
+    description:
+      "Heading of the promo. Leave heading and text blank to hide the whole section.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.promo",
+    gridColumn: "col-span-1",
+    defaultValue: "Earn points every time you shop",
+  },
+  {
+    key: "olive.homepage.promo-body",
+    label: "Promo Text",
+    description: "A line or two under the promo heading.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.promo",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Join our rewards program and collect points on every order, your birthday and a follow. Trade them for money off at checkout.",
+  },
+  {
+    key: "olive.homepage.promo-button-label",
+    label: "Promo Button Label",
+    description: "Label of the promo button. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.promo",
+    gridColumn: "col-span-1",
+    defaultValue: "Join rewards",
+  },
+  {
+    key: "olive.homepage.promo-button-link",
+    label: "Promo Button Link",
+    description:
+      "Where the promo button goes — the rewards page by default, but it can point anywhere.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.promo",
+    gridColumn: "col-span-1",
+    defaultValue: "/account/rewards",
+  },
+];
+
 // ─── 5. Sage band ─────────────────────────────────────────────────────────────
 
 const homepageBandData: TemplateField[] = [
@@ -489,6 +560,7 @@ export const oliveHomepageData: TemplateField[] = [
   ...homepageCategoriesData,
   ...homepageMoodData,
   ...homepageProductRailData,
+  ...homepagePromoData,
   ...homepageBandData,
   ...homepageFeedData,
   ...homepagePressData,
@@ -526,6 +598,14 @@ export const oliveHomepageFieldGroups: TemplateFieldGroup[] = [
     description:
       "Heading, link and the grid of products — your latest eight, or one collection",
     icon: "🛍️",
+    columns: 2,
+  },
+  {
+    id: "homepage.promo",
+    title: "Promo",
+    description:
+      "Photo-and-text band, or a full-photo takeover, after the product rail — the rewards program by default, but it can point anywhere",
+    icon: "🎁",
     columns: 2,
   },
   {
@@ -605,12 +685,21 @@ export const oliveHomepageSections: TemplateSection[] = [
     hideable: false,
   },
   {
+    id: "homepage.promo",
+    page: "homepage",
+    title: "Promo",
+    description: "Promo band or full-photo takeover after the product rail",
+    groupIds: ["homepage.promo"],
+    order: 4,
+    hideable: true,
+  },
+  {
     id: "homepage.band",
     page: "homepage",
     title: "Sage Band",
     description: "Full-width sage band with a photograph and a button",
     groupIds: ["homepage.band"],
-    order: 4,
+    order: 5,
     hideable: true,
   },
   {
@@ -619,7 +708,7 @@ export const oliveHomepageSections: TemplateSection[] = [
     title: "Feed",
     description: "Six square photographs linking to your profile",
     groupIds: ["homepage.feed"],
-    order: 5,
+    order: 6,
     hideable: true,
   },
   {
@@ -628,7 +717,7 @@ export const oliveHomepageSections: TemplateSection[] = [
     title: "Press Logos",
     description: "Scrolling row of publication logos",
     groupIds: ["homepage.press"],
-    order: 6,
+    order: 7,
     hideable: true,
     defaultHidden: true,
   },
@@ -638,7 +727,7 @@ export const oliveHomepageSections: TemplateSection[] = [
     title: "Customer Quote",
     description: "One approved review as a large quote on a slate card",
     groupIds: ["homepage.testimonial"],
-    order: 7,
+    order: 8,
     hideable: true,
   },
   {
@@ -647,7 +736,7 @@ export const oliveHomepageSections: TemplateSection[] = [
     title: "Journal",
     description: "The three most recent posts as white cards",
     groupIds: ["homepage.blog"],
-    order: 8,
+    order: 9,
     hideable: true,
   },
 ];

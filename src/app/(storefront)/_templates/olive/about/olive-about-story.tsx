@@ -22,12 +22,24 @@ function readString(row: TemplateListRow, key: string): string {
 }
 
 /**
- * about.story — up to 4 rows, alternating photo card / text band. Never
- * hidden by the owner (not in `hideable` set); an empty list falls back to
- * the page's own built-in example rows so the section is never blank.
+ * about.story — up to 4 rows, alternating photo card / text band. The leaf
+ * mark and heading render only when a heading is provided. Never hidden by
+ * the owner (not in `hideable` set); an empty list falls back to the page's
+ * own built-in example rows so the section is never blank.
  */
 export function OliveAboutStory({ rows }: Props) {
-  if (rows.length === 0) return null;
+  const filteredRows = rows.filter((row) => {
+    const image = readString(row, "image");
+    const heading = readString(row, "heading");
+    const body = readString(row, "body");
+    return (
+      image.trim().length > 0 ||
+      heading.trim().length > 0 ||
+      body.trim().length > 0
+    );
+  });
+
+  if (filteredRows.length === 0) return null;
 
   return (
     <OliveSection
@@ -37,10 +49,11 @@ export function OliveAboutStory({ rows }: Props) {
       {...sectionGroupAttr("about", "story")}
       className="flex flex-col gap-10 sm:gap-16"
     >
-      {rows.map((row, i) => {
+      {filteredRows.map((row, i) => {
         const image = readString(row, "image");
         const heading = readString(row, "heading");
         const body = readString(row, "body");
+        const hasHeading = heading.trim().length > 0;
         const reversed = i % 2 === 1;
 
         return (
@@ -72,10 +85,17 @@ export function OliveAboutStory({ rows }: Props) {
             </div>
 
             <div className="olive-card olive-card-paper flex w-full flex-col gap-3 p-6 sm:w-1/2 sm:p-8">
-              <span aria-hidden="true" style={{ color: "var(--olive-leaf)" }}>
-                <OliveLeafMark size={20} />
-              </span>
-              <h3 className="olive-h3">{heading}</h3>
+              {hasHeading && (
+                <>
+                  <span
+                    aria-hidden="true"
+                    style={{ color: "var(--olive-leaf)" }}
+                  >
+                    <OliveLeafMark size={20} />
+                  </span>
+                  <h3 className="olive-h3">{heading}</h3>
+                </>
+              )}
               {body ? (
                 <p className="olive-caption max-w-[46ch]">{body}</p>
               ) : null}
