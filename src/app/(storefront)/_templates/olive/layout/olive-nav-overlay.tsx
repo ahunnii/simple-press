@@ -4,16 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Heart, Search, User, X } from "lucide-react";
+import { Heart, Search, X } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
-import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
-import { UserButton } from "~/components/auth/user/user-button";
 
 import { oliveChipToken } from "../shared/olive-color";
 import { OliveCartButton } from "./olive-cart-button";
+import { OliveNavOverlayAccount } from "./olive-nav-overlay-account";
 
 export type OliveNavCollection = {
   id: string;
@@ -49,9 +47,10 @@ type OliveNavOverlayProps = {
 const EXIT_MS = 240;
 
 /**
- * Mobile navigation: ONE full-screen white card that wipes in from the right,
+ * Mobile navigation: ONE full-screen white card that wipes in from the left,
  * not a stack of panels. Big Josefin links, the collections listed with their
- * category chips, and a quiet account/bag row along the bottom edge.
+ * category chips, an Account section underneath, and the utilities (search,
+ * wishlist, bag) kept along the bottom edge.
  *
  * Focus trap, inert siblings, scroll lock and escape are structurally the
  * same mechanics as `vii/layout/vii-header.tsx`'s dialog and
@@ -76,16 +75,10 @@ export function OliveNavOverlay({
 }: OliveNavOverlayProps) {
   const pathname = usePathname();
   const reduced = useReducedMotion();
-  const { data: session, isPending } = useHydratedSession(initialSession);
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
-
-  // Business members reach /admin too, not just platform admins.
-  const showAdminLink =
-    session?.user?.platformRole === "PLATFORM_ADMIN" ||
-    !!session?.session?.membershipId;
 
   const isActive = (href: string) => {
     if (!href || href === "#") return false;
@@ -342,59 +335,29 @@ export function OliveNavOverlay({
             </div>
           </div>
         ) : null}
+
+        {accountsEnabled ? (
+          <div
+            className="mt-7 pt-7"
+            style={{ borderTop: "1px solid var(--olive-hairline)" }}
+          >
+            <h2 className="olive-label">Account</h2>
+            <div className="mt-3">
+              <OliveNavOverlayAccount
+                initialSession={initialSession}
+                accountsEnabled={accountsEnabled}
+                onClose={onClose}
+              />
+            </div>
+          </div>
+        ) : null}
       </nav>
 
       {/* Bottom edge: the utilities, kept quiet under the links. */}
       <div
-        className="flex shrink-0 items-center justify-between gap-3 px-[var(--olive-section-pad-x)] py-4"
+        className="flex shrink-0 items-center justify-end gap-3 px-[var(--olive-section-pad-x)] py-4"
         style={{ borderTop: "1px solid var(--olive-hairline)" }}
       >
-        <div className="flex min-w-0 items-center gap-1">
-          {accountsEnabled ? (
-            isPending ? (
-              <span
-                className="ml-2 h-8 w-8 animate-pulse rounded-full"
-                style={{ background: "var(--olive-paper)" }}
-              />
-            ) : session?.user ? (
-              <UserButton
-                size="icon"
-                className="ml-2 h-auto w-auto rounded-full p-0"
-                avatarClassName="size-8"
-                links={[
-                  {
-                    icon: <IconPackage className="h-4 w-4" />,
-                    label: "Orders",
-                    href: "/account/orders",
-                  },
-                  ...(showAdminLink
-                    ? [
-                        {
-                          icon: <IconLayoutDashboard className="h-4 w-4" />,
-                          label: "Admin",
-                          href: "/admin",
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            ) : (
-              <Link
-                href="/auth/sign-in"
-                onClick={onClose}
-                className="olive-btn olive-btn-secondary olive-btn-sm"
-              >
-                <User
-                  className="h-4 w-4"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-                Sign in
-              </Link>
-            )
-          ) : null}
-        </div>
-
         <div className="flex items-center gap-1">
           {productsEnabled ? (
             <Link
