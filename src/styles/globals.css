@@ -89,6 +89,16 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Shared page-animations (src/components/page-animations.tsx): under reduced
+   motion, force the settled state so content is visible on first paint. The
+   `!important` is deliberate — it must beat motion's inline styles. */
+@media (prefers-reduced-motion: reduce) {
+  .sp-motion {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* ── Bamboo — "Luxe Editorial Eco" design tokens. Scoped to .bamboo so they
    never bleed into other templates. Brand layer (--bam-*) drives the chrome,
    hero, and band surfaces; the shadcn remap below restyles everything else.
@@ -12206,6 +12216,223 @@
   box-shadow: 0 0 0 1px var(--umsc-purple);
 }
 
+/* ── Gallery (design.md "UmscGallery") ── */
+.umsc .umsc-gallery {
+  --umsc-gallery-cols: 4;
+  --umsc-gallery-aspect: 1 / 1;
+  gap: 16px;
+}
+
+.umsc .umsc-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--umsc-gallery-cols), minmax(0, 1fr));
+}
+
+.umsc .umsc-gallery-masonry {
+  columns: 3;
+  column-gap: 16px;
+}
+
+.umsc .umsc-gallery-masonry .umsc-gallery-tile {
+  break-inside: avoid;
+  margin-bottom: 16px;
+}
+
+.umsc .umsc-gallery-masonry .umsc-gallery-frame {
+  aspect-ratio: auto;
+}
+
+.umsc .umsc-gallery-collage {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: dense;
+}
+
+.umsc .umsc-gallery-collage .umsc-gallery-tile-lead {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+@media (max-width: 1023px) {
+  .umsc .umsc-gallery-grid,
+  .umsc .umsc-gallery-collage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .umsc .umsc-gallery-masonry {
+    columns: 2;
+  }
+}
+
+.umsc .umsc-gallery-tile {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.umsc .umsc-gallery-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--umsc-line);
+  background: var(--umsc-cream);
+  aspect-ratio: var(--umsc-gallery-aspect);
+  border-radius: 0;
+  padding: 0;
+  appearance: none;
+  color: inherit;
+}
+
+.umsc button.umsc-gallery-frame {
+  cursor: zoom-in;
+}
+
+.umsc .umsc-gallery-img {
+  transition: transform 0.5s var(--umsc-ease);
+}
+
+.umsc .umsc-gallery-tile:hover .umsc-gallery-img,
+.umsc .umsc-gallery-tile:focus-within .umsc-gallery-img {
+  transform: scale(1.03);
+}
+
+.umsc .umsc-gallery-cap {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 10px 12px;
+  background: rgba(5, 5, 5, 0.7);
+  color: var(--umsc-cream-on-black);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.umsc .umsc-gallery-cap-hover {
+  opacity: 0;
+  transition: opacity 0.3s var(--umsc-ease);
+}
+
+.umsc .umsc-gallery-tile:hover .umsc-gallery-cap-hover,
+.umsc .umsc-gallery-tile:focus-within .umsc-gallery-cap-hover {
+  opacity: 1;
+}
+
+.umsc .umsc-gallery-figcaption {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--umsc-muted);
+}
+
+/* Lightbox — portalled into the `.umsc` scope root so the tokens and the
+   brand faces still resolve (see umsc-gallery.tsx). */
+.umsc .umsc-gallery-lightbox-overlay {
+  background: var(--umsc-black);
+}
+
+.umsc .umsc-gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--umsc-black);
+  color: var(--umsc-cream-on-black);
+  outline: none;
+  border-radius: 0;
+}
+
+.umsc .umsc-gallery-lightbox[data-state="open"] {
+  animation: umsc-lightbox-in 0.25s var(--umsc-ease);
+}
+
+.umsc .umsc-gallery-lightbox[data-state="closed"] {
+  animation: umsc-lightbox-out 0.2s var(--umsc-ease);
+}
+
+@keyframes umsc-lightbox-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes umsc-lightbox-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.umsc .umsc-gallery-lightbox-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.umsc .umsc-gallery-lightbox-count {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.umsc .umsc-gallery-lightbox-btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--umsc-gold-soft);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.umsc .umsc-gallery-lightbox-btn:hover {
+  color: var(--umsc-gold);
+}
+
+.umsc .umsc-gallery-lightbox-stage {
+  position: relative;
+  margin: 0 16px;
+  max-height: 88svh;
+  min-height: 0;
+}
+
+.umsc .umsc-gallery-lightbox-prev,
+.umsc .umsc-gallery-lightbox-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  /* These two overlap the photo itself (the Close button sits on the black
+     bar and stays transparent). Gold-soft disappears over a bright frame, so
+     they carry a flat translucent black ground — no blur, no radius. */
+  background: rgba(5, 5, 5, 0.55);
+}
+
+.umsc .umsc-gallery-lightbox-prev {
+  left: 0;
+}
+
+.umsc .umsc-gallery-lightbox-next {
+  right: 0;
+}
+
+.umsc .umsc-gallery-lightbox-caption {
+  margin: 0 auto;
+  padding: 12px 16px 20px;
+  max-width: 66ch;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 /* ── Reduced motion (WCAG 2.3.3) — every animation above rendered settled;
    hover transforms and stagger off; accordion snaps. ── */
 @media (prefers-reduced-motion: reduce) {
@@ -12245,5 +12472,30 @@
   .umsc .umsc-accordion-icon-v,
   .umsc .umsc-accordion-row::before {
     transition: none;
+  }
+
+  .umsc .umsc-gallery-img {
+    transition: none;
+  }
+
+  .umsc .umsc-gallery-tile:hover .umsc-gallery-img,
+  .umsc .umsc-gallery-tile:focus-within .umsc-gallery-img {
+    transform: none;
+  }
+
+  .umsc .umsc-gallery-cap-hover {
+    opacity: 1;
+    transition: none;
+  }
+
+  /* Matches the [data-state] specificity of the open/closed rules above
+     (0,3,0); a bare `.umsc .umsc-gallery-lightbox` (0,2,0) loses to them and
+     the lightbox keeps fading in. The overlay needs no attribute qualifier:
+     its `animate-in`/`fade-in-0` utilities live in `@layer utilities`, which
+     this unlayered rule outranks regardless of specificity. */
+  .umsc .umsc-gallery-lightbox[data-state="open"],
+  .umsc .umsc-gallery-lightbox[data-state="closed"],
+  .umsc .umsc-gallery-lightbox-overlay {
+    animation: none;
   }
 }

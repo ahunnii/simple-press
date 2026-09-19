@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 // design.md "Per-page section concepts › About": hero (not hideable) → maker
 // (not hideable) → mission (not hideable) → values (hideable, hairline
@@ -238,7 +239,7 @@ const aboutCommunityData: TemplateField[] = [
     key: "umsc.about.community-gallery",
     label: "Community Gallery",
     description:
-      "Pick a photo gallery of markets/customers to show here. Leave unset to hide this section.",
+      "Pick a gallery of market and customer photos. Galleries are created under Admin → Galleries; its layout, aspect ratio, captions, and lightbox settings are honored here. Leave unset to hide this section on your site.",
     type: "gallery",
     page: "about",
     group: "about.community",
@@ -325,7 +326,7 @@ export const umscAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.community",
     title: "Our Customers. Our Community.",
-    description: "Heading and the market/customer photo gallery",
+    description: "Heading and the market/customer photo gallery (pick one from Admin → Galleries)",
     icon: "📷",
     columns: 1,
   },
@@ -379,10 +380,11 @@ export const umscAboutSections: TemplateSection[] = [
     id: "about.community",
     page: "about",
     title: "Our Customers. Our Community.",
-    description: "Market/customer photo grid",
+    description: "Market/customer photo gallery on a cream band",
     groupIds: ["about.community"],
     order: 4,
     hideable: true,
+    links: [SECTION_LINKS.galleries],
   },
   {
     id: "about.cta",
