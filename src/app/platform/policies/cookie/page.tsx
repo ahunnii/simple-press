@@ -93,11 +93,14 @@ export default function CookiePolicyPage() {
         properly.
       </p>
 
-      <h3>B. Analytics Cookies</h3>
+      <h3>B. Analytics</h3>
       <p>
         SimplePress uses self-hosted analytics tools, including Umami Analytics,
         to understand how the platform is used and to improve reliability and
-        performance.
+        performance. Umami does not set advertising or third-party cookies.
+        Storefront tracking is opt-in: a merchant storefront is tracked only
+        when that merchant has enabled analytics. Platform pages may be tracked
+        separately when platform analytics are enabled.
       </p>
       <p>Analytics technologies may collect information such as:</p>
       <ul>

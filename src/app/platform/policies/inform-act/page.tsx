@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { env } from "~/env";
+import {
+  formatPolicyDate,
+  POLICY_LAST_UPDATED,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "INFORM Consumers Act | SimplePress",
@@ -20,6 +24,10 @@ export default function InformActPage() {
   return (
     <div className="prose prose-lg mx-auto w-full max-w-7xl px-4 py-8">
       <h1>INFORM Consumers Act &mdash; Seller Verification Notice</h1>
+      <p>
+        <strong>Last Updated:</strong>{" "}
+        {formatPolicyDate(POLICY_LAST_UPDATED.informAct)}
+      </p>
       <p>
         This page explains how SimplePress complies with the{" "}
         <strong>
@@ -41,6 +49,9 @@ export default function InformActPage() {
         Required verification includes confirming the seller&apos;s identity,
         business address, and contact information. Platforms must also provide
         consumers with a way to report suspicious or non-compliant sellers.
+        SimplePress accepts those reports at the contact address below. The
+        platform does not currently publish high-volume seller identity
+        information to consumers on the storefront.
       </p>
 
       <h2>2. How SimplePress Satisfies This Requirement</h2>
@@ -51,13 +62,13 @@ export default function InformActPage() {
         connected accounts as part of its standard onboarding process.
       </p>
       <p>
-        The SimplePress payments dashboard automatically monitors each
-        Merchant&apos;s annual transaction count and revenue against the INFORM
-        Act thresholds. When either threshold is crossed, the Merchant is
-        prompted to complete Stripe Connect verification (
-        <code>details_submitted: true</code>). Once a Merchant&apos;s Stripe
-        account is verified, the platform considers that Merchant
-        INFORM-compliant.
+        The SimplePress payments dashboard monitors each Merchant&apos;s annual
+        transaction count and revenue against the INFORM Act thresholds. When
+        either threshold is crossed, the Merchant is prompted in Finances to
+        complete Stripe Connect identity verification. Completing Stripe
+        verification is the platform&apos;s current method for collecting the
+        identity, address, and contact information the Act requires; it is a
+        proxy, not a certification that the Merchant is fully INFORM-compliant.
       </p>
       <p>Stripe&apos;s verification collects and validates:</p>
       <ul>
@@ -72,15 +83,16 @@ export default function InformActPage() {
 
       <h2>3. Platform-Level vs. Merchant-Level Compliance</h2>
       <p>
-        The SimplePress platform is designed and operated to be INFORM Act
-        compliant. Threshold monitoring and Stripe verification prompts are
-        built into every Merchant account dashboard.
+        The SimplePress platform monitors INFORM Act thresholds and prompts
+        Merchants to complete Stripe verification. Those controls are built into
+        every Merchant account dashboard.
       </p>
       <p>
         Individual Merchant compliance depends on each Merchant completing the
-        Stripe Connect verification process when prompted. Merchants who do not
-        complete verification after being prompted may have their payment
-        processing suspended until verification is complete.
+        Stripe Connect verification process when prompted. SimplePress currently
+        surfaces that prompt in the Merchant dashboard; it does not
+        automatically suspend payment processing if verification is left
+        incomplete.
       </p>
 
       <h2>4. Reporting a Suspicious Seller</h2>

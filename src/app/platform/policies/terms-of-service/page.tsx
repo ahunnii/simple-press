@@ -438,8 +438,10 @@ export default function TermsOfServicePage() {
       </p>
       <p>We do not sell user data.</p>
       <p>
-        SimplePress currently uses self-hosted Umami analytics and third-party
-        providers including Stripe.
+        SimplePress uses self-hosted Umami analytics on platform pages when
+        analytics are enabled for the platform, and on a merchant storefront
+        only when that merchant has opted in. Third-party providers include
+        Stripe.
       </p>
       <p>Your use of the platform is also governed by our Privacy Policy.</p>
       <hr />
@@ -667,10 +669,14 @@ export default function TermsOfServicePage() {
       <hr />
       <p className="text-sm text-gray-500">
         Related policies:{" "}
-        <Link href="/platform/privacy-policy">Privacy Policy</Link> &middot;{" "}
-        <Link href="/platform/acceptable-use">Acceptable Use Policy</Link>{" "}
-        &middot; <Link href="/platform/disclaimer">Disclaimer</Link> &middot;{" "}
-        <Link href="/platform/inform-act">INFORM Act Notice</Link>
+        <Link href="/platform/policies/privacy-policy">Privacy Policy</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/acceptable-use">
+          Acceptable Use Policy
+        </Link>{" "}
+        &middot; <Link href="/platform/policies/disclaimer">Disclaimer</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/inform-act">INFORM Act Notice</Link>
       </p>
     </div>
   );

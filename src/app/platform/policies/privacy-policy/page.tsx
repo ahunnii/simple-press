@@ -135,6 +135,10 @@ export default function PrivacyPolicyPage() {
       <p>
         SimplePress uses self-hosted analytics tools, including Umami Analytics,
         to better understand platform usage, performance, and reliability.
+        Storefront tracking is opt-in: a merchant storefront is tracked only
+        when that merchant has enabled analytics for their store. Platform pages
+        (this site) may be tracked separately when platform analytics are
+        enabled.
       </p>
       <p>Analytics may collect:</p>
       <ul>
@@ -218,7 +222,7 @@ export default function PrivacyPolicyPage() {
         <li>secure accounts;</li>
         <li>remember preferences;</li>
         <li>improve platform functionality;</li>
-        <li>support analytics and performance monitoring.</li>
+        <li>support session security and performance diagnostics.</li>
       </ul>
       <p>
         You may be able to control certain cookie settings through your browser
@@ -371,7 +375,9 @@ export default function PrivacyPolicyPage() {
         <li>necessary to comply with legal obligations.</li>
       </ul>
       <p>
-        Requests may be submitted to:{" "}
+        If you have a customer account on a SimplePress storefront, you can
+        download a copy of your data or request deletion from your account
+        settings (Data &amp; Privacy). You may also submit requests to:{" "}
         <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
       </p>
       <hr />
@@ -389,9 +395,9 @@ export default function PrivacyPolicyPage() {
         <li>hosting infrastructure providers;</li>
         <li>
           error-monitoring and diagnostics providers, such as Sentry, which may
-          receive limited technical and account identifiers (such as email
-          address, when available) solely to help us detect, diagnose, and
-          resolve platform errors;
+          receive limited technical identifiers (such as an internal user id,
+          when available, and not email addresses) solely to help us detect,
+          diagnose, and resolve platform errors;
         </li>
         <li>
           bot and abuse detection providers, such as Google reCAPTCHA, which

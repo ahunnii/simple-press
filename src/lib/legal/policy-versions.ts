@@ -13,17 +13,15 @@
 
 /** ISO `YYYY-MM-DD`, one per policy document. */
 export const POLICY_LAST_UPDATED = {
-  termsOfService: "2026-05-29",
-  privacyPolicy: "2026-08-11",
-  cookie: "2026-08-11",
+  termsOfService: "2026-09-22",
+  privacyPolicy: "2026-09-22",
+  cookie: "2026-09-22",
   sellerMerchant: "2026-05-29",
   acceptableUse: "2026-05-29",
   dmca: "2026-05-29",
   accessibility: "2026-06-07",
-  // NOTE: `disclaimer` and `inform-act` are deliberately absent. Neither page
-  // renders a "Last Updated" line, so any date here would be invented — and an
-  // invented date is worse than none once something starts rendering it. If
-  // either page gains a date line, add its key here at the same time.
+  disclaimer: "2026-09-22",
+  informAct: "2026-09-22",
 } as const;
 
 /** Newest date in a set — a bundle is only as current as its stalest member. */
