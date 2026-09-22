@@ -9498,6 +9498,168 @@
   }
 }
 
+/* ── Hero load moment: the cover opens ──────────────────────────────────
+   One sage-tinted leaf edge sweeps the scrim left→right on the first
+   painted frame (client-mounted off the hero's `settled` flag, so never
+   SSR'd and nothing for a no-JS visitor to gate), and the card's print is
+   dealt in its wake on a slower, hero-only stagger. Reuses the swatch
+   turn's keyframes and tint variable rather than declaring new ones. */
+.olive .olive-hero {
+  --olive-turn-tint: color-mix(
+    in srgb,
+    var(--olive-sage-tint) 85%,
+    transparent
+  );
+}
+
+.olive .olive-hero-sweep {
+  position: absolute;
+  inset: 0;
+  z-index: 5; /* over the scrim, under the card (z-10) and the video button (z-20); the section is `isolate` */
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent 0 calc(100% - clamp(140px, 22vw, 320px)),
+    color-mix(in srgb, var(--olive-turn-tint) 30%, transparent) calc(100% - 3px),
+    var(--olive-turn-tint) calc(100% - 3px) 100%
+  );
+  animation: olive-swatch-edge 600ms var(--olive-ease) both;
+}
+
+/* Hero-only cadence: a 180ms head start so the card lands in the band's
+   wake, then 110ms per step so the headline arrives after the surface. */
+.olive-js .olive-hero .olive-reveal-group.is-visible .olive-reveal-item {
+  transition-delay: calc(180ms + min(calc(var(--i, 0) * 110ms), 550ms));
+}
+
+/* Print inside the card rises straight; only the card itself straightens. */
+.olive-js .olive-hero .olive-reveal-group .olive-card .olive-reveal-item {
+  transform: translateY(10px);
+}
+
+.olive-js
+  .olive-hero
+  .olive-reveal-group.is-visible
+  .olive-card
+  .olive-reveal-item {
+  transform: none;
+}
+
+/* Reduced motion is a designed state: the band becomes the swatch turn's
+   brief tint hold, and the ladder collapses to the system's instant
+   arrival. The hero selectors out-specify the global reduced-motion reveal
+   block, so every rule above is re-zeroed here explicitly. */
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-hero-sweep {
+    background: color-mix(in srgb, var(--olive-turn-tint) 16%, transparent);
+    transform: none;
+    animation: olive-swatch-tint-hold 200ms linear both;
+  }
+
+  .olive-js .olive-hero .olive-reveal-group.is-visible .olive-reveal-item {
+    transition-delay: 0ms;
+  }
+
+  .olive-js .olive-hero .olive-reveal-group .olive-card .olive-reveal-item,
+  .olive-js
+    .olive-hero
+    .olive-reveal-group.is-visible
+    .olive-card
+    .olive-reveal-item {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── Hero carousel: the leaves turn on their own ────────────────────────
+   Two or more hero photographs are turned with the swatch turn itself —
+   the same `olive-swatch-turn` wipe and travelling `olive-swatch-edge`
+   the product gallery uses for a colour change — so nothing new has to be
+   invented for "the next picture". Only the band's width is re-measured:
+   28px reads as a leaf edge on a gallery frame and as a hairline across a
+   100vw hero, so the hero widens it. It stays well under the load sweep's
+   clamp(140px, 22vw, 320px), because arrival is the bigger gesture and an
+   idle turn must not out-shout it. The hero declares its own sage
+   `--olive-turn-tint` a few rules above, and deliberately does NOT take
+   `olive-swatch-stage`, which would win on equal specificity and replace
+   it with the stage's ink fallback. Scoped to plain `.olive`: every rule
+   here is a resting state, put on by a client component in the first
+   place, so there is nothing to gate on `.olive-js`. */
+.olive .olive-hero {
+  --olive-hero-turn-band: clamp(56px, 6vw, 96px);
+  padding-block: clamp(40px, 7vw, 72px);
+}
+
+.olive .olive-hero-media .olive-swatch-edge {
+  background: linear-gradient(
+    to right,
+    transparent 0 calc(100% - var(--olive-hero-turn-band)),
+    color-mix(in srgb, var(--olive-turn-tint) 24%, transparent)
+      calc(100% - var(--olive-hero-turn-band)) calc(100% - 3px),
+    var(--olive-turn-tint) calc(100% - 3px) 100%
+  );
+}
+
+/* Dots and the pause disc share the corner the video disc has always used:
+   z-20 puts them over the scrim and the load sweep (z-5), and they sit
+   outside the aria-hidden ground so they are reachable. */
+.olive .olive-hero-controls {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+/* A dot is drawn in the middle of a full 44px `olive-icon-btn` target: the
+   mark is quiet, the thing you can hit is not. The ink ring keeps it
+   legible over a pale photograph, where white alone would disappear. */
+.olive .olive-hero-dot::before {
+  content: "";
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--olive-white) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--olive-ink) 30%, transparent);
+  transition:
+    background var(--olive-dur-hover) var(--olive-ease),
+    transform var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-hero-dot:hover::before,
+.olive .olive-hero-dot[aria-current="true"]::before {
+  background: var(--olive-white);
+}
+
+.olive .olive-hero-dot[aria-current="true"]::before {
+  transform: scale(1.3);
+}
+
+/* Phone: the card runs the full width, so the controls would land on top of
+   the button. Give them their own strip below it. */
+@media (max-width: 639.98px) {
+  .olive .olive-hero[data-controls="true"] {
+    padding-bottom: calc(clamp(40px, 7vw, 72px) + 2.75rem);
+  }
+}
+
+/* Reduced motion: the wipe is already retired by the swatch turn's own
+   block, which leaves the edge as the 200ms tint hold — olive's designed
+   stand-in, kept. Only the two things added above need re-zeroing: the
+   widened band collapses back to the flat tint, and the dot stops easing. */
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-hero-media .olive-swatch-edge {
+    background: color-mix(in srgb, var(--olive-turn-tint) 16%, transparent);
+  }
+
+  .olive .olive-hero-dot::before {
+    transition: none;
+  }
+}
+
 /* ── Olive Mode — Phase 3.5 top-ups (orchestrator) ── */
 
 /* Photograph push-in shared by every olive card family (product/category
@@ -9685,6 +9847,461 @@
 @media (max-width: 639.98px) {
   .olive .olive-sm-hide {
     display: none;
+  }
+}
+
+/* ── Olive Mode — motion pass: the swatch turn ── */
+
+/* The focal moment. Olive's world is the swatch book opened on the counter,
+   and colour is the one place that book is literal — so when the colour
+   changes, the photograph turns the way a leaf of a swatch book is turned:
+   the incoming frame is wiped in left to right, with the chosen colour riding
+   the leading edge. 520ms, the same authored-entrance band as the 600ms
+   reveal; the outgoing frame keeps the shared gallery's faster 250ms fade,
+   because an exit should always be quicker than an entrance.
+
+   Scoped to plain `.olive`, never `.olive-js`: `useOliveReveal` only stamps
+   `olive-js` onto the root of pages that render at least one reveal, and the
+   turn needs no JS-gated hidden state — every class below is put on by a
+   client component in the first place, and every rule here is a resting state
+   with JS off. */
+
+/* The frame the leaf turns inside, and the one place the band's tint is
+   declared. The fallback is a plain ink line rather than a colour: a product
+   with no colour dimension — or a colour name `resolveChipColor` refuses to
+   guess a paint for — still gets a readable leading edge without the page
+   claiming to know a paint it does not (see `shared/olive-color.ts`). The
+   gallery sets the real tint inline, which wins over this declaration. */
+.olive .olive-swatch-stage {
+  --olive-turn-tint: color-mix(in srgb, var(--olive-ink) 30%, transparent);
+}
+
+/* The incoming photograph, laid over the one it replaces — the gallery keeps
+   the covered leaf mounted and opaque underneath for the length of the wipe,
+   so the counter is never visible between leaves and the clip is the only
+   reveal (no opacity fade competing with it). Only ever carries this class
+   after a real selection change: the gallery withholds it on first mount so
+   the priority image — the product page's LCP element — is never painted
+   clipped. */
+.olive .olive-swatch-turn {
+  animation: olive-swatch-turn 520ms var(--olive-ease) both;
+}
+
+@keyframes olive-swatch-turn {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* The colour riding the leading edge. A full-frame layer painted with a band
+   at its own right-hand edge, travelling from entirely off-frame to entirely
+   on-frame: its right edge therefore sits exactly where the wipe's leading
+   edge is for the whole 520ms, and neither animation has to know how wide the
+   frame is. It therefore travels across the leaf being covered, which is what
+   makes it read as the edge of a sheet of paper rather than a highlight.
+   Remounted on every turn (the gallery keys it) because a CSS animation on a
+   persistent element only plays once. */
+.olive .olive-swatch-edge {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent 0 calc(100% - 28px),
+    color-mix(in srgb, var(--olive-turn-tint) 24%, transparent)
+      calc(100% - 28px) calc(100% - 3px),
+    var(--olive-turn-tint) calc(100% - 3px) 100%
+  );
+  animation: olive-swatch-edge 520ms var(--olive-ease) both;
+}
+
+@keyframes olive-swatch-edge {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+
+/* The same material on the product card. The hover second image is the back
+   of the leaf, so it is turned rather than dissolved — the wipe runs
+   alongside the card's existing 300ms opacity fade, at the card's own hover
+   timing rather than the product page's 520ms, because a hover is an aside
+   and a colour choice is the point. Driven by an attribute instead of an
+   inline style so reduced motion can retire it here with everything else. */
+.olive .olive-leaf-turn {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 300ms var(--olive-ease);
+}
+
+.olive .olive-leaf-turn[data-olive-turned="false"] {
+  clip-path: inset(0 100% 0 0);
+}
+
+/* Reduced motion's stand-in for the travelling band: the colour stops moving
+   and is simply held over the frame for a beat, opacity only. Declared
+   outside the media block because keyframe names are global and olive keeps
+   them all together. */
+@keyframes olive-swatch-tint-hold {
+  from {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion is a designed state, not a kill switch: nothing travels, but
+   the colour change still has to be legible. The wipe goes, the band becomes
+   the brief tint hold above, and the chosen chip's leaf-green ring carries
+   the state as it always has. Every rule added above is enumerated. */
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-swatch-turn {
+    animation: none;
+    clip-path: none;
+  }
+
+  .olive .olive-swatch-edge {
+    background: color-mix(in srgb, var(--olive-turn-tint) 16%, transparent);
+    transform: none;
+    animation: olive-swatch-tint-hold 200ms linear both;
+  }
+
+  .olive .olive-leaf-turn,
+  .olive .olive-leaf-turn[data-olive-turned="false"] {
+    clip-path: none;
+    transition: none;
+  }
+}
+
+/* ── Olive Mode — motion pass: supporting feedback ── */
+
+/* The swatch turn above is the one focal moment; everything below is the
+   quiet half of the same pass — acknowledgement for interactions that
+   changed state today with nothing to show for it: opening a panel,
+   removing a line, a figure re-rendering, an error arriving, a filter
+   re-dealing the grid, an add-to-bag click. Same envelope throughout:
+   `--olive-ease`, ≤ 600ms, transform/opacity/clip/grid-rows only, every
+   selector scoped under plain `.olive` (none of this needs the reveal
+   system's `.olive-js` gate), every new keyframe prefixed `olive-`. */
+
+/* ── Accordion panel collapse ────────────────────────────────────────────
+   `grid-template-rows: 0fr ↔ 1fr` on the wrapper, not `max-height` — a
+   guessed cap breaks the moment a Tiptap image finishes loading inside an
+   already-open panel, because `max-height` never re-measures and `0fr/1fr`
+   always does. The region itself is the grid item, so it — not the wrapper —
+   carries `overflow: hidden` plus a shorter opacity fade underneath the
+   210ms->260ms height change. `data-open` mirrors the exact `open` state the
+   trigger's `aria-expanded` already reads (both trace back to the same
+   `initialOpenIds` lazy state), so this can never disagree with it. Scoped to
+   plain `.olive`: the accordion is a "use client" component top to bottom,
+   so there is no server/client hidden-state mismatch here for `.olive-js` to
+   guard against. */
+.olive .olive-accordion-panel-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms var(--olive-ease);
+}
+
+.olive .olive-accordion-panel-wrap[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.olive .olive-accordion-panel {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 160ms var(--olive-ease);
+}
+
+.olive .olive-accordion-panel-wrap[data-open="true"] .olive-accordion-panel {
+  opacity: 1;
+}
+
+/* ── Cart line removal ─────────────────────────────────────────────────────
+   The exit is the dealt-card arrival reversed: the row fades, rises 6px and
+   rotates 0.6° over 260ms while still holding its place in the list, and
+   only once that finishes does its own height collapse from `1fr` to `0fr`
+   over another 260ms — a `transition-delay` on the collapse chains the two
+   phases without a second JS timer. The two phases run in series, not
+   together, on purpose: collapsing the height immediately would yank the
+   rows below it upward mid-fade, competing with the very motion meant to
+   explain the removal. `.olive-cart-line-inner` is the grid item, so it
+   carries `overflow: hidden`; `olive-cart-contents.tsx` defers the real
+   `removeItem` call for exactly as long as both phases take. */
+.olive .olive-cart-line {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 260ms var(--olive-ease);
+}
+
+.olive .olive-cart-line[data-leaving="true"] {
+  grid-template-rows: 0fr;
+  transition-delay: 260ms;
+}
+
+.olive .olive-cart-line-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.olive .olive-cart-line-body {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 260ms var(--olive-ease),
+    transform 260ms var(--olive-ease);
+}
+
+.olive .olive-cart-line[data-leaving="true"] .olive-cart-line-body {
+  opacity: 0;
+  transform: translateY(-6px) rotate(0.6deg);
+}
+
+/* ── Figures that change ───────────────────────────────────────────────────
+   A cart line total, the bag subtotal, a live shipping quote — tabular
+   figures being read, not cards arriving, so the acknowledgement is opacity
+   only and never moves: one flash to 55% and back over 260ms, played once
+   per change by `useOliveFigureChange` (shared/olive-figure-change.ts)
+   toggling this class on and off. */
+.olive .olive-figure-settle {
+  animation: olive-figure-settle 260ms var(--olive-ease);
+}
+
+@keyframes olive-figure-settle {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ── Form error / success notes ────────────────────────────────────────────
+   One shared arrival for every note that used to pop straight in: opacity
+   0→1 plus a 3px rise over 200ms. Deliberately no shake — it fights
+   `role="alert"`/`role="status"` (the live region itself is the
+   announcement) and is invisible to the person the message matters most to.
+   A plain `animation` is enough with no JS: every element this is put on is
+   conditionally rendered, not merely re-styled, so it mounts fresh each time
+   its message goes from absent to present. The input face's own
+   `aria-invalid` transition (`.olive-input` etc., above) is untouched. */
+.olive .olive-note-settle {
+  animation: olive-note-settle 200ms var(--olive-ease) both;
+}
+
+@keyframes olive-note-settle {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Re-deal on filter ─────────────────────────────────────────────────────
+   `useOliveReveal`'s observer fires once and disconnects, so a filtered shop
+   used to swap results in with no motion at all. `OliveProductGrid`'s
+   `dealKey` remounts the reveal group when the results changed for a real
+   reason (never on first render — see the prop doc), and `data-redeal` —
+   stamped by that same remount, never read by the reveal system itself —
+   retimes the existing dealt-card stagger a little tighter and faster than
+   the page-load version, so it reads as an answer to the interaction rather
+   than a second page load. The extra attribute selector gives this more
+   specificity than the base reveal rule, so it wins regardless of source
+   order. */
+.olive-js .olive-reveal-group[data-redeal].is-visible .olive-reveal-item {
+  transition-duration: 360ms;
+  transition-delay: min(calc(var(--i, 0) * 36ms), 288ms);
+}
+
+/* ── Add to cart: press-commit ─────────────────────────────────────────────
+   Connects the click to the toast and badge that already confirm it: the
+   pill dips to 97% scale and back over 460ms while a sage-tint layer warms
+   over it and fades — an overlay's own opacity, never the button's
+   `background-color`, so the keyframe stays inside the transform/opacity
+   envelope. `data-commit` is set by the caller for one ~460ms cycle
+   (`olive-buy-row.tsx`'s `onAdd`, `olive-product-card.tsx`'s quick-add
+   handlers) — scoped to the moment it is present, so no button pays for
+   `position: relative` the rest of the time. Never changes the button's own
+   label; see `shared/olive-button.tsx`'s `committed` prop. */
+.olive .olive-btn[data-commit="true"] {
+  position: relative;
+  animation: olive-btn-commit-scale 460ms var(--olive-ease);
+}
+
+.olive .olive-btn[data-commit="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--olive-sage-tint);
+  pointer-events: none;
+  animation: olive-btn-commit-warm 460ms var(--olive-ease);
+}
+
+@keyframes olive-btn-commit-scale {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes olive-btn-commit-warm {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The toast's own leading edge — the same idiom as the swatch turn's colour
+   riding the wipe, so pill → toast → badge reads as one vocabulary rather
+   than three separate techniques. A 2px leaf-green bar, clipped to the
+   card's own rounded corners by the `overflow: hidden` added below, that
+   wipes in with a left-anchored `scaleX` over the toast's existing 240ms
+   entrance rather than its own separate timing. */
+.olive .olive-toast {
+  position: relative;
+  overflow: hidden;
+}
+
+.olive .olive-toast-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--olive-leaf);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms var(--olive-ease);
+}
+
+.olive .olive-toast[data-state="open"] .olive-toast-edge {
+  transform: scaleX(1);
+}
+
+/* Reduced motion is a designed state, not a kill switch: every rule above is
+   enumerated below, movement removed and meaning kept.
+   - Accordion: `transition: none` only — never pin `grid-template-rows: 1fr`,
+     or every closed panel would render open.
+   - Cart line: both phases lose their transition (and the collapse its
+     delay), so a removed row disappears and its space closes in the same
+     frame instead of animating — no dead space held open while `leaving`
+     drains.
+   - Figures and notes: their animations are simply off.
+   - Re-deal: `useOliveReveal` already returns `visible: true` immediately
+     under reduced motion, so this only has to stop retiming a transition
+     that source never runs.
+   - Press-commit: no scale, no warm — the toast and badge alone still
+     confirm the add.
+   - Toast edge: still appears (still confirms the colour of the
+     confirmation), it simply stops wiping in. */
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-accordion-panel-wrap {
+    transition: none;
+  }
+
+  .olive .olive-accordion-panel {
+    transition: none;
+  }
+
+  .olive .olive-cart-line,
+  .olive .olive-cart-line[data-leaving="true"] {
+    transition: none;
+  }
+
+  .olive .olive-cart-line-body {
+    transition: none;
+  }
+
+  .olive .olive-figure-settle {
+    animation: none;
+  }
+
+  .olive .olive-note-settle {
+    animation: none;
+  }
+
+  .olive-js .olive-reveal-group[data-redeal].is-visible .olive-reveal-item {
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+
+  .olive .olive-btn[data-commit="true"] {
+    animation: none;
+  }
+
+  .olive .olive-btn[data-commit="true"]::after {
+    content: none;
+    animation: none;
+  }
+
+  .olive .olive-toast-edge {
+    transition: none;
+  }
+}
+
+/* ── Olive Mode — motion pass: the quantity readout ── */
+
+/* When the quantity value changes, the readout bumps up and down
+   (translateY 0 → -2px → 0) over 240ms, as an affordance that the number
+   changed. The bump is driven by a data attribute set when the change is
+   detected; the attribute clears after the animation. The `tabular-nums` and
+   min-width stay unchanged — the bump is a pure transform, no layout shift. */
+@keyframes olive-qty-bump {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.olive .olive-qty-readout[data-bump="true"] {
+  animation: olive-qty-bump 240ms var(--olive-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-qty-readout[data-bump="true"] {
+    animation: none;
   }
 }
 

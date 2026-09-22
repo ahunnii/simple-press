@@ -9,7 +9,7 @@ import { formatDate } from "~/lib/utils";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { hasOliveImage, OliveSection } from "../shared";
+import { hasOliveImage, OliveReveal, OliveSection } from "../shared";
 
 type Page = NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 
@@ -153,7 +153,7 @@ export function OliveGenericPage({ page }: { page: Page }) {
   const hasCover = hasOliveImage(page.image);
 
   const articleBody = (
-    <div style={{ width: "100%", maxWidth: "68ch" }}>
+    <OliveReveal threshold={0} style={{ width: "100%", maxWidth: "68ch" }}>
       {isPolicy ? (
         <p className="olive-caption" style={{ marginBottom: "2rem" }}>
           Last updated · {formatDate(page.updatedAt)}
@@ -168,7 +168,7 @@ export function OliveGenericPage({ page }: { page: Page }) {
       </div>
 
       <PlatformPolicyNotice slug={page.slug} />
-    </div>
+    </OliveReveal>
   );
 
   return (
@@ -188,27 +188,29 @@ export function OliveGenericPage({ page }: { page: Page }) {
             className="object-cover"
           />
           <div className="absolute inset-0 flex items-end p-4 sm:p-8">
-            <div className="olive-card flex max-w-[min(34rem,90%)] flex-col gap-2 p-6">
+            <OliveReveal className="olive-card flex max-w-[min(34rem,90%)] flex-col gap-2 p-6">
               <h1 className="olive-h1">{page.title}</h1>
               {page.excerpt ? (
                 <p className="olive-caption" style={{ maxWidth: "48ch" }}>
                   {page.excerpt}
                 </p>
               ) : null}
-            </div>
+            </OliveReveal>
           </div>
         </section>
       ) : (
         <OliveSection tone="white" aria-label={page.title}>
-          <h1 className="olive-h1">{page.title}</h1>
-          {page.excerpt ? (
-            <p
-              className="olive-caption"
-              style={{ marginTop: "0.75rem", maxWidth: "60ch" }}
-            >
-              {page.excerpt}
-            </p>
-          ) : null}
+          <OliveReveal>
+            <h1 className="olive-h1">{page.title}</h1>
+            {page.excerpt ? (
+              <p
+                className="olive-caption"
+                style={{ marginTop: "0.75rem", maxWidth: "60ch" }}
+              >
+                {page.excerpt}
+              </p>
+            ) : null}
+          </OliveReveal>
         </OliveSection>
       )}
 

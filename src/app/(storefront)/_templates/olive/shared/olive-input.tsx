@@ -119,7 +119,7 @@ export function OliveField({
       {error ? (
         <span
           id={errorId}
-          className="text-[0.8125rem] leading-snug"
+          className="olive-note-settle text-[0.8125rem] leading-snug"
           style={{ color: "var(--olive-error)" }}
         >
           {error}

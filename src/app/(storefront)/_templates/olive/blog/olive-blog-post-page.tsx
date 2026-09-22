@@ -9,7 +9,7 @@ import { formatDate } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
-import { hasOliveImage } from "../shared";
+import { hasOliveImage, OliveReveal } from "../shared";
 import { OliveBlogPostBand } from "./olive-blog-post-band";
 import { OliveBlogShareRow } from "./olive-blog-share-row";
 import { estimateReadingMinutes } from "./olive-reading-time";
@@ -61,23 +61,28 @@ export function OliveBlogPostPage({
           padding: "var(--olive-section-pad-y) var(--olive-section-pad-x)",
         }}
       >
-        <p
-          className="olive-caption"
-          style={{ color: "var(--olive-slate-deep)", marginBottom: "0.75rem" }}
-        >
-          <time dateTime={new Date(displayDate).toISOString()}>
-            {formatDate(displayDate)}
-          </time>
-          {" · "}
-          {readingMinutes} min read
-        </p>
+        <OliveReveal>
+          <p
+            className="olive-caption"
+            style={{
+              color: "var(--olive-slate-deep)",
+              marginBottom: "0.75rem",
+            }}
+          >
+            <time dateTime={new Date(displayDate).toISOString()}>
+              {formatDate(displayDate)}
+            </time>
+            {" · "}
+            {readingMinutes} min read
+          </p>
 
-        <h1
-          className="olive-display"
-          style={{ marginBottom: hasCover ? "1.75rem" : "1rem" }}
-        >
-          {page.title}
-        </h1>
+          <h1
+            className="olive-display"
+            style={{ marginBottom: hasCover ? "1.75rem" : "1rem" }}
+          >
+            {page.title}
+          </h1>
+        </OliveReveal>
 
         {hasCover ? (
           <figure className="olive-card relative mb-10 aspect-[3/2] overflow-hidden">
@@ -91,27 +96,31 @@ export function OliveBlogPostPage({
             />
           </figure>
         ) : excerpt ? (
-          <p
-            style={{
-              fontFamily: "var(--olive-font-body)",
-              fontSize: "1.125rem",
-              lineHeight: 1.6,
-              color: "var(--olive-ink-soft)",
-              marginBottom: "2rem",
-            }}
-          >
-            {excerpt}
-          </p>
+          <OliveReveal>
+            <p
+              style={{
+                fontFamily: "var(--olive-font-body)",
+                fontSize: "1.125rem",
+                lineHeight: 1.6,
+                color: "var(--olive-ink-soft)",
+                marginBottom: "2rem",
+              }}
+            >
+              {excerpt}
+            </p>
+          </OliveReveal>
         ) : null}
 
-        <TiptapRenderer
-          content={page.content as TiptapJSON}
-          className="olive-prose"
-        />
+        <OliveReveal threshold={0}>
+          <TiptapRenderer
+            content={page.content as TiptapJSON}
+            className="olive-prose"
+          />
+        </OliveReveal>
 
-        <div style={{ marginTop: "2.5rem" }}>
+        <OliveReveal style={{ marginTop: "2.5rem" }}>
           <OliveBlogShareRow title={page.title} path={`/blog/${page.slug}`} />
-        </div>
+        </OliveReveal>
       </article>
 
       {isSectionVisible(fields, "olive", "blog.post") ? (

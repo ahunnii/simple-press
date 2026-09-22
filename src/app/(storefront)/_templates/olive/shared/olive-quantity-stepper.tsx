@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 
 import { cn } from "~/lib/utils";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type OliveQuantityStepperProps = {
   value: number;
@@ -27,6 +29,10 @@ type OliveQuantityStepperProps = {
  * with a polite live region beside it, so the new value is announced once
  * rather than on every keystroke of a typed field, and each button says which
  * direction it goes and to what.
+ *
+ * The readout bumps up and down (translateY 0 → -2px → 0) when the value
+ * changes, via a 240ms animation. The bump is driven by a data attribute set
+ * when the value changes; the attribute clears after the animation.
  */
 export function OliveQuantityStepper({
   value,
@@ -37,6 +43,20 @@ export function OliveQuantityStepper({
   disabled = false,
   className,
 }: OliveQuantityStepperProps) {
+  const reduced = useReducedMotion();
+  const [bump, setBump] = useState(false);
+  const previousValue = useRef(value);
+
+  useEffect(() => {
+    if (value !== previousValue.current && !reduced) {
+      setBump(true);
+      previousValue.current = value;
+      const timer = setTimeout(() => setBump(false), 240);
+      return () => clearTimeout(timer);
+    }
+    previousValue.current = value;
+  }, [value, reduced]);
+
   const suffix = itemLabel ? ` of ${itemLabel}` : "";
   const atMin = value <= min;
   const atMax = max !== undefined && value >= max;
@@ -62,7 +82,8 @@ export function OliveQuantityStepper({
       </button>
 
       <span
-        className="olive-price min-w-8 text-center tabular-nums"
+        className="olive-price olive-qty-readout min-w-8 text-center tabular-nums"
+        data-bump={bump ? "true" : undefined}
         aria-hidden="true"
       >
         {value}

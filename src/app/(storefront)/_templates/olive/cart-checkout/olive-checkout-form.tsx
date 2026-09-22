@@ -29,8 +29,10 @@ import {
   OliveFieldRow,
   OliveImageFallback,
   OliveInput,
+  OliveReveal,
   OliveSection,
   OliveSelect,
+  useOliveFigureChange,
 } from "../shared";
 
 type Props = {
@@ -78,11 +80,16 @@ const DELIVERY_OPTIONS = [
  * sibling of the form column, not a child of it: `checkout.main` on the left
  * column, `checkout.summary` on the aside.
  *
- * Deliberately no scroll reveals: the reveal system starts content at
- * `opacity: 0` until an IntersectionObserver fires, and a `required` control
- * that never becomes visible makes the browser cancel the submit before
- * React sees it (see the silent-submit watchdog in `use-checkout-form.ts`).
- * Only the title block, which holds no controls, is revealed.
+ * Scroll reveals here are deliberately narrow: the reveal system starts
+ * content at `opacity: 0` until an IntersectionObserver fires, and a
+ * `required` control that never becomes visible makes the browser cancel the
+ * submit before React sees it (see the silent-submit watchdog in
+ * `use-checkout-form.ts`). So only three control-free blocks are ever
+ * revealed — the title block (breadcrumb + heading + intro), the empty-bag
+ * state, and the bag summary card (heading, line items, totals) — and no
+ * `<form>`, `<fieldset>`, or `required` control is ever nested inside a
+ * `<OliveReveal>`. The discount-code input inside the summary card is not
+ * `required`, so it stays safely inside that reveal.
  */
 export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
   const form = useCheckoutForm(business, merchantPolicies);
@@ -127,6 +134,21 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
   const shippingCalculating =
     shipping && form.state.trim().length > 0 && form.shippingPending;
 
+  // The shipping row's copy has several distinct states, not just a number —
+  // this composite is what `useOliveFigureChange` actually compares, so the
+  // settle flash fires whenever what the shopper reads changes, not only
+  // when the raw amount does.
+  const shippingDisplay = !shipping
+    ? "free-in-store"
+    : shippingCalculating
+      ? "calculating"
+      : form.shippingPending
+        ? "pending"
+        : form.shipping === 0
+          ? "free"
+          : `amount:${form.shipping}`;
+  const shippingSettling = useOliveFigureChange(shippingDisplay);
+
   // Errors name the problem and the fix, and only after a submit attempt —
   // nobody should be told a field is wrong before they have reached it.
   const errorFor = (empty: boolean, message: string) =>
@@ -146,7 +168,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
         aria-labelledby="olive-checkout-heading"
         {...sectionGroupAttr("checkout", "main")}
       >
-        <div className="mx-auto flex w-full max-w-[36rem] flex-col gap-6">
+        <OliveReveal className="mx-auto flex w-full max-w-[36rem] flex-col gap-6">
           <h1
             id="olive-checkout-heading"
             className="olive-h1 text-center"
@@ -161,7 +183,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
             body={f["olive.checkout.empty-body"] ?? ""}
             cta={{ label: f["olive.checkout.empty-cta"] ?? "", href: "/shop" }}
           />
-        </div>
+        </OliveReveal>
       </OliveSection>
     );
   }
@@ -176,7 +198,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
             className="flex min-w-0 flex-col gap-5"
             {...sectionGroupAttr("checkout", "main")}
           >
-            <div className="flex flex-col gap-3">
+            <OliveReveal className="flex flex-col gap-3">
               <OliveBreadcrumb
                 items={[
                   { label: "Home", href: "/" },
@@ -200,7 +222,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                   {intro}
                 </p>
               ) : null}
-            </div>
+            </OliveReveal>
 
             {/* ── Your details ──────────────────────────────────────────── */}
             {/* `olive-shadcn-bridge` remaps the shadcn variables the shared
@@ -531,7 +553,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
               >
                 {form.error ? (
                   <p
-                    className="text-[0.875rem] leading-snug"
+                    className="olive-note-settle text-[0.875rem] leading-snug"
                     style={{
                       color: "var(--olive-error)",
                       backgroundColor: "var(--olive-error-bg)",
@@ -604,7 +626,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
             aria-labelledby="olive-co-summary-heading"
             {...sectionGroupAttr("checkout", "summary")}
           >
-            <div
+            <OliveReveal
               className="olive-card flex flex-col gap-5 p-5 sm:p-6"
               style={{ backgroundColor: "var(--olive-slate-tint)" }}
             >
@@ -721,7 +743,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                     <p
                       id="olive-co-discount-error"
                       role="alert"
-                      className="text-[0.8125rem] leading-snug"
+                      className="olive-note-settle text-[0.8125rem] leading-snug"
                       style={{ color: "var(--olive-error)" }}
                     >
                       {form.discountFieldError}
@@ -731,7 +753,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                   {form.discountCodeLabel && form.discountAmount > 0 ? (
                     <p
                       role="status"
-                      className="text-[0.8125rem] leading-snug"
+                      className="olive-note-settle text-[0.8125rem] leading-snug"
                       style={{ color: "var(--olive-success)" }}
                     >
                       {form.discountCodeLabel} applied — you save{" "}
@@ -770,7 +792,13 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
 
                 <div className={ROW_CLASS}>
                   <dt className="olive-caption">Shipping</dt>
-                  <dd className="olive-price" aria-live="polite">
+                  <dd
+                    className={cn(
+                      "olive-price",
+                      shippingSettling && "olive-figure-settle",
+                    )}
+                    aria-live="polite"
+                  >
                     {!shipping
                       ? "Free — in store"
                       : shippingCalculating
@@ -804,7 +832,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                   {summaryNote}
                 </p>
               ) : null}
-            </div>
+            </OliveReveal>
           </aside>
         </div>
       </OliveSection>

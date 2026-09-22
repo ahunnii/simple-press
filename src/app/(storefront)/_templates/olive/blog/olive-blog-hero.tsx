@@ -2,7 +2,12 @@ import Image from "next/image";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-import { hasOliveImage, OliveSection, OliveSectionHeading } from "../shared";
+import {
+  hasOliveImage,
+  OliveReveal,
+  OliveSection,
+  OliveSectionHeading,
+} from "../shared";
 
 type Props = {
   image: string;
@@ -38,14 +43,16 @@ export function OliveBlogHero({
   if (!hasOliveImage(image)) {
     return (
       <OliveSection tone="slate">
-        <OliveSectionHeading
-          tone="slate"
-          as="h1"
-          heading={heading}
-          body={subtitle}
-          headingFieldKey={headingFieldKey}
-          bodyFieldKey={subtitleFieldKey}
-        />
+        <OliveReveal>
+          <OliveSectionHeading
+            tone="slate"
+            as="h1"
+            heading={heading}
+            body={subtitle}
+            headingFieldKey={headingFieldKey}
+            bodyFieldKey={subtitleFieldKey}
+          />
+        </OliveReveal>
       </OliveSection>
     );
   }
@@ -65,7 +72,7 @@ export function OliveBlogHero({
         className="object-cover"
       />
       <div className="absolute inset-0 flex items-end p-4 sm:p-8">
-        <div className="olive-card flex max-w-[min(34rem,90%)] flex-col gap-2 p-6">
+        <OliveReveal className="olive-card flex max-w-[min(34rem,90%)] flex-col gap-2 p-6">
           <h1 className="olive-h1" {...fieldAttr(headingFieldKey)}>
             {heading}
           </h1>
@@ -78,7 +85,7 @@ export function OliveBlogHero({
               {subtitle}
             </p>
           ) : null}
-        </div>
+        </OliveReveal>
       </div>
     </section>
   );

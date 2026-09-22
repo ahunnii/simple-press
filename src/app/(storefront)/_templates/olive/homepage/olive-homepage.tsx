@@ -70,8 +70,8 @@ export async function OliveHomepage({
   const popup = resolvePopup(business.siteContent, isEnabled("popups"));
 
   const f = resolveFields(customFields, [
-    "olive.homepage.hero-image",
     "olive.homepage.hero-video",
+    "olive.homepage.hero-show-card",
     "olive.homepage.hero-heading",
     "olive.homepage.hero-body",
     "olive.homepage.hero-cta-label",
@@ -191,6 +191,17 @@ export async function OliveHomepage({
     ? collectionProducts
     : latestProducts;
 
+  // ── Hero photographs ──────────────────────────────────────────────────────
+  // Blank/placeholder rows are dropped here so the dots and the count only
+  // ever see real photos; the first survivor is both the arrival frame and
+  // the priority (LCP) frame the hero component pins to slide 0.
+  const heroImages: string[] = parseTemplateListRows(
+    customFields?.["olive.homepage.hero-images"],
+  )
+    .map((row) => rowText(row, "image"))
+    .filter(hasOliveImage)
+    .slice(0, 6);
+
   // ── Feed and press lists ──────────────────────────────────────────────────
   const feedImages: OliveFeedImage[] = parseTemplateListRows(
     customFields?.["olive.homepage.feed-images"],
@@ -230,8 +241,9 @@ export async function OliveHomepage({
 
       <>
         <OliveHeroSection
-          image={f["olive.homepage.hero-image"] ?? "/placeholder.svg"}
+          images={heroImages}
           video={f["olive.homepage.hero-video"] ?? ""}
+          showCard={f["olive.homepage.hero-show-card"] !== "false"}
           heading={f["olive.homepage.hero-heading"] ?? ""}
           body={f["olive.homepage.hero-body"] ?? ""}
           ctaLabel={f["olive.homepage.hero-cta-label"] ?? ""}

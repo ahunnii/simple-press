@@ -3,7 +3,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
-import { OliveEmptyState, OliveSection } from "../shared";
+import { OliveEmptyState, OliveReveal, OliveSection } from "../shared";
 import { OliveBlogClient } from "./olive-blog-client";
 import { OliveBlogHero } from "./olive-blog-hero";
 
@@ -53,19 +53,21 @@ export function OliveBlogPage({ pages, business, customFields }: Props) {
 
       <OliveSection tone="white">
         {pages.length === 0 ? (
-          <OliveEmptyState
-            headingAs="h2"
-            heading={f["olive.blog.empty-heading"] ?? ""}
-            body={f["olive.blog.empty-body"] ?? ""}
-            cta={
-              emptyCtaLink
-                ? {
-                    label: f["olive.blog.empty-cta-label"] ?? "",
-                    href: emptyCtaLink,
-                  }
-                : undefined
-            }
-          />
+          <OliveReveal>
+            <OliveEmptyState
+              headingAs="h2"
+              heading={f["olive.blog.empty-heading"] ?? ""}
+              body={f["olive.blog.empty-body"] ?? ""}
+              cta={
+                emptyCtaLink
+                  ? {
+                      label: f["olive.blog.empty-cta-label"] ?? "",
+                      href: emptyCtaLink,
+                    }
+                  : undefined
+              }
+            />
+          </OliveReveal>
         ) : (
           <OliveBlogClient
             posts={pages}

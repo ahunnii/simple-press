@@ -78,6 +78,10 @@ export function OliveToast() {
     <div className="olive-toast-region" role="status" aria-live="polite">
       {item ? (
         <div className="olive-toast" data-state={open ? "open" : "closed"}>
+          {/* The same leading-edge idiom as the product page's swatch turn —
+              a leaf-green edge wiping in left-to-right — so pill → toast →
+              badge reads as one vocabulary rather than three techniques. */}
+          <span className="olive-toast-edge" aria-hidden="true" />
           <span
             className="flex items-center"
             style={{ color: "var(--olive-leaf)" }}

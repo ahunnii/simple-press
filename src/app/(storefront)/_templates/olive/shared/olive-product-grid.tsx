@@ -29,6 +29,20 @@ type OliveProductGridProps = {
   emptyBody?: string;
   emptyCta?: { label: string; href: string };
   className?: string;
+  /**
+   * A signature for "the results changed for a reason other than first
+   * arrival" — a filter, sort, or page. Passed as `key` on the inner reveal
+   * group: `useOliveReveal`'s IntersectionObserver disconnects after firing
+   * once, so filtered results otherwise teleport in with no motion. Changing
+   * this key remounts the group; the observer reconnects against a grid
+   * already on screen and fires immediately, so the existing dealt-card
+   * stagger replays as an answer to the interaction, not a page load.
+   *
+   * Build it from filter/sort/page state only — never a field value, or every
+   * keystroke in the live editor re-deals the whole grid — and never pass the
+   * page's *initial* signature, or the grid re-deals on mount.
+   */
+  dealKey?: string | number;
 };
 
 /**
@@ -53,6 +67,7 @@ export function OliveProductGrid({
   emptyBody,
   emptyCta,
   className,
+  dealKey,
 }: OliveProductGridProps) {
   if (products.length === 0) {
     return (
@@ -67,7 +82,9 @@ export function OliveProductGrid({
 
   return (
     <OliveRevealGroup
+      key={dealKey}
       fan
+      data-redeal={dealKey}
       className={cn("grid gap-3", COLUMN_CLASS[columns], className)}
     >
       {products.map((product, i) => (

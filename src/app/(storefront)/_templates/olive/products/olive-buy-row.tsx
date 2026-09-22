@@ -1,10 +1,15 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import type { OliveCartAddedDetail } from "../layout/olive-toast";
 import { cn } from "~/lib/utils";
 
 import { OLIVE_CART_ADDED_EVENT } from "../layout/olive-toast";
 import { OliveButton, OliveQuantityStepper } from "../shared";
+
+/** Matches `.olive-btn[data-commit="true"]`'s animation-duration in globals.css. */
+const COMMIT_MS = 460;
 
 /**
  * Tell the layout's toast that something landed in the bag.
@@ -49,6 +54,31 @@ export function OliveBuyRow({
   disabled = false,
   className,
 }: OliveBuyRowProps) {
+  // The press-commit connects this click to the toast/badge that follow —
+  // see `shared/olive-button.tsx`'s `committed` prop. Restarting it on a
+  // rapid repeat click needs one reduced-motion-free frame at `false` first
+  // (the same `setOpen(false)` → `requestAnimationFrame` idiom `OliveToast`
+  // uses to replay its own entrance), or re-setting `true` while it is
+  // already `true` is a no-op.
+  const [committed, setCommitted] = useState(false);
+  const commitTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    return () => {
+      if (commitTimer.current) clearTimeout(commitTimer.current);
+    };
+  }, []);
+
+  const handleAdd = () => {
+    onAdd();
+    setCommitted(false);
+    requestAnimationFrame(() => setCommitted(true));
+    if (commitTimer.current) clearTimeout(commitTimer.current);
+    commitTimer.current = setTimeout(() => setCommitted(false), COMMIT_MS);
+  };
+
   return (
     <div className={cn("flex flex-wrap items-center gap-3", className)}>
       <OliveQuantityStepper
@@ -61,8 +91,9 @@ export function OliveBuyRow({
       <OliveButton
         variant="primary"
         size="lg"
-        onClick={onAdd}
+        onClick={handleAdd}
         disabled={disabled}
+        committed={committed}
         className="min-w-[11rem] flex-1"
       >
         Add to bag

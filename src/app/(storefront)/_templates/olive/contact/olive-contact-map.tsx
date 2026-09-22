@@ -12,7 +12,7 @@ import {
   MarkerTooltip,
 } from "~/components/ui/map";
 
-import { OliveButton } from "../shared";
+import { OliveButton, OliveReveal } from "../shared";
 
 type Props = {
   sectionAttrs: Record<string, string>;
@@ -62,12 +62,14 @@ export function OliveContactMap({
       }}
     >
       {heading ? (
-        <h2 className="olive-h2 mb-6" {...fieldAttr(headingFieldKey)}>
-          {heading}
-        </h2>
+        <OliveReveal className="mb-6">
+          <h2 className="olive-h2" {...fieldAttr(headingFieldKey)}>
+            {heading}
+          </h2>
+        </OliveReveal>
       ) : null}
 
-      <div
+      <OliveReveal
         className="relative h-[380px] w-full overflow-hidden"
         style={{ borderRadius: "var(--olive-card-radius)" }}
       >
@@ -129,7 +131,7 @@ export function OliveContactMap({
             </OliveButton>
           </div>
         </div>
-      </div>
+      </OliveReveal>
     </section>
   );
 }
