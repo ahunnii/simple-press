@@ -20,26 +20,40 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 const homepageHeroData: TemplateField[] = [
   {
-    key: "olive.homepage.hero-image",
-    label: "Hero Photograph",
+    key: "olive.homepage.hero-images",
+    label: "Hero Photographs",
     description:
-      "The full-width photograph behind the hero, and the still frame for the hero video. Leave blank to show the sage cover panel instead.",
-    type: "image",
+      "Up to six full-width photographs behind the hero, shown one at a time and turned like the leaves of a swatch book. The first is the one shoppers see on arrival, and the still frame for the hero video. One photograph stays put; none shows the sage cover panel instead.",
+    type: "list",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    maxItems: 6,
+    itemSchema: [
+      { key: "image", label: "Photograph", type: "image", placeholder: "Upload a landscape photograph" },
+    ],
   },
   {
     key: "olive.homepage.hero-video",
     label: "Hero Video",
     description:
-      "Optional silent video for the hero. When set it plays instead of the photograph, muted and looping, with a pause control. Leave blank to use the photograph.",
+      "Optional silent video for the hero. When set it plays instead of the photographs, muted and looping, with a pause control. Leave blank to use the photographs.",
     type: "video",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue: "",
+  },
+  {
+    key: "olive.homepage.hero-show-card",
+    label: "Show Swatch Card",
+    description:
+      "On: the white card with the heading, line and button sits in the hero's corner. Off: the photographs stand alone — the heading is still read out to screen readers, but nothing is drawn over the picture.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "true",
   },
   {
     key: "olive.homepage.hero-heading",
@@ -573,7 +587,7 @@ export const oliveHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "The full-width photograph or video, and the white swatch card over it",
+      "Up to six full-width photographs or a video, turned like a swatch book, and the white swatch card over them",
     icon: "🌿",
     columns: 2,
   },
@@ -652,7 +666,7 @@ export const oliveHomepageSections: TemplateSection[] = [
     page: "homepage",
     title: "Hero",
     description:
-      "Full-width photograph or video with the white swatch card over it",
+      "Full-width photographs or video, turned like a swatch book, with the white swatch card over them",
     groupIds: ["homepage.hero"],
     order: 0,
     hideable: false,

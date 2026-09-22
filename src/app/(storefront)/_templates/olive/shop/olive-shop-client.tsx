@@ -14,6 +14,7 @@ import {
   OliveChip,
   OliveEmptyState,
   OliveProductGrid,
+  OliveReveal,
   OliveSelect,
 } from "../shared";
 import { oliveChipToken } from "../shared/olive-color";
@@ -81,6 +82,16 @@ export function OliveShopClient({
   const count = filtered.length;
   const hasProducts = products.length > 0;
 
+  // Re-deal the grid when the results changed for a *reason* — never on the
+  // page's first render, or the dealt-card stagger would replay on mount
+  // instead of only on an actual filter/sort/page interaction. The signature
+  // deliberately carries no field values, so a live-editor keystroke never
+  // touches it.
+  const dealSignature = `${activeCollectionId ?? ""}|${sortParam}|${inStockOnly}|${currentPage}`;
+  const initialDealSignature = useRef(dealSignature);
+  const dealKey =
+    dealSignature === initialDealSignature.current ? undefined : dealSignature;
+
   return (
     <section
       aria-labelledby="olive-shop-heading"
@@ -89,7 +100,7 @@ export function OliveShopClient({
     >
       {/* Title block — heading plus one line, and nothing else above it. */}
       <div style={containerStyle} className="pt-10 pb-6 md:pt-14 md:pb-8">
-        <div className="flex flex-col gap-3">
+        <OliveReveal className="flex flex-col gap-3">
           <h1
             id="olive-shop-heading"
             className="olive-h1"
@@ -106,7 +117,7 @@ export function OliveShopClient({
               {body}
             </p>
           ) : null}
-        </div>
+        </OliveReveal>
       </div>
 
       {/* Sticky toolbar — white card stock, one hairline, pinned under the header. */}
@@ -120,7 +131,10 @@ export function OliveShopClient({
             borderBottom: "1px solid var(--olive-hairline)",
           }}
         >
-          <div style={containerStyle} className="flex flex-col gap-3 py-3">
+          <OliveReveal
+            style={containerStyle}
+            className="flex flex-col gap-3 py-3"
+          >
             <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
               <p
                 className="olive-label"
@@ -186,31 +200,35 @@ export function OliveShopClient({
                 onChange={setActiveCollectionId}
               />
             ) : null}
-          </div>
+          </OliveReveal>
         </div>
       ) : null}
 
       {/* The swatch grid */}
       <div style={containerStyle} className="pt-8 pb-16 md:pt-10 md:pb-24">
         {count === 0 ? (
-          <OliveEmptyState
-            headingAs="h2"
-            heading={hasProducts ? noResultsHeading : emptyHeading}
-            body={hasProducts ? noResultsBody : emptyBody}
-            cta={
-              hasProducts ? undefined : { label: "Say hello", href: "/contact" }
-            }
-          >
-            {hasProducts && hasActiveFilters ? (
-              <OliveButton
-                variant="secondary"
-                onClick={clearFilters}
-                className="mt-1"
-              >
-                Clear filters
-              </OliveButton>
-            ) : null}
-          </OliveEmptyState>
+          <OliveReveal>
+            <OliveEmptyState
+              headingAs="h2"
+              heading={hasProducts ? noResultsHeading : emptyHeading}
+              body={hasProducts ? noResultsBody : emptyBody}
+              cta={
+                hasProducts
+                  ? undefined
+                  : { label: "Say hello", href: "/contact" }
+              }
+            >
+              {hasProducts && hasActiveFilters ? (
+                <OliveButton
+                  variant="secondary"
+                  onClick={clearFilters}
+                  className="mt-1"
+                >
+                  Clear filters
+                </OliveButton>
+              ) : null}
+            </OliveEmptyState>
+          </OliveReveal>
         ) : (
           <>
             <OliveProductGrid
@@ -220,14 +238,17 @@ export function OliveShopClient({
               priorityCount={4}
               emptyHeading={noResultsHeading}
               emptyBody={noResultsBody}
+              dealKey={dealKey}
             />
 
             {totalPages > 1 ? (
-              <OliveShopPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPage={handlePage}
-              />
+              <OliveReveal>
+                <OliveShopPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPage={handlePage}
+                />
+              </OliveReveal>
             ) : null}
           </>
         )}

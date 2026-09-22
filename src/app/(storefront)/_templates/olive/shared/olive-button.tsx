@@ -30,6 +30,16 @@ type OliveButtonProps = {
   disabled?: boolean;
   /** Shows a spinner, blocks activation and sets `aria-busy`. */
   loading?: boolean;
+  /**
+   * Plays a ~460ms press-commit once — `scale(1) → 0.97 → 1` with the face
+   * warming toward `--olive-sage-tint` — so the click that added something to
+   * the bag has a surface response of its own, connecting it to the toast and
+   * badge that follow. The caller owns the timing: flip it true, then false
+   * again after the animation (see `olive-buy-row.tsx`'s `onAdd`). Never
+   * changes `children` — the confirmation stays the toast and the badge, not
+   * a button that changes its mind about what it says.
+   */
+  committed?: boolean;
   className?: string;
   style?: CSSProperties;
   target?: string;
@@ -64,6 +74,7 @@ export function OliveButton({
   onClick,
   disabled = false,
   loading = false,
+  committed = false,
   className,
   style,
   target,
@@ -99,6 +110,7 @@ export function OliveButton({
     "aria-expanded": ariaExpanded,
     "aria-describedby": ariaDescribedby,
     "data-sp-field": dataSpField,
+    "data-commit": committed ? "true" : undefined,
   };
 
   if (href !== undefined) {

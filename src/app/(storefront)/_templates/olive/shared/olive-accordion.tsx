@@ -150,15 +150,32 @@ export function OliveAccordionItem({
         </button>
       </TriggerHeading>
 
+      {/* `grid-template-rows: 0fr ↔ 1fr` on this wrapper, not `max-height`, so a
+          Tiptap image that loads in after the panel is already open never
+          clips — the row re-measures instead of needing a guessed cap. The
+          region itself carries `overflow: hidden` (the grid item) and the
+          opacity fade; closed content gets `inert` so its links drop out of
+          the tab order instead of merely hiding visually. Row value comes
+          from the same `open` state `initialOpenIds` seeds, so server and
+          client agree on first paint. */}
       <div
-        id={panelId}
-        role="region"
-        aria-labelledby={buttonId}
-        hidden={!open}
-        className="px-4 pb-4 text-[0.9375rem] leading-relaxed"
-        style={{ color: "var(--olive-ink-soft)" }}
+        className="olive-accordion-panel-wrap"
+        data-open={open ? "true" : "false"}
       >
-        {children}
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={buttonId}
+          inert={!open}
+          className="olive-accordion-panel"
+        >
+          <div
+            className="px-4 pb-4 text-[0.9375rem] leading-relaxed"
+            style={{ color: "var(--olive-ink-soft)" }}
+          >
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

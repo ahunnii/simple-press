@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 
-import { OliveInput, OliveRevealGroup } from "../shared";
+import { OliveInput, OliveReveal, OliveRevealGroup } from "../shared";
 import { OliveBlogCard } from "./olive-blog-card";
 
 type Props = {
@@ -47,7 +47,7 @@ export function OliveBlogClient({ posts, searchEmptyMessage }: Props) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex max-w-[22rem] items-center gap-2.5">
+      <OliveReveal className="flex max-w-[22rem] items-center gap-2.5">
         <Search
           aria-hidden="true"
           className="h-4 w-4 shrink-0"
@@ -62,7 +62,7 @@ export function OliveBlogClient({ posts, searchEmptyMessage }: Props) {
           placeholder="Search the journal…"
           aria-label="Search the journal"
         />
-      </div>
+      </OliveReveal>
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {isSearching

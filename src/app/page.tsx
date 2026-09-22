@@ -3,6 +3,7 @@ import { permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
+import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
 import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
@@ -10,7 +11,8 @@ import {
 } from "~/lib/structured-data";
 import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
-import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
+import { MaintenancePreviewBar } from "~/components/maintenance/maintenance-preview-bar";
+import { MaintenanceTakeover } from "~/components/maintenance/maintenance-takeover";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
@@ -27,6 +29,8 @@ import { DarkTrendHomepage } from "./(storefront)/_templates/dark-trend/homepage
 import { DarkTrendLayout } from "./(storefront)/_templates/dark-trend/layout/dark-trend-layout";
 import { DefaultHomePage } from "./(storefront)/_templates/default/homepage/default-homepage";
 import { DefaultLayout } from "./(storefront)/_templates/default/layout/default-layout";
+import { DreamHomepage } from "./(storefront)/_templates/dream/homepage/dream-homepage";
+import { DreamLayout } from "./(storefront)/_templates/dream/layout/dream-layout";
 import { ElegantHomePage } from "./(storefront)/_templates/elegant/homepage/elegant-homepage";
 import { ElegantLayout } from "./(storefront)/_templates/elegant/layout/elegant-layout";
 import { HappyBambooHomepage } from "./(storefront)/_templates/happy-bamboo/homepage/happy-bamboo-homepage";
@@ -46,14 +50,12 @@ import { RelocationHomepage } from "./(storefront)/_templates/relocation/homepag
 import { RelocationLayout } from "./(storefront)/_templates/relocation/layout/relocation-layout";
 import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
 import { SledgeLayout } from "./(storefront)/_templates/sledge/layout/sledge-layout";
+import { UmscHomepage } from "./(storefront)/_templates/umsc/homepage/umsc-homepage";
+import { UmscLayout } from "./(storefront)/_templates/umsc/layout/umsc-layout";
 import { ViiHomepage } from "./(storefront)/_templates/vii/homepage/vii-homepage";
 import { ViiLayout } from "./(storefront)/_templates/vii/layout/vii-layout";
 import { WealthHomepage } from "./(storefront)/_templates/wealth/homepage/wealth-homepage";
 import { WealthLayout } from "./(storefront)/_templates/wealth/layout/wealth-layout";
-import { DreamHomepage } from "./(storefront)/_templates/dream/homepage/dream-homepage";
-import { DreamLayout } from "./(storefront)/_templates/dream/layout/dream-layout";
-import { UmscHomepage } from "./(storefront)/_templates/umsc/homepage/umsc-homepage";
-import { UmscLayout } from "./(storefront)/_templates/umsc/layout/umsc-layout";
 
 // Next 15: searchParams is a Promise.
 type Props = {
@@ -85,23 +87,16 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
     }
   }
 
-  if (business.maintenance?.active) {
-    const m = business.maintenance;
-    const t = getTemplate(business.templateId);
-    if (m.scope === "business" && t.MaintenancePage) {
-      return <t.MaintenancePage business={business} maintenance={m} />;
-    }
+  const template = getTemplate(business.templateId);
+  const gate = await resolveMaintenanceGate(business.id, business.maintenance);
+
+  if (business.maintenance.active && gate.kind === "takeover") {
     return (
-      <MaintenanceScreen
-        variant={m.variant}
-        message={m.message}
-        cta={m.scope === "business" ? m.cta : null}
-        businessName={business.name}
-        overline={m.scope === "business" ? m.overline : null}
-        headline={m.scope === "business" ? m.headline : null}
-        image={m.scope === "business" ? m.image : null}
-        location={m.scope === "business" ? m.location : null}
-        launch={m.scope === "business" ? m.launch : null}
+      <MaintenanceTakeover
+        business={business}
+        maintenance={business.maintenance}
+        template={template}
+        showEnterBar={gate.showEnterBar}
       />
     );
   }
@@ -164,6 +159,9 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
         ]}
       />
       <StorefrontFlagsProvider flags={business.featureFlags}>
+        {gate.showPreviewBar ? (
+          <MaintenancePreviewBar mode="leave" variant={gate.variant} />
+        ) : null}
         <TemplateLayout business={business}>
           <TemplateComponent business={business} />
         </TemplateLayout>

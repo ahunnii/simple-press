@@ -25,6 +25,7 @@ export {
   oliveChipToken,
 } from "./olive-color";
 export { OliveEmptyState } from "./olive-empty-state";
+export { useOliveFigureChange } from "./olive-figure-change";
 export { hasOliveImage, OliveImageFallback } from "./olive-image-fallback";
 export { OliveImageTile } from "./olive-image-tile";
 export {

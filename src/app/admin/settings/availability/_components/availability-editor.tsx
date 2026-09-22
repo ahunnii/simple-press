@@ -2,6 +2,7 @@
 
 import type { Content } from "@tiptap/react";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { TriangleAlert } from "lucide-react";
@@ -19,7 +20,12 @@ import {
 } from "~/lib/maintenance-config";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -433,9 +439,10 @@ export function AvailabilityEditor({
             &quot;noindex&quot; so search engines drop it from results while
             it&apos;s active. Checkout is blocked server-side too, so no orders
             can be placed even if a customer already has the checkout page open.
-            None of this affects you: your admin dashboard stays fully
-            accessible so you can keep working and turn this off when
-            you&apos;re ready.
+            Your admin dashboard stays accessible. While signed in as an owner
+            or manager, you can open the storefront and switch between the
+            visitor page and a preview of the live site without turning this
+            off.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -449,9 +456,10 @@ export function AvailabilityEditor({
                 Enable maintenance mode for my storefront
               </Label>
               <p className="text-muted-foreground mt-0.5 text-sm">
-                Takes effect immediately for all visitors after you save —
-                there&apos;s no scheduling or preview delay. Only the public
-                storefront is affected; your admin dashboard stays accessible.
+                Takes effect immediately for all visitors after you save. Your
+                admin dashboard stays accessible, and while signed in you can
+                open the storefront to preview the live site without turning
+                this off. Checkout stays blocked.
               </p>
             </div>
             <Switch
@@ -862,8 +870,18 @@ export function AvailabilityEditor({
                 {maintenanceVariant === "coming_soon"
                   ? "coming soon"
                   : "maintenance"}{" "}
-                page until you turn this off.
+                page until you turn this off. While signed in, you can still
+                open the storefront and preview the live site — checkout stays
+                blocked.
               </AlertDescription>
+              <AlertAction>
+                <Button variant="outline" asChild size="xs">
+                  <Link href="/" target="_blank" rel="noopener noreferrer">
+                    View public page
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </Link>
+                </Button>
+              </AlertAction>
             </Alert>
           )}
 
@@ -896,7 +914,9 @@ export function AvailabilityEditor({
                       ? "coming soon"
                       : "maintenance"}{" "}
                     screen, and no new orders can be placed until you turn it
-                    back off. Your admin dashboard stays fully accessible.
+                    back off. Your admin dashboard stays fully accessible. While
+                    signed in, you can still open the storefront and preview the
+                    live site.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

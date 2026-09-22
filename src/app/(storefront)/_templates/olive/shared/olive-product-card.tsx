@@ -86,6 +86,8 @@ const NEW_WINDOW_DAYS = 30;
 const MAX_CARD_SWATCHES = 6;
 /** How long the sr-only confirmation stays in the live region. */
 const ANNOUNCE_MS = 2400;
+/** Matches `.olive-btn[data-commit="true"]`'s animation-duration in globals.css. */
+const COMMIT_MS = 460;
 
 function isRecent(createdAt: Date | string | null | undefined): boolean {
   if (!createdAt) return false;
@@ -241,10 +243,16 @@ export function OliveProductCard({
   const [hovered, setHovered] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  // The quick-add pill's press-commit — connects the click to the toast and
+  // badge that follow, same idiom as `olive-buy-row.tsx`'s `onAdd`.
+  const [committed, setCommitted] = useState(false);
 
   const cardRef = useRef<HTMLElement | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const commitTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const sheetId = useId();
 
   const variants = product.variants ?? [];
@@ -329,6 +337,22 @@ export function OliveProductCard({
     return () => clearTimeout(timer);
   }, [announcement]);
 
+  useEffect(() => {
+    return () => {
+      if (commitTimer.current) clearTimeout(commitTimer.current);
+    };
+  }, []);
+
+  // One reduced-motion-free frame at `false` first, same as `OliveToast`'s
+  // own replay idiom, so a repeat add restarts the animation instead of a
+  // no-op re-set of an already-`true` value.
+  const commit = () => {
+    setCommitted(false);
+    requestAnimationFrame(() => setCommitted(true));
+    if (commitTimer.current) clearTimeout(commitTimer.current);
+    commitTimer.current = setTimeout(() => setCommitted(false), COMMIT_MS);
+  };
+
   const announce = (label: string) => {
     setAnnouncement(`${label} added to bag`);
     window.dispatchEvent(
@@ -352,6 +376,7 @@ export function OliveProductCard({
       sku: null,
       maxInventory: status.maxInventory,
     });
+    commit();
     announce(product.name);
   };
 
@@ -378,6 +403,7 @@ export function OliveProductCard({
     });
     setSheetOpen(false);
     triggerRef.current?.focus();
+    commit();
     announce(`${product.name} — ${choice.value}`);
   };
 
@@ -424,13 +450,23 @@ export function OliveProductCard({
                 className="object-cover"
                 style={fadeStyle(!showSecond)}
               />
+              {/* The back of the leaf. It does not merely dissolve in: the
+                  same clip wipe the product page's swatch turn uses runs
+                  alongside the existing opacity fade, so the card and the
+                  specimen page speak one language — a leaf turned to see
+                  what is on its other side. The wipe rides `.olive-leaf-turn`
+                  in globals.css, keyed off `data-olive-turned`, so reduced
+                  motion can retire it declaratively next to every other
+                  olive rule; the fade keeps the component's own
+                  `reducedMotion` guard. */}
               {hasOliveImage(secondImage?.url) ? (
                 <Image
                   src={secondImage?.url ?? ""}
                   alt=""
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
-                  className="object-cover"
+                  className="olive-leaf-turn object-cover"
+                  data-olive-turned={showSecond ? "true" : "false"}
                   style={fadeStyle(showSecond)}
                 />
               ) : null}
@@ -523,6 +559,7 @@ export function OliveProductCard({
               sheetRef={sheetRef}
               trackStock={trackStock}
               triggerRef={triggerRef}
+              committed={committed}
               onAddSimple={addSimple}
               onAddVariant={addVariant}
               onToggleSheet={() => setSheetOpen((open) => !open)}
@@ -549,6 +586,8 @@ type QuickAddProps = {
   sheetRef: React.RefObject<HTMLDivElement | null>;
   trackStock: boolean;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
+  /** The press-commit, true for one ~460ms cycle right after a successful add. */
+  committed: boolean;
   onAddSimple: () => void;
   onAddVariant: (choice: VariantChoice) => void;
   onToggleSheet: () => void;
@@ -569,6 +608,7 @@ function QuickAdd({
   sheetRef,
   trackStock,
   triggerRef,
+  committed,
   onAddSimple,
   onAddVariant,
   onToggleSheet,
@@ -592,6 +632,7 @@ function QuickAdd({
         type="button"
         onClick={onAddSimple}
         aria-label={`Add ${productName} to bag`}
+        data-commit={committed ? "true" : undefined}
         className="olive-btn olive-btn-secondary olive-btn-sm mt-1 w-full"
       >
         Add to bag
@@ -621,6 +662,7 @@ function QuickAdd({
         aria-expanded={sheetOpen}
         aria-controls={sheetId}
         aria-label={`Choose options for ${productName}`}
+        data-commit={committed ? "true" : undefined}
         className="olive-btn olive-btn-secondary olive-btn-sm mt-1 w-full"
       >
         Choose options

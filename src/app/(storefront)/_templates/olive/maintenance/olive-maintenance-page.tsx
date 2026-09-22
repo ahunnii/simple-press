@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Figtree, Josefin_Sans } from "next/font/google";
 import Image from "next/image";
 
@@ -8,7 +9,7 @@ import { LaunchCountdown } from "~/components/maintenance/launch-countdown";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
-import { OliveButton, OliveLeafMark } from "../shared";
+import { OliveButton, OliveLeafMark, OliveRevealGroup } from "../shared";
 
 /*
   This screen renders OUTSIDE `OliveLayout` — `src/app/(storefront)/layout.tsx`
@@ -102,106 +103,148 @@ export function OliveMaintenancePage({
           this to <head> regardless of where it renders). */}
       <meta name="robots" content="noindex" />
 
-      <main
-        className="olive-card flex w-full flex-col items-center gap-5 text-center"
-        style={{
-          maxWidth: 480,
-          padding: "clamp(32px, 6vw, 56px)",
-          boxShadow: "var(--olive-shadow)",
-        }}
-      >
-        {/* No default overline — olive's craft-floor ban on kickers stays
-            kicker-free unless the owner explicitly sets one. */}
-        {overline ? <span className="olive-label">{overline}</span> : null}
+      <main className="w-full" style={{ maxWidth: 480 }}>
+        <OliveRevealGroup
+          className="olive-card flex w-full flex-col items-center gap-5 text-center"
+          style={{
+            padding: "clamp(32px, 6vw, 56px)",
+            boxShadow: "var(--olive-shadow)",
+          }}
+        >
+          {/* No default overline — olive's craft-floor ban on kickers stays
+              kicker-free unless the owner explicitly sets one. */}
+          {overline ? (
+            <span
+              className="olive-label olive-reveal-item"
+              style={{ "--i": 0 } as CSSProperties}
+            >
+              {overline}
+            </span>
+          ) : null}
 
-        <span aria-hidden style={{ color: "var(--olive-leaf)" }}>
-          <OliveLeafMark size={24} />
-        </span>
-
-        {logoUrl ? (
-          <span className="relative block h-10 w-36">
-            <Image
-              src={logoUrl}
-              alt={logoAlt}
-              fill
-              sizes="144px"
-              className="object-contain"
-              priority
-            />
-          </span>
-        ) : (
-          <span className="olive-wordmark" style={{ fontSize: "0.9375rem" }}>
-            {businessName}
-          </span>
-        )}
-
-        <h1 className="olive-display" style={{ margin: 0 }}>
-          {heading}
-        </h1>
-
-        {/* Announcement flyer. Intrinsic sizing (`height: auto`) rather than
-            `fill`: the owner can upload any aspect ratio and we must not crop
-            an image whose whole point is the text printed on it. */}
-        {flyerUrl ? (
-          <figure className="olive-maintenance-flyer">
-            <Image
-              src={flyerUrl}
-              alt={maintenance.headline ?? "Grand opening flyer"}
-              width={840}
-              height={1050}
-              sizes="(max-width: 480px) 100vw, 360px"
-              style={{ width: "100%", height: "auto", display: "block" }}
-            />
-          </figure>
-        ) : null}
-
-        {/* When / where. Both halves are optional, so the middot separator is
-            emitted only when there is something on either side of it. */}
-        {launch !== null || locationText !== null ? (
-          <p className="olive-label">
-            {launch ? (
-              <time dateTime={launch.dateTimeAttr}>
-                {launch.dateText}
-                {launch.timeText ? ` · ${launch.timeText}` : ""}
-              </time>
-            ) : null}
-            {launch && locationText ? " · " : null}
-            {locationText ? <span>{locationText}</span> : null}
-          </p>
-        ) : null}
-
-        {launch ? (
-          <LaunchCountdown
-            targetIso={launch.startAt}
-            label={isComingSoon ? "Opening in" : "Back in"}
-            pastLabel={isComingSoon ? "Now open" : "We're back"}
-            className="olive-maintenance-countdown"
-          />
-        ) : null}
-
-        {maintenance.message ? (
-          <TiptapRenderer
-            content={maintenance.message}
-            className="olive-maintenance-body"
-          />
-        ) : null}
-
-        {cta ? (
-          <OliveButton
-            variant="primary"
-            href={cta.href}
-            target={cta.type === "external" ? "_blank" : undefined}
-            rel={cta.type === "external" ? "noopener noreferrer" : undefined}
+          <span
+            aria-hidden
+            className="olive-reveal-item"
+            style={{ "--i": 0, color: "var(--olive-leaf)" } as CSSProperties}
           >
-            {cta.label}
-          </OliveButton>
-        ) : null}
+            <OliveLeafMark size={24} />
+          </span>
 
-        {tagline ? (
-          <p className="olive-caption" style={{ margin: 0 }}>
-            {tagline}
-          </p>
-        ) : null}
+          {logoUrl ? (
+            <span
+              className="olive-reveal-item relative block h-10 w-36"
+              style={{ "--i": 1 } as CSSProperties}
+            >
+              <Image
+                src={logoUrl}
+                alt={logoAlt}
+                fill
+                sizes="144px"
+                className="object-contain"
+                priority
+              />
+            </span>
+          ) : (
+            <span
+              className="olive-wordmark olive-reveal-item"
+              style={{ fontSize: "0.9375rem", "--i": 1 } as CSSProperties}
+            >
+              {businessName}
+            </span>
+          )}
+
+          <h1
+            className="olive-display olive-reveal-item"
+            style={{ margin: 0, "--i": 2 } as CSSProperties}
+          >
+            {heading}
+          </h1>
+
+          {/* Announcement flyer. Intrinsic sizing (`height: auto`) rather than
+              `fill`: the owner can upload any aspect ratio and we must not crop
+              an image whose whole point is the text printed on it. */}
+          {flyerUrl ? (
+            <figure
+              className="olive-maintenance-flyer olive-reveal-item"
+              style={{ "--i": 3 } as CSSProperties}
+            >
+              <Image
+                src={flyerUrl}
+                alt={maintenance.headline ?? "Grand opening flyer"}
+                width={840}
+                height={1050}
+                sizes="(max-width: 480px) 100vw, 360px"
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+            </figure>
+          ) : null}
+
+          {/* When / where. Both halves are optional, so the middot separator is
+              emitted only when there is something on either side of it. */}
+          {launch !== null || locationText !== null ? (
+            <p
+              className="olive-label olive-reveal-item"
+              style={{ "--i": 4 } as CSSProperties}
+            >
+              {launch ? (
+                <time dateTime={launch.dateTimeAttr}>
+                  {launch.dateText}
+                  {launch.timeText ? ` · ${launch.timeText}` : ""}
+                </time>
+              ) : null}
+              {launch && locationText ? " · " : null}
+              {locationText ? <span>{locationText}</span> : null}
+            </p>
+          ) : null}
+
+          {launch ? (
+            <div
+              className="olive-reveal-item"
+              style={{ "--i": 4 } as CSSProperties}
+            >
+              <LaunchCountdown
+                targetIso={launch.startAt}
+                label={isComingSoon ? "Opening in" : "Back in"}
+                pastLabel={isComingSoon ? "Now open" : "We're back"}
+                className="olive-maintenance-countdown"
+              />
+            </div>
+          ) : null}
+
+          {maintenance.message ? (
+            <div
+              className="olive-reveal-item"
+              style={{ "--i": 5 } as CSSProperties}
+            >
+              <TiptapRenderer
+                content={maintenance.message}
+                className="olive-maintenance-body"
+              />
+            </div>
+          ) : null}
+
+          {cta ? (
+            <OliveButton
+              variant="primary"
+              href={cta.href}
+              target={cta.type === "external" ? "_blank" : undefined}
+              rel={cta.type === "external" ? "noopener noreferrer" : undefined}
+              className="olive-reveal-item"
+              style={{ "--i": 6 } as CSSProperties}
+            >
+              {cta.label}
+            </OliveButton>
+          ) : null}
+
+          {tagline ? (
+            <p
+              className="olive-caption olive-reveal-item"
+              style={{ margin: 0, "--i": 7 } as CSSProperties}
+            >
+              {tagline}
+            </p>
+          ) : null}
+        </OliveRevealGroup>
       </main>
     </div>
   );

@@ -1,6 +1,11 @@
 import type { OliveCardProduct } from "../shared";
 
-import { OliveProductGrid, OliveSection, OliveSectionHeading } from "../shared";
+import {
+  OliveProductGrid,
+  OliveReveal,
+  OliveSection,
+  OliveSectionHeading,
+} from "../shared";
 
 type Props = {
   heading: string;
@@ -39,14 +44,16 @@ export function OliveProductRail({
       aria-labelledby="olive-rail-heading"
       {...sectionAttrs}
     >
-      <OliveSectionHeading
-        heading={heading}
-        id="olive-rail-heading"
-        link={linkLabel ? { label: linkLabel, href: linkHref } : undefined}
-        headingFieldKey={headingFieldKey}
-        linkFieldKey={linkLabelFieldKey}
-        className="mb-8"
-      />
+      <OliveReveal>
+        <OliveSectionHeading
+          heading={heading}
+          id="olive-rail-heading"
+          link={linkLabel ? { label: linkLabel, href: linkHref } : undefined}
+          headingFieldKey={headingFieldKey}
+          linkFieldKey={linkLabelFieldKey}
+          className="mb-8"
+        />
+      </OliveReveal>
 
       <OliveProductGrid
         products={products}

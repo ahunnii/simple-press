@@ -6,6 +6,7 @@ import {
   getDefaultFlags,
   getDisabledDueToDependency,
 } from "~/lib/features/registry";
+import { buildBusinessBrief } from "~/lib/platform/business-brief";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { createTRPCRouter, platformAdminProcedure } from "~/server/api/trpc";
 
@@ -599,6 +600,16 @@ export const platformRouter = createTRPCRouter({
         disabledByDependency: [...disabledByDependency],
       };
     }),
+
+  /**
+   * Compact public markdown brief for a platform admin to paste into an LLM.
+   * Read-only — writes nothing and connects to no AI provider.
+   */
+  getBusinessBrief: platformAdminProcedure
+    .input(z.object({ businessId: z.string() }))
+    .query(async ({ input }) => ({
+      markdown: await buildBusinessBrief(input.businessId),
+    })),
 
   setBusinessFlags: platformAdminProcedure
     .input(

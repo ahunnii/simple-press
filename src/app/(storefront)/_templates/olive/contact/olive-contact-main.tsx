@@ -15,6 +15,7 @@ import {
   OliveField,
   OliveInput,
   OliveLeafMark,
+  OliveReveal,
   OliveTextarea,
 } from "../shared";
 
@@ -137,18 +138,20 @@ export function OliveContactMain({
               </div>
             ) : (
               <>
-                <h2 className="olive-h2" {...fieldAttr(formHeadingFieldKey)}>
-                  {formHeading}
-                </h2>
-                {formBody ? (
-                  <p
-                    className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed"
-                    style={{ color: "var(--olive-ink-soft)" }}
-                    {...fieldAttr(formBodyFieldKey)}
-                  >
-                    {formBody}
-                  </p>
-                ) : null}
+                <OliveReveal>
+                  <h2 className="olive-h2" {...fieldAttr(formHeadingFieldKey)}>
+                    {formHeading}
+                  </h2>
+                  {formBody ? (
+                    <p
+                      className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed"
+                      style={{ color: "var(--olive-ink-soft)" }}
+                      {...fieldAttr(formBodyFieldKey)}
+                    >
+                      {formBody}
+                    </p>
+                  ) : null}
+                </OliveReveal>
 
                 <form
                   ref={formRef}
@@ -253,7 +256,7 @@ export function OliveContactMain({
         ) : null}
 
         {showInfo ? (
-          <div className="olive-card olive-card-paper flex flex-col gap-6 p-6 sm:p-8">
+          <OliveReveal className="olive-card olive-card-paper flex flex-col gap-6 p-6 sm:p-8">
             {showVisit ? (
               <div>
                 <p className="olive-label" {...fieldAttr(visitHeadingFieldKey)}>
@@ -282,7 +285,7 @@ export function OliveContactMain({
                 </p>
               </div>
             ) : null}
-          </div>
+          </OliveReveal>
         ) : null}
       </div>
     </section>

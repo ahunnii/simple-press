@@ -9,6 +9,7 @@ import {
   OliveAccordion,
   OliveAccordionItem,
   OlivePromoSection,
+  OliveReveal,
   OliveSection,
 } from "../shared";
 import { OliveContactMain } from "./olive-contact-main";
@@ -114,17 +115,19 @@ export function OliveContactPage({
         {...sectionGroupAttr("contact", "hero")}
         className="flex flex-col items-center gap-3 text-center"
       >
-        <h1 className="olive-h1" {...fieldAttr("olive.contact.hero-heading")}>
-          {f["olive.contact.hero-heading"] ?? "Say hello"}
-        </h1>
-        {f["olive.contact.hero-body"] ? (
-          <p
-            className="max-w-[52ch] text-[0.9375rem] leading-relaxed"
-            {...fieldAttr("olive.contact.hero-body")}
-          >
-            {f["olive.contact.hero-body"]}
-          </p>
-        ) : null}
+        <OliveReveal className="flex flex-col items-center gap-3">
+          <h1 className="olive-h1" {...fieldAttr("olive.contact.hero-heading")}>
+            {f["olive.contact.hero-heading"] ?? "Say hello"}
+          </h1>
+          {f["olive.contact.hero-body"] ? (
+            <p
+              className="max-w-[52ch] text-[0.9375rem] leading-relaxed"
+              {...fieldAttr("olive.contact.hero-body")}
+            >
+              {f["olive.contact.hero-body"]}
+            </p>
+          ) : null}
+        </OliveReveal>
       </OliveSection>
 
       <OliveContactMain
@@ -150,24 +153,26 @@ export function OliveContactPage({
           tone="paper"
           {...sectionGroupAttr("contact", "faq")}
         >
-          <h2
-            className="olive-h2 mb-6 text-center"
-            {...fieldAttr("olive.contact.faq-heading")}
-          >
-            {f["olive.contact.faq-heading"] ?? "Questions we hear a lot"}
-          </h2>
-          <OliveAccordion type="single" className="mx-auto max-w-[720px]">
-            {faq.map((row, i) => (
-              <OliveAccordionItem
-                key={row._id ?? i}
-                id={row._id ?? `faq-${i}`}
-                title={readString(row, "question")}
-                defaultOpen={i === 0}
-              >
-                {readString(row, "answer")}
-              </OliveAccordionItem>
-            ))}
-          </OliveAccordion>
+          <OliveReveal>
+            <h2
+              className="olive-h2 mb-6 text-center"
+              {...fieldAttr("olive.contact.faq-heading")}
+            >
+              {f["olive.contact.faq-heading"] ?? "Questions we hear a lot"}
+            </h2>
+            <OliveAccordion type="single" className="mx-auto max-w-[720px]">
+              {faq.map((row, i) => (
+                <OliveAccordionItem
+                  key={row._id ?? i}
+                  id={row._id ?? `faq-${i}`}
+                  title={readString(row, "question")}
+                  defaultOpen={i === 0}
+                >
+                  {readString(row, "answer")}
+                </OliveAccordionItem>
+              ))}
+            </OliveAccordion>
+          </OliveReveal>
         </OliveSection>
       )}
 

@@ -46,6 +46,14 @@ type OliveRevealGroupProps = OliveRevealProps & {
    * for card rows and grids; leave it off for stacked text blocks.
    */
   fan?: boolean;
+  /**
+   * Stamped onto the group's own element, unchanged, so a scoped CSS rule can
+   * retime the stagger when a caller deliberately remounts the group for a
+   * reason other than first arrival — see `OliveProductGrid`'s `dealKey`,
+   * which is the only thing that sets this. The reveal system itself never
+   * reads it.
+   */
+  "data-redeal"?: string | number;
 };
 
 /**
@@ -60,11 +68,13 @@ export function OliveRevealGroup({
   style,
   threshold = 0.1,
   fan = false,
+  "data-redeal": dataRedeal,
 }: OliveRevealGroupProps) {
   const { ref, visible } = useOliveReveal(threshold);
   return (
     <div
       ref={ref}
+      data-redeal={dataRedeal}
       className={cn(
         "olive-reveal-group",
         fan && "olive-fan",

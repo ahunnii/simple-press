@@ -1,6 +1,11 @@
 import Image from "next/image";
 
-import { OliveMarquee, OliveSection, OliveSectionHeading } from "../shared";
+import {
+  OliveMarquee,
+  OliveReveal,
+  OliveSection,
+  OliveSectionHeading,
+} from "../shared";
 
 export type OlivePressLogo = {
   id: string;
@@ -39,13 +44,15 @@ export function OlivePressSection({
       aria-labelledby="olive-press-heading"
       {...sectionAttrs}
     >
-      <OliveSectionHeading
-        heading={heading}
-        id="olive-press-heading"
-        align="center"
-        headingFieldKey={headingFieldKey}
-        className="mb-8"
-      />
+      <OliveReveal>
+        <OliveSectionHeading
+          heading={heading}
+          id="olive-press-heading"
+          align="center"
+          headingFieldKey={headingFieldKey}
+          className="mb-8"
+        />
+      </OliveReveal>
 
       <OliveMarquee aria-label="Press coverage">
         {shown.map((logo) => (

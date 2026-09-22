@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
+import { getMaintenancePreviewCheckoutBlock } from "~/lib/preview/maintenance-preview-context";
 import { api } from "~/trpc/server";
+import { MaintenanceCheckoutNotice } from "~/components/maintenance/maintenance-checkout-notice";
 
 import { getTemplate } from "../_templates/registry";
 
@@ -13,6 +15,11 @@ export default async function CheckoutPage() {
 
   if (!business.isStripeConnected && environment !== "development")
     return <t.CheckoutUnavailable />;
+
+  const previewBlock = await getMaintenancePreviewCheckoutBlock(business.id);
+  if (previewBlock) {
+    return <MaintenanceCheckoutNotice variant={previewBlock} />;
+  }
 
   // Merchant terms-of-service / refund-policy pages are optional — most
   // stores never publish them (the admin only creates the Page row once the
