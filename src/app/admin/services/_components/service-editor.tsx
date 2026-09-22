@@ -65,7 +65,6 @@ const SEO_TAB_FIELDS = new Set<string>([
   "slug",
   "metaTitle",
   "metaDescription",
-  "metaKeywords",
   "ogImage",
 ]);
 

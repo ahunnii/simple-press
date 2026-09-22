@@ -133,7 +133,6 @@ const SEO_TAB_FIELDS = new Set<string>([
   "slug",
   "metaTitle",
   "metaDescription",
-  "metaKeywords",
   "ogImage",
 ]);
 
@@ -1964,14 +1963,6 @@ export function ProductForm({
                           rows={3}
                         />
 
-                        <InputFormField
-                          form={form}
-                          name="metaKeywords"
-                          label="Meta Keywords"
-                          placeholder="e.g., t-shirt, cotton, classic, white"
-                          description="Comma-separated keywords"
-                          descriptionClassName="text-xs text-muted-foreground"
-                        />
                       </CardContent>
                     </Card>
 
@@ -1979,8 +1970,9 @@ export function ProductForm({
                       <CardHeader>
                         <CardTitle>Open Graph Image</CardTitle>
                         <CardDescription>
-                          Shown when this product is shared on social media.
-                          Recommended: 1200×630px.
+                          The product photo is used when this is shared. Upload
+                          a different crop only if you want a 1200×630 share
+                          card instead.
                         </CardDescription>
                       </CardHeader>
                       <CardContent>

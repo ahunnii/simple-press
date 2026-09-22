@@ -916,15 +916,6 @@ export function SEOEditor({
                           descriptionClassName="text-xs text-muted-foreground"
                         />
 
-                        <InputFormField
-                          form={form}
-                          name="metaKeywords"
-                          label="Keywords"
-                          placeholder="handmade pottery, stoneware mugs, ceramics"
-                          description="Comma-separated words people might search for. Google ignores these; some smaller search engines still read them, so they're optional."
-                          descriptionClassName="text-xs text-muted-foreground"
-                        />
-
                         <p className="text-muted-foreground border-t pt-4 text-sm">
                           Want a different title on one page only?{" "}
                           <Button

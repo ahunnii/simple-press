@@ -408,15 +408,6 @@ export function ServiceSeoFields({
               descriptionClassName="text-xs text-muted-foreground"
             />
 
-            <InputFormField
-              form={form}
-              name="metaKeywords"
-              label="Meta Keywords"
-              placeholder="e.g., facial, treatments, skincare, spa"
-              disabled={disabled}
-              description="Comma-separated keywords"
-              descriptionClassName="text-xs text-muted-foreground"
-            />
           </CardContent>
         </Card>
 
@@ -424,8 +415,8 @@ export function ServiceSeoFields({
           <CardHeader>
             <CardTitle>Open Graph Image</CardTitle>
             <CardDescription>
-              Shown when this service is shared on social media. Recommended:
-              1200×630px.
+              The service photo is used when this is shared. Upload a different
+              crop only if you want a 1200×630 share card instead.
             </CardDescription>
           </CardHeader>
           <CardContent>

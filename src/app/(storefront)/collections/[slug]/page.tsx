@@ -84,6 +84,9 @@ export async function generateMetadata({ params }: Props) {
         description: collection.metaDescription,
         ogImage: collection.ogImage,
       },
+      // Collection photo is the natural share image, ahead of the site-wide
+      // OG image / logo the helper falls back to.
+      ogImage: collection.imageUrl,
       ogImageAlt: collection.name,
     });
   } catch {
