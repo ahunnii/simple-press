@@ -119,6 +119,8 @@ type Props = {
   /** `subscriptions` feature flag, resolved server-side — gates whether the
    *  Subscriptions card renders at all (see `ProductSubscriptionCard`). */
   subscriptionsEnabled?: boolean;
+  /** `media` feature flag — gates "Choose from library" on gallery + OG. */
+  mediaEnabled?: boolean;
   allCollections?: RouterOutputs["collections"]["getAll"];
   pools?: RouterOutputs["baseInventoryUnit"]["list"];
 };
@@ -225,6 +227,7 @@ export function ProductForm({
   galleriesEnabled,
   collectionsEnabled,
   subscriptionsEnabled,
+  mediaEnabled,
   allCollections = [],
   pools = [],
 }: Props) {
@@ -935,6 +938,7 @@ export function ProductForm({
 
   const watchedName = form.watch("name") ?? "";
   const watchedSlug = form.watch("slug") ?? "";
+  const watchedOgImage = form.watch("ogImage");
   const nameDerivedSlug = slugify(watchedName);
   const slugFrozen = !slugAutoSyncs(form.watch("published"));
   const showBasicsRenameWarning =
@@ -1498,6 +1502,7 @@ export function ProductForm({
                       images={images}
                       onImagesChange={setImages}
                       maxImages={10}
+                      mediaLibraryEnabled={mediaEnabled}
                     />
 
                     {/* Base Inventory */}
@@ -1984,7 +1989,7 @@ export function ProductForm({
                           existingUrl={
                             ogImageRemoved
                               ? undefined
-                              : (product?.ogImage ?? undefined)
+                              : (watchedOgImage ?? undefined)
                           }
                           fileInputRef={ogImageFileInputRef}
                           onFileChange={(f) => {
@@ -1996,6 +2001,16 @@ export function ProductForm({
                             setOgImageRemoved(true);
                           }}
                           disabled={isSubmitting}
+                          mediaLibraryEnabled={mediaEnabled}
+                          onLibrarySelect={(url) => {
+                            form.setValue("ogImage", url, {
+                              shouldDirty: true,
+                            });
+                            setOgImageFile(null);
+                            setOgImageRemoved(false);
+                            if (ogImageFileInputRef.current)
+                              ogImageFileInputRef.current.value = "";
+                          }}
                         />
                       </CardContent>
                     </Card>
@@ -2035,7 +2050,7 @@ export function ProductForm({
                           existingOgImage={
                             ogImageRemoved
                               ? undefined
-                              : (product?.ogImage ?? undefined)
+                              : (watchedOgImage ?? undefined)
                           }
                           siteHost={siteHost}
                         />

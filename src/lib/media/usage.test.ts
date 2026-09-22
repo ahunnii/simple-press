@@ -258,3 +258,35 @@ describe("buildUsedMediaIndex — Product.additionalFields", () => {
     await expect(buildUsedMediaIndex(BUSINESS_ID)).resolves.toBeInstanceOf(Map);
   });
 });
+
+// ─── Product gallery Image rows ───────────────────────────────────────────────
+
+describe("buildUsedMediaIndex — Product gallery Image rows", () => {
+  it("counts a gallery row even when Image.businessId is unset (legacy syncImages)", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-gallery.jpg`);
+    asMock(db.image.findMany).mockResolvedValue([
+      { id: "img_1", url, productId: "prod_1" },
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(url)?.[0]).toMatchObject({
+      url,
+      location: "Product image",
+      entityType: "image",
+      entityId: "img_1",
+      adminHref: "/admin/products/prod_1",
+    });
+
+    expect(asMock(db.image.findMany).mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({
+        where: {
+          OR: [
+            { businessId: BUSINESS_ID },
+            { product: { businessId: BUSINESS_ID } },
+          ],
+        },
+      }),
+    );
+  });
+});

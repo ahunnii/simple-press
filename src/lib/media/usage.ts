@@ -671,9 +671,16 @@ export async function buildUsedMediaIndex(
     });
 
   // ── 6. Images (product image gallery rows) ─────────────────────────────────
+  // `syncImages` historically created Image rows without `businessId`, so a
+  // `where: { businessId }` scan missed gallery photos that were still on a
+  // product. Reuse makes that dangerous (Media Library delete would destroy
+  // a live object). Match either the denormalized column or the parent
+  // product so both old and new rows count as used.
   const imagesPromise = db.image
     .findMany({
-      where: { businessId },
+      where: {
+        OR: [{ businessId }, { product: { businessId } }],
+      },
       select: { id: true, url: true, productId: true },
     })
     .then((images) => {

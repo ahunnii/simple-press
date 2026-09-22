@@ -1094,6 +1094,7 @@ export const productRouter = createTRPCRouter({
             await ctx.db.image.create({
               data: {
                 productId: input.productId,
+                businessId: ctx.businessId,
                 url: image.url,
                 altText: image.altText,
                 sortOrder: image.sortOrder,
