@@ -3,6 +3,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { resolveFaqPickerItems } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -11,12 +12,10 @@ import { DefaultContactForm } from "./default-contact-form";
 function FaqItem({
   question,
   answer,
-  answerFieldKey,
   defaultOpen,
 }: {
   question: string;
   answer: string;
-  answerFieldKey: string;
   defaultOpen?: boolean;
 }) {
   return (
@@ -33,45 +32,29 @@ function FaqItem({
           +
         </span>
       </summary>
-      <p
-        className="pt-3.5 text-sm leading-[1.7] text-[#6b6b6b]"
-        {...fieldAttr(answerFieldKey)}
-      >
-        {answer}
-      </p>
+      <p className="pt-3.5 text-sm leading-[1.7] text-[#6b6b6b]">{answer}</p>
     </details>
   );
 }
 
 export function DefaultContactPage({
   business,
+  faqItems,
 }: DefaultContactPageTemplateProps) {
-  const customFields = business?.siteContent?.customFields;
+  const customFields = business?.siteContent?.customFields as
+    | Record<string, unknown>
+    | undefined;
   const f = resolveFields(customFields, [
     "default.contact.eyebrow",
     "default.contact.heading",
     "default.contact.description",
-    "default.contact.faq-1-q",
-    "default.contact.faq-1-a",
-    "default.contact.faq-2-q",
-    "default.contact.faq-2-a",
-    "default.contact.faq-3-q",
-    "default.contact.faq-3-a",
-    "default.contact.faq-4-q",
-    "default.contact.faq-4-a",
-    "default.contact.faq-5-q",
-    "default.contact.faq-5-a",
-    "default.contact.faq-6-q",
-    "default.contact.faq-6-a",
   ]);
 
-  const faqs = [1, 2, 3, 4, 5, 6]
-    .map((n) => ({
-      q: f[`default.contact.faq-${n}-q`] ?? "",
-      a: f[`default.contact.faq-${n}-a`] ?? "",
-      aField: `default.contact.faq-${n}-a`,
-    }))
-    .filter((item) => item.q && item.a);
+  const faqs = resolveFaqPickerItems(
+    customFields?.["default.contact.faq"],
+    faqItems,
+    6,
+  );
 
   const contactCards = [
     ...(business.supportEmail
@@ -206,10 +189,9 @@ export function DefaultContactPage({
               <div>
                 {faqs.map((item, i) => (
                   <FaqItem
-                    key={i}
-                    question={item.q}
-                    answer={item.a}
-                    answerFieldKey={item.aField}
+                    key={item.id}
+                    question={item.question}
+                    answer={item.answer}
                     defaultOpen={i === 0}
                   />
                 ))}

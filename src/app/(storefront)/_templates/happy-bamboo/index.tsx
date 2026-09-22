@@ -901,26 +901,13 @@ const contactFaqData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.contact-frequently-asked-questions",
-    label: "Frequently Asked Questions",
-    description: "Frequently asked questions for the contact page",
-    type: "list",
+    label: "Questions",
+    description:
+      "Pick questions from Content → FAQ. Leave empty to show the first 10 published questions.",
+    type: "faq",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-full",
-    itemSchema: [
-      {
-        key: "question",
-        label: "Question",
-        type: "text",
-        description: "Question",
-      },
-      {
-        key: "answer",
-        label: "Answer",
-        type: "textarea",
-        description: "Answer",
-      },
-    ],
     minItems: 0,
     maxItems: 10,
   },

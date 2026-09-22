@@ -43,7 +43,8 @@ export const SECTION_LINKS = {
   donations: {
     label: "Donations",
     href: "/admin/settings/donations",
-    description: "Configure donation amounts, labels, and payment methods, and show or hide the donate link in your header and footer.",
+    description:
+      "Configure donation amounts, labels, and payment methods, and show or hide the donate link in your header and footer.",
     featureKey: "donations",
   },
   testimonials: {
@@ -89,5 +90,11 @@ export const SECTION_LINKS = {
     label: "Banner & popup",
     href: "/admin/content/announcements",
     description: "Edit your announcement bar and homepage popup.",
+  },
+  faq: {
+    label: "FAQ",
+    href: "/admin/content/faq",
+    description:
+      "Add, edit, and reorder the questions shown on your FAQ page and in contact teasers.",
   },
 } as const satisfies Record<string, SectionLink>;

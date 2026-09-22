@@ -74,7 +74,6 @@ const SEO_TAB_FIELDS = new Set<string>([
   "slug",
   "metaTitle",
   "metaDescription",
-  "metaKeywords",
   "ogImage",
   "ogImageFile",
 ]);
@@ -786,14 +785,6 @@ export function PageEditor({
                           rows={3}
                         />
 
-                        <InputFormField
-                          form={form}
-                          name="metaKeywords"
-                          label="Meta Keywords"
-                          placeholder="e.g., about us, our story, team"
-                          description="Comma-separated keywords"
-                          descriptionClassName="text-xs text-muted-foreground"
-                        />
                       </CardContent>
                     </Card>
 
@@ -801,8 +792,9 @@ export function PageEditor({
                       <CardHeader>
                         <CardTitle>Open Graph Image</CardTitle>
                         <CardDescription>
-                          Shown when this page is shared on social media.
-                          Recommended: 1200×630px.
+                          The page image is used when this is shared. Upload a
+                          different crop only if you want a 1200×630 share card
+                          instead.
                         </CardDescription>
                       </CardHeader>
                       <CardContent>

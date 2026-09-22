@@ -82,7 +82,6 @@ const SEO_TAB_FIELDS = new Set<string>([
   "slug",
   "metaTitle",
   "metaDescription",
-  "metaKeywords",
   "ogImage",
   "ogImageFile",
 ]);
@@ -899,14 +898,6 @@ export function BlogPostEditor({
                           rows={3}
                         />
 
-                        <InputFormField
-                          form={form}
-                          name="metaKeywords"
-                          label="Meta Keywords"
-                          placeholder="e.g., studio news, behind the scenes"
-                          description="Comma-separated keywords"
-                          descriptionClassName="text-xs text-muted-foreground"
-                        />
                       </CardContent>
                     </Card>
 
@@ -914,8 +905,9 @@ export function BlogPostEditor({
                       <CardHeader>
                         <CardTitle>Open Graph Image</CardTitle>
                         <CardDescription>
-                          Shown when this post is shared on social media.
-                          Recommended: 1200×630px.
+                          The featured image is used when this is shared. Upload
+                          a different crop only if you want a 1200×630 share
+                          card instead.
                         </CardDescription>
                       </CardHeader>
                       <CardContent>

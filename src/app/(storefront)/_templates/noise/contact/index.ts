@@ -58,27 +58,15 @@ const contactFaqData: TemplateField[] = [
   },
   {
     key: "noise.contact-frequently-asked-questions",
-    label: "Frequently Asked Questions",
-    description: "List of Q&A pairs for the FAQ accordion",
-    type: "list",
+    label: "Questions",
+    description:
+      "Pick questions from Content → FAQ. Leave empty to show the first 10 published questions.",
+    type: "faq",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-full",
+    minItems: 0,
     maxItems: 10,
-    itemSchema: [
-      {
-        key: "question",
-        label: "Question",
-        type: "text",
-        placeholder: "e.g. Do you accept custom orders?",
-      },
-      {
-        key: "answer",
-        label: "Answer",
-        type: "textarea",
-        placeholder: "e.g. Yes! We love creating one-of-a-kind pieces.",
-      },
-    ],
   },
 ];
 
@@ -100,41 +88,5 @@ export const noiseContactFieldGroups: TemplateFieldGroup[] = [
     description: "Frequently asked questions accordion",
     icon: "❓",
     columns: 1,
-  },
-];
-
-export const DEFAULT_FAQ: {
-  question: string;
-  answer: string;
-  _id: string;
-}[] = [
-  {
-    _id: "d1",
-    question: "Can I commission a one-of-one piece?",
-    answer:
-      "Yes. Email us with reference images and a rough silhouette. We respond within two business days with a quote and timeline (usually 4–6 weeks from first fitting to handover).",
-  },
-  {
-    _id: "d2",
-    question: "Do you ship internationally?",
-    answer:
-      "Worldwide, via DHL Express. Duties are calculated at checkout — no surprise fees at the door. Most international orders arrive within 5 business days.",
-  },
-  {
-    _id: "d3",
-    question: "Can I visit the shop?",
-    answer: "Please do. Walk-ins welcome on Friday and Saturday afternoons.",
-  },
-  {
-    _id: "d4",
-    question: "What's the return policy?",
-    answer:
-      "14-day exchange on stock pieces. Return postage on us within the US. Commissioned work are final sale.",
-  },
-  {
-    _id: "d5",
-    question: "Where are the garments made?",
-    answer:
-      "Every piece is cut, sewn, and finished in our studio with care. Fabrics are sourced from quality mills to ensure lasting durability and feel.",
   },
 ];

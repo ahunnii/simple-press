@@ -105,24 +105,11 @@ const contactPageQuestionsData: TemplateField[] = [
   {
     key: "modern.contact.faq-list",
     label: "FAQ List",
-    description: "List of FAQ items",
-    type: "list",
+    description:
+      "Pick questions from Content → FAQ. Leave empty to show the first 6 published questions.",
+    type: "faq",
     page: "contact",
     group: "contact.questions",
-    itemSchema: [
-      {
-        key: "question",
-        label: "Question",
-        type: "text",
-        description: "Question",
-      },
-      {
-        key: "answer",
-        label: "Answer",
-        type: "textarea",
-        description: "Answer",
-      },
-    ],
     minItems: 0,
     maxItems: 6,
   },
@@ -163,28 +150,5 @@ export const modernContactFieldGroups: TemplateFieldGroup[] = [
     description: "Add some frequently asked questions for your business",
     icon: "💬",
     columns: 1,
-  },
-];
-
-export const DEFAULT_MODERN_CONTACT_FAQ = [
-  {
-    question: "What is your return policy?",
-    answer:
-      "We offer a 30-day return policy on all items in their original condition. Simply contact us to initiate a return and we'll provide a prepaid shipping label.",
-  },
-  {
-    question: "How long does shipping take?",
-    answer:
-      "Standard shipping takes 5-7 business days. We also offer expedited shipping (2-3 business days) at checkout for an additional fee.",
-  },
-  {
-    question: "Do you ship internationally?",
-    answer:
-      "Yes! We ship to over 40 countries. International shipping typically takes 10-15 business days. Duties and taxes may apply depending on your location.",
-  },
-  {
-    question: "Can I modify or cancel an order?",
-    answer:
-      "Orders can be modified or cancelled within 2 hours of placement. After that, please contact us and we'll do our best to accommodate your request.",
   },
 ];

@@ -123,6 +123,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["contact.faq"],
       order: 1,
       hideable: true,
+      links: [SECTION_LINKS.faq],
     },
 
     // ── Donate ────────────────────────────────────────────────────────────

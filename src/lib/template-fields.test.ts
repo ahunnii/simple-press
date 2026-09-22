@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { parseTemplateListRows } from "./template-fields";
+import {
+  parseFaqPickerIds,
+  parseTemplateListRows,
+  resolveFaqPickerItems,
+} from "./template-fields";
 
 /**
  * List rows live inside `customFields` (`z.any()` on the wire), so the row
@@ -85,5 +89,53 @@ describe("parseTemplateListRows — link scrubbing", () => {
   it("returns [] for a non-array", () => {
     expect(parseTemplateListRows(null)).toEqual([]);
     expect(parseTemplateListRows({ href: "/a" })).toEqual([]);
+  });
+});
+
+describe("parseFaqPickerIds", () => {
+  it("returns ordered ids for a string array", () => {
+    expect(parseFaqPickerIds(["b", " a ", ""])).toEqual(["b", "a"]);
+  });
+
+  it("treats empty / missing / leftover list rows as unset", () => {
+    expect(parseFaqPickerIds(undefined)).toBeNull();
+    expect(parseFaqPickerIds(null)).toBeNull();
+    expect(parseFaqPickerIds([])).toBeNull();
+    expect(parseFaqPickerIds([{ question: "Q", answer: "A" }])).toBeNull();
+    expect(parseFaqPickerIds("faq_1")).toBeNull();
+  });
+});
+
+describe("resolveFaqPickerItems", () => {
+  const published = [
+    { id: "a", question: "A" },
+    { id: "b", question: "B" },
+    { id: "c", question: "C" },
+  ];
+
+  it("falls back to the first N published items when unset", () => {
+    expect(resolveFaqPickerItems(undefined, published, 2)).toEqual([
+      published[0],
+      published[1],
+    ]);
+    expect(resolveFaqPickerItems([], published, 2)).toEqual([
+      published[0],
+      published[1],
+    ]);
+    expect(
+      resolveFaqPickerItems([{ question: "Q", answer: "A" }], published, 2),
+    ).toEqual([published[0], published[1]]);
+  });
+
+  it("honors picked order, skips missing ids, and caps at maxItems", () => {
+    expect(
+      resolveFaqPickerItems(["c", "missing", "a", "b"], published, 2),
+    ).toEqual([published[2], published[0]]);
+  });
+
+  it("returns [] when the picker resolved to nothing", () => {
+    expect(resolveFaqPickerItems(["gone"], published, 6)).toEqual([]);
+    expect(resolveFaqPickerItems(undefined, [], 6)).toEqual([]);
+    expect(resolveFaqPickerItems(["a"], published, 0)).toEqual([]);
   });
 });

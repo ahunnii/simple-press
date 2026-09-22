@@ -40,6 +40,10 @@ import {
   defaultTemplateFieldGroups,
 } from "~/app/(storefront)/_templates/default";
 import {
+  dreamData,
+  dreamFieldGroups,
+} from "~/app/(storefront)/_templates/dream";
+import {
   elegantData,
   elegantFieldGroups,
 } from "~/app/(storefront)/_templates/elegant";
@@ -72,16 +76,12 @@ import {
   sledgeData,
   sledgeFieldGroups,
 } from "~/app/(storefront)/_templates/sledge";
+import { umscData, umscFieldGroups } from "~/app/(storefront)/_templates/umsc";
 import { viiData, viiFieldGroups } from "~/app/(storefront)/_templates/vii";
 import {
   wealthData,
   wealthFieldGroups,
 } from "~/app/(storefront)/_templates/wealth";
-import {
-  dreamData,
-  dreamFieldGroups,
-} from "~/app/(storefront)/_templates/dream";
-import { umscData, umscFieldGroups } from "~/app/(storefront)/_templates/umsc";
 
 export type TemplatePage =
   | "homepage"
@@ -142,6 +142,11 @@ export type TemplateField =
   | (TemplateFieldCommon & {
       type: "list";
       itemSchema: TemplateListItemField[];
+      minItems?: number;
+      maxItems?: number;
+    })
+  | (TemplateFieldCommon & {
+      type: "faq";
       minItems?: number;
       maxItems?: number;
     });
@@ -395,6 +400,53 @@ export function parseTemplateFAQListRows(
   return out.length > 0 ? out : (defaultList ?? null);
 }
 
+/**
+ * Parse a `type: "faq"` field value into ordered FaqItem ids.
+ *
+ * Empty / missing / leftover `{question,answer}` list rows are unset (`null`)
+ * so the resolver can fall back to the first N published items.
+ */
+export function parseFaqPickerIds(raw: unknown): string[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+
+  const ids: string[] = [];
+  for (const item of raw) {
+    if (typeof item === "string") {
+      const id = item.trim();
+      if (id) ids.push(id);
+      continue;
+    }
+    return null;
+  }
+
+  return ids.length > 0 ? ids : null;
+}
+
+/**
+ * Resolve a contact (or other) FAQ teaser from a picker field + published
+ * corpus. `published` is assumed already filtered and ordered by sortOrder.
+ */
+export function resolveFaqPickerItems<T extends { id: string }>(
+  selected: unknown,
+  published: T[],
+  maxItems: number,
+): T[] {
+  const cap = Math.max(0, maxItems);
+  if (cap === 0 || published.length === 0) return [];
+
+  const ids = parseFaqPickerIds(selected);
+  if (ids == null) return published.slice(0, cap);
+
+  const byId = new Map(published.map((item) => [item.id, item]));
+  const out: T[] = [];
+  for (const id of ids) {
+    if (out.length >= cap) break;
+    const item = byId.get(id);
+    if (item) out.push(item);
+  }
+  return out;
+}
+
 export function parseTemplateImageListRows(
   raw: unknown,
   defaultList?: GenericImageRow[],
@@ -544,7 +596,8 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
 /**
  * Returns only the custom field values that belong to the given template.
  * Keys are those defined in TEMPLATE_FIELDS for that templateId; missing values default to "".
- * List fields (`type: "list"`) are omitted — use `getListFieldValue` / `parseTemplateListRows` instead.
+ * List fields (`type: "list"`) and FAQ pickers (`type: "faq"`) are omitted —
+ * use `getListFieldValue` / `parseTemplateListRows` / `resolveFaqPickerItems`.
  * Accepts Prisma JsonValue (e.g. from siteContent.customFields).
  */
 export function getThemeFields(
@@ -560,7 +613,7 @@ export function getThemeFields(
       : {};
   const result: Record<string, string> = {};
   for (const field of fields) {
-    if (field.type === "list") continue;
+    if (field.type === "list" || field.type === "faq") continue;
     const value = raw[field.key];
     result[field.key] = typeof value === "string" ? value : "";
   }

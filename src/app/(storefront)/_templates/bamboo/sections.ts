@@ -164,6 +164,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       groupIds: ["contact.faq"],
       order: 2,
       hideable: true,
+      links: [SECTION_LINKS.faq],
     },
 
     // Collections

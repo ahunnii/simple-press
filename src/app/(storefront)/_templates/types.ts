@@ -39,6 +39,7 @@ export type DefaultProductPageTemplateProps = {
 
 export type DefaultContactPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  faqItems: RouterOutputs["faq"]["list"];
 };
 
 export type DefaultAboutPageTemplateProps = {

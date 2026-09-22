@@ -127,6 +127,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       groupIds: ["contact.questions"],
       order: 3,
       hideable: true,
+      links: [SECTION_LINKS.faq],
     },
 
     // Collections (src/app/(storefront)/_templates/modern/collections/modern-collections-page.tsx)

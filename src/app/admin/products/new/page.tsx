@@ -27,6 +27,7 @@ export default async function NewProductPage() {
         galleriesEnabled={flags.isEnabled("galleries")}
         collectionsEnabled={flags.isEnabled("collections")}
         subscriptionsEnabled={flags.isEnabled("subscriptions")}
+        mediaEnabled={flags.isEnabled("media")}
         allCollections={allCollections}
         pools={pools}
       />

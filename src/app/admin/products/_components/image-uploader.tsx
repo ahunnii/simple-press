@@ -7,6 +7,7 @@ import {
   useId,
   useImperativeHandle,
   useRef,
+  useState,
 } from "react";
 import {
   closestCenter,
@@ -22,12 +23,19 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Upload } from "lucide-react";
+import { ChevronDown, Images, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import type { FormProductImage } from "../_validators/schema";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
 
 import { SortableImage } from "./sortable-image";
 
@@ -35,6 +43,12 @@ type Props = {
   images: FormProductImage[];
   onImagesChange: (images: FormProductImage[]) => void;
   maxImages?: number;
+  /**
+   * Adds a "Choose from library" option beside "Upload from device". Only
+   * pass `true` when the `media` feature flag is enabled — `media.list` is
+   * gated server-side and throws FORBIDDEN when the flag is off.
+   */
+  mediaLibraryEnabled?: boolean;
 };
 
 /**
@@ -49,11 +63,15 @@ export type ImageUploaderHandle = {
 };
 
 export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
-  function ImageUploader({ images, onImagesChange, maxImages = 10 }, ref) {
+  function ImageUploader(
+    { images, onImagesChange, maxImages = 10, mediaLibraryEnabled },
+    ref,
+  ) {
     // A real, stable-per-mount DOM id (not a hardcoded literal) so multiple
     // uploaders could render on one page without colliding.
     const inputId = useId();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [pickerOpen, setPickerOpen] = useState(false);
     // Track all blob: URLs we've created so we can revoke them on unmount.
     const pendingObjectUrlsRef = useRef<Set<string>>(new Set());
 
@@ -195,6 +213,62 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
     };
 
     const canUploadMore = images.length < maxImages;
+    const showLibraryPicker = Boolean(mediaLibraryEnabled);
+
+    const triggerFileInput = () => fileInputRef.current?.click();
+
+    const handleLibrarySelect = (url: string) => {
+      if (images.length >= maxImages) {
+        toast.error(`You can add at most ${maxImages} images`);
+        return;
+      }
+      if (images.some((img) => img.url === url)) {
+        toast.error("That image is already in the gallery");
+        return;
+      }
+      onImagesChange([
+        ...images,
+        { url, altText: null, sortOrder: images.length },
+      ]);
+    };
+
+    const addButton = (label: string) =>
+      showLibraryPicker ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              {label}
+              <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                queueMicrotask(triggerFileInput);
+              }}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload from device
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                queueMicrotask(() => setPickerOpen(true));
+              }}
+            >
+              <Images className="mr-2 h-4 w-4" />
+              Choose from library
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button type="button" variant="outline" onClick={triggerFileInput}>
+          <Upload className="mr-2 h-4 w-4" />
+          {label}
+        </Button>
+      );
 
     return (
       <Card className="p-6">
@@ -219,14 +293,7 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
                   className="hidden"
                   title="Upload images"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Add images
-                </Button>
+                {addButton("Add images")}
               </div>
             )}
           </div>
@@ -268,13 +335,7 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
                 Drag and drop images here, or click to select multiple (JPG,
                 PNG, WebP)
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Select images
-              </Button>
+              {addButton("Select images")}
             </div>
           )}
 
@@ -301,6 +362,14 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
             )}
           </p>
         </div>
+        {showLibraryPicker && (
+          <MediaPickerDialog
+            kind="image"
+            open={pickerOpen}
+            onOpenChange={setPickerOpen}
+            onSelect={handleLibrarySelect}
+          />
+        )}
       </Card>
     );
   },

@@ -276,9 +276,16 @@ export async function computeSeoScorecard({
         where: { businessId, published: true, metaDescription: NON_BLANK },
       }),
     ),
+    // Catalog photo fills `og:image` when the dedicated column is blank —
+    // same fallback `buildPageMetadata` uses on the storefront. Score the
+    // tag that actually ships, not the override column.
     countIf(productsEnabled, () =>
       db.product.count({
-        where: { businessId, published: true, ogImage: NON_BLANK },
+        where: {
+          businessId,
+          published: true,
+          OR: [{ ogImage: NON_BLANK }, { images: { some: {} } }],
+        },
       }),
     ),
     // 🔴 Product images carry `productId` and leave `businessId` null
@@ -313,7 +320,11 @@ export async function computeSeoScorecard({
     ),
     countIf(collectionsEnabled, () =>
       db.collection.count({
-        where: { businessId, published: true, ogImage: NON_BLANK },
+        where: {
+          businessId,
+          published: true,
+          OR: [{ ogImage: NON_BLANK }, { imageUrl: NON_BLANK }],
+        },
       }),
     ),
 
@@ -332,7 +343,11 @@ export async function computeSeoScorecard({
     ),
     countIf(servicesEnabled, () =>
       db.service.count({
-        where: { businessId, published: true, ogImage: NON_BLANK },
+        where: {
+          businessId,
+          published: true,
+          OR: [{ ogImage: NON_BLANK }, { image: NON_BLANK }],
+        },
       }),
     ),
 
@@ -367,7 +382,7 @@ export async function computeSeoScorecard({
           businessId,
           type: "page",
           published: true,
-          ogImage: NON_BLANK,
+          OR: [{ ogImage: NON_BLANK }, { image: NON_BLANK }],
         },
       }),
     ),
@@ -671,7 +686,7 @@ export async function computeSeoScorecard({
       {
         ...coverage(opts.withOgImage, opts.total, opts.noun),
         key: `${opts.keyPrefix}-og-image`,
-        label: `${opts.label} with a social share image`,
+        label: `${opts.label} with a shareable image`,
         href: opts.href,
       },
     );

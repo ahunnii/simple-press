@@ -83,5 +83,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: page.metaDescription,
       ogImage: page.ogImage,
     },
+    // Page image is the natural share image, ahead of the site-wide OG
+    // image / logo the helper falls back to.
+    ogImage: page.image,
   });
 }

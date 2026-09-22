@@ -6,6 +6,8 @@
  *    itself is blank, since the check is "did the owner write one".
  *  - `local-address` prefers the structured `addressCity`/`addressState`/
  *    `addressPostalCode` columns over the legacy free-text `businessAddress`.
+ *  - catalog `og-image` counts a catalog photo as a shareable image, matching
+ *    the storefront fallback, not only the dedicated `ogImage` column.
  *
  * `~/server/db` is mocked, so this runs in the `unit` project
  * (`pnpm test:nodb`) with no Postgres — same pattern as
@@ -93,6 +95,12 @@ function localAddressItem(scorecard: Scorecard) {
   return scorecard.groups
     .find((g) => g.id === "local")
     ?.items.find((i) => i.key === "local-address");
+}
+
+function productsOgImageItem(scorecard: Scorecard) {
+  return scorecard.groups
+    .find((g) => g.id === "catalog")
+    ?.items.find((i) => i.key === "products-og-image");
 }
 
 describe("computeSeoScorecard — meta-title (rendered length)", () => {
@@ -258,5 +266,42 @@ describe("computeSeoScorecard — local-address", () => {
     expect(item?.detail).toBe(
       "Emitted as a structured PostalAddress in your LocalBusiness schema",
     );
+  });
+});
+
+describe("computeSeoScorecard — catalog shareable image", () => {
+  it("scores a published product with catalog photos and a blank ogImage as covered", async () => {
+    asMock(db.product.count).mockImplementation(async (args) => {
+      const where = (
+        args as
+          | {
+              where?: {
+                OR?: unknown;
+                metaTitle?: unknown;
+                metaDescription?: unknown;
+              };
+            }
+          | undefined
+      )?.where;
+      if (where?.OR) return 1;
+      if (
+        where?.metaTitle !== undefined ||
+        where?.metaDescription !== undefined
+      ) {
+        return 0;
+      }
+      return 1;
+    });
+
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: (key) => key === "products",
+      business: BASE_BUSINESS,
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = productsOgImageItem(scorecard);
+    expect(item?.score).toBe(1);
+    expect(item?.detail).toBe("1 of 1 products");
+    expect(item?.label).toBe("Products with a shareable image");
   });
 });

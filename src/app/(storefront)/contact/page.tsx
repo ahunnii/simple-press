@@ -39,7 +39,7 @@ export default async function ContactPage() {
   return (
     <>
       <JsonLd data={schemas} />
-      <t.ContactPage business={business} />
+      <t.ContactPage business={business} faqItems={await api.faq.list()} />
     </>
   );
 }
