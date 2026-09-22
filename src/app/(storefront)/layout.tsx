@@ -3,9 +3,11 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
+import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
-import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
+import { MaintenancePreviewBar } from "~/components/maintenance/maintenance-preview-bar";
+import { MaintenanceTakeover } from "~/components/maintenance/maintenance-takeover";
 import { PreviewFieldPatcher } from "~/components/preview/preview-field-patcher";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
@@ -35,23 +37,15 @@ export default async function StorefrontLayout({ children }: Props) {
   }
 
   const t = getTemplate(business.templateId);
+  const gate = await resolveMaintenanceGate(business.id, business.maintenance);
 
-  if (business.maintenance?.active) {
-    const m = business.maintenance;
-    if (m.scope === "business" && t.MaintenancePage) {
-      return <t.MaintenancePage business={business} maintenance={m} />;
-    }
+  if (business.maintenance.active && gate.kind === "takeover") {
     return (
-      <MaintenanceScreen
-        variant={m.variant}
-        message={m.message}
-        cta={m.scope === "business" ? m.cta : null}
-        businessName={business.name}
-        overline={m.scope === "business" ? m.overline : null}
-        headline={m.scope === "business" ? m.headline : null}
-        image={m.scope === "business" ? m.image : null}
-        location={m.scope === "business" ? m.location : null}
-        launch={m.scope === "business" ? m.launch : null}
+      <MaintenanceTakeover
+        business={business}
+        maintenance={business.maintenance}
+        template={t}
+        showEnterBar={gate.showEnterBar}
       />
     );
   }
@@ -59,6 +53,9 @@ export default async function StorefrontLayout({ children }: Props) {
   return (
     <HydrateClient>
       <StorefrontFlagsProvider flags={business.featureFlags}>
+        {gate.showPreviewBar ? (
+          <MaintenancePreviewBar mode="leave" variant={gate.variant} />
+        ) : null}
         <t.Layout business={business}>
           <>{children}</>
         </t.Layout>
