@@ -16,6 +16,7 @@ import { BusinessMembersTable } from "../../_components/business-members-table";
 import { PlatformTrailHeader } from "../../_components/platform-trail-header";
 import { BusinessFeatureFlags } from "./_components/business-feature-flags";
 import { BusinessStatusControl } from "./_components/business-status-control";
+import { CopyBusinessContextButton } from "./_components/copy-business-context-button";
 
 type Props = {
   params: Promise<{ businessId: string }>;
@@ -43,17 +44,20 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
         <div className="space-y-6">
           <div className="admin-header">
             <h1 className="text-2xl font-bold">{business.name}</h1>
-            <Button variant="outline" size="sm" asChild>
-              <a
-                href={getMainDomainUrl(
-                  `/admin/media?businessId=${business.id}`,
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Media Library
-              </a>
-            </Button>
+            <div className="flex items-center gap-2">
+              <CopyBusinessContextButton businessId={business.id} />
+              <Button variant="outline" size="sm" asChild>
+                <a
+                  href={getMainDomainUrl(
+                    `/admin/media?businessId=${business.id}`,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Media Library
+                </a>
+              </Button>
+            </div>
           </div>
           <Card>
             <CardHeader>
