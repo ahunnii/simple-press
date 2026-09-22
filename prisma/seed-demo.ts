@@ -121,9 +121,10 @@ function buildDefaultCustomFields(): Record<string, string> {
       out[field.key] = img(field.key);
       continue;
     }
-    // Skip complex/media types (list, gallery, video) — they fall back safely.
+    // Skip complex/media types (list, faq, gallery, video) — they fall back safely.
     if (
       field.type === "list" ||
+      field.type === "faq" ||
       field.type === "gallery" ||
       field.type === "video"
     ) {

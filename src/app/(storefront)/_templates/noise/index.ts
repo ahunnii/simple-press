@@ -63,27 +63,15 @@ const contactFaqData: TemplateField[] = [
   },
   {
     key: "noise.contact-frequently-asked-questions",
-    label: "Frequently Asked Questions",
-    description: "List of Q&A pairs for the FAQ accordion",
-    type: "list",
+    label: "Questions",
+    description:
+      "Pick questions from Content → FAQ. Leave empty to show the first 10 published questions.",
+    type: "faq",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-full",
+    minItems: 0,
     maxItems: 10,
-    itemSchema: [
-      {
-        key: "question",
-        label: "Question",
-        type: "text",
-        placeholder: "e.g. Do you accept custom orders?",
-      },
-      {
-        key: "answer",
-        label: "Answer",
-        type: "textarea",
-        placeholder: "e.g. Yes! We love creating one-of-a-kind pieces.",
-      },
-    ],
   },
 ];
 

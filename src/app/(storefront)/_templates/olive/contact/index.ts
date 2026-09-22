@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
@@ -112,28 +113,15 @@ const contactFaqData: TemplateField[] = [
   },
   {
     key: "olive.contact.faq",
-    label: "Questions & Answers",
+    label: "Questions",
     description:
-      "Shown as an accordion below the contact form, up to 6. Leave empty to use the built-in defaults.",
-    type: "list",
+      "Pick questions from Content → FAQ. Leave empty to show the first 6 published questions.",
+    type: "faq",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-full",
+    minItems: 0,
     maxItems: 6,
-    itemSchema: [
-      {
-        key: "question",
-        label: "Question",
-        type: "text",
-        placeholder: "e.g. Do you ship outside Michigan?",
-      },
-      {
-        key: "answer",
-        label: "Answer",
-        type: "textarea",
-        placeholder: "Your answer",
-      },
-    ],
   },
 ];
 
@@ -322,6 +310,7 @@ export const oliveContactSections: TemplateSection[] = [
     groupIds: ["contact.faq"],
     order: 2,
     hideable: true,
+    links: [SECTION_LINKS.faq],
   },
   {
     id: "contact.promo",

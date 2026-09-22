@@ -6,7 +6,7 @@ import { Mail, MapPin, MessageSquare, Phone } from "lucide-react";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { getListFieldValue } from "~/lib/template-fields";
+import { resolveFaqPickerItems } from "~/lib/template-fields";
 import {
   Accordion,
   AccordionContent,
@@ -18,10 +18,10 @@ import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { HappyBambooContactForm } from "./happy-bamboo-contact-form";
-import { parseHappyBambooFrequentlyAskedList } from "./happy-bamboo-frequently-asked-data";
 
 export function HappyBambooContactPage({
   business,
+  faqItems,
 }: DefaultContactPageTemplateProps) {
   const f = resolveFields(business?.siteContent?.customFields, [
     "happy-bamboo.contact.header",
@@ -31,15 +31,17 @@ export function HappyBambooContactPage({
     "happy-bamboo.contact-faq-subtitle",
   ]);
 
+  const customFields = business?.siteContent?.customFields as
+    | Record<string, unknown>
+    | undefined;
+  const frequentlyAsked = resolveFaqPickerItems(
+    customFields?.["happy-bamboo.contact-frequently-asked-questions"],
+    faqItems,
+    10,
+  );
   const supportEmail = business?.supportEmail;
   const phone = business?.phoneNumber;
   const locationValue = business?.businessAddress;
-
-  const servicesListRaw = getListFieldValue(
-    business?.siteContent?.customFields,
-    "happy-bamboo.contact-frequently-asked-questions",
-  );
-  const frequentlyAsked = parseHappyBambooFrequentlyAskedList(servicesListRaw);
 
   const contactInfo = [
     ...(supportEmail
@@ -159,50 +161,47 @@ export function HappyBambooContactPage({
       </section>
 
       {/* FAQ Section */}
-      {isSectionVisible(
-        business?.siteContent?.customFields,
-        "happy-bamboo",
-        "contact.faq",
-      ) && (
-        <section
-          className="bg-muted/50 py-12 md:py-20"
-          {...sectionGroupAttr("contact", "faq")}
-        >
-          <div className="container mx-auto px-4">
-            <FadeIn className="mb-12 text-center">
-              <h2
-                className="mb-4 font-serif text-3xl font-bold md:text-4xl"
-                {...fieldAttr("happy-bamboo.contact-faq-title")}
-              >
-                {f["happy-bamboo.contact-faq-title"]}
-              </h2>
-              {f["happy-bamboo.contact-faq-subtitle"] && (
-                <p
-                  className="text-muted-foreground"
-                  {...fieldAttr("happy-bamboo.contact-faq-subtitle")}
+      {frequentlyAsked.length > 0 &&
+        isSectionVisible(customFields, "happy-bamboo", "contact.faq") && (
+          <section
+            className="bg-muted/50 py-12 md:py-20"
+            {...sectionGroupAttr("contact", "faq")}
+          >
+            <div className="container mx-auto px-4">
+              <FadeIn className="mb-12 text-center">
+                <h2
+                  className="mb-4 font-serif text-3xl font-bold md:text-4xl"
+                  {...fieldAttr("happy-bamboo.contact-faq-title")}
                 >
-                  {f["happy-bamboo.contact-faq-subtitle"]}
-                </p>
-              )}
-            </FadeIn>
+                  {f["happy-bamboo.contact-faq-title"]}
+                </h2>
+                {f["happy-bamboo.contact-faq-subtitle"] && (
+                  <p
+                    className="text-muted-foreground"
+                    {...fieldAttr("happy-bamboo.contact-faq-subtitle")}
+                  >
+                    {f["happy-bamboo.contact-faq-subtitle"]}
+                  </p>
+                )}
+              </FadeIn>
 
-            <FadeIn delay={0.1} className="mx-auto max-w-3xl">
-              <Accordion type="single" collapsible className="w-full">
-                {frequentlyAsked?.map((faq, index) => (
-                  <AccordionItem key={index} value={`item-${index}`}>
-                    <AccordionTrigger className="text-left">
-                      {faq.question}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
-                      {faq.answer}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </FadeIn>
-          </div>
-        </section>
-      )}
+              <FadeIn delay={0.1} className="mx-auto max-w-3xl">
+                <Accordion type="single" collapsible className="w-full">
+                  {frequentlyAsked.map((faq) => (
+                    <AccordionItem key={faq.id} value={faq.id}>
+                      <AccordionTrigger className="text-left">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </FadeIn>
+            </div>
+          </section>
+        )}
     </PageTransition>
   );
 }

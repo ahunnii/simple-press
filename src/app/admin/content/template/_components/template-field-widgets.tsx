@@ -48,6 +48,7 @@ import {
   TEMPLATE_LUCIDE_ICON_NAMES,
 } from "~/lib/lucide-template-icons";
 import {
+  parseFaqPickerIds,
   parseTemplateIframeValue,
   parseTemplateListRows,
 } from "~/lib/template-fields";
@@ -229,6 +230,8 @@ export function FieldInput({
           value={value}
           onChange={onChange}
         />
+      ) : field.type === "faq" ? (
+        <FaqFieldEditor field={field} value={value} onChange={onChange} />
       ) : field.type === "image" ? (
         <TemplateImageUploadField
           value={stringValue}
@@ -1025,6 +1028,162 @@ export function CollectionFieldSelect({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+const FAQ_NONE = "__none__";
+
+export function FaqFieldEditor({
+  field,
+  value,
+  onChange,
+}: {
+  field: Extract<TemplateField, { type: "faq" }>;
+  value: unknown;
+  onChange: (value: unknown) => void;
+}) {
+  const { data: items } = api.faq.adminList.useQuery();
+  const maxItems = field.maxItems ?? 10;
+  const minItems = field.minItems ?? 0;
+  const ids = parseFaqPickerIds(value) ?? [];
+  const published = (items ?? []).filter((item) => item.published);
+  const byId = new Map((items ?? []).map((item) => [item.id, item]));
+
+  const setIds = (next: string[]) => onChange(next);
+
+  const addRow = () => {
+    if (ids.length >= maxItems) return;
+    const used = new Set(ids);
+    const nextId = published.find((item) => !used.has(item.id))?.id ?? "";
+    setIds([...ids, nextId]);
+  };
+
+  const removeRow = (index: number) => {
+    if (ids.length <= minItems) return;
+    setIds(ids.filter((_, i) => i !== index));
+  };
+
+  const moveRow = (index: number, delta: -1 | 1) => {
+    const j = index + delta;
+    if (j < 0 || j >= ids.length) return;
+    const next = [...ids];
+    const a = next[index]!;
+    const b = next[j]!;
+    next[index] = b;
+    next[j] = a;
+    setIds(next);
+  };
+
+  const updateRow = (index: number, id: string) => {
+    const next = [...ids];
+    next[index] = id;
+    setIds(next);
+  };
+
+  return (
+    <div className="space-y-3">
+      {ids.length === 0 && (
+        <p className="text-muted-foreground text-sm">
+          Showing the first {maxItems} published questions.{" "}
+          <a
+            href="/admin/content/faq"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline underline-offset-2"
+          >
+            Pick specific ones, or add questions under Content → FAQ
+          </a>
+          .
+        </p>
+      )}
+      {ids.map((id, rowIndex) => {
+        const usedElsewhere = new Set(
+          ids.filter((_, i) => i !== rowIndex && i >= 0),
+        );
+        const current = byId.get(id);
+        const options = published.filter(
+          (item) => item.id === id || !usedElsewhere.has(item.id),
+        );
+        if (
+          current &&
+          !current.published &&
+          !options.some((o) => o.id === id)
+        ) {
+          options.unshift(current);
+        }
+        return (
+          <div
+            key={`${id || "empty"}-${rowIndex}`}
+            className="border-border bg-muted/50 flex items-center gap-2 rounded-lg border p-3"
+          >
+            <Select
+              value={id || FAQ_NONE}
+              onValueChange={(v) =>
+                updateRow(rowIndex, v === FAQ_NONE ? "" : v)
+              }
+            >
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select a question..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={FAQ_NONE}>Select a question...</SelectItem>
+                {options.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.question}
+                    {item.published ? "" : " (unpublished)"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex shrink-0 items-center gap-0.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                aria-label="Move up"
+                disabled={rowIndex === 0}
+                onClick={() => moveRow(rowIndex, -1)}
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                aria-label="Move down"
+                disabled={rowIndex >= ids.length - 1}
+                onClick={() => moveRow(rowIndex, 1)}
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700"
+                aria-label="Remove question"
+                disabled={ids.length <= minItems}
+                onClick={() => removeRow(rowIndex)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        );
+      })}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={addRow}
+        disabled={ids.length >= maxItems || published.length === 0}
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        Add question
+      </Button>
+    </div>
   );
 }
 

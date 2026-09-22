@@ -1,8 +1,7 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
-import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import { resolveFaqPickerItems } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
 import {
@@ -15,51 +14,9 @@ import {
 import { OliveContactMain } from "./olive-contact-main";
 import { OliveContactMap } from "./olive-contact-map";
 
-// Built-in example FAQ, used when the owner hasn't configured any rows.
-const DEFAULT_FAQ: TemplateListRow[] = [
-  {
-    _id: "default-faq-1",
-    question: "What's your return policy?",
-    answer:
-      "Unworn pieces with tags can come back for an exchange or store credit — message us and we'll sort it out.",
-  },
-  {
-    _id: "default-faq-2",
-    question: "Do you ship outside Michigan?",
-    answer:
-      "Yes — we ship anywhere in the US, and every order leaves from Detroit with a tracking link.",
-  },
-  {
-    _id: "default-faq-3",
-    question: "How do I know what size to order?",
-    answer:
-      "Message us your usual size and the piece you're eyeing — we'll tell you how it actually fits before you buy.",
-  },
-  {
-    _id: "default-faq-4",
-    question: "Can I return a sale item?",
-    answer:
-      "Sale items are final sale, but we're happy to help you pick the right size before you buy.",
-  },
-  {
-    _id: "default-faq-5",
-    question: "Do you offer gift cards?",
-    answer: "Not online yet — stop by the shop and we'll set one up for you.",
-  },
-  {
-    _id: "default-faq-6",
-    question: "Can you hold an item for me?",
-    answer: "Yes, for 24 hours. Send us a message with the item and your size.",
-  },
-];
-
-function readString(row: TemplateListRow, key: string): string {
-  const value = row[key];
-  return typeof value === "string" ? value : "";
-}
-
 export function OliveContactPage({
   business,
+  faqItems,
 }: DefaultContactPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, unknown>
@@ -86,8 +43,11 @@ export function OliveContactPage({
     "olive.contact.map-lng",
   ]);
 
-  const faqRows = parseTemplateListRows(customFields?.["olive.contact.faq"]);
-  const faq = faqRows.length > 0 ? faqRows : DEFAULT_FAQ;
+  const faq = resolveFaqPickerItems(
+    customFields?.["olive.contact.faq"],
+    faqItems,
+    6,
+  );
 
   // Guard against `Number("")` coercing to `0` (a "valid" coordinate) — a
   // blank field must hide the map, not point it at the Gulf of Guinea.
@@ -146,35 +106,36 @@ export function OliveContactPage({
         hoursBodyFieldKey="olive.contact.info-hours-body"
       />
 
-      {isSectionVisible(customFields, "olive", "contact.faq") && (
-        <OliveSection
-          as="section"
-          aria-label="Frequently asked questions"
-          tone="paper"
-          {...sectionGroupAttr("contact", "faq")}
-        >
-          <OliveReveal>
-            <h2
-              className="olive-h2 mb-6 text-center"
-              {...fieldAttr("olive.contact.faq-heading")}
-            >
-              {f["olive.contact.faq-heading"] ?? "Questions we hear a lot"}
-            </h2>
-            <OliveAccordion type="single" className="mx-auto max-w-[720px]">
-              {faq.map((row, i) => (
-                <OliveAccordionItem
-                  key={row._id ?? i}
-                  id={row._id ?? `faq-${i}`}
-                  title={readString(row, "question")}
-                  defaultOpen={i === 0}
-                >
-                  {readString(row, "answer")}
-                </OliveAccordionItem>
-              ))}
-            </OliveAccordion>
-          </OliveReveal>
-        </OliveSection>
-      )}
+      {faq.length > 0 &&
+        isSectionVisible(customFields, "olive", "contact.faq") && (
+          <OliveSection
+            as="section"
+            aria-label="Frequently asked questions"
+            tone="paper"
+            {...sectionGroupAttr("contact", "faq")}
+          >
+            <OliveReveal>
+              <h2
+                className="olive-h2 mb-6 text-center"
+                {...fieldAttr("olive.contact.faq-heading")}
+              >
+                {f["olive.contact.faq-heading"] ?? "Questions we hear a lot"}
+              </h2>
+              <OliveAccordion type="single" className="mx-auto max-w-[720px]">
+                {faq.map((row, i) => (
+                  <OliveAccordionItem
+                    key={row.id}
+                    id={row.id}
+                    title={row.question}
+                    defaultOpen={i === 0}
+                  >
+                    {row.answer}
+                  </OliveAccordionItem>
+                ))}
+              </OliveAccordion>
+            </OliveReveal>
+          </OliveSection>
+        )}
 
       {isSectionVisible(customFields, "olive", "contact.promo") ? (
         <OlivePromoSection

@@ -3,19 +3,19 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import {
-  getListFieldValue,
-  parseTemplateFAQListRows,
-} from "~/lib/template-fields";
+import { resolveFaqPickerItems } from "~/lib/template-fields";
 
-import { DEFAULT_MODERN_CONTACT_FAQ } from ".";
 import { resolveFields } from "..";
 import { ModernContactForm } from "./modern-contact-form";
 
 export function ModernContactPage({
   business,
+  faqItems,
 }: DefaultContactPageTemplateProps) {
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields as
+    | Record<string, unknown>
+    | undefined;
+  const f = resolveFields(customFields, [
     "modern.contact.page-tagline",
     "modern.contact.page-header",
     "modern.contact.page-description",
@@ -30,12 +30,10 @@ export function ModernContactPage({
     "modern.contact.faq-heading",
   ]);
 
-  const faqList = parseTemplateFAQListRows(
-    getListFieldValue(
-      business?.siteContent?.customFields,
-      "modern.contact.faq-list",
-    ),
-    DEFAULT_MODERN_CONTACT_FAQ,
+  const faqList = resolveFaqPickerItems(
+    customFields?.["modern.contact.faq-list"],
+    faqItems,
+    6,
   );
   // Fall back to business record for contact details not set by owner
   const displayEmail = business?.supportEmail;
@@ -179,45 +177,42 @@ export function ModernContactPage({
       </section>
 
       {/* FAQ teaser */}
-      {isSectionVisible(
-        business?.siteContent?.customFields,
-        "modern",
-        "contact.questions",
-      ) && (
-        <section
-          className="border-border bg-secondary border-t py-20"
-          {...sectionGroupAttr("contact", "questions")}
-        >
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="text-center">
-              <p
-                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
-                {...fieldAttr("modern.contact.faq-tagline")}
-              >
-                {f["modern.contact.faq-tagline"]}
-              </p>
-              <h2
-                className="text-foreground mt-2 font-serif text-3xl md:text-4xl"
-                {...fieldAttr("modern.contact.faq-heading")}
-              >
-                {f["modern.contact.faq-heading"]}
-              </h2>
+      {faqList.length > 0 &&
+        isSectionVisible(customFields, "modern", "contact.questions") && (
+          <section
+            className="border-border bg-secondary border-t py-20"
+            {...sectionGroupAttr("contact", "questions")}
+          >
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <div className="text-center">
+                <p
+                  className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                  {...fieldAttr("modern.contact.faq-tagline")}
+                >
+                  {f["modern.contact.faq-tagline"]}
+                </p>
+                <h2
+                  className="text-foreground mt-2 font-serif text-3xl md:text-4xl"
+                  {...fieldAttr("modern.contact.faq-heading")}
+                >
+                  {f["modern.contact.faq-heading"]}
+                </h2>
+              </div>
+              <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+                {faqList.map((faq) => (
+                  <div key={faq.id}>
+                    <h3 className="text-foreground text-sm font-semibold">
+                      {faq.question}
+                    </h3>
+                    <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
-              {faqList?.map((faq) => (
-                <div key={faq.question}>
-                  <h3 className="text-foreground text-sm font-semibold">
-                    {faq.question}
-                  </h3>
-                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
     </div>
   );
 }

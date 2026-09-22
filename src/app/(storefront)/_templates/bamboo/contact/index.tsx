@@ -99,27 +99,13 @@ const contactFaqData: TemplateField[] = [
     key: "bamboo.contact.faq",
     label: "Questions",
     description:
-      "Shown as an accordion below the contact form, up to 10. Leave empty to use the built-in defaults.",
-    type: "list",
+      "Pick questions from Content → FAQ. Leave empty to show the first 10 published questions.",
+    type: "faq",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-full",
     minItems: 0,
     maxItems: 10,
-    itemSchema: [
-      {
-        key: "question",
-        label: "Question",
-        type: "text",
-        placeholder: "e.g. Do you ship outside Michigan?",
-      },
-      {
-        key: "answer",
-        label: "Answer",
-        type: "textarea",
-        placeholder: "Your answer",
-      },
-    ],
   },
 ];
 
