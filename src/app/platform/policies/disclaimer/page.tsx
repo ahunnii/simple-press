@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { env } from "~/env";
+import {
+  formatPolicyDate,
+  POLICY_LAST_UPDATED,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Disclaimer | SimplePress",
@@ -16,6 +20,10 @@ export default function DisclaimerPage() {
   return (
     <div className="prose prose-lg mx-auto w-full max-w-7xl px-4 py-8">
       <h1>SimplePress Platform Disclaimer</h1>
+      <p>
+        <strong>Last Updated:</strong>{" "}
+        {formatPolicyDate(POLICY_LAST_UPDATED.disclaimer)}
+      </p>
       <p>
         SimplePress is a free, community-oriented platform operated by the
         Center for Generative Justice LLC. Please read this disclaimer carefully
@@ -108,10 +116,14 @@ export default function DisclaimerPage() {
 
       <h2>6. Governing Law</h2>
       <p>
-        This disclaimer is governed by the laws of the State of Michigan. By
-        using SimplePress, you agree that any disputes arising from this
-        disclaimer shall be subject to the exclusive jurisdiction of the courts
-        of Michigan.
+        This disclaimer is governed by the same terms as the{" "}
+        <Link href="/platform/policies/terms-of-service">
+          SimplePress Terms of Service
+        </Link>
+        , including the dispute-resolution provisions in those Terms (binding
+        arbitration in Washtenaw County, Michigan, except where those Terms
+        require otherwise). This disclaimer does not create a separate right to
+        litigate in court.
       </p>
 
       <hr />

@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { env } from "~/env";
+import {
+  formatPolicyDate,
+  POLICY_LAST_UPDATED,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Legal & Policies | SimplePress",
@@ -16,11 +20,17 @@ const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
   "csdt@generativejustice.org";
 
-const POLICIES = [
+const POLICIES: Array<{
+  title: string;
+  href: string;
+  updatedKey: keyof typeof POLICY_LAST_UPDATED;
+  description: string;
+  audience: string;
+}> = [
   {
     title: "Terms of Service",
     href: "/platform/policies/terms-of-service",
-    updated: "May 29, 2026",
+    updatedKey: "termsOfService",
     description:
       "The agreement governing your access to and use of the SimplePress platform, including merchant and customer obligations, intellectual property, and dispute resolution.",
     audience: "All users",
@@ -28,7 +38,7 @@ const POLICIES = [
   {
     title: "Privacy Policy",
     href: "/platform/policies/privacy-policy",
-    updated: "May 29, 2026",
+    updatedKey: "privacyPolicy",
     description:
       "How we collect, use, store, and share your personal information across the platform, merchant storefronts, and related services.",
     audience: "All users",
@@ -36,7 +46,7 @@ const POLICIES = [
   {
     title: "Acceptable Use Policy",
     href: "/platform/policies/acceptable-use",
-    updated: "May 29, 2026",
+    updatedKey: "acceptableUse",
     description:
       "Prohibited products, content, and conduct on the platform. Covers merchants, customers, and visitors, along with enforcement and escalation procedures.",
     audience: "All users",
@@ -44,7 +54,7 @@ const POLICIES = [
   {
     title: "Seller & Merchant Agreement",
     href: "/platform/policies/seller-merchant",
-    updated: "May 29, 2026",
+    updatedKey: "sellerMerchant",
     description:
       "Terms specific to businesses operating storefronts on SimplePress — covering account responsibilities, fees, Stripe Connect, inventory, fulfillment, and chargebacks.",
     audience: "Merchants",
@@ -52,7 +62,7 @@ const POLICIES = [
   {
     title: "Cookie Policy",
     href: "/platform/policies/cookie",
-    updated: "May 29, 2026",
+    updatedKey: "cookie",
     description:
       "What cookies and similar tracking technologies we use, why we use them, and how you can control or opt out.",
     audience: "All users",
@@ -60,7 +70,7 @@ const POLICIES = [
   {
     title: "DMCA Policy",
     href: "/platform/policies/dmca",
-    updated: "May 29, 2026",
+    updatedKey: "dmca",
     description:
       "How to submit a copyright takedown notice or counter-notice under the Digital Millennium Copyright Act, and how we handle intellectual property disputes.",
     audience: "All users",
@@ -68,7 +78,7 @@ const POLICIES = [
   {
     title: "INFORM Consumers Act Notice",
     href: "/platform/policies/inform-act",
-    updated: "May 29, 2026",
+    updatedKey: "informAct",
     description:
       "How SimplePress complies with the federal INFORM Consumers Act, which requires platforms to collect and verify high-volume seller identity information.",
     audience: "Merchants",
@@ -76,7 +86,7 @@ const POLICIES = [
   {
     title: "Platform Disclaimer",
     href: "/platform/policies/disclaimer",
-    updated: "May 29, 2026",
+    updatedKey: "disclaimer",
     description:
       'SimplePress is provided "as is." This disclaimer covers warranty exclusions, liability limitations, and merchant responsibility for their own storefronts and transactions.',
     audience: "All users",
@@ -84,7 +94,7 @@ const POLICIES = [
   {
     title: "Accessibility Statement",
     href: "/platform/policies/accessibility",
-    updated: "May 27, 2026",
+    updatedKey: "accessibility",
     description:
       "Our commitment to WCAG 2.1 AA accessibility, known limitations in the current release, and how to report accessibility issues or request accommodations.",
     audience: "All users",
@@ -132,7 +142,7 @@ export default function PoliciesIndexPage() {
               {policy.description}
             </p>
             <p className="mt-auto text-xs text-gray-400">
-              Updated {policy.updated}
+              Updated {formatPolicyDate(POLICY_LAST_UPDATED[policy.updatedKey])}
             </p>
           </Link>
         ))}
