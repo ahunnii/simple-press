@@ -32,11 +32,13 @@ const Toolbar = ({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
 }: {
   editor: Editor;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  formsEnabled?: boolean;
 }) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
     <div className="flex w-max items-center gap-px">
@@ -80,12 +82,14 @@ const Toolbar = ({
           "gallery",
           "embed",
           "quoteCalculator",
+          "form",
           "table",
         ]}
         mainActionCount={0}
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
         quotesEnabled={quotesEnabled}
+        formsEnabled={formsEnabled}
       />
     </div>
   </div>
@@ -99,6 +103,7 @@ export const MinimalTiptapEditor = ({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
   ...props
 }: MinimalTiptapProps) => {
   const editor = useMinimalTiptapEditor({
@@ -107,6 +112,7 @@ export const MinimalTiptapEditor = ({
     galleriesEnabled,
     embedsEnabled,
     quotesEnabled,
+    formsEnabled,
     ...props,
   });
 
@@ -123,6 +129,7 @@ export const MinimalTiptapEditor = ({
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
         quotesEnabled={quotesEnabled}
+        formsEnabled={formsEnabled}
       />
     </EditorContext.Provider>
   );
@@ -139,6 +146,7 @@ export const MainMinimalTiptapEditor = ({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
 }: MinimalTiptapProps & { editor: Editor }) => {
   // Use provided editor directly. Do not subscribe to full editor state here,
   // or every transaction (e.g. from gallery) re-renders the whole toolbar and
@@ -163,6 +171,7 @@ export const MainMinimalTiptapEditor = ({
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
         quotesEnabled={quotesEnabled}
+        formsEnabled={formsEnabled}
       />
       <EditorContent
         editor={providedEditor}

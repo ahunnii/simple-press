@@ -15,6 +15,7 @@ import {
   Color,
   Embed,
   FileHandler,
+  Form,
   Gallery,
   HorizontalRule,
   Image,
@@ -53,6 +54,7 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  formsEnabled?: boolean;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -119,6 +121,7 @@ const createExtensions = ({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
@@ -128,6 +131,7 @@ const createExtensions = ({
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  formsEnabled?: boolean;
 }) => [
   StarterKit.configure({
     blockquote: { HTMLAttributes: { class: "block-node" } },
@@ -324,6 +328,7 @@ const createExtensions = ({
     businessId,
     quotesEnabled: quotesEnabled !== false,
   }),
+  Form.configure({ formsEnabled: formsEnabled !== false }),
   TableKit.configure({}),
 ];
 
@@ -342,6 +347,7 @@ export const useMinimalTiptapEditor = ({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
   ...props
 }: UseMinimalTiptapEditorProps) => {
   // const lastExternalValueRef = React.useRef<Content | undefined>(value);
@@ -390,6 +396,7 @@ export const useMinimalTiptapEditor = ({
         galleriesEnabled,
         embedsEnabled,
         quotesEnabled,
+        formsEnabled,
       }) as unknown as Extension[],
     [
       placeholder,
@@ -400,6 +407,7 @@ export const useMinimalTiptapEditor = ({
       galleriesEnabled,
       embedsEnabled,
       quotesEnabled,
+      formsEnabled,
     ],
   );
 

@@ -387,4 +387,34 @@ describe("tiptapToHtml", () => {
     expect(result.warnings.length).toBe(1);
     expect(result.warnings[0]).toContain("quote calculator");
   });
+
+  it("skips a form node with a warning and renders surrounding paragraphs", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Before form" }],
+        },
+        {
+          type: "form",
+          attrs: { formId: "form-1" },
+        },
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "After form" }],
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain("Before form");
+    expect(result.html).toContain("After form");
+    expect(result.html).toContain(
+      "<em>[Form: interactive widget not exported]</em>",
+    );
+    expect(result.warnings.length).toBe(1);
+    expect(result.warnings[0]).toContain("form");
+  });
 });

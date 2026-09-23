@@ -286,6 +286,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  forms: {
+    key: "forms",
+    label: "Forms",
+    description:
+      "Build custom forms (applications, intake, sign-ups) and embed them in pages",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
   quickbooks: {
     key: "quickbooks",
     label: "QuickBooks Invoicing",

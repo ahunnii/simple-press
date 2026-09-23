@@ -16,10 +16,12 @@ import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
 import { api } from "~/trpc/react";
 import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
+import { Form } from "~/components/ui/minimal-tiptap/extensions/form";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
 import { QuoteCalculator } from "~/components/ui/minimal-tiptap/extensions/quote-calculator";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
+import { FormBlock } from "~/components/forms/form-block";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 import { QuoteCalculatorBlock } from "~/components/quote/quote-calculator-block";
 import { RichTextVideo } from "~/components/rich-text-video";
@@ -45,6 +47,7 @@ const extensions = [
   Gallery,
   Embed,
   QuoteCalculator,
+  Form,
 ];
 
 /**
@@ -201,6 +204,12 @@ function isQuoteCalculatorNode(node: ContentNode): node is ContentNode & {
   );
 }
 
+function isFormNode(
+  node: ContentNode,
+): node is ContentNode & { attrs: { formId?: string | null } } {
+  return node.type === "form" && node.attrs != null && "formId" in node.attrs;
+}
+
 function isEmbedNode(node: ContentNode): node is ContentNode & {
   attrs: {
     src?: string;
@@ -254,6 +263,14 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
             height={coerceQuoteHeight(node.attrs.height)}
             density={coerceQuoteDensity(node.attrs.density)}
             layout={coerceQuoteLayout(node.attrs.layout)}
+          />
+        );
+      }
+      if (isFormNode(node) && node.attrs.formId) {
+        return (
+          <FormBlock
+            key={`form-${node.attrs.formId}-${index}`}
+            formId={String(node.attrs.formId)}
           />
         );
       }

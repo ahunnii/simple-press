@@ -1,4 +1,4 @@
-import { getSchema } from "@tiptap/core";
+import { getSchema, Node } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
 import { RENDERER_BASE_EXTENSIONS } from "./renderer-extensions";
@@ -423,6 +423,28 @@ describe("sanitizeTiptapDoc — unknown nodes", () => {
     // like `image` does here.
     const node = { type: "image", attrs: { src: "/a.png" } };
     expect(sanitizeTiptapDoc(doc(node), schema)).toEqual(doc(node));
+  });
+
+  it("survives a `form` node with a formId when the schema declares it", () => {
+    // The real `Form` extension's node view pulls in React/tRPC and can't be
+    // imported from this node test (same reason Gallery/Embed/QuoteCalculator
+    // are excluded from `schema` above) — a minimal stand-in Node with the
+    // same name/attrs shape is enough to exercise the mechanism the real
+    // renderer relies on: `TiptapRenderer` appends the real `Form` extension
+    // to its schema, so `sanitizeTiptapDoc` allowlists `form`/`formId` there.
+    const formSchema = getSchema([
+      ...RENDERER_BASE_EXTENSIONS,
+      Node.create({
+        name: "form",
+        group: "block",
+        atom: true,
+        addAttributes() {
+          return { formId: { default: null } };
+        },
+      }),
+    ]);
+    const node = { type: "form", attrs: { formId: "form-1" } };
+    expect(sanitizeTiptapDoc(doc(node), formSchema)).toEqual(doc(node));
   });
 
   it("drops malformed entries", () => {

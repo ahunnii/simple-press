@@ -144,6 +144,13 @@ export const quoteLivePreviewLimiter = makeLazy({
   keyPrefix: "rl:quote-preview",
 });
 
+// 5 form submissions per 15 minutes per IP, keyed ip:host
+export const formSubmitLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:form-submit",
+});
+
 // 10 checkout session attempts per minute per IP
 export const checkoutLimiter = makeLazy({
   points: 10,

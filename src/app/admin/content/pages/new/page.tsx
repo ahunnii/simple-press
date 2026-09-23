@@ -18,6 +18,7 @@ export default async function NewPagePage() {
         galleriesEnabled={flags.isEnabled("galleries")}
         embedsEnabled={flags.isEnabled("embeds")}
         quotesEnabled={flags.isEnabled("quoteCalculator")}
+        formsEnabled={flags.isEnabled("forms")}
         mediaEnabled={flags.isEnabled("media")}
       />
     </>

@@ -901,6 +901,31 @@ exports.Prisma.QuoteSubmissionScalarFieldEnum = {
   businessId: 'businessId'
 };
 
+exports.Prisma.FormScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  name: 'name',
+  definition: 'definition',
+  published: 'published',
+  businessId: 'businessId'
+};
+
+exports.Prisma.FormSubmissionScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  submittedAt: 'submittedAt',
+  status: 'status',
+  source: 'source',
+  answers: 'answers',
+  submitterEmail: 'submitterEmail',
+  tags: 'tags',
+  formName: 'formName',
+  formId: 'formId',
+  businessId: 'businessId'
+};
+
 exports.Prisma.QuickBooksConnectionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1162,6 +1187,8 @@ exports.Prisma.ModelName = {
   BackInStockRequest: 'BackInStockRequest',
   QuoteCalculator: 'QuoteCalculator',
   QuoteSubmission: 'QuoteSubmission',
+  Form: 'Form',
+  FormSubmission: 'FormSubmission',
   QuickBooksConnection: 'QuickBooksConnection',
   QuickBooksInvoice: 'QuickBooksInvoice',
   Subscription: 'Subscription',

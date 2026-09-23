@@ -132,6 +132,7 @@ type PageEditorProps = {
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaEnabled?: boolean;
 };
 
@@ -140,6 +141,7 @@ export function PageEditor({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
   mediaEnabled,
 }: PageEditorProps) {
   const router = useRouter();
@@ -681,6 +683,7 @@ export function PageEditor({
                       galleriesEnabled={galleriesEnabled}
                       embedsEnabled={embedsEnabled}
                       quotesEnabled={quotesEnabled}
+                      formsEnabled={formsEnabled}
                       videosEnabled={true}
                       mediaEnabled={mediaEnabled}
                       required

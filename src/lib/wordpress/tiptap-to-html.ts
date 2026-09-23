@@ -149,6 +149,12 @@ function isQuoteCalculatorNode(node: ContentNode): node is ContentNode & {
   return node.type === "quoteCalculator" && node.attrs != null;
 }
 
+function isFormNode(
+  node: ContentNode,
+): node is ContentNode & { attrs: { formId?: string } } {
+  return node.type === "form" && node.attrs != null;
+}
+
 /** Render a resolved gallery to a `wp-block-gallery` figure. */
 function renderGallery(gallery: GalleryForHtml): string {
   const inner = gallery.images
@@ -274,6 +280,14 @@ export function tiptapToHtml(
       fragments.push(
         "<p><em>[Quote calculator: interactive widget not exported]</em></p>",
       );
+      continue;
+    }
+
+    if (isFormNode(node)) {
+      warnings.push(
+        "Skipped form node (interactive widget has no WordPress equivalent)",
+      );
+      fragments.push("<p><em>[Form: interactive widget not exported]</em></p>");
       continue;
     }
 

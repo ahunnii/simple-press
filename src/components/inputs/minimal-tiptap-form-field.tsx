@@ -86,6 +86,7 @@ type Props<CurrentForm extends FieldValues> = {
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   /**
    * Enables video clips (toolbar button + drag/drop/paste), uploaded via
    * `uploadRichTextVideo`. Off by default.
@@ -120,6 +121,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
   videosEnabled,
   mediaEnabled,
   required,
@@ -160,6 +162,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 galleriesEnabled={galleriesEnabled}
                 embedsEnabled={embedsEnabled}
                 quotesEnabled={quotesEnabled}
+                formsEnabled={formsEnabled}
                 uploader={resolvedUploader}
                 videoUploader={videosEnabled ? uploadRichTextVideo : undefined}
                 mediaEnabled={mediaEnabled}

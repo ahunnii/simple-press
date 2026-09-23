@@ -8,12 +8,13 @@ import {
   PlusIcon,
   QuoteIcon,
 } from "@radix-ui/react-icons";
-import { Calculator, Frame, Images, Table } from "lucide-react";
+import { Calculator, Frame, FormInput, Images, Table } from "lucide-react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
 
 import { EmbedInsertDialog } from "../embed/embed-insert-dialog";
+import { FormInsertDialog } from "../form/form-insert-dialog";
 import { GalleryInsertDialog } from "../gallery/gallery-insert-dialog";
 import { ImageEditDialog } from "../image/image-edit-dialog";
 import { LinkEditPopover } from "../link/link-edit-popover";
@@ -28,6 +29,7 @@ type InsertElementAction =
   | "gallery"
   | "embed"
   | "quoteCalculator"
+  | "form"
   | "table";
 interface InsertElement extends FormatAction {
   value: InsertElementAction;
@@ -93,6 +95,15 @@ const formatActions: InsertElement[] = [
     shortcuts: ["mod", "alt", "Q"],
   },
   {
+    value: "form",
+    label: "Form",
+    icon: <FormInput className="size-5" />,
+    action: (editor) => editor.chain().focus().insertForm().run(),
+    isActive: () => false,
+    canExecute: (editor) => editor.can().chain().focus().insertForm().run(),
+    shortcuts: ["mod", "alt", "F"],
+  },
+  {
     value: "table",
     label: "Table",
     icon: <Table className="size-5" />,
@@ -115,6 +126,7 @@ interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  formsEnabled?: boolean;
 }
 
 export const SectionFive: React.FC<SectionFiveProps> = ({
@@ -126,11 +138,13 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
   galleriesEnabled = true,
   embedsEnabled = true,
   quotesEnabled = true,
+  formsEnabled = true,
 }) => {
   const filteredActions = activeActions
     .filter((a) => galleriesEnabled || a !== "gallery")
     .filter((a) => embedsEnabled || a !== "embed")
-    .filter((a) => quotesEnabled || a !== "quoteCalculator");
+    .filter((a) => quotesEnabled || a !== "quoteCalculator")
+    .filter((a) => formsEnabled || a !== "form");
   // The video extension is only registered when the editor was given a
   // `videoUploader`, so its presence doubles as the "videos enabled" flag.
   const videosEnabled = editor.extensionManager.extensions.some(
@@ -160,6 +174,13 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
       )}
       {quotesEnabled && (
         <QuoteCalculatorInsertDialog
+          editor={editor}
+          size={size ?? "default"}
+          variant={variant ?? "default"}
+        />
+      )}
+      {formsEnabled && (
+        <FormInsertDialog
           editor={editor}
           size={size ?? "default"}
           variant={variant ?? "default"}

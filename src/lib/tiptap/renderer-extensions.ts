@@ -19,7 +19,9 @@ import { VideoNode } from "./video-node";
  * renderer, so the schema it derives is still the complete one.
  *
  * This module must stay free of React, tRPC and `server-only` — it is the
- * input to `getSchema()` on both the server and the client.
+ * input to `getSchema()` on both the server and the client. `Form` (like
+ * Gallery/Embed/QuoteCalculator) is also appended back on in the renderer
+ * rather than declared here, for the same reason.
  */
 export const RENDERER_BASE_EXTENSIONS = [
   // StarterKit now bundles its own `link` and `underline`, so registering the
