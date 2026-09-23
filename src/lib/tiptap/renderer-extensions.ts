@@ -6,6 +6,8 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 
+import { VideoNode } from "./video-node";
+
 /**
  * The node/mark-defining half of `TiptapRenderer`'s extension list.
  *
@@ -34,6 +36,7 @@ export const RENDERER_BASE_EXTENSIONS = [
     protocols: ["http", "https", "mailto", "tel"],
   }),
   Image,
+  VideoNode,
   Underline,
   TextStyle,
   TextAlign.configure({

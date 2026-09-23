@@ -19,6 +19,7 @@ import { ImageEditDialog } from "../image/image-edit-dialog";
 import { LinkEditPopover } from "../link/link-edit-popover";
 import { QuoteCalculatorInsertDialog } from "../quote-calculator/quote-calculator-insert-dialog";
 import { ToolbarSection } from "../toolbar-section";
+import { VideoInsertDialog } from "../video/video-insert-dialog";
 
 type InsertElementAction =
   | "codeBlock"
@@ -130,11 +131,19 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
     .filter((a) => galleriesEnabled || a !== "gallery")
     .filter((a) => embedsEnabled || a !== "embed")
     .filter((a) => quotesEnabled || a !== "quoteCalculator");
+  // The video extension is only registered when the editor was given a
+  // `videoUploader`, so its presence doubles as the "videos enabled" flag.
+  const videosEnabled = editor.extensionManager.extensions.some(
+    (ext) => ext.name === "video",
+  );
 
   return (
     <>
       <LinkEditPopover editor={editor} size={size} variant={variant} />
       <ImageEditDialog editor={editor} size={size} variant={variant} />
+      {videosEnabled && (
+        <VideoInsertDialog editor={editor} size={size} variant={variant} />
+      )}
       {galleriesEnabled && (
         <GalleryInsertDialog
           editor={editor}

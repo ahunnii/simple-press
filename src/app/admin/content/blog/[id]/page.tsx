@@ -34,6 +34,7 @@ export default async function EditPagePage({ params }: Props) {
         galleriesEnabled={flags.isEnabled("galleries")}
         embedsEnabled={flags.isEnabled("embeds")}
         quotesEnabled={flags.isEnabled("quoteCalculator")}
+        mediaEnabled={flags.isEnabled("media")}
       />
     </>
   );

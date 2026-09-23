@@ -51,6 +51,9 @@ const DATA_IMAGE_SRC_RE =
 /** Schemes an `<img src>` may carry. Relative (scheme-less) is also allowed. */
 const IMAGE_SCHEMES = new Set(["http", "https"]);
 
+/** Schemes a `<video src>` may carry. Relative (scheme-less) is also allowed. */
+const VIDEO_SCHEMES = new Set(["http", "https"]);
+
 const SCHEME_RE = /^([a-z][a-z0-9+.-]*):/i;
 
 /** `target` values a link mark may keep. Anything else is dropped (the attr, not the mark). */
@@ -117,6 +120,24 @@ export function isSafeImageSrc(value: unknown): boolean {
 
   const scheme = SCHEME_RE.exec(safe)?.[1];
   return scheme === undefined || IMAGE_SCHEMES.has(scheme.toLowerCase());
+}
+
+/**
+ * Validates a `video` node's `src`: relative or `http(s)` only. Unlike
+ * images, there is no inline base64 case — uploads always go through
+ * `/api/upload` and come back as a storage URL, never a data URI — so
+ * `data:`, `blob:`, `javascript:` and `file:` all drop the whole node.
+ */
+export function isSafeVideoSrc(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (trimmed === "") return false;
+
+  const safe = safeHref(trimmed);
+  if (safe === null) return false;
+
+  const scheme = SCHEME_RE.exec(safe)?.[1];
+  return scheme === undefined || VIDEO_SCHEMES.has(scheme.toLowerCase());
 }
 
 /** Sanitizes a node's `marks` array. Unknown marks are dropped; the text they wrapped is kept. */
@@ -229,6 +250,7 @@ function sanitizeNode(
   }
 
   if (type === "image" && !isSafeImageSrc(readAttr(raw, "src"))) return [];
+  if (type === "video" && !isSafeVideoSrc(readAttr(raw, "src"))) return [];
 
   const node: JSONContent = { type };
   attachAttrsAndMarks(node, raw, nodeType, schema);

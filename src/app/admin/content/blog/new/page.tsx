@@ -18,6 +18,7 @@ export default async function NewBlogPostPage() {
         galleriesEnabled={flags.isEnabled("galleries")}
         embedsEnabled={flags.isEnabled("embeds")}
         quotesEnabled={flags.isEnabled("quoteCalculator")}
+        mediaEnabled={flags.isEnabled("media")}
       />
     </>
   );

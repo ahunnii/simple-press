@@ -23,6 +23,7 @@ const FileHandlePlugin = (options: FileHandlePluginOptions) => {
     onValidationError,
     allowedMimeTypes,
     maxFileSize,
+    maxFileSizeByType,
   } = options;
 
   return new Plugin({
@@ -49,6 +50,7 @@ const FileHandlePlugin = (options: FileHandlePluginOptions) => {
           {
             allowedMimeTypes,
             maxFileSize,
+            maxFileSizeByType,
             allowBase64: options.allowBase64,
           },
         );
@@ -79,6 +81,7 @@ const FileHandlePlugin = (options: FileHandlePluginOptions) => {
           {
             allowedMimeTypes,
             maxFileSize,
+            maxFileSizeByType,
             allowBase64: options.allowBase64,
           },
         );

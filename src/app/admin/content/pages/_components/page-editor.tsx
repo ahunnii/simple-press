@@ -132,6 +132,7 @@ type PageEditorProps = {
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  mediaEnabled?: boolean;
 };
 
 export function PageEditor({
@@ -139,6 +140,7 @@ export function PageEditor({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  mediaEnabled,
 }: PageEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -679,6 +681,8 @@ export function PageEditor({
                       galleriesEnabled={galleriesEnabled}
                       embedsEnabled={embedsEnabled}
                       quotesEnabled={quotesEnabled}
+                      videosEnabled={true}
+                      mediaEnabled={mediaEnabled}
                       required
                     />
                   </CardContent>

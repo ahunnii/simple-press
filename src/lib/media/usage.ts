@@ -102,7 +102,11 @@ function addUsage(map: UsageMap, rawUrl: string, usage: MediaUsage): void {
 /**
  * Recursively walk a TipTap JSON document.
  *
- * - `image` nodes → calls `onImageSrc` with `attrs.src`
+ * - `image` and `video` nodes → calls `onImageSrc` with `attrs.src` (the
+ *   callback is named for images historically, but it's really "storage URL
+ *   found in rich text" — a video's `src` feeds the same URL→key matching
+ *   path as an image's, otherwise uploaded clips used in a page/post would
+ *   show as unused in the Media Library and be eligible for deletion)
  * - `gallery` nodes → calls `onGalleryId` with `attrs.galleryId`
  * - `embed` nodes are deliberately ignored (external iframes)
  */
@@ -115,7 +119,7 @@ function walkTiptap(
 
   const n = node as Record<string, unknown>;
 
-  if (n.type === "image") {
+  if (n.type === "image" || n.type === "video") {
     const attrs = n.attrs as Record<string, unknown> | undefined;
     const src = attrs?.src;
     if (typeof src === "string" && src) onImageSrc(src);

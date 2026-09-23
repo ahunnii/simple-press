@@ -9,6 +9,7 @@ import { generateHTML } from "@tiptap/html/server";
 import StarterKit from "@tiptap/starter-kit";
 
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
+import { VideoNode } from "~/lib/tiptap/video-node";
 
 /**
  * Server-side TipTap document -> HTML serializer for the WordPress export.
@@ -69,6 +70,7 @@ const SERVER_EXTENSIONS = [
     protocols: ["http", "https", "mailto", "tel"],
   }),
   Image,
+  VideoNode,
   Underline,
   TextStyle,
   TextAlign.configure({

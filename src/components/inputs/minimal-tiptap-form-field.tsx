@@ -49,6 +49,28 @@ export async function uploadRichTextImage(file: File): Promise<string> {
   return url;
 }
 
+/**
+ * Uploads a richtext video clip via `/api/upload`'s "video" route (50MB,
+ * mp4/webm/mov/avi) and returns its public URL. Module-level so it's a
+ * stable reference for the editor's extensions memo. Same metadata/scoping
+ * notes as `uploadRichTextImage` above.
+ */
+export async function uploadRichTextVideo(file: File): Promise<string> {
+  const result = await uploadFile({
+    api: "/api/upload",
+    route: "video",
+    file,
+  });
+
+  const url = getStoredPath(result.file);
+
+  if (!url) {
+    throw new Error("Upload succeeded but no file URL was returned.");
+  }
+
+  return url;
+}
+
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
   name: Path<CurrentForm>;
@@ -64,6 +86,16 @@ type Props<CurrentForm extends FieldValues> = {
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  /**
+   * Enables video clips (toolbar button + drag/drop/paste), uploaded via
+   * `uploadRichTextVideo`. Off by default.
+   */
+  videosEnabled?: boolean;
+  /**
+   * Adds "Choose from library" to the video dialog. Only pass `true` when
+   * the `media` feature flag is on — `media.list` throws FORBIDDEN otherwise.
+   */
+  mediaEnabled?: boolean;
   required?: boolean;
   /**
    * Image upload function passed to the editor. Defaults to an S3 uploader
@@ -88,6 +120,8 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  videosEnabled,
+  mediaEnabled,
   required,
   uploader,
 }: Props<CurrentForm>) => {
@@ -127,6 +161,8 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 embedsEnabled={embedsEnabled}
                 quotesEnabled={quotesEnabled}
                 uploader={resolvedUploader}
+                videoUploader={videosEnabled ? uploadRichTextVideo : undefined}
+                mediaEnabled={mediaEnabled}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

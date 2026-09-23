@@ -9,3 +9,4 @@ export * from "./quote-calculator";
 export * from "./reset-marks-on-enter";
 export * from "./table";
 export * from "./unset-all-marks";
+export * from "./video";

@@ -2,7 +2,7 @@ import { getSchema } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
 import { RENDERER_BASE_EXTENSIONS } from "./renderer-extensions";
-import { isSafeImageSrc, sanitizeTiptapDoc } from "./sanitize";
+import { isSafeImageSrc, isSafeVideoSrc, sanitizeTiptapDoc } from "./sanitize";
 
 /**
  * Built exactly the way `TiptapRenderer` builds its schema, minus the three
@@ -306,6 +306,75 @@ describe("sanitizeTiptapDoc — images", () => {
     expect(isSafeImageSrc(null)).toBe(false);
     expect(isSafeImageSrc("")).toBe(false);
     expect(isSafeImageSrc("   ")).toBe(false);
+  });
+});
+
+describe("sanitizeTiptapDoc — videos", () => {
+  it("keeps an https src", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "video",
+        attrs: { src: "https://cdn.example.com/clip.mp4", title: "Clip" },
+      }),
+      schema,
+    );
+    expect(out?.content).toHaveLength(1);
+    expect(out?.content?.[0]?.attrs?.src).toBe(
+      "https://cdn.example.com/clip.mp4",
+    );
+  });
+
+  it("keeps a relative src", () => {
+    const out = sanitizeTiptapDoc(
+      doc({ type: "video", attrs: { src: "/uploads/clip.mp4" } }),
+      schema,
+    );
+    expect(out?.content).toHaveLength(1);
+  });
+
+  it.each([
+    "data:video/mp4;base64,AAA",
+    "blob:https://x/y",
+    "javascript:alert(1)",
+    "file:///etc/passwd",
+  ])("drops the whole video node for src %s", (src) => {
+    expect(
+      sanitizeTiptapDoc(doc({ type: "video", attrs: { src } }), schema),
+    ).toEqual(doc());
+  });
+
+  it("keeps a truthy ambient boolean attr", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "video",
+        attrs: { src: "https://cdn.example.com/clip.mp4", ambient: true },
+      }),
+      schema,
+    );
+    expect(out?.content?.[0]?.attrs?.ambient).toBe(true);
+  });
+
+  it("strips onplay and style attrs from a video node", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "video",
+        attrs: {
+          src: "https://cdn.example.com/clip.mp4",
+          onplay: "alert(1)",
+          style: "color:red",
+        },
+      }),
+      schema,
+    );
+    expect(out?.content?.[0]?.attrs).toEqual({
+      src: "https://cdn.example.com/clip.mp4",
+    });
+  });
+
+  it("isSafeVideoSrc refuses non-strings and blanks", () => {
+    expect(isSafeVideoSrc(null)).toBe(false);
+    expect(isSafeVideoSrc("")).toBe(false);
+    expect(isSafeVideoSrc("   ")).toBe(false);
   });
 });
 

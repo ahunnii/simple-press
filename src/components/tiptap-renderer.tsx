@@ -22,6 +22,7 @@ import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 import { QuoteCalculatorBlock } from "~/components/quote/quote-calculator-block";
+import { RichTextVideo } from "~/components/rich-text-video";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 /** TipTap document JSON — matches first parameter of generateHTML */
@@ -214,6 +215,12 @@ function isEmbedNode(node: ContentNode): node is ContentNode & {
   return node.type === "embed" && node.attrs != null && "src" in node.attrs;
 }
 
+function isVideoNode(node: ContentNode): node is ContentNode & {
+  attrs: { src?: string; title?: string; ambient?: boolean };
+} {
+  return node.type === "video" && node.attrs != null && "src" in node.attrs;
+}
+
 export function TiptapRenderer({ content, className }: TiptapRendererProps) {
   const { isEnabled } = useStorefrontFlags();
   const embedsEnabled = isEnabled("embeds");
@@ -332,6 +339,16 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
             title={title}
             aspectRatio={aspectRatio}
             maxWidth={maxWidth}
+          />
+        );
+      }
+      if (isVideoNode(node) && node.attrs.src) {
+        return (
+          <RichTextVideo
+            key={`video-${index}`}
+            src={node.attrs.src}
+            title={node.attrs.title}
+            ambient={node.attrs.ambient}
           />
         );
       }

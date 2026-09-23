@@ -185,6 +185,45 @@ describe("tiptapToHtml", () => {
     expect(result.html).not.toContain("title=");
   });
 
+  it("renders a video node as a <video> with controls", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "video",
+          attrs: { src: "https://cdn.example.com/clip.mp4", title: "Clip" },
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain("<video");
+    expect(result.html).toContain('src="https://cdn.example.com/clip.mp4"');
+    expect(result.html).toContain("controls");
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("renders an ambient video node as muted/autoplay/loop with no controls", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "video",
+          attrs: { src: "https://cdn.example.com/clip.mp4", ambient: true },
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain("<video");
+    expect(result.html).toContain("muted");
+    expect(result.html).toContain("autoplay");
+    expect(result.html).toContain("loop");
+    expect(result.html).not.toContain("controls");
+  });
+
   it("warns on unknown node types but renders the rest", () => {
     const doc = {
       type: "doc",

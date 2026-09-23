@@ -15,6 +15,12 @@ export type FileError = {
 export type FileValidationOptions = {
   allowedMimeTypes: string[];
   maxFileSize?: number;
+  /**
+   * Per top-level MIME type size limits (e.g. `{ video: 50MB }`), checked
+   * before falling back to `maxFileSize`. Lets one FileHandler accept both
+   * 5MB images and 50MB videos.
+   */
+  maxFileSizeByType?: Partial<Record<string, number>>;
   allowBase64: boolean;
 };
 
@@ -161,7 +167,7 @@ const validateFileOrBase64 = <T extends FileInput>(
 
 const checkTypeAndSize = (
   input: File | string,
-  { allowedMimeTypes, maxFileSize }: FileValidationOptions,
+  { allowedMimeTypes, maxFileSize, maxFileSizeByType }: FileValidationOptions,
 ): { isValidType: boolean; isValidSize: boolean } => {
   const mimeType = input instanceof File ? input.type : base64MimeType(input);
   const size =
@@ -172,7 +178,9 @@ const checkTypeAndSize = (
     allowedMimeTypes.includes(mimeType) ||
     allowedMimeTypes.includes(`${mimeType.split("/")[0]}/*`);
 
-  const isValidSize = !maxFileSize || size <= maxFileSize;
+  const sizeLimit =
+    maxFileSizeByType?.[mimeType.split("/")[0] ?? ""] ?? maxFileSize;
+  const isValidSize = !sizeLimit || size <= sizeLimit;
 
   return { isValidType, isValidSize };
 };

@@ -150,6 +150,26 @@ describe("buildUsedMediaIndex — Service.customFields", () => {
     expect(index.get(url)?.[0]?.location).toContain("rich text");
   });
 
+  it("finds URLs from a video node nested inside a richtext (TipTap) service field", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/video-in-body.mp4`);
+    asMock(db.service.findMany).mockResolvedValue([
+      serviceRow({
+        "service-two.intro-body": {
+          type: "doc",
+          content: [
+            { type: "paragraph", content: [{ type: "text", text: "hi" }] },
+            { type: "video", attrs: { src: url, ambient: true } },
+          ],
+        },
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(url)).toHaveLength(1);
+    expect(index.get(url)?.[0]?.location).toContain("rich text");
+  });
+
   it("ignores non-storage URLs in service fields", async () => {
     const external = "https://images.example.com/not-ours.jpg";
     asMock(db.service.findMany).mockResolvedValue([
