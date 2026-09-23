@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import type { GeneralBusinessFormSchema } from "~/lib/validators/general-business";
 import type { RouterOutputs } from "~/trpc/react";
 import { formatBusinessAddress } from "~/lib/address/format";
-import { firstNonBlank } from "~/lib/seo/blank";
 import { COMMON_TIME_ZONES } from "~/lib/time-zones";
 import { cn } from "~/lib/utils";
 import { generalBusinessFormSchema } from "~/lib/validators/general-business";
@@ -153,10 +152,10 @@ export function GeneralSettings({ business }: Props) {
       name: data.name,
       ownerEmail: data.ownerEmail,
       supportEmail: data.supportEmail ?? undefined,
-      addressStreet: firstNonBlank(data.addressStreet),
-      addressCity: firstNonBlank(data.addressCity),
-      addressState: firstNonBlank(data.addressState),
-      addressPostalCode: firstNonBlank(data.addressPostalCode),
+      addressStreet: data.addressStreet?.trim() ?? "",
+      addressCity: data.addressCity?.trim() ?? "",
+      addressState: data.addressState?.trim() ?? "",
+      addressPostalCode: data.addressPostalCode?.trim() ?? "",
       phoneNumber: data.phoneNumber ?? undefined,
       sendAbandonedCheckoutEmails: data.sendAbandonedCheckoutEmails,
       timeZone: data.timeZone,

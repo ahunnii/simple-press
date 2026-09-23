@@ -5,6 +5,7 @@ import {
   computeSavingsLabel,
   dollarsToCents,
   formatPrice,
+  formatProductDisplayPrice,
   getEffectiveCompareAtPrice,
   getEffectivePrice,
 } from "./prices";
@@ -166,5 +167,60 @@ describe("getEffectiveCompareAtPrice", () => {
         compareAtPrice: 1_200,
       }),
     ).toBe(1_200);
+  });
+});
+
+describe("formatProductDisplayPrice", () => {
+  it("formats the base price when there are no variants", () => {
+    expect(formatProductDisplayPrice({ price: 5_000, variants: [] })).toBe(
+      "$50.00",
+    );
+  });
+
+  it("formats a single price when every variant agrees", () => {
+    expect(
+      formatProductDisplayPrice({
+        price: 5_000,
+        variants: [{ price: 10_000 }, { price: 10_000 }],
+      }),
+    ).toBe("$100.00");
+  });
+
+  it("formats a 'starting at' price when variant prices differ", () => {
+    expect(
+      formatProductDisplayPrice({
+        price: 5_000,
+        variants: [{ price: 10_000 }, { price: 15_000 }],
+      }),
+    ).toBe("$100.00+");
+  });
+
+  it("inherits the base price for a null variant price", () => {
+    expect(
+      formatProductDisplayPrice({
+        price: 5_000,
+        variants: [{ price: null }],
+      }),
+    ).toBe("$50.00");
+  });
+
+  it("inherits the base price for a 0 variant price", () => {
+    expect(
+      formatProductDisplayPrice({
+        price: 5_000,
+        variants: [{ price: 0 }],
+      }),
+    ).toBe("$50.00");
+  });
+
+  it("folds an inheriting variant into the min/'+' comparison", () => {
+    // One variant inherits the $50 base price, the other is priced at $100 —
+    // that's a mix, so it should read "$50.00+", not a single $100.00.
+    expect(
+      formatProductDisplayPrice({
+        price: 5_000,
+        variants: [{ price: null }, { price: 10_000 }],
+      }),
+    ).toBe("$50.00+");
   });
 });

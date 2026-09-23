@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import type { BulkAction } from "../../_components/admin-bulk-bar";
 import type { AdminFilterDef } from "../../_components/admin-filters";
 import type { RouterOutputs } from "~/trpc/react";
-import { formatPrice } from "~/lib/prices";
+import { formatProductDisplayPrice } from "~/lib/prices";
 import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
@@ -141,32 +141,6 @@ const TD_CHECKBOX = TABLE_CELL_TIGHT;
 
 /** "3 of 5" — a bulk op silently touching fewer rows than asked must say so. */
 const shortfallMessage = createShortfallMessage(ITEM_NOUN);
-
-/**
- * The figure the storefront would show: one price when every variant agrees,
- * the cheapest with a "+" when they don't.
- *
- * Variants may carry a null price, meaning "inherit the product's" — those are
- * filtered out rather than treated as zero, and a product whose variants all
- * inherit falls back to its own price, which is what a shopper sees.
- *
- * `Product.price` is a non-nullable Float in the schema, so there is no
- * priceless branch. The old inline version opened on `let displayPrice = "N/A"`
- * and guarded with `product.price != null` — both dead, and "N/A" could never
- * have rendered.
- */
-function displayPriceFor(product: Product): string {
-  const variantPrices = product.variants
-    .map((variant) => variant.price)
-    .filter((price): price is number => price !== null);
-
-  if (variantPrices.length === 0) return formatPrice(product.price);
-
-  const min = Math.min(...variantPrices);
-  return variantPrices.every((price) => price === min)
-    ? formatPrice(min)
-    : `${formatPrice(min)}+`;
-}
 
 /** Both the desktop cell and the `md:hidden` reflow line render this, so the
  *  two cannot drift. */
@@ -629,7 +603,7 @@ export function ProductsClient({
                     {products.map((product, index) => {
                       const isSelected = selectedIds.has(product.id);
                       const image = product.images[0];
-                      const displayPrice = displayPriceFor(product);
+                      const displayPrice = formatProductDisplayPrice(product);
                       const variantLabel = variantLabelFor(product);
 
                       return (

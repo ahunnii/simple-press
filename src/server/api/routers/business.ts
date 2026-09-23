@@ -1048,6 +1048,12 @@ export const businessRouter = createTRPCRouter({
         state: addressState,
         postalCode: addressPostalCode,
       };
+      // Whether the caller sent all four parts (even as blanks), vs. omitted
+      // them entirely — distinguishes "the owner cleared every field" from
+      // "this caller doesn't manage structured address parts at all".
+      const partsProvided = Object.values(addressParts).every(
+        (p) => p !== undefined,
+      );
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -1058,11 +1064,15 @@ export const businessRouter = createTRPCRouter({
           // The structured parts are the source of truth once the owner has
           // filled in any of them: the single-line display string every
           // template footer renders is derived from them, so the two can
-          // never drift. With all four blank, whatever the caller sent as
-          // `businessAddress` stands (and `undefined` leaves it untouched).
+          // never drift. When all four are provided but blank, the owner
+          // cleared the address, so it's nulled out too. Otherwise, whatever
+          // the caller sent as `businessAddress` stands (and `undefined`
+          // leaves it untouched).
           businessAddress: hasAddressParts(addressParts)
             ? formatBusinessAddress(addressParts)
-            : businessAddress,
+            : partsProvided
+              ? null
+              : businessAddress,
           addressStreet: normalizeAddressPart(addressStreet),
           addressCity: normalizeAddressPart(addressCity),
           addressState: normalizeAddressPart(addressState),

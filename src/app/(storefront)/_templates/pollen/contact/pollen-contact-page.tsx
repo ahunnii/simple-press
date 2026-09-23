@@ -3,6 +3,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import {
   FadeIn,
   StaggerContainer,
@@ -28,30 +29,32 @@ export function PollenContactPage({
   const formTitle = f["pollen.contact.form-title"];
   const formDescription = f["pollen.contact.form-description"];
 
-  const physicalAddress = business?.businessAddress ?? "Detroit, MI";
-  const contactEmail = business?.supportEmail ?? "hello@example.com";
-  const phoneNumber = business?.phoneNumber ?? "(123) 456-7890";
+  const physicalAddress = business?.businessAddress?.trim();
+  const contactEmail = business?.supportEmail?.trim();
+  const phoneNumber = business?.phoneNumber?.trim();
 
+  // Only show what the owner has actually filled in; a placeholder address,
+  // email, or (tappable) phone number would read as real contact details.
   const contactInfo = [
-    {
+    physicalAddress && {
       icon: MapPin,
       label: "Location",
       value: physicalAddress,
       href: undefined,
     },
-    {
+    contactEmail && {
       icon: Mail,
       label: "Email Address",
       value: contactEmail,
       href: `mailto:${contactEmail}`,
     },
-    {
+    phoneNumber && {
       icon: Phone,
       label: "Phone Number",
       value: phoneNumber,
       href: `tel:${phoneNumber}`,
     },
-  ];
+  ].filter((info) => !!info);
 
   return (
     <PollenGeneralLayout
@@ -66,18 +69,26 @@ export function PollenContactPage({
         className="mx-auto max-w-7xl px-4 py-20 pb-20 sm:px-6 md:py-20 lg:px-8"
         {...sectionGroupAttr("contact", "main")}
       >
-        <StaggerContainer className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {contactInfo.map((info) => (
-            <StaggerItem key={info.label}>
-              <PollenContactInfoCard
-                Icon={info.icon}
-                label={info.label}
-                value={info.value}
-                href={info.href}
-              />
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+        {contactInfo.length > 0 && (
+          <StaggerContainer
+            className={cn(
+              "mb-12 grid grid-cols-1 gap-6",
+              contactInfo.length === 3 && "md:grid-cols-3",
+              contactInfo.length === 2 && "md:grid-cols-2",
+            )}
+          >
+            {contactInfo.map((info) => (
+              <StaggerItem key={info.label}>
+                <PollenContactInfoCard
+                  Icon={info.icon}
+                  label={info.label}
+                  value={info.value}
+                  href={info.href}
+                />
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        )}
 
         <FadeIn direction="up" delay={0.15}>
           <div className="grid min-h-[560px] grid-cols-1 overflow-hidden rounded-lg shadow-xl lg:grid-cols-3">
