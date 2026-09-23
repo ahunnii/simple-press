@@ -164,6 +164,21 @@ describe("SubscribeForm", () => {
     expect(screen.queryByText("Tax")).not.toBeInTheDocument();
   });
 
+  it("says '+ shipping' instead of an items-only total while the quote is pending", () => {
+    shippingQuoteData = undefined;
+    shippingQuoteIsLoading = true;
+    renderForm();
+
+    // 3600c items, shipping not yet known.
+    expect(screen.getByText("Calculating…")).toBeInTheDocument();
+    expect(screen.getByText("$36.00 + shipping")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "First charge today, then $36.00 + shipping every month until you cancel.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("shows a tax disclosure row and adjusted copy when automatic tax is enabled", () => {
     shippingQuoteData = { shippingCents: 500 };
     renderForm({ business: makeBusiness({ stripeAutoTaxEnabled: true }) });

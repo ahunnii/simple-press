@@ -173,7 +173,7 @@ export async function PinkProductPage({
 
       {/* ── Gallery + details ── */}
       <section className="px-5 py-8 md:px-10 md:py-10">
-        <div className="mx-auto grid max-w-[1280px] gap-10 sm:grid-cols-2 sm:gap-12">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 sm:grid-cols-2 sm:gap-12">
           <PinkProductGallery
             images={product.images}
             productName={product.name}

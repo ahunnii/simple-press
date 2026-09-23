@@ -15,6 +15,13 @@ type VariantSelectorProps = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
   selectedVariantId: string | null;
   setSelectedVariantId: (variantId: string | null) => void;
+  /**
+   * Notified whenever this selector's own `quantity` state changes, so a
+   * parent that renders `SubscribePanel` below it (which has no stepper of
+   * its own) can link to `/subscribe` with the quantity the shopper actually
+   * chose instead of always `1`.
+   */
+  onQuantityChange?: (quantity: number) => void;
 };
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -22,6 +29,7 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 export function ElegantVariantSelector({
   product,
   setSelectedVariantId,
+  onQuantityChange,
 }: VariantSelectorProps) {
   const { addItem } = useCart();
   const { setVariantImageUrl } = useVariantImage();
@@ -35,6 +43,10 @@ export function ElegantVariantSelector({
   useEffect(() => {
     setVariantImageUrl(selectedVariant?.imageUrl ?? null);
   }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  useEffect(() => {
+    onQuantityChange?.(quantity);
+  }, [quantity, onQuantityChange]);
 
   const BACKORDER_MAX = 100;
   const isBackordered =

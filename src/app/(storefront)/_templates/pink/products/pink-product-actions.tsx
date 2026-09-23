@@ -8,6 +8,7 @@ import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { PinkProductVariantPills } from "./pink-product-variant-pills";
@@ -29,6 +30,7 @@ export function PinkProductActions({ product }: Props) {
     variantOptions,
     selectedOptions,
     selectedVariant,
+    selectedVariantId,
     handleOptionSelect,
     displayPrice,
     displayCompareAtPrice,
@@ -131,7 +133,11 @@ export function PinkProductActions({ product }: Props) {
         </div>
       ) : (
         <>
-          <div className="flex items-stretch gap-3">
+          {/* Wraps: stepper + a 220px-min basket button + the heart need
+              ~426px, wider than a phone column (and each half of the
+              two-column tablet layout) — without wrapping the row pushed the
+              whole details column past the viewport. */}
+          <div className="flex flex-wrap items-stretch gap-3">
             <div
               className="flex items-center"
               style={{ border: "1px solid var(--pink-ink)" }}
@@ -207,6 +213,24 @@ export function PinkProductActions({ product }: Props) {
           </p>
         </>
       )}
+
+      {/* `.pink-subscribe-panel` (globals.css) scopes the shared token-only
+          panel onto pink's own palette — pink doesn't remap the shadcn
+          --card/--border/--primary tokens globally the way bamboo/
+          happy-bamboo/animated-bamboo do (see the note in
+          subscribe-panel.tsx). No quantity-lifting needed here: unlike the
+          other templates' variant selectors, `PinkProductVariantPills` is a
+          dumb presentational row with no quantity state of its own — the
+          stepper above already comes straight from `useProduct`, so its
+          `quantity` is always the shopper's real pick. */}
+      <SubscribePanel
+        product={product}
+        selectedVariantId={selectedVariantId}
+        quantity={quantity}
+        available={inStock}
+        className="pink-subscribe-panel"
+        ctaClassName="inline-flex h-[52px] items-center justify-center bg-[var(--pink-rose)] px-6 text-[15px] font-semibold text-[var(--pink-on-accent)] transition-colors hover:bg-[var(--pink-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pink-rose)] focus-visible:ring-offset-2"
+      />
 
       {/* Per-product trust badges — `Product.additionalFields.productFeatures`,
           set in admin. Silently unused before this fix (review 2026-07-29,

@@ -603,7 +603,10 @@ export function SubscribeForm({
                       ? "Per-delivery total (before tax)"
                       : "Per-delivery total"}
                   </dt>
-                  <dd>{formatPrice(quote.perDeliveryCents)}</dd>
+                  <dd>
+                    {formatPrice(quote.perDeliveryCents)}
+                    {shippingPending ? " + shipping" : ""}
+                  </dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Delivery frequency</dt>
@@ -614,7 +617,12 @@ export function SubscribeForm({
 
             {quote && (
               <p className="text-muted-foreground mt-3 text-xs">
+                {/* Until the shipping quote lands, `perDeliveryCents` is the
+                    items alone — say so rather than promise a total that's
+                    about to grow. */}
                 {`First charge today, then ${formatPrice(quote.perDeliveryCents)}${
+                  shippingPending ? " + shipping" : ""
+                }${
                   business.stripeAutoTaxEnabled ? " plus tax" : ""
                 } every ${cadenceText} until you cancel.`}
               </p>

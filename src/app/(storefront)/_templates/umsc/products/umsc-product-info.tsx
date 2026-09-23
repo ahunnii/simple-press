@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Check, Heart } from "lucide-react";
 
@@ -12,6 +13,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { UmscAccordion, UmscAccordionItem } from "../shared/umsc-accordion";
 import { UmscSection } from "../shared/umsc-section";
@@ -65,6 +67,13 @@ export function UmscProductInfo({
     displayTrustBadges.length > 0 ? displayTrustBadges : globalTrustBadges;
   const hasVariants = Object.keys(variantOptions).length > 0;
   const comingSoon = !!additionalFields?.comingSoon;
+
+  // `UmscVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
   return (
     <UmscSection
@@ -140,6 +149,7 @@ export function UmscProductInfo({
               product={product}
               selectedVariantId={selectedVariantId}
               setSelectedVariantId={setSelectedVariantId}
+              onQuantityChange={setVariantQuantity}
               wishlistSlot={
                 <UmscWishlistHeart product={product} price={displayPrice} />
               }
@@ -242,6 +252,19 @@ export function UmscProductInfo({
                 )}
             </div>
           )}
+
+          {/* `.umsc-subscribe-panel` (globals.css) scopes the shared
+              token-only panel to umsc's own palette — see the note in
+              `subscribe-panel.tsx` for why umsc doesn't remap the shadcn
+              tokens globally the way `bamboo`/`happy-bamboo` do. */}
+          <SubscribePanel
+            product={product}
+            selectedVariantId={selectedVariantId}
+            quantity={subscribeQuantity}
+            available={inStock}
+            className="umsc-subscribe-panel"
+            ctaClassName="umsc-btn umsc-btn-gold h-12"
+          />
 
           {/* Trust badges */}
           {trustBadges.length > 0 && (

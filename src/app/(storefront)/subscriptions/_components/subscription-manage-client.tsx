@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -188,12 +188,34 @@ export function SubscriptionManageClient({
   // reads it — "Next delivery is back on" vs "Subscription resumed".
   const skipped = isSkipped(subscription);
 
+  // Which action is in flight, from the moment its button is clicked until
+  // the *refreshed* subscription data has actually landed — not just until
+  // the mutation resolves. A mutation's `onSuccess` fires the instant
+  // Stripe/the DB write completes, but `router.refresh()` re-fetches this
+  // page's server component asynchronously; if we cleared this on
+  // `onSuccess` instead, the old action buttons would stay rendered (and
+  // clickable) for that whole gap, letting a second click race the stale
+  // props — e.g. "Skip" then "Pause" landing on what looks like a single
+  // skip. Cleared below via the "adjust state during render" idiom (same one
+  // `AdminInvoicesClient` uses for its `?new=1` prop) the moment a *new*
+  // `subscription` prop object streams in from the refresh, which is the
+  // only real signal that the page has caught up.
+  const [pendingAction, setPendingAction] = useState<
+    "skip" | "pause" | "resume" | "undoSkip" | "cancel" | null
+  >(null);
+  const [settledSubscription, setSettledSubscription] = useState(subscription);
+  if (subscription !== settledSubscription) {
+    setSettledSubscription(subscription);
+    setPendingAction(null);
+  }
+
   const skipMutation = api.subscription.skipNextByToken.useMutation({
     onSuccess: () => {
       toast.success("Next delivery skipped.");
       router.refresh();
     },
     onError: (err) => {
+      setPendingAction(null);
       toast.error(err.message || "Something went wrong. Please try again.");
     },
   });
@@ -204,6 +226,7 @@ export function SubscriptionManageClient({
       router.refresh();
     },
     onError: (err) => {
+      setPendingAction(null);
       toast.error(err.message || "Something went wrong. Please try again.");
     },
   });
@@ -218,6 +241,7 @@ export function SubscriptionManageClient({
       router.refresh();
     },
     onError: (err) => {
+      setPendingAction(null);
       toast.error(err.message || "Something went wrong. Please try again.");
     },
   });
@@ -229,11 +253,14 @@ export function SubscriptionManageClient({
       router.refresh();
     },
     onError: (err) => {
+      setPendingAction(null);
       toast.error(err.message || "Something went wrong. Please try again.");
       setCancelOpen(false);
     },
   });
 
+  // Redirects away to Stripe's billing portal on success, so there's no page
+  // state left here to go stale — `isPending` alone is enough.
   const portalMutation =
     api.subscription.createPortalSessionByToken.useMutation({
       onSuccess: (data) => {
@@ -244,12 +271,48 @@ export function SubscriptionManageClient({
       },
     });
 
+  // Backstop: `router.refresh()` has no failure signal, so if the refreshed
+  // props never arrive (offline, server error) the actions would stay locked
+  // forever. Give up waiting after a while — an in-flight mutation still
+  // counts as busy below regardless.
+  useEffect(() => {
+    if (pendingAction === null) return;
+    const timer = setTimeout(() => setPendingAction(null), 15_000);
+    return () => clearTimeout(timer);
+  }, [pendingAction]);
+
   const isBusy =
+    pendingAction !== null ||
     skipMutation.isPending ||
     pauseMutation.isPending ||
     resumeMutation.isPending ||
     cancelMutation.isPending ||
     portalMutation.isPending;
+
+  function handleSkip() {
+    setPendingAction("skip");
+    skipMutation.mutate({ token });
+  }
+
+  function handlePause() {
+    setPendingAction("pause");
+    pauseMutation.mutate({ token });
+  }
+
+  function handleResume() {
+    setPendingAction("resume");
+    resumeMutation.mutate({ token });
+  }
+
+  function handleUndoSkip() {
+    setPendingAction("undoSkip");
+    resumeMutation.mutate({ token });
+  }
+
+  function handleCancel() {
+    setPendingAction("cancel");
+    cancelMutation.mutate({ token });
+  }
 
   function handleUpdatePayment() {
     const returnUrl = new URL(window.location.href);
@@ -434,9 +497,11 @@ export function SubscriptionManageClient({
                     variant="outline"
                     disabled={isBusy}
                     aria-describedby="sub-skip-help"
-                    onClick={() => skipMutation.mutate({ token })}
+                    onClick={handleSkip}
                   >
-                    Skip next delivery
+                    {pendingAction === "skip"
+                      ? "Skipping…"
+                      : "Skip next delivery"}
                   </Button>
                   <p
                     id="sub-skip-help"
@@ -452,9 +517,9 @@ export function SubscriptionManageClient({
                   type="button"
                   variant="outline"
                   disabled={isBusy}
-                  onClick={() => resumeMutation.mutate({ token })}
+                  onClick={handleUndoSkip}
                 >
-                  Undo skip
+                  {pendingAction === "undoSkip" ? "Undoing…" : "Undo skip"}
                 </Button>
               )}
 
@@ -465,9 +530,9 @@ export function SubscriptionManageClient({
                     variant="outline"
                     disabled={isBusy}
                     aria-describedby="sub-pause-help"
-                    onClick={() => pauseMutation.mutate({ token })}
+                    onClick={handlePause}
                   >
-                    Pause
+                    {pendingAction === "pause" ? "Pausing…" : "Pause"}
                   </Button>
                   <p
                     id="sub-pause-help"
@@ -483,9 +548,9 @@ export function SubscriptionManageClient({
                   type="button"
                   variant="outline"
                   disabled={isBusy}
-                  onClick={() => resumeMutation.mutate({ token })}
+                  onClick={handleResume}
                 >
-                  Resume
+                  {pendingAction === "resume" ? "Resuming…" : "Resume"}
                 </Button>
               )}
 
@@ -544,15 +609,15 @@ export function SubscriptionManageClient({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelMutation.isPending}>
+            <AlertDialogCancel disabled={pendingAction === "cancel"}>
               Keep subscription
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={cancelMutation.isPending}
-              onClick={() => cancelMutation.mutate({ token })}
+              disabled={pendingAction === "cancel"}
+              onClick={handleCancel}
             >
-              {cancelMutation.isPending ? "Cancelling…" : "Yes, cancel"}
+              {pendingAction === "cancel" ? "Cancelling…" : "Yes, cancel"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

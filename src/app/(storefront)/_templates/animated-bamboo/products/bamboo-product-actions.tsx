@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 
@@ -31,11 +33,21 @@ export function BambooProductActions({
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    selectedVariantId,
     additionalFields,
     justAdded,
     remainingStock,
     isInventoryTracked,
   } = useProduct(product);
+
+  const hasVariants = Object.keys(variantOptions).length > 0;
+
+  // `BambooVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
   return (
     <>
@@ -48,10 +60,11 @@ export function BambooProductActions({
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
-      ) : Object.keys(variantOptions).length > 0 ? (
+      ) : hasVariants ? (
         <BambooVariantSelector
           product={product}
           setSelectedVariantId={setSelectedVariantId}
+          onQuantityChange={setVariantQuantity}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -152,6 +165,14 @@ export function BambooProductActions({
           )}
         </>
       )}
+      <SubscribePanel
+        product={product}
+        selectedVariantId={selectedVariantId}
+        quantity={subscribeQuantity}
+        available={inStock}
+        className="mt-4"
+        ctaClassName="bamboo-btn bamboo-btn-primary justify-center"
+      />
     </>
   );
 }
