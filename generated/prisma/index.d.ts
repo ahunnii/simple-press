@@ -286,6 +286,19 @@ export type QuoteCalculator = $Result.DefaultSelection<Prisma.$QuoteCalculatorPa
  */
 export type QuoteSubmission = $Result.DefaultSelection<Prisma.$QuoteSubmissionPayload>
 /**
+ * Model Form
+ * Owner-built form embedded in CMS pages via the TipTap `form` node.
+ */
+export type Form = $Result.DefaultSelection<Prisma.$FormPayload>
+/**
+ * Model FormSubmission
+ * One entry for a Form. `answers` is an encrypted JSON string of
+ * FormAnswerSnapshot[] ({ fieldId, label, type, value }) so old entries still
+ * render after the form is edited. Search on answers happens in-app after
+ * decryption; status/tags/submittedAt are plaintext for SQL-side filtering.
+ */
+export type FormSubmission = $Result.DefaultSelection<Prisma.$FormSubmissionPayload>
+/**
  * Model QuickBooksConnection
  * One QuickBooks Online company connection per business (1:1). Updated in
  * place on reconnect and never deleted by the app, so deposit settings and
@@ -972,6 +985,26 @@ export class PrismaClient<
   get quoteSubmission(): Prisma.QuoteSubmissionDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.form`: Exposes CRUD operations for the **Form** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Forms
+    * const forms = await prisma.form.findMany()
+    * ```
+    */
+  get form(): Prisma.FormDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.formSubmission`: Exposes CRUD operations for the **FormSubmission** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FormSubmissions
+    * const formSubmissions = await prisma.formSubmission.findMany()
+    * ```
+    */
+  get formSubmission(): Prisma.FormSubmissionDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.quickBooksConnection`: Exposes CRUD operations for the **QuickBooksConnection** model.
     * Example usage:
     * ```ts
@@ -1526,6 +1559,8 @@ export namespace Prisma {
     BackInStockRequest: 'BackInStockRequest',
     QuoteCalculator: 'QuoteCalculator',
     QuoteSubmission: 'QuoteSubmission',
+    Form: 'Form',
+    FormSubmission: 'FormSubmission',
     QuickBooksConnection: 'QuickBooksConnection',
     QuickBooksInvoice: 'QuickBooksInvoice',
     Subscription: 'Subscription',
@@ -1551,7 +1586,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4885,6 +4920,154 @@ export namespace Prisma {
           }
         }
       }
+      Form: {
+        payload: Prisma.$FormPayload<ExtArgs>
+        fields: Prisma.FormFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FormFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FormFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>
+          }
+          findFirst: {
+            args: Prisma.FormFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FormFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>
+          }
+          findMany: {
+            args: Prisma.FormFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>[]
+          }
+          create: {
+            args: Prisma.FormCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>
+          }
+          createMany: {
+            args: Prisma.FormCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FormCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>[]
+          }
+          delete: {
+            args: Prisma.FormDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>
+          }
+          update: {
+            args: Prisma.FormUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>
+          }
+          deleteMany: {
+            args: Prisma.FormDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FormUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FormUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>[]
+          }
+          upsert: {
+            args: Prisma.FormUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormPayload>
+          }
+          aggregate: {
+            args: Prisma.FormAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateForm>
+          }
+          groupBy: {
+            args: Prisma.FormGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FormGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FormCountArgs<ExtArgs>
+            result: $Utils.Optional<FormCountAggregateOutputType> | number
+          }
+        }
+      }
+      FormSubmission: {
+        payload: Prisma.$FormSubmissionPayload<ExtArgs>
+        fields: Prisma.FormSubmissionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FormSubmissionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FormSubmissionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>
+          }
+          findFirst: {
+            args: Prisma.FormSubmissionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FormSubmissionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>
+          }
+          findMany: {
+            args: Prisma.FormSubmissionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>[]
+          }
+          create: {
+            args: Prisma.FormSubmissionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>
+          }
+          createMany: {
+            args: Prisma.FormSubmissionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FormSubmissionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>[]
+          }
+          delete: {
+            args: Prisma.FormSubmissionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>
+          }
+          update: {
+            args: Prisma.FormSubmissionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>
+          }
+          deleteMany: {
+            args: Prisma.FormSubmissionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FormSubmissionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FormSubmissionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>[]
+          }
+          upsert: {
+            args: Prisma.FormSubmissionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormSubmissionPayload>
+          }
+          aggregate: {
+            args: Prisma.FormSubmissionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFormSubmission>
+          }
+          groupBy: {
+            args: Prisma.FormSubmissionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FormSubmissionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FormSubmissionCountArgs<ExtArgs>
+            result: $Utils.Optional<FormSubmissionCountAggregateOutputType> | number
+          }
+        }
+      }
       QuickBooksConnection: {
         payload: Prisma.$QuickBooksConnectionPayload<ExtArgs>
         fields: Prisma.QuickBooksConnectionFieldRefs
@@ -5544,6 +5727,8 @@ export namespace Prisma {
     backInStockRequest?: BackInStockRequestOmit
     quoteCalculator?: QuoteCalculatorOmit
     quoteSubmission?: QuoteSubmissionOmit
+    form?: FormOmit
+    formSubmission?: FormSubmissionOmit
     quickBooksConnection?: QuickBooksConnectionOmit
     quickBooksInvoice?: QuickBooksInvoiceOmit
     subscription?: SubscriptionOmit
@@ -5743,6 +5928,8 @@ export namespace Prisma {
     backInStockRequests: number
     quoteCalculators: number
     quoteSubmissions: number
+    forms: number
+    formSubmissions: number
     quickBooksInvoices: number
     subscriptions: number
     donations: number
@@ -5777,6 +5964,8 @@ export namespace Prisma {
     backInStockRequests?: boolean | BusinessCountOutputTypeCountBackInStockRequestsArgs
     quoteCalculators?: boolean | BusinessCountOutputTypeCountQuoteCalculatorsArgs
     quoteSubmissions?: boolean | BusinessCountOutputTypeCountQuoteSubmissionsArgs
+    forms?: boolean | BusinessCountOutputTypeCountFormsArgs
+    formSubmissions?: boolean | BusinessCountOutputTypeCountFormSubmissionsArgs
     quickBooksInvoices?: boolean | BusinessCountOutputTypeCountQuickBooksInvoicesArgs
     subscriptions?: boolean | BusinessCountOutputTypeCountSubscriptionsArgs
     donations?: boolean | BusinessCountOutputTypeCountDonationsArgs
@@ -5981,6 +6170,20 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountQuoteSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuoteSubmissionWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountFormsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountFormSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormSubmissionWhereInput
   }
 
   /**
@@ -6663,6 +6866,37 @@ export namespace Prisma {
    */
   export type QuoteSubmissionCountOutputTypeCountQuickBooksInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuickBooksInvoiceWhereInput
+  }
+
+
+  /**
+   * Count Type FormCountOutputType
+   */
+
+  export type FormCountOutputType = {
+    submissions: number
+  }
+
+  export type FormCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    submissions?: boolean | FormCountOutputTypeCountSubmissionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * FormCountOutputType without action
+   */
+  export type FormCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormCountOutputType
+     */
+    select?: FormCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * FormCountOutputType without action
+   */
+  export type FormCountOutputTypeCountSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormSubmissionWhereInput
   }
 
 
@@ -13104,6 +13338,8 @@ export namespace Prisma {
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     quoteCalculators?: boolean | Business$quoteCalculatorsArgs<ExtArgs>
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
+    forms?: boolean | Business$formsArgs<ExtArgs>
+    formSubmissions?: boolean | Business$formSubmissionsArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
@@ -13335,6 +13571,8 @@ export namespace Prisma {
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     quoteCalculators?: boolean | Business$quoteCalculatorsArgs<ExtArgs>
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
+    forms?: boolean | Business$formsArgs<ExtArgs>
+    formSubmissions?: boolean | Business$formSubmissionsArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     subscriptions?: boolean | Business$subscriptionsArgs<ExtArgs>
@@ -13377,6 +13615,8 @@ export namespace Prisma {
       backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
       quoteCalculators: Prisma.$QuoteCalculatorPayload<ExtArgs>[]
       quoteSubmissions: Prisma.$QuoteSubmissionPayload<ExtArgs>[]
+      forms: Prisma.$FormPayload<ExtArgs>[]
+      formSubmissions: Prisma.$FormSubmissionPayload<ExtArgs>[]
       quickBooksConnection: Prisma.$QuickBooksConnectionPayload<ExtArgs> | null
       quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
       subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
@@ -13868,6 +14108,8 @@ export namespace Prisma {
     backInStockRequests<T extends Business$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Business$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quoteCalculators<T extends Business$quoteCalculatorsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteCalculatorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quoteSubmissions<T extends Business$quoteSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    forms<T extends Business$formsArgs<ExtArgs> = {}>(args?: Subset<T, Business$formsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    formSubmissions<T extends Business$formSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$formSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quickBooksConnection<T extends Business$quickBooksConnectionArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksConnectionArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     quickBooksInvoices<T extends Business$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscriptions<T extends Business$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -15016,6 +15258,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: QuoteSubmissionScalarFieldEnum | QuoteSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Business.forms
+   */
+  export type Business$formsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    where?: FormWhereInput
+    orderBy?: FormOrderByWithRelationInput | FormOrderByWithRelationInput[]
+    cursor?: FormWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FormScalarFieldEnum | FormScalarFieldEnum[]
+  }
+
+  /**
+   * Business.formSubmissions
+   */
+  export type Business$formSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    where?: FormSubmissionWhereInput
+    orderBy?: FormSubmissionOrderByWithRelationInput | FormSubmissionOrderByWithRelationInput[]
+    cursor?: FormSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FormSubmissionScalarFieldEnum | FormSubmissionScalarFieldEnum[]
   }
 
   /**
@@ -63468,6 +63758,2290 @@ export namespace Prisma {
 
 
   /**
+   * Model Form
+   */
+
+  export type AggregateForm = {
+    _count: FormCountAggregateOutputType | null
+    _min: FormMinAggregateOutputType | null
+    _max: FormMaxAggregateOutputType | null
+  }
+
+  export type FormMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    published: boolean | null
+    businessId: string | null
+  }
+
+  export type FormMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    published: boolean | null
+    businessId: string | null
+  }
+
+  export type FormCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    name: number
+    definition: number
+    published: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type FormMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    published?: true
+    businessId?: true
+  }
+
+  export type FormMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    published?: true
+    businessId?: true
+  }
+
+  export type FormCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    definition?: true
+    published?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type FormAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Form to aggregate.
+     */
+    where?: FormWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Forms to fetch.
+     */
+    orderBy?: FormOrderByWithRelationInput | FormOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FormWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Forms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Forms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Forms
+    **/
+    _count?: true | FormCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FormMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FormMaxAggregateInputType
+  }
+
+  export type GetFormAggregateType<T extends FormAggregateArgs> = {
+        [P in keyof T & keyof AggregateForm]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateForm[P]>
+      : GetScalarType<T[P], AggregateForm[P]>
+  }
+
+
+
+
+  export type FormGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormWhereInput
+    orderBy?: FormOrderByWithAggregationInput | FormOrderByWithAggregationInput[]
+    by: FormScalarFieldEnum[] | FormScalarFieldEnum
+    having?: FormScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FormCountAggregateInputType | true
+    _min?: FormMinAggregateInputType
+    _max?: FormMaxAggregateInputType
+  }
+
+  export type FormGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    name: string
+    definition: JsonValue
+    published: boolean
+    businessId: string
+    _count: FormCountAggregateOutputType | null
+    _min: FormMinAggregateOutputType | null
+    _max: FormMaxAggregateOutputType | null
+  }
+
+  type GetFormGroupByPayload<T extends FormGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FormGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FormGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FormGroupByOutputType[P]>
+            : GetScalarType<T[P], FormGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FormSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    submissions?: boolean | Form$submissionsArgs<ExtArgs>
+    _count?: boolean | FormCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["form"]>
+
+  export type FormSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["form"]>
+
+  export type FormSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["form"]>
+
+  export type FormSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+  }
+
+  export type FormOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "definition" | "published" | "businessId", ExtArgs["result"]["form"]>
+  export type FormInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    submissions?: boolean | Form$submissionsArgs<ExtArgs>
+    _count?: boolean | FormCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type FormIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type FormIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $FormPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Form"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      submissions: Prisma.$FormSubmissionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      name: string
+      /**
+       * Versioned definition blob — `formDefinitionSchema` in src/lib/validators/form.ts
+       */
+      definition: Prisma.JsonValue
+      published: boolean
+      businessId: string
+    }, ExtArgs["result"]["form"]>
+    composites: {}
+  }
+
+  type FormGetPayload<S extends boolean | null | undefined | FormDefaultArgs> = $Result.GetResult<Prisma.$FormPayload, S>
+
+  type FormCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FormFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FormCountAggregateInputType | true
+    }
+
+  export interface FormDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Form'], meta: { name: 'Form' } }
+    /**
+     * Find zero or one Form that matches the filter.
+     * @param {FormFindUniqueArgs} args - Arguments to find a Form
+     * @example
+     * // Get one Form
+     * const form = await prisma.form.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FormFindUniqueArgs>(args: SelectSubset<T, FormFindUniqueArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Form that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FormFindUniqueOrThrowArgs} args - Arguments to find a Form
+     * @example
+     * // Get one Form
+     * const form = await prisma.form.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FormFindUniqueOrThrowArgs>(args: SelectSubset<T, FormFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Form that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormFindFirstArgs} args - Arguments to find a Form
+     * @example
+     * // Get one Form
+     * const form = await prisma.form.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FormFindFirstArgs>(args?: SelectSubset<T, FormFindFirstArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Form that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormFindFirstOrThrowArgs} args - Arguments to find a Form
+     * @example
+     * // Get one Form
+     * const form = await prisma.form.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FormFindFirstOrThrowArgs>(args?: SelectSubset<T, FormFindFirstOrThrowArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Forms that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Forms
+     * const forms = await prisma.form.findMany()
+     * 
+     * // Get first 10 Forms
+     * const forms = await prisma.form.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const formWithIdOnly = await prisma.form.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FormFindManyArgs>(args?: SelectSubset<T, FormFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Form.
+     * @param {FormCreateArgs} args - Arguments to create a Form.
+     * @example
+     * // Create one Form
+     * const Form = await prisma.form.create({
+     *   data: {
+     *     // ... data to create a Form
+     *   }
+     * })
+     * 
+     */
+    create<T extends FormCreateArgs>(args: SelectSubset<T, FormCreateArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Forms.
+     * @param {FormCreateManyArgs} args - Arguments to create many Forms.
+     * @example
+     * // Create many Forms
+     * const form = await prisma.form.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FormCreateManyArgs>(args?: SelectSubset<T, FormCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Forms and returns the data saved in the database.
+     * @param {FormCreateManyAndReturnArgs} args - Arguments to create many Forms.
+     * @example
+     * // Create many Forms
+     * const form = await prisma.form.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Forms and only return the `id`
+     * const formWithIdOnly = await prisma.form.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FormCreateManyAndReturnArgs>(args?: SelectSubset<T, FormCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Form.
+     * @param {FormDeleteArgs} args - Arguments to delete one Form.
+     * @example
+     * // Delete one Form
+     * const Form = await prisma.form.delete({
+     *   where: {
+     *     // ... filter to delete one Form
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FormDeleteArgs>(args: SelectSubset<T, FormDeleteArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Form.
+     * @param {FormUpdateArgs} args - Arguments to update one Form.
+     * @example
+     * // Update one Form
+     * const form = await prisma.form.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FormUpdateArgs>(args: SelectSubset<T, FormUpdateArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Forms.
+     * @param {FormDeleteManyArgs} args - Arguments to filter Forms to delete.
+     * @example
+     * // Delete a few Forms
+     * const { count } = await prisma.form.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FormDeleteManyArgs>(args?: SelectSubset<T, FormDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Forms.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Forms
+     * const form = await prisma.form.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FormUpdateManyArgs>(args: SelectSubset<T, FormUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Forms and returns the data updated in the database.
+     * @param {FormUpdateManyAndReturnArgs} args - Arguments to update many Forms.
+     * @example
+     * // Update many Forms
+     * const form = await prisma.form.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Forms and only return the `id`
+     * const formWithIdOnly = await prisma.form.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FormUpdateManyAndReturnArgs>(args: SelectSubset<T, FormUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Form.
+     * @param {FormUpsertArgs} args - Arguments to update or create a Form.
+     * @example
+     * // Update or create a Form
+     * const form = await prisma.form.upsert({
+     *   create: {
+     *     // ... data to create a Form
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Form we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FormUpsertArgs>(args: SelectSubset<T, FormUpsertArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Forms.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormCountArgs} args - Arguments to filter Forms to count.
+     * @example
+     * // Count the number of Forms
+     * const count = await prisma.form.count({
+     *   where: {
+     *     // ... the filter for the Forms we want to count
+     *   }
+     * })
+    **/
+    count<T extends FormCountArgs>(
+      args?: Subset<T, FormCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FormCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Form.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FormAggregateArgs>(args: Subset<T, FormAggregateArgs>): Prisma.PrismaPromise<GetFormAggregateType<T>>
+
+    /**
+     * Group by Form.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FormGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FormGroupByArgs['orderBy'] }
+        : { orderBy?: FormGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FormGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFormGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Form model
+   */
+  readonly fields: FormFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Form.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FormClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    submissions<T extends Form$submissionsArgs<ExtArgs> = {}>(args?: Subset<T, Form$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Form model
+   */
+  interface FormFieldRefs {
+    readonly id: FieldRef<"Form", 'String'>
+    readonly createdAt: FieldRef<"Form", 'DateTime'>
+    readonly updatedAt: FieldRef<"Form", 'DateTime'>
+    readonly name: FieldRef<"Form", 'String'>
+    readonly definition: FieldRef<"Form", 'Json'>
+    readonly published: FieldRef<"Form", 'Boolean'>
+    readonly businessId: FieldRef<"Form", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Form findUnique
+   */
+  export type FormFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * Filter, which Form to fetch.
+     */
+    where: FormWhereUniqueInput
+  }
+
+  /**
+   * Form findUniqueOrThrow
+   */
+  export type FormFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * Filter, which Form to fetch.
+     */
+    where: FormWhereUniqueInput
+  }
+
+  /**
+   * Form findFirst
+   */
+  export type FormFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * Filter, which Form to fetch.
+     */
+    where?: FormWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Forms to fetch.
+     */
+    orderBy?: FormOrderByWithRelationInput | FormOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Forms.
+     */
+    cursor?: FormWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Forms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Forms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Forms.
+     */
+    distinct?: FormScalarFieldEnum | FormScalarFieldEnum[]
+  }
+
+  /**
+   * Form findFirstOrThrow
+   */
+  export type FormFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * Filter, which Form to fetch.
+     */
+    where?: FormWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Forms to fetch.
+     */
+    orderBy?: FormOrderByWithRelationInput | FormOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Forms.
+     */
+    cursor?: FormWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Forms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Forms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Forms.
+     */
+    distinct?: FormScalarFieldEnum | FormScalarFieldEnum[]
+  }
+
+  /**
+   * Form findMany
+   */
+  export type FormFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * Filter, which Forms to fetch.
+     */
+    where?: FormWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Forms to fetch.
+     */
+    orderBy?: FormOrderByWithRelationInput | FormOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Forms.
+     */
+    cursor?: FormWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Forms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Forms.
+     */
+    skip?: number
+    distinct?: FormScalarFieldEnum | FormScalarFieldEnum[]
+  }
+
+  /**
+   * Form create
+   */
+  export type FormCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Form.
+     */
+    data: XOR<FormCreateInput, FormUncheckedCreateInput>
+  }
+
+  /**
+   * Form createMany
+   */
+  export type FormCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Forms.
+     */
+    data: FormCreateManyInput | FormCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Form createManyAndReturn
+   */
+  export type FormCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * The data used to create many Forms.
+     */
+    data: FormCreateManyInput | FormCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Form update
+   */
+  export type FormUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Form.
+     */
+    data: XOR<FormUpdateInput, FormUncheckedUpdateInput>
+    /**
+     * Choose, which Form to update.
+     */
+    where: FormWhereUniqueInput
+  }
+
+  /**
+   * Form updateMany
+   */
+  export type FormUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Forms.
+     */
+    data: XOR<FormUpdateManyMutationInput, FormUncheckedUpdateManyInput>
+    /**
+     * Filter which Forms to update
+     */
+    where?: FormWhereInput
+    /**
+     * Limit how many Forms to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Form updateManyAndReturn
+   */
+  export type FormUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * The data used to update Forms.
+     */
+    data: XOR<FormUpdateManyMutationInput, FormUncheckedUpdateManyInput>
+    /**
+     * Filter which Forms to update
+     */
+    where?: FormWhereInput
+    /**
+     * Limit how many Forms to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Form upsert
+   */
+  export type FormUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Form to update in case it exists.
+     */
+    where: FormWhereUniqueInput
+    /**
+     * In case the Form found by the `where` argument doesn't exist, create a new Form with this data.
+     */
+    create: XOR<FormCreateInput, FormUncheckedCreateInput>
+    /**
+     * In case the Form was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FormUpdateInput, FormUncheckedUpdateInput>
+  }
+
+  /**
+   * Form delete
+   */
+  export type FormDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+    /**
+     * Filter which Form to delete.
+     */
+    where: FormWhereUniqueInput
+  }
+
+  /**
+   * Form deleteMany
+   */
+  export type FormDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Forms to delete
+     */
+    where?: FormWhereInput
+    /**
+     * Limit how many Forms to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Form.submissions
+   */
+  export type Form$submissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    where?: FormSubmissionWhereInput
+    orderBy?: FormSubmissionOrderByWithRelationInput | FormSubmissionOrderByWithRelationInput[]
+    cursor?: FormSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FormSubmissionScalarFieldEnum | FormSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Form without action
+   */
+  export type FormDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Form
+     */
+    select?: FormSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Form
+     */
+    omit?: FormOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FormSubmission
+   */
+
+  export type AggregateFormSubmission = {
+    _count: FormSubmissionCountAggregateOutputType | null
+    _min: FormSubmissionMinAggregateOutputType | null
+    _max: FormSubmissionMaxAggregateOutputType | null
+  }
+
+  export type FormSubmissionMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    submittedAt: Date | null
+    status: string | null
+    source: string | null
+    answers: string | null
+    submitterEmail: string | null
+    formName: string | null
+    formId: string | null
+    businessId: string | null
+  }
+
+  export type FormSubmissionMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    submittedAt: Date | null
+    status: string | null
+    source: string | null
+    answers: string | null
+    submitterEmail: string | null
+    formName: string | null
+    formId: string | null
+    businessId: string | null
+  }
+
+  export type FormSubmissionCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    submittedAt: number
+    status: number
+    source: number
+    answers: number
+    submitterEmail: number
+    tags: number
+    formName: number
+    formId: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type FormSubmissionMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    submittedAt?: true
+    status?: true
+    source?: true
+    answers?: true
+    submitterEmail?: true
+    formName?: true
+    formId?: true
+    businessId?: true
+  }
+
+  export type FormSubmissionMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    submittedAt?: true
+    status?: true
+    source?: true
+    answers?: true
+    submitterEmail?: true
+    formName?: true
+    formId?: true
+    businessId?: true
+  }
+
+  export type FormSubmissionCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    submittedAt?: true
+    status?: true
+    source?: true
+    answers?: true
+    submitterEmail?: true
+    tags?: true
+    formName?: true
+    formId?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type FormSubmissionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FormSubmission to aggregate.
+     */
+    where?: FormSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormSubmissions to fetch.
+     */
+    orderBy?: FormSubmissionOrderByWithRelationInput | FormSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FormSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FormSubmissions
+    **/
+    _count?: true | FormSubmissionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FormSubmissionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FormSubmissionMaxAggregateInputType
+  }
+
+  export type GetFormSubmissionAggregateType<T extends FormSubmissionAggregateArgs> = {
+        [P in keyof T & keyof AggregateFormSubmission]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFormSubmission[P]>
+      : GetScalarType<T[P], AggregateFormSubmission[P]>
+  }
+
+
+
+
+  export type FormSubmissionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormSubmissionWhereInput
+    orderBy?: FormSubmissionOrderByWithAggregationInput | FormSubmissionOrderByWithAggregationInput[]
+    by: FormSubmissionScalarFieldEnum[] | FormSubmissionScalarFieldEnum
+    having?: FormSubmissionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FormSubmissionCountAggregateInputType | true
+    _min?: FormSubmissionMinAggregateInputType
+    _max?: FormSubmissionMaxAggregateInputType
+  }
+
+  export type FormSubmissionGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    submittedAt: Date
+    status: string
+    source: string
+    answers: string
+    submitterEmail: string | null
+    tags: string[]
+    formName: string
+    formId: string
+    businessId: string
+    _count: FormSubmissionCountAggregateOutputType | null
+    _min: FormSubmissionMinAggregateOutputType | null
+    _max: FormSubmissionMaxAggregateOutputType | null
+  }
+
+  type GetFormSubmissionGroupByPayload<T extends FormSubmissionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FormSubmissionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FormSubmissionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FormSubmissionGroupByOutputType[P]>
+            : GetScalarType<T[P], FormSubmissionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FormSubmissionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    status?: boolean
+    source?: boolean
+    answers?: boolean
+    submitterEmail?: boolean
+    tags?: boolean
+    formName?: boolean
+    formId?: boolean
+    businessId?: boolean
+    form?: boolean | FormDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["formSubmission"]>
+
+  export type FormSubmissionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    status?: boolean
+    source?: boolean
+    answers?: boolean
+    submitterEmail?: boolean
+    tags?: boolean
+    formName?: boolean
+    formId?: boolean
+    businessId?: boolean
+    form?: boolean | FormDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["formSubmission"]>
+
+  export type FormSubmissionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    status?: boolean
+    source?: boolean
+    answers?: boolean
+    submitterEmail?: boolean
+    tags?: boolean
+    formName?: boolean
+    formId?: boolean
+    businessId?: boolean
+    form?: boolean | FormDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["formSubmission"]>
+
+  export type FormSubmissionSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    status?: boolean
+    source?: boolean
+    answers?: boolean
+    submitterEmail?: boolean
+    tags?: boolean
+    formName?: boolean
+    formId?: boolean
+    businessId?: boolean
+  }
+
+  export type FormSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "submittedAt" | "status" | "source" | "answers" | "submitterEmail" | "tags" | "formName" | "formId" | "businessId", ExtArgs["result"]["formSubmission"]>
+  export type FormSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    form?: boolean | FormDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type FormSubmissionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    form?: boolean | FormDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type FormSubmissionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    form?: boolean | FormDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $FormSubmissionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FormSubmission"
+    objects: {
+      form: Prisma.$FormPayload<ExtArgs>
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      /**
+       * Overridable by CSV import.
+       */
+      submittedAt: Date
+      /**
+       * NEW | READ | ARCHIVED (FORM_STATUS_VALUES)
+       */
+      status: string
+      /**
+       * WEB | IMPORT
+       */
+      source: string
+      /**
+       * @encrypted
+       */
+      answers: string
+      /**
+       * @encrypted
+       */
+      submitterEmail: string | null
+      /**
+       * Owner-applied labels; plaintext so they can be filtered in SQL.
+       */
+      tags: string[]
+      formName: string
+      formId: string
+      businessId: string
+    }, ExtArgs["result"]["formSubmission"]>
+    composites: {}
+  }
+
+  type FormSubmissionGetPayload<S extends boolean | null | undefined | FormSubmissionDefaultArgs> = $Result.GetResult<Prisma.$FormSubmissionPayload, S>
+
+  type FormSubmissionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FormSubmissionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FormSubmissionCountAggregateInputType | true
+    }
+
+  export interface FormSubmissionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FormSubmission'], meta: { name: 'FormSubmission' } }
+    /**
+     * Find zero or one FormSubmission that matches the filter.
+     * @param {FormSubmissionFindUniqueArgs} args - Arguments to find a FormSubmission
+     * @example
+     * // Get one FormSubmission
+     * const formSubmission = await prisma.formSubmission.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FormSubmissionFindUniqueArgs>(args: SelectSubset<T, FormSubmissionFindUniqueArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FormSubmission that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FormSubmissionFindUniqueOrThrowArgs} args - Arguments to find a FormSubmission
+     * @example
+     * // Get one FormSubmission
+     * const formSubmission = await prisma.formSubmission.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FormSubmissionFindUniqueOrThrowArgs>(args: SelectSubset<T, FormSubmissionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FormSubmission that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormSubmissionFindFirstArgs} args - Arguments to find a FormSubmission
+     * @example
+     * // Get one FormSubmission
+     * const formSubmission = await prisma.formSubmission.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FormSubmissionFindFirstArgs>(args?: SelectSubset<T, FormSubmissionFindFirstArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FormSubmission that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormSubmissionFindFirstOrThrowArgs} args - Arguments to find a FormSubmission
+     * @example
+     * // Get one FormSubmission
+     * const formSubmission = await prisma.formSubmission.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FormSubmissionFindFirstOrThrowArgs>(args?: SelectSubset<T, FormSubmissionFindFirstOrThrowArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FormSubmissions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormSubmissionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FormSubmissions
+     * const formSubmissions = await prisma.formSubmission.findMany()
+     * 
+     * // Get first 10 FormSubmissions
+     * const formSubmissions = await prisma.formSubmission.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const formSubmissionWithIdOnly = await prisma.formSubmission.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FormSubmissionFindManyArgs>(args?: SelectSubset<T, FormSubmissionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FormSubmission.
+     * @param {FormSubmissionCreateArgs} args - Arguments to create a FormSubmission.
+     * @example
+     * // Create one FormSubmission
+     * const FormSubmission = await prisma.formSubmission.create({
+     *   data: {
+     *     // ... data to create a FormSubmission
+     *   }
+     * })
+     * 
+     */
+    create<T extends FormSubmissionCreateArgs>(args: SelectSubset<T, FormSubmissionCreateArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FormSubmissions.
+     * @param {FormSubmissionCreateManyArgs} args - Arguments to create many FormSubmissions.
+     * @example
+     * // Create many FormSubmissions
+     * const formSubmission = await prisma.formSubmission.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FormSubmissionCreateManyArgs>(args?: SelectSubset<T, FormSubmissionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FormSubmissions and returns the data saved in the database.
+     * @param {FormSubmissionCreateManyAndReturnArgs} args - Arguments to create many FormSubmissions.
+     * @example
+     * // Create many FormSubmissions
+     * const formSubmission = await prisma.formSubmission.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FormSubmissions and only return the `id`
+     * const formSubmissionWithIdOnly = await prisma.formSubmission.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FormSubmissionCreateManyAndReturnArgs>(args?: SelectSubset<T, FormSubmissionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FormSubmission.
+     * @param {FormSubmissionDeleteArgs} args - Arguments to delete one FormSubmission.
+     * @example
+     * // Delete one FormSubmission
+     * const FormSubmission = await prisma.formSubmission.delete({
+     *   where: {
+     *     // ... filter to delete one FormSubmission
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FormSubmissionDeleteArgs>(args: SelectSubset<T, FormSubmissionDeleteArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FormSubmission.
+     * @param {FormSubmissionUpdateArgs} args - Arguments to update one FormSubmission.
+     * @example
+     * // Update one FormSubmission
+     * const formSubmission = await prisma.formSubmission.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FormSubmissionUpdateArgs>(args: SelectSubset<T, FormSubmissionUpdateArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FormSubmissions.
+     * @param {FormSubmissionDeleteManyArgs} args - Arguments to filter FormSubmissions to delete.
+     * @example
+     * // Delete a few FormSubmissions
+     * const { count } = await prisma.formSubmission.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FormSubmissionDeleteManyArgs>(args?: SelectSubset<T, FormSubmissionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FormSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormSubmissionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FormSubmissions
+     * const formSubmission = await prisma.formSubmission.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FormSubmissionUpdateManyArgs>(args: SelectSubset<T, FormSubmissionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FormSubmissions and returns the data updated in the database.
+     * @param {FormSubmissionUpdateManyAndReturnArgs} args - Arguments to update many FormSubmissions.
+     * @example
+     * // Update many FormSubmissions
+     * const formSubmission = await prisma.formSubmission.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FormSubmissions and only return the `id`
+     * const formSubmissionWithIdOnly = await prisma.formSubmission.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FormSubmissionUpdateManyAndReturnArgs>(args: SelectSubset<T, FormSubmissionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FormSubmission.
+     * @param {FormSubmissionUpsertArgs} args - Arguments to update or create a FormSubmission.
+     * @example
+     * // Update or create a FormSubmission
+     * const formSubmission = await prisma.formSubmission.upsert({
+     *   create: {
+     *     // ... data to create a FormSubmission
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FormSubmission we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FormSubmissionUpsertArgs>(args: SelectSubset<T, FormSubmissionUpsertArgs<ExtArgs>>): Prisma__FormSubmissionClient<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FormSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormSubmissionCountArgs} args - Arguments to filter FormSubmissions to count.
+     * @example
+     * // Count the number of FormSubmissions
+     * const count = await prisma.formSubmission.count({
+     *   where: {
+     *     // ... the filter for the FormSubmissions we want to count
+     *   }
+     * })
+    **/
+    count<T extends FormSubmissionCountArgs>(
+      args?: Subset<T, FormSubmissionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FormSubmissionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FormSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormSubmissionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FormSubmissionAggregateArgs>(args: Subset<T, FormSubmissionAggregateArgs>): Prisma.PrismaPromise<GetFormSubmissionAggregateType<T>>
+
+    /**
+     * Group by FormSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormSubmissionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FormSubmissionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FormSubmissionGroupByArgs['orderBy'] }
+        : { orderBy?: FormSubmissionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FormSubmissionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFormSubmissionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FormSubmission model
+   */
+  readonly fields: FormSubmissionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FormSubmission.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FormSubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    form<T extends FormDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FormDefaultArgs<ExtArgs>>): Prisma__FormClient<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FormSubmission model
+   */
+  interface FormSubmissionFieldRefs {
+    readonly id: FieldRef<"FormSubmission", 'String'>
+    readonly createdAt: FieldRef<"FormSubmission", 'DateTime'>
+    readonly updatedAt: FieldRef<"FormSubmission", 'DateTime'>
+    readonly submittedAt: FieldRef<"FormSubmission", 'DateTime'>
+    readonly status: FieldRef<"FormSubmission", 'String'>
+    readonly source: FieldRef<"FormSubmission", 'String'>
+    readonly answers: FieldRef<"FormSubmission", 'String'>
+    readonly submitterEmail: FieldRef<"FormSubmission", 'String'>
+    readonly tags: FieldRef<"FormSubmission", 'String[]'>
+    readonly formName: FieldRef<"FormSubmission", 'String'>
+    readonly formId: FieldRef<"FormSubmission", 'String'>
+    readonly businessId: FieldRef<"FormSubmission", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FormSubmission findUnique
+   */
+  export type FormSubmissionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FormSubmission to fetch.
+     */
+    where: FormSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FormSubmission findUniqueOrThrow
+   */
+  export type FormSubmissionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FormSubmission to fetch.
+     */
+    where: FormSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FormSubmission findFirst
+   */
+  export type FormSubmissionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FormSubmission to fetch.
+     */
+    where?: FormSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormSubmissions to fetch.
+     */
+    orderBy?: FormSubmissionOrderByWithRelationInput | FormSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FormSubmissions.
+     */
+    cursor?: FormSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FormSubmissions.
+     */
+    distinct?: FormSubmissionScalarFieldEnum | FormSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * FormSubmission findFirstOrThrow
+   */
+  export type FormSubmissionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FormSubmission to fetch.
+     */
+    where?: FormSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormSubmissions to fetch.
+     */
+    orderBy?: FormSubmissionOrderByWithRelationInput | FormSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FormSubmissions.
+     */
+    cursor?: FormSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FormSubmissions.
+     */
+    distinct?: FormSubmissionScalarFieldEnum | FormSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * FormSubmission findMany
+   */
+  export type FormSubmissionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FormSubmissions to fetch.
+     */
+    where?: FormSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormSubmissions to fetch.
+     */
+    orderBy?: FormSubmissionOrderByWithRelationInput | FormSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FormSubmissions.
+     */
+    cursor?: FormSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormSubmissions.
+     */
+    skip?: number
+    distinct?: FormSubmissionScalarFieldEnum | FormSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * FormSubmission create
+   */
+  export type FormSubmissionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FormSubmission.
+     */
+    data: XOR<FormSubmissionCreateInput, FormSubmissionUncheckedCreateInput>
+  }
+
+  /**
+   * FormSubmission createMany
+   */
+  export type FormSubmissionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FormSubmissions.
+     */
+    data: FormSubmissionCreateManyInput | FormSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FormSubmission createManyAndReturn
+   */
+  export type FormSubmissionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to create many FormSubmissions.
+     */
+    data: FormSubmissionCreateManyInput | FormSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FormSubmission update
+   */
+  export type FormSubmissionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FormSubmission.
+     */
+    data: XOR<FormSubmissionUpdateInput, FormSubmissionUncheckedUpdateInput>
+    /**
+     * Choose, which FormSubmission to update.
+     */
+    where: FormSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FormSubmission updateMany
+   */
+  export type FormSubmissionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FormSubmissions.
+     */
+    data: XOR<FormSubmissionUpdateManyMutationInput, FormSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which FormSubmissions to update
+     */
+    where?: FormSubmissionWhereInput
+    /**
+     * Limit how many FormSubmissions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FormSubmission updateManyAndReturn
+   */
+  export type FormSubmissionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to update FormSubmissions.
+     */
+    data: XOR<FormSubmissionUpdateManyMutationInput, FormSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which FormSubmissions to update
+     */
+    where?: FormSubmissionWhereInput
+    /**
+     * Limit how many FormSubmissions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FormSubmission upsert
+   */
+  export type FormSubmissionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FormSubmission to update in case it exists.
+     */
+    where: FormSubmissionWhereUniqueInput
+    /**
+     * In case the FormSubmission found by the `where` argument doesn't exist, create a new FormSubmission with this data.
+     */
+    create: XOR<FormSubmissionCreateInput, FormSubmissionUncheckedCreateInput>
+    /**
+     * In case the FormSubmission was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FormSubmissionUpdateInput, FormSubmissionUncheckedUpdateInput>
+  }
+
+  /**
+   * FormSubmission delete
+   */
+  export type FormSubmissionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter which FormSubmission to delete.
+     */
+    where: FormSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FormSubmission deleteMany
+   */
+  export type FormSubmissionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FormSubmissions to delete
+     */
+    where?: FormSubmissionWhereInput
+    /**
+     * Limit how many FormSubmissions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FormSubmission without action
+   */
+  export type FormSubmissionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormSubmission
+     */
+    select?: FormSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FormSubmission
+     */
+    omit?: FormSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormSubmissionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model QuickBooksConnection
    */
 
@@ -73884,6 +76458,37 @@ export namespace Prisma {
   export type QuoteSubmissionScalarFieldEnum = (typeof QuoteSubmissionScalarFieldEnum)[keyof typeof QuoteSubmissionScalarFieldEnum]
 
 
+  export const FormScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    name: 'name',
+    definition: 'definition',
+    published: 'published',
+    businessId: 'businessId'
+  };
+
+  export type FormScalarFieldEnum = (typeof FormScalarFieldEnum)[keyof typeof FormScalarFieldEnum]
+
+
+  export const FormSubmissionScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    submittedAt: 'submittedAt',
+    status: 'status',
+    source: 'source',
+    answers: 'answers',
+    submitterEmail: 'submitterEmail',
+    tags: 'tags',
+    formName: 'formName',
+    formId: 'formId',
+    businessId: 'businessId'
+  };
+
+  export type FormSubmissionScalarFieldEnum = (typeof FormSubmissionScalarFieldEnum)[keyof typeof FormSubmissionScalarFieldEnum]
+
+
   export const QuickBooksConnectionScalarFieldEnum: {
     id: 'id',
     createdAt: 'createdAt',
@@ -74751,6 +77356,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestListRelationFilter
     quoteCalculators?: QuoteCalculatorListRelationFilter
     quoteSubmissions?: QuoteSubmissionListRelationFilter
+    forms?: FormListRelationFilter
+    formSubmissions?: FormSubmissionListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
@@ -74849,6 +77456,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
     quoteCalculators?: QuoteCalculatorOrderByRelationAggregateInput
     quoteSubmissions?: QuoteSubmissionOrderByRelationAggregateInput
+    forms?: FormOrderByRelationAggregateInput
+    formSubmissions?: FormSubmissionOrderByRelationAggregateInput
     quickBooksConnection?: QuickBooksConnectionOrderByWithRelationInput
     quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
     subscriptions?: SubscriptionOrderByRelationAggregateInput
@@ -74950,6 +77559,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestListRelationFilter
     quoteCalculators?: QuoteCalculatorListRelationFilter
     quoteSubmissions?: QuoteSubmissionListRelationFilter
+    forms?: FormListRelationFilter
+    formSubmissions?: FormSubmissionListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
@@ -79187,6 +81798,167 @@ export namespace Prisma {
     businessId?: StringWithAggregatesFilter<"QuoteSubmission"> | string
   }
 
+  export type FormWhereInput = {
+    AND?: FormWhereInput | FormWhereInput[]
+    OR?: FormWhereInput[]
+    NOT?: FormWhereInput | FormWhereInput[]
+    id?: StringFilter<"Form"> | string
+    createdAt?: DateTimeFilter<"Form"> | Date | string
+    updatedAt?: DateTimeFilter<"Form"> | Date | string
+    name?: StringFilter<"Form"> | string
+    definition?: JsonFilter<"Form">
+    published?: BoolFilter<"Form"> | boolean
+    businessId?: StringFilter<"Form"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    submissions?: FormSubmissionListRelationFilter
+  }
+
+  export type FormOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    definition?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+    submissions?: FormSubmissionOrderByRelationAggregateInput
+  }
+
+  export type FormWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FormWhereInput | FormWhereInput[]
+    OR?: FormWhereInput[]
+    NOT?: FormWhereInput | FormWhereInput[]
+    createdAt?: DateTimeFilter<"Form"> | Date | string
+    updatedAt?: DateTimeFilter<"Form"> | Date | string
+    name?: StringFilter<"Form"> | string
+    definition?: JsonFilter<"Form">
+    published?: BoolFilter<"Form"> | boolean
+    businessId?: StringFilter<"Form"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    submissions?: FormSubmissionListRelationFilter
+  }, "id">
+
+  export type FormOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    definition?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+    _count?: FormCountOrderByAggregateInput
+    _max?: FormMaxOrderByAggregateInput
+    _min?: FormMinOrderByAggregateInput
+  }
+
+  export type FormScalarWhereWithAggregatesInput = {
+    AND?: FormScalarWhereWithAggregatesInput | FormScalarWhereWithAggregatesInput[]
+    OR?: FormScalarWhereWithAggregatesInput[]
+    NOT?: FormScalarWhereWithAggregatesInput | FormScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Form"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Form"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Form"> | Date | string
+    name?: StringWithAggregatesFilter<"Form"> | string
+    definition?: JsonWithAggregatesFilter<"Form">
+    published?: BoolWithAggregatesFilter<"Form"> | boolean
+    businessId?: StringWithAggregatesFilter<"Form"> | string
+  }
+
+  export type FormSubmissionWhereInput = {
+    AND?: FormSubmissionWhereInput | FormSubmissionWhereInput[]
+    OR?: FormSubmissionWhereInput[]
+    NOT?: FormSubmissionWhereInput | FormSubmissionWhereInput[]
+    id?: StringFilter<"FormSubmission"> | string
+    createdAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    submittedAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    status?: StringFilter<"FormSubmission"> | string
+    source?: StringFilter<"FormSubmission"> | string
+    answers?: StringFilter<"FormSubmission"> | string
+    submitterEmail?: StringNullableFilter<"FormSubmission"> | string | null
+    tags?: StringNullableListFilter<"FormSubmission">
+    formName?: StringFilter<"FormSubmission"> | string
+    formId?: StringFilter<"FormSubmission"> | string
+    businessId?: StringFilter<"FormSubmission"> | string
+    form?: XOR<FormScalarRelationFilter, FormWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type FormSubmissionOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    status?: SortOrder
+    source?: SortOrder
+    answers?: SortOrder
+    submitterEmail?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    formName?: SortOrder
+    formId?: SortOrder
+    businessId?: SortOrder
+    form?: FormOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type FormSubmissionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FormSubmissionWhereInput | FormSubmissionWhereInput[]
+    OR?: FormSubmissionWhereInput[]
+    NOT?: FormSubmissionWhereInput | FormSubmissionWhereInput[]
+    createdAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    submittedAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    status?: StringFilter<"FormSubmission"> | string
+    source?: StringFilter<"FormSubmission"> | string
+    answers?: StringFilter<"FormSubmission"> | string
+    submitterEmail?: StringNullableFilter<"FormSubmission"> | string | null
+    tags?: StringNullableListFilter<"FormSubmission">
+    formName?: StringFilter<"FormSubmission"> | string
+    formId?: StringFilter<"FormSubmission"> | string
+    businessId?: StringFilter<"FormSubmission"> | string
+    form?: XOR<FormScalarRelationFilter, FormWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id">
+
+  export type FormSubmissionOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    status?: SortOrder
+    source?: SortOrder
+    answers?: SortOrder
+    submitterEmail?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    formName?: SortOrder
+    formId?: SortOrder
+    businessId?: SortOrder
+    _count?: FormSubmissionCountOrderByAggregateInput
+    _max?: FormSubmissionMaxOrderByAggregateInput
+    _min?: FormSubmissionMinOrderByAggregateInput
+  }
+
+  export type FormSubmissionScalarWhereWithAggregatesInput = {
+    AND?: FormSubmissionScalarWhereWithAggregatesInput | FormSubmissionScalarWhereWithAggregatesInput[]
+    OR?: FormSubmissionScalarWhereWithAggregatesInput[]
+    NOT?: FormSubmissionScalarWhereWithAggregatesInput | FormSubmissionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FormSubmission"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"FormSubmission"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FormSubmission"> | Date | string
+    submittedAt?: DateTimeWithAggregatesFilter<"FormSubmission"> | Date | string
+    status?: StringWithAggregatesFilter<"FormSubmission"> | string
+    source?: StringWithAggregatesFilter<"FormSubmission"> | string
+    answers?: StringWithAggregatesFilter<"FormSubmission"> | string
+    submitterEmail?: StringNullableWithAggregatesFilter<"FormSubmission"> | string | null
+    tags?: StringNullableListFilter<"FormSubmission">
+    formName?: StringWithAggregatesFilter<"FormSubmission"> | string
+    formId?: StringWithAggregatesFilter<"FormSubmission"> | string
+    businessId?: StringWithAggregatesFilter<"FormSubmission"> | string
+  }
+
   export type QuickBooksConnectionWhereInput = {
     AND?: QuickBooksConnectionWhereInput | QuickBooksConnectionWhereInput[]
     OR?: QuickBooksConnectionWhereInput[]
@@ -80738,6 +83510,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -80836,6 +83610,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -80934,6 +83710,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -81032,6 +83810,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -85890,6 +88670,182 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type FormCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    business: BusinessCreateNestedOneWithoutFormsInput
+    submissions?: FormSubmissionCreateNestedManyWithoutFormInput
+  }
+
+  export type FormUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    businessId: string
+    submissions?: FormSubmissionUncheckedCreateNestedManyWithoutFormInput
+  }
+
+  export type FormUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    business?: BusinessUpdateOneRequiredWithoutFormsNestedInput
+    submissions?: FormSubmissionUpdateManyWithoutFormNestedInput
+  }
+
+  export type FormUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+    submissions?: FormSubmissionUncheckedUpdateManyWithoutFormNestedInput
+  }
+
+  export type FormCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    businessId: string
+  }
+
+  export type FormUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type FormUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type FormSubmissionCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    form: FormCreateNestedOneWithoutSubmissionsInput
+    business: BusinessCreateNestedOneWithoutFormSubmissionsInput
+  }
+
+  export type FormSubmissionUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    formId: string
+    businessId: string
+  }
+
+  export type FormSubmissionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    form?: FormUpdateOneRequiredWithoutSubmissionsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutFormSubmissionsNestedInput
+  }
+
+  export type FormSubmissionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    formId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type FormSubmissionCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    formId: string
+    businessId: string
+  }
+
+  export type FormSubmissionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type FormSubmissionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    formId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type QuickBooksConnectionCreateInput = {
     id?: string
     createdAt?: Date | string
@@ -87728,6 +90684,18 @@ export namespace Prisma {
     none?: QuoteSubmissionWhereInput
   }
 
+  export type FormListRelationFilter = {
+    every?: FormWhereInput
+    some?: FormWhereInput
+    none?: FormWhereInput
+  }
+
+  export type FormSubmissionListRelationFilter = {
+    every?: FormSubmissionWhereInput
+    some?: FormSubmissionWhereInput
+    none?: FormSubmissionWhereInput
+  }
+
   export type QuickBooksConnectionNullableScalarRelationFilter = {
     is?: QuickBooksConnectionWhereInput | null
     isNot?: QuickBooksConnectionWhereInput | null
@@ -87847,6 +90815,14 @@ export namespace Prisma {
   }
 
   export type QuoteSubmissionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FormOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FormSubmissionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -90689,6 +93665,82 @@ export namespace Prisma {
     sentQuoteCents?: SortOrder
   }
 
+  export type FormCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    definition?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FormMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FormMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FormScalarRelationFilter = {
+    is?: FormWhereInput
+    isNot?: FormWhereInput
+  }
+
+  export type FormSubmissionCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    status?: SortOrder
+    source?: SortOrder
+    answers?: SortOrder
+    submitterEmail?: SortOrder
+    tags?: SortOrder
+    formName?: SortOrder
+    formId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FormSubmissionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    status?: SortOrder
+    source?: SortOrder
+    answers?: SortOrder
+    submitterEmail?: SortOrder
+    formName?: SortOrder
+    formId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FormSubmissionMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    status?: SortOrder
+    source?: SortOrder
+    answers?: SortOrder
+    submitterEmail?: SortOrder
+    formName?: SortOrder
+    formId?: SortOrder
+    businessId?: SortOrder
+  }
+
   export type QuickBooksConnectionCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -91891,6 +94943,20 @@ export namespace Prisma {
     connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
   }
 
+  export type FormCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<FormCreateWithoutBusinessInput, FormUncheckedCreateWithoutBusinessInput> | FormCreateWithoutBusinessInput[] | FormUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormCreateOrConnectWithoutBusinessInput | FormCreateOrConnectWithoutBusinessInput[]
+    createMany?: FormCreateManyBusinessInputEnvelope
+    connect?: FormWhereUniqueInput | FormWhereUniqueInput[]
+  }
+
+  export type FormSubmissionCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<FormSubmissionCreateWithoutBusinessInput, FormSubmissionUncheckedCreateWithoutBusinessInput> | FormSubmissionCreateWithoutBusinessInput[] | FormSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutBusinessInput | FormSubmissionCreateOrConnectWithoutBusinessInput[]
+    createMany?: FormSubmissionCreateManyBusinessInputEnvelope
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+  }
+
   export type QuickBooksConnectionCreateNestedOneWithoutBusinessInput = {
     create?: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
     connectOrCreate?: QuickBooksConnectionCreateOrConnectWithoutBusinessInput
@@ -92124,6 +95190,20 @@ export namespace Prisma {
     connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutBusinessInput | QuoteSubmissionCreateOrConnectWithoutBusinessInput[]
     createMany?: QuoteSubmissionCreateManyBusinessInputEnvelope
     connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+  }
+
+  export type FormUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<FormCreateWithoutBusinessInput, FormUncheckedCreateWithoutBusinessInput> | FormCreateWithoutBusinessInput[] | FormUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormCreateOrConnectWithoutBusinessInput | FormCreateOrConnectWithoutBusinessInput[]
+    createMany?: FormCreateManyBusinessInputEnvelope
+    connect?: FormWhereUniqueInput | FormWhereUniqueInput[]
+  }
+
+  export type FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<FormSubmissionCreateWithoutBusinessInput, FormSubmissionUncheckedCreateWithoutBusinessInput> | FormSubmissionCreateWithoutBusinessInput[] | FormSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutBusinessInput | FormSubmissionCreateOrConnectWithoutBusinessInput[]
+    createMany?: FormSubmissionCreateManyBusinessInputEnvelope
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
   }
 
   export type QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput = {
@@ -92577,6 +95657,34 @@ export namespace Prisma {
     update?: QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput | QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput | QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+  }
+
+  export type FormUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<FormCreateWithoutBusinessInput, FormUncheckedCreateWithoutBusinessInput> | FormCreateWithoutBusinessInput[] | FormUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormCreateOrConnectWithoutBusinessInput | FormCreateOrConnectWithoutBusinessInput[]
+    upsert?: FormUpsertWithWhereUniqueWithoutBusinessInput | FormUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: FormCreateManyBusinessInputEnvelope
+    set?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    disconnect?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    delete?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    connect?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    update?: FormUpdateWithWhereUniqueWithoutBusinessInput | FormUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: FormUpdateManyWithWhereWithoutBusinessInput | FormUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: FormScalarWhereInput | FormScalarWhereInput[]
+  }
+
+  export type FormSubmissionUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<FormSubmissionCreateWithoutBusinessInput, FormSubmissionUncheckedCreateWithoutBusinessInput> | FormSubmissionCreateWithoutBusinessInput[] | FormSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutBusinessInput | FormSubmissionCreateOrConnectWithoutBusinessInput[]
+    upsert?: FormSubmissionUpsertWithWhereUniqueWithoutBusinessInput | FormSubmissionUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: FormSubmissionCreateManyBusinessInputEnvelope
+    set?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    disconnect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    delete?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    update?: FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput | FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: FormSubmissionUpdateManyWithWhereWithoutBusinessInput | FormSubmissionUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
   }
 
   export type QuickBooksConnectionUpdateOneWithoutBusinessNestedInput = {
@@ -93041,6 +96149,34 @@ export namespace Prisma {
     update?: QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput | QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput | QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+  }
+
+  export type FormUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<FormCreateWithoutBusinessInput, FormUncheckedCreateWithoutBusinessInput> | FormCreateWithoutBusinessInput[] | FormUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormCreateOrConnectWithoutBusinessInput | FormCreateOrConnectWithoutBusinessInput[]
+    upsert?: FormUpsertWithWhereUniqueWithoutBusinessInput | FormUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: FormCreateManyBusinessInputEnvelope
+    set?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    disconnect?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    delete?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    connect?: FormWhereUniqueInput | FormWhereUniqueInput[]
+    update?: FormUpdateWithWhereUniqueWithoutBusinessInput | FormUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: FormUpdateManyWithWhereWithoutBusinessInput | FormUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: FormScalarWhereInput | FormScalarWhereInput[]
+  }
+
+  export type FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<FormSubmissionCreateWithoutBusinessInput, FormSubmissionUncheckedCreateWithoutBusinessInput> | FormSubmissionCreateWithoutBusinessInput[] | FormSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutBusinessInput | FormSubmissionCreateOrConnectWithoutBusinessInput[]
+    upsert?: FormSubmissionUpsertWithWhereUniqueWithoutBusinessInput | FormSubmissionUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: FormSubmissionCreateManyBusinessInputEnvelope
+    set?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    disconnect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    delete?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    update?: FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput | FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: FormSubmissionUpdateManyWithWhereWithoutBusinessInput | FormSubmissionUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
   }
 
   export type QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput = {
@@ -95608,6 +98744,99 @@ export namespace Prisma {
     deleteMany?: QuickBooksInvoiceScalarWhereInput | QuickBooksInvoiceScalarWhereInput[]
   }
 
+  export type BusinessCreateNestedOneWithoutFormsInput = {
+    create?: XOR<BusinessCreateWithoutFormsInput, BusinessUncheckedCreateWithoutFormsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutFormsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type FormSubmissionCreateNestedManyWithoutFormInput = {
+    create?: XOR<FormSubmissionCreateWithoutFormInput, FormSubmissionUncheckedCreateWithoutFormInput> | FormSubmissionCreateWithoutFormInput[] | FormSubmissionUncheckedCreateWithoutFormInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutFormInput | FormSubmissionCreateOrConnectWithoutFormInput[]
+    createMany?: FormSubmissionCreateManyFormInputEnvelope
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+  }
+
+  export type FormSubmissionUncheckedCreateNestedManyWithoutFormInput = {
+    create?: XOR<FormSubmissionCreateWithoutFormInput, FormSubmissionUncheckedCreateWithoutFormInput> | FormSubmissionCreateWithoutFormInput[] | FormSubmissionUncheckedCreateWithoutFormInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutFormInput | FormSubmissionCreateOrConnectWithoutFormInput[]
+    createMany?: FormSubmissionCreateManyFormInputEnvelope
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutFormsNestedInput = {
+    create?: XOR<BusinessCreateWithoutFormsInput, BusinessUncheckedCreateWithoutFormsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutFormsInput
+    upsert?: BusinessUpsertWithoutFormsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutFormsInput, BusinessUpdateWithoutFormsInput>, BusinessUncheckedUpdateWithoutFormsInput>
+  }
+
+  export type FormSubmissionUpdateManyWithoutFormNestedInput = {
+    create?: XOR<FormSubmissionCreateWithoutFormInput, FormSubmissionUncheckedCreateWithoutFormInput> | FormSubmissionCreateWithoutFormInput[] | FormSubmissionUncheckedCreateWithoutFormInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutFormInput | FormSubmissionCreateOrConnectWithoutFormInput[]
+    upsert?: FormSubmissionUpsertWithWhereUniqueWithoutFormInput | FormSubmissionUpsertWithWhereUniqueWithoutFormInput[]
+    createMany?: FormSubmissionCreateManyFormInputEnvelope
+    set?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    disconnect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    delete?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    update?: FormSubmissionUpdateWithWhereUniqueWithoutFormInput | FormSubmissionUpdateWithWhereUniqueWithoutFormInput[]
+    updateMany?: FormSubmissionUpdateManyWithWhereWithoutFormInput | FormSubmissionUpdateManyWithWhereWithoutFormInput[]
+    deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
+  }
+
+  export type FormSubmissionUncheckedUpdateManyWithoutFormNestedInput = {
+    create?: XOR<FormSubmissionCreateWithoutFormInput, FormSubmissionUncheckedCreateWithoutFormInput> | FormSubmissionCreateWithoutFormInput[] | FormSubmissionUncheckedCreateWithoutFormInput[]
+    connectOrCreate?: FormSubmissionCreateOrConnectWithoutFormInput | FormSubmissionCreateOrConnectWithoutFormInput[]
+    upsert?: FormSubmissionUpsertWithWhereUniqueWithoutFormInput | FormSubmissionUpsertWithWhereUniqueWithoutFormInput[]
+    createMany?: FormSubmissionCreateManyFormInputEnvelope
+    set?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    disconnect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    delete?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+    update?: FormSubmissionUpdateWithWhereUniqueWithoutFormInput | FormSubmissionUpdateWithWhereUniqueWithoutFormInput[]
+    updateMany?: FormSubmissionUpdateManyWithWhereWithoutFormInput | FormSubmissionUpdateManyWithWhereWithoutFormInput[]
+    deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
+  }
+
+  export type FormSubmissionCreatetagsInput = {
+    set: string[]
+  }
+
+  export type FormCreateNestedOneWithoutSubmissionsInput = {
+    create?: XOR<FormCreateWithoutSubmissionsInput, FormUncheckedCreateWithoutSubmissionsInput>
+    connectOrCreate?: FormCreateOrConnectWithoutSubmissionsInput
+    connect?: FormWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutFormSubmissionsInput = {
+    create?: XOR<BusinessCreateWithoutFormSubmissionsInput, BusinessUncheckedCreateWithoutFormSubmissionsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutFormSubmissionsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type FormSubmissionUpdatetagsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type FormUpdateOneRequiredWithoutSubmissionsNestedInput = {
+    create?: XOR<FormCreateWithoutSubmissionsInput, FormUncheckedCreateWithoutSubmissionsInput>
+    connectOrCreate?: FormCreateOrConnectWithoutSubmissionsInput
+    upsert?: FormUpsertWithoutSubmissionsInput
+    connect?: FormWhereUniqueInput
+    update?: XOR<XOR<FormUpdateToOneWithWhereWithoutSubmissionsInput, FormUpdateWithoutSubmissionsInput>, FormUncheckedUpdateWithoutSubmissionsInput>
+  }
+
+  export type BusinessUpdateOneRequiredWithoutFormSubmissionsNestedInput = {
+    create?: XOR<BusinessCreateWithoutFormSubmissionsInput, BusinessUncheckedCreateWithoutFormSubmissionsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutFormSubmissionsInput
+    upsert?: BusinessUpsertWithoutFormSubmissionsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutFormSubmissionsInput, BusinessUpdateWithoutFormSubmissionsInput>, BusinessUncheckedUpdateWithoutFormSubmissionsInput>
+  }
+
   export type BusinessCreateNestedOneWithoutQuickBooksConnectionInput = {
     create?: XOR<BusinessCreateWithoutQuickBooksConnectionInput, BusinessUncheckedCreateWithoutQuickBooksConnectionInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutQuickBooksConnectionInput
@@ -96905,6 +100134,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -97002,6 +100233,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -97164,6 +100397,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -97261,6 +100496,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -98746,6 +101983,74 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FormCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    submissions?: FormSubmissionCreateNestedManyWithoutFormInput
+  }
+
+  export type FormUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    submissions?: FormSubmissionUncheckedCreateNestedManyWithoutFormInput
+  }
+
+  export type FormCreateOrConnectWithoutBusinessInput = {
+    where: FormWhereUniqueInput
+    create: XOR<FormCreateWithoutBusinessInput, FormUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type FormCreateManyBusinessInputEnvelope = {
+    data: FormCreateManyBusinessInput | FormCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FormSubmissionCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    form: FormCreateNestedOneWithoutSubmissionsInput
+  }
+
+  export type FormSubmissionUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    formId: string
+  }
+
+  export type FormSubmissionCreateOrConnectWithoutBusinessInput = {
+    where: FormSubmissionWhereUniqueInput
+    create: XOR<FormSubmissionCreateWithoutBusinessInput, FormSubmissionUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type FormSubmissionCreateManyBusinessInputEnvelope = {
+    data: FormSubmissionCreateManyBusinessInput | FormSubmissionCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type QuickBooksConnectionCreateWithoutBusinessInput = {
     id?: string
     createdAt?: Date | string
@@ -100069,6 +103374,69 @@ export namespace Prisma {
     businessId?: StringFilter<"QuoteSubmission"> | string
   }
 
+  export type FormUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: FormWhereUniqueInput
+    update: XOR<FormUpdateWithoutBusinessInput, FormUncheckedUpdateWithoutBusinessInput>
+    create: XOR<FormCreateWithoutBusinessInput, FormUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type FormUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: FormWhereUniqueInput
+    data: XOR<FormUpdateWithoutBusinessInput, FormUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type FormUpdateManyWithWhereWithoutBusinessInput = {
+    where: FormScalarWhereInput
+    data: XOR<FormUpdateManyMutationInput, FormUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type FormScalarWhereInput = {
+    AND?: FormScalarWhereInput | FormScalarWhereInput[]
+    OR?: FormScalarWhereInput[]
+    NOT?: FormScalarWhereInput | FormScalarWhereInput[]
+    id?: StringFilter<"Form"> | string
+    createdAt?: DateTimeFilter<"Form"> | Date | string
+    updatedAt?: DateTimeFilter<"Form"> | Date | string
+    name?: StringFilter<"Form"> | string
+    definition?: JsonFilter<"Form">
+    published?: BoolFilter<"Form"> | boolean
+    businessId?: StringFilter<"Form"> | string
+  }
+
+  export type FormSubmissionUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: FormSubmissionWhereUniqueInput
+    update: XOR<FormSubmissionUpdateWithoutBusinessInput, FormSubmissionUncheckedUpdateWithoutBusinessInput>
+    create: XOR<FormSubmissionCreateWithoutBusinessInput, FormSubmissionUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: FormSubmissionWhereUniqueInput
+    data: XOR<FormSubmissionUpdateWithoutBusinessInput, FormSubmissionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type FormSubmissionUpdateManyWithWhereWithoutBusinessInput = {
+    where: FormSubmissionScalarWhereInput
+    data: XOR<FormSubmissionUpdateManyMutationInput, FormSubmissionUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type FormSubmissionScalarWhereInput = {
+    AND?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
+    OR?: FormSubmissionScalarWhereInput[]
+    NOT?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
+    id?: StringFilter<"FormSubmission"> | string
+    createdAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    submittedAt?: DateTimeFilter<"FormSubmission"> | Date | string
+    status?: StringFilter<"FormSubmission"> | string
+    source?: StringFilter<"FormSubmission"> | string
+    answers?: StringFilter<"FormSubmission"> | string
+    submitterEmail?: StringNullableFilter<"FormSubmission"> | string | null
+    tags?: StringNullableListFilter<"FormSubmission">
+    formName?: StringFilter<"FormSubmission"> | string
+    formId?: StringFilter<"FormSubmission"> | string
+    businessId?: StringFilter<"FormSubmission"> | string
+  }
+
   export type QuickBooksConnectionUpsertWithoutBusinessInput = {
     update: XOR<QuickBooksConnectionUpdateWithoutBusinessInput, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
     create: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
@@ -100455,6 +103823,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -100552,6 +103922,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -100665,6 +104037,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -100762,6 +104136,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -100859,6 +104235,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -100956,6 +104334,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -101069,6 +104449,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -101166,6 +104548,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -101300,6 +104684,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -101397,6 +104783,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -101925,6 +105313,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -102022,6 +105412,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -102762,6 +106154,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -102859,6 +106253,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -102994,6 +106390,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -103091,6 +106489,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -103496,6 +106896,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -103593,6 +106995,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -103758,6 +107162,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -103855,6 +107261,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -104085,6 +107493,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -104182,6 +107592,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -104295,6 +107707,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -104392,6 +107806,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -104489,6 +107905,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -104586,6 +108004,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -104747,6 +108167,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -104844,6 +108266,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -104992,6 +108416,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -105089,6 +108515,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -105243,6 +108671,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -105340,6 +108770,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -105538,6 +108970,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -105635,6 +109069,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -105855,6 +109291,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -105952,6 +109390,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -106092,6 +109532,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -106189,6 +109631,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -106779,6 +110223,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -106876,6 +110322,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -107577,6 +111025,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -107674,6 +111124,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -108253,6 +111705,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -108350,6 +111804,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -109366,6 +112822,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -109463,6 +112921,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -109703,6 +113163,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -109800,6 +113262,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -110133,6 +113597,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -110230,6 +113696,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -110670,6 +114138,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -110767,6 +114237,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -111006,6 +114478,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -111103,6 +114577,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -111362,6 +114838,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -111459,6 +114937,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -111588,6 +115068,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -111685,6 +115167,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -111798,6 +115282,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -111895,6 +115381,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -111992,6 +115480,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -112089,6 +115579,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -112202,6 +115694,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -112299,6 +115793,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -112396,6 +115892,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -112493,6 +115991,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -112649,6 +116149,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -112746,6 +116248,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -112892,6 +116396,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -112989,6 +116495,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -113102,6 +116610,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -113199,6 +116709,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -113296,6 +116808,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -113393,6 +116907,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -113538,6 +117054,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -113635,6 +117153,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -113847,6 +117367,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -113944,6 +117466,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -114120,6 +117644,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -114217,6 +117743,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -114383,6 +117911,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -114480,6 +118010,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -114656,6 +118188,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -114753,6 +118287,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -115605,6 +119141,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -115702,6 +119240,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -115858,6 +119398,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -115955,6 +119497,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -116101,6 +119645,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -116198,6 +119744,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -116311,6 +119859,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -116408,6 +119958,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -116505,6 +120057,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -116602,6 +120156,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -116737,6 +120293,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -116834,6 +120392,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -117106,6 +120666,8 @@ export namespace Prisma {
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -117203,6 +120765,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -117423,6 +120987,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -117520,6 +121086,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -117617,6 +121185,8 @@ export namespace Prisma {
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -117714,6 +121284,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -117879,6 +121451,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -117976,6 +121550,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -118178,6 +121754,8 @@ export namespace Prisma {
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -118275,6 +121853,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -118435,6 +122015,8 @@ export namespace Prisma {
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -118532,6 +122114,942 @@ export namespace Prisma {
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutFormsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutFormsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutFormsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutFormsInput, BusinessUncheckedCreateWithoutFormsInput>
+  }
+
+  export type FormSubmissionCreateWithoutFormInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    business: BusinessCreateNestedOneWithoutFormSubmissionsInput
+  }
+
+  export type FormSubmissionUncheckedCreateWithoutFormInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    businessId: string
+  }
+
+  export type FormSubmissionCreateOrConnectWithoutFormInput = {
+    where: FormSubmissionWhereUniqueInput
+    create: XOR<FormSubmissionCreateWithoutFormInput, FormSubmissionUncheckedCreateWithoutFormInput>
+  }
+
+  export type FormSubmissionCreateManyFormInputEnvelope = {
+    data: FormSubmissionCreateManyFormInput | FormSubmissionCreateManyFormInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutFormsInput = {
+    update: XOR<BusinessUpdateWithoutFormsInput, BusinessUncheckedUpdateWithoutFormsInput>
+    create: XOR<BusinessCreateWithoutFormsInput, BusinessUncheckedCreateWithoutFormsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutFormsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutFormsInput, BusinessUncheckedUpdateWithoutFormsInput>
+  }
+
+  export type BusinessUpdateWithoutFormsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutFormsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type FormSubmissionUpsertWithWhereUniqueWithoutFormInput = {
+    where: FormSubmissionWhereUniqueInput
+    update: XOR<FormSubmissionUpdateWithoutFormInput, FormSubmissionUncheckedUpdateWithoutFormInput>
+    create: XOR<FormSubmissionCreateWithoutFormInput, FormSubmissionUncheckedCreateWithoutFormInput>
+  }
+
+  export type FormSubmissionUpdateWithWhereUniqueWithoutFormInput = {
+    where: FormSubmissionWhereUniqueInput
+    data: XOR<FormSubmissionUpdateWithoutFormInput, FormSubmissionUncheckedUpdateWithoutFormInput>
+  }
+
+  export type FormSubmissionUpdateManyWithWhereWithoutFormInput = {
+    where: FormSubmissionScalarWhereInput
+    data: XOR<FormSubmissionUpdateManyMutationInput, FormSubmissionUncheckedUpdateManyWithoutFormInput>
+  }
+
+  export type FormCreateWithoutSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    business: BusinessCreateNestedOneWithoutFormsInput
+  }
+
+  export type FormUncheckedCreateWithoutSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    businessId: string
+  }
+
+  export type FormCreateOrConnectWithoutSubmissionsInput = {
+    where: FormWhereUniqueInput
+    create: XOR<FormCreateWithoutSubmissionsInput, FormUncheckedCreateWithoutSubmissionsInput>
+  }
+
+  export type BusinessCreateWithoutFormSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutFormSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutFormSubmissionsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutFormSubmissionsInput, BusinessUncheckedCreateWithoutFormSubmissionsInput>
+  }
+
+  export type FormUpsertWithoutSubmissionsInput = {
+    update: XOR<FormUpdateWithoutSubmissionsInput, FormUncheckedUpdateWithoutSubmissionsInput>
+    create: XOR<FormCreateWithoutSubmissionsInput, FormUncheckedCreateWithoutSubmissionsInput>
+    where?: FormWhereInput
+  }
+
+  export type FormUpdateToOneWithWhereWithoutSubmissionsInput = {
+    where?: FormWhereInput
+    data: XOR<FormUpdateWithoutSubmissionsInput, FormUncheckedUpdateWithoutSubmissionsInput>
+  }
+
+  export type FormUpdateWithoutSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    business?: BusinessUpdateOneRequiredWithoutFormsNestedInput
+  }
+
+  export type FormUncheckedUpdateWithoutSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BusinessUpsertWithoutFormSubmissionsInput = {
+    update: XOR<BusinessUpdateWithoutFormSubmissionsInput, BusinessUncheckedUpdateWithoutFormSubmissionsInput>
+    create: XOR<BusinessCreateWithoutFormSubmissionsInput, BusinessUncheckedCreateWithoutFormSubmissionsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutFormSubmissionsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutFormSubmissionsInput, BusinessUncheckedUpdateWithoutFormSubmissionsInput>
+  }
+
+  export type BusinessUpdateWithoutFormSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutFormSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -118630,6 +123148,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
@@ -118727,6 +123247,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
@@ -118840,6 +123362,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
@@ -118937,6 +123461,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
@@ -119034,6 +123560,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
@@ -119131,6 +123659,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
@@ -119291,6 +123821,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
@@ -119388,6 +123920,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
@@ -119538,6 +124072,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
@@ -119635,6 +124171,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
@@ -120088,6 +124626,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
@@ -120185,6 +124725,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
@@ -120570,6 +125112,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -120667,6 +125211,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -120780,6 +125326,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -120877,6 +125425,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -120974,6 +125524,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -121071,6 +125623,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -121222,6 +125776,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -121319,6 +125875,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -121538,6 +126096,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
@@ -121635,6 +126195,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
@@ -121943,6 +126505,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
@@ -122040,6 +126604,8 @@ export namespace Prisma {
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -123118,6 +127684,29 @@ export namespace Prisma {
     calculatorName: string
     showEstimateToCustomer?: boolean
     calculatorId?: string | null
+  }
+
+  export type FormCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+  }
+
+  export type FormSubmissionCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    formId: string
   }
 
   export type QuickBooksInvoiceCreateManyBusinessInput = {
@@ -124609,6 +129198,77 @@ export namespace Prisma {
     calculatorName?: StringFieldUpdateOperationsInput | string
     showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
     calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type FormUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    submissions?: FormSubmissionUpdateManyWithoutFormNestedInput
+  }
+
+  export type FormUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    submissions?: FormSubmissionUncheckedUpdateManyWithoutFormNestedInput
+  }
+
+  export type FormUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type FormSubmissionUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    form?: FormUpdateOneRequiredWithoutSubmissionsNestedInput
+  }
+
+  export type FormSubmissionUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    formId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type FormSubmissionUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    formId?: StringFieldUpdateOperationsInput | string
   }
 
   export type QuickBooksInvoiceUpdateWithoutBusinessInput = {
@@ -128024,6 +132684,62 @@ export namespace Prisma {
     qboSyncToken?: NullableStringFieldUpdateOperationsInput | string | null
     lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type FormSubmissionCreateManyFormInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string
+    status?: string
+    source?: string
+    answers: string
+    submitterEmail?: string | null
+    tags?: FormSubmissionCreatetagsInput | string[]
+    formName: string
+    businessId: string
+  }
+
+  export type FormSubmissionUpdateWithoutFormInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUpdateOneRequiredWithoutFormSubmissionsNestedInput
+  }
+
+  export type FormSubmissionUncheckedUpdateWithoutFormInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type FormSubmissionUncheckedUpdateManyWithoutFormInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    answers?: StringFieldUpdateOperationsInput | string
+    submitterEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: FormSubmissionUpdatetagsInput | string[]
+    formName?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type OrderCreateManySubscriptionInput = {

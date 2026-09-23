@@ -286,6 +286,8 @@ model Business {
   backInStockRequests   BackInStockRequest[]
   quoteCalculators      QuoteCalculator[]
   quoteSubmissions      QuoteSubmission[]
+  forms                 Form[]
+  formSubmissions       FormSubmission[]
   quickBooksConnection  QuickBooksConnection?
   quickBooksInvoices    QuickBooksInvoice[]
   subscriptions         Subscription[]
@@ -1762,6 +1764,59 @@ model QuoteSubmission {
   @@index([businessId, status, createdAt]) // inbox: status filter + newest-first
   @@index([businessId, createdAt]) // inbox: unfiltered listing
   @@index([calculatorId]) // SetNull fan-out on calculator delete
+}
+
+/// Owner-built form embedded in CMS pages via the TipTap `form` node.
+model Form {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+  /// Versioned definition blob — `formDefinitionSchema` in src/lib/validators/form.ts
+  definition Json
+  published  Boolean @default(false)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  submissions FormSubmission[]
+
+  @@index([businessId])
+}
+
+/// One entry for a Form. `answers` is an encrypted JSON string of
+/// FormAnswerSnapshot[] ({ fieldId, label, type, value }) so old entries still
+/// render after the form is edited. Search on answers happens in-app after
+/// decryption; status/tags/submittedAt are plaintext for SQL-side filtering.
+model FormSubmission {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Overridable by CSV import.
+  submittedAt DateTime @default(now())
+  /// NEW | READ | ARCHIVED (FORM_STATUS_VALUES)
+  status      String   @default("NEW")
+  /// WEB | IMPORT
+  source      String   @default("WEB")
+
+  answers        String   @db.Text /// @encrypted
+  submitterEmail String? /// @encrypted
+  /// Owner-applied labels; plaintext so they can be filtered in SQL.
+  tags           String[] @default([])
+
+  formName String
+
+  formId String
+  form   Form   @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, formId, submittedAt])
+  @@index([businessId, formId, status])
+  @@index([tags], type: Gin)
 }
 
 /// One QuickBooks Online company connection per business (1:1). Updated in

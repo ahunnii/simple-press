@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -26,6 +27,15 @@ export function DefaultProductActions({
     justAdded,
   } = useProduct(product);
 
+  const hasVariants = Object.keys(variantOptions).length > 0;
+
+  // `DefaultVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
   return (
     <>
       {additionalFields?.comingSoon ? (
@@ -35,10 +45,11 @@ export function DefaultProductActions({
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
-      ) : Object.keys(variantOptions).length > 0 ? (
+      ) : hasVariants ? (
         <DefaultVariantSelector
           product={product}
           setSelectedVariantId={setSelectedVariantId}
+          onQuantityChange={setVariantQuantity}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -140,7 +151,7 @@ export function DefaultProductActions({
       <SubscribePanel
         product={product}
         selectedVariantId={selectedVariantId}
-        quantity={quantity}
+        quantity={subscribeQuantity}
         available={inStock}
         className="mt-4"
       />

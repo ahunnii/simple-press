@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -7,6 +8,7 @@ import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { NoiseVariantSelector } from "./noise-variant-selector";
 
@@ -25,9 +27,19 @@ export function NoiseProductActions({
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    selectedVariantId,
     additionalFields,
     justAdded,
   } = useProduct(product);
+
+  const hasVariants = Object.keys(variantOptions).length > 0;
+
+  // `NoiseVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
   /* Price split: major / minor for styled display */
   const priceStr = formatPrice(displayPrice);
@@ -96,10 +108,11 @@ export function NoiseProductActions({
             This piece isn&apos;t available yet. Check back soon.
           </p>
         </div>
-      ) : Object.keys(variantOptions).length > 0 ? (
+      ) : hasVariants ? (
         <NoiseVariantSelector
           product={product}
           setSelectedVariantId={setSelectedVariantId}
+          onQuantityChange={setVariantQuantity}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -201,6 +214,18 @@ export function NoiseProductActions({
             )}
         </div>
       )}
+
+      {/* `noise-subscribe-panel` (globals.css) scopes the shared token-only
+          panel to noise's own ink/bone palette, since noise doesn't remap
+          the shadcn tokens globally. */}
+      <SubscribePanel
+        product={product}
+        selectedVariantId={selectedVariantId}
+        quantity={subscribeQuantity}
+        available={inStock}
+        className="noise-subscribe-panel mt-2"
+        ctaClassName="inline-flex h-11 items-center justify-center gap-2 rounded-none border-[1.5px] border-[var(--vn-ink)] bg-[var(--vn-ink)] px-5 font-mono text-[11px] tracking-[0.24em] text-[var(--vn-bone)] uppercase transition-colors hover:border-[var(--vn-steel)] hover:bg-[var(--vn-steel)] focus-visible:ring-2 focus-visible:ring-[var(--vn-ink)] focus-visible:ring-offset-2 focus-visible:outline-none"
+      />
 
       {/* Trust badges from additionalFields */}
       {trustBadges?.length > 0 && (

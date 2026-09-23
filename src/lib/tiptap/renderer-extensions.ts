@@ -6,6 +6,8 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 
+import { VideoNode } from "./video-node";
+
 /**
  * The node/mark-defining half of `TiptapRenderer`'s extension list.
  *
@@ -17,7 +19,9 @@ import StarterKit from "@tiptap/starter-kit";
  * renderer, so the schema it derives is still the complete one.
  *
  * This module must stay free of React, tRPC and `server-only` — it is the
- * input to `getSchema()` on both the server and the client.
+ * input to `getSchema()` on both the server and the client. `Form` (like
+ * Gallery/Embed/QuoteCalculator) is also appended back on in the renderer
+ * rather than declared here, for the same reason.
  */
 export const RENDERER_BASE_EXTENSIONS = [
   // StarterKit now bundles its own `link` and `underline`, so registering the
@@ -34,6 +38,7 @@ export const RENDERER_BASE_EXTENSIONS = [
     protocols: ["http", "https", "mailto", "tel"],
   }),
   Image,
+  VideoNode,
   Underline,
   TextStyle,
   TextAlign.configure({

@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { SledgeVariantSelector } from "./sledge-variant-selector";
 
@@ -21,12 +23,38 @@ export function SledgeProductActions({
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    selectedVariantId,
     additionalFields,
     justAdded,
   } = useProduct(product);
 
+  const hasVariants = Object.keys(variantOptions).length > 0;
+
+  // `SledgeVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
   const stockQty = product.trackInventory ? (product.inventoryQty ?? 0) : null;
   const showStockCount = stockQty !== null && stockQty > 0 && inStock;
+
+  // `sledge-subscribe-panel` (globals.css) scopes the shared token-only
+  // panel to sledge's own coral/ink palette, since sledge doesn't remap the
+  // shadcn tokens globally. `sl-btn` is sledge's own CTA class (used by
+  // every other primary button in this template) so the Subscribe button
+  // matches Add to Cart exactly.
+  const subscribePanel = (
+    <SubscribePanel
+      product={product}
+      selectedVariantId={selectedVariantId}
+      quantity={subscribeQuantity}
+      available={inStock}
+      className="sledge-subscribe-panel mt-3"
+      ctaClassName="sl-btn"
+    />
+  );
 
   if (additionalFields?.comingSoon) {
     return (
@@ -41,12 +69,16 @@ export function SledgeProductActions({
     );
   }
 
-  if (Object.keys(variantOptions).length > 0) {
+  if (hasVariants) {
     return (
-      <SledgeVariantSelector
-        product={product}
-        setSelectedVariantId={setSelectedVariantId}
-      />
+      <>
+        <SledgeVariantSelector
+          product={product}
+          setSelectedVariantId={setSelectedVariantId}
+          onQuantityChange={setVariantQuantity}
+        />
+        {subscribePanel}
+      </>
     );
   }
 
@@ -154,6 +186,8 @@ export function SledgeProductActions({
           />
         </>
       )}
+
+      {subscribePanel}
     </div>
   );
 }

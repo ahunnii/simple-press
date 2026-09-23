@@ -168,19 +168,13 @@ export function NoiseProductCard({ product, index }: Props) {
         )}
       </div>
 
-      {/* Meta — grid: name (1fr) + price (auto), sub row spans both */}
-      <div
-        className="mt-3"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) auto",
-          gap: "4px 12px",
-          alignItems: "baseline",
-        }}
-      >
+      {/* Meta — grid: name (1fr) + price (auto), sub row spans both. Below
+          sm the 2-up cards are ~150px wide, so name and price stack instead
+          of the price squeezing the name down to a couple of letters. */}
+      <div className="mt-3 grid grid-cols-1 items-baseline gap-x-3 gap-y-1 sm:grid-cols-[minmax(0,1fr)_auto]">
         {/* Product name — stretched link covers the whole card via ::after */}
         <h3
-          className="min-w-0 truncate font-serif leading-[1.1] italic transition-opacity group-hover:opacity-60"
+          className="line-clamp-2 min-w-0 font-serif leading-[1.1] italic transition-opacity group-hover:opacity-60 sm:truncate"
           style={{ fontSize: "22px", letterSpacing: "-0.005em" }}
         >
           <Link href={`/shop/${product.slug}`} className="vn-card-link">
@@ -207,7 +201,7 @@ export function NoiseProductCard({ product, index }: Props) {
 
         {/* Sub row — tagline left, swatches right */}
         <div
-          className="col-span-2 flex min-w-0 items-center justify-between gap-3.5"
+          className="flex min-w-0 items-center justify-between gap-3.5 sm:col-span-2"
           style={{ marginTop: "2px" }}
         >
           <span

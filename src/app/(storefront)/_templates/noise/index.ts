@@ -3,6 +3,10 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { noiseAboutData, noiseAboutFieldGroups } from "./about";
 import { noiseBlogData, noiseBlogFieldGroups } from "./blog";
+import {
+  noiseCollectionsData,
+  noiseCollectionsFieldGroups,
+} from "./collections";
 import { noiseHomepageData, noiseHomepageFieldGroups } from "./homepage";
 
 // ─── Contact Page ─────────────────────────────────────────────────────────────
@@ -234,6 +238,7 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...noiseHomepageFieldGroups,
   ...noiseAboutFieldGroups,
   ...noiseBlogFieldGroups,
+  ...noiseCollectionsFieldGroups,
   {
     id: "global.branding",
     title: "Global Branding",
@@ -289,6 +294,7 @@ export const noiseData = {
     ...contactPageData,
     ...contactFaqData,
     ...shopListingData,
+    ...noiseCollectionsData,
     ...noiseBlogData,
     ...testimonialsPageData,
     ...globalBrandingData,

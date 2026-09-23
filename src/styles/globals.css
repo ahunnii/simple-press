@@ -2266,6 +2266,19 @@
   --font-mono: "JetBrains Mono", "JetBrains Mono Fallback";
 }
 
+/* `SubscribePanel` (shared component, product page) is styled with shadcn
+   design tokens only — noise never remaps those globally, so scope the
+   remap to the panel itself rather than the whole template. */
+.noise .noise-subscribe-panel {
+  --card: var(--vn-paper);
+  --card-foreground: var(--vn-ink);
+  --muted-foreground: var(--vn-steel-mist);
+  --border: var(--vn-rule);
+  --primary: var(--vn-ink);
+  --primary-foreground: var(--vn-bone);
+  --ring: var(--vn-ink);
+}
+
 /* ─── Announcement bar ──────────────────────────────────────────────────── */
 .noise .vn-topbar,
 .visual-noise .vn-topbar {
@@ -2731,7 +2744,10 @@
 .visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-count,
 .visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-num,
 .visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-count {
-  color: var(--vn-steel-mist);
+  /* Card text colours are classes, not inline styles, so these hover rules
+     win. Steel-mist on ink read ~3:1 at 10px — bone at 72% clears AA. */
+  color: var(--vn-bone);
+  opacity: 0.72;
 }
 
 .noise .vn-cat-card:hover .vn-cat-meta .vn-cat-name,
@@ -2889,6 +2905,21 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* `SubscribePanel` (shared component, product page) is styled with shadcn
+   design tokens only — pollen has no CSS vars for its own palette (see
+   note above), so the remap below uses its literal hex values directly,
+   scoped to the panel itself rather than the whole template. */
+.pollen .pollen-subscribe-panel {
+  --card: #ffffff;
+  --card-foreground: #2a351f;
+  --muted-foreground: #4c566a;
+  --border: rgb(42 53 31 / 0.2);
+  --primary: #215935;
+  --primary-foreground: #ffffff;
+  --ring: #215935;
+  --radius: 0.75rem;
 }
 
 .elegant {
@@ -4545,6 +4576,19 @@
     background: var(--sl-coral-aa-hover);
   }
 
+  /* `SubscribePanel` (shared component, product page) is styled with shadcn
+     design tokens only — sledge never remaps those globally, so scope the
+     remap to the panel itself rather than the whole template. */
+  .sledge .sledge-subscribe-panel {
+    --card: #ffffff;
+    --card-foreground: var(--sl-ink);
+    --muted-foreground: var(--sl-ink-soft);
+    --border: var(--sl-border-input);
+    --primary: var(--sl-coral-aa);
+    --primary-foreground: #ffffff;
+    --ring: var(--sl-coral-aa);
+  }
+
   /* ─── Sledge: focus ring ────────────────────────────────────────────────── */
   .sledge *:focus-visible {
     outline: 2px solid var(--sl-coral-aa);
@@ -5216,6 +5260,50 @@
 .vii .vii-nav-link:focus-visible::after,
 .vii .vii-nav-link[data-current="true"]::after {
   transform: scaleX(1);
+}
+
+/* Scopes the shared, token-only `SubscribePanel` (see its own doc comment) to
+   vii's palette. Mirrors `.olive .olive-subscribe-panel`: vii styles its own
+   product-page controls with inline styles / `--vii-*` tokens rather than
+   remapping the shadcn tokens at the `.vii` template scope (the `.vii-account`
+   bridge above is scoped to account pages only), so without this the panel
+   would render in the plain, unthemed shadcn colors. */
+.vii .vii-subscribe-panel {
+  --card: var(--vii-paper);
+  --card-foreground: var(--vii-navy);
+  --muted-foreground: var(--vii-ink-soft);
+  --border: var(--vii-hairline-strong);
+  --primary: var(--vii-copper-deep);
+  --primary-foreground: var(--vii-paper);
+  --ring: var(--vii-copper);
+  --radius: 0.2rem;
+}
+
+/* Matches the Add to cart pill's inline styles (`vii-product-actions.tsx` /
+   `vii-variant-selector.tsx`) so the Subscribe CTA is the same shape, color
+   and type treatment — vii has no existing button utility class to reuse via
+   `ctaClassName` since those buttons are styled inline. */
+.vii .vii-subscribe-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: var(--radius);
+  background: var(--vii-copper-deep);
+  color: var(--vii-paper);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: opacity 0.2s var(--vii-ease);
+}
+
+.vii .vii-subscribe-cta:hover,
+.vii .vii-subscribe-cta:focus-visible {
+  opacity: 0.9;
 }
 
 /* Blog card — quiet lift whisper on hover/focus */
@@ -7297,6 +7385,22 @@
   }
 }
 
+/* `.pink-subscribe-panel` — pink doesn't remap the shadcn --card/--border/
+   --primary tokens globally the way bamboo/happy-bamboo/animated-bamboo do
+   (see the note in subscribe-panel.tsx), so this scopes the shared
+   token-only panel onto pink's own palette, the same way
+   `.olive .olive-subscribe-panel` does. `--muted-foreground` and `--radius`
+   are already mapped at `.pink` scope above, so only the card/border/primary
+   tokens need remapping here. */
+.pink .pink-subscribe-panel {
+  --card: var(--pink-panel);
+  --card-foreground: var(--pink-ink);
+  --border: var(--pink-line-strong);
+  --primary: var(--pink-rose);
+  --primary-foreground: var(--pink-on-accent);
+  --ring: var(--pink-rose);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    RELOCATION — Handy Relocations (relocation)
    Design tokens + scoped utilities. Everything below is scoped to `.relocation`
@@ -8423,6 +8527,25 @@
   font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--olive-ink-soft);
+}
+
+/* Scopes the shared, token-only `SubscribePanel` (see its own doc comment)
+   to olive's palette. Unlike `.bamboo`/`.happy-bamboo`, `.olive` never
+   remaps the shadcn `--card`/`--primary`/etc. tokens at the template scope
+   — it styles everything itself with `.olive-*` classes — so without this
+   the panel would render in the plain, unthemed shadcn colors. Scoping the
+   remap to just this class (rather than adding it to the `.olive` block
+   above) keeps every other shared component that happens to use `bg-card`
+   etc. exactly as it renders today. */
+.olive .olive-subscribe-panel {
+  --card: var(--olive-paper);
+  --card-foreground: var(--olive-ink);
+  --muted-foreground: var(--olive-ink-soft);
+  --border: var(--olive-hairline);
+  --primary: var(--olive-sage);
+  --primary-foreground: var(--olive-white);
+  --ring: var(--olive-sage-bright);
+  --radius: var(--olive-card-radius);
 }
 
 /* ── Maintenance / coming-soon takeover — owner-editable fields on
@@ -12678,6 +12801,24 @@
 .umsc .umsc-btn-link:hover .umsc-btn-link-arrow,
 .umsc .umsc-btn-link:focus-visible .umsc-btn-link-arrow {
   transform: translateX(4px);
+}
+
+/* Scopes the shared, token-only `SubscribePanel` (see its own doc comment) to
+   umsc's palette. Like `.olive`, umsc never remaps the shadcn
+   `--card`/`--primary`/etc. tokens at the template scope — it styles
+   everything itself with `.umsc-*` classes — so without this the panel would
+   render in the plain, unthemed shadcn colors. Scoped to just this class
+   (rather than the `.umsc` block above) so every other shared component that
+   happens to use `bg-card` etc. renders exactly as it does today. */
+.umsc .umsc-subscribe-panel {
+  --card: var(--umsc-white);
+  --card-foreground: var(--umsc-ink);
+  --muted-foreground: var(--umsc-muted);
+  --border: var(--umsc-line);
+  --primary: var(--umsc-gold);
+  --primary-foreground: var(--umsc-black);
+  --ring: var(--umsc-gold-ink);
+  --radius: 0.2rem;
 }
 
 /* ── Product card (design.md "UmscProductCard") ── */

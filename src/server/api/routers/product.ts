@@ -488,6 +488,7 @@ export const productRouter = createTRPCRouter({
           id: true,
           name: true,
           price: true,
+          variants: { select: { price: true } },
           published: true,
           images: {
             orderBy: { sortOrder: "asc" },

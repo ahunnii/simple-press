@@ -30,13 +30,21 @@ type Props = {
    */
   available: boolean;
   className?: string;
+  /**
+   * Replaces the Subscribe link's default token-styled button classes, so a
+   * template can render it with its own primary-button class (e.g. olive's
+   * pill `olive-btn olive-btn-primary`) and match its Add-to-cart control.
+   */
+  ctaClassName?: string;
 };
 
 /**
  * "Subscribe & save" panel rendered directly below a template's Add-to-cart
- * control. Shared across templates (currently wired into `default` and
- * `happy-bamboo`) — styled with design tokens only, never a template-specific
- * class, so it looks correct inside any template's chrome.
+ * control. Shared by every template's product page (templates without their
+ * own, e.g. `dream`/`wealth`, get it via the `default` fallback) — styled with
+ * design tokens only, so a template themes it by remapping those tokens on a
+ * wrapper class (see `.olive .olive-subscribe-panel` in globals.css) and can
+ * swap the CTA's look via `ctaClassName`.
  *
  * Renders nothing unless the `subscriptions` flag is on, the product has
  * subscriptions enabled with at least one configured cadence, the product
@@ -51,6 +59,7 @@ export function SubscribePanel({
   quantity,
   available,
   className,
+  ctaClassName,
 }: Props) {
   const { isEnabled } = useStorefrontFlags();
   const additionalFields = parseCardAdditionalFields(product.additionalFields);
@@ -111,6 +120,18 @@ export function SubscribePanel({
           {formatPrice(quote.itemsCents)}{" "}
           <span className="text-muted-foreground text-sm font-normal">
             per delivery + shipping
+            {/* Only one cadence offered — there's no picker below to say how
+                often, so say it here instead of leaving it to the /subscribe
+                page. */}
+            {offer.intervals.length === 1 &&
+              getInterval(selectedInterval)?.label && (
+                <>
+                  {" · "}
+                  <span className="whitespace-nowrap">
+                    {getInterval(selectedInterval)?.label}
+                  </span>
+                </>
+              )}
           </span>
         </p>
         {offer.discountPercent > 0 && quote.savingsCents > 0 && (
@@ -159,7 +180,10 @@ export function SubscribePanel({
 
       <Link
         href={href}
-        className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex h-11 items-center justify-center rounded-[var(--radius)] px-5 text-sm font-medium transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+        className={
+          ctaClassName ??
+          "bg-primary text-primary-foreground focus-visible:ring-ring inline-flex h-11 items-center justify-center rounded-[var(--radius)] px-5 text-sm font-medium transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+        }
       >
         Subscribe
       </Link>

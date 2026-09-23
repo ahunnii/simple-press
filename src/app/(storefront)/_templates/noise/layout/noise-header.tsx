@@ -652,7 +652,7 @@ export function NoiseHeader({
                     initial={{ scale: reduce ? 1 : 0 }}
                     animate={{ scale: 1 }}
                     transition={{ duration: reduce ? 0 : 0.2 }}
-                    className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
+                    className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
                     style={{
                       background: "var(--vn-accent)",
                       color: "#fff",
@@ -682,7 +682,7 @@ export function NoiseHeader({
                   initial={{ scale: reduce ? 1 : 0 }}
                   animate={{ scale: 1 }}
                   transition={{ duration: reduce ? 0 : 0.2 }}
-                  className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
+                  className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
                   style={{
                     background: "var(--vn-accent)",
                     color: "#fff",

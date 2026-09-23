@@ -11,9 +11,11 @@ import {
 
 import { NoiseProductCard } from "../shared/noise-product-card";
 
-type FeaturedProduct = NonNullable<
-  RouterOutputs["business"]["getHomepage"]
->["products"][number];
+// Accepts either the homepage's featured slice or `getRailProducts` output —
+// both are cast to `Product` at the card, which reads only shared fields.
+type RailProduct =
+  | NonNullable<RouterOutputs["business"]["getHomepage"]>["products"][number]
+  | RouterOutputs["product"]["getRailProducts"][number];
 
 type NoiseProductRailProps = {
   title: string;
@@ -21,7 +23,7 @@ type NoiseProductRailProps = {
   description?: string;
   ctaText: string;
   ctaHref: string;
-  products: FeaturedProduct[];
+  products: RailProduct[];
   /** Maximum products to show — defaults to 4 */
   limit?: number;
   /** Spread on root <section> for preview overlay hotspot. */
@@ -34,6 +36,8 @@ type NoiseProductRailProps = {
   overlineFieldKey?: string;
   /** Field key for the `ctaText` prop, same rationale as `overlineFieldKey`. */
   ctaTextFieldKey?: string;
+  /** Field key for the `title` prop, same rationale as `overlineFieldKey`. */
+  titleFieldKey?: string;
 };
 
 export function NoiseProductRail({
@@ -47,6 +51,7 @@ export function NoiseProductRail({
   sectionAttrs,
   overlineFieldKey,
   ctaTextFieldKey,
+  titleFieldKey,
 }: NoiseProductRailProps) {
   const shown = products.slice(0, limit);
   if (shown.length === 0) return null;
@@ -75,6 +80,7 @@ export function NoiseProductRail({
               fontSize: "clamp(2rem, 4vw, 3rem)",
               letterSpacing: "-0.02em",
             }}
+            {...(titleFieldKey ? fieldAttr(titleFieldKey) : {})}
           >
             {title}
           </h2>
@@ -99,13 +105,18 @@ export function NoiseProductRail({
           </Link>
         </FadeIn>
 
-        {/* 4-column product grid */}
+        {/* Centered wrap row — fixed per-breakpoint widths (2 / 3 / 4 across)
+            so a short row of 1–3 products sits centered instead of hugging
+            the left edge of an empty grid. Widths subtract the gap share. */}
         <StaggerContainer
-          className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4"
+          className="flex flex-wrap justify-center gap-5"
           staggerDelay={0.07}
         >
           {shown.map((product, index) => (
-            <StaggerItem key={product.id}>
+            <StaggerItem
+              key={product.id}
+              className="w-[calc(50%-10px)] md:w-[calc(33.333%-14px)] lg:w-[calc(25%-15px)]"
+            >
               <NoiseProductCard
                 product={product as unknown as Product}
                 index={index}

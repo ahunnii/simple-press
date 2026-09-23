@@ -15,6 +15,7 @@ import {
   IconFileInvoice,
   IconFileText,
   IconFolder,
+  IconForms,
   IconHeartHandshake,
   IconImageInPicture,
   IconMail,
@@ -334,6 +335,23 @@ export const NAV_ITEMS: NavItem[] = [
     section: "marketing",
     featureKey: "quoteCalculator",
     keywords: ["estimate", "calculator", "lead", "moving", "request", "quote"],
+  },
+  {
+    key: "forms",
+    title: "Forms",
+    href: "/admin/forms",
+    icon: IconForms,
+    section: "marketing",
+    featureKey: "forms",
+    keywords: [
+      "form",
+      "application",
+      "intake",
+      "survey",
+      "sign up",
+      "entries",
+      "submissions",
+    ],
   },
 
   // Content
@@ -818,6 +836,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     icon: IconCalculator,
     featureKey: "quoteCalculator",
     keywords: ["estimate", "calculator", "lead", "quote"],
+  },
+  {
+    key: "add-form",
+    title: "New form",
+    href: "/admin/forms/new",
+    icon: IconForms,
+    featureKey: "forms",
+    keywords: ["form", "application", "intake", "survey", "sign up"],
   },
   {
     key: "new-invoice",

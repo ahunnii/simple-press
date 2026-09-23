@@ -100,6 +100,20 @@ describe("SubscribePanel", () => {
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
   });
 
+  it("shows the single cadence as plain text when only one interval is configured", () => {
+    renderPanel({ subscriptionIntervals: ["month:3"] });
+
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(screen.getByText(/Every 3 months/)).toBeInTheDocument();
+  });
+
+  it("omits the cadence text when more than one interval is configured", () => {
+    renderPanel({ subscriptionIntervals: ["week:1", "month:1"] });
+
+    expect(screen.queryByText(/Every week/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Every month/)).not.toBeInTheDocument();
+  });
+
   it("shows the cadence radio group when more than one interval is configured", () => {
     renderPanel({ subscriptionIntervals: ["week:1", "month:1"] });
 

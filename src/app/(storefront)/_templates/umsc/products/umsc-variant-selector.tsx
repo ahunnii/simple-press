@@ -18,6 +18,13 @@ type Props = {
   setSelectedVariantId: (variantId: string | null) => void;
   /** Wishlist heart, rendered next to the Add to Cart pill. */
   wishlistSlot?: ReactNode;
+  /**
+   * Notified whenever this selector's own `quantity` state changes, so a
+   * parent that renders `SubscribePanel` below it (which has no stepper of
+   * its own) can link to `/subscribe` with the quantity the shopper actually
+   * chose instead of always `1`.
+   */
+  onQuantityChange?: (quantity: number) => void;
 };
 
 /**
@@ -31,6 +38,7 @@ export function UmscVariantSelector({
   selectedVariantId,
   setSelectedVariantId,
   wishlistSlot,
+  onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
   const { setVariantImageUrl } = useVariantImage();
@@ -45,6 +53,10 @@ export function UmscVariantSelector({
   useEffect(() => {
     setVariantImageUrl(selectedVariant?.imageUrl ?? null);
   }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  useEffect(() => {
+    onQuantityChange?.(quantity);
+  }, [quantity, onQuantityChange]);
 
   const BACKORDER_MAX = 100;
   const isBackordered =

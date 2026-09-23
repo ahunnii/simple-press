@@ -16,12 +16,15 @@ import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
 import { api } from "~/trpc/react";
 import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
+import { Form } from "~/components/ui/minimal-tiptap/extensions/form";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
 import { QuoteCalculator } from "~/components/ui/minimal-tiptap/extensions/quote-calculator";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
+import { FormBlock } from "~/components/forms/form-block";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 import { QuoteCalculatorBlock } from "~/components/quote/quote-calculator-block";
+import { RichTextVideo } from "~/components/rich-text-video";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 /** TipTap document JSON — matches first parameter of generateHTML */
@@ -44,6 +47,7 @@ const extensions = [
   Gallery,
   Embed,
   QuoteCalculator,
+  Form,
 ];
 
 /**
@@ -200,6 +204,12 @@ function isQuoteCalculatorNode(node: ContentNode): node is ContentNode & {
   );
 }
 
+function isFormNode(
+  node: ContentNode,
+): node is ContentNode & { attrs: { formId?: string | null } } {
+  return node.type === "form" && node.attrs != null && "formId" in node.attrs;
+}
+
 function isEmbedNode(node: ContentNode): node is ContentNode & {
   attrs: {
     src?: string;
@@ -212,6 +222,12 @@ function isEmbedNode(node: ContentNode): node is ContentNode & {
   };
 } {
   return node.type === "embed" && node.attrs != null && "src" in node.attrs;
+}
+
+function isVideoNode(node: ContentNode): node is ContentNode & {
+  attrs: { src?: string; title?: string; ambient?: boolean };
+} {
+  return node.type === "video" && node.attrs != null && "src" in node.attrs;
 }
 
 export function TiptapRenderer({ content, className }: TiptapRendererProps) {
@@ -247,6 +263,14 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
             height={coerceQuoteHeight(node.attrs.height)}
             density={coerceQuoteDensity(node.attrs.density)}
             layout={coerceQuoteLayout(node.attrs.layout)}
+          />
+        );
+      }
+      if (isFormNode(node) && node.attrs.formId) {
+        return (
+          <FormBlock
+            key={`form-${node.attrs.formId}-${index}`}
+            formId={String(node.attrs.formId)}
           />
         );
       }
@@ -332,6 +356,16 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
             title={title}
             aspectRatio={aspectRatio}
             maxWidth={maxWidth}
+          />
+        );
+      }
+      if (isVideoNode(node) && node.attrs.src) {
+        return (
+          <RichTextVideo
+            key={`video-${index}`}
+            src={node.attrs.src}
+            title={node.attrs.title}
+            ambient={node.attrs.ambient}
           />
         );
       }

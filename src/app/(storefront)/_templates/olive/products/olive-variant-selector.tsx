@@ -24,6 +24,13 @@ type Props = {
   product: OliveProduct;
   selectedVariantId: string | null;
   setSelectedVariantId: (variantId: string | null) => void;
+  /**
+   * Notified whenever this selector's own `quantity` state changes, so a
+   * parent that renders `SubscribePanel` below it (which has no stepper of
+   * its own) can link to `/subscribe` with the quantity the shopper actually
+   * chose instead of always `1`.
+   */
+  onQuantityChange?: (quantity: number) => void;
 };
 
 /** `{ size: "M", colour: "Sage" }`, with the junk dropped. */
@@ -61,10 +68,15 @@ export function OliveVariantSelector({
   product,
   selectedVariantId,
   setSelectedVariantId,
+  onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
   const { setVariantImageUrl } = useVariantImage();
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    onQuantityChange?.(quantity);
+  }, [quantity, onQuantityChange]);
 
   const selected =
     product.variants.find((variant) => variant.id === selectedVariantId) ??

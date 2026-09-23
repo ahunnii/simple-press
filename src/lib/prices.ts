@@ -62,3 +62,27 @@ export function getEffectiveCompareAtPrice(product: Product): number | null {
   }
   return product.compareAtPrice ?? null;
 }
+
+/**
+ * The figure the storefront would show: one price when every variant agrees,
+ * the cheapest with a "+" when they don't.
+ *
+ * A null or 0 variant price means "inherit the product's" (`resolveVariantPrice`),
+ * so those variants are folded in at the base price rather than ignored — a
+ * product with no variants uses its own price the same way.
+ */
+export function formatProductDisplayPrice(product: {
+  price: number;
+  variants: { price: number | null }[];
+}): string {
+  if (product.variants.length === 0) return formatPrice(product.price);
+
+  const effectivePrices = product.variants.map((variant) =>
+    resolveVariantPrice(variant.price, product.price),
+  );
+
+  const min = Math.min(...effectivePrices);
+  return effectivePrices.every((price) => price === min)
+    ? formatPrice(min)
+    : `${formatPrice(min)}+`;
+}

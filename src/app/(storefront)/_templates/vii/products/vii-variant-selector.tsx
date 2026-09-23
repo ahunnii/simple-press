@@ -13,12 +13,20 @@ type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
   selectedVariantId: string | null;
   setSelectedVariantId: (variantId: string | null) => void;
+  /**
+   * Notified whenever this selector's own `quantity` state changes, so a
+   * parent that renders `SubscribePanel` below it (which has no stepper of
+   * its own) can link to `/subscribe` with the quantity the shopper actually
+   * chose instead of always `1`.
+   */
+  onQuantityChange?: (quantity: number) => void;
 };
 
 export function ViiVariantSelector({
   product,
   selectedVariantId,
   setSelectedVariantId,
+  onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
   const { setVariantImageUrl } = useVariantImage();
@@ -33,6 +41,10 @@ export function ViiVariantSelector({
   useEffect(() => {
     setVariantImageUrl(selectedVariant?.imageUrl ?? null);
   }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  useEffect(() => {
+    onQuantityChange?.(quantity);
+  }, [quantity, onQuantityChange]);
 
   const BACKORDER_MAX = 100;
   const isBackordered =

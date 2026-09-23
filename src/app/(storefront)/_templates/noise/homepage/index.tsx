@@ -188,86 +188,86 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
 ];
 
-// ─── Homepage: Featured Products ─────────────────────────────────────────────
+// ─── Homepage: Collections Showcase ──────────────────────────────────────────
+// Keys reused from the old first product rail (overline, featured-*) so any
+// copy an owner already edited carries over to the showcase.
 
-const homepageFeaturedData: TemplateField[] = [
+const homepageCollectionsData: TemplateField[] = [
   {
-    key: "noise.homepage-featured-title",
-    label: "Featured Section Title",
-    description: "Heading for the featured collection section",
+    key: "noise.homepage.rail-one-overline",
+    label: "Collections Overline",
+    description:
+      "Small caps label above the collections heading (e.g. 'Collections'). Leave blank to hide.",
     type: "text",
     page: "homepage",
-    group: "homepage.featured",
+    group: "homepage.collections",
+    gridColumn: "col-span-1",
+    defaultValue: "Collections",
+  },
+  {
+    key: "noise.homepage.collections-count",
+    label: "Collections Shown",
+    description:
+      "How many collections to show, in the order set on the Collections admin page (2–6). Collections with no published products are skipped.",
+    type: "number",
+    page: "homepage",
+    group: "homepage.collections",
+    gridColumn: "col-span-1",
+    defaultValue: "3",
+    placeholder: "3",
+  },
+  {
+    key: "noise.homepage-featured-title",
+    label: "Collections Heading",
+    description: "Heading for the collections showcase",
+    type: "text",
+    page: "homepage",
+    group: "homepage.collections",
     gridColumn: "col-span-full",
-    defaultValue: "The Collection",
+    defaultValue: "The Collections",
   },
   {
     key: "noise.homepage-featured-description",
-    label: "Featured Section Description",
-    description: "Optional intro text below the section heading",
+    label: "Collections Description",
+    description: "Optional intro text below the collections heading",
     type: "textarea",
     page: "homepage",
-    group: "homepage.featured",
+    group: "homepage.collections",
     gridColumn: "col-span-full",
     defaultValue: "Handcrafted with intention. Worn with purpose.",
   },
   {
     key: "noise.homepage-featured-button-text",
-    label: "Featured Button Text",
-    description: "CTA button text for the featured section",
+    label: "Collections Button Text",
+    description: "CTA button text for the collections showcase",
     type: "text",
     page: "homepage",
-    group: "homepage.featured",
+    group: "homepage.collections",
     gridColumn: "col-span-1",
-    defaultValue: "View All",
+    defaultValue: "View All Collections",
   },
   {
     key: "noise.homepage-featured-button-link",
-    label: "Featured Button Link",
-    description:
-      "CTA button URL (ignored when a collection is selected — link auto-points to the collection page)",
+    label: "Collections Button Link",
+    description: "CTA button URL for the collections showcase",
     type: "url",
     page: "homepage",
-    group: "homepage.featured",
+    group: "homepage.collections",
     gridColumn: "col-span-1",
-    defaultValue: "/shop",
+    defaultValue: "/collections",
   },
-  {
-    key: "noise.homepage.rail-one-collection",
-    label: "Rail 1 — Collection",
-    description:
-      "Pick a collection for the first product rail. Defaults to featured products when unset.",
-    type: "collection",
-    page: "homepage",
-    group: "homepage.featured",
-    gridColumn: "col-span-1",
-  },
-  {
-    key: "noise.homepage.rail-one-overline",
-    label: "Rail 1 — Overline",
-    description:
-      "Small caps label above the first product rail (e.g. 'Collection'). Leave blank to hide.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.featured",
-    gridColumn: "col-span-1",
-    defaultValue: "Collection",
-  },
-  {
-    key: "noise.homepage.rail-two-collection",
-    label: "Rail 2 — Collection",
-    description:
-      "Pick a collection for the second product rail. Defaults to featured products when unset.",
-    type: "collection",
-    page: "homepage",
-    group: "homepage.featured",
-    gridColumn: "col-span-1",
-  },
+];
+
+// ─── Homepage: Latest Arrivals ───────────────────────────────────────────────
+// Group id stays `homepage.featured` (and the rail-two keys stay) so saved
+// section visibility and copy carry over from the old second product rail.
+
+const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage.rail-two-overline",
-    label: "Rail 2 — Overline",
+    label: "Latest Overline",
     description:
-      "Small caps label above the second product rail (e.g. 'New Arrivals'). Leave blank to hide.",
+      "Small caps label above the latest arrivals rail (e.g. 'New Arrivals'). Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -276,14 +276,34 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "noise.homepage.rail-two-title",
-    label: "Rail 2 — Title",
+    label: "Latest Title",
     description:
-      "Section heading for the second product rail (used when no collection is selected).",
+      "Heading for the latest arrivals rail — your newest published products, newest first.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
-    gridColumn: "col-span-full",
-    defaultValue: "New Arrivals",
+    gridColumn: "col-span-1",
+    defaultValue: "Latest Arrivals",
+  },
+  {
+    key: "noise.homepage.latest-button-text",
+    label: "Latest Button Text",
+    description: "CTA button text for the latest arrivals rail",
+    type: "text",
+    page: "homepage",
+    group: "homepage.featured",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop All",
+  },
+  {
+    key: "noise.homepage.latest-button-link",
+    label: "Latest Button Link",
+    description: "CTA button URL for the latest arrivals rail",
+    type: "url",
+    page: "homepage",
+    group: "homepage.featured",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
   },
 ];
 
@@ -368,6 +388,7 @@ export const noiseHomepageData = [
   ...homepageEditorialData,
   ...homepageGuaranteeData,
   ...homepageAboutTeaserData,
+  ...homepageCollectionsData,
   ...homepageFeaturedData,
   ...homepagePhilosophyData,
   ...homepageTestimonialsData,
@@ -413,9 +434,17 @@ export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
+    id: "homepage.collections",
+    title: "Collections",
+    description:
+      "Your first few collections, in admin sort order, with cover images",
+    icon: "🗂",
+    columns: 2,
+  },
+  {
     id: "homepage.featured",
-    title: "Featured Collection",
-    description: "Highlighted products on the homepage",
+    title: "Latest Arrivals",
+    description: "Your newest published products, newest first",
     icon: "👗",
     columns: 2,
   },

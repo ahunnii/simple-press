@@ -20,6 +20,7 @@ import { TrackView } from "~/components/analytics/track-view";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { resolveFields } from "..";
 import {
@@ -125,6 +126,16 @@ export function OliveProductPage({
     productId: product.id,
   });
 
+  const hasVariants = product.variants.length > 0;
+
+  // `OliveVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s `quantity`/`handleQuantityChange`, which only ever drives
+  // the plain, no-variant buy row above) — mirror its value here so
+  // `SubscribePanel` links to `/subscribe` with what the shopper actually
+  // picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
   // ── The swatch turn ─────────────────────────────────────────────────────
   //
   // Olive's focal moment. When the photograph changes because a *colour*
@@ -223,7 +234,6 @@ export function OliveProductPage({
   const tagline = additionalFields?.productTagline?.trim() ?? "";
   const details = additionalFields?.additionalInformation as TiptapJSON;
   const hasDetails = !isContentEmpty(details);
-  const hasVariants = product.variants.length > 0;
   const relatedProducts = related ?? [];
 
   const onAddSimple = () => {
@@ -338,6 +348,7 @@ export function OliveProductPage({
                 product={product}
                 selectedVariantId={selectedVariantId}
                 setSelectedVariantId={setSelectedVariantId}
+                onQuantityChange={setVariantQuantity}
               />
             ) : !inStock ? (
               <div className="flex flex-col gap-3">
@@ -386,6 +397,19 @@ export function OliveProductPage({
                 ) : null}
               </div>
             )}
+
+            {/* `olive-subscribe-panel` (globals.css) scopes the shared
+                token-only panel to olive's own palette — see the note in
+                `subscribe-panel.tsx` for why olive doesn't remap the shadcn
+                tokens globally the way `bamboo`/`happy-bamboo` do. */}
+            <SubscribePanel
+              product={product}
+              selectedVariantId={selectedVariantId}
+              quantity={subscribeQuantity}
+              available={inStock}
+              className="olive-subscribe-panel"
+              ctaClassName="olive-btn olive-btn-primary h-11"
+            />
 
             {badges.length > 0 ? (
               <ul

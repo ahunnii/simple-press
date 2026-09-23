@@ -6,11 +6,13 @@ import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
 import DisputeAlertEmail from "~/emails/dispute-alert";
 import FinalQuoteEmail from "~/emails/final-quote";
+import FormConfirmationEmail from "~/emails/form-confirmation";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import LoyaltyBirthdayEmail from "~/emails/loyalty-birthday";
 import LoyaltyRewardRedeemedEmail from "~/emails/loyalty-reward-redeemed";
 import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 import NewDonationNotificationEmail from "~/emails/new-donation-notification";
+import NewFormSubmissionNotificationEmail from "~/emails/new-form-submission-notification";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
 import NewReviewEmail from "~/emails/new-review";
@@ -1040,6 +1042,98 @@ export async function sendNewQuoteNotification(params: {
     }),
     tags: [
       { name: "category", value: "new_quote_owner" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Form submission received (submitter) — sent only when the owner set a
+// confirmation field and the submitter answered it with a valid email.
+export async function sendFormConfirmation(params: {
+  to: string;
+  formId: string;
+  formName: string;
+  /** Owner's confirmationMessage, plain text. */
+  message: string;
+  /** Owner's confirmationSubject; falls back to the default literal when blank. */
+  subject: string;
+  answers: Array<{ label: string; value: string }>;
+  business: {
+    name: string;
+    ownerEmail: string;
+    supportEmail?: string | null;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+  };
+  idempotencyKey?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.SUPPORT,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.supportEmail ?? params.business.ownerEmail,
+    subject: applySubjectTemplate(params.subject, {
+      businessName: params.business.name,
+    }),
+    react: FormConfirmationEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      message: params.message,
+      formName: params.formName,
+      answers: params.answers,
+    }),
+    tags: [
+      { name: "category", value: "form-confirmation" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// New form submission — notify store owner
+export async function sendNewFormSubmissionNotification(params: {
+  submissionId: string;
+  formId: string;
+  formName: string;
+  submittedAt: Date;
+  answers: Array<{ label: string; value: string }>;
+  /** submitterEmail from the entry, when the visitor gave one — used as replyTo. */
+  submitterEmail?: string | null;
+  /** Owner's configured notify address, already resolved (notifyEmail ?? supportEmail ?? ownerEmail). */
+  notifyTo: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const adminEntryUrl = `${getBusinessUrl(params.business)}/admin/forms/${params.formId}/entries/${params.submissionId}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.notifyTo,
+    replyTo: params.submitterEmail ?? params.business.ownerEmail,
+    subject: `New submission: ${params.formName}`,
+    react: NewFormSubmissionNotificationEmail({
+      formName: params.formName,
+      submittedAt: params.submittedAt,
+      answers: params.answers,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      adminEntryUrl,
+    }),
+    tags: [
+      { name: "category", value: "form-submission" },
       { name: "business", value: params.business.subdomain },
     ],
     idempotencyKey: params.idempotencyKey,

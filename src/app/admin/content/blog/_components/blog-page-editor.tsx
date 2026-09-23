@@ -156,6 +156,8 @@ type BlogPostEditorProps = {
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
+  formsEnabled?: boolean;
+  mediaEnabled?: boolean;
 };
 
 export function BlogPostEditor({
@@ -163,6 +165,8 @@ export function BlogPostEditor({
   galleriesEnabled,
   embedsEnabled,
   quotesEnabled,
+  formsEnabled,
+  mediaEnabled,
 }: BlogPostEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -788,6 +792,9 @@ export function BlogPostEditor({
                       galleriesEnabled={galleriesEnabled}
                       embedsEnabled={embedsEnabled}
                       quotesEnabled={quotesEnabled}
+                      formsEnabled={formsEnabled}
+                      videosEnabled={true}
+                      mediaEnabled={mediaEnabled}
                       required
                     />
                   </CardContent>

@@ -9,6 +9,7 @@ import { generateHTML } from "@tiptap/html/server";
 import StarterKit from "@tiptap/starter-kit";
 
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
+import { VideoNode } from "~/lib/tiptap/video-node";
 
 /**
  * Server-side TipTap document -> HTML serializer for the WordPress export.
@@ -69,6 +70,7 @@ const SERVER_EXTENSIONS = [
     protocols: ["http", "https", "mailto", "tel"],
   }),
   Image,
+  VideoNode,
   Underline,
   TextStyle,
   TextAlign.configure({
@@ -145,6 +147,12 @@ function isQuoteCalculatorNode(node: ContentNode): node is ContentNode & {
   attrs: { calculatorId?: string; businessId?: string };
 } {
   return node.type === "quoteCalculator" && node.attrs != null;
+}
+
+function isFormNode(
+  node: ContentNode,
+): node is ContentNode & { attrs: { formId?: string } } {
+  return node.type === "form" && node.attrs != null;
 }
 
 /** Render a resolved gallery to a `wp-block-gallery` figure. */
@@ -272,6 +280,14 @@ export function tiptapToHtml(
       fragments.push(
         "<p><em>[Quote calculator: interactive widget not exported]</em></p>",
       );
+      continue;
+    }
+
+    if (isFormNode(node)) {
+      warnings.push(
+        "Skipped form node (interactive widget has no WordPress equivalent)",
+      );
+      fragments.push("<p><em>[Form: interactive widget not exported]</em></p>");
       continue;
     }
 

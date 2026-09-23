@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -7,6 +8,7 @@ import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { PollenVariantSelector } from "./pollen-variant-selector";
 
@@ -25,9 +27,19 @@ export function PollenProductActions({
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    selectedVariantId,
     additionalFields,
     justAdded,
   } = useProduct(product);
+
+  const hasVariants = Object.keys(variantOptions).length > 0;
+
+  // `PollenVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
   return (
     <>
@@ -46,10 +58,11 @@ export function PollenProductActions({
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
-      ) : Object.keys(variantOptions).length > 0 ? (
+      ) : hasVariants ? (
         <PollenVariantSelector
           product={product}
           setSelectedVariantId={setSelectedVariantId}
+          onQuantityChange={setVariantQuantity}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -142,6 +155,18 @@ export function PollenProductActions({
           )}
         </>
       )}
+
+      {/* `pollen-subscribe-panel` (globals.css) scopes the shared token-only
+          panel to pollen's own green/ink palette — pollen uses Tailwind
+          utilities exclusively and never remaps the shadcn tokens. */}
+      <SubscribePanel
+        product={product}
+        selectedVariantId={selectedVariantId}
+        quantity={subscribeQuantity}
+        available={inStock}
+        className="pollen-subscribe-panel mt-4"
+        ctaClassName="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#215935] px-5 text-sm font-medium text-white transition-colors hover:bg-[#1a4729] focus-visible:ring-2 focus-visible:ring-[#215935] focus-visible:ring-offset-2 focus-visible:outline-none"
+      />
     </>
   );
 }

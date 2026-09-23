@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { ElegantVariantSelector } from "./elegant-variant-selector";
 
@@ -31,89 +33,118 @@ export function ElegantProductActions({
   } = useProduct(product);
 
   const additional = parseCardAdditionalFields(product.additionalFields);
+  const hasVariants = Object.keys(variantOptions).length > 0;
+
+  // `ElegantVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  const subscribePanel = (
+    <SubscribePanel
+      product={product}
+      selectedVariantId={selectedVariantId}
+      quantity={subscribeQuantity}
+      available={inStock}
+      className="mt-6"
+      ctaClassName="el-btn-primary inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[var(--el-ink)] px-7 text-[13px] font-medium tracking-[0.08em] text-[var(--el-paper)] uppercase transition-colors"
+    />
+  );
 
   if (additional?.comingSoon) {
     return (
-      <div
-        style={{
-          padding: "16px 20px",
-          borderRadius: 8,
-          border: "1px solid rgba(217, 185, 168, 0.5)",
-          background: "rgba(217, 185, 168, 0.12)",
-          marginBottom: 24,
-        }}
-      >
-        <p
+      <>
+        <div
           style={{
-            fontFamily: "var(--font-mono, ui-monospace)",
-            fontSize: 11,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "var(--el-blush, #d9b9a8)",
-            marginBottom: 4,
+            padding: "16px 20px",
+            borderRadius: 8,
+            border: "1px solid rgba(217, 185, 168, 0.5)",
+            background: "rgba(217, 185, 168, 0.12)",
+            marginBottom: 24,
           }}
         >
-          Coming Soon
-        </p>
-        <p
-          style={{
-            fontSize: 14,
-            color: "var(--el-ink-soft, #6b6659)",
-            fontFamily: "var(--font-sans, sans-serif)",
-          }}
-        >
-          This product isn&apos;t available yet. Check back soon.
-        </p>
-      </div>
+          <p
+            style={{
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 11,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--el-blush, #d9b9a8)",
+              marginBottom: 4,
+            }}
+          >
+            Coming Soon
+          </p>
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--el-ink-soft, #6b6659)",
+              fontFamily: "var(--font-sans, sans-serif)",
+            }}
+          >
+            This product isn&apos;t available yet. Check back soon.
+          </p>
+        </div>
+        {subscribePanel}
+      </>
     );
   }
 
-  if (Object.keys(variantOptions).length > 0) {
+  if (hasVariants) {
     return (
-      <ElegantVariantSelector
-        product={product}
-        selectedVariantId={selectedVariantId}
-        setSelectedVariantId={setSelectedVariantId}
-      />
+      <>
+        <ElegantVariantSelector
+          product={product}
+          selectedVariantId={selectedVariantId}
+          setSelectedVariantId={setSelectedVariantId}
+          onQuantityChange={setVariantQuantity}
+        />
+        {subscribePanel}
+      </>
     );
   }
 
   if (!inStock) {
     return (
-      <div style={{ marginBottom: 24 }}>
-        <button
-          type="button"
-          aria-disabled="true"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            padding: "16px 28px",
-            borderRadius: 999,
-            fontSize: 13,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            fontWeight: 500,
-            background: "var(--el-cream-3, #e0d9c8)",
-            color: "var(--el-ink-soft, #6b6659)",
-            border: "none",
-            cursor: "not-allowed",
-            fontFamily: "var(--font-sans, sans-serif)",
-          }}
-        >
-          Out of Stock
-        </button>
-        <NotifyMeForm
-          productId={product.id}
-          variantId={selectedVariantId}
-          className="mt-4"
-          message="Get notified when it's back in stock."
-          messageClassName="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--el-ink-soft)]"
-          inputClassName="rounded-full border-[var(--el-line)] px-4"
-          buttonClassName="rounded-full uppercase tracking-[0.08em] text-xs"
-        />
-      </div>
+      <>
+        <div style={{ marginBottom: 24 }}>
+          <button
+            type="button"
+            aria-disabled="true"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              padding: "16px 28px",
+              borderRadius: 999,
+              fontSize: 13,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              fontWeight: 500,
+              background: "var(--el-cream-3, #e0d9c8)",
+              color: "var(--el-ink-soft, #6b6659)",
+              border: "none",
+              cursor: "not-allowed",
+              fontFamily: "var(--font-sans, sans-serif)",
+            }}
+          >
+            Out of Stock
+          </button>
+          <NotifyMeForm
+            productId={product.id}
+            variantId={selectedVariantId}
+            className="mt-4"
+            message="Get notified when it's back in stock."
+            messageClassName="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--el-ink-soft)]"
+            inputClassName="rounded-full border-[var(--el-line)] px-4"
+            buttonClassName="rounded-full uppercase tracking-[0.08em] text-xs"
+          />
+        </div>
+        {subscribePanel}
+      </>
     );
   }
 
@@ -310,6 +341,7 @@ export function ElegantProductActions({
           Maximum quantity in cart
         </p>
       )}
+      {subscribePanel}
     </>
   );
 }

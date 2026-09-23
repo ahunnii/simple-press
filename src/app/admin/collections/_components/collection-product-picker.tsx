@@ -24,6 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Search, TriangleAlert, X } from "lucide-react";
 
 import type { CollectionFormData } from "~/lib/validators/collections";
+import { formatProductDisplayPrice } from "~/lib/prices";
 import { api } from "~/trpc/react";
 import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { Badge } from "~/components/ui/badge";
@@ -46,6 +47,7 @@ export type ProductSummary = {
   id: string;
   name: string;
   price: number;
+  variants: { price: number | null }[];
   published: boolean;
   images: { url: string }[];
 };
@@ -103,7 +105,7 @@ function SortableProductRow({
           )}
         </div>
         <p className="text-muted-foreground text-xs">
-          ${(product.price / 100).toFixed(2)}
+          {formatProductDisplayPrice(product)}
         </p>
       </div>
       <button
@@ -274,7 +276,7 @@ export function CollectionProductPicker({ form, initialProducts }: Props) {
                                   )}
                                 </div>
                                 <p className="text-muted-foreground text-xs">
-                                  ${(product.price / 100).toFixed(2)}
+                                  {formatProductDisplayPrice(product)}
                                 </p>
                               </div>
                               {added && (

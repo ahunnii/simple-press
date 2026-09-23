@@ -1,8 +1,8 @@
-import { getSchema } from "@tiptap/core";
+import { getSchema, Node } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
 import { RENDERER_BASE_EXTENSIONS } from "./renderer-extensions";
-import { isSafeImageSrc, sanitizeTiptapDoc } from "./sanitize";
+import { isSafeImageSrc, isSafeVideoSrc, sanitizeTiptapDoc } from "./sanitize";
 
 /**
  * Built exactly the way `TiptapRenderer` builds its schema, minus the three
@@ -309,6 +309,75 @@ describe("sanitizeTiptapDoc — images", () => {
   });
 });
 
+describe("sanitizeTiptapDoc — videos", () => {
+  it("keeps an https src", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "video",
+        attrs: { src: "https://cdn.example.com/clip.mp4", title: "Clip" },
+      }),
+      schema,
+    );
+    expect(out?.content).toHaveLength(1);
+    expect(out?.content?.[0]?.attrs?.src).toBe(
+      "https://cdn.example.com/clip.mp4",
+    );
+  });
+
+  it("keeps a relative src", () => {
+    const out = sanitizeTiptapDoc(
+      doc({ type: "video", attrs: { src: "/uploads/clip.mp4" } }),
+      schema,
+    );
+    expect(out?.content).toHaveLength(1);
+  });
+
+  it.each([
+    "data:video/mp4;base64,AAA",
+    "blob:https://x/y",
+    "javascript:alert(1)",
+    "file:///etc/passwd",
+  ])("drops the whole video node for src %s", (src) => {
+    expect(
+      sanitizeTiptapDoc(doc({ type: "video", attrs: { src } }), schema),
+    ).toEqual(doc());
+  });
+
+  it("keeps a truthy ambient boolean attr", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "video",
+        attrs: { src: "https://cdn.example.com/clip.mp4", ambient: true },
+      }),
+      schema,
+    );
+    expect(out?.content?.[0]?.attrs?.ambient).toBe(true);
+  });
+
+  it("strips onplay and style attrs from a video node", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "video",
+        attrs: {
+          src: "https://cdn.example.com/clip.mp4",
+          onplay: "alert(1)",
+          style: "color:red",
+        },
+      }),
+      schema,
+    );
+    expect(out?.content?.[0]?.attrs).toEqual({
+      src: "https://cdn.example.com/clip.mp4",
+    });
+  });
+
+  it("isSafeVideoSrc refuses non-strings and blanks", () => {
+    expect(isSafeVideoSrc(null)).toBe(false);
+    expect(isSafeVideoSrc("")).toBe(false);
+    expect(isSafeVideoSrc("   ")).toBe(false);
+  });
+});
+
 describe("sanitizeTiptapDoc — unknown nodes", () => {
   it("drops a script wrapper and hoists its text into the parent paragraph", () => {
     const out = sanitizeTiptapDoc(
@@ -354,6 +423,28 @@ describe("sanitizeTiptapDoc — unknown nodes", () => {
     // like `image` does here.
     const node = { type: "image", attrs: { src: "/a.png" } };
     expect(sanitizeTiptapDoc(doc(node), schema)).toEqual(doc(node));
+  });
+
+  it("survives a `form` node with a formId when the schema declares it", () => {
+    // The real `Form` extension's node view pulls in React/tRPC and can't be
+    // imported from this node test (same reason Gallery/Embed/QuoteCalculator
+    // are excluded from `schema` above) — a minimal stand-in Node with the
+    // same name/attrs shape is enough to exercise the mechanism the real
+    // renderer relies on: `TiptapRenderer` appends the real `Form` extension
+    // to its schema, so `sanitizeTiptapDoc` allowlists `form`/`formId` there.
+    const formSchema = getSchema([
+      ...RENDERER_BASE_EXTENSIONS,
+      Node.create({
+        name: "form",
+        group: "block",
+        atom: true,
+        addAttributes() {
+          return { formId: { default: null } };
+        },
+      }),
+    ]);
+    const node = { type: "form", attrs: { formId: "form-1" } };
+    expect(sanitizeTiptapDoc(doc(node), formSchema)).toEqual(doc(node));
   });
 
   it("drops malformed entries", () => {

@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
+import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import { ModernVariantSelector } from "./modern-variant-selector";
 
@@ -23,9 +25,19 @@ export function ModernProductActions({ product }: Props) {
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    selectedVariantId,
     additionalFields,
     justAdded,
   } = useProduct(product);
+
+  const hasVariants = Object.keys(variantOptions).length > 0;
+
+  // `ModernVariantSelector` keeps its own quantity stepper (separate from
+  // `useProduct`'s, which stays 1 for variant products) — mirror its value
+  // here so `SubscribePanel` links to `/subscribe` with what the shopper
+  // actually picked instead of always `qty=1`.
+  const [variantQuantity, setVariantQuantity] = useState(1);
+  const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
   return (
     <div className="mt-8">
@@ -38,10 +50,11 @@ export function ModernProductActions({ product }: Props) {
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
-      ) : Object.keys(variantOptions).length > 0 ? (
+      ) : hasVariants ? (
         <ModernVariantSelector
           product={product}
           setSelectedVariantId={setSelectedVariantId}
+          onQuantityChange={setVariantQuantity}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -147,6 +160,14 @@ export function ModernProductActions({ product }: Props) {
           )}
         </>
       )}
+      <SubscribePanel
+        product={product}
+        selectedVariantId={selectedVariantId}
+        quantity={subscribeQuantity}
+        available={inStock}
+        className="mt-6"
+        ctaClassName="bg-primary text-primary-foreground inline-flex h-11 items-center justify-center gap-2 px-8 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
+      />
     </div>
   );
 }
