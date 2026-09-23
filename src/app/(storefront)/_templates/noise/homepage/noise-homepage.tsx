@@ -10,6 +10,7 @@ import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { NoiseAboutTeaser } from "./noise-about-teaser";
+import { NoiseCollectionShowcase } from "./noise-collection-showcase";
 import { NoiseEditorialSplit } from "./noise-editorial-split";
 import { NoiseGuaranteeSection } from "./noise-guarantee-section";
 import { NoiseHeroSection } from "./noise-hero-section";
@@ -18,6 +19,38 @@ import { NoiseMarqueeStrip } from "./noise-marquee-strip";
 import { NoisePhilosophySection } from "./noise-philosophy-section";
 import { NoiseProductRail } from "./noise-product-rail";
 import { NoiseTestimonialStrip } from "./noise-testimonial-strip";
+
+type NoiseCollections = Awaited<
+  ReturnType<typeof api.collections.getAllPublic>
+>;
+type NoiseRailProducts = Awaited<
+  ReturnType<typeof api.product.getRailProducts>
+>;
+
+/**
+ * Mirrors `business.getHomepage`'s coming-soon exclusion (it filters on
+ * `additionalFields.comingSoon` stored as either `false` or `"false"`).
+ * `getRailProducts` doesn't filter, so drop anything flagged true here —
+ * a product with no flag at all is treated as live.
+ */
+function isComingSoon(additionalFields: unknown): boolean {
+  if (
+    additionalFields == null ||
+    typeof additionalFields !== "object" ||
+    Array.isArray(additionalFields)
+  ) {
+    return false;
+  }
+  const flag = (additionalFields as Record<string, unknown>).comingSoon;
+  return flag === true || flag === "true";
+}
+
+/** Owner-set showcase size, clamped to 2–6; falls back to 3 when unparseable. */
+function parseCollectionsCount(raw: string | undefined): number {
+  const n = Number.parseInt(raw ?? "", 10);
+  if (Number.isNaN(n)) return 3;
+  return Math.min(6, Math.max(2, n));
+}
 
 export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
   const [homepage, flags] = await Promise.all([
@@ -59,11 +92,12 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage-guarantee-heading",
     "noise.homepage-guarantee-headingAccent",
     "noise.homepage-guarantee-quote",
-    "noise.homepage.rail-one-collection",
     "noise.homepage.rail-one-overline",
-    "noise.homepage.rail-two-collection",
+    "noise.homepage.collections-count",
     "noise.homepage.rail-two-overline",
     "noise.homepage.rail-two-title",
+    "noise.homepage.latest-button-text",
+    "noise.homepage.latest-button-link",
     "noise.global.shop-cta-text",
     "noise.global.shop-cta-link",
     "noise.global.location-tag",
@@ -81,8 +115,6 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage-about-body",
   );
 
-  const products = homepage?.products ?? [];
-
   const introGalleryId = f["noise.homepage.intro-gallery"];
   const introGallery = introGalleryId
     ? await db.gallery.findUnique({
@@ -96,27 +128,30 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
       altText: img.altText,
     })) ?? [];
 
-  const rail1CollectionId = f["noise.homepage.rail-one-collection"] ?? "";
-  const rail2CollectionId = f["noise.homepage.rail-two-collection"] ?? "";
-
-  const [rail1Data, rail2Data] = await Promise.all([
-    rail1CollectionId
-      ? api.collections.getProductsByCollectionId(rail1CollectionId)
-      : Promise.resolve(null),
-    rail2CollectionId
-      ? api.collections.getProductsByCollectionId(rail2CollectionId)
-      : Promise.resolve(null),
+  // Both fetches are feature-gated server-side (FORBIDDEN when the flag is
+  // off), so gate them here too and swallow any other failure — a broken
+  // rail must never 500 the whole homepage.
+  const [allCollections, railProducts] = await Promise.all([
+    flags.isEnabled("collections")
+      ? api.collections.getAllPublic().catch(() => [] as NoiseCollections)
+      : Promise.resolve([] as NoiseCollections),
+    flags.isEnabled("products")
+      ? api.product
+          .getRailProducts({ limit: 4 })
+          .catch(() => [] as NoiseRailProducts)
+      : Promise.resolve([] as NoiseRailProducts),
   ]);
 
-  const railOneProducts = rail1Data?.products ?? products.slice(0, 4);
-  const railTwoProducts = rail2Data?.products ?? products.slice(4, 8);
+  // Admin sort order; skip empty collections so a card never leads to an
+  // empty page.
+  const showcaseCollections = allCollections
+    .filter((c) => c._count.collectionProducts > 0)
+    .slice(0, parseCollectionsCount(f["noise.homepage.collections-count"]));
 
-  const railOneCtaHref = rail1Data
-    ? `/collections/${rail1Data.collection.slug}`
-    : (f["noise.homepage-featured-button-link"] ?? "/shop");
-  const railTwoCtaHref = rail2Data
-    ? `/collections/${rail2Data.collection.slug}`
-    : "/shop";
+  // Newest first (getRailProducts orders by createdAt desc).
+  const latestProducts = railProducts.filter(
+    (p) => !isComingSoon(p.additionalFields),
+  );
 
   return (
     <HydrateClient>
@@ -179,47 +214,56 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             />
           )}
 
-          {/* 5. First product rail */}
-          {railOneProducts.length > 0 && (
-            <NoiseProductRail
-              overline={f["noise.homepage.rail-one-overline"] ?? "Collection"}
-              overlineFieldKey="noise.homepage.rail-one-overline"
-              title={
-                rail1Data?.collection.name ??
-                f["noise.homepage-featured-title"] ??
-                "The Collection"
-              }
-              description={
-                rail1Data?.collection.description ??
-                f["noise.homepage-featured-description"] ??
-                undefined
-              }
-              ctaText={f["noise.homepage-featured-button-text"] ?? "Shop All"}
-              ctaTextFieldKey="noise.homepage-featured-button-text"
-              ctaHref={railOneCtaHref}
-              products={railOneProducts}
-              sectionAttrs={sectionGroupAttr("homepage", "featured")}
-            />
-          )}
+          {/* 5. Collections showcase */}
+          <NoiseCollectionShowcase
+            overline={
+              (f["noise.homepage.rail-one-overline"] ?? "").trim() || undefined
+            }
+            title={
+              (f["noise.homepage-featured-title"] ?? "").trim() ||
+              "The Collections"
+            }
+            description={
+              (f["noise.homepage-featured-description"] ?? "").trim() ||
+              undefined
+            }
+            ctaText={
+              (f["noise.homepage-featured-button-text"] ?? "").trim() ||
+              "View All Collections"
+            }
+            ctaHref={
+              (f["noise.homepage-featured-button-link"] ?? "").trim() ||
+              "/collections"
+            }
+            collections={showcaseCollections}
+            sectionAttrs={sectionGroupAttr("homepage", "collections")}
+          />
 
           {/* 6. Editorial split — links to the journal */}
           {flags.isEnabled("blog") && <NoiseEditorialSplit />}
 
-          {/* 7. Second product rail (when 5+ featured products or a collection is configured) */}
-          {railTwoProducts.length > 0 && (
+          {/* 7. Latest arrivals — hidden when nothing is live */}
+          {latestProducts.length > 0 && (
             <NoiseProductRail
-              overline={f["noise.homepage.rail-two-overline"] ?? "New Arrivals"}
+              overline={
+                (f["noise.homepage.rail-two-overline"] ?? "").trim() ||
+                undefined
+              }
               overlineFieldKey="noise.homepage.rail-two-overline"
               title={
-                rail2Data?.collection.name ??
-                f["noise.homepage.rail-two-title"] ??
-                "New Arrivals"
+                (f["noise.homepage.rail-two-title"] ?? "").trim() ||
+                "Latest Arrivals"
               }
-              description={rail2Data?.collection.description ?? undefined}
-              ctaText={f["noise.global.shop-cta-text"] ?? "Shop All"}
-              ctaTextFieldKey="noise.global.shop-cta-text"
-              ctaHref={railTwoCtaHref}
-              products={railTwoProducts}
+              titleFieldKey="noise.homepage.rail-two-title"
+              ctaText={
+                (f["noise.homepage.latest-button-text"] ?? "").trim() ||
+                "Shop All"
+              }
+              ctaTextFieldKey="noise.homepage.latest-button-text"
+              ctaHref={
+                (f["noise.homepage.latest-button-link"] ?? "").trim() || "/shop"
+              }
+              products={latestProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
             />
           )}

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   PageTransition,
@@ -10,33 +11,39 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
-import { NoiseProductCard } from "../shared/noise-product-card";
+import { resolveFields } from "../index";
+import { NoiseCollectionCard } from "../shared/noise-collection-card";
 import { NoiseCollectionClient } from "./noise-collection-client";
-
-const SILHOUETTES: Record<string, string> = {
-  wrap: "M30 10 Q50 0 70 10 Q80 30 75 50 Q90 70 80 100 Q70 130 50 130 Q30 130 20 100 Q10 70 25 50 Q20 30 30 10 Z",
-  dress: "M40 8 L60 8 L62 25 L75 50 L82 130 L18 130 L25 50 L38 25 Z",
-  coat: "M35 8 L65 8 L80 28 L88 60 L84 130 L62 130 L60 75 L50 130 L40 75 L38 130 L16 130 L12 60 L20 28 Z",
-  scarf:
-    "M15 25 Q35 18 50 30 Q65 42 85 28 L88 35 Q70 55 50 45 Q30 35 18 50 Z M50 40 L42 130 L58 130 Z",
-  default: "M35 8 L65 8 L80 28 L88 130 L12 130 L20 28 Z",
-};
-
-function getCategorySilhouette(name: string): string {
-  const lower = name.toLowerCase();
-  if (lower.includes("wrap")) return SILHOUETTES.wrap!;
-  if (lower.includes("dress") || lower.includes("skirt"))
-    return SILHOUETTES.dress!;
-  if (lower.includes("coat") || lower.includes("jacket"))
-    return SILHOUETTES.coat!;
-  if (lower.includes("scarf")) return SILHOUETTES.scarf!;
-  return SILHOUETTES.default!;
-}
 
 export function NoiseCollectionPage({
   collection,
   additionalCollections,
+  business,
 }: DefaultCollectionPageTemplateProps) {
+  const customFields = business.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+
+  const f = resolveFields(customFields, [
+    "noise.collections.detail-overline",
+    "noise.collections.detail-empty-text",
+    "noise.collections.detail-browse-text",
+    "noise.collections.detail-back-label",
+    "noise.collections.more-overline",
+    "noise.collections.more-heading",
+  ]);
+
+  const detailOverline = f["noise.collections.detail-overline"] ?? "Collection";
+  const detailEmptyText =
+    f["noise.collections.detail-empty-text"] ??
+    "No garments in this collection yet.";
+  const detailBrowseText =
+    f["noise.collections.detail-browse-text"] ?? "Browse All Garments →";
+  const detailBackLabel =
+    f["noise.collections.detail-back-label"] ?? "All Collections";
+  const moreOverline = f["noise.collections.more-overline"] ?? "Continue exploring";
+  const moreHeading = f["noise.collections.more-heading"] ?? "More collections.";
+
   const products = collection.collectionProducts
     .map((cp) => cp.product)
     .filter(
@@ -56,13 +63,15 @@ export function NoiseCollectionPage({
           background: "var(--vn-paper)",
           borderBottom: "1px solid var(--vn-line-soft) ",
         }}
+        {...sectionGroupAttr("collections", "detail")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1440px" }}>
           <p
             className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
             style={{ color: "var(--vn-steel-mist)" }}
+            {...fieldAttr("noise.collections.detail-overline")}
           >
-            Collection
+            {detailOverline}
           </p>
           <h1
             className="font-serif leading-none tracking-tight italic"
@@ -97,14 +106,16 @@ export function NoiseCollectionPage({
           <p
             className="font-serif text-2xl font-light italic"
             style={{ color: "var(--vn-steel-mist)" }}
+            {...fieldAttr("noise.collections.detail-empty-text")}
           >
-            No garments in this collection yet.
+            {detailEmptyText}
           </p>
           <Link
             href="/shop"
             className="vn-stamp vn-stamp-solid mt-8 inline-flex text-[10px]"
+            {...fieldAttr("noise.collections.detail-browse-text")}
           >
-            Browse All Garments →
+            {detailBrowseText}
           </Link>
         </FadeIn>
       ) : (
@@ -112,7 +123,7 @@ export function NoiseCollectionPage({
           <NoiseCollectionClient
             products={products}
             backHref="/collections"
-            backLabel="All Collections"
+            backLabel={detailBackLabel}
           />
         </Suspense>
       )}
@@ -129,8 +140,9 @@ export function NoiseCollectionPage({
                 <p
                   className="mb-3 font-mono text-[9.5px] tracking-[0.22em] uppercase"
                   style={{ color: "var(--vn-steel-mist)" }}
+                  {...fieldAttr("noise.collections.more-overline")}
                 >
-                  Continue exploring
+                  {moreOverline}
                 </p>
                 <h2
                   className="font-serif leading-none tracking-tight italic"
@@ -138,8 +150,9 @@ export function NoiseCollectionPage({
                     fontSize: "clamp(2rem, 4vw, 3rem)",
                     letterSpacing: "-0.02em",
                   }}
+                  {...fieldAttr("noise.collections.more-heading")}
                 >
-                  More collections.
+                  {moreHeading}
                 </h2>
               </div>
               <Link
@@ -155,62 +168,16 @@ export function NoiseCollectionPage({
               className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6"
               staggerDelay={0.05}
             >
-              {others.map((col, i) => {
-                const count = col._count.collectionProducts;
-                return (
-                  <StaggerItem key={col.id}>
-                    <Link
-                      href={`/collections/${col.slug}`}
-                      className="vn-cat-card border-foreground flex flex-col overflow-hidden border"
-                      style={{ background: "var(--vn-paper)" }}
-                    >
-                      <div
-                        className="border-foreground relative aspect-[4/5] overflow-hidden border-b"
-                        style={{
-                          background: `linear-gradient(180deg, var(--vn-steel-deep), var(--vn-steel))`,
-                        }}
-                      >
-                        <svg
-                          viewBox="0 0 100 140"
-                          className="absolute inset-0 h-full w-full"
-                          style={{ padding: "10%" }}
-                          aria-hidden="true"
-                        >
-                          <path
-                            d={getCategorySilhouette(col.name)}
-                            fill="var(--vn-bone)"
-                            opacity="0.9"
-                          />
-                        </svg>
-                      </div>
-                      <div className="vn-cat-meta flex flex-col gap-1 px-3.5 py-3.5">
-                        <span
-                          className="vn-cat-num font-mono text-[10px] tracking-[0.22em] uppercase"
-                          style={{ color: "var(--vn-steel)" }}
-                        >
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span
-                          className="vn-cat-name font-serif leading-[1.15] italic"
-                          style={{
-                            fontSize: "clamp(1.1rem, 1.6vw, 1.6rem)",
-                            letterSpacing: "-0.01em",
-                            color: "var(--vn-ink)",
-                          }}
-                        >
-                          {col.name}
-                        </span>
-                        <span
-                          className="vn-cat-count font-mono text-[10px] tracking-[0.18em] uppercase"
-                          style={{ color: "var(--vn-ink-soft)" }}
-                        >
-                          {count} {count === 1 ? "piece" : "pieces"}
-                        </span>
-                      </div>
-                    </Link>
-                  </StaggerItem>
-                );
-              })}
+              {others.map((col, i) => (
+                <StaggerItem key={col.id}>
+                  <NoiseCollectionCard
+                    collection={col}
+                    index={i}
+                    aspect="4/5"
+                    showNumber
+                  />
+                </StaggerItem>
+              ))}
             </StaggerContainer>
           </div>
         </section>

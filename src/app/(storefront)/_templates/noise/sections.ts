@@ -49,14 +49,24 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       hideable: true,
     },
     {
+      id: "homepage.collections",
+      page: "homepage",
+      title: "Collections",
+      description:
+        "Showcase of your first few collections (admin sort order) with cover images. Collections with no published products are skipped.",
+      groupIds: ["homepage.collections"],
+      order: 5,
+      links: [SECTION_LINKS.collections],
+    },
+    {
       id: "homepage.featured",
       page: "homepage",
-      title: "Featured Collection",
+      title: "Latest Arrivals",
       description:
-        "Two product rails on the homepage — each can point at a specific collection or fall back to featured products.",
+        "Your newest published products, newest first. A short row is centered.",
       groupIds: ["homepage.featured"],
-      order: 5,
-      links: [SECTION_LINKS.products, SECTION_LINKS.collections],
+      order: 6,
+      links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.guarantee",
@@ -64,7 +74,7 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       title: "Guarantee",
       description: "Guarantee/trust band with image and supporting copy.",
       groupIds: ["homepage.guarantee"],
-      order: 6,
+      order: 7,
     },
     {
       id: "homepage.testimonials",
@@ -72,7 +82,7 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       title: "Testimonials",
       description: "Rotating customer quote strip.",
       groupIds: ["homepage.testimonials"],
-      order: 7,
+      order: 8,
       hideable: true,
       links: [SECTION_LINKS.testimonials],
     },
@@ -136,6 +146,28 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       groupIds: ["shop.listing"],
       order: 0,
       links: [SECTION_LINKS.products],
+    },
+
+    // Collections
+    {
+      id: "collections.listing",
+      page: "collections",
+      title: "Collections Listing",
+      description:
+        "Overline, heading, CTA, and empty state on the collections index.",
+      groupIds: ["collections.listing"],
+      order: 0,
+      links: [SECTION_LINKS.collections],
+    },
+    {
+      id: "collections.detail",
+      page: "collections",
+      title: "Collection Detail",
+      description:
+        'Overline, empty state, back link, and "more collections" heading on a collection detail page.',
+      groupIds: ["collections.detail"],
+      order: 1,
+      links: [SECTION_LINKS.collections],
     },
 
     // Testimonials

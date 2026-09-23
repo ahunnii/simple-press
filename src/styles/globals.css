@@ -2744,7 +2744,10 @@
 .visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-count,
 .visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-num,
 .visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-count {
-  color: var(--vn-steel-mist);
+  /* Card text colours are classes, not inline styles, so these hover rules
+     win. Steel-mist on ink read ~3:1 at 10px — bone at 72% clears AA. */
+  color: var(--vn-bone);
+  opacity: 0.72;
 }
 
 .noise .vn-cat-card:hover .vn-cat-meta .vn-cat-name,
