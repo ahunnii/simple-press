@@ -23,6 +23,7 @@ const NAV_ITEMS: OliveAccountNavItem[] = [
     label: "Subscriptions",
     flag: "subscriptions",
   },
+  { href: "/account/invoices", label: "Invoices", flag: "invoices" },
   { href: "/account/settings", label: "Settings" },
   { href: "/account/security", label: "Security" },
   { href: "/account/address-book", label: "Address Book" },

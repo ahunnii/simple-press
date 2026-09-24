@@ -6,6 +6,12 @@ import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
 import FinalQuoteEmail from "~/emails/final-quote";
+import InvoiceCancelledEmail from "~/emails/invoice-cancelled";
+import InvoiceOverdueOwnerEmail from "~/emails/invoice-overdue-owner";
+import InvoicePaymentReceiptEmail from "~/emails/invoice-payment-receipt";
+import InvoiceReminderEmail from "~/emails/invoice-reminder";
+import InvoiceSentEmail from "~/emails/invoice-sent";
+import InvoiceWeeklyDigestEmail from "~/emails/invoice-weekly-digest";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import LoyaltyBirthdayEmail from "~/emails/loyalty-birthday";
 import LoyaltyRewardRedeemedEmail from "~/emails/loyalty-reward-redeemed";
@@ -411,6 +417,147 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
               { title: "Move type", display: "In State" },
               { title: "From zip", display: "48601 (Saginaw, MI)" },
             ],
+          }),
+      },
+      {
+        key: "invoice-sent",
+        label: "Invoice Sent",
+        overrideId: "invoice-sent",
+        // supportsIntro is false for this template — the message is written
+        // per-send from the invoice detail page, so the preview ignores
+        // introText and shows a sample owner message instead.
+        build: () =>
+          InvoiceSentEmail({
+            customerName: "Jane Smith",
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            message: "Thanks for your business this month!",
+            invoiceNumber: "INV-0012",
+            amountDueCents: 168000,
+            dueDateLabel: "October 15, 2026",
+            lineItems: [
+              { description: "Design consultation", quantity: 2, amountCents: 30000 },
+              { description: "Website build", quantity: 1, amountCents: 140000 },
+            ],
+            subtotalCents: 170000,
+            discountCents: 8500,
+            taxCents: 6500,
+            totalCents: 168000,
+            paymentMethodLabels: ["Bank transfer", "Venmo", "Zelle"],
+            viewInvoiceUrl: `${businessUrl}/invoice/sample`,
+          }),
+      },
+      {
+        key: "invoice-reminder",
+        label: "Invoice Reminder",
+        overrideId: "invoice-reminder",
+        build: () =>
+          InvoiceReminderEmail({
+            customerName: "Jane Smith",
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            isOverdue: true,
+            message: "Just a friendly nudge — let us know if you have questions.",
+            invoiceNumber: "INV-0012",
+            amountDueCents: 168000,
+            dueDateLabel: "October 15, 2026",
+            lineItems: [
+              { description: "Design consultation", quantity: 2, amountCents: 30000 },
+              { description: "Website build", quantity: 1, amountCents: 140000 },
+            ],
+            totalCents: 168000,
+            balanceCents: 168000,
+            paymentMethodLabels: ["Bank transfer", "Venmo", "Zelle"],
+            viewInvoiceUrl: `${businessUrl}/invoice/sample`,
+          }),
+      },
+      {
+        key: "invoice-cancelled",
+        label: "Invoice Cancelled",
+        build: () =>
+          InvoiceCancelledEmail({
+            customerName: "Jane Smith",
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            invoiceNumber: "INV-0012",
+            reason: "The project scope changed, so we're issuing a new invoice.",
+            amountPaidCents: 0,
+          }),
+      },
+      {
+        key: "invoice-payment-receipt",
+        label: "Invoice Payment Receipt",
+        build: () =>
+          InvoicePaymentReceiptEmail({
+            customerName: "Jane Smith",
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            invoiceNumber: "INV-0012",
+            amountPaidCents: 84000,
+            paidOnLabel: "September 23, 2026",
+            methodLabel: "Bank transfer",
+            balanceCents: 84000,
+            viewInvoiceUrl: `${businessUrl}/invoice/sample`,
+          }),
+      },
+      {
+        key: "invoice-overdue-owner",
+        label: "Invoices Past Due (owner)",
+        build: () =>
+          InvoiceOverdueOwnerEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            count: 2,
+            invoices: [
+              {
+                displayNumber: "INV-0012",
+                customerName: "Jane Smith",
+                balanceCents: 168000,
+                dueDateLabel: "September 20, 2026",
+                adminUrl: `${businessUrl}/admin/invoices/sample1`,
+              },
+              {
+                displayNumber: "INV-0013",
+                customerName: "John Doe",
+                balanceCents: 45000,
+                dueDateLabel: "September 21, 2026",
+                adminUrl: `${businessUrl}/admin/invoices/sample2`,
+              },
+            ],
+            viewAllUrl: `${businessUrl}/admin/invoices?status=overdue`,
+          }),
+      },
+      {
+        key: "invoice-weekly-digest",
+        label: "Weekly Invoice Digest (owner)",
+        build: () =>
+          InvoiceWeeklyDigestEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            outstandingCount: 5,
+            outstandingCents: 420000,
+            overdueCount: 2,
+            overdueCents: 213000,
+            collectedLast7DaysCents: 96000,
+            invoices: [
+              {
+                displayNumber: "INV-0012",
+                customerName: "Jane Smith",
+                balanceCents: 168000,
+                dueDateLabel: "September 20, 2026",
+                isOverdue: true,
+                adminUrl: `${businessUrl}/admin/invoices/sample1`,
+              },
+              {
+                displayNumber: "INV-0014",
+                customerName: "Alex Brown",
+                balanceCents: 65000,
+                dueDateLabel: "September 30, 2026",
+                isOverdue: false,
+                adminUrl: `${businessUrl}/admin/invoices/sample3`,
+              },
+            ],
+            viewAllUrl: `${businessUrl}/admin/invoices`,
           }),
       },
       {

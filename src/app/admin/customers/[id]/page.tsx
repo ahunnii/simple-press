@@ -19,6 +19,7 @@ import {
 
 import { TrailHeader } from "../../_components/trail-header";
 import { OrdersTable } from "../../orders/_components/orders-table";
+import { CustomerInvoicesCard } from "./_components/customer-invoices-card";
 import { CustomerLoyaltyCard } from "./_components/customer-loyalty-card";
 import { CustomerNotes } from "./_components/customer-notes";
 import { CustomerPrivacyActions } from "./_components/customer-privacy-actions";
@@ -169,6 +170,11 @@ export default async function CustomerDetailPage({ params }: Props) {
             <CustomerLoyaltyCard
               customerId={customer.id}
               canAdjust={canAdjustLoyalty}
+            />
+
+            <CustomerInvoicesCard
+              customerId={customer.id}
+              customerEmail={customer.email}
             />
 
             <CustomerNotes customerId={customer.id} notes={customer.notes} />

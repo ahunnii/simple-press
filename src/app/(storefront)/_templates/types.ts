@@ -137,6 +137,11 @@ export type SubscriptionsPageTemplateProps = {
   subscriptions: RouterOutputs["subscription"]["getMine"];
 };
 
+export type InvoicesPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  invoices: RouterOutputs["invoice"]["getMine"];
+};
+
 export type OrderDetailPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   order: NonNullable<RouterOutputs["customer"]["getMyOrderById"]>;

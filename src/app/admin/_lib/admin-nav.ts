@@ -112,6 +112,8 @@ export interface NavItem {
   icon: TablerIcon | LucideIcon;
   section: NavSection;
   featureKey?: string;
+  /** Visible when ANY of these flags is on; takes precedence over featureKey. */
+  featureKeysAny?: string[];
   /**
    * Membership roles that can see this item. Defaults to OWNER + MANAGER
    * (`DEFAULT_NAV_ROLES`). Include "STAFF" only for fulfillment-safe pages
@@ -168,6 +170,8 @@ export interface PaletteAction {
   icon: TablerIcon | LucideIcon;
   keywords?: string[];
   featureKey?: string;
+  /** Visible when ANY of these flags is on; takes precedence over featureKey. */
+  featureKeysAny?: string[];
   /**
    * Membership roles that can see this action. Defaults to OWNER + MANAGER
    * (`DEFAULT_NAV_ROLES`). PLATFORM_ADMIN always sees everything.
@@ -221,8 +225,16 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/admin/invoices",
     icon: IconFileInvoice,
     section: "sell",
-    featureKey: "quickbooks",
-    keywords: ["quickbooks", "invoice", "deposit", "bill", "final bill"],
+    featureKeysAny: ["invoices", "quickbooks"],
+    keywords: [
+      "quickbooks",
+      "invoice",
+      "deposit",
+      "bill",
+      "final bill",
+      "billing",
+      "payment",
+    ],
   },
   {
     key: "subscriptions",
@@ -562,6 +574,18 @@ export const HUB_CARDS: HubCard[] = [
     keywords: ["tips", "support", "donate", "venmo", "cash app", "fundraiser"],
   },
   {
+    key: "settings-invoices",
+    title: "Invoices",
+    description: "Payment methods, numbering, and reminders",
+    body: "Configure invoice settings, payment methods, and payment reminders",
+    href: "/admin/settings/invoices",
+    hub: "settings",
+    color: "amber",
+    icon: IconFileInvoice,
+    featureKey: "invoices",
+    keywords: ["invoice", "bill", "payment", "numbering"],
+  },
+  {
     key: "settings-loyalty",
     title: "Rewards",
     description: "Points, bonuses, and reward tiers",
@@ -761,6 +785,25 @@ export function isHubCardEnabled(
   return !card.featureKey || isEnabled(card.featureKey);
 }
 
+/**
+ * Whether a nav item (NavItem or PaletteAction) should be shown given the
+ * business's enabled feature flags. Items gated on a single `featureKey` need
+ * that flag on; items gated on `featureKeysAny` need at least one of those on.
+ * An item with neither is always shown.
+ *
+ * Use this everywhere nav items are filtered by flags rather than
+ * re-deriving the feature visibility logic.
+ */
+export function isNavFeatureEnabled(
+  item: Pick<NavItem | PaletteAction, "featureKey" | "featureKeysAny">,
+  isEnabled: (key: string) => boolean,
+): boolean {
+  if (item.featureKeysAny?.length) {
+    return item.featureKeysAny.some((k) => isEnabled(k));
+  }
+  return !item.featureKey || isEnabled(item.featureKey);
+}
+
 // ─── Palette actions ────────────────────────────────────────────────────────
 
 export const PALETTE_ACTIONS: PaletteAction[] = [
@@ -848,6 +891,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
   {
     key: "new-invoice",
     title: "New invoice",
+    href: "/admin/invoices/new",
+    icon: Plus,
+    featureKey: "invoices",
+    keywords: ["invoice", "bill", "create", "send"],
+  },
+  {
+    key: "new-quickbooks-invoice",
+    title: "New QuickBooks invoice",
     href: "/admin/invoices?new=1",
     icon: Plus,
     featureKey: "quickbooks",

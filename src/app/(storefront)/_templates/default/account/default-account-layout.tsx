@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Bell,
   BookUser,
+  FileText,
   Gift,
   Lock,
   Package,
@@ -29,6 +30,12 @@ const BASE_NAV_ITEMS = [
     label: "Subscriptions",
     icon: Repeat,
     flag: "subscriptions",
+  },
+  {
+    href: "/account/invoices",
+    label: "Invoices",
+    icon: FileText,
+    flag: "invoices",
   },
   {
     href: "/account/settings",

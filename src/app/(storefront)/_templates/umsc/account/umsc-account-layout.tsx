@@ -8,6 +8,7 @@ import {
   Award,
   Bell,
   BookUser,
+  FileText,
   Lock,
   Package,
   Repeat,
@@ -38,6 +39,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Subscriptions",
     icon: Repeat,
     flag: "subscriptions",
+  },
+  {
+    href: "/account/invoices",
+    label: "Invoices",
+    icon: FileText,
+    flag: "invoices",
   },
   { href: "/account/rewards", label: "Rewards", icon: Award, flag: "loyalty" },
 ];

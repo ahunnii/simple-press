@@ -106,4 +106,21 @@ describe("applySubjectTemplate", () => {
       }),
     ).toBe("A1-A1");
   });
+
+  it("replaces {invoiceNumber} alongside {businessName}", () => {
+    expect(
+      applySubjectTemplate("Invoice {invoiceNumber} from {businessName}", {
+        invoiceNumber: "INV-0012",
+        businessName: "Acme Co",
+      }),
+    ).toBe("Invoice INV-0012 from Acme Co");
+  });
+
+  it("replaces a missing invoiceNumber with an empty string", () => {
+    expect(
+      applySubjectTemplate("Invoice {invoiceNumber} from {businessName}", {
+        businessName: "Acme Co",
+      }),
+    ).toBe("Invoice  from Acme Co");
+  });
 });

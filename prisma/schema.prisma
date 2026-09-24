@@ -290,6 +290,9 @@ model Business {
   formSubmissions       FormSubmission[]
   quickBooksConnection  QuickBooksConnection?
   quickBooksInvoices    QuickBooksInvoice[]
+  invoiceSettings       InvoiceSettings?
+  invoices              Invoice[]
+  invoicePayments       InvoicePayment[]
   subscriptions         Subscription[]
   donations             Donation[]
   loyaltyProgram        LoyaltyProgram?
@@ -913,6 +916,7 @@ model Customer {
   reviews            ProductReview[]
   subscriptions      Subscription[]
   loyaltyLedger      LoyaltyLedger[]
+  invoices           Invoice[]
 
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
@@ -1925,6 +1929,159 @@ model QuickBooksInvoice {
   @@index([businessId, status, createdAt]) // list status filter
   @@index([quoteSubmissionId]) // lead card + SetNull fan-out
   @@index([status, lastSyncedAt]) // cron sweep: open invoices, stalest first
+}
+
+/// Per-business defaults for native (non-QuickBooks) invoices (1:1). Upserted
+/// on the first `invoice.create`, so a business that never invoices has no
+/// row. Notes/terms/payment methods are `/// @encrypted` and can never appear
+/// in a `where`; the digest bookkeeping columns stay plaintext for the cron.
+model InvoiceSettings {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Numbering: formatInvoiceNumber(prefix, number, padding) → "INV-0001".
+  numberPrefix   String @default("INV-")
+  numberPadding  Int    @default(4)
+  startingNumber Int    @default(1)
+
+  defaultDueTerms   String @default("net_30") // INVOICE_DUE_TERMS_VALUES
+  defaultTaxRateBps Int    @default(0) // basis points: 625 = 6.25%
+
+  defaultNotes String? @db.Text /// @encrypted
+  defaultTerms String? @db.Text /// @encrypted
+  // JSON InvoicePaymentMethod[] — may hold account numbers/handles.
+  paymentMethods String? @db.Text /// @encrypted
+
+  overdueAlertsEnabled Boolean   @default(true)
+  weeklyDigestEnabled  Boolean   @default(true)
+  lastDigestWeekKey    String? // local-Monday YYYY-MM-DD; digest idempotency key
+  lastDigestSentAt     DateTime?
+}
+
+/// A native SimplePress invoice (parallel to QuickBooksInvoice, which mirrors
+/// QBO). Numbered per business (`@@unique([businessId, invoiceNumber])`,
+/// allocated max+1 with P2002 retry). Customer name/email stay PLAINTEXT to
+/// match Customer/Order (search + list); phone/address/line items/notes are
+/// encrypted. Money is integer cents; `status` is derived from payments.
+model Invoice {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  invoiceNumber Int
+  numberPrefix  String @default("INV-") // snapshot of InvoiceSettings.numberPrefix
+  // DRAFT | SENT | PARTIALLY_PAID | PAID | CANCELLED — INVOICE_STATUS_VALUES
+  status        String @default("DRAFT")
+
+  // SetNull, not Cascade: invoices are money records and must outlive the
+  // customer row they were linked to.
+  customerId     String?
+  customer       Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName   String // plaintext (matches Customer/Order)
+  customerEmail  String // plaintext
+  customerPhone  String? /// @encrypted
+  // JSON {line1,line2?,city,state,zip} — quickBooksBillingAddressSchema.
+  billingAddress String? @db.Text /// @encrypted
+
+  currency  String @default("usd")
+  // JSON InvoiceLineItem[].
+  lineItems String @db.Text /// @encrypted
+
+  subtotalCents   Int     @default(0)
+  discountType    String? // flat | percent
+  discountValue   Int     @default(0) // cents (flat) or bps (percent)
+  discountCents   Int     @default(0)
+  taxRateBps      Int     @default(0)
+  taxCents        Int     @default(0)
+  totalCents      Int     @default(0)
+  amountPaidCents Int     @default(0)
+
+  dueTerms  String    @default("net_30")
+  issueDate DateTime? // calendar date @ UTC midnight, set at send
+  dueDate   DateTime? // calendar date @ UTC midnight
+
+  notes               String?  @db.Text /// @encrypted
+  terms               String?  @db.Text /// @encrypted
+  paymentMethodIds    String[] @default([])
+  // Snapshot of the rendered payment instructions at send.
+  paymentInstructions String?  @db.Text /// @encrypted
+  issuerSnapshot      Json? // public business info at send
+
+  sentAt       DateTime?
+  sentVia      String? // email | manual
+  paidAt       DateTime?
+  cancelledAt  DateTime?
+  cancelReason String?   @db.Text /// @encrypted
+
+  lastReminderSentAt DateTime?
+  reminderCount      Int       @default(0)
+  overdueNotifiedAt  DateTime?
+  firstViewedAt      DateTime?
+  lastViewedAt       DateTime?
+  createdByUserId    String?
+
+  payments InvoicePayment[]
+  events   InvoiceEvent[]
+
+  @@unique([businessId, invoiceNumber]) // per-business numbering + number lookup
+  @@index([businessId, status, createdAt]) // /admin/invoices list + status filter
+  @@index([businessId, dueDate]) // due-date sort / upcoming-due views
+  @@index([customerId]) // customer detail + SetNull fan-out
+  @@index([status, overdueNotifiedAt, dueDate]) // cron overdue sweep
+}
+
+/// One manually recorded payment against an Invoice. Recording/deleting runs
+/// in a transaction that recomputes Invoice.amountPaidCents/status with a
+/// compare-and-swap. `reference`/`note` are encrypted (may hold check or
+/// account numbers).
+model InvoicePayment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  amountCents Int
+  paidOn      DateTime // calendar date @ UTC midnight
+  method      String // INVOICE_PAYMENT_RECORD_METHOD_VALUES
+
+  reference String? /// @encrypted
+  note      String? @db.Text /// @encrypted
+
+  recordedByUserId String?
+  receiptSentAt    DateTime?
+
+  @@index([invoiceId, paidOn]) // invoice detail payment history
+  @@index([businessId, paidOn]) // weekly digest / collected-in-period totals
+}
+
+/// Append-only activity log for an Invoice (created, sent, viewed, reminded,
+/// payment recorded, cancelled, ...). `businessId` is denormalized for scoping
+/// checks and is deliberately NOT a relation. `metadata` must hold
+/// non-sensitive data only — it is plaintext JSONB.
+model InvoiceEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  businessId  String
+  type        String // INVOICE_EVENT_TYPE_VALUES
+  actorUserId String?
+  metadata    Json? // non-sensitive only
+
+  @@index([invoiceId, createdAt]) // invoice detail activity timeline
 }
 
 /// One customer's subscription to a recurring product purchase (Stripe Billing

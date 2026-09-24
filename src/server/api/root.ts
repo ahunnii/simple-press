@@ -24,6 +24,7 @@ import { formSubmissionRouter } from "./routers/form-submission";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
+import { invoiceRouter } from "./routers/invoice";
 import { legalRouter } from "./routers/legal";
 import { loyaltyRouter } from "./routers/loyalty";
 import { marketingRouter } from "./routers/marketing";
@@ -85,6 +86,7 @@ export const appRouter = createTRPCRouter({
   platform: platformRouter,
   contact: contactRouter,
   quickbooks: quickbooksRouter,
+  invoice: invoiceRouter,
   quoteCalculator: quoteCalculatorRouter,
   quoteSubmission: quoteSubmissionRouter,
   form: formRouter,

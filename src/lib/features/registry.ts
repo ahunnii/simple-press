@@ -304,6 +304,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  invoices: {
+    key: "invoices",
+    label: "Invoices",
+    description:
+      "Build and send invoices, get paid by bank transfer, PayPal, Venmo, Cash App, Zelle, or cash",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
   subscriptions: {
     key: "subscriptions",
     label: "Product Subscriptions",

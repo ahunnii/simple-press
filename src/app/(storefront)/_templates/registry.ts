@@ -105,6 +105,7 @@ import { DefaultAboutPage } from "./default/about/default-about-page";
 import { DefaultAccountSecurityPage } from "./default/account/default-account-security-page";
 import { DefaultAccountSettingsPage } from "./default/account/default-account-settings-page";
 import { DefaultAddressBookFallback } from "./default/account/default-address-book-fallback";
+import { DefaultInvoicesPage } from "./default/account/default-invoices-page";
 import { DefaultOrderDetailPage } from "./default/account/default-order-detail-page";
 import { DefaultOrdersPage } from "./default/account/default-orders-page";
 import { DefaultPreferencesFallback } from "./default/account/default-preferences-fallback";
@@ -164,6 +165,7 @@ import { HappyBambooOrderDetailPage } from "./happy-bamboo/account/happy-bamboo-
 import { HappyBambooOrdersPage } from "./happy-bamboo/account/happy-bamboo-orders-page";
 import { HappyBambooPreferencesPage } from "./happy-bamboo/account/happy-bamboo-preferences-page";
 import { HappyBambooSubscriptionsPage } from "./happy-bamboo/account/happy-bamboo-subscriptions-page";
+import { HappyBambooInvoicesPage } from "./happy-bamboo/account/happy-bamboo-invoices-page";
 import { HappyBambooBlogPage } from "./happy-bamboo/blog/happy-bamboo-blog-page";
 import { HappyBambooBlogPostPage } from "./happy-bamboo/blog/happy-bamboo-blog-post-page";
 import { HappyBambooCartPage } from "./happy-bamboo/cart-checkout/happy-bamboo-cart-page";
@@ -235,6 +237,7 @@ import { OliveOrdersPage } from "./olive/account/olive-orders-page";
 import { OlivePreferencesPage } from "./olive/account/olive-preferences-page";
 import { OliveRewardsPage } from "./olive/account/olive-rewards-page";
 import { OliveSubscriptionsPage } from "./olive/account/olive-subscriptions-page";
+import { OliveInvoicesPage } from "./olive/account/olive-invoices-page";
 import { OliveBlogPage } from "./olive/blog/olive-blog-page";
 import { OliveBlogPostPage } from "./olive/blog/olive-blog-post-page";
 import { OliveCartPage } from "./olive/cart-checkout/olive-cart-page";
@@ -372,6 +375,7 @@ import { WealthOrderDetailPage } from "./wealth/account/wealth-order-detail-page
 import { WealthOrdersPage } from "./wealth/account/wealth-orders-page";
 import { WealthPreferencesPage } from "./wealth/account/wealth-preferences-page";
 import { WealthSubscriptionsPage } from "./wealth/account/wealth-subscriptions-page";
+import { WealthInvoicesPage } from "./wealth/account/wealth-invoices-page";
 import { WealthBlogPage } from "./wealth/blog/wealth-blog-page";
 import { WealthBlogPostPage } from "./wealth/blog/wealth-blog-post-page";
 import { WealthContactPage } from "./wealth/contact/wealth-contact-page";
@@ -391,6 +395,7 @@ import { DreamOrderDetailPage } from "./dream/account/dream-order-detail-page";
 import { DreamOrdersPage } from "./dream/account/dream-orders-page";
 import { DreamPreferencesPage } from "./dream/account/dream-preferences-page";
 import { DreamSubscriptionsPage } from "./dream/account/dream-subscriptions-page";
+import { DreamInvoicesPage } from "./dream/account/dream-invoices-page";
 import { DreamContactPage } from "./dream/contact/dream-contact-page";
 import { DreamGenericPage } from "./dream/generic/dream-generic-page";
 import { DreamMaintenancePage } from "./dream/maintenance/dream-maintenance-page";
@@ -407,6 +412,7 @@ import { UmscOrdersPage } from "./umsc/account/umsc-orders-page";
 import { UmscPreferencesPage } from "./umsc/account/umsc-preferences-page";
 import { UmscRewardsPage } from "./umsc/account/umsc-rewards-page";
 import { UmscSubscriptionsPage } from "./umsc/account/umsc-subscriptions-page";
+import { UmscInvoicesPage } from "./umsc/account/umsc-invoices-page";
 import { UmscCartPage } from "./umsc/cart-checkout/umsc-cart-page";
 import { UmscCheckoutPage } from "./umsc/cart-checkout/umsc-checkout-page";
 import { UmscCheckoutUnavailable } from "./umsc/cart-checkout/umsc-checkout-unavailable";
@@ -471,6 +477,7 @@ export type TemplateComponentSet = {
   PreferencesPage: AnyComponent;
   RewardsPage: AnyComponent;
   SubscriptionsPage: AnyComponent;
+  InvoicesPage: AnyComponent;
   // Optional — only some templates implement this
   ServicesPage?: AnyComponent;
   ServicesIndexPage?: AnyComponent;
@@ -516,6 +523,7 @@ const defaultEntry: TemplateComponentSet = {
   PreferencesPage: DefaultPreferencesFallback,
   RewardsPage: DefaultRewardsFallback,
   SubscriptionsPage: DefaultSubscriptionsPage,
+  InvoicesPage: DefaultInvoicesPage,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
   EventPage: DefaultEventPage,
@@ -642,6 +650,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrdersPage: HappyBambooOrdersPage,
     PreferencesPage: HappyBambooPreferencesPage,
     SubscriptionsPage: HappyBambooSubscriptionsPage,
+    InvoicesPage: HappyBambooInvoicesPage,
   },
 
   modern: {
@@ -757,6 +766,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrdersPage: WealthOrdersPage,
     PreferencesPage: WealthPreferencesPage,
     SubscriptionsPage: WealthSubscriptionsPage,
+    InvoicesPage: WealthInvoicesPage,
   },
   // Dream Your Theme — service archetype (event decor / rentals / draping):
   // no commerce slots (Default fallback); blog/faq/events/videos/donate also
@@ -776,6 +786,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrdersPage: DreamOrdersPage,
     PreferencesPage: DreamPreferencesPage,
     SubscriptionsPage: DreamSubscriptionsPage,
+    InvoicesPage: DreamInvoicesPage,
   },
   // Unique Monique — retail archetype (candles / soaps / body care / home care).
   // Blog, events, videos, donate and services fall back to Default by scope.
@@ -802,6 +813,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: UmscPreferencesPage,
     SubscriptionsPage: UmscSubscriptionsPage,
     RewardsPage: UmscRewardsPage,
+    InvoicesPage: UmscInvoicesPage,
     MaintenancePage: UmscMaintenancePage,
   },
 
@@ -852,6 +864,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: OlivePreferencesPage,
     RewardsPage: OliveRewardsPage,
     SubscriptionsPage: OliveSubscriptionsPage,
+    InvoicesPage: OliveInvoicesPage,
     MaintenancePage: OliveMaintenancePage,
   },
   pollen: {

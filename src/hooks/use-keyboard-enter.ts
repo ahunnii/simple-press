@@ -48,6 +48,15 @@ export function useKeyboardEnter(
           '[contenteditable="true"], [contenteditable=""]',
         );
         if (editable) return;
+
+        // Don't submit the background form while a Dialog/AlertDialog is
+        // focused (e.g. the invoice settings "Add payment method" dialog).
+        // Those are portaled to `document.body`, outside this form's DOM
+        // subtree, but focus can still land inside one while this listener
+        // is bound — and the dialog's own Save action is what should own
+        // Enter/Cmd+Enter there, not the form underneath it.
+        const dialog = target.closest('[role="dialog"], [role="alertdialog"]');
+        if (dialog) return;
       }
 
       void form.handleSubmit(onSubmitRef.current, onInvalidRef.current)();

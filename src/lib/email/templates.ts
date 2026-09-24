@@ -7,6 +7,12 @@ import ContactFormEmail from "~/emails/contact-form";
 import DisputeAlertEmail from "~/emails/dispute-alert";
 import FinalQuoteEmail from "~/emails/final-quote";
 import FormConfirmationEmail from "~/emails/form-confirmation";
+import InvoiceCancelledEmail from "~/emails/invoice-cancelled";
+import InvoiceOverdueOwnerEmail from "~/emails/invoice-overdue-owner";
+import InvoicePaymentReceiptEmail from "~/emails/invoice-payment-receipt";
+import InvoiceReminderEmail from "~/emails/invoice-reminder";
+import InvoiceSentEmail from "~/emails/invoice-sent";
+import InvoiceWeeklyDigestEmail from "~/emails/invoice-weekly-digest";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import LoyaltyBirthdayEmail from "~/emails/loyalty-birthday";
 import LoyaltyRewardRedeemedEmail from "~/emails/loyalty-reward-redeemed";
@@ -36,6 +42,10 @@ import SubscriptionStartedEmail from "~/emails/subscription-started";
 import SubscriptionUpdatedEmail from "~/emails/subscription-updated";
 import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
+
+import type { InvoiceSummaryLineItem } from "~/emails/components/invoice-summary";
+import type { DigestInvoiceRow } from "~/emails/invoice-weekly-digest";
+import type { OverdueInvoiceRow } from "~/emails/invoice-overdue-owner";
 
 import type { DonationLabel } from "~/lib/donations/label";
 import { getBusinessUrl } from "~/lib/business-url";
@@ -1805,5 +1815,295 @@ export async function sendLoyaltyBirthdayEmail(params: {
       { name: "business", value: params.business.subdomain },
     ],
     idempotencyKey: `loyalty-birthday-${params.customerId}-${params.year}`,
+  });
+}
+
+// ─── Invoices ───
+
+type InvoiceCustomerBusiness = {
+  name: string;
+  ownerEmail: string;
+  supportEmail?: string | null;
+  siteContent?: { logoUrl?: string | null } | null;
+  subdomain: string;
+};
+
+type InvoiceOwnerBusiness = {
+  name: string;
+  ownerEmail: string;
+  siteContent?: { logoUrl?: string | null } | null;
+  subdomain: string;
+};
+
+/** Shared totals/line-items shape used by the invoice-sent and reminder emails. */
+type InvoiceSummaryParams = {
+  amountDueCents: number;
+  /** Pre-formatted, e.g. "September 30, 2026". */
+  dueDateLabel: string;
+  lineItems: InvoiceSummaryLineItem[];
+  subtotalCents?: number;
+  discountCents?: number;
+  taxCents?: number;
+  totalCents?: number;
+  amountPaidCents?: number;
+  balanceCents?: number;
+  /** Payment method NAMES only — never account numbers or handles. */
+  paymentMethodLabels?: string[];
+};
+
+// Invoice sent (customer)
+export async function sendInvoiceEmail(
+  params: {
+    to: string;
+    customerName: string;
+    invoiceNumber: string;
+    /** Optional owner-written message shown above the invoice summary. */
+    message?: string;
+    /** Signed URL to the hosted invoice page — no login required. */
+    viewInvoiceUrl: string;
+    business: InvoiceCustomerBusiness;
+    idempotencyKey?: string;
+  } & InvoiceSummaryParams,
+) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["invoice-sent"];
+  const defaultSubject = `Invoice ${params.invoiceNumber} from ${params.business.name}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.SUPPORT,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.supportEmail ?? params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          invoiceNumber: params.invoiceNumber,
+          businessName: params.business.name,
+        })
+      : defaultSubject,
+    react: InvoiceSentEmail({
+      customerName: params.customerName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      message: params.message,
+      invoiceNumber: params.invoiceNumber,
+      amountDueCents: params.amountDueCents,
+      dueDateLabel: params.dueDateLabel,
+      lineItems: params.lineItems,
+      subtotalCents: params.subtotalCents,
+      discountCents: params.discountCents,
+      taxCents: params.taxCents,
+      totalCents: params.totalCents,
+      amountPaidCents: params.amountPaidCents,
+      balanceCents: params.balanceCents,
+      paymentMethodLabels: params.paymentMethodLabels,
+      viewInvoiceUrl: params.viewInvoiceUrl,
+    }),
+    tags: [
+      { name: "category", value: "invoice_sent" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Invoice reminder (customer) — the owner's manual "Send reminder" button
+export async function sendInvoiceReminderEmail(
+  params: {
+    to: string;
+    customerName: string;
+    invoiceNumber: string;
+    /** Whether the due date has already passed. */
+    isOverdue: boolean;
+    /** Optional owner-written message shown above the invoice summary. */
+    message?: string;
+    /** Signed URL to the hosted invoice page — no login required. */
+    viewInvoiceUrl: string;
+    business: InvoiceCustomerBusiness;
+    idempotencyKey?: string;
+  } & InvoiceSummaryParams,
+) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["invoice-reminder"];
+  const defaultSubject = `Reminder: invoice ${params.invoiceNumber} from ${params.business.name}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.SUPPORT,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.supportEmail ?? params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          invoiceNumber: params.invoiceNumber,
+          businessName: params.business.name,
+        })
+      : defaultSubject,
+    react: InvoiceReminderEmail({
+      customerName: params.customerName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      isOverdue: params.isOverdue,
+      message: params.message,
+      invoiceNumber: params.invoiceNumber,
+      amountDueCents: params.amountDueCents,
+      dueDateLabel: params.dueDateLabel,
+      lineItems: params.lineItems,
+      subtotalCents: params.subtotalCents,
+      discountCents: params.discountCents,
+      taxCents: params.taxCents,
+      totalCents: params.totalCents,
+      amountPaidCents: params.amountPaidCents,
+      balanceCents: params.balanceCents,
+      paymentMethodLabels: params.paymentMethodLabels,
+      viewInvoiceUrl: params.viewInvoiceUrl,
+    }),
+    tags: [
+      { name: "category", value: "invoice_reminder" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Invoice cancelled (customer)
+export async function sendInvoiceCancelledEmail(params: {
+  to: string;
+  customerName: string;
+  invoiceNumber: string;
+  /** Optional owner-written explanation. */
+  reason?: string;
+  /** Total already paid toward this invoice, in cents, before cancellation. */
+  amountPaidCents?: number;
+  business: InvoiceCustomerBusiness;
+  idempotencyKey?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.SUPPORT,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.supportEmail ?? params.business.ownerEmail,
+    subject: `Invoice ${params.invoiceNumber} has been cancelled`,
+    react: InvoiceCancelledEmail({
+      customerName: params.customerName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      invoiceNumber: params.invoiceNumber,
+      reason: params.reason,
+      amountPaidCents: params.amountPaidCents,
+    }),
+    tags: [
+      { name: "category", value: "invoice_cancelled" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Invoice payment receipt (customer)
+export async function sendInvoicePaymentReceiptEmail(params: {
+  to: string;
+  customerName: string;
+  invoiceNumber: string;
+  amountPaidCents: number;
+  /** Pre-formatted, e.g. "September 23, 2026". */
+  paidOnLabel: string;
+  /** Human-readable payment method label, e.g. "Bank transfer". */
+  methodLabel: string;
+  /** Remaining balance in cents. `0` means the invoice is now paid in full. */
+  balanceCents: number;
+  /** Signed URL to the hosted invoice page — no login required. */
+  viewInvoiceUrl: string;
+  business: InvoiceCustomerBusiness;
+  idempotencyKey?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.SUPPORT,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.supportEmail ?? params.business.ownerEmail,
+    subject: `Payment received for invoice ${params.invoiceNumber}`,
+    react: InvoicePaymentReceiptEmail({
+      customerName: params.customerName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      invoiceNumber: params.invoiceNumber,
+      amountPaidCents: params.amountPaidCents,
+      paidOnLabel: params.paidOnLabel,
+      methodLabel: params.methodLabel,
+      balanceCents: params.balanceCents,
+      viewInvoiceUrl: params.viewInvoiceUrl,
+    }),
+    tags: [
+      { name: "category", value: "invoice_receipt" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Invoice(s) became past due (owner) — the daily overdue-sweep cron
+export async function sendInvoiceOverdueOwnerAlert(params: {
+  count: number;
+  invoices: OverdueInvoiceRow[];
+  /** Link to /admin/invoices?status=overdue. */
+  viewAllUrl: string;
+  business: InvoiceOwnerBusiness;
+  idempotencyKey?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `${params.count} invoice${params.count === 1 ? "" : "s"} past due`,
+    react: InvoiceOverdueOwnerEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      count: params.count,
+      invoices: params.invoices,
+      viewAllUrl: params.viewAllUrl,
+    }),
+    tags: [
+      { name: "category", value: "invoice_overdue_owner" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Weekly invoice digest (owner) — the Monday-8am-local cron
+export async function sendInvoiceWeeklyDigest(params: {
+  outstandingCount: number;
+  outstandingCents: number;
+  overdueCount: number;
+  overdueCents: number;
+  /** Total collected across all invoices in the last 7 days, in cents. */
+  collectedLast7DaysCents: number;
+  /** Up to 20 rows, overdue rows first. */
+  invoices: DigestInvoiceRow[];
+  /** Link to /admin/invoices. */
+  viewAllUrl: string;
+  business: InvoiceOwnerBusiness;
+  idempotencyKey?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: "Your weekly invoice summary",
+    react: InvoiceWeeklyDigestEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      outstandingCount: params.outstandingCount,
+      outstandingCents: params.outstandingCents,
+      overdueCount: params.overdueCount,
+      overdueCents: params.overdueCents,
+      collectedLast7DaysCents: params.collectedLast7DaysCents,
+      invoices: params.invoices,
+      viewAllUrl: params.viewAllUrl,
+    }),
+    tags: [
+      { name: "category", value: "invoice_weekly_digest" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
   });
 }
