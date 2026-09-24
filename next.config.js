@@ -25,6 +25,18 @@ const config = {
     // import route's own 200MB guard (MAX_UPLOAD_BYTES in
     // src/app/api/admin/store-transfer/import/route.ts).
     middlewareClientMaxBodySize: "200mb",
+
+    // Next only defaults build workers on when there is no custom `webpack`
+    // config, and `withSentryConfig` adds one — so without this the server,
+    // edge and client compiles share one process and its heap never shrinks.
+    // Workers give each compile its own process. Output is identical.
+    webpackBuildWorker: true,
+
+    // Trims webpack-sources string buffer caching during compilation to lower
+    // peak memory (slightly slower builds; output unchanged). Together with
+    // the build worker, this keeps Sentry source-map builds (SENTRY_AUTH_TOKEN
+    // set, e.g. on Coolify) from getting OOM-killed.
+    webpackMemoryOptimizations: true,
   },
 
   images: {
