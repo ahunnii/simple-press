@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
@@ -29,9 +30,21 @@ export function HappyBambooCartDrawer({
   const { items, isOpen, setIsOpen, updateQuantity, removeItem } = useCart();
   const reducedMotion = useReducedMotion();
 
+  // The sheet portals to document.body by default, which escapes the
+  // .happy-bamboo scope class — the --hb-* tokens, theme-palette overrides
+  // (inline vars on the wrapper) and the Outfit/Spectral font variables would
+  // all resolve to nothing. Portal into the template wrapper instead.
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setContainer(document.querySelector<HTMLElement>("main.happy-bamboo"));
+  }, []);
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent className="flex w-full flex-col sm:max-w-lg">
+      <SheetContent
+        container={container}
+        className="flex w-full flex-col sm:max-w-lg"
+      >
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5" aria-hidden="true" />

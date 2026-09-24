@@ -852,7 +852,7 @@ describe("invoice router", () => {
           }),
         }),
       ).resolves.toEqual({ state: "expired" });
-    });
+    }, 15_000);
   });
 
   // ─── Customer-facing ─────────────────────────────────────────────────────

@@ -66,7 +66,7 @@ export function HappyBambooHeroSection({
 
           <FadeIn delay={0.15}>
             <p
-              className="text-primary mb-3 text-4xl leading-tight font-extrabold drop-shadow-md md:text-5xl lg:text-6xl"
+              className="mb-3 text-4xl leading-tight font-extrabold text-[var(--hb-primary-on-dark)] drop-shadow-md md:text-5xl lg:text-6xl"
               {...fieldAttr("happy-bamboo.homepage.hero-title")}
             >
               {heroTitle}
@@ -85,7 +85,7 @@ export function HappyBambooHeroSection({
               {...fieldAttr("happy-bamboo.homepage.hero-tagline")}
             >
               <Leaf
-                className="text-primary h-5 w-5 shrink-0"
+                className="h-5 w-5 shrink-0 text-[var(--hb-primary-on-dark)]"
                 aria-hidden="true"
               />
               {heroTagline}
