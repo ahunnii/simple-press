@@ -39,6 +39,20 @@ const config = {
     webpackMemoryOptimizations: true,
   },
 
+  // Production builds keep webpack's cache in memory instead of serializing it
+  // to .next/cache. With Sentry source maps on, that pack-file serialization
+  // (after the server compile) was the step that exhausted the ~4GB heap on
+  // Coolify. Output is unchanged. Trade-off: Nixpacks persists .next/cache
+  // between deploys via a BuildKit cache mount, so builds lose incremental
+  // reuse and may take longer. Runtime caches (images, fetch) are written by
+  // the server, not webpack, and are unaffected. Dev is untouched.
+  webpack: (config, { dev }) => {
+    if (config.cache && !dev) {
+      config.cache = Object.freeze({ type: "memory" });
+    }
+    return config;
+  },
+
   images: {
     remotePatterns: [
       {
