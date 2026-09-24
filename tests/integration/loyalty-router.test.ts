@@ -277,14 +277,16 @@ describe("loyalty router", () => {
     const { business, owner } = await setupBusiness({
       featureFlags: { loyalty: true, coupons: true },
     });
+    // The signup bonus exactly covers the tier so a freshly-joined customer
+    // can redeem it — this test only cares about where the minted code shows
+    // up, not the points math, which is covered by the happy-path test above.
+    // (A zero-cost tier won't do: redeemRewardTier refuses pointsCost 0.)
     const program = await createLoyaltyProgram(business.id, {
-      signupEnabled: false,
+      signupEnabled: true,
+      signupBonus: 100,
     });
-    // pointsCost: 0 so a freshly-joined (0-balance) customer can redeem it —
-    // this test only cares about where the minted code shows up, not the
-    // points math, which is covered by the happy-path test above.
-    const freeTier = await createLoyaltyTier(program.id, business.id, {
-      pointsCost: 0,
+    const tier = await createLoyaltyTier(program.id, business.id, {
+      pointsCost: 100,
     });
 
     const user = await createUser();
@@ -294,7 +296,7 @@ describe("loyalty router", () => {
     });
     await custCaller.loyalty.join();
     const redeemed = await custCaller.loyalty.redeem({
-      tierId: freeTier.id,
+      tierId: tier.id,
     });
 
     await db.discountCode.create({

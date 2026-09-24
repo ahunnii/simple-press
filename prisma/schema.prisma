@@ -55,11 +55,12 @@ model User {
   sessions Session[]
   accounts Account[]
 
-  memberships      BusinessMembership[]
-  customers        Customer[]
-  inventoryHistory InventoryHistory[]
-  createdInvites   PlatformInvite[]     @relation("CreatedInvites")
-  editorNotes      EditorNote[]
+  memberships               BusinessMembership[]
+  customers                 Customer[]
+  inventoryHistory          InventoryHistory[]
+  inventoryCheckoutsCreated InventoryCheckout[]
+  createdInvites            PlatformInvite[]     @relation("CreatedInvites")
+  editorNotes               EditorNote[]
 
   // ← removed businessId direct FK, membership table handles this
   @@map("user")
@@ -258,45 +259,47 @@ model Business {
   donationShowInFooter  Boolean @default(true)
 
   // Relationships
-  products              Product[]
-  collections           Collection[]
-  services              Service[]
-  orders                Order[]
-  customers             Customer[]
-  siteContent           SiteContent?
-  images                Image[]
-  discountCodes         DiscountCode[]
-  inventoryHistory      InventoryHistory[]
-  baseInventoryUnits    BaseInventoryUnit[]
-  inventoryReservations InventoryReservation[]
-  pages                 Page[]
-  editorNotes           EditorNote[]
-  productImports        ProductImport[]
-  galleries             Gallery[]
-  testimonials          Testimonial[]
-  testimonialInvites    TestimonialInvite[]
-  platformInvites       PlatformInvite[]
-  teamInvites           TeamInvite[]
-  memberships           BusinessMembership[]
-  zones                 ShippingZone[]
-  faqItems              FaqItem[]
-  events                Event[]
-  videos                Video[]
-  videoSources          VideoSource[]
-  backInStockRequests   BackInStockRequest[]
-  quoteCalculators      QuoteCalculator[]
-  quoteSubmissions      QuoteSubmission[]
-  forms                 Form[]
-  formSubmissions       FormSubmission[]
-  quickBooksConnection  QuickBooksConnection?
-  quickBooksInvoices    QuickBooksInvoice[]
-  invoiceSettings       InvoiceSettings?
-  invoices              Invoice[]
-  invoicePayments       InvoicePayment[]
-  subscriptions         Subscription[]
-  donations             Donation[]
-  loyaltyProgram        LoyaltyProgram?
-  loyaltyLedger         LoyaltyLedger[]
+  products               Product[]
+  collections            Collection[]
+  services               Service[]
+  orders                 Order[]
+  customers              Customer[]
+  siteContent            SiteContent?
+  images                 Image[]
+  discountCodes          DiscountCode[]
+  inventoryHistory       InventoryHistory[]
+  baseInventoryUnits     BaseInventoryUnit[]
+  inventoryCheckouts     InventoryCheckout[]
+  inventoryCheckoutLines InventoryCheckoutLine[]
+  inventoryReservations  InventoryReservation[]
+  pages                  Page[]
+  editorNotes            EditorNote[]
+  productImports         ProductImport[]
+  galleries              Gallery[]
+  testimonials           Testimonial[]
+  testimonialInvites     TestimonialInvite[]
+  platformInvites        PlatformInvite[]
+  teamInvites            TeamInvite[]
+  memberships            BusinessMembership[]
+  zones                  ShippingZone[]
+  faqItems               FaqItem[]
+  events                 Event[]
+  videos                 Video[]
+  videoSources           VideoSource[]
+  backInStockRequests    BackInStockRequest[]
+  quoteCalculators       QuoteCalculator[]
+  quoteSubmissions       QuoteSubmission[]
+  forms                  Form[]
+  formSubmissions        FormSubmission[]
+  quickBooksConnection   QuickBooksConnection?
+  quickBooksInvoices     QuickBooksInvoice[]
+  invoiceSettings        InvoiceSettings?
+  invoices               Invoice[]
+  invoicePayments        InvoicePayment[]
+  subscriptions          Subscription[]
+  donations              Donation[]
+  loyaltyProgram         LoyaltyProgram?
+  loyaltyLedger          LoyaltyLedger[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -714,11 +717,11 @@ model VideoSource {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  kind        String // "channel" | "playlist"
-  externalId  String // UC… (channel) or PL…/UU… (playlist)
-  label       String? // owner-facing name
-  enabled     Boolean @default(true)
-  autoPublish Boolean @default(true)
+  kind         String // "channel" | "playlist"
+  externalId   String // UC… (channel) or PL…/UU… (playlist)
+  label        String? // owner-facing name
+  enabled      Boolean @default(true)
+  autoPublish  Boolean @default(true)
   // Optional rule set gating `autoPublish` for NEW videos from this source:
   // title include/exclude phrases and weekdays (in the business's time zone),
   // validated by `publishRulesSchema` in src/lib/validators/videos.ts and
@@ -1185,13 +1188,18 @@ model InventoryHistory {
   newQty      Int
   changeQty   Int // positive = increase, negative = decrease
 
-  // Why it changed
-  reason String // "sale", "return", "restock", "adjustment", "correction", "damage"
+  // Why it changed. Order-driven: sale, oversell, return. Manual: adjustment,
+  // correction, damage, return, restock, used, import, checkout, checkin,
+  // lost, initial.
+  reason String
   note   String? @db.Text
 
   // References
   orderId String?
   order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  checkoutId String?
+  checkout   InventoryCheckout? @relation(fields: [checkoutId], references: [id], onDelete: SetNull)
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -1201,8 +1209,11 @@ model InventoryHistory {
   @@index([baseInventoryUnitId])
   @@index([businessId])
   @@index([orderId])
+  @@index([checkoutId])
   @@index([userId])
   @@index([createdAt])
+  @@index([businessId, createdAt])
+  @@index([baseInventoryUnitId, createdAt])
 }
 
 // ============================================
@@ -1224,12 +1235,77 @@ model BaseInventoryUnit {
   outOfStockAlertSent   Boolean @default(false)
   allowBackorders       Boolean @default(false)
 
+  // "stock" (consumable, default — every pre-existing pool) | "rental" (returnable)
+  itemType        String  @default("stock")
+  sku             String? // trimmed, null when blank; case-insensitive uniqueness enforced in app
+  category        String?
+  storageLocation String?
+  unitCostCents   Int? // unit cost / replacement value, integer cents
+
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   products         Product[]
   inventoryHistory InventoryHistory[]
+  checkoutLines    InventoryCheckoutLine[]
 
+  @@unique([businessId, sku]) // NULLs distinct in Postgres → many SKU-less items OK
+  @@index([businessId])
+}
+
+// ============================================
+// INVENTORY CHECK-OUTS (RENTALS)
+// ============================================
+
+model InventoryCheckout {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  label        String // event / client name
+  customerName String?
+  notes        String?   @db.Text /// @encrypted
+  status       String    @default("open") // open | closed
+  checkedOutAt DateTime  @default(now())
+  dueBackOn    DateTime? // calendar date @ UTC midnight (Invoice.dueDate convention)
+  closedAt     DateTime?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  lines   InventoryCheckoutLine[]
+  history InventoryHistory[]
+
+  @@index([businessId, status, dueBackOn])
+  @@index([businessId, checkedOutAt])
+}
+
+model InventoryCheckoutLine {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  checkoutId String
+  checkout   InventoryCheckout @relation(fields: [checkoutId], references: [id], onDelete: Cascade)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  itemId   String?
+  item     BaseInventoryUnit? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  itemName String // snapshot at checkout
+
+  qtyOut      Int
+  qtyReturned Int @default(0)
+  qtyDamaged  Int @default(0)
+  qtyLost     Int @default(0)
+  // outstanding = qtyOut - qtyReturned - qtyDamaged - qtyLost (app-enforced ≥ 0 under lock)
+
+  @@unique([checkoutId, itemId])
+  @@index([itemId])
   @@index([businessId])
 }
 
@@ -1776,7 +1852,7 @@ model Form {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name String
+  name       String
   /// Versioned definition blob — `formDefinitionSchema` in src/lib/validators/form.ts
   definition Json
   published  Boolean @default(false)
@@ -1951,8 +2027,8 @@ model InvoiceSettings {
   defaultDueTerms   String @default("net_30") // INVOICE_DUE_TERMS_VALUES
   defaultTaxRateBps Int    @default(0) // basis points: 625 = 6.25%
 
-  defaultNotes String? @db.Text /// @encrypted
-  defaultTerms String? @db.Text /// @encrypted
+  defaultNotes   String? @db.Text /// @encrypted
+  defaultTerms   String? @db.Text /// @encrypted
   // JSON InvoicePaymentMethod[] — may hold account numbers/handles.
   paymentMethods String? @db.Text /// @encrypted
 
@@ -1988,7 +2064,7 @@ model Invoice {
   customerEmail  String // plaintext
   customerPhone  String? /// @encrypted
   // JSON {line1,line2?,city,state,zip} — quickBooksBillingAddressSchema.
-  billingAddress String? @db.Text /// @encrypted
+  billingAddress String?   @db.Text /// @encrypted
 
   currency  String @default("usd")
   // JSON InvoiceLineItem[].

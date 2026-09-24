@@ -229,8 +229,9 @@ export const ownerAdminProcedure = t.procedure
  * Like ownerAdminProcedure but also allows the STAFF role (fulfillment-only
  * workers). Use this ONLY for read/fulfillment procedures a fulfillment worker
  * needs (order lookup, marking fulfilled/shipped/ready-for-pickup, customer
- * lookup). Anything touching money, prices, refunds, products, or settings
- * must stay on ownerAdminProcedure (or stricter).
+ * lookup, inventory counting, inventory check-out/check-in). Anything touching money,
+ * prices, refunds, products, or settings must stay on ownerAdminProcedure (or stricter).
+ * Inventory item cost must be redacted for STAFF.
  * PLATFORM_ADMIN still bypasses the membership check.
  */
 export const staffProcedure = t.procedure

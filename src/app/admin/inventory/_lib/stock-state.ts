@@ -95,3 +95,33 @@ export function unavailableMessage(
 ) {
   return `${pool.inventoryQty} unit${pool.inventoryQty === 1 ? "" : "s"} in stock, but all of it is reserved by in-progress checkouts — nothing available to sell`;
 }
+
+type RentalShape = {
+  inventoryQty: number;
+  outQty: number;
+};
+
+/**
+ * A rental item's Total column: everything the business owns, whether it's on
+ * the shelf right now or out with a customer. Damaged/lost units never come
+ * back (see `rentals.ts`'s `lineOutstanding` — a write-off leaves `qtyOut`
+ * unchanged but stops counting toward outstanding once it's marked damaged or
+ * lost), so Total only drops when that happens, not on every check-out.
+ */
+export function totalOwned(item: RentalShape): number {
+  return item.inventoryQty + item.outQty;
+}
+
+/**
+ * Units actually free to check out or sell right now, floored at zero.
+ *
+ * Deliberately NOT the same helper as `availableQty` above: that one is used
+ * as a *sign* (`isUnavailable`'s `<= 0` check cares whether it's negative or
+ * merely zero), where a negative reserved-past-stock number is a real and
+ * meaningful state. This is used as a *quantity to display* — the check-out
+ * picker's "N available" and the detail page's Available card — where a
+ * negative number would read as a bug, not a fact, so it's clamped.
+ */
+export function availableNow(item: AvailabilityShape): number {
+  return Math.max(0, availableQty(item));
+}

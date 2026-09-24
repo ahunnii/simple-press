@@ -1527,16 +1527,16 @@ export function ProductForm({
                           />
                         )}
 
-                        {/* Base Unit pool selector (shown when pools exist and no variants) */}
+                        {/* Inventory item selector (shown when items exist and no variants) */}
                         {pools.length > 0 && variants.length === 0 && (
                           <div className="space-y-3 rounded-lg border p-4">
                             <div>
                               <Label className="text-sm font-medium">
-                                Base Unit
+                                Inventory item
                               </Label>
                               <p className="text-muted-foreground mt-0.5 text-sm">
-                                Link this product to a shared inventory pool.
-                                For example, if your base unit is a
+                                Link products to this item to sell from its
+                                stock. For example, if your item is a
                                 &ldquo;4-pack Roll&rdquo; and this product is a
                                 24-pack, set units consumed to 6.
                               </p>
@@ -1546,7 +1546,7 @@ export function ProductForm({
                               name="baseInventoryUnitId"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Pool</FormLabel>
+                                  <FormLabel>Item</FormLabel>
                                   <Select
                                     onValueChange={(val) =>
                                       field.onChange(
@@ -1597,8 +1597,8 @@ export function ProductForm({
                                       />
                                     </FormControl>
                                     <FormDescription>
-                                      How many base units this product uses per
-                                      item sold.
+                                      How many units of this item this product
+                                      uses per item sold.
                                     </FormDescription>
                                   </FormItem>
                                 )}
@@ -1607,7 +1607,7 @@ export function ProductForm({
                           </div>
                         )}
 
-                        {/* Individual inventory controls — hidden when pool is selected */}
+                        {/* Individual inventory controls — hidden when an item is selected */}
                         {!form.watch("baseInventoryUnitId") && (
                           <>
                             <SwitchFormField
@@ -1681,11 +1681,11 @@ export function ProductForm({
                           </>
                         )}
 
-                        {/* Informational note when pool is active */}
+                        {/* Informational note when an item is active */}
                         {form.watch("baseInventoryUnitId") && (
                           <p className="text-muted-foreground text-sm">
-                            Individual inventory tracking is disabled while a
-                            base unit pool is selected. Manage pool stock from
+                            Individual inventory tracking is disabled while an
+                            inventory item is selected. Manage its stock from
                             the{" "}
                             <Link href="/admin/inventory" className="underline">
                               Inventory
@@ -1962,7 +1962,6 @@ export function ProductForm({
                           descriptionClassName="text-xs text-muted-foreground"
                           rows={3}
                         />
-
                       </CardContent>
                     </Card>
 

@@ -196,6 +196,16 @@ export type InventoryHistory = $Result.DefaultSelection<Prisma.$InventoryHistory
  */
 export type BaseInventoryUnit = $Result.DefaultSelection<Prisma.$BaseInventoryUnitPayload>
 /**
+ * Model InventoryCheckout
+ * 
+ */
+export type InventoryCheckout = $Result.DefaultSelection<Prisma.$InventoryCheckoutPayload>
+/**
+ * Model InventoryCheckoutLine
+ * 
+ */
+export type InventoryCheckoutLine = $Result.DefaultSelection<Prisma.$InventoryCheckoutLinePayload>
+/**
  * Model InventoryReservation
  * 
  */
@@ -836,6 +846,26 @@ export class PrismaClient<
     * ```
     */
   get baseInventoryUnit(): Prisma.BaseInventoryUnitDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.inventoryCheckout`: Exposes CRUD operations for the **InventoryCheckout** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InventoryCheckouts
+    * const inventoryCheckouts = await prisma.inventoryCheckout.findMany()
+    * ```
+    */
+  get inventoryCheckout(): Prisma.InventoryCheckoutDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.inventoryCheckoutLine`: Exposes CRUD operations for the **InventoryCheckoutLine** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InventoryCheckoutLines
+    * const inventoryCheckoutLines = await prisma.inventoryCheckoutLine.findMany()
+    * ```
+    */
+  get inventoryCheckoutLine(): Prisma.InventoryCheckoutLineDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.inventoryReservation`: Exposes CRUD operations for the **InventoryReservation** model.
@@ -1614,6 +1644,8 @@ export namespace Prisma {
     DiscountCode: 'DiscountCode',
     InventoryHistory: 'InventoryHistory',
     BaseInventoryUnit: 'BaseInventoryUnit',
+    InventoryCheckout: 'InventoryCheckout',
+    InventoryCheckoutLine: 'InventoryCheckoutLine',
     InventoryReservation: 'InventoryReservation',
     Page: 'Page',
     EditorNote: 'EditorNote',
@@ -1663,7 +1695,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3662,6 +3694,154 @@ export namespace Prisma {
           count: {
             args: Prisma.BaseInventoryUnitCountArgs<ExtArgs>
             result: $Utils.Optional<BaseInventoryUnitCountAggregateOutputType> | number
+          }
+        }
+      }
+      InventoryCheckout: {
+        payload: Prisma.$InventoryCheckoutPayload<ExtArgs>
+        fields: Prisma.InventoryCheckoutFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InventoryCheckoutFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InventoryCheckoutFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>
+          }
+          findFirst: {
+            args: Prisma.InventoryCheckoutFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InventoryCheckoutFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>
+          }
+          findMany: {
+            args: Prisma.InventoryCheckoutFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>[]
+          }
+          create: {
+            args: Prisma.InventoryCheckoutCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>
+          }
+          createMany: {
+            args: Prisma.InventoryCheckoutCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InventoryCheckoutCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>[]
+          }
+          delete: {
+            args: Prisma.InventoryCheckoutDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>
+          }
+          update: {
+            args: Prisma.InventoryCheckoutUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>
+          }
+          deleteMany: {
+            args: Prisma.InventoryCheckoutDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InventoryCheckoutUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InventoryCheckoutUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>[]
+          }
+          upsert: {
+            args: Prisma.InventoryCheckoutUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutPayload>
+          }
+          aggregate: {
+            args: Prisma.InventoryCheckoutAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInventoryCheckout>
+          }
+          groupBy: {
+            args: Prisma.InventoryCheckoutGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InventoryCheckoutGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InventoryCheckoutCountArgs<ExtArgs>
+            result: $Utils.Optional<InventoryCheckoutCountAggregateOutputType> | number
+          }
+        }
+      }
+      InventoryCheckoutLine: {
+        payload: Prisma.$InventoryCheckoutLinePayload<ExtArgs>
+        fields: Prisma.InventoryCheckoutLineFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InventoryCheckoutLineFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InventoryCheckoutLineFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>
+          }
+          findFirst: {
+            args: Prisma.InventoryCheckoutLineFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InventoryCheckoutLineFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>
+          }
+          findMany: {
+            args: Prisma.InventoryCheckoutLineFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>[]
+          }
+          create: {
+            args: Prisma.InventoryCheckoutLineCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>
+          }
+          createMany: {
+            args: Prisma.InventoryCheckoutLineCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InventoryCheckoutLineCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>[]
+          }
+          delete: {
+            args: Prisma.InventoryCheckoutLineDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>
+          }
+          update: {
+            args: Prisma.InventoryCheckoutLineUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>
+          }
+          deleteMany: {
+            args: Prisma.InventoryCheckoutLineDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InventoryCheckoutLineUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InventoryCheckoutLineUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>[]
+          }
+          upsert: {
+            args: Prisma.InventoryCheckoutLineUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryCheckoutLinePayload>
+          }
+          aggregate: {
+            args: Prisma.InventoryCheckoutLineAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInventoryCheckoutLine>
+          }
+          groupBy: {
+            args: Prisma.InventoryCheckoutLineGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InventoryCheckoutLineGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InventoryCheckoutLineCountArgs<ExtArgs>
+            result: $Utils.Optional<InventoryCheckoutLineCountAggregateOutputType> | number
           }
         }
       }
@@ -6082,6 +6262,8 @@ export namespace Prisma {
     discountCode?: DiscountCodeOmit
     inventoryHistory?: InventoryHistoryOmit
     baseInventoryUnit?: BaseInventoryUnitOmit
+    inventoryCheckout?: InventoryCheckoutOmit
+    inventoryCheckoutLine?: InventoryCheckoutLineOmit
     inventoryReservation?: InventoryReservationOmit
     page?: PageOmit
     editorNote?: EditorNoteOmit
@@ -6198,6 +6380,7 @@ export namespace Prisma {
     memberships: number
     customers: number
     inventoryHistory: number
+    inventoryCheckoutsCreated: number
     createdInvites: number
     editorNotes: number
   }
@@ -6208,6 +6391,7 @@ export namespace Prisma {
     memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
     customers?: boolean | UserCountOutputTypeCountCustomersArgs
     inventoryHistory?: boolean | UserCountOutputTypeCountInventoryHistoryArgs
+    inventoryCheckoutsCreated?: boolean | UserCountOutputTypeCountInventoryCheckoutsCreatedArgs
     createdInvites?: boolean | UserCountOutputTypeCountCreatedInvitesArgs
     editorNotes?: boolean | UserCountOutputTypeCountEditorNotesArgs
   }
@@ -6261,6 +6445,13 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountInventoryCheckoutsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryCheckoutWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountCreatedInvitesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PlatformInviteWhereInput
   }
@@ -6287,6 +6478,8 @@ export namespace Prisma {
     discountCodes: number
     inventoryHistory: number
     baseInventoryUnits: number
+    inventoryCheckouts: number
+    inventoryCheckoutLines: number
     inventoryReservations: number
     pages: number
     editorNotes: number
@@ -6325,6 +6518,8 @@ export namespace Prisma {
     discountCodes?: boolean | BusinessCountOutputTypeCountDiscountCodesArgs
     inventoryHistory?: boolean | BusinessCountOutputTypeCountInventoryHistoryArgs
     baseInventoryUnits?: boolean | BusinessCountOutputTypeCountBaseInventoryUnitsArgs
+    inventoryCheckouts?: boolean | BusinessCountOutputTypeCountInventoryCheckoutsArgs
+    inventoryCheckoutLines?: boolean | BusinessCountOutputTypeCountInventoryCheckoutLinesArgs
     inventoryReservations?: boolean | BusinessCountOutputTypeCountInventoryReservationsArgs
     pages?: boolean | BusinessCountOutputTypeCountPagesArgs
     editorNotes?: boolean | BusinessCountOutputTypeCountEditorNotesArgs
@@ -6425,6 +6620,20 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountBaseInventoryUnitsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BaseInventoryUnitWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountInventoryCheckoutsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryCheckoutWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountInventoryCheckoutLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryCheckoutLineWhereInput
   }
 
   /**
@@ -7085,11 +7294,13 @@ export namespace Prisma {
   export type BaseInventoryUnitCountOutputType = {
     products: number
     inventoryHistory: number
+    checkoutLines: number
   }
 
   export type BaseInventoryUnitCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | BaseInventoryUnitCountOutputTypeCountProductsArgs
     inventoryHistory?: boolean | BaseInventoryUnitCountOutputTypeCountInventoryHistoryArgs
+    checkoutLines?: boolean | BaseInventoryUnitCountOutputTypeCountCheckoutLinesArgs
   }
 
   // Custom InputTypes
@@ -7114,6 +7325,53 @@ export namespace Prisma {
    * BaseInventoryUnitCountOutputType without action
    */
   export type BaseInventoryUnitCountOutputTypeCountInventoryHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryHistoryWhereInput
+  }
+
+  /**
+   * BaseInventoryUnitCountOutputType without action
+   */
+  export type BaseInventoryUnitCountOutputTypeCountCheckoutLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryCheckoutLineWhereInput
+  }
+
+
+  /**
+   * Count Type InventoryCheckoutCountOutputType
+   */
+
+  export type InventoryCheckoutCountOutputType = {
+    lines: number
+    history: number
+  }
+
+  export type InventoryCheckoutCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    lines?: boolean | InventoryCheckoutCountOutputTypeCountLinesArgs
+    history?: boolean | InventoryCheckoutCountOutputTypeCountHistoryArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * InventoryCheckoutCountOutputType without action
+   */
+  export type InventoryCheckoutCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutCountOutputType
+     */
+    select?: InventoryCheckoutCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * InventoryCheckoutCountOutputType without action
+   */
+  export type InventoryCheckoutCountOutputTypeCountLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryCheckoutLineWhereInput
+  }
+
+  /**
+   * InventoryCheckoutCountOutputType without action
+   */
+  export type InventoryCheckoutCountOutputTypeCountHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InventoryHistoryWhereInput
   }
 
@@ -7619,6 +7877,7 @@ export namespace Prisma {
     memberships?: boolean | User$membershipsArgs<ExtArgs>
     customers?: boolean | User$customersArgs<ExtArgs>
     inventoryHistory?: boolean | User$inventoryHistoryArgs<ExtArgs>
+    inventoryCheckoutsCreated?: boolean | User$inventoryCheckoutsCreatedArgs<ExtArgs>
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -7670,6 +7929,7 @@ export namespace Prisma {
     memberships?: boolean | User$membershipsArgs<ExtArgs>
     customers?: boolean | User$customersArgs<ExtArgs>
     inventoryHistory?: boolean | User$inventoryHistoryArgs<ExtArgs>
+    inventoryCheckoutsCreated?: boolean | User$inventoryCheckoutsCreatedArgs<ExtArgs>
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -7685,6 +7945,7 @@ export namespace Prisma {
       memberships: Prisma.$BusinessMembershipPayload<ExtArgs>[]
       customers: Prisma.$CustomerPayload<ExtArgs>[]
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
+      inventoryCheckoutsCreated: Prisma.$InventoryCheckoutPayload<ExtArgs>[]
       createdInvites: Prisma.$PlatformInvitePayload<ExtArgs>[]
       editorNotes: Prisma.$EditorNotePayload<ExtArgs>[]
     }
@@ -8098,6 +8359,7 @@ export namespace Prisma {
     memberships<T extends User$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     customers<T extends User$customersArgs<ExtArgs> = {}>(args?: Subset<T, User$customersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryHistory<T extends User$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inventoryCheckoutsCreated<T extends User$inventoryCheckoutsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryCheckoutsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdInvites<T extends User$createdInvitesArgs<ExtArgs> = {}>(args?: Subset<T, User$createdInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     editorNotes<T extends User$editorNotesArgs<ExtArgs> = {}>(args?: Subset<T, User$editorNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -8644,6 +8906,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: InventoryHistoryScalarFieldEnum | InventoryHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * User.inventoryCheckoutsCreated
+   */
+  export type User$inventoryCheckoutsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    where?: InventoryCheckoutWhereInput
+    orderBy?: InventoryCheckoutOrderByWithRelationInput | InventoryCheckoutOrderByWithRelationInput[]
+    cursor?: InventoryCheckoutWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryCheckoutScalarFieldEnum | InventoryCheckoutScalarFieldEnum[]
   }
 
   /**
@@ -13764,6 +14050,8 @@ export namespace Prisma {
     discountCodes?: boolean | Business$discountCodesArgs<ExtArgs>
     inventoryHistory?: boolean | Business$inventoryHistoryArgs<ExtArgs>
     baseInventoryUnits?: boolean | Business$baseInventoryUnitsArgs<ExtArgs>
+    inventoryCheckouts?: boolean | Business$inventoryCheckoutsArgs<ExtArgs>
+    inventoryCheckoutLines?: boolean | Business$inventoryCheckoutLinesArgs<ExtArgs>
     inventoryReservations?: boolean | Business$inventoryReservationsArgs<ExtArgs>
     pages?: boolean | Business$pagesArgs<ExtArgs>
     editorNotes?: boolean | Business$editorNotesArgs<ExtArgs>
@@ -14000,6 +14288,8 @@ export namespace Prisma {
     discountCodes?: boolean | Business$discountCodesArgs<ExtArgs>
     inventoryHistory?: boolean | Business$inventoryHistoryArgs<ExtArgs>
     baseInventoryUnits?: boolean | Business$baseInventoryUnitsArgs<ExtArgs>
+    inventoryCheckouts?: boolean | Business$inventoryCheckoutsArgs<ExtArgs>
+    inventoryCheckoutLines?: boolean | Business$inventoryCheckoutLinesArgs<ExtArgs>
     inventoryReservations?: boolean | Business$inventoryReservationsArgs<ExtArgs>
     pages?: boolean | Business$pagesArgs<ExtArgs>
     editorNotes?: boolean | Business$editorNotesArgs<ExtArgs>
@@ -14047,6 +14337,8 @@ export namespace Prisma {
       discountCodes: Prisma.$DiscountCodePayload<ExtArgs>[]
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       baseInventoryUnits: Prisma.$BaseInventoryUnitPayload<ExtArgs>[]
+      inventoryCheckouts: Prisma.$InventoryCheckoutPayload<ExtArgs>[]
+      inventoryCheckoutLines: Prisma.$InventoryCheckoutLinePayload<ExtArgs>[]
       inventoryReservations: Prisma.$InventoryReservationPayload<ExtArgs>[]
       pages: Prisma.$PagePayload<ExtArgs>[]
       editorNotes: Prisma.$EditorNotePayload<ExtArgs>[]
@@ -14543,6 +14835,8 @@ export namespace Prisma {
     discountCodes<T extends Business$discountCodesArgs<ExtArgs> = {}>(args?: Subset<T, Business$discountCodesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DiscountCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryHistory<T extends Business$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     baseInventoryUnits<T extends Business$baseInventoryUnitsArgs<ExtArgs> = {}>(args?: Subset<T, Business$baseInventoryUnitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BaseInventoryUnitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inventoryCheckouts<T extends Business$inventoryCheckoutsArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryCheckoutsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inventoryCheckoutLines<T extends Business$inventoryCheckoutLinesArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryCheckoutLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryReservations<T extends Business$inventoryReservationsArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     pages<T extends Business$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Business$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     editorNotes<T extends Business$editorNotesArgs<ExtArgs> = {}>(args?: Subset<T, Business$editorNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -15282,6 +15576,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: BaseInventoryUnitScalarFieldEnum | BaseInventoryUnitScalarFieldEnum[]
+  }
+
+  /**
+   * Business.inventoryCheckouts
+   */
+  export type Business$inventoryCheckoutsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    where?: InventoryCheckoutWhereInput
+    orderBy?: InventoryCheckoutOrderByWithRelationInput | InventoryCheckoutOrderByWithRelationInput[]
+    cursor?: InventoryCheckoutWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryCheckoutScalarFieldEnum | InventoryCheckoutScalarFieldEnum[]
+  }
+
+  /**
+   * Business.inventoryCheckoutLines
+   */
+  export type Business$inventoryCheckoutLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    where?: InventoryCheckoutLineWhereInput
+    orderBy?: InventoryCheckoutLineOrderByWithRelationInput | InventoryCheckoutLineOrderByWithRelationInput[]
+    cursor?: InventoryCheckoutLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryCheckoutLineScalarFieldEnum | InventoryCheckoutLineScalarFieldEnum[]
   }
 
   /**
@@ -40718,6 +41060,7 @@ export namespace Prisma {
     reason: string | null
     note: string | null
     orderId: string | null
+    checkoutId: string | null
     userId: string | null
   }
 
@@ -40734,6 +41077,7 @@ export namespace Prisma {
     reason: string | null
     note: string | null
     orderId: string | null
+    checkoutId: string | null
     userId: string | null
   }
 
@@ -40750,6 +41094,7 @@ export namespace Prisma {
     reason: number
     note: number
     orderId: number
+    checkoutId: number
     userId: number
     _all: number
   }
@@ -40780,6 +41125,7 @@ export namespace Prisma {
     reason?: true
     note?: true
     orderId?: true
+    checkoutId?: true
     userId?: true
   }
 
@@ -40796,6 +41142,7 @@ export namespace Prisma {
     reason?: true
     note?: true
     orderId?: true
+    checkoutId?: true
     userId?: true
   }
 
@@ -40812,6 +41159,7 @@ export namespace Prisma {
     reason?: true
     note?: true
     orderId?: true
+    checkoutId?: true
     userId?: true
     _all?: true
   }
@@ -40915,6 +41263,7 @@ export namespace Prisma {
     reason: string
     note: string | null
     orderId: string | null
+    checkoutId: string | null
     userId: string | null
     _count: InventoryHistoryCountAggregateOutputType | null
     _avg: InventoryHistoryAvgAggregateOutputType | null
@@ -40950,12 +41299,14 @@ export namespace Prisma {
     reason?: boolean
     note?: boolean
     orderId?: boolean
+    checkoutId?: boolean
     userId?: boolean
     variant?: boolean | InventoryHistory$variantArgs<ExtArgs>
     product?: boolean | InventoryHistory$productArgs<ExtArgs>
     baseInventoryUnit?: boolean | InventoryHistory$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     order?: boolean | InventoryHistory$orderArgs<ExtArgs>
+    checkout?: boolean | InventoryHistory$checkoutArgs<ExtArgs>
     user?: boolean | InventoryHistory$userArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryHistory"]>
 
@@ -40972,12 +41323,14 @@ export namespace Prisma {
     reason?: boolean
     note?: boolean
     orderId?: boolean
+    checkoutId?: boolean
     userId?: boolean
     variant?: boolean | InventoryHistory$variantArgs<ExtArgs>
     product?: boolean | InventoryHistory$productArgs<ExtArgs>
     baseInventoryUnit?: boolean | InventoryHistory$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     order?: boolean | InventoryHistory$orderArgs<ExtArgs>
+    checkout?: boolean | InventoryHistory$checkoutArgs<ExtArgs>
     user?: boolean | InventoryHistory$userArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryHistory"]>
 
@@ -40994,12 +41347,14 @@ export namespace Prisma {
     reason?: boolean
     note?: boolean
     orderId?: boolean
+    checkoutId?: boolean
     userId?: boolean
     variant?: boolean | InventoryHistory$variantArgs<ExtArgs>
     product?: boolean | InventoryHistory$productArgs<ExtArgs>
     baseInventoryUnit?: boolean | InventoryHistory$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     order?: boolean | InventoryHistory$orderArgs<ExtArgs>
+    checkout?: boolean | InventoryHistory$checkoutArgs<ExtArgs>
     user?: boolean | InventoryHistory$userArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryHistory"]>
 
@@ -41016,16 +41371,18 @@ export namespace Prisma {
     reason?: boolean
     note?: boolean
     orderId?: boolean
+    checkoutId?: boolean
     userId?: boolean
   }
 
-  export type InventoryHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "variantId" | "productId" | "baseInventoryUnitId" | "businessId" | "previousQty" | "newQty" | "changeQty" | "reason" | "note" | "orderId" | "userId", ExtArgs["result"]["inventoryHistory"]>
+  export type InventoryHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "variantId" | "productId" | "baseInventoryUnitId" | "businessId" | "previousQty" | "newQty" | "changeQty" | "reason" | "note" | "orderId" | "checkoutId" | "userId", ExtArgs["result"]["inventoryHistory"]>
   export type InventoryHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     variant?: boolean | InventoryHistory$variantArgs<ExtArgs>
     product?: boolean | InventoryHistory$productArgs<ExtArgs>
     baseInventoryUnit?: boolean | InventoryHistory$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     order?: boolean | InventoryHistory$orderArgs<ExtArgs>
+    checkout?: boolean | InventoryHistory$checkoutArgs<ExtArgs>
     user?: boolean | InventoryHistory$userArgs<ExtArgs>
   }
   export type InventoryHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -41034,6 +41391,7 @@ export namespace Prisma {
     baseInventoryUnit?: boolean | InventoryHistory$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     order?: boolean | InventoryHistory$orderArgs<ExtArgs>
+    checkout?: boolean | InventoryHistory$checkoutArgs<ExtArgs>
     user?: boolean | InventoryHistory$userArgs<ExtArgs>
   }
   export type InventoryHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -41042,6 +41400,7 @@ export namespace Prisma {
     baseInventoryUnit?: boolean | InventoryHistory$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     order?: boolean | InventoryHistory$orderArgs<ExtArgs>
+    checkout?: boolean | InventoryHistory$checkoutArgs<ExtArgs>
     user?: boolean | InventoryHistory$userArgs<ExtArgs>
   }
 
@@ -41053,6 +41412,7 @@ export namespace Prisma {
       baseInventoryUnit: Prisma.$BaseInventoryUnitPayload<ExtArgs> | null
       business: Prisma.$BusinessPayload<ExtArgs>
       order: Prisma.$OrderPayload<ExtArgs> | null
+      checkout: Prisma.$InventoryCheckoutPayload<ExtArgs> | null
       user: Prisma.$UserPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -41068,6 +41428,7 @@ export namespace Prisma {
       reason: string
       note: string | null
       orderId: string | null
+      checkoutId: string | null
       userId: string | null
     }, ExtArgs["result"]["inventoryHistory"]>
     composites: {}
@@ -41468,6 +41829,7 @@ export namespace Prisma {
     baseInventoryUnit<T extends InventoryHistory$baseInventoryUnitArgs<ExtArgs> = {}>(args?: Subset<T, InventoryHistory$baseInventoryUnitArgs<ExtArgs>>): Prisma__BaseInventoryUnitClient<$Result.GetResult<Prisma.$BaseInventoryUnitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     order<T extends InventoryHistory$orderArgs<ExtArgs> = {}>(args?: Subset<T, InventoryHistory$orderArgs<ExtArgs>>): Prisma__OrderClient<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    checkout<T extends InventoryHistory$checkoutArgs<ExtArgs> = {}>(args?: Subset<T, InventoryHistory$checkoutArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     user<T extends InventoryHistory$userArgs<ExtArgs> = {}>(args?: Subset<T, InventoryHistory$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -41510,6 +41872,7 @@ export namespace Prisma {
     readonly reason: FieldRef<"InventoryHistory", 'String'>
     readonly note: FieldRef<"InventoryHistory", 'String'>
     readonly orderId: FieldRef<"InventoryHistory", 'String'>
+    readonly checkoutId: FieldRef<"InventoryHistory", 'String'>
     readonly userId: FieldRef<"InventoryHistory", 'String'>
   }
     
@@ -41983,6 +42346,25 @@ export namespace Prisma {
   }
 
   /**
+   * InventoryHistory.checkout
+   */
+  export type InventoryHistory$checkoutArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    where?: InventoryCheckoutWhereInput
+  }
+
+  /**
    * InventoryHistory.user
    */
   export type InventoryHistory$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -42036,12 +42418,14 @@ export namespace Prisma {
     inventoryQty: number | null
     reservedQty: number | null
     lowInventoryThreshold: number | null
+    unitCostCents: number | null
   }
 
   export type BaseInventoryUnitSumAggregateOutputType = {
     inventoryQty: number | null
     reservedQty: number | null
     lowInventoryThreshold: number | null
+    unitCostCents: number | null
   }
 
   export type BaseInventoryUnitMinAggregateOutputType = {
@@ -42056,6 +42440,11 @@ export namespace Prisma {
     lowInventoryAlertSent: boolean | null
     outOfStockAlertSent: boolean | null
     allowBackorders: boolean | null
+    itemType: string | null
+    sku: string | null
+    category: string | null
+    storageLocation: string | null
+    unitCostCents: number | null
     businessId: string | null
   }
 
@@ -42071,6 +42460,11 @@ export namespace Prisma {
     lowInventoryAlertSent: boolean | null
     outOfStockAlertSent: boolean | null
     allowBackorders: boolean | null
+    itemType: string | null
+    sku: string | null
+    category: string | null
+    storageLocation: string | null
+    unitCostCents: number | null
     businessId: string | null
   }
 
@@ -42086,6 +42480,11 @@ export namespace Prisma {
     lowInventoryAlertSent: number
     outOfStockAlertSent: number
     allowBackorders: number
+    itemType: number
+    sku: number
+    category: number
+    storageLocation: number
+    unitCostCents: number
     businessId: number
     _all: number
   }
@@ -42095,12 +42494,14 @@ export namespace Prisma {
     inventoryQty?: true
     reservedQty?: true
     lowInventoryThreshold?: true
+    unitCostCents?: true
   }
 
   export type BaseInventoryUnitSumAggregateInputType = {
     inventoryQty?: true
     reservedQty?: true
     lowInventoryThreshold?: true
+    unitCostCents?: true
   }
 
   export type BaseInventoryUnitMinAggregateInputType = {
@@ -42115,6 +42516,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: true
     outOfStockAlertSent?: true
     allowBackorders?: true
+    itemType?: true
+    sku?: true
+    category?: true
+    storageLocation?: true
+    unitCostCents?: true
     businessId?: true
   }
 
@@ -42130,6 +42536,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: true
     outOfStockAlertSent?: true
     allowBackorders?: true
+    itemType?: true
+    sku?: true
+    category?: true
+    storageLocation?: true
+    unitCostCents?: true
     businessId?: true
   }
 
@@ -42145,6 +42556,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: true
     outOfStockAlertSent?: true
     allowBackorders?: true
+    itemType?: true
+    sku?: true
+    category?: true
+    storageLocation?: true
+    unitCostCents?: true
     businessId?: true
     _all?: true
   }
@@ -42247,6 +42663,11 @@ export namespace Prisma {
     lowInventoryAlertSent: boolean
     outOfStockAlertSent: boolean
     allowBackorders: boolean
+    itemType: string
+    sku: string | null
+    category: string | null
+    storageLocation: string | null
+    unitCostCents: number | null
     businessId: string
     _count: BaseInventoryUnitCountAggregateOutputType | null
     _avg: BaseInventoryUnitAvgAggregateOutputType | null
@@ -42281,10 +42702,16 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: boolean
+    sku?: boolean
+    category?: boolean
+    storageLocation?: boolean
+    unitCostCents?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     products?: boolean | BaseInventoryUnit$productsArgs<ExtArgs>
     inventoryHistory?: boolean | BaseInventoryUnit$inventoryHistoryArgs<ExtArgs>
+    checkoutLines?: boolean | BaseInventoryUnit$checkoutLinesArgs<ExtArgs>
     _count?: boolean | BaseInventoryUnitCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["baseInventoryUnit"]>
 
@@ -42300,6 +42727,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: boolean
+    sku?: boolean
+    category?: boolean
+    storageLocation?: boolean
+    unitCostCents?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["baseInventoryUnit"]>
@@ -42316,6 +42748,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: boolean
+    sku?: boolean
+    category?: boolean
+    storageLocation?: boolean
+    unitCostCents?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["baseInventoryUnit"]>
@@ -42332,14 +42769,20 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: boolean
+    sku?: boolean
+    category?: boolean
+    storageLocation?: boolean
+    unitCostCents?: boolean
     businessId?: boolean
   }
 
-  export type BaseInventoryUnitOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "inventoryQty" | "reservedQty" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "allowBackorders" | "businessId", ExtArgs["result"]["baseInventoryUnit"]>
+  export type BaseInventoryUnitOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "inventoryQty" | "reservedQty" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "allowBackorders" | "itemType" | "sku" | "category" | "storageLocation" | "unitCostCents" | "businessId", ExtArgs["result"]["baseInventoryUnit"]>
   export type BaseInventoryUnitInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     products?: boolean | BaseInventoryUnit$productsArgs<ExtArgs>
     inventoryHistory?: boolean | BaseInventoryUnit$inventoryHistoryArgs<ExtArgs>
+    checkoutLines?: boolean | BaseInventoryUnit$checkoutLinesArgs<ExtArgs>
     _count?: boolean | BaseInventoryUnitCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BaseInventoryUnitIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -42355,6 +42798,7 @@ export namespace Prisma {
       business: Prisma.$BusinessPayload<ExtArgs>
       products: Prisma.$ProductPayload<ExtArgs>[]
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
+      checkoutLines: Prisma.$InventoryCheckoutLinePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -42368,6 +42812,11 @@ export namespace Prisma {
       lowInventoryAlertSent: boolean
       outOfStockAlertSent: boolean
       allowBackorders: boolean
+      itemType: string
+      sku: string | null
+      category: string | null
+      storageLocation: string | null
+      unitCostCents: number | null
       businessId: string
     }, ExtArgs["result"]["baseInventoryUnit"]>
     composites: {}
@@ -42766,6 +43215,7 @@ export namespace Prisma {
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     products<T extends BaseInventoryUnit$productsArgs<ExtArgs> = {}>(args?: Subset<T, BaseInventoryUnit$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryHistory<T extends BaseInventoryUnit$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, BaseInventoryUnit$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    checkoutLines<T extends BaseInventoryUnit$checkoutLinesArgs<ExtArgs> = {}>(args?: Subset<T, BaseInventoryUnit$checkoutLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -42806,6 +43256,11 @@ export namespace Prisma {
     readonly lowInventoryAlertSent: FieldRef<"BaseInventoryUnit", 'Boolean'>
     readonly outOfStockAlertSent: FieldRef<"BaseInventoryUnit", 'Boolean'>
     readonly allowBackorders: FieldRef<"BaseInventoryUnit", 'Boolean'>
+    readonly itemType: FieldRef<"BaseInventoryUnit", 'String'>
+    readonly sku: FieldRef<"BaseInventoryUnit", 'String'>
+    readonly category: FieldRef<"BaseInventoryUnit", 'String'>
+    readonly storageLocation: FieldRef<"BaseInventoryUnit", 'String'>
+    readonly unitCostCents: FieldRef<"BaseInventoryUnit", 'Int'>
     readonly businessId: FieldRef<"BaseInventoryUnit", 'String'>
   }
     
@@ -43251,6 +43706,30 @@ export namespace Prisma {
   }
 
   /**
+   * BaseInventoryUnit.checkoutLines
+   */
+  export type BaseInventoryUnit$checkoutLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    where?: InventoryCheckoutLineWhereInput
+    orderBy?: InventoryCheckoutLineOrderByWithRelationInput | InventoryCheckoutLineOrderByWithRelationInput[]
+    cursor?: InventoryCheckoutLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryCheckoutLineScalarFieldEnum | InventoryCheckoutLineScalarFieldEnum[]
+  }
+
+  /**
    * BaseInventoryUnit without action
    */
   export type BaseInventoryUnitDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -43266,6 +43745,2460 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: BaseInventoryUnitInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InventoryCheckout
+   */
+
+  export type AggregateInventoryCheckout = {
+    _count: InventoryCheckoutCountAggregateOutputType | null
+    _min: InventoryCheckoutMinAggregateOutputType | null
+    _max: InventoryCheckoutMaxAggregateOutputType | null
+  }
+
+  export type InventoryCheckoutMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    label: string | null
+    customerName: string | null
+    notes: string | null
+    status: string | null
+    checkedOutAt: Date | null
+    dueBackOn: Date | null
+    closedAt: Date | null
+    createdById: string | null
+  }
+
+  export type InventoryCheckoutMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    label: string | null
+    customerName: string | null
+    notes: string | null
+    status: string | null
+    checkedOutAt: Date | null
+    dueBackOn: Date | null
+    closedAt: Date | null
+    createdById: string | null
+  }
+
+  export type InventoryCheckoutCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    label: number
+    customerName: number
+    notes: number
+    status: number
+    checkedOutAt: number
+    dueBackOn: number
+    closedAt: number
+    createdById: number
+    _all: number
+  }
+
+
+  export type InventoryCheckoutMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    label?: true
+    customerName?: true
+    notes?: true
+    status?: true
+    checkedOutAt?: true
+    dueBackOn?: true
+    closedAt?: true
+    createdById?: true
+  }
+
+  export type InventoryCheckoutMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    label?: true
+    customerName?: true
+    notes?: true
+    status?: true
+    checkedOutAt?: true
+    dueBackOn?: true
+    closedAt?: true
+    createdById?: true
+  }
+
+  export type InventoryCheckoutCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    label?: true
+    customerName?: true
+    notes?: true
+    status?: true
+    checkedOutAt?: true
+    dueBackOn?: true
+    closedAt?: true
+    createdById?: true
+    _all?: true
+  }
+
+  export type InventoryCheckoutAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryCheckout to aggregate.
+     */
+    where?: InventoryCheckoutWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckouts to fetch.
+     */
+    orderBy?: InventoryCheckoutOrderByWithRelationInput | InventoryCheckoutOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InventoryCheckoutWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckouts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckouts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned InventoryCheckouts
+    **/
+    _count?: true | InventoryCheckoutCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InventoryCheckoutMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InventoryCheckoutMaxAggregateInputType
+  }
+
+  export type GetInventoryCheckoutAggregateType<T extends InventoryCheckoutAggregateArgs> = {
+        [P in keyof T & keyof AggregateInventoryCheckout]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInventoryCheckout[P]>
+      : GetScalarType<T[P], AggregateInventoryCheckout[P]>
+  }
+
+
+
+
+  export type InventoryCheckoutGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryCheckoutWhereInput
+    orderBy?: InventoryCheckoutOrderByWithAggregationInput | InventoryCheckoutOrderByWithAggregationInput[]
+    by: InventoryCheckoutScalarFieldEnum[] | InventoryCheckoutScalarFieldEnum
+    having?: InventoryCheckoutScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InventoryCheckoutCountAggregateInputType | true
+    _min?: InventoryCheckoutMinAggregateInputType
+    _max?: InventoryCheckoutMaxAggregateInputType
+  }
+
+  export type InventoryCheckoutGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    label: string
+    customerName: string | null
+    notes: string | null
+    status: string
+    checkedOutAt: Date
+    dueBackOn: Date | null
+    closedAt: Date | null
+    createdById: string | null
+    _count: InventoryCheckoutCountAggregateOutputType | null
+    _min: InventoryCheckoutMinAggregateOutputType | null
+    _max: InventoryCheckoutMaxAggregateOutputType | null
+  }
+
+  type GetInventoryCheckoutGroupByPayload<T extends InventoryCheckoutGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InventoryCheckoutGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InventoryCheckoutGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InventoryCheckoutGroupByOutputType[P]>
+            : GetScalarType<T[P], InventoryCheckoutGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InventoryCheckoutSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    label?: boolean
+    customerName?: boolean
+    notes?: boolean
+    status?: boolean
+    checkedOutAt?: boolean
+    dueBackOn?: boolean
+    closedAt?: boolean
+    createdById?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | InventoryCheckout$createdByArgs<ExtArgs>
+    lines?: boolean | InventoryCheckout$linesArgs<ExtArgs>
+    history?: boolean | InventoryCheckout$historyArgs<ExtArgs>
+    _count?: boolean | InventoryCheckoutCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryCheckout"]>
+
+  export type InventoryCheckoutSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    label?: boolean
+    customerName?: boolean
+    notes?: boolean
+    status?: boolean
+    checkedOutAt?: boolean
+    dueBackOn?: boolean
+    closedAt?: boolean
+    createdById?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | InventoryCheckout$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryCheckout"]>
+
+  export type InventoryCheckoutSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    label?: boolean
+    customerName?: boolean
+    notes?: boolean
+    status?: boolean
+    checkedOutAt?: boolean
+    dueBackOn?: boolean
+    closedAt?: boolean
+    createdById?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | InventoryCheckout$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryCheckout"]>
+
+  export type InventoryCheckoutSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    label?: boolean
+    customerName?: boolean
+    notes?: boolean
+    status?: boolean
+    checkedOutAt?: boolean
+    dueBackOn?: boolean
+    closedAt?: boolean
+    createdById?: boolean
+  }
+
+  export type InventoryCheckoutOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "label" | "customerName" | "notes" | "status" | "checkedOutAt" | "dueBackOn" | "closedAt" | "createdById", ExtArgs["result"]["inventoryCheckout"]>
+  export type InventoryCheckoutInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | InventoryCheckout$createdByArgs<ExtArgs>
+    lines?: boolean | InventoryCheckout$linesArgs<ExtArgs>
+    history?: boolean | InventoryCheckout$historyArgs<ExtArgs>
+    _count?: boolean | InventoryCheckoutCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type InventoryCheckoutIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | InventoryCheckout$createdByArgs<ExtArgs>
+  }
+  export type InventoryCheckoutIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | InventoryCheckout$createdByArgs<ExtArgs>
+  }
+
+  export type $InventoryCheckoutPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InventoryCheckout"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      createdBy: Prisma.$UserPayload<ExtArgs> | null
+      lines: Prisma.$InventoryCheckoutLinePayload<ExtArgs>[]
+      history: Prisma.$InventoryHistoryPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      label: string
+      customerName: string | null
+      /**
+       * @encrypted
+       */
+      notes: string | null
+      status: string
+      checkedOutAt: Date
+      dueBackOn: Date | null
+      closedAt: Date | null
+      createdById: string | null
+    }, ExtArgs["result"]["inventoryCheckout"]>
+    composites: {}
+  }
+
+  type InventoryCheckoutGetPayload<S extends boolean | null | undefined | InventoryCheckoutDefaultArgs> = $Result.GetResult<Prisma.$InventoryCheckoutPayload, S>
+
+  type InventoryCheckoutCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InventoryCheckoutFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InventoryCheckoutCountAggregateInputType | true
+    }
+
+  export interface InventoryCheckoutDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InventoryCheckout'], meta: { name: 'InventoryCheckout' } }
+    /**
+     * Find zero or one InventoryCheckout that matches the filter.
+     * @param {InventoryCheckoutFindUniqueArgs} args - Arguments to find a InventoryCheckout
+     * @example
+     * // Get one InventoryCheckout
+     * const inventoryCheckout = await prisma.inventoryCheckout.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InventoryCheckoutFindUniqueArgs>(args: SelectSubset<T, InventoryCheckoutFindUniqueArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one InventoryCheckout that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InventoryCheckoutFindUniqueOrThrowArgs} args - Arguments to find a InventoryCheckout
+     * @example
+     * // Get one InventoryCheckout
+     * const inventoryCheckout = await prisma.inventoryCheckout.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InventoryCheckoutFindUniqueOrThrowArgs>(args: SelectSubset<T, InventoryCheckoutFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryCheckout that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutFindFirstArgs} args - Arguments to find a InventoryCheckout
+     * @example
+     * // Get one InventoryCheckout
+     * const inventoryCheckout = await prisma.inventoryCheckout.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InventoryCheckoutFindFirstArgs>(args?: SelectSubset<T, InventoryCheckoutFindFirstArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryCheckout that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutFindFirstOrThrowArgs} args - Arguments to find a InventoryCheckout
+     * @example
+     * // Get one InventoryCheckout
+     * const inventoryCheckout = await prisma.inventoryCheckout.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InventoryCheckoutFindFirstOrThrowArgs>(args?: SelectSubset<T, InventoryCheckoutFindFirstOrThrowArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more InventoryCheckouts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InventoryCheckouts
+     * const inventoryCheckouts = await prisma.inventoryCheckout.findMany()
+     * 
+     * // Get first 10 InventoryCheckouts
+     * const inventoryCheckouts = await prisma.inventoryCheckout.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const inventoryCheckoutWithIdOnly = await prisma.inventoryCheckout.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InventoryCheckoutFindManyArgs>(args?: SelectSubset<T, InventoryCheckoutFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a InventoryCheckout.
+     * @param {InventoryCheckoutCreateArgs} args - Arguments to create a InventoryCheckout.
+     * @example
+     * // Create one InventoryCheckout
+     * const InventoryCheckout = await prisma.inventoryCheckout.create({
+     *   data: {
+     *     // ... data to create a InventoryCheckout
+     *   }
+     * })
+     * 
+     */
+    create<T extends InventoryCheckoutCreateArgs>(args: SelectSubset<T, InventoryCheckoutCreateArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many InventoryCheckouts.
+     * @param {InventoryCheckoutCreateManyArgs} args - Arguments to create many InventoryCheckouts.
+     * @example
+     * // Create many InventoryCheckouts
+     * const inventoryCheckout = await prisma.inventoryCheckout.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InventoryCheckoutCreateManyArgs>(args?: SelectSubset<T, InventoryCheckoutCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InventoryCheckouts and returns the data saved in the database.
+     * @param {InventoryCheckoutCreateManyAndReturnArgs} args - Arguments to create many InventoryCheckouts.
+     * @example
+     * // Create many InventoryCheckouts
+     * const inventoryCheckout = await prisma.inventoryCheckout.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many InventoryCheckouts and only return the `id`
+     * const inventoryCheckoutWithIdOnly = await prisma.inventoryCheckout.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InventoryCheckoutCreateManyAndReturnArgs>(args?: SelectSubset<T, InventoryCheckoutCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a InventoryCheckout.
+     * @param {InventoryCheckoutDeleteArgs} args - Arguments to delete one InventoryCheckout.
+     * @example
+     * // Delete one InventoryCheckout
+     * const InventoryCheckout = await prisma.inventoryCheckout.delete({
+     *   where: {
+     *     // ... filter to delete one InventoryCheckout
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InventoryCheckoutDeleteArgs>(args: SelectSubset<T, InventoryCheckoutDeleteArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one InventoryCheckout.
+     * @param {InventoryCheckoutUpdateArgs} args - Arguments to update one InventoryCheckout.
+     * @example
+     * // Update one InventoryCheckout
+     * const inventoryCheckout = await prisma.inventoryCheckout.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InventoryCheckoutUpdateArgs>(args: SelectSubset<T, InventoryCheckoutUpdateArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more InventoryCheckouts.
+     * @param {InventoryCheckoutDeleteManyArgs} args - Arguments to filter InventoryCheckouts to delete.
+     * @example
+     * // Delete a few InventoryCheckouts
+     * const { count } = await prisma.inventoryCheckout.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InventoryCheckoutDeleteManyArgs>(args?: SelectSubset<T, InventoryCheckoutDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryCheckouts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InventoryCheckouts
+     * const inventoryCheckout = await prisma.inventoryCheckout.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InventoryCheckoutUpdateManyArgs>(args: SelectSubset<T, InventoryCheckoutUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryCheckouts and returns the data updated in the database.
+     * @param {InventoryCheckoutUpdateManyAndReturnArgs} args - Arguments to update many InventoryCheckouts.
+     * @example
+     * // Update many InventoryCheckouts
+     * const inventoryCheckout = await prisma.inventoryCheckout.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more InventoryCheckouts and only return the `id`
+     * const inventoryCheckoutWithIdOnly = await prisma.inventoryCheckout.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InventoryCheckoutUpdateManyAndReturnArgs>(args: SelectSubset<T, InventoryCheckoutUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one InventoryCheckout.
+     * @param {InventoryCheckoutUpsertArgs} args - Arguments to update or create a InventoryCheckout.
+     * @example
+     * // Update or create a InventoryCheckout
+     * const inventoryCheckout = await prisma.inventoryCheckout.upsert({
+     *   create: {
+     *     // ... data to create a InventoryCheckout
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InventoryCheckout we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InventoryCheckoutUpsertArgs>(args: SelectSubset<T, InventoryCheckoutUpsertArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of InventoryCheckouts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutCountArgs} args - Arguments to filter InventoryCheckouts to count.
+     * @example
+     * // Count the number of InventoryCheckouts
+     * const count = await prisma.inventoryCheckout.count({
+     *   where: {
+     *     // ... the filter for the InventoryCheckouts we want to count
+     *   }
+     * })
+    **/
+    count<T extends InventoryCheckoutCountArgs>(
+      args?: Subset<T, InventoryCheckoutCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InventoryCheckoutCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InventoryCheckout.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InventoryCheckoutAggregateArgs>(args: Subset<T, InventoryCheckoutAggregateArgs>): Prisma.PrismaPromise<GetInventoryCheckoutAggregateType<T>>
+
+    /**
+     * Group by InventoryCheckout.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InventoryCheckoutGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InventoryCheckoutGroupByArgs['orderBy'] }
+        : { orderBy?: InventoryCheckoutGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InventoryCheckoutGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInventoryCheckoutGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InventoryCheckout model
+   */
+  readonly fields: InventoryCheckoutFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InventoryCheckout.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InventoryCheckoutClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    createdBy<T extends InventoryCheckout$createdByArgs<ExtArgs> = {}>(args?: Subset<T, InventoryCheckout$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    lines<T extends InventoryCheckout$linesArgs<ExtArgs> = {}>(args?: Subset<T, InventoryCheckout$linesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    history<T extends InventoryCheckout$historyArgs<ExtArgs> = {}>(args?: Subset<T, InventoryCheckout$historyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InventoryCheckout model
+   */
+  interface InventoryCheckoutFieldRefs {
+    readonly id: FieldRef<"InventoryCheckout", 'String'>
+    readonly createdAt: FieldRef<"InventoryCheckout", 'DateTime'>
+    readonly updatedAt: FieldRef<"InventoryCheckout", 'DateTime'>
+    readonly businessId: FieldRef<"InventoryCheckout", 'String'>
+    readonly label: FieldRef<"InventoryCheckout", 'String'>
+    readonly customerName: FieldRef<"InventoryCheckout", 'String'>
+    readonly notes: FieldRef<"InventoryCheckout", 'String'>
+    readonly status: FieldRef<"InventoryCheckout", 'String'>
+    readonly checkedOutAt: FieldRef<"InventoryCheckout", 'DateTime'>
+    readonly dueBackOn: FieldRef<"InventoryCheckout", 'DateTime'>
+    readonly closedAt: FieldRef<"InventoryCheckout", 'DateTime'>
+    readonly createdById: FieldRef<"InventoryCheckout", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * InventoryCheckout findUnique
+   */
+  export type InventoryCheckoutFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckout to fetch.
+     */
+    where: InventoryCheckoutWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckout findUniqueOrThrow
+   */
+  export type InventoryCheckoutFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckout to fetch.
+     */
+    where: InventoryCheckoutWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckout findFirst
+   */
+  export type InventoryCheckoutFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckout to fetch.
+     */
+    where?: InventoryCheckoutWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckouts to fetch.
+     */
+    orderBy?: InventoryCheckoutOrderByWithRelationInput | InventoryCheckoutOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryCheckouts.
+     */
+    cursor?: InventoryCheckoutWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckouts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckouts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryCheckouts.
+     */
+    distinct?: InventoryCheckoutScalarFieldEnum | InventoryCheckoutScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckout findFirstOrThrow
+   */
+  export type InventoryCheckoutFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckout to fetch.
+     */
+    where?: InventoryCheckoutWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckouts to fetch.
+     */
+    orderBy?: InventoryCheckoutOrderByWithRelationInput | InventoryCheckoutOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryCheckouts.
+     */
+    cursor?: InventoryCheckoutWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckouts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckouts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryCheckouts.
+     */
+    distinct?: InventoryCheckoutScalarFieldEnum | InventoryCheckoutScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckout findMany
+   */
+  export type InventoryCheckoutFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckouts to fetch.
+     */
+    where?: InventoryCheckoutWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckouts to fetch.
+     */
+    orderBy?: InventoryCheckoutOrderByWithRelationInput | InventoryCheckoutOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing InventoryCheckouts.
+     */
+    cursor?: InventoryCheckoutWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckouts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckouts.
+     */
+    skip?: number
+    distinct?: InventoryCheckoutScalarFieldEnum | InventoryCheckoutScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckout create
+   */
+  export type InventoryCheckoutCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InventoryCheckout.
+     */
+    data: XOR<InventoryCheckoutCreateInput, InventoryCheckoutUncheckedCreateInput>
+  }
+
+  /**
+   * InventoryCheckout createMany
+   */
+  export type InventoryCheckoutCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InventoryCheckouts.
+     */
+    data: InventoryCheckoutCreateManyInput | InventoryCheckoutCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InventoryCheckout createManyAndReturn
+   */
+  export type InventoryCheckoutCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * The data used to create many InventoryCheckouts.
+     */
+    data: InventoryCheckoutCreateManyInput | InventoryCheckoutCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryCheckout update
+   */
+  export type InventoryCheckoutUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InventoryCheckout.
+     */
+    data: XOR<InventoryCheckoutUpdateInput, InventoryCheckoutUncheckedUpdateInput>
+    /**
+     * Choose, which InventoryCheckout to update.
+     */
+    where: InventoryCheckoutWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckout updateMany
+   */
+  export type InventoryCheckoutUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InventoryCheckouts.
+     */
+    data: XOR<InventoryCheckoutUpdateManyMutationInput, InventoryCheckoutUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryCheckouts to update
+     */
+    where?: InventoryCheckoutWhereInput
+    /**
+     * Limit how many InventoryCheckouts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryCheckout updateManyAndReturn
+   */
+  export type InventoryCheckoutUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * The data used to update InventoryCheckouts.
+     */
+    data: XOR<InventoryCheckoutUpdateManyMutationInput, InventoryCheckoutUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryCheckouts to update
+     */
+    where?: InventoryCheckoutWhereInput
+    /**
+     * Limit how many InventoryCheckouts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryCheckout upsert
+   */
+  export type InventoryCheckoutUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InventoryCheckout to update in case it exists.
+     */
+    where: InventoryCheckoutWhereUniqueInput
+    /**
+     * In case the InventoryCheckout found by the `where` argument doesn't exist, create a new InventoryCheckout with this data.
+     */
+    create: XOR<InventoryCheckoutCreateInput, InventoryCheckoutUncheckedCreateInput>
+    /**
+     * In case the InventoryCheckout was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InventoryCheckoutUpdateInput, InventoryCheckoutUncheckedUpdateInput>
+  }
+
+  /**
+   * InventoryCheckout delete
+   */
+  export type InventoryCheckoutDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+    /**
+     * Filter which InventoryCheckout to delete.
+     */
+    where: InventoryCheckoutWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckout deleteMany
+   */
+  export type InventoryCheckoutDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryCheckouts to delete
+     */
+    where?: InventoryCheckoutWhereInput
+    /**
+     * Limit how many InventoryCheckouts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryCheckout.createdBy
+   */
+  export type InventoryCheckout$createdByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * InventoryCheckout.lines
+   */
+  export type InventoryCheckout$linesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    where?: InventoryCheckoutLineWhereInput
+    orderBy?: InventoryCheckoutLineOrderByWithRelationInput | InventoryCheckoutLineOrderByWithRelationInput[]
+    cursor?: InventoryCheckoutLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryCheckoutLineScalarFieldEnum | InventoryCheckoutLineScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckout.history
+   */
+  export type InventoryCheckout$historyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryHistory
+     */
+    select?: InventoryHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryHistory
+     */
+    omit?: InventoryHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryHistoryInclude<ExtArgs> | null
+    where?: InventoryHistoryWhereInput
+    orderBy?: InventoryHistoryOrderByWithRelationInput | InventoryHistoryOrderByWithRelationInput[]
+    cursor?: InventoryHistoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryHistoryScalarFieldEnum | InventoryHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckout without action
+   */
+  export type InventoryCheckoutDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckout
+     */
+    select?: InventoryCheckoutSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckout
+     */
+    omit?: InventoryCheckoutOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InventoryCheckoutLine
+   */
+
+  export type AggregateInventoryCheckoutLine = {
+    _count: InventoryCheckoutLineCountAggregateOutputType | null
+    _avg: InventoryCheckoutLineAvgAggregateOutputType | null
+    _sum: InventoryCheckoutLineSumAggregateOutputType | null
+    _min: InventoryCheckoutLineMinAggregateOutputType | null
+    _max: InventoryCheckoutLineMaxAggregateOutputType | null
+  }
+
+  export type InventoryCheckoutLineAvgAggregateOutputType = {
+    qtyOut: number | null
+    qtyReturned: number | null
+    qtyDamaged: number | null
+    qtyLost: number | null
+  }
+
+  export type InventoryCheckoutLineSumAggregateOutputType = {
+    qtyOut: number | null
+    qtyReturned: number | null
+    qtyDamaged: number | null
+    qtyLost: number | null
+  }
+
+  export type InventoryCheckoutLineMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    checkoutId: string | null
+    businessId: string | null
+    itemId: string | null
+    itemName: string | null
+    qtyOut: number | null
+    qtyReturned: number | null
+    qtyDamaged: number | null
+    qtyLost: number | null
+  }
+
+  export type InventoryCheckoutLineMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    checkoutId: string | null
+    businessId: string | null
+    itemId: string | null
+    itemName: string | null
+    qtyOut: number | null
+    qtyReturned: number | null
+    qtyDamaged: number | null
+    qtyLost: number | null
+  }
+
+  export type InventoryCheckoutLineCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    checkoutId: number
+    businessId: number
+    itemId: number
+    itemName: number
+    qtyOut: number
+    qtyReturned: number
+    qtyDamaged: number
+    qtyLost: number
+    _all: number
+  }
+
+
+  export type InventoryCheckoutLineAvgAggregateInputType = {
+    qtyOut?: true
+    qtyReturned?: true
+    qtyDamaged?: true
+    qtyLost?: true
+  }
+
+  export type InventoryCheckoutLineSumAggregateInputType = {
+    qtyOut?: true
+    qtyReturned?: true
+    qtyDamaged?: true
+    qtyLost?: true
+  }
+
+  export type InventoryCheckoutLineMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    checkoutId?: true
+    businessId?: true
+    itemId?: true
+    itemName?: true
+    qtyOut?: true
+    qtyReturned?: true
+    qtyDamaged?: true
+    qtyLost?: true
+  }
+
+  export type InventoryCheckoutLineMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    checkoutId?: true
+    businessId?: true
+    itemId?: true
+    itemName?: true
+    qtyOut?: true
+    qtyReturned?: true
+    qtyDamaged?: true
+    qtyLost?: true
+  }
+
+  export type InventoryCheckoutLineCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    checkoutId?: true
+    businessId?: true
+    itemId?: true
+    itemName?: true
+    qtyOut?: true
+    qtyReturned?: true
+    qtyDamaged?: true
+    qtyLost?: true
+    _all?: true
+  }
+
+  export type InventoryCheckoutLineAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryCheckoutLine to aggregate.
+     */
+    where?: InventoryCheckoutLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckoutLines to fetch.
+     */
+    orderBy?: InventoryCheckoutLineOrderByWithRelationInput | InventoryCheckoutLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InventoryCheckoutLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckoutLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckoutLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned InventoryCheckoutLines
+    **/
+    _count?: true | InventoryCheckoutLineCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InventoryCheckoutLineAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InventoryCheckoutLineSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InventoryCheckoutLineMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InventoryCheckoutLineMaxAggregateInputType
+  }
+
+  export type GetInventoryCheckoutLineAggregateType<T extends InventoryCheckoutLineAggregateArgs> = {
+        [P in keyof T & keyof AggregateInventoryCheckoutLine]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInventoryCheckoutLine[P]>
+      : GetScalarType<T[P], AggregateInventoryCheckoutLine[P]>
+  }
+
+
+
+
+  export type InventoryCheckoutLineGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryCheckoutLineWhereInput
+    orderBy?: InventoryCheckoutLineOrderByWithAggregationInput | InventoryCheckoutLineOrderByWithAggregationInput[]
+    by: InventoryCheckoutLineScalarFieldEnum[] | InventoryCheckoutLineScalarFieldEnum
+    having?: InventoryCheckoutLineScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InventoryCheckoutLineCountAggregateInputType | true
+    _avg?: InventoryCheckoutLineAvgAggregateInputType
+    _sum?: InventoryCheckoutLineSumAggregateInputType
+    _min?: InventoryCheckoutLineMinAggregateInputType
+    _max?: InventoryCheckoutLineMaxAggregateInputType
+  }
+
+  export type InventoryCheckoutLineGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    checkoutId: string
+    businessId: string
+    itemId: string | null
+    itemName: string
+    qtyOut: number
+    qtyReturned: number
+    qtyDamaged: number
+    qtyLost: number
+    _count: InventoryCheckoutLineCountAggregateOutputType | null
+    _avg: InventoryCheckoutLineAvgAggregateOutputType | null
+    _sum: InventoryCheckoutLineSumAggregateOutputType | null
+    _min: InventoryCheckoutLineMinAggregateOutputType | null
+    _max: InventoryCheckoutLineMaxAggregateOutputType | null
+  }
+
+  type GetInventoryCheckoutLineGroupByPayload<T extends InventoryCheckoutLineGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InventoryCheckoutLineGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InventoryCheckoutLineGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InventoryCheckoutLineGroupByOutputType[P]>
+            : GetScalarType<T[P], InventoryCheckoutLineGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InventoryCheckoutLineSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    checkoutId?: boolean
+    businessId?: boolean
+    itemId?: boolean
+    itemName?: boolean
+    qtyOut?: boolean
+    qtyReturned?: boolean
+    qtyDamaged?: boolean
+    qtyLost?: boolean
+    checkout?: boolean | InventoryCheckoutDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    item?: boolean | InventoryCheckoutLine$itemArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryCheckoutLine"]>
+
+  export type InventoryCheckoutLineSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    checkoutId?: boolean
+    businessId?: boolean
+    itemId?: boolean
+    itemName?: boolean
+    qtyOut?: boolean
+    qtyReturned?: boolean
+    qtyDamaged?: boolean
+    qtyLost?: boolean
+    checkout?: boolean | InventoryCheckoutDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    item?: boolean | InventoryCheckoutLine$itemArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryCheckoutLine"]>
+
+  export type InventoryCheckoutLineSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    checkoutId?: boolean
+    businessId?: boolean
+    itemId?: boolean
+    itemName?: boolean
+    qtyOut?: boolean
+    qtyReturned?: boolean
+    qtyDamaged?: boolean
+    qtyLost?: boolean
+    checkout?: boolean | InventoryCheckoutDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    item?: boolean | InventoryCheckoutLine$itemArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryCheckoutLine"]>
+
+  export type InventoryCheckoutLineSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    checkoutId?: boolean
+    businessId?: boolean
+    itemId?: boolean
+    itemName?: boolean
+    qtyOut?: boolean
+    qtyReturned?: boolean
+    qtyDamaged?: boolean
+    qtyLost?: boolean
+  }
+
+  export type InventoryCheckoutLineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "checkoutId" | "businessId" | "itemId" | "itemName" | "qtyOut" | "qtyReturned" | "qtyDamaged" | "qtyLost", ExtArgs["result"]["inventoryCheckoutLine"]>
+  export type InventoryCheckoutLineInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    checkout?: boolean | InventoryCheckoutDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    item?: boolean | InventoryCheckoutLine$itemArgs<ExtArgs>
+  }
+  export type InventoryCheckoutLineIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    checkout?: boolean | InventoryCheckoutDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    item?: boolean | InventoryCheckoutLine$itemArgs<ExtArgs>
+  }
+  export type InventoryCheckoutLineIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    checkout?: boolean | InventoryCheckoutDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    item?: boolean | InventoryCheckoutLine$itemArgs<ExtArgs>
+  }
+
+  export type $InventoryCheckoutLinePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InventoryCheckoutLine"
+    objects: {
+      checkout: Prisma.$InventoryCheckoutPayload<ExtArgs>
+      business: Prisma.$BusinessPayload<ExtArgs>
+      item: Prisma.$BaseInventoryUnitPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      checkoutId: string
+      businessId: string
+      itemId: string | null
+      itemName: string
+      qtyOut: number
+      qtyReturned: number
+      qtyDamaged: number
+      qtyLost: number
+    }, ExtArgs["result"]["inventoryCheckoutLine"]>
+    composites: {}
+  }
+
+  type InventoryCheckoutLineGetPayload<S extends boolean | null | undefined | InventoryCheckoutLineDefaultArgs> = $Result.GetResult<Prisma.$InventoryCheckoutLinePayload, S>
+
+  type InventoryCheckoutLineCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InventoryCheckoutLineFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InventoryCheckoutLineCountAggregateInputType | true
+    }
+
+  export interface InventoryCheckoutLineDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InventoryCheckoutLine'], meta: { name: 'InventoryCheckoutLine' } }
+    /**
+     * Find zero or one InventoryCheckoutLine that matches the filter.
+     * @param {InventoryCheckoutLineFindUniqueArgs} args - Arguments to find a InventoryCheckoutLine
+     * @example
+     * // Get one InventoryCheckoutLine
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InventoryCheckoutLineFindUniqueArgs>(args: SelectSubset<T, InventoryCheckoutLineFindUniqueArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one InventoryCheckoutLine that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InventoryCheckoutLineFindUniqueOrThrowArgs} args - Arguments to find a InventoryCheckoutLine
+     * @example
+     * // Get one InventoryCheckoutLine
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InventoryCheckoutLineFindUniqueOrThrowArgs>(args: SelectSubset<T, InventoryCheckoutLineFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryCheckoutLine that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutLineFindFirstArgs} args - Arguments to find a InventoryCheckoutLine
+     * @example
+     * // Get one InventoryCheckoutLine
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InventoryCheckoutLineFindFirstArgs>(args?: SelectSubset<T, InventoryCheckoutLineFindFirstArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryCheckoutLine that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutLineFindFirstOrThrowArgs} args - Arguments to find a InventoryCheckoutLine
+     * @example
+     * // Get one InventoryCheckoutLine
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InventoryCheckoutLineFindFirstOrThrowArgs>(args?: SelectSubset<T, InventoryCheckoutLineFindFirstOrThrowArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more InventoryCheckoutLines that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutLineFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InventoryCheckoutLines
+     * const inventoryCheckoutLines = await prisma.inventoryCheckoutLine.findMany()
+     * 
+     * // Get first 10 InventoryCheckoutLines
+     * const inventoryCheckoutLines = await prisma.inventoryCheckoutLine.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const inventoryCheckoutLineWithIdOnly = await prisma.inventoryCheckoutLine.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InventoryCheckoutLineFindManyArgs>(args?: SelectSubset<T, InventoryCheckoutLineFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a InventoryCheckoutLine.
+     * @param {InventoryCheckoutLineCreateArgs} args - Arguments to create a InventoryCheckoutLine.
+     * @example
+     * // Create one InventoryCheckoutLine
+     * const InventoryCheckoutLine = await prisma.inventoryCheckoutLine.create({
+     *   data: {
+     *     // ... data to create a InventoryCheckoutLine
+     *   }
+     * })
+     * 
+     */
+    create<T extends InventoryCheckoutLineCreateArgs>(args: SelectSubset<T, InventoryCheckoutLineCreateArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many InventoryCheckoutLines.
+     * @param {InventoryCheckoutLineCreateManyArgs} args - Arguments to create many InventoryCheckoutLines.
+     * @example
+     * // Create many InventoryCheckoutLines
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InventoryCheckoutLineCreateManyArgs>(args?: SelectSubset<T, InventoryCheckoutLineCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InventoryCheckoutLines and returns the data saved in the database.
+     * @param {InventoryCheckoutLineCreateManyAndReturnArgs} args - Arguments to create many InventoryCheckoutLines.
+     * @example
+     * // Create many InventoryCheckoutLines
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many InventoryCheckoutLines and only return the `id`
+     * const inventoryCheckoutLineWithIdOnly = await prisma.inventoryCheckoutLine.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InventoryCheckoutLineCreateManyAndReturnArgs>(args?: SelectSubset<T, InventoryCheckoutLineCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a InventoryCheckoutLine.
+     * @param {InventoryCheckoutLineDeleteArgs} args - Arguments to delete one InventoryCheckoutLine.
+     * @example
+     * // Delete one InventoryCheckoutLine
+     * const InventoryCheckoutLine = await prisma.inventoryCheckoutLine.delete({
+     *   where: {
+     *     // ... filter to delete one InventoryCheckoutLine
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InventoryCheckoutLineDeleteArgs>(args: SelectSubset<T, InventoryCheckoutLineDeleteArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one InventoryCheckoutLine.
+     * @param {InventoryCheckoutLineUpdateArgs} args - Arguments to update one InventoryCheckoutLine.
+     * @example
+     * // Update one InventoryCheckoutLine
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InventoryCheckoutLineUpdateArgs>(args: SelectSubset<T, InventoryCheckoutLineUpdateArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more InventoryCheckoutLines.
+     * @param {InventoryCheckoutLineDeleteManyArgs} args - Arguments to filter InventoryCheckoutLines to delete.
+     * @example
+     * // Delete a few InventoryCheckoutLines
+     * const { count } = await prisma.inventoryCheckoutLine.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InventoryCheckoutLineDeleteManyArgs>(args?: SelectSubset<T, InventoryCheckoutLineDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryCheckoutLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutLineUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InventoryCheckoutLines
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InventoryCheckoutLineUpdateManyArgs>(args: SelectSubset<T, InventoryCheckoutLineUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryCheckoutLines and returns the data updated in the database.
+     * @param {InventoryCheckoutLineUpdateManyAndReturnArgs} args - Arguments to update many InventoryCheckoutLines.
+     * @example
+     * // Update many InventoryCheckoutLines
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more InventoryCheckoutLines and only return the `id`
+     * const inventoryCheckoutLineWithIdOnly = await prisma.inventoryCheckoutLine.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InventoryCheckoutLineUpdateManyAndReturnArgs>(args: SelectSubset<T, InventoryCheckoutLineUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one InventoryCheckoutLine.
+     * @param {InventoryCheckoutLineUpsertArgs} args - Arguments to update or create a InventoryCheckoutLine.
+     * @example
+     * // Update or create a InventoryCheckoutLine
+     * const inventoryCheckoutLine = await prisma.inventoryCheckoutLine.upsert({
+     *   create: {
+     *     // ... data to create a InventoryCheckoutLine
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InventoryCheckoutLine we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InventoryCheckoutLineUpsertArgs>(args: SelectSubset<T, InventoryCheckoutLineUpsertArgs<ExtArgs>>): Prisma__InventoryCheckoutLineClient<$Result.GetResult<Prisma.$InventoryCheckoutLinePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of InventoryCheckoutLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutLineCountArgs} args - Arguments to filter InventoryCheckoutLines to count.
+     * @example
+     * // Count the number of InventoryCheckoutLines
+     * const count = await prisma.inventoryCheckoutLine.count({
+     *   where: {
+     *     // ... the filter for the InventoryCheckoutLines we want to count
+     *   }
+     * })
+    **/
+    count<T extends InventoryCheckoutLineCountArgs>(
+      args?: Subset<T, InventoryCheckoutLineCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InventoryCheckoutLineCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InventoryCheckoutLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutLineAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InventoryCheckoutLineAggregateArgs>(args: Subset<T, InventoryCheckoutLineAggregateArgs>): Prisma.PrismaPromise<GetInventoryCheckoutLineAggregateType<T>>
+
+    /**
+     * Group by InventoryCheckoutLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryCheckoutLineGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InventoryCheckoutLineGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InventoryCheckoutLineGroupByArgs['orderBy'] }
+        : { orderBy?: InventoryCheckoutLineGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InventoryCheckoutLineGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInventoryCheckoutLineGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InventoryCheckoutLine model
+   */
+  readonly fields: InventoryCheckoutLineFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InventoryCheckoutLine.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InventoryCheckoutLineClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    checkout<T extends InventoryCheckoutDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InventoryCheckoutDefaultArgs<ExtArgs>>): Prisma__InventoryCheckoutClient<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    item<T extends InventoryCheckoutLine$itemArgs<ExtArgs> = {}>(args?: Subset<T, InventoryCheckoutLine$itemArgs<ExtArgs>>): Prisma__BaseInventoryUnitClient<$Result.GetResult<Prisma.$BaseInventoryUnitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InventoryCheckoutLine model
+   */
+  interface InventoryCheckoutLineFieldRefs {
+    readonly id: FieldRef<"InventoryCheckoutLine", 'String'>
+    readonly createdAt: FieldRef<"InventoryCheckoutLine", 'DateTime'>
+    readonly updatedAt: FieldRef<"InventoryCheckoutLine", 'DateTime'>
+    readonly checkoutId: FieldRef<"InventoryCheckoutLine", 'String'>
+    readonly businessId: FieldRef<"InventoryCheckoutLine", 'String'>
+    readonly itemId: FieldRef<"InventoryCheckoutLine", 'String'>
+    readonly itemName: FieldRef<"InventoryCheckoutLine", 'String'>
+    readonly qtyOut: FieldRef<"InventoryCheckoutLine", 'Int'>
+    readonly qtyReturned: FieldRef<"InventoryCheckoutLine", 'Int'>
+    readonly qtyDamaged: FieldRef<"InventoryCheckoutLine", 'Int'>
+    readonly qtyLost: FieldRef<"InventoryCheckoutLine", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * InventoryCheckoutLine findUnique
+   */
+  export type InventoryCheckoutLineFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckoutLine to fetch.
+     */
+    where: InventoryCheckoutLineWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckoutLine findUniqueOrThrow
+   */
+  export type InventoryCheckoutLineFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckoutLine to fetch.
+     */
+    where: InventoryCheckoutLineWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckoutLine findFirst
+   */
+  export type InventoryCheckoutLineFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckoutLine to fetch.
+     */
+    where?: InventoryCheckoutLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckoutLines to fetch.
+     */
+    orderBy?: InventoryCheckoutLineOrderByWithRelationInput | InventoryCheckoutLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryCheckoutLines.
+     */
+    cursor?: InventoryCheckoutLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckoutLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckoutLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryCheckoutLines.
+     */
+    distinct?: InventoryCheckoutLineScalarFieldEnum | InventoryCheckoutLineScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckoutLine findFirstOrThrow
+   */
+  export type InventoryCheckoutLineFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckoutLine to fetch.
+     */
+    where?: InventoryCheckoutLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckoutLines to fetch.
+     */
+    orderBy?: InventoryCheckoutLineOrderByWithRelationInput | InventoryCheckoutLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryCheckoutLines.
+     */
+    cursor?: InventoryCheckoutLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckoutLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckoutLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryCheckoutLines.
+     */
+    distinct?: InventoryCheckoutLineScalarFieldEnum | InventoryCheckoutLineScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckoutLine findMany
+   */
+  export type InventoryCheckoutLineFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryCheckoutLines to fetch.
+     */
+    where?: InventoryCheckoutLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryCheckoutLines to fetch.
+     */
+    orderBy?: InventoryCheckoutLineOrderByWithRelationInput | InventoryCheckoutLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing InventoryCheckoutLines.
+     */
+    cursor?: InventoryCheckoutLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryCheckoutLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryCheckoutLines.
+     */
+    skip?: number
+    distinct?: InventoryCheckoutLineScalarFieldEnum | InventoryCheckoutLineScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryCheckoutLine create
+   */
+  export type InventoryCheckoutLineCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InventoryCheckoutLine.
+     */
+    data: XOR<InventoryCheckoutLineCreateInput, InventoryCheckoutLineUncheckedCreateInput>
+  }
+
+  /**
+   * InventoryCheckoutLine createMany
+   */
+  export type InventoryCheckoutLineCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InventoryCheckoutLines.
+     */
+    data: InventoryCheckoutLineCreateManyInput | InventoryCheckoutLineCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InventoryCheckoutLine createManyAndReturn
+   */
+  export type InventoryCheckoutLineCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * The data used to create many InventoryCheckoutLines.
+     */
+    data: InventoryCheckoutLineCreateManyInput | InventoryCheckoutLineCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryCheckoutLine update
+   */
+  export type InventoryCheckoutLineUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InventoryCheckoutLine.
+     */
+    data: XOR<InventoryCheckoutLineUpdateInput, InventoryCheckoutLineUncheckedUpdateInput>
+    /**
+     * Choose, which InventoryCheckoutLine to update.
+     */
+    where: InventoryCheckoutLineWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckoutLine updateMany
+   */
+  export type InventoryCheckoutLineUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InventoryCheckoutLines.
+     */
+    data: XOR<InventoryCheckoutLineUpdateManyMutationInput, InventoryCheckoutLineUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryCheckoutLines to update
+     */
+    where?: InventoryCheckoutLineWhereInput
+    /**
+     * Limit how many InventoryCheckoutLines to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryCheckoutLine updateManyAndReturn
+   */
+  export type InventoryCheckoutLineUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * The data used to update InventoryCheckoutLines.
+     */
+    data: XOR<InventoryCheckoutLineUpdateManyMutationInput, InventoryCheckoutLineUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryCheckoutLines to update
+     */
+    where?: InventoryCheckoutLineWhereInput
+    /**
+     * Limit how many InventoryCheckoutLines to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryCheckoutLine upsert
+   */
+  export type InventoryCheckoutLineUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InventoryCheckoutLine to update in case it exists.
+     */
+    where: InventoryCheckoutLineWhereUniqueInput
+    /**
+     * In case the InventoryCheckoutLine found by the `where` argument doesn't exist, create a new InventoryCheckoutLine with this data.
+     */
+    create: XOR<InventoryCheckoutLineCreateInput, InventoryCheckoutLineUncheckedCreateInput>
+    /**
+     * In case the InventoryCheckoutLine was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InventoryCheckoutLineUpdateInput, InventoryCheckoutLineUncheckedUpdateInput>
+  }
+
+  /**
+   * InventoryCheckoutLine delete
+   */
+  export type InventoryCheckoutLineDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
+    /**
+     * Filter which InventoryCheckoutLine to delete.
+     */
+    where: InventoryCheckoutLineWhereUniqueInput
+  }
+
+  /**
+   * InventoryCheckoutLine deleteMany
+   */
+  export type InventoryCheckoutLineDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryCheckoutLines to delete
+     */
+    where?: InventoryCheckoutLineWhereInput
+    /**
+     * Limit how many InventoryCheckoutLines to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryCheckoutLine.item
+   */
+  export type InventoryCheckoutLine$itemArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BaseInventoryUnit
+     */
+    select?: BaseInventoryUnitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BaseInventoryUnit
+     */
+    omit?: BaseInventoryUnitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BaseInventoryUnitInclude<ExtArgs> | null
+    where?: BaseInventoryUnitWhereInput
+  }
+
+  /**
+   * InventoryCheckoutLine without action
+   */
+  export type InventoryCheckoutLineDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryCheckoutLine
+     */
+    select?: InventoryCheckoutLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryCheckoutLine
+     */
+    omit?: InventoryCheckoutLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryCheckoutLineInclude<ExtArgs> | null
   }
 
 
@@ -81887,6 +84820,7 @@ export namespace Prisma {
     reason: 'reason',
     note: 'note',
     orderId: 'orderId',
+    checkoutId: 'checkoutId',
     userId: 'userId'
   };
 
@@ -81905,10 +84839,50 @@ export namespace Prisma {
     lowInventoryAlertSent: 'lowInventoryAlertSent',
     outOfStockAlertSent: 'outOfStockAlertSent',
     allowBackorders: 'allowBackorders',
+    itemType: 'itemType',
+    sku: 'sku',
+    category: 'category',
+    storageLocation: 'storageLocation',
+    unitCostCents: 'unitCostCents',
     businessId: 'businessId'
   };
 
   export type BaseInventoryUnitScalarFieldEnum = (typeof BaseInventoryUnitScalarFieldEnum)[keyof typeof BaseInventoryUnitScalarFieldEnum]
+
+
+  export const InventoryCheckoutScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    label: 'label',
+    customerName: 'customerName',
+    notes: 'notes',
+    status: 'status',
+    checkedOutAt: 'checkedOutAt',
+    dueBackOn: 'dueBackOn',
+    closedAt: 'closedAt',
+    createdById: 'createdById'
+  };
+
+  export type InventoryCheckoutScalarFieldEnum = (typeof InventoryCheckoutScalarFieldEnum)[keyof typeof InventoryCheckoutScalarFieldEnum]
+
+
+  export const InventoryCheckoutLineScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    checkoutId: 'checkoutId',
+    businessId: 'businessId',
+    itemId: 'itemId',
+    itemName: 'itemName',
+    qtyOut: 'qtyOut',
+    qtyReturned: 'qtyReturned',
+    qtyDamaged: 'qtyDamaged',
+    qtyLost: 'qtyLost'
+  };
+
+  export type InventoryCheckoutLineScalarFieldEnum = (typeof InventoryCheckoutLineScalarFieldEnum)[keyof typeof InventoryCheckoutLineScalarFieldEnum]
 
 
   export const InventoryReservationScalarFieldEnum: {
@@ -82729,6 +85703,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipListRelationFilter
     customers?: CustomerListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
+    inventoryCheckoutsCreated?: InventoryCheckoutListRelationFilter
     createdInvites?: PlatformInviteListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
   }
@@ -82749,6 +85724,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipOrderByRelationAggregateInput
     customers?: CustomerOrderByRelationAggregateInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
+    inventoryCheckoutsCreated?: InventoryCheckoutOrderByRelationAggregateInput
     createdInvites?: PlatformInviteOrderByRelationAggregateInput
     editorNotes?: EditorNoteOrderByRelationAggregateInput
   }
@@ -82772,6 +85748,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipListRelationFilter
     customers?: CustomerListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
+    inventoryCheckoutsCreated?: InventoryCheckoutListRelationFilter
     createdInvites?: PlatformInviteListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
   }, "id" | "email">
@@ -83194,6 +86171,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     baseInventoryUnits?: BaseInventoryUnitListRelationFilter
+    inventoryCheckouts?: InventoryCheckoutListRelationFilter
+    inventoryCheckoutLines?: InventoryCheckoutLineListRelationFilter
     inventoryReservations?: InventoryReservationListRelationFilter
     pages?: PageListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
@@ -83297,6 +86276,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeOrderByRelationAggregateInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     baseInventoryUnits?: BaseInventoryUnitOrderByRelationAggregateInput
+    inventoryCheckouts?: InventoryCheckoutOrderByRelationAggregateInput
+    inventoryCheckoutLines?: InventoryCheckoutLineOrderByRelationAggregateInput
     inventoryReservations?: InventoryReservationOrderByRelationAggregateInput
     pages?: PageOrderByRelationAggregateInput
     editorNotes?: EditorNoteOrderByRelationAggregateInput
@@ -83403,6 +86384,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     baseInventoryUnits?: BaseInventoryUnitListRelationFilter
+    inventoryCheckouts?: InventoryCheckoutListRelationFilter
+    inventoryCheckoutLines?: InventoryCheckoutLineListRelationFilter
     inventoryReservations?: InventoryReservationListRelationFilter
     pages?: PageListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
@@ -85894,12 +88877,14 @@ export namespace Prisma {
     reason?: StringFilter<"InventoryHistory"> | string
     note?: StringNullableFilter<"InventoryHistory"> | string | null
     orderId?: StringNullableFilter<"InventoryHistory"> | string | null
+    checkoutId?: StringNullableFilter<"InventoryHistory"> | string | null
     userId?: StringNullableFilter<"InventoryHistory"> | string | null
     variant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
     product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
     baseInventoryUnit?: XOR<BaseInventoryUnitNullableScalarRelationFilter, BaseInventoryUnitWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     order?: XOR<OrderNullableScalarRelationFilter, OrderWhereInput> | null
+    checkout?: XOR<InventoryCheckoutNullableScalarRelationFilter, InventoryCheckoutWhereInput> | null
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }
 
@@ -85916,12 +88901,14 @@ export namespace Prisma {
     reason?: SortOrder
     note?: SortOrderInput | SortOrder
     orderId?: SortOrderInput | SortOrder
+    checkoutId?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     variant?: ProductVariantOrderByWithRelationInput
     product?: ProductOrderByWithRelationInput
     baseInventoryUnit?: BaseInventoryUnitOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
     order?: OrderOrderByWithRelationInput
+    checkout?: InventoryCheckoutOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
   }
 
@@ -85941,12 +88928,14 @@ export namespace Prisma {
     reason?: StringFilter<"InventoryHistory"> | string
     note?: StringNullableFilter<"InventoryHistory"> | string | null
     orderId?: StringNullableFilter<"InventoryHistory"> | string | null
+    checkoutId?: StringNullableFilter<"InventoryHistory"> | string | null
     userId?: StringNullableFilter<"InventoryHistory"> | string | null
     variant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
     product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
     baseInventoryUnit?: XOR<BaseInventoryUnitNullableScalarRelationFilter, BaseInventoryUnitWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     order?: XOR<OrderNullableScalarRelationFilter, OrderWhereInput> | null
+    checkout?: XOR<InventoryCheckoutNullableScalarRelationFilter, InventoryCheckoutWhereInput> | null
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }, "id">
 
@@ -85963,6 +88952,7 @@ export namespace Prisma {
     reason?: SortOrder
     note?: SortOrderInput | SortOrder
     orderId?: SortOrderInput | SortOrder
+    checkoutId?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     _count?: InventoryHistoryCountOrderByAggregateInput
     _avg?: InventoryHistoryAvgOrderByAggregateInput
@@ -85987,6 +88977,7 @@ export namespace Prisma {
     reason?: StringWithAggregatesFilter<"InventoryHistory"> | string
     note?: StringNullableWithAggregatesFilter<"InventoryHistory"> | string | null
     orderId?: StringNullableWithAggregatesFilter<"InventoryHistory"> | string | null
+    checkoutId?: StringNullableWithAggregatesFilter<"InventoryHistory"> | string | null
     userId?: StringNullableWithAggregatesFilter<"InventoryHistory"> | string | null
   }
 
@@ -86005,10 +88996,16 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     allowBackorders?: BoolFilter<"BaseInventoryUnit"> | boolean
+    itemType?: StringFilter<"BaseInventoryUnit"> | string
+    sku?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    category?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    storageLocation?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    unitCostCents?: IntNullableFilter<"BaseInventoryUnit"> | number | null
     businessId?: StringFilter<"BaseInventoryUnit"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     products?: ProductListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
+    checkoutLines?: InventoryCheckoutLineListRelationFilter
   }
 
   export type BaseInventoryUnitOrderByWithRelationInput = {
@@ -86023,14 +89020,21 @@ export namespace Prisma {
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
     allowBackorders?: SortOrder
+    itemType?: SortOrder
+    sku?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
+    storageLocation?: SortOrderInput | SortOrder
+    unitCostCents?: SortOrderInput | SortOrder
     businessId?: SortOrder
     business?: BusinessOrderByWithRelationInput
     products?: ProductOrderByRelationAggregateInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
+    checkoutLines?: InventoryCheckoutLineOrderByRelationAggregateInput
   }
 
   export type BaseInventoryUnitWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    businessId_sku?: BaseInventoryUnitBusinessIdSkuCompoundUniqueInput
     AND?: BaseInventoryUnitWhereInput | BaseInventoryUnitWhereInput[]
     OR?: BaseInventoryUnitWhereInput[]
     NOT?: BaseInventoryUnitWhereInput | BaseInventoryUnitWhereInput[]
@@ -86044,11 +89048,17 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     allowBackorders?: BoolFilter<"BaseInventoryUnit"> | boolean
+    itemType?: StringFilter<"BaseInventoryUnit"> | string
+    sku?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    category?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    storageLocation?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    unitCostCents?: IntNullableFilter<"BaseInventoryUnit"> | number | null
     businessId?: StringFilter<"BaseInventoryUnit"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     products?: ProductListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
-  }, "id">
+    checkoutLines?: InventoryCheckoutLineListRelationFilter
+  }, "id" | "businessId_sku">
 
   export type BaseInventoryUnitOrderByWithAggregationInput = {
     id?: SortOrder
@@ -86062,6 +89072,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
     allowBackorders?: SortOrder
+    itemType?: SortOrder
+    sku?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
+    storageLocation?: SortOrderInput | SortOrder
+    unitCostCents?: SortOrderInput | SortOrder
     businessId?: SortOrder
     _count?: BaseInventoryUnitCountOrderByAggregateInput
     _avg?: BaseInventoryUnitAvgOrderByAggregateInput
@@ -86085,7 +89100,205 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolWithAggregatesFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolWithAggregatesFilter<"BaseInventoryUnit"> | boolean
     allowBackorders?: BoolWithAggregatesFilter<"BaseInventoryUnit"> | boolean
+    itemType?: StringWithAggregatesFilter<"BaseInventoryUnit"> | string
+    sku?: StringNullableWithAggregatesFilter<"BaseInventoryUnit"> | string | null
+    category?: StringNullableWithAggregatesFilter<"BaseInventoryUnit"> | string | null
+    storageLocation?: StringNullableWithAggregatesFilter<"BaseInventoryUnit"> | string | null
+    unitCostCents?: IntNullableWithAggregatesFilter<"BaseInventoryUnit"> | number | null
     businessId?: StringWithAggregatesFilter<"BaseInventoryUnit"> | string
+  }
+
+  export type InventoryCheckoutWhereInput = {
+    AND?: InventoryCheckoutWhereInput | InventoryCheckoutWhereInput[]
+    OR?: InventoryCheckoutWhereInput[]
+    NOT?: InventoryCheckoutWhereInput | InventoryCheckoutWhereInput[]
+    id?: StringFilter<"InventoryCheckout"> | string
+    createdAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    businessId?: StringFilter<"InventoryCheckout"> | string
+    label?: StringFilter<"InventoryCheckout"> | string
+    customerName?: StringNullableFilter<"InventoryCheckout"> | string | null
+    notes?: StringNullableFilter<"InventoryCheckout"> | string | null
+    status?: StringFilter<"InventoryCheckout"> | string
+    checkedOutAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    dueBackOn?: DateTimeNullableFilter<"InventoryCheckout"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"InventoryCheckout"> | Date | string | null
+    createdById?: StringNullableFilter<"InventoryCheckout"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    lines?: InventoryCheckoutLineListRelationFilter
+    history?: InventoryHistoryListRelationFilter
+  }
+
+  export type InventoryCheckoutOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    customerName?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    checkedOutAt?: SortOrder
+    dueBackOn?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    createdBy?: UserOrderByWithRelationInput
+    lines?: InventoryCheckoutLineOrderByRelationAggregateInput
+    history?: InventoryHistoryOrderByRelationAggregateInput
+  }
+
+  export type InventoryCheckoutWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: InventoryCheckoutWhereInput | InventoryCheckoutWhereInput[]
+    OR?: InventoryCheckoutWhereInput[]
+    NOT?: InventoryCheckoutWhereInput | InventoryCheckoutWhereInput[]
+    createdAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    businessId?: StringFilter<"InventoryCheckout"> | string
+    label?: StringFilter<"InventoryCheckout"> | string
+    customerName?: StringNullableFilter<"InventoryCheckout"> | string | null
+    notes?: StringNullableFilter<"InventoryCheckout"> | string | null
+    status?: StringFilter<"InventoryCheckout"> | string
+    checkedOutAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    dueBackOn?: DateTimeNullableFilter<"InventoryCheckout"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"InventoryCheckout"> | Date | string | null
+    createdById?: StringNullableFilter<"InventoryCheckout"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    lines?: InventoryCheckoutLineListRelationFilter
+    history?: InventoryHistoryListRelationFilter
+  }, "id">
+
+  export type InventoryCheckoutOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    customerName?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    checkedOutAt?: SortOrder
+    dueBackOn?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    _count?: InventoryCheckoutCountOrderByAggregateInput
+    _max?: InventoryCheckoutMaxOrderByAggregateInput
+    _min?: InventoryCheckoutMinOrderByAggregateInput
+  }
+
+  export type InventoryCheckoutScalarWhereWithAggregatesInput = {
+    AND?: InventoryCheckoutScalarWhereWithAggregatesInput | InventoryCheckoutScalarWhereWithAggregatesInput[]
+    OR?: InventoryCheckoutScalarWhereWithAggregatesInput[]
+    NOT?: InventoryCheckoutScalarWhereWithAggregatesInput | InventoryCheckoutScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"InventoryCheckout"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"InventoryCheckout"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"InventoryCheckout"> | Date | string
+    businessId?: StringWithAggregatesFilter<"InventoryCheckout"> | string
+    label?: StringWithAggregatesFilter<"InventoryCheckout"> | string
+    customerName?: StringNullableWithAggregatesFilter<"InventoryCheckout"> | string | null
+    notes?: StringNullableWithAggregatesFilter<"InventoryCheckout"> | string | null
+    status?: StringWithAggregatesFilter<"InventoryCheckout"> | string
+    checkedOutAt?: DateTimeWithAggregatesFilter<"InventoryCheckout"> | Date | string
+    dueBackOn?: DateTimeNullableWithAggregatesFilter<"InventoryCheckout"> | Date | string | null
+    closedAt?: DateTimeNullableWithAggregatesFilter<"InventoryCheckout"> | Date | string | null
+    createdById?: StringNullableWithAggregatesFilter<"InventoryCheckout"> | string | null
+  }
+
+  export type InventoryCheckoutLineWhereInput = {
+    AND?: InventoryCheckoutLineWhereInput | InventoryCheckoutLineWhereInput[]
+    OR?: InventoryCheckoutLineWhereInput[]
+    NOT?: InventoryCheckoutLineWhereInput | InventoryCheckoutLineWhereInput[]
+    id?: StringFilter<"InventoryCheckoutLine"> | string
+    createdAt?: DateTimeFilter<"InventoryCheckoutLine"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryCheckoutLine"> | Date | string
+    checkoutId?: StringFilter<"InventoryCheckoutLine"> | string
+    businessId?: StringFilter<"InventoryCheckoutLine"> | string
+    itemId?: StringNullableFilter<"InventoryCheckoutLine"> | string | null
+    itemName?: StringFilter<"InventoryCheckoutLine"> | string
+    qtyOut?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyReturned?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyDamaged?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyLost?: IntFilter<"InventoryCheckoutLine"> | number
+    checkout?: XOR<InventoryCheckoutScalarRelationFilter, InventoryCheckoutWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    item?: XOR<BaseInventoryUnitNullableScalarRelationFilter, BaseInventoryUnitWhereInput> | null
+  }
+
+  export type InventoryCheckoutLineOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    checkoutId?: SortOrder
+    businessId?: SortOrder
+    itemId?: SortOrderInput | SortOrder
+    itemName?: SortOrder
+    qtyOut?: SortOrder
+    qtyReturned?: SortOrder
+    qtyDamaged?: SortOrder
+    qtyLost?: SortOrder
+    checkout?: InventoryCheckoutOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
+    item?: BaseInventoryUnitOrderByWithRelationInput
+  }
+
+  export type InventoryCheckoutLineWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    checkoutId_itemId?: InventoryCheckoutLineCheckoutIdItemIdCompoundUniqueInput
+    AND?: InventoryCheckoutLineWhereInput | InventoryCheckoutLineWhereInput[]
+    OR?: InventoryCheckoutLineWhereInput[]
+    NOT?: InventoryCheckoutLineWhereInput | InventoryCheckoutLineWhereInput[]
+    createdAt?: DateTimeFilter<"InventoryCheckoutLine"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryCheckoutLine"> | Date | string
+    checkoutId?: StringFilter<"InventoryCheckoutLine"> | string
+    businessId?: StringFilter<"InventoryCheckoutLine"> | string
+    itemId?: StringNullableFilter<"InventoryCheckoutLine"> | string | null
+    itemName?: StringFilter<"InventoryCheckoutLine"> | string
+    qtyOut?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyReturned?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyDamaged?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyLost?: IntFilter<"InventoryCheckoutLine"> | number
+    checkout?: XOR<InventoryCheckoutScalarRelationFilter, InventoryCheckoutWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    item?: XOR<BaseInventoryUnitNullableScalarRelationFilter, BaseInventoryUnitWhereInput> | null
+  }, "id" | "checkoutId_itemId">
+
+  export type InventoryCheckoutLineOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    checkoutId?: SortOrder
+    businessId?: SortOrder
+    itemId?: SortOrderInput | SortOrder
+    itemName?: SortOrder
+    qtyOut?: SortOrder
+    qtyReturned?: SortOrder
+    qtyDamaged?: SortOrder
+    qtyLost?: SortOrder
+    _count?: InventoryCheckoutLineCountOrderByAggregateInput
+    _avg?: InventoryCheckoutLineAvgOrderByAggregateInput
+    _max?: InventoryCheckoutLineMaxOrderByAggregateInput
+    _min?: InventoryCheckoutLineMinOrderByAggregateInput
+    _sum?: InventoryCheckoutLineSumOrderByAggregateInput
+  }
+
+  export type InventoryCheckoutLineScalarWhereWithAggregatesInput = {
+    AND?: InventoryCheckoutLineScalarWhereWithAggregatesInput | InventoryCheckoutLineScalarWhereWithAggregatesInput[]
+    OR?: InventoryCheckoutLineScalarWhereWithAggregatesInput[]
+    NOT?: InventoryCheckoutLineScalarWhereWithAggregatesInput | InventoryCheckoutLineScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"InventoryCheckoutLine"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"InventoryCheckoutLine"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"InventoryCheckoutLine"> | Date | string
+    checkoutId?: StringWithAggregatesFilter<"InventoryCheckoutLine"> | string
+    businessId?: StringWithAggregatesFilter<"InventoryCheckoutLine"> | string
+    itemId?: StringNullableWithAggregatesFilter<"InventoryCheckoutLine"> | string | null
+    itemName?: StringWithAggregatesFilter<"InventoryCheckoutLine"> | string
+    qtyOut?: IntWithAggregatesFilter<"InventoryCheckoutLine"> | number
+    qtyReturned?: IntWithAggregatesFilter<"InventoryCheckoutLine"> | number
+    qtyDamaged?: IntWithAggregatesFilter<"InventoryCheckoutLine"> | number
+    qtyLost?: IntWithAggregatesFilter<"InventoryCheckoutLine"> | number
   }
 
   export type InventoryReservationWhereInput = {
@@ -89353,6 +92566,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
@@ -89373,6 +92587,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -89393,6 +92608,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
@@ -89413,6 +92629,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
@@ -89874,6 +93091,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -89977,6 +93196,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -90080,6 +93301,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -90183,6 +93406,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -93118,6 +96343,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutInventoryHistoryInput
     business: BusinessCreateNestedOneWithoutInventoryHistoryInput
     order?: OrderCreateNestedOneWithoutInventoryHistoryInput
+    checkout?: InventoryCheckoutCreateNestedOneWithoutHistoryInput
     user?: UserCreateNestedOneWithoutInventoryHistoryInput
   }
 
@@ -93134,6 +96360,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -93150,6 +96377,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutInventoryHistoryNestedInput
     business?: BusinessUpdateOneRequiredWithoutInventoryHistoryNestedInput
     order?: OrderUpdateOneWithoutInventoryHistoryNestedInput
+    checkout?: InventoryCheckoutUpdateOneWithoutHistoryNestedInput
     user?: UserUpdateOneWithoutInventoryHistoryNestedInput
   }
 
@@ -93166,6 +96394,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -93182,6 +96411,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -93208,6 +96438,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -93223,9 +96454,15 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     business: BusinessCreateNestedOneWithoutBaseInventoryUnitsInput
     products?: ProductCreateNestedManyWithoutBaseInventoryUnitInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitUncheckedCreateInput = {
@@ -93240,9 +96477,15 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     businessId: string
     products?: ProductUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitUpdateInput = {
@@ -93257,9 +96500,15 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     business?: BusinessUpdateOneRequiredWithoutBaseInventoryUnitsNestedInput
     products?: ProductUpdateManyWithoutBaseInventoryUnitNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUpdateManyWithoutItemNestedInput
   }
 
   export type BaseInventoryUnitUncheckedUpdateInput = {
@@ -93274,9 +96523,15 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     businessId?: StringFieldUpdateOperationsInput | string
     products?: ProductUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type BaseInventoryUnitCreateManyInput = {
@@ -93291,6 +96546,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     businessId: string
   }
 
@@ -93306,6 +96566,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type BaseInventoryUnitUncheckedUpdateManyInput = {
@@ -93320,7 +96585,218 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InventoryCheckoutCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutInventoryCheckoutsInput
+    createdBy?: UserCreateNestedOneWithoutInventoryCheckoutsCreatedInput
+    lines?: InventoryCheckoutLineCreateNestedManyWithoutCheckoutInput
+    history?: InventoryHistoryCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    createdById?: string | null
+    lines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutCheckoutInput
+    history?: InventoryHistoryUncheckedCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutInventoryCheckoutsNestedInput
+    createdBy?: UserUpdateOneWithoutInventoryCheckoutsCreatedNestedInput
+    lines?: InventoryCheckoutLineUpdateManyWithoutCheckoutNestedInput
+    history?: InventoryHistoryUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lines?: InventoryCheckoutLineUncheckedUpdateManyWithoutCheckoutNestedInput
+    history?: InventoryHistoryUncheckedUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    createdById?: string | null
+  }
+
+  export type InventoryCheckoutUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type InventoryCheckoutUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type InventoryCheckoutLineCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+    checkout: InventoryCheckoutCreateNestedOneWithoutLinesInput
+    business: BusinessCreateNestedOneWithoutInventoryCheckoutLinesInput
+    item?: BaseInventoryUnitCreateNestedOneWithoutCheckoutLinesInput
+  }
+
+  export type InventoryCheckoutLineUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checkoutId: string
+    businessId: string
+    itemId?: string | null
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+  }
+
+  export type InventoryCheckoutLineUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+    checkout?: InventoryCheckoutUpdateOneRequiredWithoutLinesNestedInput
+    business?: BusinessUpdateOneRequiredWithoutInventoryCheckoutLinesNestedInput
+    item?: BaseInventoryUnitUpdateOneWithoutCheckoutLinesNestedInput
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkoutId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    itemId?: NullableStringFieldUpdateOperationsInput | string | null
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryCheckoutLineCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checkoutId: string
+    businessId: string
+    itemId?: string | null
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+  }
+
+  export type InventoryCheckoutLineUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkoutId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    itemId?: NullableStringFieldUpdateOperationsInput | string | null
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryReservationCreateInput = {
@@ -97125,6 +100601,12 @@ export namespace Prisma {
     none?: InventoryHistoryWhereInput
   }
 
+  export type InventoryCheckoutListRelationFilter = {
+    every?: InventoryCheckoutWhereInput
+    some?: InventoryCheckoutWhereInput
+    none?: InventoryCheckoutWhereInput
+  }
+
   export type PlatformInviteListRelationFilter = {
     every?: PlatformInviteWhereInput
     some?: PlatformInviteWhereInput
@@ -97159,6 +100641,10 @@ export namespace Prisma {
   }
 
   export type InventoryHistoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InventoryCheckoutOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -97603,6 +101089,12 @@ export namespace Prisma {
     none?: BaseInventoryUnitWhereInput
   }
 
+  export type InventoryCheckoutLineListRelationFilter = {
+    every?: InventoryCheckoutLineWhereInput
+    some?: InventoryCheckoutLineWhereInput
+    none?: InventoryCheckoutLineWhereInput
+  }
+
   export type InventoryReservationListRelationFilter = {
     every?: InventoryReservationWhereInput
     some?: InventoryReservationWhereInput
@@ -97781,6 +101273,10 @@ export namespace Prisma {
   }
 
   export type BaseInventoryUnitOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InventoryCheckoutLineOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -99692,6 +103188,11 @@ export namespace Prisma {
     isNot?: OrderWhereInput | null
   }
 
+  export type InventoryCheckoutNullableScalarRelationFilter = {
+    is?: InventoryCheckoutWhereInput | null
+    isNot?: InventoryCheckoutWhereInput | null
+  }
+
   export type InventoryHistoryCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -99705,6 +103206,7 @@ export namespace Prisma {
     reason?: SortOrder
     note?: SortOrder
     orderId?: SortOrder
+    checkoutId?: SortOrder
     userId?: SortOrder
   }
 
@@ -99727,6 +103229,7 @@ export namespace Prisma {
     reason?: SortOrder
     note?: SortOrder
     orderId?: SortOrder
+    checkoutId?: SortOrder
     userId?: SortOrder
   }
 
@@ -99743,6 +103246,7 @@ export namespace Prisma {
     reason?: SortOrder
     note?: SortOrder
     orderId?: SortOrder
+    checkoutId?: SortOrder
     userId?: SortOrder
   }
 
@@ -99750,6 +103254,11 @@ export namespace Prisma {
     previousQty?: SortOrder
     newQty?: SortOrder
     changeQty?: SortOrder
+  }
+
+  export type BaseInventoryUnitBusinessIdSkuCompoundUniqueInput = {
+    businessId: string
+    sku: string
   }
 
   export type BaseInventoryUnitCountOrderByAggregateInput = {
@@ -99764,6 +103273,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
     allowBackorders?: SortOrder
+    itemType?: SortOrder
+    sku?: SortOrder
+    category?: SortOrder
+    storageLocation?: SortOrder
+    unitCostCents?: SortOrder
     businessId?: SortOrder
   }
 
@@ -99771,6 +103285,7 @@ export namespace Prisma {
     inventoryQty?: SortOrder
     reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
+    unitCostCents?: SortOrder
   }
 
   export type BaseInventoryUnitMaxOrderByAggregateInput = {
@@ -99785,6 +103300,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
     allowBackorders?: SortOrder
+    itemType?: SortOrder
+    sku?: SortOrder
+    category?: SortOrder
+    storageLocation?: SortOrder
+    unitCostCents?: SortOrder
     businessId?: SortOrder
   }
 
@@ -99800,6 +103320,11 @@ export namespace Prisma {
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
     allowBackorders?: SortOrder
+    itemType?: SortOrder
+    sku?: SortOrder
+    category?: SortOrder
+    storageLocation?: SortOrder
+    unitCostCents?: SortOrder
     businessId?: SortOrder
   }
 
@@ -99807,6 +103332,118 @@ export namespace Prisma {
     inventoryQty?: SortOrder
     reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
+    unitCostCents?: SortOrder
+  }
+
+  export type InventoryCheckoutCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    customerName?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    checkedOutAt?: SortOrder
+    dueBackOn?: SortOrder
+    closedAt?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type InventoryCheckoutMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    customerName?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    checkedOutAt?: SortOrder
+    dueBackOn?: SortOrder
+    closedAt?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type InventoryCheckoutMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    label?: SortOrder
+    customerName?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    checkedOutAt?: SortOrder
+    dueBackOn?: SortOrder
+    closedAt?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type InventoryCheckoutScalarRelationFilter = {
+    is?: InventoryCheckoutWhereInput
+    isNot?: InventoryCheckoutWhereInput
+  }
+
+  export type InventoryCheckoutLineCheckoutIdItemIdCompoundUniqueInput = {
+    checkoutId: string
+    itemId: string
+  }
+
+  export type InventoryCheckoutLineCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    checkoutId?: SortOrder
+    businessId?: SortOrder
+    itemId?: SortOrder
+    itemName?: SortOrder
+    qtyOut?: SortOrder
+    qtyReturned?: SortOrder
+    qtyDamaged?: SortOrder
+    qtyLost?: SortOrder
+  }
+
+  export type InventoryCheckoutLineAvgOrderByAggregateInput = {
+    qtyOut?: SortOrder
+    qtyReturned?: SortOrder
+    qtyDamaged?: SortOrder
+    qtyLost?: SortOrder
+  }
+
+  export type InventoryCheckoutLineMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    checkoutId?: SortOrder
+    businessId?: SortOrder
+    itemId?: SortOrder
+    itemName?: SortOrder
+    qtyOut?: SortOrder
+    qtyReturned?: SortOrder
+    qtyDamaged?: SortOrder
+    qtyLost?: SortOrder
+  }
+
+  export type InventoryCheckoutLineMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    checkoutId?: SortOrder
+    businessId?: SortOrder
+    itemId?: SortOrder
+    itemName?: SortOrder
+    qtyOut?: SortOrder
+    qtyReturned?: SortOrder
+    qtyDamaged?: SortOrder
+    qtyLost?: SortOrder
+  }
+
+  export type InventoryCheckoutLineSumOrderByAggregateInput = {
+    qtyOut?: SortOrder
+    qtyReturned?: SortOrder
+    qtyDamaged?: SortOrder
+    qtyLost?: SortOrder
   }
 
   export type InventoryReservationCountOrderByAggregateInput = {
@@ -101754,6 +105391,13 @@ export namespace Prisma {
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
   }
 
+  export type InventoryCheckoutCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutCreatedByInput, InventoryCheckoutUncheckedCreateWithoutCreatedByInput> | InventoryCheckoutCreateWithoutCreatedByInput[] | InventoryCheckoutUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutCreatedByInput | InventoryCheckoutCreateOrConnectWithoutCreatedByInput[]
+    createMany?: InventoryCheckoutCreateManyCreatedByInputEnvelope
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+  }
+
   export type PlatformInviteCreateNestedManyWithoutCreatorInput = {
     create?: XOR<PlatformInviteCreateWithoutCreatorInput, PlatformInviteUncheckedCreateWithoutCreatorInput> | PlatformInviteCreateWithoutCreatorInput[] | PlatformInviteUncheckedCreateWithoutCreatorInput[]
     connectOrCreate?: PlatformInviteCreateOrConnectWithoutCreatorInput | PlatformInviteCreateOrConnectWithoutCreatorInput[]
@@ -101801,6 +105445,13 @@ export namespace Prisma {
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutUserInput | InventoryHistoryCreateOrConnectWithoutUserInput[]
     createMany?: InventoryHistoryCreateManyUserInputEnvelope
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+  }
+
+  export type InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutCreatedByInput, InventoryCheckoutUncheckedCreateWithoutCreatedByInput> | InventoryCheckoutCreateWithoutCreatedByInput[] | InventoryCheckoutUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutCreatedByInput | InventoryCheckoutCreateOrConnectWithoutCreatedByInput[]
+    createMany?: InventoryCheckoutCreateManyCreatedByInputEnvelope
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
   }
 
   export type PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput = {
@@ -101911,6 +105562,20 @@ export namespace Prisma {
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
   }
 
+  export type InventoryCheckoutUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutCreatedByInput, InventoryCheckoutUncheckedCreateWithoutCreatedByInput> | InventoryCheckoutCreateWithoutCreatedByInput[] | InventoryCheckoutUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutCreatedByInput | InventoryCheckoutCreateOrConnectWithoutCreatedByInput[]
+    upsert?: InventoryCheckoutUpsertWithWhereUniqueWithoutCreatedByInput | InventoryCheckoutUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: InventoryCheckoutCreateManyCreatedByInputEnvelope
+    set?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    disconnect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    delete?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    update?: InventoryCheckoutUpdateWithWhereUniqueWithoutCreatedByInput | InventoryCheckoutUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: InventoryCheckoutUpdateManyWithWhereWithoutCreatedByInput | InventoryCheckoutUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: InventoryCheckoutScalarWhereInput | InventoryCheckoutScalarWhereInput[]
+  }
+
   export type PlatformInviteUpdateManyWithoutCreatorNestedInput = {
     create?: XOR<PlatformInviteCreateWithoutCreatorInput, PlatformInviteUncheckedCreateWithoutCreatorInput> | PlatformInviteCreateWithoutCreatorInput[] | PlatformInviteUncheckedCreateWithoutCreatorInput[]
     connectOrCreate?: PlatformInviteCreateOrConnectWithoutCreatorInput | PlatformInviteCreateOrConnectWithoutCreatorInput[]
@@ -102007,6 +105672,20 @@ export namespace Prisma {
     update?: InventoryHistoryUpdateWithWhereUniqueWithoutUserInput | InventoryHistoryUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: InventoryHistoryUpdateManyWithWhereWithoutUserInput | InventoryHistoryUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutCreatedByInput, InventoryCheckoutUncheckedCreateWithoutCreatedByInput> | InventoryCheckoutCreateWithoutCreatedByInput[] | InventoryCheckoutUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutCreatedByInput | InventoryCheckoutCreateOrConnectWithoutCreatedByInput[]
+    upsert?: InventoryCheckoutUpsertWithWhereUniqueWithoutCreatedByInput | InventoryCheckoutUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: InventoryCheckoutCreateManyCreatedByInputEnvelope
+    set?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    disconnect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    delete?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    update?: InventoryCheckoutUpdateWithWhereUniqueWithoutCreatedByInput | InventoryCheckoutUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: InventoryCheckoutUpdateManyWithWhereWithoutCreatedByInput | InventoryCheckoutUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: InventoryCheckoutScalarWhereInput | InventoryCheckoutScalarWhereInput[]
   }
 
   export type PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput = {
@@ -102168,6 +105847,20 @@ export namespace Prisma {
     connectOrCreate?: BaseInventoryUnitCreateOrConnectWithoutBusinessInput | BaseInventoryUnitCreateOrConnectWithoutBusinessInput[]
     createMany?: BaseInventoryUnitCreateManyBusinessInputEnvelope
     connect?: BaseInventoryUnitWhereUniqueInput | BaseInventoryUnitWhereUniqueInput[]
+  }
+
+  export type InventoryCheckoutCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutBusinessInput, InventoryCheckoutUncheckedCreateWithoutBusinessInput> | InventoryCheckoutCreateWithoutBusinessInput[] | InventoryCheckoutUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutBusinessInput | InventoryCheckoutCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryCheckoutCreateManyBusinessInputEnvelope
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+  }
+
+  export type InventoryCheckoutLineCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutBusinessInput, InventoryCheckoutLineUncheckedCreateWithoutBusinessInput> | InventoryCheckoutLineCreateWithoutBusinessInput[] | InventoryCheckoutLineUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutBusinessInput | InventoryCheckoutLineCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryCheckoutLineCreateManyBusinessInputEnvelope
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
   }
 
   export type InventoryReservationCreateNestedManyWithoutBusinessInput = {
@@ -102437,6 +106130,20 @@ export namespace Prisma {
     connectOrCreate?: BaseInventoryUnitCreateOrConnectWithoutBusinessInput | BaseInventoryUnitCreateOrConnectWithoutBusinessInput[]
     createMany?: BaseInventoryUnitCreateManyBusinessInputEnvelope
     connect?: BaseInventoryUnitWhereUniqueInput | BaseInventoryUnitWhereUniqueInput[]
+  }
+
+  export type InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutBusinessInput, InventoryCheckoutUncheckedCreateWithoutBusinessInput> | InventoryCheckoutCreateWithoutBusinessInput[] | InventoryCheckoutUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutBusinessInput | InventoryCheckoutCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryCheckoutCreateManyBusinessInputEnvelope
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+  }
+
+  export type InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutBusinessInput, InventoryCheckoutLineUncheckedCreateWithoutBusinessInput> | InventoryCheckoutLineCreateWithoutBusinessInput[] | InventoryCheckoutLineUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutBusinessInput | InventoryCheckoutLineCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryCheckoutLineCreateManyBusinessInputEnvelope
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
   }
 
   export type InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -102798,6 +106505,34 @@ export namespace Prisma {
     update?: BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput | BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput | BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: BaseInventoryUnitScalarWhereInput | BaseInventoryUnitScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutBusinessInput, InventoryCheckoutUncheckedCreateWithoutBusinessInput> | InventoryCheckoutCreateWithoutBusinessInput[] | InventoryCheckoutUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutBusinessInput | InventoryCheckoutCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryCheckoutUpsertWithWhereUniqueWithoutBusinessInput | InventoryCheckoutUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryCheckoutCreateManyBusinessInputEnvelope
+    set?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    disconnect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    delete?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    update?: InventoryCheckoutUpdateWithWhereUniqueWithoutBusinessInput | InventoryCheckoutUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryCheckoutUpdateManyWithWhereWithoutBusinessInput | InventoryCheckoutUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryCheckoutScalarWhereInput | InventoryCheckoutScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutBusinessInput, InventoryCheckoutLineUncheckedCreateWithoutBusinessInput> | InventoryCheckoutLineCreateWithoutBusinessInput[] | InventoryCheckoutLineUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutBusinessInput | InventoryCheckoutLineCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryCheckoutLineUpsertWithWhereUniqueWithoutBusinessInput | InventoryCheckoutLineUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryCheckoutLineCreateManyBusinessInputEnvelope
+    set?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    disconnect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    delete?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    update?: InventoryCheckoutLineUpdateWithWhereUniqueWithoutBusinessInput | InventoryCheckoutLineUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryCheckoutLineUpdateManyWithWhereWithoutBusinessInput | InventoryCheckoutLineUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
   }
 
   export type InventoryReservationUpdateManyWithoutBusinessNestedInput = {
@@ -103328,6 +107063,34 @@ export namespace Prisma {
     update?: BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput | BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput | BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: BaseInventoryUnitScalarWhereInput | BaseInventoryUnitScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutBusinessInput, InventoryCheckoutUncheckedCreateWithoutBusinessInput> | InventoryCheckoutCreateWithoutBusinessInput[] | InventoryCheckoutUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutBusinessInput | InventoryCheckoutCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryCheckoutUpsertWithWhereUniqueWithoutBusinessInput | InventoryCheckoutUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryCheckoutCreateManyBusinessInputEnvelope
+    set?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    disconnect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    delete?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    connect?: InventoryCheckoutWhereUniqueInput | InventoryCheckoutWhereUniqueInput[]
+    update?: InventoryCheckoutUpdateWithWhereUniqueWithoutBusinessInput | InventoryCheckoutUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryCheckoutUpdateManyWithWhereWithoutBusinessInput | InventoryCheckoutUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryCheckoutScalarWhereInput | InventoryCheckoutScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutBusinessInput, InventoryCheckoutLineUncheckedCreateWithoutBusinessInput> | InventoryCheckoutLineCreateWithoutBusinessInput[] | InventoryCheckoutLineUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutBusinessInput | InventoryCheckoutLineCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryCheckoutLineUpsertWithWhereUniqueWithoutBusinessInput | InventoryCheckoutLineUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryCheckoutLineCreateManyBusinessInputEnvelope
+    set?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    disconnect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    delete?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    update?: InventoryCheckoutLineUpdateWithWhereUniqueWithoutBusinessInput | InventoryCheckoutLineUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryCheckoutLineUpdateManyWithWhereWithoutBusinessInput | InventoryCheckoutLineUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
   }
 
   export type InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -105490,6 +109253,12 @@ export namespace Prisma {
     connect?: OrderWhereUniqueInput
   }
 
+  export type InventoryCheckoutCreateNestedOneWithoutHistoryInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutHistoryInput, InventoryCheckoutUncheckedCreateWithoutHistoryInput>
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutHistoryInput
+    connect?: InventoryCheckoutWhereUniqueInput
+  }
+
   export type UserCreateNestedOneWithoutInventoryHistoryInput = {
     create?: XOR<UserCreateWithoutInventoryHistoryInput, UserUncheckedCreateWithoutInventoryHistoryInput>
     connectOrCreate?: UserCreateOrConnectWithoutInventoryHistoryInput
@@ -105544,6 +109313,16 @@ export namespace Prisma {
     update?: XOR<XOR<OrderUpdateToOneWithWhereWithoutInventoryHistoryInput, OrderUpdateWithoutInventoryHistoryInput>, OrderUncheckedUpdateWithoutInventoryHistoryInput>
   }
 
+  export type InventoryCheckoutUpdateOneWithoutHistoryNestedInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutHistoryInput, InventoryCheckoutUncheckedCreateWithoutHistoryInput>
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutHistoryInput
+    upsert?: InventoryCheckoutUpsertWithoutHistoryInput
+    disconnect?: InventoryCheckoutWhereInput | boolean
+    delete?: InventoryCheckoutWhereInput | boolean
+    connect?: InventoryCheckoutWhereUniqueInput
+    update?: XOR<XOR<InventoryCheckoutUpdateToOneWithWhereWithoutHistoryInput, InventoryCheckoutUpdateWithoutHistoryInput>, InventoryCheckoutUncheckedUpdateWithoutHistoryInput>
+  }
+
   export type UserUpdateOneWithoutInventoryHistoryNestedInput = {
     create?: XOR<UserCreateWithoutInventoryHistoryInput, UserUncheckedCreateWithoutInventoryHistoryInput>
     connectOrCreate?: UserCreateOrConnectWithoutInventoryHistoryInput
@@ -105574,6 +109353,13 @@ export namespace Prisma {
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
   }
 
+  export type InventoryCheckoutLineCreateNestedManyWithoutItemInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutItemInput, InventoryCheckoutLineUncheckedCreateWithoutItemInput> | InventoryCheckoutLineCreateWithoutItemInput[] | InventoryCheckoutLineUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutItemInput | InventoryCheckoutLineCreateOrConnectWithoutItemInput[]
+    createMany?: InventoryCheckoutLineCreateManyItemInputEnvelope
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBaseInventoryUnitInput = {
     create?: XOR<ProductCreateWithoutBaseInventoryUnitInput, ProductUncheckedCreateWithoutBaseInventoryUnitInput> | ProductCreateWithoutBaseInventoryUnitInput[] | ProductUncheckedCreateWithoutBaseInventoryUnitInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBaseInventoryUnitInput | ProductCreateOrConnectWithoutBaseInventoryUnitInput[]
@@ -105586,6 +109372,13 @@ export namespace Prisma {
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutBaseInventoryUnitInput | InventoryHistoryCreateOrConnectWithoutBaseInventoryUnitInput[]
     createMany?: InventoryHistoryCreateManyBaseInventoryUnitInputEnvelope
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+  }
+
+  export type InventoryCheckoutLineUncheckedCreateNestedManyWithoutItemInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutItemInput, InventoryCheckoutLineUncheckedCreateWithoutItemInput> | InventoryCheckoutLineCreateWithoutItemInput[] | InventoryCheckoutLineUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutItemInput | InventoryCheckoutLineCreateOrConnectWithoutItemInput[]
+    createMany?: InventoryCheckoutLineCreateManyItemInputEnvelope
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
   }
 
   export type BusinessUpdateOneRequiredWithoutBaseInventoryUnitsNestedInput = {
@@ -105624,6 +109417,20 @@ export namespace Prisma {
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
   }
 
+  export type InventoryCheckoutLineUpdateManyWithoutItemNestedInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutItemInput, InventoryCheckoutLineUncheckedCreateWithoutItemInput> | InventoryCheckoutLineCreateWithoutItemInput[] | InventoryCheckoutLineUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutItemInput | InventoryCheckoutLineCreateOrConnectWithoutItemInput[]
+    upsert?: InventoryCheckoutLineUpsertWithWhereUniqueWithoutItemInput | InventoryCheckoutLineUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: InventoryCheckoutLineCreateManyItemInputEnvelope
+    set?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    disconnect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    delete?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    update?: InventoryCheckoutLineUpdateWithWhereUniqueWithoutItemInput | InventoryCheckoutLineUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: InventoryCheckoutLineUpdateManyWithWhereWithoutItemInput | InventoryCheckoutLineUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput = {
     create?: XOR<ProductCreateWithoutBaseInventoryUnitInput, ProductUncheckedCreateWithoutBaseInventoryUnitInput> | ProductCreateWithoutBaseInventoryUnitInput[] | ProductUncheckedCreateWithoutBaseInventoryUnitInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBaseInventoryUnitInput | ProductCreateOrConnectWithoutBaseInventoryUnitInput[]
@@ -105650,6 +109457,178 @@ export namespace Prisma {
     update?: InventoryHistoryUpdateWithWhereUniqueWithoutBaseInventoryUnitInput | InventoryHistoryUpdateWithWhereUniqueWithoutBaseInventoryUnitInput[]
     updateMany?: InventoryHistoryUpdateManyWithWhereWithoutBaseInventoryUnitInput | InventoryHistoryUpdateManyWithWhereWithoutBaseInventoryUnitInput[]
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateManyWithoutItemNestedInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutItemInput, InventoryCheckoutLineUncheckedCreateWithoutItemInput> | InventoryCheckoutLineCreateWithoutItemInput[] | InventoryCheckoutLineUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutItemInput | InventoryCheckoutLineCreateOrConnectWithoutItemInput[]
+    upsert?: InventoryCheckoutLineUpsertWithWhereUniqueWithoutItemInput | InventoryCheckoutLineUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: InventoryCheckoutLineCreateManyItemInputEnvelope
+    set?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    disconnect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    delete?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    update?: InventoryCheckoutLineUpdateWithWhereUniqueWithoutItemInput | InventoryCheckoutLineUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: InventoryCheckoutLineUpdateManyWithWhereWithoutItemInput | InventoryCheckoutLineUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
+  }
+
+  export type BusinessCreateNestedOneWithoutInventoryCheckoutsInput = {
+    create?: XOR<BusinessCreateWithoutInventoryCheckoutsInput, BusinessUncheckedCreateWithoutInventoryCheckoutsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryCheckoutsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutInventoryCheckoutsCreatedInput = {
+    create?: XOR<UserCreateWithoutInventoryCheckoutsCreatedInput, UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInventoryCheckoutsCreatedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type InventoryCheckoutLineCreateNestedManyWithoutCheckoutInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutCheckoutInput, InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput> | InventoryCheckoutLineCreateWithoutCheckoutInput[] | InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput | InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput[]
+    createMany?: InventoryCheckoutLineCreateManyCheckoutInputEnvelope
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+  }
+
+  export type InventoryHistoryCreateNestedManyWithoutCheckoutInput = {
+    create?: XOR<InventoryHistoryCreateWithoutCheckoutInput, InventoryHistoryUncheckedCreateWithoutCheckoutInput> | InventoryHistoryCreateWithoutCheckoutInput[] | InventoryHistoryUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryHistoryCreateOrConnectWithoutCheckoutInput | InventoryHistoryCreateOrConnectWithoutCheckoutInput[]
+    createMany?: InventoryHistoryCreateManyCheckoutInputEnvelope
+    connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+  }
+
+  export type InventoryCheckoutLineUncheckedCreateNestedManyWithoutCheckoutInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutCheckoutInput, InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput> | InventoryCheckoutLineCreateWithoutCheckoutInput[] | InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput | InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput[]
+    createMany?: InventoryCheckoutLineCreateManyCheckoutInputEnvelope
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+  }
+
+  export type InventoryHistoryUncheckedCreateNestedManyWithoutCheckoutInput = {
+    create?: XOR<InventoryHistoryCreateWithoutCheckoutInput, InventoryHistoryUncheckedCreateWithoutCheckoutInput> | InventoryHistoryCreateWithoutCheckoutInput[] | InventoryHistoryUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryHistoryCreateOrConnectWithoutCheckoutInput | InventoryHistoryCreateOrConnectWithoutCheckoutInput[]
+    createMany?: InventoryHistoryCreateManyCheckoutInputEnvelope
+    connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutInventoryCheckoutsNestedInput = {
+    create?: XOR<BusinessCreateWithoutInventoryCheckoutsInput, BusinessUncheckedCreateWithoutInventoryCheckoutsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryCheckoutsInput
+    upsert?: BusinessUpsertWithoutInventoryCheckoutsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutInventoryCheckoutsInput, BusinessUpdateWithoutInventoryCheckoutsInput>, BusinessUncheckedUpdateWithoutInventoryCheckoutsInput>
+  }
+
+  export type UserUpdateOneWithoutInventoryCheckoutsCreatedNestedInput = {
+    create?: XOR<UserCreateWithoutInventoryCheckoutsCreatedInput, UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInventoryCheckoutsCreatedInput
+    upsert?: UserUpsertWithoutInventoryCheckoutsCreatedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInventoryCheckoutsCreatedInput, UserUpdateWithoutInventoryCheckoutsCreatedInput>, UserUncheckedUpdateWithoutInventoryCheckoutsCreatedInput>
+  }
+
+  export type InventoryCheckoutLineUpdateManyWithoutCheckoutNestedInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutCheckoutInput, InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput> | InventoryCheckoutLineCreateWithoutCheckoutInput[] | InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput | InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput[]
+    upsert?: InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput | InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput[]
+    createMany?: InventoryCheckoutLineCreateManyCheckoutInputEnvelope
+    set?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    disconnect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    delete?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    update?: InventoryCheckoutLineUpdateWithWhereUniqueWithoutCheckoutInput | InventoryCheckoutLineUpdateWithWhereUniqueWithoutCheckoutInput[]
+    updateMany?: InventoryCheckoutLineUpdateManyWithWhereWithoutCheckoutInput | InventoryCheckoutLineUpdateManyWithWhereWithoutCheckoutInput[]
+    deleteMany?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
+  }
+
+  export type InventoryHistoryUpdateManyWithoutCheckoutNestedInput = {
+    create?: XOR<InventoryHistoryCreateWithoutCheckoutInput, InventoryHistoryUncheckedCreateWithoutCheckoutInput> | InventoryHistoryCreateWithoutCheckoutInput[] | InventoryHistoryUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryHistoryCreateOrConnectWithoutCheckoutInput | InventoryHistoryCreateOrConnectWithoutCheckoutInput[]
+    upsert?: InventoryHistoryUpsertWithWhereUniqueWithoutCheckoutInput | InventoryHistoryUpsertWithWhereUniqueWithoutCheckoutInput[]
+    createMany?: InventoryHistoryCreateManyCheckoutInputEnvelope
+    set?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    disconnect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    delete?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    update?: InventoryHistoryUpdateWithWhereUniqueWithoutCheckoutInput | InventoryHistoryUpdateWithWhereUniqueWithoutCheckoutInput[]
+    updateMany?: InventoryHistoryUpdateManyWithWhereWithoutCheckoutInput | InventoryHistoryUpdateManyWithWhereWithoutCheckoutInput[]
+    deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateManyWithoutCheckoutNestedInput = {
+    create?: XOR<InventoryCheckoutLineCreateWithoutCheckoutInput, InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput> | InventoryCheckoutLineCreateWithoutCheckoutInput[] | InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput | InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput[]
+    upsert?: InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput | InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput[]
+    createMany?: InventoryCheckoutLineCreateManyCheckoutInputEnvelope
+    set?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    disconnect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    delete?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    connect?: InventoryCheckoutLineWhereUniqueInput | InventoryCheckoutLineWhereUniqueInput[]
+    update?: InventoryCheckoutLineUpdateWithWhereUniqueWithoutCheckoutInput | InventoryCheckoutLineUpdateWithWhereUniqueWithoutCheckoutInput[]
+    updateMany?: InventoryCheckoutLineUpdateManyWithWhereWithoutCheckoutInput | InventoryCheckoutLineUpdateManyWithWhereWithoutCheckoutInput[]
+    deleteMany?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
+  }
+
+  export type InventoryHistoryUncheckedUpdateManyWithoutCheckoutNestedInput = {
+    create?: XOR<InventoryHistoryCreateWithoutCheckoutInput, InventoryHistoryUncheckedCreateWithoutCheckoutInput> | InventoryHistoryCreateWithoutCheckoutInput[] | InventoryHistoryUncheckedCreateWithoutCheckoutInput[]
+    connectOrCreate?: InventoryHistoryCreateOrConnectWithoutCheckoutInput | InventoryHistoryCreateOrConnectWithoutCheckoutInput[]
+    upsert?: InventoryHistoryUpsertWithWhereUniqueWithoutCheckoutInput | InventoryHistoryUpsertWithWhereUniqueWithoutCheckoutInput[]
+    createMany?: InventoryHistoryCreateManyCheckoutInputEnvelope
+    set?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    disconnect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    delete?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+    update?: InventoryHistoryUpdateWithWhereUniqueWithoutCheckoutInput | InventoryHistoryUpdateWithWhereUniqueWithoutCheckoutInput[]
+    updateMany?: InventoryHistoryUpdateManyWithWhereWithoutCheckoutInput | InventoryHistoryUpdateManyWithWhereWithoutCheckoutInput[]
+    deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
+  }
+
+  export type InventoryCheckoutCreateNestedOneWithoutLinesInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutLinesInput, InventoryCheckoutUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutLinesInput
+    connect?: InventoryCheckoutWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutInventoryCheckoutLinesInput = {
+    create?: XOR<BusinessCreateWithoutInventoryCheckoutLinesInput, BusinessUncheckedCreateWithoutInventoryCheckoutLinesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryCheckoutLinesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type BaseInventoryUnitCreateNestedOneWithoutCheckoutLinesInput = {
+    create?: XOR<BaseInventoryUnitCreateWithoutCheckoutLinesInput, BaseInventoryUnitUncheckedCreateWithoutCheckoutLinesInput>
+    connectOrCreate?: BaseInventoryUnitCreateOrConnectWithoutCheckoutLinesInput
+    connect?: BaseInventoryUnitWhereUniqueInput
+  }
+
+  export type InventoryCheckoutUpdateOneRequiredWithoutLinesNestedInput = {
+    create?: XOR<InventoryCheckoutCreateWithoutLinesInput, InventoryCheckoutUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: InventoryCheckoutCreateOrConnectWithoutLinesInput
+    upsert?: InventoryCheckoutUpsertWithoutLinesInput
+    connect?: InventoryCheckoutWhereUniqueInput
+    update?: XOR<XOR<InventoryCheckoutUpdateToOneWithWhereWithoutLinesInput, InventoryCheckoutUpdateWithoutLinesInput>, InventoryCheckoutUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type BusinessUpdateOneRequiredWithoutInventoryCheckoutLinesNestedInput = {
+    create?: XOR<BusinessCreateWithoutInventoryCheckoutLinesInput, BusinessUncheckedCreateWithoutInventoryCheckoutLinesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryCheckoutLinesInput
+    upsert?: BusinessUpsertWithoutInventoryCheckoutLinesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutInventoryCheckoutLinesInput, BusinessUpdateWithoutInventoryCheckoutLinesInput>, BusinessUncheckedUpdateWithoutInventoryCheckoutLinesInput>
+  }
+
+  export type BaseInventoryUnitUpdateOneWithoutCheckoutLinesNestedInput = {
+    create?: XOR<BaseInventoryUnitCreateWithoutCheckoutLinesInput, BaseInventoryUnitUncheckedCreateWithoutCheckoutLinesInput>
+    connectOrCreate?: BaseInventoryUnitCreateOrConnectWithoutCheckoutLinesInput
+    upsert?: BaseInventoryUnitUpsertWithoutCheckoutLinesInput
+    disconnect?: BaseInventoryUnitWhereInput | boolean
+    delete?: BaseInventoryUnitWhereInput | boolean
+    connect?: BaseInventoryUnitWhereUniqueInput
+    update?: XOR<XOR<BaseInventoryUnitUpdateToOneWithWhereWithoutCheckoutLinesInput, BaseInventoryUnitUpdateWithoutCheckoutLinesInput>, BaseInventoryUnitUncheckedUpdateWithoutCheckoutLinesInput>
   }
 
   export type BusinessCreateNestedOneWithoutInventoryReservationsInput = {
@@ -107354,6 +111333,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutInventoryHistoryInput
     business: BusinessCreateNestedOneWithoutInventoryHistoryInput
     order?: OrderCreateNestedOneWithoutInventoryHistoryInput
+    checkout?: InventoryCheckoutCreateNestedOneWithoutHistoryInput
   }
 
   export type InventoryHistoryUncheckedCreateWithoutUserInput = {
@@ -107369,6 +111349,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
   }
 
   export type InventoryHistoryCreateOrConnectWithoutUserInput = {
@@ -107378,6 +111359,48 @@ export namespace Prisma {
 
   export type InventoryHistoryCreateManyUserInputEnvelope = {
     data: InventoryHistoryCreateManyUserInput | InventoryHistoryCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryCheckoutCreateWithoutCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutInventoryCheckoutsInput
+    lines?: InventoryCheckoutLineCreateNestedManyWithoutCheckoutInput
+    history?: InventoryHistoryCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutUncheckedCreateWithoutCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    lines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutCheckoutInput
+    history?: InventoryHistoryUncheckedCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutCreateOrConnectWithoutCreatedByInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    create: XOR<InventoryCheckoutCreateWithoutCreatedByInput, InventoryCheckoutUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type InventoryCheckoutCreateManyCreatedByInputEnvelope = {
+    data: InventoryCheckoutCreateManyCreatedByInput | InventoryCheckoutCreateManyCreatedByInput[]
     skipDuplicates?: boolean
   }
 
@@ -107625,7 +111648,42 @@ export namespace Prisma {
     reason?: StringFilter<"InventoryHistory"> | string
     note?: StringNullableFilter<"InventoryHistory"> | string | null
     orderId?: StringNullableFilter<"InventoryHistory"> | string | null
+    checkoutId?: StringNullableFilter<"InventoryHistory"> | string | null
     userId?: StringNullableFilter<"InventoryHistory"> | string | null
+  }
+
+  export type InventoryCheckoutUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    update: XOR<InventoryCheckoutUpdateWithoutCreatedByInput, InventoryCheckoutUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<InventoryCheckoutCreateWithoutCreatedByInput, InventoryCheckoutUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type InventoryCheckoutUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    data: XOR<InventoryCheckoutUpdateWithoutCreatedByInput, InventoryCheckoutUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type InventoryCheckoutUpdateManyWithWhereWithoutCreatedByInput = {
+    where: InventoryCheckoutScalarWhereInput
+    data: XOR<InventoryCheckoutUpdateManyMutationInput, InventoryCheckoutUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type InventoryCheckoutScalarWhereInput = {
+    AND?: InventoryCheckoutScalarWhereInput | InventoryCheckoutScalarWhereInput[]
+    OR?: InventoryCheckoutScalarWhereInput[]
+    NOT?: InventoryCheckoutScalarWhereInput | InventoryCheckoutScalarWhereInput[]
+    id?: StringFilter<"InventoryCheckout"> | string
+    createdAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    businessId?: StringFilter<"InventoryCheckout"> | string
+    label?: StringFilter<"InventoryCheckout"> | string
+    customerName?: StringNullableFilter<"InventoryCheckout"> | string | null
+    notes?: StringNullableFilter<"InventoryCheckout"> | string | null
+    status?: StringFilter<"InventoryCheckout"> | string
+    checkedOutAt?: DateTimeFilter<"InventoryCheckout"> | Date | string
+    dueBackOn?: DateTimeNullableFilter<"InventoryCheckout"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"InventoryCheckout"> | Date | string | null
+    createdById?: StringNullableFilter<"InventoryCheckout"> | string | null
   }
 
   export type PlatformInviteUpsertWithWhereUniqueWithoutCreatorInput = {
@@ -107709,6 +111767,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
@@ -107728,6 +111787,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -107809,6 +111869,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -107911,6 +111973,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -107972,6 +112036,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
@@ -107991,6 +112056,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
@@ -108078,6 +112144,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -108180,6 +112248,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -108225,6 +112295,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
@@ -108244,6 +112315,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -108279,6 +112351,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
@@ -108298,6 +112371,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
@@ -108317,6 +112391,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
@@ -108336,6 +112411,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -108371,6 +112447,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
@@ -108390,6 +112467,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
@@ -108925,6 +113003,7 @@ export namespace Prisma {
     product?: ProductCreateNestedOneWithoutInventoryHistoryInput
     baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutInventoryHistoryInput
     order?: OrderCreateNestedOneWithoutInventoryHistoryInput
+    checkout?: InventoryCheckoutCreateNestedOneWithoutHistoryInput
     user?: UserCreateNestedOneWithoutInventoryHistoryInput
   }
 
@@ -108940,6 +113019,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -108965,8 +113045,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     products?: ProductCreateNestedManyWithoutBaseInventoryUnitInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitUncheckedCreateWithoutBusinessInput = {
@@ -108981,8 +113067,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     products?: ProductUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitCreateOrConnectWithoutBusinessInput = {
@@ -108992,6 +113084,84 @@ export namespace Prisma {
 
   export type BaseInventoryUnitCreateManyBusinessInputEnvelope = {
     data: BaseInventoryUnitCreateManyBusinessInput | BaseInventoryUnitCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryCheckoutCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    createdBy?: UserCreateNestedOneWithoutInventoryCheckoutsCreatedInput
+    lines?: InventoryCheckoutLineCreateNestedManyWithoutCheckoutInput
+    history?: InventoryHistoryCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    createdById?: string | null
+    lines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutCheckoutInput
+    history?: InventoryHistoryUncheckedCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutCreateOrConnectWithoutBusinessInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    create: XOR<InventoryCheckoutCreateWithoutBusinessInput, InventoryCheckoutUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutCreateManyBusinessInputEnvelope = {
+    data: InventoryCheckoutCreateManyBusinessInput | InventoryCheckoutCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryCheckoutLineCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+    checkout: InventoryCheckoutCreateNestedOneWithoutLinesInput
+    item?: BaseInventoryUnitCreateNestedOneWithoutCheckoutLinesInput
+  }
+
+  export type InventoryCheckoutLineUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checkoutId: string
+    itemId?: string | null
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+  }
+
+  export type InventoryCheckoutLineCreateOrConnectWithoutBusinessInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    create: XOR<InventoryCheckoutLineCreateWithoutBusinessInput, InventoryCheckoutLineUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutLineCreateManyBusinessInputEnvelope = {
+    data: InventoryCheckoutLineCreateManyBusinessInput | InventoryCheckoutLineCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -110689,7 +114859,61 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     allowBackorders?: BoolFilter<"BaseInventoryUnit"> | boolean
+    itemType?: StringFilter<"BaseInventoryUnit"> | string
+    sku?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    category?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    storageLocation?: StringNullableFilter<"BaseInventoryUnit"> | string | null
+    unitCostCents?: IntNullableFilter<"BaseInventoryUnit"> | number | null
     businessId?: StringFilter<"BaseInventoryUnit"> | string
+  }
+
+  export type InventoryCheckoutUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    update: XOR<InventoryCheckoutUpdateWithoutBusinessInput, InventoryCheckoutUncheckedUpdateWithoutBusinessInput>
+    create: XOR<InventoryCheckoutCreateWithoutBusinessInput, InventoryCheckoutUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    data: XOR<InventoryCheckoutUpdateWithoutBusinessInput, InventoryCheckoutUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutUpdateManyWithWhereWithoutBusinessInput = {
+    where: InventoryCheckoutScalarWhereInput
+    data: XOR<InventoryCheckoutUpdateManyMutationInput, InventoryCheckoutUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutLineUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    update: XOR<InventoryCheckoutLineUpdateWithoutBusinessInput, InventoryCheckoutLineUncheckedUpdateWithoutBusinessInput>
+    create: XOR<InventoryCheckoutLineCreateWithoutBusinessInput, InventoryCheckoutLineUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutLineUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    data: XOR<InventoryCheckoutLineUpdateWithoutBusinessInput, InventoryCheckoutLineUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutLineUpdateManyWithWhereWithoutBusinessInput = {
+    where: InventoryCheckoutLineScalarWhereInput
+    data: XOR<InventoryCheckoutLineUpdateManyMutationInput, InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type InventoryCheckoutLineScalarWhereInput = {
+    AND?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
+    OR?: InventoryCheckoutLineScalarWhereInput[]
+    NOT?: InventoryCheckoutLineScalarWhereInput | InventoryCheckoutLineScalarWhereInput[]
+    id?: StringFilter<"InventoryCheckoutLine"> | string
+    createdAt?: DateTimeFilter<"InventoryCheckoutLine"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryCheckoutLine"> | Date | string
+    checkoutId?: StringFilter<"InventoryCheckoutLine"> | string
+    businessId?: StringFilter<"InventoryCheckoutLine"> | string
+    itemId?: StringNullableFilter<"InventoryCheckoutLine"> | string | null
+    itemName?: StringFilter<"InventoryCheckoutLine"> | string
+    qtyOut?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyReturned?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyDamaged?: IntFilter<"InventoryCheckoutLine"> | number
+    qtyLost?: IntFilter<"InventoryCheckoutLine"> | number
   }
 
   export type InventoryReservationUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -111831,6 +116055,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -111933,6 +116159,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -112051,6 +116279,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -112153,6 +116383,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -112256,6 +116488,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -112358,6 +116592,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -112476,6 +116712,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -112578,6 +116816,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -112620,8 +116860,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     business: BusinessCreateNestedOneWithoutBaseInventoryUnitsInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitUncheckedCreateWithoutProductsInput = {
@@ -112636,8 +116882,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     businessId: string
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitCreateOrConnectWithoutProductsInput = {
@@ -112716,6 +116968,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -112818,6 +117072,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -113002,6 +117258,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutInventoryHistoryInput
     business: BusinessCreateNestedOneWithoutInventoryHistoryInput
     order?: OrderCreateNestedOneWithoutInventoryHistoryInput
+    checkout?: InventoryCheckoutCreateNestedOneWithoutHistoryInput
     user?: UserCreateNestedOneWithoutInventoryHistoryInput
   }
 
@@ -113017,6 +117274,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -113249,8 +117507,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     business?: BusinessUpdateOneRequiredWithoutBaseInventoryUnitsNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUpdateManyWithoutItemNestedInput
   }
 
   export type BaseInventoryUnitUncheckedUpdateWithoutProductsInput = {
@@ -113265,8 +117529,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     businessId?: StringFieldUpdateOperationsInput | string
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type BusinessUpsertWithoutProductsInput = {
@@ -113351,6 +117621,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -113453,6 +117725,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -113798,6 +118072,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutInventoryHistoryInput
     business: BusinessCreateNestedOneWithoutInventoryHistoryInput
     order?: OrderCreateNestedOneWithoutInventoryHistoryInput
+    checkout?: InventoryCheckoutCreateNestedOneWithoutHistoryInput
     user?: UserCreateNestedOneWithoutInventoryHistoryInput
   }
 
@@ -113813,6 +118088,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -114198,6 +118474,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -114300,6 +118578,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -114440,6 +118720,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -114542,6 +118824,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -114952,6 +119236,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -115054,6 +119340,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -115224,6 +119512,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -115326,6 +119616,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -115562,6 +119854,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -115664,6 +119958,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -115782,6 +120078,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -115884,6 +120182,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -115986,6 +120286,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -116088,6 +120390,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -116254,6 +120558,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -116356,6 +120662,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -116509,6 +120817,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -116611,6 +120921,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -116770,6 +121082,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -116872,6 +121186,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -117074,6 +121390,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -117176,6 +121494,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -117401,6 +121721,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -117503,6 +121825,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -117549,6 +121873,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
@@ -117568,6 +121893,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -117648,6 +121974,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -117750,6 +122078,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -118340,6 +122670,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
@@ -118359,6 +122690,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
@@ -118445,6 +122777,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -118547,6 +122881,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -119273,6 +123609,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -119375,6 +123713,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -119612,6 +123952,7 @@ export namespace Prisma {
     product?: ProductCreateNestedOneWithoutInventoryHistoryInput
     baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutInventoryHistoryInput
     business: BusinessCreateNestedOneWithoutInventoryHistoryInput
+    checkout?: InventoryCheckoutCreateNestedOneWithoutHistoryInput
     user?: UserCreateNestedOneWithoutInventoryHistoryInput
   }
 
@@ -119627,6 +123968,7 @@ export namespace Prisma {
     changeQty: number
     reason: string
     note?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -119961,6 +124303,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -120063,6 +124407,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -121086,6 +125432,8 @@ export namespace Prisma {
     images?: ImageCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -121188,6 +125536,8 @@ export namespace Prisma {
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -121433,6 +125783,8 @@ export namespace Prisma {
     images?: ImageUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -121535,6 +125887,8 @@ export namespace Prisma {
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -121777,8 +126131,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     business: BusinessCreateNestedOneWithoutBaseInventoryUnitsInput
     products?: ProductCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitUncheckedCreateWithoutInventoryHistoryInput = {
@@ -121793,8 +126153,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
     businessId: string
     products?: ProductUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
+    checkoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type BaseInventoryUnitCreateOrConnectWithoutInventoryHistoryInput = {
@@ -121873,6 +126239,8 @@ export namespace Prisma {
     images?: ImageCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -121975,6 +126343,8 @@ export namespace Prisma {
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -122098,6 +126468,43 @@ export namespace Prisma {
     create: XOR<OrderCreateWithoutInventoryHistoryInput, OrderUncheckedCreateWithoutInventoryHistoryInput>
   }
 
+  export type InventoryCheckoutCreateWithoutHistoryInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutInventoryCheckoutsInput
+    createdBy?: UserCreateNestedOneWithoutInventoryCheckoutsCreatedInput
+    lines?: InventoryCheckoutLineCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutUncheckedCreateWithoutHistoryInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    createdById?: string | null
+    lines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutCreateOrConnectWithoutHistoryInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    create: XOR<InventoryCheckoutCreateWithoutHistoryInput, InventoryCheckoutUncheckedCreateWithoutHistoryInput>
+  }
+
   export type UserCreateWithoutInventoryHistoryInput = {
     id?: string
     name: string
@@ -122113,6 +126520,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
@@ -122132,6 +126540,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -122318,8 +126727,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     business?: BusinessUpdateOneRequiredWithoutBaseInventoryUnitsNestedInput
     products?: ProductUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUpdateManyWithoutItemNestedInput
   }
 
   export type BaseInventoryUnitUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -122334,8 +126749,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     businessId?: StringFieldUpdateOperationsInput | string
     products?: ProductUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type BusinessUpsertWithoutInventoryHistoryInput = {
@@ -122420,6 +126841,8 @@ export namespace Prisma {
     images?: ImageUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -122522,6 +126945,8 @@ export namespace Prisma {
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -122646,6 +127071,49 @@ export namespace Prisma {
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
+  export type InventoryCheckoutUpsertWithoutHistoryInput = {
+    update: XOR<InventoryCheckoutUpdateWithoutHistoryInput, InventoryCheckoutUncheckedUpdateWithoutHistoryInput>
+    create: XOR<InventoryCheckoutCreateWithoutHistoryInput, InventoryCheckoutUncheckedCreateWithoutHistoryInput>
+    where?: InventoryCheckoutWhereInput
+  }
+
+  export type InventoryCheckoutUpdateToOneWithWhereWithoutHistoryInput = {
+    where?: InventoryCheckoutWhereInput
+    data: XOR<InventoryCheckoutUpdateWithoutHistoryInput, InventoryCheckoutUncheckedUpdateWithoutHistoryInput>
+  }
+
+  export type InventoryCheckoutUpdateWithoutHistoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutInventoryCheckoutsNestedInput
+    createdBy?: UserUpdateOneWithoutInventoryCheckoutsCreatedNestedInput
+    lines?: InventoryCheckoutLineUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutUncheckedUpdateWithoutHistoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lines?: InventoryCheckoutLineUncheckedUpdateManyWithoutCheckoutNestedInput
+  }
+
   export type UserUpsertWithoutInventoryHistoryInput = {
     update: XOR<UserUpdateWithoutInventoryHistoryInput, UserUncheckedUpdateWithoutInventoryHistoryInput>
     create: XOR<UserCreateWithoutInventoryHistoryInput, UserUncheckedCreateWithoutInventoryHistoryInput>
@@ -122672,6 +127140,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
@@ -122691,6 +127160,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
@@ -122766,6 +127236,8 @@ export namespace Prisma {
     images?: ImageCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -122868,6 +127340,8 @@ export namespace Prisma {
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -123022,6 +127496,7 @@ export namespace Prisma {
     product?: ProductCreateNestedOneWithoutInventoryHistoryInput
     business: BusinessCreateNestedOneWithoutInventoryHistoryInput
     order?: OrderCreateNestedOneWithoutInventoryHistoryInput
+    checkout?: InventoryCheckoutCreateNestedOneWithoutHistoryInput
     user?: UserCreateNestedOneWithoutInventoryHistoryInput
   }
 
@@ -123037,6 +127512,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -123047,6 +127523,42 @@ export namespace Prisma {
 
   export type InventoryHistoryCreateManyBaseInventoryUnitInputEnvelope = {
     data: InventoryHistoryCreateManyBaseInventoryUnitInput | InventoryHistoryCreateManyBaseInventoryUnitInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryCheckoutLineCreateWithoutItemInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+    checkout: InventoryCheckoutCreateNestedOneWithoutLinesInput
+    business: BusinessCreateNestedOneWithoutInventoryCheckoutLinesInput
+  }
+
+  export type InventoryCheckoutLineUncheckedCreateWithoutItemInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checkoutId: string
+    businessId: string
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+  }
+
+  export type InventoryCheckoutLineCreateOrConnectWithoutItemInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    create: XOR<InventoryCheckoutLineCreateWithoutItemInput, InventoryCheckoutLineUncheckedCreateWithoutItemInput>
+  }
+
+  export type InventoryCheckoutLineCreateManyItemInputEnvelope = {
+    data: InventoryCheckoutLineCreateManyItemInput | InventoryCheckoutLineCreateManyItemInput[]
     skipDuplicates?: boolean
   }
 
@@ -123132,6 +127644,8 @@ export namespace Prisma {
     images?: ImageUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -123234,6 +127748,8 @@ export namespace Prisma {
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -123295,6 +127811,1276 @@ export namespace Prisma {
   export type InventoryHistoryUpdateManyWithWhereWithoutBaseInventoryUnitInput = {
     where: InventoryHistoryScalarWhereInput
     data: XOR<InventoryHistoryUpdateManyMutationInput, InventoryHistoryUncheckedUpdateManyWithoutBaseInventoryUnitInput>
+  }
+
+  export type InventoryCheckoutLineUpsertWithWhereUniqueWithoutItemInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    update: XOR<InventoryCheckoutLineUpdateWithoutItemInput, InventoryCheckoutLineUncheckedUpdateWithoutItemInput>
+    create: XOR<InventoryCheckoutLineCreateWithoutItemInput, InventoryCheckoutLineUncheckedCreateWithoutItemInput>
+  }
+
+  export type InventoryCheckoutLineUpdateWithWhereUniqueWithoutItemInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    data: XOR<InventoryCheckoutLineUpdateWithoutItemInput, InventoryCheckoutLineUncheckedUpdateWithoutItemInput>
+  }
+
+  export type InventoryCheckoutLineUpdateManyWithWhereWithoutItemInput = {
+    where: InventoryCheckoutLineScalarWhereInput
+    data: XOR<InventoryCheckoutLineUpdateManyMutationInput, InventoryCheckoutLineUncheckedUpdateManyWithoutItemInput>
+  }
+
+  export type BusinessCreateWithoutInventoryCheckoutsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutInventoryCheckoutsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutInventoryCheckoutsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutInventoryCheckoutsInput, BusinessUncheckedCreateWithoutInventoryCheckoutsInput>
+  }
+
+  export type UserCreateWithoutInventoryCheckoutsCreatedInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserCreateOrConnectWithoutInventoryCheckoutsCreatedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutInventoryCheckoutsCreatedInput, UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput>
+  }
+
+  export type InventoryCheckoutLineCreateWithoutCheckoutInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+    business: BusinessCreateNestedOneWithoutInventoryCheckoutLinesInput
+    item?: BaseInventoryUnitCreateNestedOneWithoutCheckoutLinesInput
+  }
+
+  export type InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    itemId?: string | null
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+  }
+
+  export type InventoryCheckoutLineCreateOrConnectWithoutCheckoutInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    create: XOR<InventoryCheckoutLineCreateWithoutCheckoutInput, InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput>
+  }
+
+  export type InventoryCheckoutLineCreateManyCheckoutInputEnvelope = {
+    data: InventoryCheckoutLineCreateManyCheckoutInput | InventoryCheckoutLineCreateManyCheckoutInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryHistoryCreateWithoutCheckoutInput = {
+    id?: string
+    createdAt?: Date | string
+    previousQty: number
+    newQty: number
+    changeQty: number
+    reason: string
+    note?: string | null
+    variant?: ProductVariantCreateNestedOneWithoutInventoryHistoryInput
+    product?: ProductCreateNestedOneWithoutInventoryHistoryInput
+    baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutInventoryHistoryInput
+    business: BusinessCreateNestedOneWithoutInventoryHistoryInput
+    order?: OrderCreateNestedOneWithoutInventoryHistoryInput
+    user?: UserCreateNestedOneWithoutInventoryHistoryInput
+  }
+
+  export type InventoryHistoryUncheckedCreateWithoutCheckoutInput = {
+    id?: string
+    createdAt?: Date | string
+    variantId?: string | null
+    productId?: string | null
+    baseInventoryUnitId?: string | null
+    businessId: string
+    previousQty: number
+    newQty: number
+    changeQty: number
+    reason: string
+    note?: string | null
+    orderId?: string | null
+    userId?: string | null
+  }
+
+  export type InventoryHistoryCreateOrConnectWithoutCheckoutInput = {
+    where: InventoryHistoryWhereUniqueInput
+    create: XOR<InventoryHistoryCreateWithoutCheckoutInput, InventoryHistoryUncheckedCreateWithoutCheckoutInput>
+  }
+
+  export type InventoryHistoryCreateManyCheckoutInputEnvelope = {
+    data: InventoryHistoryCreateManyCheckoutInput | InventoryHistoryCreateManyCheckoutInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutInventoryCheckoutsInput = {
+    update: XOR<BusinessUpdateWithoutInventoryCheckoutsInput, BusinessUncheckedUpdateWithoutInventoryCheckoutsInput>
+    create: XOR<BusinessCreateWithoutInventoryCheckoutsInput, BusinessUncheckedCreateWithoutInventoryCheckoutsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutInventoryCheckoutsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutInventoryCheckoutsInput, BusinessUncheckedUpdateWithoutInventoryCheckoutsInput>
+  }
+
+  export type BusinessUpdateWithoutInventoryCheckoutsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutInventoryCheckoutsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type UserUpsertWithoutInventoryCheckoutsCreatedInput = {
+    update: XOR<UserUpdateWithoutInventoryCheckoutsCreatedInput, UserUncheckedUpdateWithoutInventoryCheckoutsCreatedInput>
+    create: XOR<UserCreateWithoutInventoryCheckoutsCreatedInput, UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutInventoryCheckoutsCreatedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutInventoryCheckoutsCreatedInput, UserUncheckedUpdateWithoutInventoryCheckoutsCreatedInput>
+  }
+
+  export type UserUpdateWithoutInventoryCheckoutsCreatedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutInventoryCheckoutsCreatedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    update: XOR<InventoryCheckoutLineUpdateWithoutCheckoutInput, InventoryCheckoutLineUncheckedUpdateWithoutCheckoutInput>
+    create: XOR<InventoryCheckoutLineCreateWithoutCheckoutInput, InventoryCheckoutLineUncheckedCreateWithoutCheckoutInput>
+  }
+
+  export type InventoryCheckoutLineUpdateWithWhereUniqueWithoutCheckoutInput = {
+    where: InventoryCheckoutLineWhereUniqueInput
+    data: XOR<InventoryCheckoutLineUpdateWithoutCheckoutInput, InventoryCheckoutLineUncheckedUpdateWithoutCheckoutInput>
+  }
+
+  export type InventoryCheckoutLineUpdateManyWithWhereWithoutCheckoutInput = {
+    where: InventoryCheckoutLineScalarWhereInput
+    data: XOR<InventoryCheckoutLineUpdateManyMutationInput, InventoryCheckoutLineUncheckedUpdateManyWithoutCheckoutInput>
+  }
+
+  export type InventoryHistoryUpsertWithWhereUniqueWithoutCheckoutInput = {
+    where: InventoryHistoryWhereUniqueInput
+    update: XOR<InventoryHistoryUpdateWithoutCheckoutInput, InventoryHistoryUncheckedUpdateWithoutCheckoutInput>
+    create: XOR<InventoryHistoryCreateWithoutCheckoutInput, InventoryHistoryUncheckedCreateWithoutCheckoutInput>
+  }
+
+  export type InventoryHistoryUpdateWithWhereUniqueWithoutCheckoutInput = {
+    where: InventoryHistoryWhereUniqueInput
+    data: XOR<InventoryHistoryUpdateWithoutCheckoutInput, InventoryHistoryUncheckedUpdateWithoutCheckoutInput>
+  }
+
+  export type InventoryHistoryUpdateManyWithWhereWithoutCheckoutInput = {
+    where: InventoryHistoryScalarWhereInput
+    data: XOR<InventoryHistoryUpdateManyMutationInput, InventoryHistoryUncheckedUpdateManyWithoutCheckoutInput>
+  }
+
+  export type InventoryCheckoutCreateWithoutLinesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutInventoryCheckoutsInput
+    createdBy?: UserCreateNestedOneWithoutInventoryCheckoutsCreatedInput
+    history?: InventoryHistoryCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutUncheckedCreateWithoutLinesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    createdById?: string | null
+    history?: InventoryHistoryUncheckedCreateNestedManyWithoutCheckoutInput
+  }
+
+  export type InventoryCheckoutCreateOrConnectWithoutLinesInput = {
+    where: InventoryCheckoutWhereUniqueInput
+    create: XOR<InventoryCheckoutCreateWithoutLinesInput, InventoryCheckoutUncheckedCreateWithoutLinesInput>
+  }
+
+  export type BusinessCreateWithoutInventoryCheckoutLinesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutInventoryCheckoutLinesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutInventoryCheckoutLinesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutInventoryCheckoutLinesInput, BusinessUncheckedCreateWithoutInventoryCheckoutLinesInput>
+  }
+
+  export type BaseInventoryUnitCreateWithoutCheckoutLinesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    inventoryQty?: number
+    reservedQty?: number
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
+    business: BusinessCreateNestedOneWithoutBaseInventoryUnitsInput
+    products?: ProductCreateNestedManyWithoutBaseInventoryUnitInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBaseInventoryUnitInput
+  }
+
+  export type BaseInventoryUnitUncheckedCreateWithoutCheckoutLinesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    inventoryQty?: number
+    reservedQty?: number
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
+    businessId: string
+    products?: ProductUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBaseInventoryUnitInput
+  }
+
+  export type BaseInventoryUnitCreateOrConnectWithoutCheckoutLinesInput = {
+    where: BaseInventoryUnitWhereUniqueInput
+    create: XOR<BaseInventoryUnitCreateWithoutCheckoutLinesInput, BaseInventoryUnitUncheckedCreateWithoutCheckoutLinesInput>
+  }
+
+  export type InventoryCheckoutUpsertWithoutLinesInput = {
+    update: XOR<InventoryCheckoutUpdateWithoutLinesInput, InventoryCheckoutUncheckedUpdateWithoutLinesInput>
+    create: XOR<InventoryCheckoutCreateWithoutLinesInput, InventoryCheckoutUncheckedCreateWithoutLinesInput>
+    where?: InventoryCheckoutWhereInput
+  }
+
+  export type InventoryCheckoutUpdateToOneWithWhereWithoutLinesInput = {
+    where?: InventoryCheckoutWhereInput
+    data: XOR<InventoryCheckoutUpdateWithoutLinesInput, InventoryCheckoutUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type InventoryCheckoutUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutInventoryCheckoutsNestedInput
+    createdBy?: UserUpdateOneWithoutInventoryCheckoutsCreatedNestedInput
+    history?: InventoryHistoryUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutUncheckedUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    history?: InventoryHistoryUncheckedUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type BusinessUpsertWithoutInventoryCheckoutLinesInput = {
+    update: XOR<BusinessUpdateWithoutInventoryCheckoutLinesInput, BusinessUncheckedUpdateWithoutInventoryCheckoutLinesInput>
+    create: XOR<BusinessCreateWithoutInventoryCheckoutLinesInput, BusinessUncheckedCreateWithoutInventoryCheckoutLinesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutInventoryCheckoutLinesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutInventoryCheckoutLinesInput, BusinessUncheckedUpdateWithoutInventoryCheckoutLinesInput>
+  }
+
+  export type BusinessUpdateWithoutInventoryCheckoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutInventoryCheckoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BaseInventoryUnitUpsertWithoutCheckoutLinesInput = {
+    update: XOR<BaseInventoryUnitUpdateWithoutCheckoutLinesInput, BaseInventoryUnitUncheckedUpdateWithoutCheckoutLinesInput>
+    create: XOR<BaseInventoryUnitCreateWithoutCheckoutLinesInput, BaseInventoryUnitUncheckedCreateWithoutCheckoutLinesInput>
+    where?: BaseInventoryUnitWhereInput
+  }
+
+  export type BaseInventoryUnitUpdateToOneWithWhereWithoutCheckoutLinesInput = {
+    where?: BaseInventoryUnitWhereInput
+    data: XOR<BaseInventoryUnitUpdateWithoutCheckoutLinesInput, BaseInventoryUnitUncheckedUpdateWithoutCheckoutLinesInput>
+  }
+
+  export type BaseInventoryUnitUpdateWithoutCheckoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
+    business?: BusinessUpdateOneRequiredWithoutBaseInventoryUnitsNestedInput
+    products?: ProductUpdateManyWithoutBaseInventoryUnitNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBaseInventoryUnitNestedInput
+  }
+
+  export type BaseInventoryUnitUncheckedUpdateWithoutCheckoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    products?: ProductUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
   }
 
   export type BusinessCreateWithoutInventoryReservationsInput = {
@@ -123369,6 +129155,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
@@ -123471,6 +129259,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
@@ -123589,6 +129379,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
@@ -123691,6 +129483,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
@@ -123793,6 +129587,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
@@ -123895,6 +129691,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
@@ -124013,6 +129811,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
@@ -124115,6 +129915,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
@@ -124217,6 +130019,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
@@ -124319,6 +130123,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
@@ -124370,6 +130176,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
   }
 
@@ -124389,6 +130196,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
   }
 
@@ -124480,6 +130288,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
@@ -124582,6 +130392,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
@@ -124639,6 +130451,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
   }
 
@@ -124658,6 +130471,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
   }
 
@@ -124733,6 +130547,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -124835,6 +130651,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -124953,6 +130771,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -125055,6 +130875,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -125157,6 +130979,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -125259,6 +131083,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -125409,6 +131235,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -125511,6 +131339,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -125728,6 +131558,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -125830,6 +131662,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -126013,6 +131847,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -126115,6 +131951,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -126288,6 +132126,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -126390,6 +132230,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -126573,6 +132415,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -126675,6 +132519,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -127538,6 +133384,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -127640,6 +133488,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -127691,6 +133541,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
@@ -127710,6 +133561,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
@@ -127801,6 +133653,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -127903,6 +133757,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -127960,6 +133816,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
@@ -127979,6 +133836,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
@@ -128054,6 +133912,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -128156,6 +134016,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -128274,6 +134136,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -128376,6 +134240,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -128478,6 +134344,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -128580,6 +134448,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -128720,6 +134590,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -128822,6 +134694,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -129099,6 +134973,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -129201,6 +135077,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -129426,6 +135304,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -129528,6 +135408,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -129630,6 +135512,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -129732,6 +135616,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -129902,6 +135788,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -130004,6 +135892,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -130211,6 +136101,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -130313,6 +136205,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -130478,6 +136372,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -130580,6 +136476,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -130682,6 +136580,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -130784,6 +136684,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -130940,6 +136842,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -131042,6 +136946,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -131185,6 +137091,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -131287,6 +137195,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -131436,6 +137346,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -131538,6 +137450,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -131640,6 +137554,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -131742,6 +137658,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -131860,6 +137778,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -131962,6 +137882,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -132064,6 +137986,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -132166,6 +138090,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -132331,6 +138257,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -132433,6 +138361,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -132588,6 +138518,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -132690,6 +138622,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -132808,6 +138742,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -132910,6 +138846,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -133012,6 +138950,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -133114,6 +139054,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -133361,6 +139303,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -133463,6 +139407,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -133776,6 +139722,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -133878,6 +139826,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -134097,6 +140047,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -134199,6 +140151,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -134497,6 +140451,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -134599,6 +140555,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -135059,6 +141017,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -135161,6 +141121,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -135553,6 +141515,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -135655,6 +141619,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -135773,6 +141739,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -135875,6 +141843,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -135977,6 +141947,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -136079,6 +142051,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -136235,6 +142209,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -136337,6 +142313,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -136561,6 +142539,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
@@ -136663,6 +142643,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
@@ -136978,6 +142960,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
@@ -137080,6 +143064,8 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -137398,6 +143384,21 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
+  }
+
+  export type InventoryCheckoutCreateManyCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
   }
 
   export type PlatformInviteCreateManyCreatorInput = {
@@ -137635,6 +143636,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutInventoryHistoryNestedInput
     business?: BusinessUpdateOneRequiredWithoutInventoryHistoryNestedInput
     order?: OrderUpdateOneWithoutInventoryHistoryNestedInput
+    checkout?: InventoryCheckoutUpdateOneWithoutHistoryNestedInput
   }
 
   export type InventoryHistoryUncheckedUpdateWithoutUserInput = {
@@ -137650,6 +143652,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type InventoryHistoryUncheckedUpdateManyWithoutUserInput = {
@@ -137665,6 +143668,53 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type InventoryCheckoutUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutInventoryCheckoutsNestedInput
+    lines?: InventoryCheckoutLineUpdateManyWithoutCheckoutNestedInput
+    history?: InventoryHistoryUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutUncheckedUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lines?: InventoryCheckoutLineUncheckedUpdateManyWithoutCheckoutNestedInput
+    history?: InventoryHistoryUncheckedUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type PlatformInviteUpdateWithoutCreatorInput = {
@@ -137918,6 +143968,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -137933,6 +143984,38 @@ export namespace Prisma {
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+    itemType?: string
+    sku?: string | null
+    category?: string | null
+    storageLocation?: string | null
+    unitCostCents?: number | null
+  }
+
+  export type InventoryCheckoutCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    customerName?: string | null
+    notes?: string | null
+    status?: string
+    checkedOutAt?: Date | string
+    dueBackOn?: Date | string | null
+    closedAt?: Date | string | null
+    createdById?: string | null
+  }
+
+  export type InventoryCheckoutLineCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checkoutId: string
+    itemId?: string | null
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
   }
 
   export type InventoryReservationCreateManyBusinessInput = {
@@ -138914,6 +144997,7 @@ export namespace Prisma {
     product?: ProductUpdateOneWithoutInventoryHistoryNestedInput
     baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutInventoryHistoryNestedInput
     order?: OrderUpdateOneWithoutInventoryHistoryNestedInput
+    checkout?: InventoryCheckoutUpdateOneWithoutHistoryNestedInput
     user?: UserUpdateOneWithoutInventoryHistoryNestedInput
   }
 
@@ -138929,6 +145013,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -138944,6 +145029,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -138959,8 +145045,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     products?: ProductUpdateManyWithoutBaseInventoryUnitNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUpdateManyWithoutItemNestedInput
   }
 
   export type BaseInventoryUnitUncheckedUpdateWithoutBusinessInput = {
@@ -138975,8 +145067,14 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
     products?: ProductUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBaseInventoryUnitNestedInput
+    checkoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type BaseInventoryUnitUncheckedUpdateManyWithoutBusinessInput = {
@@ -138991,6 +145089,96 @@ export namespace Prisma {
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    itemType?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    storageLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCostCents?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type InventoryCheckoutUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdBy?: UserUpdateOneWithoutInventoryCheckoutsCreatedNestedInput
+    lines?: InventoryCheckoutLineUpdateManyWithoutCheckoutNestedInput
+    history?: InventoryHistoryUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lines?: InventoryCheckoutLineUncheckedUpdateManyWithoutCheckoutNestedInput
+    history?: InventoryHistoryUncheckedUpdateManyWithoutCheckoutNestedInput
+  }
+
+  export type InventoryCheckoutUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    checkedOutAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dueBackOn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type InventoryCheckoutLineUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+    checkout?: InventoryCheckoutUpdateOneRequiredWithoutLinesNestedInput
+    item?: BaseInventoryUnitUpdateOneWithoutCheckoutLinesNestedInput
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkoutId?: StringFieldUpdateOperationsInput | string
+    itemId?: NullableStringFieldUpdateOperationsInput | string | null
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkoutId?: StringFieldUpdateOperationsInput | string
+    itemId?: NullableStringFieldUpdateOperationsInput | string | null
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryReservationUpdateWithoutBusinessInput = {
@@ -140370,6 +146558,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -140607,6 +146796,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutInventoryHistoryNestedInput
     business?: BusinessUpdateOneRequiredWithoutInventoryHistoryNestedInput
     order?: OrderUpdateOneWithoutInventoryHistoryNestedInput
+    checkout?: InventoryCheckoutUpdateOneWithoutHistoryNestedInput
     user?: UserUpdateOneWithoutInventoryHistoryNestedInput
   }
 
@@ -140622,6 +146812,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -140637,6 +146828,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -140899,6 +147091,7 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -140976,6 +147169,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutInventoryHistoryNestedInput
     business?: BusinessUpdateOneRequiredWithoutInventoryHistoryNestedInput
     order?: OrderUpdateOneWithoutInventoryHistoryNestedInput
+    checkout?: InventoryCheckoutUpdateOneWithoutHistoryNestedInput
     user?: UserUpdateOneWithoutInventoryHistoryNestedInput
   }
 
@@ -140991,6 +147185,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -141006,6 +147201,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -142632,6 +148828,7 @@ export namespace Prisma {
     changeQty: number
     reason: string
     note?: string | null
+    checkoutId?: string | null
     userId?: string | null
   }
 
@@ -142734,6 +148931,7 @@ export namespace Prisma {
     product?: ProductUpdateOneWithoutInventoryHistoryNestedInput
     baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutInventoryHistoryNestedInput
     business?: BusinessUpdateOneRequiredWithoutInventoryHistoryNestedInput
+    checkout?: InventoryCheckoutUpdateOneWithoutHistoryNestedInput
     user?: UserUpdateOneWithoutInventoryHistoryNestedInput
   }
 
@@ -142749,6 +148947,7 @@ export namespace Prisma {
     changeQty?: IntFieldUpdateOperationsInput | number
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -142764,6 +148963,7 @@ export namespace Prisma {
     changeQty?: IntFieldUpdateOperationsInput | number
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -143119,7 +149319,21 @@ export namespace Prisma {
     reason: string
     note?: string | null
     orderId?: string | null
+    checkoutId?: string | null
     userId?: string | null
+  }
+
+  export type InventoryCheckoutLineCreateManyItemInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checkoutId: string
+    businessId: string
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
   }
 
   export type ProductUpdateWithoutBaseInventoryUnitInput = {
@@ -143270,6 +149484,7 @@ export namespace Prisma {
     product?: ProductUpdateOneWithoutInventoryHistoryNestedInput
     business?: BusinessUpdateOneRequiredWithoutInventoryHistoryNestedInput
     order?: OrderUpdateOneWithoutInventoryHistoryNestedInput
+    checkout?: InventoryCheckoutUpdateOneWithoutHistoryNestedInput
     user?: UserUpdateOneWithoutInventoryHistoryNestedInput
   }
 
@@ -143285,6 +149500,7 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -143293,6 +149509,162 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     variantId?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    previousQty?: IntFieldUpdateOperationsInput | number
+    newQty?: IntFieldUpdateOperationsInput | number
+    changeQty?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type InventoryCheckoutLineUpdateWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+    checkout?: InventoryCheckoutUpdateOneRequiredWithoutLinesNestedInput
+    business?: BusinessUpdateOneRequiredWithoutInventoryCheckoutLinesNestedInput
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkoutId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateManyWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkoutId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryCheckoutLineCreateManyCheckoutInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    itemId?: string | null
+    itemName: string
+    qtyOut: number
+    qtyReturned?: number
+    qtyDamaged?: number
+    qtyLost?: number
+  }
+
+  export type InventoryHistoryCreateManyCheckoutInput = {
+    id?: string
+    createdAt?: Date | string
+    variantId?: string | null
+    productId?: string | null
+    baseInventoryUnitId?: string | null
+    businessId: string
+    previousQty: number
+    newQty: number
+    changeQty: number
+    reason: string
+    note?: string | null
+    orderId?: string | null
+    userId?: string | null
+  }
+
+  export type InventoryCheckoutLineUpdateWithoutCheckoutInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutInventoryCheckoutLinesNestedInput
+    item?: BaseInventoryUnitUpdateOneWithoutCheckoutLinesNestedInput
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateWithoutCheckoutInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    itemId?: NullableStringFieldUpdateOperationsInput | string | null
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryCheckoutLineUncheckedUpdateManyWithoutCheckoutInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    itemId?: NullableStringFieldUpdateOperationsInput | string | null
+    itemName?: StringFieldUpdateOperationsInput | string
+    qtyOut?: IntFieldUpdateOperationsInput | number
+    qtyReturned?: IntFieldUpdateOperationsInput | number
+    qtyDamaged?: IntFieldUpdateOperationsInput | number
+    qtyLost?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryHistoryUpdateWithoutCheckoutInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    previousQty?: IntFieldUpdateOperationsInput | number
+    newQty?: IntFieldUpdateOperationsInput | number
+    changeQty?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    variant?: ProductVariantUpdateOneWithoutInventoryHistoryNestedInput
+    product?: ProductUpdateOneWithoutInventoryHistoryNestedInput
+    baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutInventoryHistoryNestedInput
+    business?: BusinessUpdateOneRequiredWithoutInventoryHistoryNestedInput
+    order?: OrderUpdateOneWithoutInventoryHistoryNestedInput
+    user?: UserUpdateOneWithoutInventoryHistoryNestedInput
+  }
+
+  export type InventoryHistoryUncheckedUpdateWithoutCheckoutInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    baseInventoryUnitId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    previousQty?: IntFieldUpdateOperationsInput | number
+    newQty?: IntFieldUpdateOperationsInput | number
+    changeQty?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type InventoryHistoryUncheckedUpdateManyWithoutCheckoutInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: NullableStringFieldUpdateOperationsInput | string | null
+    baseInventoryUnitId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     previousQty?: IntFieldUpdateOperationsInput | number
     newQty?: IntFieldUpdateOperationsInput | number

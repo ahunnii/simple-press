@@ -189,7 +189,7 @@ function ProductRow({
 /**
  * Stock is deliberately quiet for the two cases where a single number would be
  * a lie: products with variants (stock is per-variant, shown on the variant
- * select) and pool-backed products (stock lives on the shared pool).
+ * select) and item-backed products (stock lives on the shared inventory item).
  */
 function StockLabel({ product }: { product: PickableProduct }) {
   if (product.variants.length > 0) {
@@ -202,7 +202,9 @@ function StockLabel({ product }: { product: PickableProduct }) {
 
   if (product.baseInventoryUnitId) {
     return (
-      <span className="text-muted-foreground shrink-0 text-xs">Pooled</span>
+      <span className="text-muted-foreground shrink-0 text-xs">
+        Shared item
+      </span>
     );
   }
 

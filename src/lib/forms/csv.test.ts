@@ -242,6 +242,54 @@ describe("parseFormCsv", () => {
     expect(result.errors[0]!.message).toMatch(/at most 2/);
   });
 
+  it("rejects the whole file on an unterminated quote instead of dropping rows", () => {
+    const csv = 'Name,Email\nA,a@x.co\n"B,b@x.co\nC,c@x.co\n';
+    const result = parseFormCsv(definition, csv);
+    expect(result.validRows).toEqual([]);
+    expect(result.errors).toEqual([
+      {
+        row: 0,
+        message:
+          "This file has mismatched quotes near line 3. Fix the quoting and upload it again.",
+      },
+    ]);
+  });
+
+  it("names the physical line despite blank lines and multi-line cells above it", () => {
+    const csv = [
+      "Name,Notes",
+      "",
+      '"Ada","line one',
+      'line two"',
+      "",
+      "Bob,fine",
+      '"Cy"x,broken',
+      "Dee,after",
+    ].join("\r\n");
+    const result = parseFormCsv(definition, csv);
+    expect(result.validRows).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toMatchObject({ row: 0 });
+    expect(result.errors[0]!.message).toMatch(/near line 7\./);
+  });
+
+  it("counts lines after stripping a BOM", () => {
+    const csv = '\uFEFFName\nA\n"B\n';
+    expect(parseFormCsv(definition, csv).errors[0]!.message).toMatch(
+      /near line 3\./,
+    );
+  });
+
+  it("still tolerates field-count mismatches and quoted multi-line cells", () => {
+    const csv = 'Name,Email,Notes\nA\nB,b@x.co,"two\nlines",extra\n';
+    const result = parseFormCsv(definition, csv);
+    expect(result.errors).toEqual([]);
+    expect(result.validRows.map((r) => r.values.notes)).toEqual([
+      null,
+      "two\nlines",
+    ]);
+  });
+
   it("errors when no header matches a field, or the file is empty", () => {
     expect(parseFormCsv(definition, "Foo,Bar\n1,2\n").errors[0]).toMatchObject({
       row: 0,

@@ -100,7 +100,7 @@ export const ROLE_DESCRIPTIONS: Record<
   STAFF: {
     label: "Staff",
     summary:
-      "Fulfillment access only — can view and manage orders and customers.",
+      "Fulfillment access only — can view and manage orders, customers, and inventory counts/check-outs.",
   },
 };
 
@@ -117,7 +117,7 @@ export interface NavItem {
   /**
    * Membership roles that can see this item. Defaults to OWNER + MANAGER
    * (`DEFAULT_NAV_ROLES`). Include "STAFF" only for fulfillment-safe pages
-   * (orders, customers). PLATFORM_ADMIN always sees everything.
+   * (orders, customers, inventory counts/check-outs). PLATFORM_ADMIN always sees everything.
    */
   roles?: AdminRole[];
   /** Keyword synonyms for command palette matching. */
@@ -278,6 +278,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconPackages,
     section: "catalog",
     featureKey: "inventory",
+    roles: ["OWNER", "MANAGER", "STAFF"],
+    keywords: ["stock", "items", "rentals", "check out", "check in"],
   },
   {
     key: "collections",
@@ -733,13 +735,17 @@ export function isNavItemAllowedForRole(
 }
 
 /** Path prefixes a STAFF member may visit inside /admin. */
-const STAFF_ALLOWED_PATH_PREFIXES = ["/admin/orders", "/admin/customers"];
+const STAFF_ALLOWED_PATH_PREFIXES = [
+  "/admin/orders",
+  "/admin/customers",
+  "/admin/inventory",
+];
 
 /**
  * Whether an /admin pathname is accessible to the given role.
  * OWNER and MANAGER can visit everything; STAFF is limited to fulfillment
- * pages (orders + customers). Consumed by src/lib/require-admin-access.ts —
- * hard enforcement lives in the tRPC procedure roles.
+ * pages (orders + customers) and inventory counts/check-outs. Consumed by
+ * src/lib/require-admin-access.ts — hard enforcement lives in the tRPC procedure roles.
  */
 export function isPathAllowedForRole(
   pathname: string,

@@ -207,7 +207,8 @@ export function ImportEntriesDialog({ formId, trigger }: Props) {
                   <div className="mt-2 max-h-32 overflow-y-auto text-sm">
                     {preview.errors.slice(0, 5).map((error) => (
                       <div key={error.row}>
-                        • Row {error.row}: {error.message}
+                        • {error.row > 0 && `Row ${error.row}: `}
+                        {error.message}
                       </div>
                     ))}
                     {preview.errorCount > 5 && (

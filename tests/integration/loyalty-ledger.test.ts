@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AwardResult } from "~/lib/loyalty/ledger";
-import { ensureLoyaltyCustomer } from "~/lib/loyalty/customer";
+import {
+  ensureLoyaltyCustomer,
+  LoyaltyCustomerConflictError,
+} from "~/lib/loyalty/customer";
 import { awardPoints, getBalance, listLedger } from "~/lib/loyalty/ledger";
 import {
   awardPointsForPaidOrder,
@@ -288,7 +291,7 @@ describe("loyalty ledger: idempotency, clamping, earning, redeeming, clawback", 
           businessId: business.id,
           user: { id: intruder.id, email: "shared@example.com" },
         }),
-      ).rejects.toThrow("Customer record belongs to another account");
+      ).rejects.toThrow(LoyaltyCustomerConflictError);
     });
   });
 

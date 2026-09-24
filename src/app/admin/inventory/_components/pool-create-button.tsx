@@ -8,8 +8,12 @@ import { Button } from "~/components/ui/button";
 import { PoolDialog } from "./pool-dialog";
 
 type Props = {
-  /** "New Base Unit" in the page header, "Create Base Unit" in the empty state. */
+  /** "New item" in the page header, "Create item" in the empty state. */
   label: string;
+  /** Existing categories across the business, threaded to the dialog's datalist. */
+  categories: string[];
+  /** Whether the `inventoryRentals` flag is on — threaded to the dialog's Type field. */
+  rentalsEnabled: boolean;
 };
 
 /**
@@ -29,7 +33,7 @@ type Props = {
  * since each owns its own `open` state. Don't add `forceMount` without collapsing
  * these to a single shared dialog first.
  */
-export function PoolCreateButton({ label }: Props) {
+export function PoolCreateButton({ label, categories, rentalsEnabled }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -41,7 +45,12 @@ export function PoolCreateButton({ label }: Props) {
         <Plus className="mr-2 h-4 w-4" />
         {label}
       </Button>
-      <PoolDialog open={open} onOpenChange={setOpen} />
+      <PoolDialog
+        open={open}
+        onOpenChange={setOpen}
+        categories={categories}
+        rentalsEnabled={rentalsEnabled}
+      />
     </>
   );
 }

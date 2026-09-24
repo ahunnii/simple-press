@@ -3,6 +3,7 @@ import Papa from "papaparse";
 import type { FormAnswerSnapshot, FormAnswerValue } from "~/lib/forms/answers";
 import type { FormDefinition, FormStatus } from "~/lib/validators/form";
 import { sanitizeCsvMatrix } from "~/lib/csv/escape-cell";
+import { mismatchedQuotesMessage } from "~/lib/csv/quote-errors";
 import {
   formatAnswerForDisplay,
   validateFormAnswers,
@@ -210,7 +211,8 @@ export type ParseFormCsvOptions = {
  * Headers match field labels trimmed + case-insensitively; the reserved
  * columns are optional. Answers are validated with
  * `{ relaxRequired: true, optionMatch: "label" }` — historical rows may lack
- * required fields and may carry past dates.
+ * required fields and may carry past dates. Mismatched quotes anywhere are a
+ * file-level (`row: 0`) error naming the physical line.
  */
 export function parseFormCsv(
   definition: FormDefinition,
@@ -279,6 +281,15 @@ export function parseFormCsv(
     .filter((field) => !fieldHeaders.has(field.id))
     .map((field) => field.label);
 
+  // Bad quoting rejects the whole file (see `mismatchedQuotesMessage`).
+  // Field-count mismatches are tolerated: missing trailing cells just read
+  // as blank.
+  const quoteMessage = mismatchedQuotesMessage(text, parsed.errors);
+  if (quoteMessage) {
+    result.errors.push({ row: 0, message: quoteMessage });
+    return result;
+  }
+
   if (headers.length === 0 || result.totalRows === 0) {
     result.errors.push({
       row: 0,
@@ -302,15 +313,6 @@ export function parseFormCsv(
     return result;
   }
 
-  // Structural parse errors (bad quoting) poison their row. Field-count
-  // mismatches are tolerated: missing trailing cells just read as blank.
-  const brokenRows = new Map<number, string>();
-  for (const error of parsed.errors) {
-    if (error.type === "Quotes" && typeof error.row === "number") {
-      brokenRows.set(error.row, "This row has mismatched quotes.");
-    }
-  }
-
   const fieldLabelById = new Map(
     definition.fields.map((field) => [field.id, field.label]),
   );
@@ -319,11 +321,6 @@ export function parseFormCsv(
 
   parsed.data.forEach((row, index) => {
     const rowNumber = index + 2;
-    const broken = brokenRows.get(index);
-    if (broken) {
-      result.errors.push({ row: rowNumber, message: broken });
-      return;
-    }
 
     const raw: Record<string, unknown> = {};
     let hasAnswer = false;

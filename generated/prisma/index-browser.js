@@ -633,6 +633,7 @@ exports.Prisma.InventoryHistoryScalarFieldEnum = {
   reason: 'reason',
   note: 'note',
   orderId: 'orderId',
+  checkoutId: 'checkoutId',
   userId: 'userId'
 };
 
@@ -648,7 +649,41 @@ exports.Prisma.BaseInventoryUnitScalarFieldEnum = {
   lowInventoryAlertSent: 'lowInventoryAlertSent',
   outOfStockAlertSent: 'outOfStockAlertSent',
   allowBackorders: 'allowBackorders',
+  itemType: 'itemType',
+  sku: 'sku',
+  category: 'category',
+  storageLocation: 'storageLocation',
+  unitCostCents: 'unitCostCents',
   businessId: 'businessId'
+};
+
+exports.Prisma.InventoryCheckoutScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  label: 'label',
+  customerName: 'customerName',
+  notes: 'notes',
+  status: 'status',
+  checkedOutAt: 'checkedOutAt',
+  dueBackOn: 'dueBackOn',
+  closedAt: 'closedAt',
+  createdById: 'createdById'
+};
+
+exports.Prisma.InventoryCheckoutLineScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  checkoutId: 'checkoutId',
+  businessId: 'businessId',
+  itemId: 'itemId',
+  itemName: 'itemName',
+  qtyOut: 'qtyOut',
+  qtyReturned: 'qtyReturned',
+  qtyDamaged: 'qtyDamaged',
+  qtyLost: 'qtyLost'
 };
 
 exports.Prisma.InventoryReservationScalarFieldEnum = {
@@ -1256,6 +1291,8 @@ exports.Prisma.ModelName = {
   DiscountCode: 'DiscountCode',
   InventoryHistory: 'InventoryHistory',
   BaseInventoryUnit: 'BaseInventoryUnit',
+  InventoryCheckout: 'InventoryCheckout',
+  InventoryCheckoutLine: 'InventoryCheckoutLine',
   InventoryReservation: 'InventoryReservation',
   Page: 'Page',
   EditorNote: 'EditorNote',
