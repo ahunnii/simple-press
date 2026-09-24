@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Heart, Menu, ShoppingBag } from "lucide-react";
+import { ChevronDown, Heart, Menu, ShoppingBag, UserRound } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
@@ -19,9 +19,11 @@ import { useWishlist } from "~/providers/wishlist-context";
 
 import { resolveFields } from "..";
 import { BambooCartDrawer } from "../cart-checkout/bamboo-cart-drawer";
+import { BambooLeafSprig } from "../shared/bamboo-leaf-sprig";
 import { BambooMobileNav } from "./bamboo-mobile-nav";
 import {
   BambooSocialIcons,
+  hasBambooSocialLinks,
   readBambooSocialLinks,
 } from "./bamboo-social-icons";
 
@@ -43,28 +45,45 @@ const NAV_LINKS: NavLink[] = [
 /**
  * BambooHeader — the "hanging emblem" nav, bamboo's signature moment.
  *
- * Desktop (lg and up) is three stable cells that never re-order: socials on
- * the left, the split nav + emblem in the middle, account/wishlist/cart on the
- * right. The outer cells are both `flex-1 basis-0`, which is what keeps the
- * emblem on the bar's true centre in BOTH states:
+ * Desktop (lg and up) is three stable cells that never re-order: an empty
+ * spacer on the left, the split nav + emblem in the middle, and the right
+ * cluster — socials · gold hairline · account · wishlist · cart. The outer
+ * cells are both `flex-1 basis-0`, which is what keeps the nav centred on the
+ * bar in BOTH states:
  *
- * - **Expanded** (page not scrolled): the links split into two halves around a
- *   large circular logo (size-28/lg:size-32 at top-2) hanging ~40% below the
- *   forest bar.
+ * - **Expanded** (page not scrolled): cream links split into two halves around
+ *   a big circular logo (lg:size-36 / xl:size-44 at top-2 — 176px is 2.2x the
+ *   80px bar) hanging deep into the hero, with a full gold ring-[3px] and
+ *   shadow-lg so it reads as a seal pressed onto the page.
  * - **Compact** (once scrolled): the emblem SHRINKS IN PLACE — never migrating
  *   to a corner — into a 72px "mini-hang": size-18 at top-6, so 24 + 72 = 96
- *   against the 80px bar still leaves a 16px lip breaking the forest edge. It
- *   keeps its gold ring-2 and takes a lighter shadow-sm. The gesture survives
- *   the scroll instead of collapsing into an avatar-sized chip.
+ *   against the 80px bar still leaves a 16px lip breaking the forest edge. The
+ *   ring eases down to a softer ring-2 at /70 and the shadow to shadow-sm (both
+ *   live in `box-shadow`, so they interpolate with the size). The gesture
+ *   survives the scroll instead of collapsing into an avatar-sized chip.
  *
  * The one exception is the merchant `nav-wordmark`: a horizontal wordmark has
  * nothing to hang, so when one exists the compact anchor re-centres on the bar
  * (top-1/2) and the wordmark cross-fades in over the disc, which fades out.
  *
  * Everything else about the bar is deliberately CONSTANT across the flip — the
- * socials stay in the left cell (balancing the right-side actions rather than
- * leaving a hole), the nav `gap-8` and the links' `tracking-widest` never move.
- * The emblem resizing between the two link halves is the only change of shape.
+ * right cluster never changes, the nav `gap-8` and the links' `tracking-widest`
+ * never move. The emblem resizing between the two link halves is the only
+ * change of shape. Links idle in cream/90 and warm to gold-soft on hover; the
+ * active page holds gold-soft plus the gold underline.
+ *
+ * Right cluster: socials are xl-only cream-outlined circles (lg is too tight
+ * beside a 144px emblem; the footer and mobile sheet still carry them), and
+ * the hairline divider after them renders only when at least one social link
+ * does. Signed out, account is ONE ghost `UserRound` icon to /auth/sign-in
+ * (the sign-in page links on to sign-up) instead of a text Log in / Sign up
+ * pair, so the cluster stays icon-scale; signed in it is the UserButton.
+ *
+ * A bamboo leaf sprig, vertically mirrored so its leaves hang down-right,
+ * decorates the bar's top-left corner at lg+ in both states. Its wrapper clips
+ * it to the bar (overflow-hidden lives THERE only — never on the header or the
+ * bar row, which the emblem overhangs) and it paints beneath the bar row,
+ * which is `relative` and later in source order.
  *
  * The state flips from an IntersectionObserver watching an 80px-tall sentinel
  * at the top of the page (never a scroll listener) — compact engages once the
@@ -84,7 +103,7 @@ const NAV_LINKS: NavLink[] = [
  *
  * Below lg the bar is a plain row — brand (wordmark, or disc + name) · user
  * button when signed in · cart · hamburger. Everything else (nav links, auth
- * buttons, wishlist, socials) lives in the mobile sheet.
+ * links, wishlist, socials) lives in the mobile sheet.
  */
 export function BambooHeader({
   business,
@@ -152,6 +171,7 @@ export function BambooHeader({
   const links =
     (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
   const socialLinks = readBambooSocialLinks(business?.siteContent?.socialLinks);
+  const hasSocials = hasBambooSocialLinks(socialLinks);
   const logoUrl = business.siteContent?.logoUrl;
   const businessName = business.name ?? "Business";
 
@@ -168,30 +188,22 @@ export function BambooHeader({
   const splitIndex = Math.ceil(links.length / 2);
 
   /*
-    Signed-out actions, lg and up only — below lg the sheet carries them, so
-    the mobile bar stays brand · cart · menu. `variant="outline"` ships
-    `bg-background` + `shadow-xs`, which would read as a pale chip on the
-    forest bar; `bg-transparent` and the explicit gold border/text override it.
+    Signed-out account entry, lg and up only — below lg the sheet carries the
+    Log in / Sign up pair, so the mobile bar stays brand · cart · menu. One
+    icon (not a text pair) keeps the right cluster at icon scale beside the
+    socials; the sign-in page links on to sign-up for new customers.
   */
-  const authActions = (
-    <>
-      <Button
-        variant="ghost"
-        size="sm"
-        asChild
-        className="hidden text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)] lg:inline-flex"
-      >
-        <Link href="/auth/sign-in">Log in</Link>
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        asChild
-        className="hidden rounded-full border-[var(--bam-gold-soft)]/70 bg-transparent px-4 text-[var(--bam-gold-soft)] shadow-none hover:border-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)] lg:inline-flex"
-      >
-        <Link href="/auth/sign-up">Sign up</Link>
-      </Button>
-    </>
+  const signInAction = (
+    <Button
+      variant="ghost"
+      size="icon"
+      asChild
+      className="hidden text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)] lg:inline-flex"
+    >
+      <Link href="/auth/sign-in" aria-label="Log in or create an account">
+        <UserRound className="size-5" aria-hidden="true" />
+      </Link>
+    </Button>
   );
 
   const userMenu = session?.user && (
@@ -224,7 +236,7 @@ export function BambooHeader({
       "relative inline-flex items-center gap-1 py-2 text-sm tracking-widest uppercase transition-[opacity,transform,color] duration-300",
       isActive
         ? "text-[var(--bam-gold-soft)]"
-        : "text-[var(--bam-gold-soft)]/80 hover:text-[var(--bam-cream)]",
+        : "text-[var(--bam-cream)]/90 hover:text-[var(--bam-gold-soft)]",
     );
 
   const activeUnderline = (
@@ -343,11 +355,25 @@ export function BambooHeader({
       />
 
       <header className="sticky top-0 z-50 w-full bg-[var(--bam-forest)]">
+        {/*
+          Corner sprig, lg+ only. The sticky header is the containing block;
+          this wrapper (and ONLY this wrapper) clips the leaves to the bar —
+          the header and bar row must stay unclipped for the hanging emblem.
+          No z-index: the `relative` bar row below comes later in source
+          order, so every link and button paints above the leaves.
+        */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 hidden w-44 overflow-hidden lg:block"
+        >
+          <BambooLeafSprig className="absolute top-0 left-0 w-44 -scale-y-100 opacity-90" />
+        </div>
+
         <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:h-20 lg:px-8">
           {/*
-            Left cell — sub-lg brand, then the social row. `flex-1 basis-0`
-            here and on the actions cell is what pins the emblem to the bar's
-            true centre in both states, whatever the two link halves measure.
+            Left cell — the sub-lg brand; an empty spacer at lg+. `flex-1
+            basis-0` here and on the actions cell is what pins the nav to the
+            bar's centre in both states.
           */}
           <div className="flex min-w-0 flex-1 basis-0 items-center">
             {/*
@@ -380,7 +406,7 @@ export function BambooHeader({
                         alt=""
                         fill
                         sizes="40px"
-                        className="object-contain p-1.5"
+                        className="object-contain p-0.5"
                       />
                     </span>
                   ) : null}
@@ -390,19 +416,6 @@ export function BambooHeader({
                 </>
               )}
             </Link>
-
-            {/*
-              Socials are a constant of the lg+ bar — they stay put through the
-              compact flip so the left cell keeps balancing the right-side
-              account/wishlist/cart cluster instead of emptying out.
-            */}
-            <BambooSocialIcons
-              socialLinks={socialLinks}
-              label="Follow us"
-              className="mr-2 hidden lg:flex"
-              linkClassName="size-9 rounded-full border border-[var(--bam-gold-soft)]/50 text-[var(--bam-gold-soft)] hover:border-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)]"
-              iconClassName="size-4"
-            />
           </div>
 
           {/*
@@ -436,7 +449,7 @@ export function BambooHeader({
               <div
                 className={cn(
                   "relative h-full shrink-0 transition-[width] duration-300",
-                  compact ? (wordmarkUrl ? "w-44" : "w-20") : "w-28 lg:w-32",
+                  compact ? (wordmarkUrl ? "w-44" : "w-20") : "lg:w-36 xl:w-44",
                 )}
               >
                 <Link
@@ -451,16 +464,20 @@ export function BambooHeader({
                       : "top-2 translate-y-0",
                   )}
                 >
-                  {/* Disc — shrinks in place to the 72px mini-hang (top-6 + 72
-                      = 96 against the 80px bar, so a 16px lip still breaks the
-                      forest edge); cross-fades out only when a wordmark takes
-                      the compact centre over from it. */}
+                  {/* Disc — expanded lg:size-36 / xl:size-44 (144 → 176px, 2.2x
+                      the bar) with a full gold ring-[3px] + shadow-lg; shrinks
+                      in place to the 72px mini-hang (top-6 + 72 = 96 against
+                      the 80px bar, so a 16px lip still breaks the forest edge)
+                      with the lighter ring-2 /70 + shadow-sm. Ring and shadow
+                      are both `box-shadow`, so they interpolate with the size.
+                      No base size: the nav only renders at lg+. Cross-fades
+                      out only when a wordmark takes the compact centre. */}
                   <span
                     className={cn(
-                      "relative block rounded-full bg-[var(--bam-cream)] ring-2 ring-[var(--bam-gold-soft)]/70 transition-[width,height,opacity,visibility,box-shadow] duration-300",
+                      "relative block rounded-full bg-[var(--bam-cream)] transition-[width,height,opacity,visibility,box-shadow] duration-300",
                       compact
-                        ? "size-18 shadow-sm"
-                        : "size-28 shadow-md lg:size-32",
+                        ? "size-18 shadow-sm ring-2 ring-[var(--bam-gold-soft)]/70"
+                        : "shadow-lg ring-[3px] ring-[var(--bam-gold-soft)] lg:size-36 xl:size-44",
                       compact && wordmarkUrl && "invisible opacity-0",
                     )}
                   >
@@ -470,10 +487,10 @@ export function BambooHeader({
                       src={logoUrl}
                       alt=""
                       fill
-                      sizes="128px"
+                      sizes="(min-width: 1280px) 176px, 144px"
                       className={cn(
                         "object-contain transition-[padding] duration-300",
-                        compact ? "p-2.5" : "p-4",
+                        compact ? "p-1" : "p-1.5 xl:p-2",
                       )}
                     />
                   </span>
@@ -553,10 +570,33 @@ export function BambooHeader({
           </nav>
 
           {/*
-            Actions — account, wishlist, cart, menu. Mirrors the left cell's
-            `flex-1 basis-0` in both states so the emblem stays centred.
+            Actions — socials · divider · account, wishlist, cart, menu.
+            Mirrors the left cell's `flex-1 basis-0` in both states so the nav
+            stays centred.
           */}
           <div className="flex flex-1 shrink-0 basis-0 items-center justify-end gap-1">
+            {/*
+              Socials are xl-only: at lg the row would crowd a 144px emblem and
+              its link halves, and the footer and mobile sheet carry them
+              anyway. The hairline divider renders only beside a real row
+              (BambooSocialIcons returns null when every href is blank).
+            */}
+            {hasSocials && (
+              <>
+                <BambooSocialIcons
+                  socialLinks={socialLinks}
+                  label="Follow us"
+                  className="hidden xl:flex"
+                  linkClassName="size-9 rounded-full border border-[var(--bam-cream)]/60 text-[var(--bam-cream)] hover:border-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-gold-soft)]"
+                  iconClassName="size-4"
+                />
+                <span
+                  aria-hidden="true"
+                  className="mx-2 hidden h-6 w-px bg-[var(--bam-gold-soft)]/30 xl:block"
+                />
+              </>
+            )}
+
             {isEnabled("customerAccounts") && (
               <>
                 {isPending ? (
@@ -564,7 +604,7 @@ export function BambooHeader({
                 ) : session?.user ? (
                   userMenu
                 ) : (
-                  authActions
+                  signInAction
                 )}
               </>
             )}

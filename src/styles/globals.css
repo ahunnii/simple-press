@@ -113,6 +113,51 @@
   --bam-cream-deep: oklch(0.92 0.03 95);
   /* Derived — compute, don't hardcode, so theme presets update them free */
   --bam-hairline: color-mix(in srgb, var(--bam-forest) 14%, transparent);
+  /* Decorative derivations. Theme presets set --bam-gold / --bam-forest as
+     inline style on this same element, so these recompute per preset. */
+  /* NON-TEXT ONLY (wave line, glyphs, CTA rim); never text on cream. */
+  --bam-gold-bright: oklch(from var(--bam-gold) calc(l + 0.2) c h);
+  /* Metallic gold for the value band's hairline wave (a gradient stroke in
+     shared/bamboo-wave-divider.tsx: shade → vivid → highlight → vivid →
+     shade) and the band's icons. Warmer and more saturated than gold-bright
+     (stock ≈ #cfa43a / #a87b1c / #eedea1). NON-TEXT ONLY, like gold-bright;
+     vivid on --bam-forest measures ≈ 5:1, clear of the 3:1 non-text floor. */
+  --bam-gold-vivid: oklch(
+    from var(--bam-gold) calc(l + 0.24) calc(c + 0.03) calc(h - 6)
+  );
+  --bam-gold-shade: oklch(
+    from var(--bam-gold) calc(l + 0.12) calc(c + 0.015) calc(h - 10)
+  );
+  --bam-gold-highlight: oklch(
+    from var(--bam-gold) calc(l + 0.4) calc(c - 0.02) calc(h + 3)
+  );
+  /* Homepage hero-scoped gold (2026-09-24, see design.md Palette "Hero gold").
+     Unlike gold-bright/-vivid/-shade/-highlight above, these ARE text-grade —
+     scoped to the hero only, never used template-wide. Relative to --bam-gold
+     so every theme preset's hero follows automatically (see theme.ts). */
+  /* LARGE TEXT ONLY (hero h1 accent line, ≥2.5rem/bold — needs ≥3:1): brighter
+     and more golden. Worst-pixel sampler, 320-1920px, default hero wash:
+     3.70-4.09:1 (floor 3:1, target margin 3.4:1); worst-case dark tint at
+     1440: 3.62:1. A larger L bump (tried +0.10) reads brighter but LOSES
+     contrast here — the lg+ wash is a bright cream scrim, so pushing the
+     gold's own lightness closer to it shrinks the gap; +0.06 is the tuned
+     sweet spot. */
+  --bam-gold-display: oklch(
+    from var(--bam-gold) calc(l + 0.06) calc(c + 0.04) calc(h - 6)
+  );
+  /* SMALL TEXT (hero eyebrow, text-sm caps — needs ≥4.5:1): same lightness as
+     --bam-gold, more chroma + a warmer hue for richness without losing
+     darkness. Worst-pixel sampler, 320-1920px, default hero wash: 4.76-5.26:1;
+     worst-case dark tint at 1440: 4.65:1. */
+  --bam-gold-rich: oklch(from var(--bam-gold) l calc(c + 0.03) calc(h - 5));
+  /* Leaf sprigs (shared/bamboo-leaf-sprig.tsx): fresh bamboo green on the
+     forest bar/band. The hue nudges toward yellow-green like new growth. */
+  --bam-leaf: oklch(
+    from var(--bam-forest) calc(l + 0.22) calc(c + 0.05) calc(h - 14)
+  );
+  --bam-leaf-deep: oklch(
+    from var(--bam-forest) calc(l + 0.1) calc(c + 0.02) calc(h - 8)
+  );
   /* shadcn remap */
   --background: var(--bam-cream);
   --foreground: oklch(0.24 0.03 150);
