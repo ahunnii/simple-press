@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertCircle,
   ArrowLeft,
   Check,
+  ExternalLink,
   Loader2,
   MessageSquare,
   Monitor,
+  MoreHorizontal,
+  RefreshCw,
   Smartphone,
   Tablet,
 } from "lucide-react";
@@ -27,6 +30,13 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -89,6 +99,17 @@ export type EditorTopBarProps = {
   openNotesCount: number;
   /** Toggle the Notes panel. */
   onToggleNotes: () => void;
+  /**
+   * Phone / portrait-tablet layout: icon-only Exit, a full-width page picker,
+   * no device toggle (the preview is always the real viewport width), a
+   * status dot beside Publish, and Notes / Discard / preview actions folded
+   * into a "more" menu.
+   */
+  compact?: boolean;
+  /** Compact only — reload the preview iframe (menu item). */
+  onRefreshPreview?: () => void;
+  /** Compact only — open the storefront preview in a new tab (menu item). */
+  onOpenPreview?: () => void;
 };
 
 const DEVICES: { kind: DeviceKind; label: string; Icon: typeof Monitor }[] = [
@@ -138,11 +159,24 @@ export function EditorTopBar({
   notesOpen,
   openNotesCount,
   onToggleNotes,
+  compact = false,
+  onRefreshPreview,
+  onOpenPreview,
 }: EditorTopBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [exitOpen, setExitOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
+  /**
+   * Compact "more" menu → Discard confirm hand-off. Opening a Radix Dialog
+   * straight from a DropdownMenuItem races the menu's own teardown (its
+   * outside-pointer lock and focus return fire AFTER the dialog mounts,
+   * leaving the page unclickable or yanking focus out of the dialog). So the
+   * item only flags the request; the dialog opens from the menu's
+   * `onCloseAutoFocus`, which Radix fires once the menu has fully unmounted.
+   */
+  const pendingDiscardRef = useRef(false);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
 
   const fromParam = searchParams.get("from");
   const exitHref = isSafeExitDestination(fromParam)
@@ -168,6 +202,235 @@ export function EditorTopBar({
       : hasUnpublishedChanges
         ? "Unpublished changes"
         : "Published";
+
+  // Shared by both layouts so their state (and the Exit/Discard guards) is
+  // identical whichever header is showing.
+  const pageSelectContent = (
+    <SelectContent>
+      <SelectGroup>
+        <SelectLabel>Site pages</SelectLabel>
+        {pages.map((page) => (
+          <SelectItem key={page.value} value={page.value}>
+            {page.label}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+      {cmsPages.length > 0 && (
+        <SelectGroup>
+          <SelectLabel>Your pages</SelectLabel>
+          <CmsSelectItems items={cmsPages} />
+        </SelectGroup>
+      )}
+      {blogPosts.length > 0 && (
+        <SelectGroup>
+          <SelectLabel>Blog posts</SelectLabel>
+          <CmsSelectItems items={blogPosts} />
+        </SelectGroup>
+      )}
+    </SelectContent>
+  );
+
+  const confirmDialogs = (
+    <>
+      {/* Exit confirm — reachable while a flush or a publish/discard mutation is pending */}
+      <AlertDialog open={exitOpen} onOpenChange={setExitOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave the editor?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A change is still saving to your draft. Leave now and the last
+              edit may not be saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={() => router.push(exitHref)}>
+              Leave anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Discard confirm */}
+      <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unpublished changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This reverts your draft back to the currently published content.
+              This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onDiscard}
+              className="bg-destructive hover:bg-destructive/90 text-white"
+            >
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+
+  if (compact) {
+    return (
+      <header className="bg-card flex h-14 shrink-0 items-center gap-1.5 border-b px-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={handleExit}
+          className="h-9 w-9 shrink-0"
+          aria-label="Exit editor"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+
+        <div className="min-w-0 flex-1">
+          <Select value={activePage} onValueChange={onPageChange}>
+            <SelectTrigger
+              size="sm"
+              className="w-full min-w-0 sm:max-w-xs"
+              aria-label="Page to edit"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            {pageSelectContent}
+          </Select>
+        </div>
+
+        {/* Save status as a glyph — the label is in `title` + sr-only text. */}
+        <div
+          role="status"
+          aria-live="polite"
+          title={
+            saveFailed
+              ? `${statusLabel} — editing again will retry`
+              : statusLabel
+          }
+          className="flex h-9 w-6 shrink-0 items-center justify-center"
+        >
+          {saveFailed ? (
+            <AlertCircle
+              className="text-destructive h-4 w-4"
+              aria-hidden="true"
+            />
+          ) : flushPending ? (
+            <Loader2
+              className="text-muted-foreground h-4 w-4 animate-spin"
+              aria-hidden="true"
+            />
+          ) : hasUnpublishedChanges ? (
+            <span
+              className="h-2 w-2 rounded-full bg-amber-500"
+              aria-hidden="true"
+            />
+          ) : (
+            <Check
+              className="text-muted-foreground h-4 w-4"
+              aria-hidden="true"
+            />
+          )}
+          <span className="sr-only">{statusLabel}</span>
+        </div>
+
+        <Button
+          type="button"
+          size="sm"
+          className="shrink-0"
+          disabled={!hasUnpublishedChanges || isPublishing}
+          onClick={onPublish}
+        >
+          {isPublishing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          {isPublishing ? "Publishing…" : "Publish"}
+        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              ref={moreTriggerRef}
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="relative h-9 w-9 shrink-0"
+              aria-label={
+                openNotesCount > 0
+                  ? `More actions (${openNotesCount} open ${openNotesCount === 1 ? "note" : "notes"})`
+                  : "More actions"
+              }
+            >
+              <MoreHorizontal className="h-4 w-4" />
+              {openNotesCount > 0 && (
+                <span
+                  className="bg-primary absolute top-1.5 right-1.5 h-2 w-2 rounded-full"
+                  aria-hidden="true"
+                />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="min-w-48"
+            onCloseAutoFocus={(event) => {
+              if (!pendingDiscardRef.current) return;
+              pendingDiscardRef.current = false;
+              // Land focus on the trigger ourselves so the dialog records it
+              // as the element to return to when it closes.
+              event.preventDefault();
+              moreTriggerRef.current?.focus();
+              setDiscardOpen(true);
+            }}
+          >
+            <DropdownMenuItem onSelect={onToggleNotes}>
+              <MessageSquare className="h-4 w-4" aria-hidden="true" />
+              <span className="flex-1">
+                {notesOpen ? "Close notes" : "Notes"}
+              </span>
+              {openNotesCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="h-4 min-w-4 justify-center rounded-full px-1 text-[10px] leading-none"
+                >
+                  {openNotesCount}
+                </Badge>
+              )}
+            </DropdownMenuItem>
+            {onRefreshPreview && (
+              <DropdownMenuItem onSelect={onRefreshPreview}>
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                Refresh preview
+              </DropdownMenuItem>
+            )}
+            {onOpenPreview && (
+              <DropdownMenuItem onSelect={onOpenPreview}>
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                Open site in new tab
+              </DropdownMenuItem>
+            )}
+            {hasUnpublishedChanges && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  disabled={isPublishing}
+                  onSelect={() => {
+                    pendingDiscardRef.current = true;
+                  }}
+                >
+                  Discard changes
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {confirmDialogs}
+      </header>
+    );
+  }
 
   return (
     <header className="bg-card flex h-14 shrink-0 items-center gap-3 border-b px-3">
@@ -202,28 +465,7 @@ export function EditorTopBar({
           <SelectTrigger size="sm" className="w-40" aria-label="Page to edit">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Site pages</SelectLabel>
-              {pages.map((page) => (
-                <SelectItem key={page.value} value={page.value}>
-                  {page.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-            {cmsPages.length > 0 && (
-              <SelectGroup>
-                <SelectLabel>Your pages</SelectLabel>
-                <CmsSelectItems items={cmsPages} />
-              </SelectGroup>
-            )}
-            {blogPosts.length > 0 && (
-              <SelectGroup>
-                <SelectLabel>Blog posts</SelectLabel>
-                <CmsSelectItems items={blogPosts} />
-              </SelectGroup>
-            )}
-          </SelectContent>
+          {pageSelectContent}
         </Select>
 
         <div className="bg-muted/40 flex items-center gap-1 rounded-lg border p-0.5">
@@ -340,46 +582,7 @@ export function EditorTopBar({
         </Button>
       </div>
 
-      {/* Exit confirm — reachable while a flush or a publish/discard mutation is pending */}
-      <AlertDialog open={exitOpen} onOpenChange={setExitOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Leave the editor?</AlertDialogTitle>
-            <AlertDialogDescription>
-              A change is still saving to your draft. Leave now and the last
-              edit may not be saved.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Stay</AlertDialogCancel>
-            <AlertDialogAction onClick={() => router.push(exitHref)}>
-              Leave anyway
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Discard confirm */}
-      <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Discard unpublished changes?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This reverts your draft back to the currently published content.
-              This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={onDiscard}
-              className="bg-destructive hover:bg-destructive/90 text-white"
-            >
-              Discard
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {confirmDialogs}
     </header>
   );
 }

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import type { PreviewFrameHandle } from "./preview-frame";
+import type { PreviewEditTarget } from "~/lib/preview/preview-target";
 import { Button } from "~/components/ui/button";
 
 import { PreviewFrame } from "./preview-frame";
@@ -23,7 +24,11 @@ export type PreviewPaneHandle = {
 
 type Props = {
   /** Called when the overlay inside the iframe sends sp:edit-group. */
-  onEditGroup?: (page: string, group: string) => void;
+  onEditGroup?: (
+    page: string,
+    group: string,
+    target?: PreviewEditTarget,
+  ) => void;
   /** Whether a draft save is in-flight — shows a shimmer over the iframe. */
   isUpdating?: boolean;
   /**

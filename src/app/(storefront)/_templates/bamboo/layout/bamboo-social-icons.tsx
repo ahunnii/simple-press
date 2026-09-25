@@ -1,55 +1,35 @@
+import type { ResolvedSocialLink } from "~/lib/social-links";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { cn } from "~/lib/utils";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { TwitterIcon } from "~/components/icons/twitter-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 /**
- * Shape of `business.siteContent.socialLinks` as the storefront stores it.
- * Deliberately loose (every key optional) — merchants fill in whichever
- * networks they use, and empty strings must render nothing.
- */
-export type BambooSocialLinks = {
-  instagram?: string;
-  facebook?: string;
-  twitter?: string;
-  tiktok?: string;
-  youtube?: string;
-};
-
-/**
- * Narrows the untyped `siteContent.socialLinks` JSON column into
- * `BambooSocialLinks`. Shared by the header (client) and the footer (server)
- * so both read the same field with the same fallbacks.
+ * Narrows the untyped `siteContent.socialLinks` JSON column into the
+ * platform-wide social-links registry (`~/lib/social-links`, the same
+ * `SiteContent.socialLinks` column read by
+ * `elegant`/`pollen`/`builders`/`happy-bamboo`/`pink`/`dream`). Shared by the
+ * header (client), mobile nav (client), and footer (server) so all three
+ * read the same field with the same fallbacks and the same network list —
+ * previously bamboo kept its own 5-network table here, which meant a
+ * LinkedIn or Pinterest URL saved in Content → Branding never rendered.
  */
 export function readBambooSocialLinks(
   socialLinks: unknown,
-): BambooSocialLinks | undefined {
-  return (socialLinks as BambooSocialLinks | null | undefined) ?? undefined;
+): ResolvedSocialLink[] {
+  return resolveSocialLinks(socialLinks);
 }
 
-const NETWORKS = [
-  { key: "instagram", label: "Instagram", Icon: InstagramIcon },
-  { key: "facebook", label: "Facebook", Icon: FacebookIcon },
-  { key: "twitter", label: "X (Twitter)", Icon: TwitterIcon },
-  { key: "tiktok", label: "TikTok", Icon: TikTokIcon },
-  { key: "youtube", label: "YouTube", Icon: YouTubeIcon },
-] as const;
-
 /**
- * True when `BambooSocialIcons` would render at least one link — i.e. the same
- * non-empty-href test it runs internally, over the same known networks. Lets a
+ * True when `BambooSocialIcons` would render at least one link. Lets a
  * caller render chrome that only makes sense beside the row (a divider).
  */
 export function hasBambooSocialLinks(
-  socialLinks: BambooSocialLinks | undefined,
+  socialLinks: ResolvedSocialLink[],
 ): boolean {
-  return NETWORKS.some(({ key }) => !!socialLinks?.[key]?.trim());
+  return socialLinks.length > 0;
 }
 
 type BambooSocialIconsProps = {
-  socialLinks: BambooSocialLinks | undefined;
+  socialLinks: ResolvedSocialLink[];
   /** Class list for the wrapping row. */
   className?: string;
   /** Class list for each anchor (the tinted round button / bare icon). */
@@ -79,19 +59,14 @@ export function BambooSocialIcons({
   label,
   onLinkClick,
 }: BambooSocialIconsProps) {
-  const entries = NETWORKS.flatMap(({ key, label: name, Icon }) => {
-    const href = socialLinks?.[key]?.trim();
-    return href ? [{ key, name, Icon, href }] : [];
-  });
-
-  if (entries.length === 0) return null;
+  if (socialLinks.length === 0) return null;
 
   return (
     <ul className={cn("flex items-center gap-2", className)} aria-label={label}>
-      {entries.map(({ key, name, Icon, href }) => (
+      {socialLinks.map(({ key, ariaLabel, Icon, url }) => (
         <li key={key}>
           <a
-            href={href}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -101,7 +76,7 @@ export function BambooSocialIcons({
             onClick={onLinkClick}
           >
             <Icon className={cn("size-4", iconClassName)} />
-            <span className="sr-only">{name} (opens in new tab)</span>
+            <span className="sr-only">{ariaLabel} (opens in new tab)</span>
           </a>
         </li>
       ))}

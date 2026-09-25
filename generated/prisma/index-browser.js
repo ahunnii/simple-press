@@ -204,6 +204,8 @@ exports.Prisma.BusinessScalarFieldEnum = {
   addressCity: 'addressCity',
   addressState: 'addressState',
   addressPostalCode: 'addressPostalCode',
+  latitude: 'latitude',
+  longitude: 'longitude',
   stripeAccountId: 'stripeAccountId',
   stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
   stripeChargesEnabled: 'stripeChargesEnabled',

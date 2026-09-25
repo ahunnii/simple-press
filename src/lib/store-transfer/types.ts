@@ -12,6 +12,15 @@
  *   - Stripe/identity fields on Business (stripeAccountId, stripeAutoTaxEnabled,
  *     subdomain, customDomain, domainStatus, status, onboardingComplete,
  *     umamiWebsiteId, umamiEnabled)
+ *   - SiteContent.siteVerification (domain-bound search-console tokens;
+ *     importing would clobber the target's own verification)
+ *   - DiscountCode rows with source "loyalty" (single-use, customer-bound
+ *     codes minted by rewards redemptions — never exported)
+ *   - Form/QuoteCalculator submissions, loyalty accounts + points ledger,
+ *     invoices (customer/transaction data — only the config is transferred)
+ *   - InvoiceSettings.paymentMethods (may hold bank account numbers /
+ *     payment handles; the export ZIP is plaintext, unlike the encrypted
+ *     column), lastDigestWeekKey / lastDigestSentAt (digest bookkeeping)
  */
 
 import type { PublishRules } from "~/lib/youtube/publish-rules";
@@ -78,6 +87,15 @@ export interface ExportedBusiness {
   supportEmail: string | null;
   phoneNumber: string | null;
   businessAddress: string | null;
+  // Structured address parts, feeding LocalBusiness JSON-LD. Added 2026-09-25
+  // — absent in older manifests.
+  addressStreet?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressPostalCode?: string | null;
+  // Map pin coordinates. Added 2026-09-25 — absent in older manifests.
+  latitude?: number | null;
+  longitude?: number | null;
   // Template — imported (the key reason to transfer)
   templateId: string;
   // Storefront toggles
@@ -102,6 +120,9 @@ export interface ExportedBusiness {
   localPresence?: string;
   areaServed?: string[];
   allowAiCrawlers: boolean;
+  // Abandoned-checkout recovery email. Added 2026-09-25 — absent in older
+  // manifests.
+  sendAbandonedCheckoutEmails?: boolean;
   // Shipping
   shippingType: string;
   shippingFlatRate: number | null;
@@ -115,6 +136,13 @@ export interface ExportedBusiness {
   shippingFallbackRate: number | null;
   shippingDefaultItemWeightLb: number | null;
   salesCountries: string[];
+  // Donations / Tips. Added 2026-09-25 — absent in older manifests.
+  donationLabel?: string;
+  donationPresetAmounts?: unknown; // number[] of cents
+  venmoHandle?: string | null;
+  cashAppHandle?: string | null;
+  donationShowInHeader?: boolean;
+  donationShowInFooter?: boolean;
   // Feature flags
   featureFlags: unknown; // Record<string, boolean>
   // IANA time zone used to display Event start/end times. Added after the
@@ -141,6 +169,9 @@ export interface ExportedSiteContent {
   metaKeywords: string | null;
   ogImage: string | null;
   faviconUrl: string | null;
+  // Short brand used as the " | Brand" suffix on every page title. Added
+  // 2026-09-25 — absent in older manifests.
+  seoBrandName?: string | null;
   logoUrl: string | null;
   logoAltText: string | null;
   primaryColor: string | null;
@@ -150,6 +181,12 @@ export interface ExportedSiteContent {
   customFields: unknown; // { key: value }
   bannerConfig: unknown; // BannerConfig
   popupConfig: unknown; // PopupConfig
+  // Per-route meta overrides: { [route]: { title, description, ogImage } }.
+  // Added 2026-09-25 — absent in older manifests.
+  pageMeta?: unknown;
+  // Per-email-template copy overrides. Added 2026-09-25 — absent in older
+  // manifests.
+  emailOverrides?: unknown;
   previewCustomFields: unknown;
   previewUpdatedAt: string | null; // ISO string
 }
@@ -232,6 +269,11 @@ export interface ExportedProduct {
   price: number;
   compareAtPrice: number | null;
   cost: number | null;
+  // "Subscribe & save" (Stripe Billing on the connected account). Added
+  // 2026-09-25 — absent in older manifests.
+  subscriptionEnabled?: boolean;
+  subscriptionIntervals?: unknown; // string[] of interval keys
+  subscriptionDiscountPercent?: number;
   sku: string | null;
   barcode: string | null;
   trackInventory: boolean;
@@ -244,6 +286,9 @@ export interface ExportedProduct {
   weightUnit: string | null;
   published: boolean;
   featured: boolean;
+  // When set and in the future, the cron publish job flips published=true
+  // at/after this time. Added 2026-09-25 — absent in older manifests.
+  scheduledPublishAt?: string | null; // ISO string
   sortOrder: number;
   metaTitle: string | null;
   metaDescription: string | null;
@@ -270,6 +315,15 @@ export interface ExportedServiceItem {
   image: string | null;
   priceLabel: string | null;
   durationLabel: string | null;
+  // Display-only "was" price + alternate/extra pricing rows. Added
+  // 2026-09-25 — absent in older manifests.
+  compareAtPriceLabel?: string | null;
+  priceTiers?: unknown; // [{ label, priceLabel, compareAtPriceLabel? }]
+  addOns?: unknown; // [{ name, priceLabel?, description? }]
+  // Section assignment key for category-aware templates (vii-collection).
+  // Added 2026-09-25 — absent in older manifests.
+  category?: string | null;
+  isSignature?: boolean;
   bookingEmbedSrc: string | null;
   bookingEmbedHeight: number | null;
   published: boolean;
@@ -288,6 +342,8 @@ export interface ExportedService {
   sortOrder: number;
   metaTitle: string | null;
   metaDescription: string | null;
+  // Added 2026-09-25 — absent in older manifests.
+  metaKeywords?: string | null;
   ogImage: string | null;
   items: ExportedServiceItem[];
 }
@@ -305,6 +361,13 @@ export interface ExportedPage {
   ogImage: string | null;
   published: boolean;
   sortOrder: number;
+  // When set and in the future, the cron publish job flips published=true
+  // at/after this time. Added 2026-09-25 — absent in older manifests.
+  scheduledPublishAt?: string | null; // ISO string
+  // Visual-editor draft: { title, excerpt, content } — null = no draft.
+  // Added 2026-09-25 — absent in older manifests.
+  previewDraft?: unknown;
+  previewDraftUpdatedAt?: string | null; // ISO string
   type: string;
   template: string;
 }
@@ -342,6 +405,9 @@ export interface ExportedDiscountCode {
   active: boolean;
   usageLimit: number | null;
   // usageCount excluded (runtime counter)
+  // Enforced by counting the customer's prior orders using this code. Added
+  // 2026-09-25 — absent in older manifests.
+  perCustomerLimit?: number | null;
   startsAt: string | null; // ISO string
   expiresAt: string | null; // ISO string
   minPurchase: number | null;
@@ -444,6 +510,65 @@ export interface ExportedShippingZone {
   rates: ExportedShippingRate[];
 }
 
+export interface ExportedForm {
+  exportId: string;
+  name: string;
+  /** Versioned definition blob — `formDefinitionSchema` in src/lib/validators/form.ts */
+  definition: unknown;
+  published: boolean;
+}
+
+export interface ExportedQuoteCalculator {
+  exportId: string;
+  name: string;
+  /** Versioned definition blob — `quoteCalculatorDefinitionSchema` in src/lib/validators/quote-calculator.ts */
+  definition: unknown;
+  published: boolean;
+}
+
+export interface ExportedLoyaltyRewardTier {
+  exportId: string;
+  label: string;
+  pointsCost: number;
+  type: string; // "percentage" | "fixed"
+  value: number; // percent, or cents
+  minPurchase: number | null; // cents
+  sortOrder: number;
+  active: boolean;
+}
+
+/** Program config only — member accounts and the points ledger are excluded. */
+export interface ExportedLoyaltyProgram {
+  earnOnOrders: boolean;
+  pointsPerDollar: number;
+  signupEnabled: boolean;
+  signupBonus: number;
+  firstOrderEnabled: boolean;
+  firstOrderBonus: number;
+  birthdayEnabled: boolean;
+  birthdayBonus: number;
+  socialEnabled: boolean;
+  socialFollowBonus: number;
+  rewardCodeExpiryDays: number;
+  tiers: ExportedLoyaltyRewardTier[];
+}
+
+/**
+ * Invoice numbering/defaults. `paymentMethods`, `lastDigestWeekKey` and
+ * `lastDigestSentAt` are excluded — see file header.
+ */
+export interface ExportedInvoiceSettings {
+  numberPrefix: string;
+  numberPadding: number;
+  startingNumber: number;
+  defaultDueTerms: string;
+  defaultTaxRateBps: number;
+  defaultNotes: string | null;
+  defaultTerms: string | null;
+  overdueAlertsEnabled: boolean;
+  weeklyDigestEnabled: boolean;
+}
+
 // ─── Manifest content block ───────────────────────────────────────────────────
 
 export interface StoreTransferContent {
@@ -463,6 +588,12 @@ export interface StoreTransferContent {
   videoSources: ExportedVideoSource[];
   videos: ExportedVideo[];
   shippingZones: ExportedShippingZone[];
+  // Added 2026-09-25 — absent in older manifests; the validator defaults the
+  // arrays to [] and the 1:1 blocks to null (null = leave the target as-is).
+  forms: ExportedForm[];
+  quoteCalculators: ExportedQuoteCalculator[];
+  loyaltyProgram: ExportedLoyaltyProgram | null;
+  invoiceSettings: ExportedInvoiceSettings | null;
 }
 
 // ─── Top-level manifest ───────────────────────────────────────────────────────

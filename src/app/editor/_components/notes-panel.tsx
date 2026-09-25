@@ -5,6 +5,8 @@ import { formatDistanceToNow } from "date-fns";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 
+import type { PanelVariant } from "./panel-variant";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -19,6 +21,12 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 
+import {
+  PANEL_ASIDE_CLASS,
+  PANEL_CLOSE_BUTTON_CLASS,
+  PANEL_SHEET_BODY_CLASS,
+} from "./panel-variant";
+
 /** Sentinel scope value meaning "not scoped to a specific page". */
 const SITE_SCOPE_VALUE = "__site__";
 
@@ -27,6 +35,8 @@ type NotesPanelProps = {
   activePageKey: string;
   /** Human label for the active page, e.g. "Homepage" or the CMS page title. */
   activePageLabel: string;
+  /** Desktop right column (default) or compact bottom-sheet content. */
+  variant?: PanelVariant;
   /** Close the panel. */
   onClose: () => void;
 };
@@ -63,6 +73,7 @@ function StatusBadge({ status }: { status: "open" | "resolved" }) {
 export function NotesPanel({
   activePageKey,
   activePageLabel,
+  variant = "sidebar",
   onClose,
 }: NotesPanelProps) {
   const utils = api.useUtils();
@@ -108,7 +119,7 @@ export function NotesPanel({
   const notes = notesQuery.data ?? [];
 
   return (
-    <aside className="bg-card animate-in slide-in-from-right-8 fade-in flex w-[380px] shrink-0 flex-col border-l duration-200">
+    <aside className={PANEL_ASIDE_CLASS[variant]}>
       {/* Header */}
       <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
         <div className="min-w-0">
@@ -122,7 +133,7 @@ export function NotesPanel({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-7 w-7 shrink-0"
+          className={PANEL_CLOSE_BUTTON_CLASS[variant]}
           aria-label="Close notes panel"
           onClick={onClose}
         >
@@ -131,7 +142,12 @@ export function NotesPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto px-4 py-4",
+          variant === "sheet" && PANEL_SHEET_BODY_CLASS,
+        )}
+      >
         {/* Compose */}
         <div className="space-y-3 border-b pb-4">
           <div className="space-y-2">

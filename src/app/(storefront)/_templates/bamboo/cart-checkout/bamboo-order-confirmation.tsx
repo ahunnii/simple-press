@@ -9,6 +9,9 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
+type DeliveryMethod = "ship" | "pickup" | null;
 
 type Props = {
   business: {
@@ -17,7 +20,11 @@ type Props = {
     siteContent: {
       primaryColor: string | null;
     } | null;
+    pickupLocation?: string | null;
+    pickupInstructions?: string | null;
   };
+  /** Owner-authored note (`bamboo.checkout.success-note`); blank hides it. */
+  note?: string;
 };
 
 // Order-details fetch is best-effort only — it must never block the
@@ -27,7 +34,33 @@ type Props = {
 // error state.
 const DETAILS_FETCH_TIMEOUT_MS = 10_000;
 
-export function BambooOrderConfirmation({ business }: Props) {
+/**
+ * "What happens next?" bullets, keyed by the Stripe session's delivery
+ * method (`session.metadata.deliveryMethod`, "ship" | "pickup" | unset).
+ * Pickup adds an owner-authored location/instructions line beneath the
+ * bullets instead of a third generic bullet — see the render below.
+ */
+function nextStepsBullets(deliveryMethod: DeliveryMethod): string[] {
+  if (deliveryMethod === "pickup") {
+    return [
+      "You'll receive an email confirmation shortly",
+      "We'll let you know when your order is ready for pickup",
+    ];
+  }
+  if (deliveryMethod === "ship") {
+    return [
+      "You'll receive an email confirmation shortly",
+      "We'll notify you when your order ships",
+      "Track your order status via email",
+    ];
+  }
+  return [
+    "You'll receive an email confirmation shortly",
+    "We'll email you with updates about your order",
+  ];
+}
+
+export function BambooOrderConfirmation({ business, note = "" }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [orderDetails, setOrderDetails] = useState<{
@@ -35,6 +68,7 @@ export function BambooOrderConfirmation({ business }: Props) {
     amount_total: number;
     currency: string;
     payment_status: string;
+    delivery_method: DeliveryMethod;
   } | null>(null);
   // Gates only the order-details card (email/amount), never the
   // confirmation heading itself.
@@ -71,6 +105,7 @@ export function BambooOrderConfirmation({ business }: Props) {
             amount_total: number;
             currency: string;
             payment_status: string;
+            delivery_method: DeliveryMethod;
           };
 
           setOrderDetails(data);
@@ -103,7 +138,13 @@ export function BambooOrderConfirmation({ business }: Props) {
   if (!sessionId) {
     return (
       <div className="mx-auto max-w-2xl text-center">
-        <p className="text-muted-foreground mb-4">No order found</p>
+        <h1 className="font-serif text-foreground mb-3 text-3xl font-bold tracking-tight md:text-4xl">
+          We couldn&apos;t find that order
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          This page needs an order to show. If you just checked out, check
+          your email for a receipt.
+        </p>
         <Button
           asChild
           className="rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
@@ -114,8 +155,16 @@ export function BambooOrderConfirmation({ business }: Props) {
     );
   }
 
+  const bullets = nextStepsBullets(orderDetails?.delivery_method ?? null);
+  const showPickupLocation =
+    orderDetails?.delivery_method === "pickup" &&
+    !!business.pickupLocation?.trim();
+
   return (
-    <div className="mx-auto max-w-3xl">
+    <div
+      className="mx-auto max-w-3xl"
+      {...sectionGroupAttr("checkout", "success")}
+    >
       {/* Fire purchase analytics event once — idempotent via sessionStorage */}
       {orderDetails && (
         <TrackPurchase
@@ -158,19 +207,38 @@ export function BambooOrderConfirmation({ business }: Props) {
                 What happens next?
               </h2>
               <ul className="text-muted-foreground space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
-                  <span>You&apos;ll receive an email confirmation shortly</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
-                  <span>We&apos;ll notify you when your order ships</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
-                  <span>Track your order status via email</span>
-                </li>
+                {bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    <span>{bullet}</span>
+                  </li>
+                ))}
               </ul>
+
+              {showPickupLocation && (
+                <div className="mt-4 text-sm">
+                  <p className="text-foreground font-semibold">
+                    Pickup location
+                  </p>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {business.pickupLocation}
+                  </p>
+                  {business.pickupInstructions?.trim() && (
+                    <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                      {business.pickupInstructions}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {note.trim() && (
+                <p
+                  className="text-muted-foreground mt-4 text-sm whitespace-pre-line"
+                  {...fieldAttr("bamboo.checkout.success-note")}
+                >
+                  {note}
+                </p>
+              )}
             </div>
           </div>
 

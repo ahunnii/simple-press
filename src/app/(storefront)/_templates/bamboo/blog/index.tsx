@@ -3,9 +3,20 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 /// BLOG + TESTIMONIALS PAGES
 const blogPageData: TemplateField[] = [
   {
+    key: "bamboo.blog.listing-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-1",
+    defaultValue: "Journal",
+    placeholder: "Journal",
+  },
+  {
     key: "bamboo.blog.listing-title",
-    label: "Blog listing title",
-    description: "Main heading on the blog index page",
+    label: "Heading",
+    description: "Main heading at the top of the blog page.",
     type: "text",
     page: "blog",
     group: "blog.listing",
@@ -15,21 +26,20 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "bamboo.blog.listing-intro",
-    label: "Blog listing intro",
-    description: "Short intro below the blog listing title",
+    label: "Intro text",
+    description: "Short intro below the heading. Leave blank to hide.",
     type: "textarea",
     page: "blog",
     group: "blog.listing",
     gridColumn: "col-span-full",
     defaultValue:
       "Tips on sustainable living, product care, and what is new at the shop.",
-    placeholder:
-      "Tips on sustainable living, product care, and what is new at the shop.",
+    placeholder: "Tips on sustainable living and product care.",
   },
   {
     key: "bamboo.blog.listing-image",
-    label: "Blog listing image",
-    description: "Hero image beside the blog listing title",
+    label: "Photo",
+    description: "Photo shown beside the heading.",
     type: "image",
     page: "blog",
     group: "blog.listing",
@@ -38,7 +48,7 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "bamboo.blog.hero-bg-image",
-    label: "Blog Hero Background (override)",
+    label: "Background image override",
     description:
       "Overrides the site-wide Page Hero Background for this page only. Blank = use the site-wide image, or the flat band if none is set.",
     type: "image",
@@ -49,8 +59,8 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "bamboo.blog.post-cta-heading",
-    label: "Blog post — CTA heading",
-    description: "Call-to-action box at the end of each blog post",
+    label: "Heading",
+    description: "Heading for the closing banner at the end of each post.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -60,21 +70,20 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "bamboo.blog.post-cta-body",
-    label: "Blog post — CTA body",
-    description: "Supporting text for the post footer CTA",
+    label: "Body text",
+    description: "Paragraph below the heading.",
     type: "textarea",
     page: "blog",
     group: "blog.post",
     gridColumn: "col-span-full",
     defaultValue:
       "Explore tree-free, thoughtfully made essentials — crafted for everyday comfort.",
-    placeholder:
-      "Explore tree-free, thoughtfully made essentials — crafted for everyday comfort.",
+    placeholder: "Explore tree-free, thoughtfully made essentials.",
   },
   {
     key: "bamboo.blog.post-cta-button-text",
-    label: "Blog post — CTA button text",
-    description: "Label for the primary button in the post footer CTA",
+    label: "Button text",
+    description: "Label for the button.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -84,8 +93,8 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "bamboo.blog.post-cta-button-link",
-    label: "Blog post — CTA button link",
-    description: "Destination URL for the post footer CTA button",
+    label: "Button link",
+    description: "Where the button goes, e.g. /shop",
     type: "url",
     page: "blog",
     group: "blog.post",
@@ -100,15 +109,15 @@ export const bambooBlogData = [...blogPageData];
 export const bambooBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.listing",
-    title: "Blog Post Listings Hero",
-    description: "Blog index page hero (title, intro, image)",
+    title: "Blog page",
+    description: "Heading, intro, and photo at the top of the blog index page.",
     icon: "📝",
     columns: 2,
   },
   {
     id: "blog.post",
-    title: "Blog Post Call to Action",
-    description: "Call-to-action shown at the end of every blog article",
+    title: "End-of-post banner",
+    description: "Banner with a heading, short text, and a button at the end of every blog post.",
     icon: "✨",
     columns: 2,
   },

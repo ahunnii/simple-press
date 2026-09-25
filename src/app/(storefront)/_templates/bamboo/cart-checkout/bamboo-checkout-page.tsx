@@ -5,27 +5,27 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { Button } from "~/components/ui/button";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
+import { BambooCheckoutUnavailable } from "./bamboo-checkout-unavailable";
 import { CheckoutForm } from "./bamboo-checkout-form";
 
+/**
+ * `checkout/page.tsx` already renders `t.CheckoutUnavailable` (no props)
+ * when the store has no Stripe account outside development — see the guard
+ * there at `src/app/(storefront)/checkout/page.tsx:16-17`. This guard is
+ * belt-and-suspenders for any caller that reaches this component anyway,
+ * matching olive's `OliveCheckoutPage` pattern, and hands the already-loaded
+ * `customFields` down so the unavailable screen doesn't have to re-fetch the
+ * tenant.
+ */
 export async function BambooCheckoutPage({
   business,
   merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
-  if (!business.isStripeConnected) {
+  if (!business.isStripeConnected && process.env.NODE_ENV !== "development") {
     return (
-      <PageTransition>
-        <div className="flex min-h-[50vh] flex-1 items-center justify-center bg-[var(--bam-forest)] p-4">
-          <div className="max-w-md text-center">
-            <h1 className="font-serif mb-4 text-2xl font-bold tracking-tight text-[var(--bam-cream)]">
-              Checkout Unavailable
-            </h1>
-            <p className="text-[var(--bam-cream)]/70">
-              This store hasn&apos;t set up payment processing yet. Please
-              contact the store owner.
-            </p>
-          </div>
-        </div>
-      </PageTransition>
+      <BambooCheckoutUnavailable
+        customFields={business.siteContent?.customFields}
+      />
     );
   }
 

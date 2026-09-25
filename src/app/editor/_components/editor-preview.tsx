@@ -3,6 +3,7 @@
 import { ExternalLink, Info, RefreshCw } from "lucide-react";
 
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
+import type { PreviewEditTarget } from "~/lib/preview/preview-target";
 import { Button } from "~/components/ui/button";
 import { PreviewFrame } from "~/components/preview/preview-frame";
 
@@ -27,12 +28,26 @@ export type EditorPreviewProps = {
    * product the product page previews). Rendered as a pill over the canvas.
    */
   notice?: string;
-  /** Fired when a preview hotspot is clicked inside the iframe. */
-  onEditGroup: (page: string, group: string) => void;
+  /**
+   * Fired when a preview hotspot is clicked inside the iframe. `target`
+   * narrows the click to one field / list row when the overlay resolved one.
+   */
+  onEditGroup: (
+    page: string,
+    group: string,
+    target?: PreviewEditTarget,
+  ) => void;
   /** Fired when the iframe acks a live text patch. */
   onPatched: (applied: string[], missed: string[]) => void;
   /** Imperative handle to the underlying `PreviewFrame`. */
   frameRef: React.RefObject<PreviewFrameHandle | null>;
+  /**
+   * Phone / portrait-tablet layout: the storefront fills the canvas edge to
+   * edge at the real viewport width (no gutter, device frame, or floating
+   * toolbar — refresh / open-in-new-tab live in the top bar's menu there).
+   * `width` is ignored.
+   */
+  compact?: boolean;
 };
 
 /**
@@ -50,6 +65,7 @@ export function EditorPreview({
   onEditGroup,
   onPatched,
   frameRef,
+  compact = false,
 }: EditorPreviewProps) {
   const handleRefresh = () => {
     frameRef.current?.refresh();
@@ -58,6 +74,32 @@ export function EditorPreview({
   const handleOpenExternal = () => {
     window.open(`${path}?__preview=1`, "_blank", "noopener");
   };
+
+  if (compact) {
+    return (
+      <div className="bg-background relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {notice && (
+          <p className="bg-muted/60 text-muted-foreground flex shrink-0 items-start gap-1.5 border-b px-3 py-1.5 text-xs">
+            <Info className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span className="line-clamp-2">{notice}</span>
+          </p>
+        )}
+        <div className="relative min-h-0 flex-1">
+          <PreviewFrame
+            ref={frameRef}
+            path={path}
+            width="100%"
+            minHeight={0}
+            isUpdating={isUpdating}
+            onEditGroup={onEditGroup}
+            onPatched={onPatched}
+            // Pinned to the box so the iframe gets a definite height to fill.
+            className="bg-background absolute inset-0"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-muted/40 relative flex min-w-0 flex-1 justify-center overflow-auto p-6">

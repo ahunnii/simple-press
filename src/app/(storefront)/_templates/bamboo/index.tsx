@@ -1,69 +1,35 @@
-import {
-  Building2,
-  Droplets,
-  Heart,
-  Leaf,
-  ShieldCheck,
-  Sprout,
-  TreePine,
-  Truck,
-  Users,
-} from "lucide-react";
-
-import type {
-  GenericIconRow,
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { aboutBambooData, bambooAboutFieldGroups } from "./about";
 import { bambooBlogData, bambooBlogFieldGroups } from "./blog";
+import {
+  bambooCheckoutSuccessData,
+  bambooCheckoutSuccessFieldGroups,
+} from "./cart-checkout";
+import {
+  bambooCheckoutUnavailableData,
+  bambooCheckoutUnavailableFieldGroups,
+} from "./cart-checkout/unavailable-fields";
 import {
   bambooCollectionsData,
   bambooCollectionsFieldGroups,
 } from "./collections";
 import { bambooContactData, bambooContactFieldGroups } from "./contact";
 import { bambooHomepageFieldGroups, homepageBambooData } from "./homepage";
+import { bambooProductFieldGroups, bambooProductFields } from "./products";
 import { bambooProductsData, bambooProductsFieldGroups } from "./shop";
 import {
   bambooTestimonialsData,
   bambooTestimonialsFieldGroups,
 } from "./testimonials";
 
-const globalLocationData: TemplateField[] = [
-  {
-    key: "bamboo.global.map-lat",
-    label: "Map Latitude",
-    description:
-      "Latitude of your location pin. In Google Maps, right-click your spot and click the coordinates to copy them — this is the first number.",
-    type: "number",
-    page: "global",
-    group: "global.location",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "42.4305",
-  },
-  {
-    key: "bamboo.global.map-lng",
-    label: "Map Longitude",
-    description:
-      "Longitude of your location pin — the second number from the copied Google Maps coordinates.",
-    type: "number",
-    page: "global",
-    group: "global.location",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "-83.1419",
-  },
-];
-
 const globalBrandingData: TemplateField[] = [
   {
     key: "bamboo.global.footer-note",
-    label: "Footer Note",
+    label: "Footer bottom-bar note",
     description:
-      "Short note shown in the footer's bottom bar next to the copyright line (e.g. \"Proudly made in Detroit\"). Leave blank to hide.",
+      'Short line beside the copyright at the very bottom of every page, e.g. "Proudly made in Detroit". Leave blank to hide. The longer blurb in the footer\'s first column comes from Content → Branding → Footer tagline.',
     type: "text",
     page: "global",
     group: "global.branding",
@@ -72,21 +38,57 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "bamboo.global.nav-wordmark",
-    label: "Navigation Wordmark",
+    label: "Navigation wordmark",
     description:
-      "Optional horizontal wordmark logo. Once the page is scrolled, it replaces the round logo in the centre of the navigation bar; on phones it replaces the round logo and business name in the top bar. It sits on the dark green bar, so upload a light or transparent version. Leave blank to keep the round logo and name.",
+      "Optional horizontal logo shown in the navigation bar once the page is scrolled (and, on phones, in the top bar in place of the round logo and business name). Use a light or transparent version — it sits on a dark bar. Leave blank to keep the round logo and name.",
     type: "image",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-full",
     defaultValue: "",
   },
+  {
+    key: "bamboo.global.menu-tagline",
+    label: "Menu tagline",
+    description:
+      "Short line at the bottom of the phone menu. Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.branding",
+    defaultValue: "",
+    placeholder: "A short line about your business",
+  },
+];
+
+const globalCartData: TemplateField[] = [
+  {
+    key: "bamboo.global.cart-label",
+    label: "Cart panel label",
+    description:
+      "Small label above the item count at the top of the cart panel that slides out from the side. Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.cart",
+    defaultValue: "Your cart",
+    placeholder: "Your cart",
+  },
+  {
+    key: "bamboo.global.cart-empty-text",
+    label: "Empty cart message",
+    description:
+      "Line shown under \"Your cart is empty\" in the cart panel. Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.cart",
+    defaultValue: "Add something you love to get started.",
+    placeholder: "Add something you love to get started.",
+  },
 ];
 
 const globalAuthenticationData: TemplateField[] = [
   {
     key: "bamboo.global.authentication-image",
-    label: "Authentication Image",
+    label: "Sign-in background image",
     description: "Image shown behind the sign-in and sign-up panel.",
     type: "image",
     page: "global",
@@ -96,34 +98,40 @@ const globalAuthenticationData: TemplateField[] = [
   },
   {
     key: "bamboo.global.logo-size-width",
-    label: "Logo Size Width",
-    description: "Width of the logo on the sign-in and sign-up screens (pixels).",
+    label: "Logo width (px)",
+    description: "Width of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
     placeholder: "80",
+    min: 24,
+    max: 400,
+    unit: "px",
   },
   {
     key: "bamboo.global.logo-size-height",
-    label: "Logo Size Height",
-    description: "Height of the logo on the sign-in and sign-up screens (pixels).",
+    label: "Logo height (px)",
+    description: "Height of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
     placeholder: "80",
+    min: 24,
+    max: 400,
+    unit: "px",
   },
 ];
 
 const globalPageHeroData: TemplateField[] = [
   {
     key: "bamboo.global.page-hero-bg-image",
-    label: "Page Hero Background",
+    label: "Page background photo",
     description:
-      "Optional full-bleed background photo behind the top hero band of interior pages (contact, blog, about, and other pages) under a translucent wash. Leave blank for the flat band. Contact, blog, and about can each override this with their own image below their hero fields.",
+      "Optional full-bleed background photo behind the top section of contact, blog, about, and other custom pages, under a translucent overlay. Leave blank for the flat look. Contact, blog, and about can each set their own photo instead, below their own hero fields.",
     type: "image",
     page: "global",
     group: "global.pageHero",
@@ -134,31 +142,32 @@ const globalPageHeroData: TemplateField[] = [
 
 const fieldGroups: TemplateFieldGroup[] = [
   {
-    id: "global.location",
-    title: "Map Location",
-    description:
-      "Coordinates for the map pin shown on the homepage and contact page maps.",
-    icon: "🗺️",
-    columns: 2,
-  },
-  {
     id: "global.branding",
-    title: "Branding",
-    description: "Navigation wordmark and the footer's bottom-bar note.",
+    title: "Logo, menu & footer text",
+    description:
+      "Navigation wordmark, the tagline at the bottom of the phone menu, and the short note in the footer's bottom bar.",
     icon: "🖋️",
   },
   {
+    id: "global.cart",
+    title: "Cart",
+    description:
+      "Wording inside the cart panel that slides out from the side.",
+    icon: "🛒",
+  },
+  {
     id: "global.authentication",
-    title: "Authentication",
-    description: "Image and logo size on the sign-in and sign-up screens.",
+    title: "Sign-in screens",
+    description:
+      "Background image and logo size on the sign-in and sign-up screens.",
     icon: "🔐",
     columns: 2,
   },
   {
     id: "global.pageHero",
-    title: "Page Hero Background",
+    title: "Page background photo",
     description:
-      "Optional background photo for the top hero band of interior pages.",
+      "Site-wide background photo for the top section of secondary pages (contact, blog, about, and other custom pages). Contact, blog, and about can each use their own photo instead.",
     icon: "🖼️",
   },
   ...bambooHomepageFieldGroups,
@@ -168,6 +177,9 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...bambooTestimonialsFieldGroups,
   ...bambooCollectionsFieldGroups,
   ...bambooProductsFieldGroups,
+  ...bambooProductFieldGroups,
+  ...bambooCheckoutSuccessFieldGroups,
+  ...bambooCheckoutUnavailableFieldGroups,
 ];
 
 export const bambooData = {
@@ -179,8 +191,11 @@ export const bambooData = {
     ...bambooTestimonialsData,
     ...bambooCollectionsData,
     ...bambooProductsData,
-    ...globalLocationData,
+    ...bambooProductFields,
+    ...bambooCheckoutSuccessData,
+    ...bambooCheckoutUnavailableData,
     ...globalBrandingData,
+    ...globalCartData,
     ...globalAuthenticationData,
     ...globalPageHeroData,
   ],
@@ -200,64 +215,3 @@ export function resolveFields(
 ): Record<string, string> {
   return resolveTemplateFields(customFields, keys, _bambooFieldMap);
 }
-
-export const DEFAULT_BAMBOO_VALUES: GenericIconRow[] = [
-  {
-    icon: Leaf,
-    title: "Sustainability First",
-    description:
-      "Every decision we make starts with the planet. From sourcing to packaging, we choose the path that leaves the smallest footprint.",
-  },
-  {
-    icon: Heart,
-    title: "Premium Quality",
-    description:
-      "We refuse to compromise. Our bamboo products match or exceed the softness and strength of traditional premium brands.",
-  },
-  {
-    icon: Users,
-    title: "Community Driven",
-    description:
-      "We believe in the power of community. We are always here to help you find the perfect product for your needs.",
-  },
-];
-export const DEFAULT_BAMBOO_NATIONWIDE_FACTS: GenericIconRow[] = [
-  {
-    icon: Truck,
-    title: "Nationwide Shipping",
-    description:
-      "We deliver our premium products to doorsteps across the country, carefully packaged and always on time.",
-  },
-  {
-    icon: Building2,
-    title: "Homes & Businesses",
-    description:
-      "From your bathroom to bustling restaurants, hotels, schools, and local stores -- we have solutions for every setting.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Customer-First Service",
-    description:
-      "Our dedicated Detroit-based team provides responsive, knowledgeable support for every order and inquiry.",
-  },
-];
-export const DEFAULT_BAMBOO_WHY_BAMBOO_FACTS: GenericIconRow[] = [
-  {
-    icon: Sprout,
-    title: "Rapid Growth",
-    description:
-      "Bamboo grows up to 35 inches per day and reaches maturity in 3-5 years, compared to 20-50 years for hardwood trees.",
-  },
-  {
-    icon: TreePine,
-    title: "No Replanting Needed",
-    description:
-      "Bamboo regenerates from its own root system after harvest, which means the soil stays intact and carbon continues to be sequestered.",
-  },
-  {
-    icon: Droplets,
-    title: "Water Efficient",
-    description:
-      "Bamboo requires significantly less water than traditional tree farming and thrives without pesticides or fertilizers.",
-  },
-];

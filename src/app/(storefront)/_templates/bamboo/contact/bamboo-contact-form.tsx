@@ -6,6 +6,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -19,7 +20,15 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 const IS_IN_PRODUCTION = process.env.NODE_ENV === "production";
 
-export function BambooContactForm() {
+type BambooContactFormProps = {
+  successHeading: string;
+  successBody: string;
+};
+
+export function BambooContactForm({
+  successHeading,
+  successBody,
+}: BambooContactFormProps) {
   const {
     form,
     messageLength,
@@ -54,6 +63,7 @@ export function BambooContactForm() {
   if (isSuccess) {
     return (
       <Card
+        {...sectionGroupAttr("contact", "form")}
         className="bg-card rounded-2xl border-[var(--bam-hairline)] shadow-sm"
         role="status"
       >
@@ -67,13 +77,16 @@ export function BambooContactForm() {
           <h2
             ref={successHeadingRef}
             tabIndex={-1}
+            {...fieldAttr("bamboo.contact.form-success-heading")}
             className="text-foreground font-heading text-xl font-semibold outline-none"
           >
-            Message Sent
+            {successHeading}
           </h2>
-          <p className="text-muted-foreground">
-            Thank you for reaching out. We will get back to you within 1-2
-            business days.
+          <p
+            {...fieldAttr("bamboo.contact.form-success-body")}
+            className="text-muted-foreground"
+          >
+            {successBody}
           </p>
           <Button
             variant="outline"
@@ -92,6 +105,7 @@ export function BambooContactForm() {
       <form
         ref={formRef}
         onSubmit={form.handleSubmit(onSubmit)}
+        {...sectionGroupAttr("contact", "form")}
         className="flex w-full flex-col gap-5"
       >
         {/* M-7: required field explanation */}

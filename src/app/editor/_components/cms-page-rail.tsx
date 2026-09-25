@@ -26,6 +26,11 @@ export type CmsPageRailProps = {
   onSelectSection?: (section: TemplateSection) => void;
   /** Fired when a hideable section's eye toggle is clicked. */
   onToggleVisibility?: (section: TemplateSection) => void;
+  /**
+   * `"rail"` (default): the fixed 240px left column of the desktop editor.
+   * `"sheet"`: full-width list inside the compact editor's Sections drawer.
+   */
+  variant?: "rail" | "sheet";
 };
 
 /**
@@ -49,6 +54,7 @@ export function CmsPageRail({
   hiddenSectionIds,
   onSelectSection,
   onToggleVisibility,
+  variant = "rail",
 }: CmsPageRailProps) {
   const isBlog = kind === "blog";
   // Section rows only make sense on a blog post preview, and only when the
@@ -64,7 +70,11 @@ export function CmsPageRail({
   return (
     <nav
       aria-label={navLabel}
-      className="bg-card flex w-60 shrink-0 flex-col overflow-y-auto border-l"
+      className={
+        variant === "sheet"
+          ? "bg-card flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]"
+          : "bg-card flex w-60 shrink-0 flex-col overflow-y-auto border-l"
+      }
     >
       <div className="flex flex-1 flex-col py-1">
         <p className="text-muted-foreground px-3 pt-3 pb-1 text-xs font-medium tracking-wide uppercase">

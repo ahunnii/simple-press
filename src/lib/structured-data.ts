@@ -22,6 +22,10 @@ import {
   parseBusinessHours,
 } from "~/lib/business-hours";
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
+import {
+  isValidLatitude,
+  isValidLongitude,
+} from "~/lib/address/coordinates";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { getEffectivePrice } from "~/lib/prices";
 import { firstNonBlank } from "~/lib/seo/blank";
@@ -536,6 +540,8 @@ interface BusinessForLocalBusiness extends CanonicalBusiness {
   addressCity?: string | null;
   addressState?: string | null;
   addressPostalCode?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   phoneNumber?: string | null;
   supportEmail?: string | null;
   businessHours?: unknown;
@@ -602,6 +608,18 @@ export function buildLocalBusinessSchema(
       schema.address = {
         "@type": "PostalAddress",
         streetAddress: business.businessAddress,
+      };
+    }
+
+    // Emit geo coordinates only for storefronts when both are valid numbers in range
+    if (
+      isValidLatitude(business.latitude) &&
+      isValidLongitude(business.longitude)
+    ) {
+      schema.geo = {
+        "@type": "GeoCoordinates",
+        latitude: business.latitude,
+        longitude: business.longitude,
       };
     }
   } else if (addressLocality || addressRegion) {

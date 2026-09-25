@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
@@ -8,16 +7,11 @@ import { FadeIn, PageTransition } from "~/components/page-animations";
 import { resolveFields } from "..";
 import { BambooShopClient } from "./bamboo-shop-client";
 
-export const metadata: Metadata = {
-  title: "Shop",
-  description:
-    "Browse our collection of premium bamboo toilet paper and household paper products. Septic-safe, hypoallergenic, and sustainably crafted.",
-};
-
 export async function BambooShopPage({
   business,
 }: DefaultProductsPageTemplateProps) {
   const f = resolveFields(business.siteContent?.customFields, [
+    "bamboo.products.listing-eyebrow",
     "bamboo.products.listing-title",
     "bamboo.products.listing-intro",
   ]);
@@ -31,9 +25,14 @@ export async function BambooShopPage({
         <div className="mx-auto max-w-7xl">
           <FadeIn className="mx-auto max-w-3xl text-center">
             <div {...sectionGroupAttr("products", "listing")}>
-              <p className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
-                Shop
-              </p>
+              {f["bamboo.products.listing-eyebrow"] ? (
+                <p
+                  className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase"
+                  {...fieldAttr("bamboo.products.listing-eyebrow")}
+                >
+                  {f["bamboo.products.listing-eyebrow"]}
+                </p>
+              ) : null}
               <h1 className="text-foreground font-serif mt-3 text-4xl font-bold tracking-tight md:text-5xl">
                 <span
                   className="text-balance"

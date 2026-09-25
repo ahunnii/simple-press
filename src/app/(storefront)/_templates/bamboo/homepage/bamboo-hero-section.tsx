@@ -3,7 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf } from "lucide-react";
 
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -66,13 +70,21 @@ export function BambooHeroSection({ customFields, hasValueBand }: Props) {
     "bamboo.homepage.hero-primary-button-text",
     "bamboo.homepage.hero-secondary-button-link",
     "bamboo.homepage.hero-secondary-button-text",
+    "bamboo.homepage.hero-show-badges",
   ]);
 
-  const badges =
-    parseTemplateIconListRows(
-      getListFieldValue(customFields, "bamboo.homepage.hero-badges"),
-      DEFAULT_BAMBOO_HERO_BADGES,
-    ) ?? [];
+  // Same plain on/off reading as `showFullPhoto` below: an absent/blank
+  // saved value falls back to the literal default ("true") before the
+  // comparison, so only an explicit "false" hides the row.
+  const showBadges =
+    ((f["bamboo.homepage.hero-show-badges"] ?? "").trim() || "true") !==
+    "false";
+  const badges = showBadges
+    ? (parseTemplateIconListRows(
+        getListFieldValue(customFields, "bamboo.homepage.hero-badges"),
+        DEFAULT_BAMBOO_HERO_BADGES,
+      ) ?? [])
+    : [];
 
   const tagline = f["bamboo.homepage.hero-tagline"] ?? "";
   const description = f["bamboo.homepage.hero-description"] ?? "";
@@ -354,6 +366,7 @@ export function BambooHeroSection({ customFields, hasValueBand }: Props) {
               {badges.map((badge, index) => (
                 <li
                   key={`${badge.title}-${index}`}
+                  {...listItemAttr("bamboo.homepage.hero-badges", index)}
                   className={cn(
                     "flex w-1/3 min-w-0 flex-col items-center gap-2.5 px-2 py-3 text-center sm:w-auto sm:flex-1 sm:py-0",
                     index > 0 &&

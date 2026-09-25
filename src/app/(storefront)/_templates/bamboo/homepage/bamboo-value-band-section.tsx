@@ -1,4 +1,4 @@
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -72,6 +72,7 @@ export function BambooValueBandSection({ customFields }: Props) {
             {items.slice(0, 4).map((item, index) => (
               <StaggerItem
                 key={`${item.title}-${index}`}
+                {...listItemAttr("bamboo.homepage.value-band-items", index)}
                 className={cn(
                   "flex flex-col items-center gap-3 px-3 text-center lg:px-6",
                   index > 0 &&

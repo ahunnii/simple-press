@@ -62,11 +62,22 @@ const exportedBusinessSchema = z.object({
   supportEmail: nullableString.optional(),
   phoneNumber: nullableString.optional(),
   businessAddress: nullableString.optional(),
+  // Structured address parts. Added 2026-09-25 — absent in older manifests.
+  addressStreet: nullableString.optional(),
+  addressCity: nullableString.optional(),
+  addressState: nullableString.optional(),
+  addressPostalCode: nullableString.optional(),
+  // Map pin coordinates. Added 2026-09-25 — absent in older manifests.
+  latitude: nullableNumber.optional(),
+  longitude: nullableNumber.optional(),
   templateId: z.string(),
   testimonialsAutoApprove: z.boolean(),
   maintenanceMode: z.boolean(),
   maintenanceVariant: z.string(),
-  maintenanceMessage: nullableString.optional(),
+  // A TipTap doc since the column became Json (legacy bundles carry a plain
+  // string). Typed as a string here, every bundle from a store with a message
+  // failed to parse; import.ts normalizes both shapes.
+  maintenanceMessage: z.unknown().optional(),
   // zod v3 `z.object` strips unknown keys, so the exporter's `maintenanceCta`
   // was silently dropped before it ever reached import. Declared so it survives.
   maintenanceCta: z.unknown().optional(),
@@ -88,6 +99,8 @@ const exportedBusinessSchema = z.object({
   localPresence: z.string().optional(),
   areaServed: z.array(z.string()).optional(),
   allowAiCrawlers: z.boolean(),
+  // Added 2026-09-25 — absent in older manifests.
+  sendAbandonedCheckoutEmails: z.boolean().optional(),
   shippingType: z.string(),
   shippingFlatRate: nullableNumber.optional(),
   freeShippingThreshold: nullableNumber.optional(),
@@ -100,6 +113,13 @@ const exportedBusinessSchema = z.object({
   shippingFallbackRate: nullableNumber.optional(),
   shippingDefaultItemWeightLb: nullableNumber.optional(),
   salesCountries: z.array(z.string()),
+  // Donations / Tips. Added 2026-09-25 — absent in older manifests.
+  donationLabel: z.string().optional(),
+  donationPresetAmounts: z.unknown().optional(),
+  venmoHandle: nullableString.optional(),
+  cashAppHandle: nullableString.optional(),
+  donationShowInHeader: z.boolean().optional(),
+  donationShowInFooter: z.boolean().optional(),
   featureFlags: z.unknown(),
   // `timeZone` was added after the original export format shipped. It MUST
   // stay optional (no default here — import.ts falls back to the Business
@@ -126,6 +146,8 @@ const exportedSiteContentSchema = z.object({
   metaKeywords: nullableString.optional(),
   ogImage: nullableString.optional(),
   faviconUrl: nullableString.optional(),
+  // Added 2026-09-25 — absent in older manifests.
+  seoBrandName: nullableString.optional(),
   logoUrl: nullableString.optional(),
   logoAltText: nullableString.optional(),
   primaryColor: nullableString.optional(),
@@ -135,6 +157,9 @@ const exportedSiteContentSchema = z.object({
   customFields: z.unknown(),
   bannerConfig: z.unknown(),
   popupConfig: z.unknown(),
+  // Added 2026-09-25 — absent in older manifests.
+  pageMeta: z.unknown().optional(),
+  emailOverrides: z.unknown().optional(),
   previewCustomFields: z.unknown(),
   previewUpdatedAt: nullableString.optional(),
 });
@@ -216,6 +241,10 @@ const exportedProductSchema = z.object({
   price: z.number(),
   compareAtPrice: nullableNumber.optional(),
   cost: nullableNumber.optional(),
+  // "Subscribe & save". Added 2026-09-25 — absent in older manifests.
+  subscriptionEnabled: z.boolean().optional(),
+  subscriptionIntervals: z.unknown().optional(),
+  subscriptionDiscountPercent: z.number().optional(),
   sku: nullableString.optional(),
   barcode: nullableString.optional(),
   trackInventory: z.boolean(),
@@ -227,6 +256,8 @@ const exportedProductSchema = z.object({
   weightUnit: nullableString.optional(),
   published: z.boolean(),
   featured: z.boolean(),
+  // Added 2026-09-25 — absent in older manifests.
+  scheduledPublishAt: nullableString.optional(),
   sortOrder: z.number(),
   metaTitle: nullableString.optional(),
   metaDescription: nullableString.optional(),
@@ -251,6 +282,12 @@ const exportedServiceItemSchema = z.object({
   image: nullableString.optional(),
   priceLabel: nullableString.optional(),
   durationLabel: nullableString.optional(),
+  // Added 2026-09-25 — absent in older manifests.
+  compareAtPriceLabel: nullableString.optional(),
+  priceTiers: z.unknown().optional(),
+  addOns: z.unknown().optional(),
+  category: nullableString.optional(),
+  isSignature: z.boolean().optional(),
   bookingEmbedSrc: nullableString.optional(),
   bookingEmbedHeight: nullableNumber.optional(),
   published: z.boolean(),
@@ -269,6 +306,8 @@ const exportedServiceSchema = z.object({
   sortOrder: z.number(),
   metaTitle: nullableString.optional(),
   metaDescription: nullableString.optional(),
+  // Added 2026-09-25 — absent in older manifests.
+  metaKeywords: nullableString.optional(),
   ogImage: nullableString.optional(),
   items: z.array(exportedServiceItemSchema),
 });
@@ -286,6 +325,10 @@ const exportedPageSchema = z.object({
   ogImage: nullableString.optional(),
   published: z.boolean(),
   sortOrder: z.number(),
+  // Added 2026-09-25 — absent in older manifests.
+  scheduledPublishAt: nullableString.optional(),
+  previewDraft: z.unknown().optional(),
+  previewDraftUpdatedAt: nullableString.optional(),
   type: z.string(),
   template: z.string(),
 });
@@ -322,6 +365,8 @@ const exportedDiscountCodeSchema = z.object({
   value: z.number(),
   active: z.boolean(),
   usageLimit: nullableNumber.optional(),
+  // Added 2026-09-25 — absent in older manifests.
+  perCustomerLimit: nullableNumber.optional(),
   startsAt: nullableString.optional(),
   expiresAt: nullableString.optional(),
   minPurchase: nullableNumber.optional(),
@@ -417,6 +462,63 @@ const exportedVideoSchema = z.object({
   hiddenByRule: z.boolean().optional().default(false),
 });
 
+// Form / QuoteCalculator definitions stay z.unknown() here — import.ts
+// validates each one with the owning feature's stored-definition parser and
+// skips (with a warning) any row that fails, rather than rejecting the ZIP.
+const exportedFormSchema = z.object({
+  exportId: z.string(),
+  name: z.string(),
+  definition: z.unknown(),
+  published: z.boolean(),
+});
+
+const exportedQuoteCalculatorSchema = z.object({
+  exportId: z.string(),
+  name: z.string(),
+  definition: z.unknown(),
+  published: z.boolean(),
+});
+
+const exportedLoyaltyRewardTierSchema = z.object({
+  exportId: z.string(),
+  label: z.string(),
+  pointsCost: z.number().int(),
+  type: z.string(),
+  value: z.number().int(),
+  minPurchase: nullableNumber.optional().default(null),
+  sortOrder: z.number().int(),
+  active: z.boolean(),
+});
+
+const exportedLoyaltyProgramSchema = z.object({
+  earnOnOrders: z.boolean(),
+  pointsPerDollar: z.number().int(),
+  signupEnabled: z.boolean(),
+  signupBonus: z.number().int(),
+  firstOrderEnabled: z.boolean(),
+  firstOrderBonus: z.number().int(),
+  birthdayEnabled: z.boolean(),
+  birthdayBonus: z.number().int(),
+  socialEnabled: z.boolean(),
+  socialFollowBonus: z.number().int(),
+  rewardCodeExpiryDays: z.number().int(),
+  tiers: z.array(exportedLoyaltyRewardTierSchema),
+});
+
+// `paymentMethods` is deliberately absent (never exported — see types.ts
+// header); zod strips it if a hand-edited manifest carries one anyway.
+const exportedInvoiceSettingsSchema = z.object({
+  numberPrefix: z.string(),
+  numberPadding: z.number().int(),
+  startingNumber: z.number().int(),
+  defaultDueTerms: z.string(),
+  defaultTaxRateBps: z.number().int(),
+  defaultNotes: nullableString.optional().default(null),
+  defaultTerms: nullableString.optional().default(null),
+  overdueAlertsEnabled: z.boolean(),
+  weeklyDigestEnabled: z.boolean(),
+});
+
 // ─── Content block ────────────────────────────────────────────────────────────
 
 const storeTransferContentSchema = z.object({
@@ -444,6 +546,24 @@ const storeTransferContentSchema = z.object({
   videoSources: z.array(exportedVideoSourceSchema).optional().default([]),
   videos: z.array(exportedVideoSchema).optional().default([]),
   shippingZones: z.array(exportedShippingZoneSchema),
+  // Forms, quote calculators, loyalty program config and invoice settings
+  // were added 2026-09-25 — same rule as `events` above: optional with a
+  // default, NOT a STORE_TRANSFER_FORMAT_VERSION bump, so ZIPs exported
+  // before these keys existed still parse. A null 1:1 block means "leave the
+  // target's own config untouched" on import. Do not make these required.
+  forms: z.array(exportedFormSchema).optional().default([]),
+  quoteCalculators: z
+    .array(exportedQuoteCalculatorSchema)
+    .optional()
+    .default([]),
+  loyaltyProgram: exportedLoyaltyProgramSchema
+    .nullable()
+    .optional()
+    .default(null),
+  invoiceSettings: exportedInvoiceSettingsSchema
+    .nullable()
+    .optional()
+    .default(null),
 });
 
 // ─── Top-level manifest schema ────────────────────────────────────────────────

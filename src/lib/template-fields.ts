@@ -105,9 +105,12 @@ export type TemplatePage =
 export type TemplateListItemField = {
   key: string;
   label: string;
+  /** Helper text rendered BELOW the input in the editors. Never used as a placeholder. */
   description?: string;
   type: "text" | "textarea" | "image" | "video" | "url" | "icon" | "boolean";
   placeholder?: string;
+  /** Renders "(optional)" after the label. */
+  optional?: boolean;
 };
 
 type TemplateFieldCommon = {
@@ -119,6 +122,22 @@ type TemplateFieldCommon = {
   group?: string;
   gridColumn?: string;
   placeholder?: string;
+  /** Number fields only: minimum allowed value. */
+  min?: number;
+  /** Number fields only: maximum allowed value. */
+  max?: number;
+  /** Number fields only: increment step. */
+  step?: number;
+  /** Number fields only: unit label rendered alongside the value (e.g. "px", "%"). */
+  unit?: string;
+  /** Number fields only: renders a slider with a value readout instead of a bare number input. */
+  control?: "slider";
+  /**
+   * Editors hide this field unless another field's current value equals
+   * `equals`. "Current value" means the saved value for `key`, falling back
+   * to that field's own `defaultValue` when unset.
+   */
+  visibleWhen?: { key: string; equals: string };
 };
 
 export type TemplateFieldScalarType =
@@ -144,6 +163,20 @@ export type TemplateField =
       itemSchema: TemplateListItemField[];
       minItems?: number;
       maxItems?: number;
+      /**
+       * Sub-field key whose value titles a collapsed row in the editor.
+       * Defaults to the first `text` sub-field, then the first `textarea`
+       * sub-field, when omitted.
+       */
+      summaryKey?: string;
+      /** Singular noun used for "Add <itemLabel>" / "<itemLabel> 3" labels. Defaults to "item". */
+      itemLabel?: string;
+      /**
+       * When true, the storefront falls back to built-in rows if the saved
+       * list is empty. Purely descriptive for the editor, which shows a hint
+       * — the actual fallback behaviour lives in the template's own render code.
+       */
+      defaultsWhenEmpty?: boolean;
     })
   | (TemplateFieldCommon & {
       type: "faq";
@@ -174,12 +207,6 @@ export function getRichTextFieldValue(
 /** One row in a template list field; `_id` is for admin/editor stable keys. */
 export type TemplateListRow = Record<string, unknown> & { _id?: string };
 
-function newListRowId(index: number): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `row-${index}-${Date.now()}`;
-}
 
 /**
  * Row keys the templates render as an `href`.
@@ -217,15 +244,42 @@ function scrubRowLinks(row: TemplateListRow): TemplateListRow {
   return row;
 }
 
+/**
+ * Parses a raw stored list value into rows with stable `_id`s.
+ *
+ * Rows already carrying a non-empty `_id` keep it unchanged. A row without
+ * one gets the deterministic id `row-${index}` (its position in the input
+ * array) — deliberately NOT `crypto.randomUUID()`, which used to change on
+ * every call and broke dnd-kit's sortable ids plus SSR/CSR row keys on
+ * storefront pages that key by `row._id`. If `row-${index}` collides with an
+ * `_id` already present elsewhere in the same list, a numeric suffix is
+ * appended (`row-${index}-1`, `row-${index}-2`, …) until it's unique.
+ */
 export function parseTemplateListRows(raw: unknown): TemplateListRow[] {
   if (!Array.isArray(raw)) return [];
-  return raw.map((item, index) => {
-    if (!isObjectRecord(item)) {
-      return { _id: newListRowId(index) };
+
+  const items = raw.map((item) =>
+    isObjectRecord(item) ? ({ ...item } as TemplateListRow) : null,
+  );
+
+  const usedIds = new Set<string>();
+  for (const item of items) {
+    if (item && typeof item._id === "string" && item._id) {
+      usedIds.add(item._id);
     }
-    const row = { ...item } as TemplateListRow;
+  }
+
+  return items.map((item, index) => {
+    const row: TemplateListRow = item ?? {};
     if (typeof row._id !== "string" || !row._id) {
-      row._id = newListRowId(index);
+      let candidate = `row-${index}`;
+      let suffix = 1;
+      while (usedIds.has(candidate)) {
+        candidate = `row-${index}-${suffix}`;
+        suffix += 1;
+      }
+      row._id = candidate;
+      usedIds.add(candidate);
     }
     return scrubRowLinks(row);
   });
@@ -260,6 +314,95 @@ export function getListFieldValue(
   if (!isObjectRecord(customFields)) return null;
   const value = customFields[key];
   return Array.isArray(value) ? value : null;
+}
+
+/**
+ * Returns the SAVED string value for `key` from a `customFields` object, with
+ * no default applied. Unlike `getThemeFields`/`resolveTemplateFields`, this
+ * never falls back to a field's `defaultValue` — callers that need the raw
+ * saved-or-absent distinction (e.g. deciding whether to show a "not set"
+ * state) should use this instead.
+ *
+ * `customFields` is `z.any()` on the wire, so non-objects, arrays, and
+ * non-string values at `key` all resolve to `undefined`.
+ */
+export function getRawCustomFieldString(
+  customFields: unknown,
+  key: string,
+): string | undefined {
+  if (!isObjectRecord(customFields)) return undefined;
+  const value = customFields[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Collapses a string's internal whitespace/newlines into single spaces and
+ * trims the ends. Used to render multi-line `textarea` sub-field values as a
+ * single-line row summary.
+ */
+function collapseWhitespace(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Derives the collapsed-row title shown for a `list` field's row in the
+ * editors.
+ *
+ * Priority: `summaryKey`'s value (if given and non-empty after trimming) →
+ * the first non-empty `text` sub-field (declaration order in `itemSchema`) →
+ * the first non-empty `textarea` sub-field (whitespace/newlines collapsed to
+ * single spaces) → `null` when nothing usable is found. Never truncates —
+ * truncation is a CSS concern for the caller.
+ */
+export function getListRowSummary(
+  row: Record<string, unknown>,
+  itemSchema: TemplateListItemField[],
+  summaryKey?: string,
+): string | null {
+  if (summaryKey) {
+    const value = row[summaryKey];
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) return trimmed;
+    }
+  }
+
+  for (const field of itemSchema) {
+    if (field.type !== "text") continue;
+    const value = row[field.key];
+    if (typeof value !== "string") continue;
+    const trimmed = value.trim();
+    if (trimmed) return trimmed;
+  }
+
+  for (const field of itemSchema) {
+    if (field.type !== "textarea") continue;
+    const value = row[field.key];
+    if (typeof value !== "string") continue;
+    const collapsed = collapseWhitespace(value);
+    if (collapsed) return collapsed;
+  }
+
+  return null;
+}
+
+/**
+ * Template field keys retired from the field registries — no template
+ * declares them anymore — but whose values, if a site saved one before the
+ * key was removed, must keep round-tripping: the admin "custom pairs" editor
+ * hides them (there's no schema left to render an input for) while save
+ * paths preserve them untouched, and any runtime code that still reads the
+ * saved value (e.g. via `getRawCustomFieldString`) treats it as a read-only
+ * fallback rather than dead data to discard.
+ */
+export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
+  "bamboo.global.map-lat",
+  "bamboo.global.map-lng",
+  "bamboo.contact.hours",
+]);
+
+export function isRetiredTemplateKey(key: string): boolean {
+  return RETIRED_TEMPLATE_KEYS.has(key);
 }
 
 const genericIconRowSchema = z
@@ -642,6 +785,47 @@ export function getGroupMetadata(
   groupId: string,
 ): TemplateFieldGroup | undefined {
   return TEMPLATE_FIELD_GROUPS[templateId]?.find((g) => g.id === groupId);
+}
+
+/**
+ * Indexes a flat field list by `key`. Used to resolve a `visibleWhen`
+ * condition's controlling field even when it lives in a different
+ * group/page grouping than the field being tested — e.g. `fields` passed to
+ * `isFieldVisible` may be scoped to one group, while `fieldsByKey` here
+ * should span the whole template (or at least the whole page).
+ */
+export function buildFieldsByKey(
+  fields: TemplateField[],
+): Record<string, TemplateField> {
+  const byKey: Record<string, TemplateField> = {};
+  for (const field of fields) byKey[field.key] = field;
+  return byKey;
+}
+
+/**
+ * Resolves whether `field` should be shown to the owner, given the current
+ * draft/saved values map and a `key`-indexed lookup of every field the
+ * template defines (see `buildFieldsByKey`).
+ *
+ * A field with no `visibleWhen` is always visible. Otherwise the controlling
+ * field's "current value" is its saved value in `values`, falling back to
+ * that field's own `defaultValue`, falling back to `""` — matching the
+ * contract documented on `TemplateFieldCommon.visibleWhen`.
+ */
+export function isFieldVisible(
+  field: TemplateField,
+  values: Record<string, unknown>,
+  fieldsByKey: Record<string, TemplateField>,
+): boolean {
+  const condition = field.visibleWhen;
+  if (!condition) return true;
+
+  const raw = values[condition.key];
+  const saved = typeof raw === "string" ? raw : undefined;
+  const controlling = fieldsByKey[condition.key];
+  const resolved = saved ?? controlling?.defaultValue ?? "";
+
+  return resolved === condition.equals;
 }
 
 // Helper to group fields by page

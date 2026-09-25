@@ -8,9 +8,13 @@
  *   urlMap      Map<normalizedOldUrl, newUrl>   — S3 URL rewrites
  *   galleryIdMap Map<oldGalleryId, newGalleryId> — gallery ID remaps
  *
+ * plus an optional `embedIdMaps` (form / quote-calculator ID remaps) for the
+ * TipTap embed nodes that reference those records by id.
+ *
  * Coverage is intentionally kept identical to usage.ts so that no media
  * reference is silently skipped. Any field type added to usage.ts must also
- * be handled here.
+ * be handled here, and any column added to usage.ts must also be rewritten
+ * in import.ts (whose post-import check reports misses via usage.ts).
  *
  * normalizeUrl is re-exported from src/lib/media/usage.ts (single source of
  * truth) — do NOT re-implement it here.
@@ -39,17 +43,46 @@ export function rewriteUrl(url: string, urlMap: Map<string, string>): string {
   return urlMap.get(normalized) ?? url;
 }
 
+// ─── Embed ID maps ────────────────────────────────────────────────────────────
+
+/**
+ * Source-id → target-id maps for TipTap nodes that embed a record by id.
+ * Built by import.ts step 3b2 (forms + quote calculators) before any TipTap
+ * or custom-field rewriting runs. Omitted/absent maps leave ids unchanged.
+ */
+export interface EmbedIdMaps {
+  form?: Map<string, string>;
+  quoteCalculator?: Map<string, string>;
+}
+
+/** Return a copy of `attrs` with `attrs[key]` remapped via `map`, or null if nothing to remap. */
+function remapAttr(
+  attrs: Record<string, unknown> | undefined,
+  key: string,
+  map: Map<string, string> | undefined,
+): Record<string, unknown> | null {
+  if (!attrs) return null;
+  const id = attrs[key];
+  if (typeof id !== "string" || !id) return null;
+  return { ...attrs, [key]: map?.get(id) ?? id };
+}
+
 // ─── rewriteTiptapDoc ─────────────────────────────────────────────────────────
 
 /**
  * Deep-clone and rewrite a TipTap JSON document node.
  *
- *   image nodes   → attrs.src rewritten via urlMap
+ *   image / video nodes → attrs.src rewritten via urlMap
  *   gallery nodes → attrs.galleryId rewritten via galleryIdMap
+ *   form nodes    → attrs.formId rewritten via embedIdMaps.form
+ *   quoteCalculator nodes → attrs.calculatorId rewritten via embedIdMaps.quoteCalculator
  *   embed nodes   → left intact (external iframe)
- *   quoteCalculator nodes → left intact (calculators are not part of the transfer manifest; v1 tradeoff — a dangling calculatorId renders a graceful placeholder on the storefront)
- *   form nodes    → left intact (forms are not part of the transfer manifest; same tradeoff as quoteCalculator)
  *   all others    → recursed
+ *
+ * Forms and quote calculators travel in the manifest (since 2026-09-25), so
+ * their embeds are remapped like galleries. An id with no map entry (older
+ * bundle without those keys, or a row skipped on import) passes through
+ * unchanged — the storefront renders a graceful placeholder for a dangling id.
  *
  * Returns a new object — the input is never mutated.
  */
@@ -57,6 +90,7 @@ export function rewriteTiptapDoc(
   node: unknown,
   urlMap: Map<string, string>,
   galleryIdMap: Map<string, string>,
+  embedIdMaps?: EmbedIdMaps,
 ): unknown {
   if (!node || typeof node !== "object" || Array.isArray(node)) return node;
 
@@ -65,7 +99,9 @@ export function rewriteTiptapDoc(
   // Shallow-clone this node so we don't mutate the original
   const result: Record<string, unknown> = { ...n };
 
-  if (n.type === "image") {
+  // `video` nodes carry an uploaded clip's URL in `attrs.src` exactly like
+  // `image` nodes (usage.ts walkTiptap treats them the same way).
+  if (n.type === "image" || n.type === "video") {
     const attrs = n.attrs as Record<string, unknown> | undefined;
     if (attrs) {
       const src = attrs.src;
@@ -74,26 +110,36 @@ export function rewriteTiptapDoc(
       }
     }
   } else if (n.type === "gallery") {
-    const attrs = n.attrs as Record<string, unknown> | undefined;
-    if (attrs) {
-      const galleryId = attrs.galleryId;
-      if (typeof galleryId === "string" && galleryId) {
-        result.attrs = {
-          ...attrs,
-          galleryId: galleryIdMap.get(galleryId) ?? galleryId,
-        };
-      }
-    }
+    const attrs = remapAttr(
+      n.attrs as Record<string, unknown> | undefined,
+      "galleryId",
+      galleryIdMap,
+    );
+    if (attrs) result.attrs = attrs;
+  } else if (n.type === "form") {
+    // Node/attr names: src/components/ui/minimal-tiptap/extensions/form
+    const attrs = remapAttr(
+      n.attrs as Record<string, unknown> | undefined,
+      "formId",
+      embedIdMaps?.form,
+    );
+    if (attrs) result.attrs = attrs;
+  } else if (n.type === "quoteCalculator") {
+    // Node/attr names: src/components/ui/minimal-tiptap/extensions/quote-calculator
+    const attrs = remapAttr(
+      n.attrs as Record<string, unknown> | undefined,
+      "calculatorId",
+      embedIdMaps?.quoteCalculator,
+    );
+    if (attrs) result.attrs = attrs;
   }
   // "embed" → intentionally left intact (mirrors usage.ts)
-  // "quoteCalculator" → intentionally left intact (calculators are not part of the transfer manifest)
-  // "form" → intentionally left intact (forms are not part of the transfer manifest)
 
   // Recurse into content array
   const content = n.content;
   if (Array.isArray(content)) {
     result.content = content.map((child: unknown) =>
-      rewriteTiptapDoc(child, urlMap, galleryIdMap),
+      rewriteTiptapDoc(child, urlMap, galleryIdMap, embedIdMaps),
     );
   }
 
@@ -119,12 +165,15 @@ export function rewriteTiptapDoc(
  * @param galleryIdMap Old-galleryId → new-galleryId map
  * @param opts.templateId  The manifest's templateId; activates gallery-field remapping
  * @param opts._fieldKey   (internal) current field key being walked; used for gallery detection
+ * @param embedIdMaps  Optional form / quote-calculator id remaps, applied to
+ *                     any TipTap doc found inside `value` (see rewriteTiptapDoc)
  */
 export function rewriteJsonValue(
   value: unknown,
   urlMap: Map<string, string>,
   galleryIdMap: Map<string, string>,
   opts?: { templateId?: string; _fieldKey?: string },
+  embedIdMaps?: EmbedIdMaps,
 ): unknown {
   if (value === null || value === undefined) return value;
 
@@ -151,7 +200,7 @@ export function rewriteJsonValue(
   // ── Array ──────────────────────────────────────────────────────────────────
   if (Array.isArray(value)) {
     return value.map((item: unknown) =>
-      rewriteJsonValue(item, urlMap, galleryIdMap, opts),
+      rewriteJsonValue(item, urlMap, galleryIdMap, opts, embedIdMaps),
     );
   }
 
@@ -161,17 +210,20 @@ export function rewriteJsonValue(
 
     // Detect TipTap document (mirrors deepWalkJson heuristic)
     if (obj.type === "doc" && Array.isArray(obj.content)) {
-      return rewriteTiptapDoc(obj, urlMap, galleryIdMap);
+      return rewriteTiptapDoc(obj, urlMap, galleryIdMap, embedIdMaps);
     }
 
     // For top-level custom-field objects, iterate per-key so each key's value
     // can be checked against the gallery-type predicate.
     const result: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj)) {
-      result[k] = rewriteJsonValue(v, urlMap, galleryIdMap, {
-        templateId,
-        _fieldKey: k,
-      });
+      result[k] = rewriteJsonValue(
+        v,
+        urlMap,
+        galleryIdMap,
+        { templateId, _fieldKey: k },
+        embedIdMaps,
+      );
     }
     return result;
   }

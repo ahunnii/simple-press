@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
+import { resolveFields } from "..";
 import { BambooOrderConfirmation } from "./bamboo-order-confirmation";
 
 type Props = {
@@ -9,6 +10,11 @@ type Props = {
 };
 
 export function BambooOrderSuccessPage({ business }: Props) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "bamboo.checkout.success-note",
+  ]);
+  const note = f["bamboo.checkout.success-note"] ?? "";
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
       <Suspense
@@ -18,7 +24,7 @@ export function BambooOrderSuccessPage({ business }: Props) {
           </div>
         }
       >
-        <BambooOrderConfirmation business={business} />
+        <BambooOrderConfirmation business={business} note={note} />
       </Suspense>
     </section>
   );

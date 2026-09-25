@@ -32,9 +32,21 @@ export type DefaultProductsPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["getWithProducts"]>;
 };
 
+/**
+ * Which merchant policy pages are published, resolved server-side by
+ * `shop/[slug]/page.tsx` so product pages can link them without a client
+ * fetch (and never link a page that doesn't exist). Optional — templates
+ * that don't link policies simply ignore it.
+ */
+export type ProductPagePolicies = {
+  hasShippingPolicy: boolean;
+  hasRefundPolicy: boolean;
+};
+
 export type DefaultProductPageTemplateProps = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  productPolicies?: ProductPagePolicies;
 };
 
 export type DefaultContactPageTemplateProps = {

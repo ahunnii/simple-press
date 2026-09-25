@@ -28,6 +28,7 @@ import {
   getGroupMetadata,
   groupFieldsByGroup,
   groupFieldsByPage,
+  isRetiredTemplateKey,
   PAGE_METADATA,
 } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
@@ -126,6 +127,7 @@ export function TemplateFieldsEditor({
         .filter(
           ([key, value]) =>
             key !== SP_META_KEY &&
+            !isRetiredTemplateKey(key) &&
             !allTemplateKeys.has(key) &&
             typeof value === "string" &&
             value !== "",
@@ -155,9 +157,17 @@ export function TemplateFieldsEditor({
         .flat()
         .map((f) => f.key),
     );
-    // Exclude the reserved editor-metadata key — it is not owner-editable content.
+    // Exclude the reserved editor-metadata key and retired template keys —
+    // neither is owner-editable content (retired keys have no schema left to
+    // render an input for; their saved value round-trips untouched via
+    // `customFields`/`allFields` below).
     return Object.entries(initialFields)
-      .filter(([key]) => key !== SP_META_KEY && !allTemplateKeys.has(key))
+      .filter(
+        ([key]) =>
+          key !== SP_META_KEY &&
+          !isRetiredTemplateKey(key) &&
+          !allTemplateKeys.has(key),
+      )
       .map(([key, value]) => {
         const page = key.split(".")[0] ?? "global";
         return { key, value: typeof value === "string" ? value : "", page };
@@ -348,6 +358,9 @@ export function TemplateFieldsEditor({
 
         for (const [key, value] of Object.entries(parsed)) {
           if (key === "_templateId") continue;
+          // Retired keys have no schema left to render an input for — same
+          // treatment as SP_META_KEY, never surfaced as an editable pair.
+          if (isRetiredTemplateKey(key)) continue;
           // Only import keys that belong to this template
           if (!key.startsWith(prefix)) continue;
           if (allTemplateKeys.has(key)) {
@@ -419,6 +432,7 @@ export function TemplateFieldsEditor({
         .filter(
           ([key, value]) =>
             key !== SP_META_KEY &&
+            !isRetiredTemplateKey(key) &&
             !allTemplateKeys.has(key) &&
             typeof value === "string" &&
             value !== "",
@@ -859,6 +873,7 @@ export function TemplateFieldsEditor({
                                 page={page}
                                 groupMeta={groupMeta}
                                 fields={fields}
+                                allFields={templateFields}
                                 customFields={customFields}
                                 modifiedFields={modifiedFields}
                                 onFieldChange={handleFieldChange}

@@ -28,3 +28,20 @@ export function sectionGroupAttr(page: string, group: string) {
 export function fieldAttr(key: string) {
   return { "data-sp-field": key } as const;
 }
+
+/**
+ * Returns the data attribute object for one rendered row of a `list`
+ * template field. Spread onto the row's root element so a click on that row
+ * in the editor preview opens the owning section AND expands + focuses the
+ * matching row in the list editor (see `resolvePreviewTarget`).
+ *
+ * Usage: <li {...listItemAttr("bamboo.homepage.hero-badges", index)}>
+ *
+ * `index` is the 0-based position in the rendered list. When the storefront
+ * renders built-in default rows for an empty list, the index points past the
+ * saved rows — the list editor ignores out-of-range indexes, so the click
+ * just opens the section.
+ */
+export function listItemAttr(fieldKey: string, index: number) {
+  return { "data-sp-item": `${fieldKey}#${index}` } as const;
+}

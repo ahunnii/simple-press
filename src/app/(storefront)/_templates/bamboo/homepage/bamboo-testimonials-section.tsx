@@ -34,6 +34,7 @@ export function BambooTestimonialsSection({
     "bamboo.homepage.testimonials-eyebrow",
     "bamboo.homepage.testimonials-heading",
     "bamboo.homepage.testimonials-button-text",
+    "bamboo.homepage.testimonials-button-link",
   ]);
 
   const buttonText = f["bamboo.homepage.testimonials-button-text"] ?? "";
@@ -111,7 +112,10 @@ export function BambooTestimonialsSection({
           <FadeIn direction="up" delay={0.3}>
             <div className="mt-12 text-center">
               <Link
-                href="/testimonials"
+                href={
+                  f["bamboo.homepage.testimonials-button-link"] ??
+                  "/testimonials"
+                }
                 className="group text-foreground inline-flex items-center gap-2.5 border-b border-[var(--bam-gold)]/50 pb-1 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-[var(--bam-gold)] hover:text-[var(--bam-forest)]"
               >
                 <span

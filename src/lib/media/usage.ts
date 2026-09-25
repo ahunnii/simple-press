@@ -9,7 +9,10 @@
  * The scanner is intentionally exhaustive:
  *  - Plain image/video columns on every relevant model
  *  - JSON custom fields (generic deep walk + targeted gallery-field pass)
+ *  - Targeted URL keys inside small config blobs (SiteContent.pageMeta
+ *    `ogImage`s, SiteContent.popupConfig `imagePath`)
  *  - TipTap rich-text documents embedded in content columns and additionalFields
+ *    (including Page.previewDraft and Business.maintenanceMessage)
  *  - Gallery images that are referenced by gallery-type template fields or by
  *    `gallery` nodes inside TipTap documents
  *  - Logo / favicon objects are marked "always in use" via `isAlwaysInUseKey`
@@ -20,6 +23,7 @@ import { isStorageUrl } from "~/lib/s3/url";
 import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { getTemplateLabel } from "~/lib/template-ownership";
+import { STATIC_SEO_ROUTES } from "~/lib/validators/site-seo";
 import { db } from "~/server/db";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -216,6 +220,8 @@ export async function buildUsedMediaIndex(
         ogImage: true,
         faviconUrl: true,
         logoUrl: true,
+        pageMeta: true,
+        popupConfig: true,
         customFields: true,
         previewCustomFields: true,
         business: { select: { templateId: true } },
@@ -241,6 +247,52 @@ export async function buildUsedMediaIndex(
       scUsage(sc.ogImage, "OG image");
       scUsage(sc.faviconUrl, "Favicon");
       scUsage(sc.logoUrl, "Logo");
+
+      // Per-route SEO overrides: { [routeKey]: { title, description, ogImage } }
+      // (src/lib/validators/site-seo.ts). Read raw rather than through
+      // `parsePageMeta` — an entry under a retired route key still holds the
+      // URL, and an unattributable reference must keep blocking deletion.
+      const pageMeta = sc.pageMeta;
+      if (
+        pageMeta &&
+        typeof pageMeta === "object" &&
+        !Array.isArray(pageMeta)
+      ) {
+        for (const [routeKey, entry] of Object.entries(
+          pageMeta as Record<string, unknown>,
+        )) {
+          if (!entry || typeof entry !== "object" || Array.isArray(entry))
+            continue;
+          const ogImage = (entry as Record<string, unknown>).ogImage;
+          if (typeof ogImage !== "string" || !ogImage) continue;
+          const routeLabel =
+            STATIC_SEO_ROUTES.find((r) => r.key === routeKey)?.label ??
+            routeKey;
+          addUsage(map, ogImage, {
+            url: ogImage,
+            location: "Page SEO image",
+            entityType: "siteContent",
+            entityLabel: routeLabel,
+            adminHref: "/admin/content/seo",
+          });
+        }
+      }
+
+      // Announcement popup image (PopupConfig.imagePath —
+      // src/lib/validators/site-banner.ts). BannerConfig has no media field.
+      const popup = sc.popupConfig;
+      if (popup && typeof popup === "object" && !Array.isArray(popup)) {
+        const imagePath = (popup as Record<string, unknown>).imagePath;
+        if (typeof imagePath === "string" && imagePath) {
+          addUsage(map, imagePath, {
+            url: imagePath,
+            location: "Announcement popup",
+            entityType: "siteContent",
+            entityLabel: "Popup image",
+            adminHref: "/admin/content/announcements",
+          });
+        }
+      }
 
       const templateId = sc.business?.templateId ?? "";
       const templateLabel = getTemplateLabel(templateId);
@@ -713,6 +765,7 @@ export async function buildUsedMediaIndex(
         image: true,
         ogImage: true,
         content: true,
+        previewDraft: true,
         type: true,
       },
     })
@@ -745,13 +798,13 @@ export async function buildUsedMediaIndex(
             adminHref: pageHref,
           });
         }
-        if (page.content) {
+        const walkPageDoc = (doc: unknown, location: string) => {
           walkTiptap(
-            page.content,
+            doc,
             (src) => {
               addUsage(map, src, {
                 url: src,
-                location: "Page content",
+                location,
                 entityType: "page",
                 entityId: page.id,
                 entityLabel: page.title,
@@ -761,7 +814,7 @@ export async function buildUsedMediaIndex(
             (id) => {
               galleryRefs.push({
                 id,
-                location: "Page content",
+                location,
                 entityType: "page",
                 entityId: page.id,
                 entityLabel: page.title,
@@ -769,7 +822,60 @@ export async function buildUsedMediaIndex(
               });
             },
           );
+        };
+        if (page.content) walkPageDoc(page.content, "Page content");
+
+        // Visual-editor draft: { title, excerpt, content } — only `content`
+        // (a TipTap doc) can hold media. An image placed in the draft but not
+        // yet published is live the moment the owner hits Publish.
+        const draft = page.previewDraft;
+        if (draft && typeof draft === "object" && !Array.isArray(draft)) {
+          const draftContent = (draft as Record<string, unknown>).content;
+          if (draftContent) walkPageDoc(draftContent, "Page content (draft)");
         }
+      }
+    });
+
+  // ── 7b. Business (maintenance / coming-soon page) ──────────────────────────
+  const businessPromise = db.business
+    .findUnique({
+      where: { id: businessId },
+      select: { maintenanceImage: true, maintenanceMessage: true },
+    })
+    .then((b) => {
+      if (!b) return;
+      const maintenanceUsage = (location: string, entityLabel?: string) => ({
+        location,
+        entityType: "business",
+        entityLabel,
+        adminHref: "/admin/settings/availability",
+      });
+
+      if (b.maintenanceImage) {
+        addUsage(map, b.maintenanceImage, {
+          url: b.maintenanceImage,
+          ...maintenanceUsage("Maintenance page", "Flyer image"),
+        });
+      }
+
+      // The message is a TipTap doc (src/lib/maintenance-config.ts); its
+      // editor's image dialog accepts a pasted URL, so walk it like Page.content.
+      if (b.maintenanceMessage) {
+        walkTiptap(
+          b.maintenanceMessage,
+          (src) => {
+            addUsage(map, src, {
+              url: src,
+              ...maintenanceUsage("Maintenance page message (rich text)"),
+            });
+          },
+          (id) => {
+            galleryRefs.push({
+              id,
+              ...maintenanceUsage("Maintenance page message (rich text)"),
+            });
+          },
+        );
       }
     });
 
@@ -865,6 +971,7 @@ export async function buildUsedMediaIndex(
     videosPromise,
     imagesPromise,
     pagesPromise,
+    businessPromise,
     galleryImagesPromise,
     testimonialsPromise,
     reviewsPromise,

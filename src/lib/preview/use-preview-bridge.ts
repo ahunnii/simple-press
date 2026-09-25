@@ -17,6 +17,15 @@ export type PreviewMessage =
       type: "sp:edit-group";
       page: string;
       group: string;
+      /**
+       * Optional narrowing to one field inside the group (the element under
+       * the pointer carried `data-sp-field` / `data-sp-item`). Absent for
+       * keyboard activation and clicks on unannotated content. Receivers
+       * must validate it (`sanitizeEditTarget`) — it crosses a frame boundary.
+       */
+      field?: string;
+      /** Optional 0-based row index when `field` is a `list` field. */
+      item?: number;
     }
   | {
       source: typeof PREVIEW_SOURCE;

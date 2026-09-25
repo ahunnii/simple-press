@@ -179,9 +179,15 @@ export function BambooHeader({
   // compact centre slot and in the sub-lg brand cluster; blank keeps the disc.
   const f = resolveFields(business.siteContent?.customFields, [
     "bamboo.global.nav-wordmark",
+    "bamboo.global.menu-tagline",
+    "bamboo.global.cart-label",
+    "bamboo.global.cart-empty-text",
   ]);
   const wordmarkValue = f["bamboo.global.nav-wordmark"]?.trim();
   const wordmarkUrl = wordmarkValue === "" ? undefined : wordmarkValue;
+  const menuTagline = f["bamboo.global.menu-tagline"] ?? "";
+  const cartLabel = f["bamboo.global.cart-label"] ?? "";
+  const cartEmptyText = f["bamboo.global.cart-empty-text"] ?? "";
 
   // The emblem gap sits between the two link halves; with an odd count the
   // extra link goes to the left half.
@@ -668,9 +674,14 @@ export function BambooHeader({
         onOpenChange={setMobileOpen}
         business={business}
         isAuthenticated={!!session?.user}
+        menuTagline={menuTagline}
       />
 
-      <BambooCartDrawer shippingConfig={shippingConfigFromBusiness(business)} />
+      <BambooCartDrawer
+        shippingConfig={shippingConfigFromBusiness(business)}
+        cartLabel={cartLabel}
+        cartEmptyText={cartEmptyText}
+      />
 
       <span
         role="status"

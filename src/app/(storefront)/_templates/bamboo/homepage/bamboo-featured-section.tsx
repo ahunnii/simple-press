@@ -25,7 +25,10 @@ export function BambooFeaturedSection({ customFields, products }: Props) {
     "bamboo.homepage.featured-title",
     "bamboo.homepage.featured-description",
     "bamboo.homepage.featured-button-text",
+    "bamboo.homepage.featured-button-link",
   ]);
+
+  const buttonText = f["bamboo.homepage.featured-button-text"] ?? "";
 
   // happy-bamboo's featured grid: four products, two up from md.
   const featured = products?.slice(0, 4) ?? [];
@@ -79,22 +82,24 @@ export function BambooFeaturedSection({ customFields, products }: Props) {
           )}
         </StaggerContainer>
 
-        <FadeIn direction="up" delay={0.3}>
-          <div className="mt-12 text-center">
-            <Link
-              href="/shop"
-              className="group text-foreground inline-flex items-center gap-2.5 border-b border-[var(--bam-gold)]/50 pb-1 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-[var(--bam-gold)] hover:text-[var(--bam-forest)]"
-            >
-              <span {...fieldAttr("bamboo.homepage.featured-button-text")}>
-                {f["bamboo.homepage.featured-button-text"] ?? ""}
-              </span>
-              <ArrowRight
-                className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
-            </Link>
-          </div>
-        </FadeIn>
+        {buttonText ? (
+          <FadeIn direction="up" delay={0.3}>
+            <div className="mt-12 text-center">
+              <Link
+                href={f["bamboo.homepage.featured-button-link"] ?? "/shop"}
+                className="group text-foreground inline-flex items-center gap-2.5 border-b border-[var(--bam-gold)]/50 pb-1 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-[var(--bam-gold)] hover:text-[var(--bam-forest)]"
+              >
+                <span {...fieldAttr("bamboo.homepage.featured-button-text")}>
+                  {buttonText}
+                </span>
+                <ArrowRight
+                  className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
+            </div>
+          </FadeIn>
+        ) : null}
       </div>
     </section>
   );

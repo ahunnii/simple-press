@@ -35,6 +35,11 @@ export type SectionRailProps = {
   onSelectTheme: () => void;
   /** True for PLATFORM_ADMIN users — shows the pinned "Advanced editor" link. */
   isPlatformAdmin?: boolean;
+  /**
+   * `"rail"` (default): the fixed 240px left column of the desktop editor.
+   * `"sheet"`: full-width list inside the compact editor's Sections drawer.
+   */
+  variant?: "rail" | "sheet";
 };
 
 /** Shared with `CmsPageRail` for the blog-post "Article sections" group. */
@@ -107,7 +112,8 @@ export function SectionRow({
             // on hover/focus otherwise.
             isHidden
               ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+              : // Touch screens have no hover to reveal it — keep it shown.
+                "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100",
           )}
         >
           {isHidden ? (
@@ -138,11 +144,16 @@ export function SectionRail({
   themeActive,
   onSelectTheme,
   isPlatformAdmin,
+  variant = "rail",
 }: SectionRailProps) {
   return (
     <nav
       aria-label="Page sections"
-      className="bg-card flex w-60 shrink-0 flex-col overflow-y-auto border-r"
+      className={
+        variant === "sheet"
+          ? "bg-card flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]"
+          : "bg-card flex w-60 shrink-0 flex-col overflow-y-auto border-r"
+      }
     >
       <div className="flex flex-1 flex-col py-1">
         <p className="text-muted-foreground px-3 pt-3 pb-1 text-xs font-medium tracking-wide uppercase">

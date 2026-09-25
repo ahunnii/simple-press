@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 
 import type { PendingFile } from "~/components/inputs/pending-image-grid";
+import { prepareImageForUpload } from "~/lib/image-prep";
 import {
   getImageDimensions,
   getStoredPath,
@@ -44,8 +45,17 @@ export type UseDeferredImageUpload = {
   /** Whether an upload batch is currently in-flight. */
   isUploading: boolean;
   /**
-   * Stage additional files. Client-side validation rejects non-images and
-   * files over 5 MB; rejected files are surfaced via a toast.
+   * Whether `addFiles` is currently normalizing (HEIC conversion / downscale)
+   * newly-added files before staging them. Files aren't added to
+   * `pendingFiles` until this finishes for them.
+   */
+  isPreparing: boolean;
+  /**
+   * Stage additional files. Each file is first passed through
+   * `prepareImageForUpload` (HEIC/HEIF is transcoded, oversized images are
+   * downscaled) before the non-image/over-5MB checks run, so large phone
+   * photos are normalized rather than rejected outright; rejected files are
+   * surfaced via a toast.
    */
   addFiles: (files: File[] | FileList) => void;
   /** Remove a single staged file by its client id. Revokes the object URL. */
@@ -90,6 +100,7 @@ export function useDeferredImageUpload(
   const pendingFilesRef = useRef<PendingFile[]>([]);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
 
   const uploadHook = useUploadFiles({ api: "/api/upload", route });
 
@@ -127,42 +138,65 @@ export function useDeferredImageUpload(
     const fileArray = Array.from(files);
     if (fileArray.length === 0) return;
 
-    const valid: File[] = [];
-    const skippedSize: string[] = [];
+    const candidates: File[] = [];
     const skippedType: string[] = [];
 
     for (const file of fileArray) {
-      if (!file.type.startsWith("image/")) {
+      // Some browsers (notably Android Chrome) leave `file.type` empty for
+      // HEIC/HEIF, so fall back to the extension for those.
+      if (file.type.startsWith("image/") || /\.(heic|heif)$/i.test(file.name)) {
+        candidates.push(file);
+      } else {
         skippedType.push(file.name);
-        continue;
       }
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        skippedSize.push(file.name);
-        continue;
-      }
-      valid.push(file);
     }
 
-    if (skippedSize.length > 0) {
-      toast.warning(
-        `Skipped ${skippedSize.length} file${skippedSize.length > 1 ? "s" : ""} over 5 MB: ${skippedSize.join(", ")}`,
-      );
-    }
     if (skippedType.length > 0) {
       toast.warning(
         `Skipped ${skippedType.length} non-image file${skippedType.length > 1 ? "s" : ""}: ${skippedType.join(", ")}`,
       );
     }
 
-    if (valid.length === 0) return;
+    if (candidates.length === 0) return;
 
-    const newItems: PendingFile[] = valid.map((file) => ({
-      id: `pending-${(nextIdRef.current++).toString()}`,
-      previewUrl: URL.createObjectURL(file),
-      file,
-    }));
+    void (async () => {
+      setIsPreparing(true);
+      let prepared: File[];
+      try {
+        prepared = await Promise.all(
+          candidates.map((file) => prepareImageForUpload(file)),
+        );
+      } finally {
+        setIsPreparing(false);
+      }
 
-    setPendingFiles((prev) => [...prev, ...newItems]);
+      const valid: File[] = [];
+      const skippedSize: string[] = [];
+
+      for (const file of prepared) {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+          skippedSize.push(file.name);
+          continue;
+        }
+        valid.push(file);
+      }
+
+      if (skippedSize.length > 0) {
+        toast.warning(
+          `Skipped ${skippedSize.length} file${skippedSize.length > 1 ? "s" : ""} over 5 MB: ${skippedSize.join(", ")}`,
+        );
+      }
+
+      if (valid.length === 0) return;
+
+      const newItems: PendingFile[] = valid.map((file) => ({
+        id: `pending-${(nextIdRef.current++).toString()}`,
+        previewUrl: URL.createObjectURL(file),
+        file,
+      }));
+
+      setPendingFiles((prev) => [...prev, ...newItems]);
+    })();
   }, []);
 
   const removeFile = useCallback((id: string) => {
@@ -274,6 +308,7 @@ export function useDeferredImageUpload(
   return {
     pendingFiles,
     isUploading,
+    isPreparing,
     addFiles,
     removeFile,
     reorder,

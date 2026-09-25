@@ -97,4 +97,22 @@ export const SECTION_LINKS = {
     description:
       "Add, edit, and reorder the questions shown on your FAQ page and in contact teasers.",
   },
+  // No featureKey on these three: address, contact info, and hours are core
+  // Settings fields available to every business, not gated by a feature flag.
+  businessLocation: {
+    label: "Business address",
+    href: "/admin/settings/general#location",
+    description:
+      "Your address and the optional map pin used by this section's map.",
+  },
+  businessContact: {
+    label: "Email & phone",
+    href: "/admin/settings/general#contact",
+    description: "The public email and phone number shown on your site.",
+  },
+  businessHours: {
+    label: "Business hours",
+    href: "/admin/settings/hours",
+    description: "Opening hours shown on your contact page.",
+  },
 } as const satisfies Record<string, SectionLink>;

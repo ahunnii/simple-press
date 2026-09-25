@@ -18,6 +18,7 @@ import { Prisma } from "generated/prisma";
 import JSZip from "jszip";
 
 import type { LocalPresence } from "~/lib/seo/local-presence";
+import type { EmbedIdMaps } from "~/lib/store-transfer/rewrite";
 import type { ExportedBusiness } from "~/lib/store-transfer/types";
 import {
   normalizeMaintenanceMessage,
@@ -41,6 +42,8 @@ import {
   rewriteTiptapDoc,
   rewriteUrl,
 } from "~/lib/store-transfer/rewrite";
+import { parseStoredFormDefinition } from "~/lib/validators/form";
+import { parseStoredQuoteDefinition } from "~/lib/validators/quote-calculator";
 import { parseManifest } from "~/lib/validators/store-transfer";
 import { db } from "~/server/db";
 
@@ -209,6 +212,27 @@ export async function importStoreBundle(args: {
     return null;
   }
 
+  // Optional-DateTime back-compat (fields added 2026-09-25 and later): a
+  // missing key must leave the target column untouched (undefined); an
+  // explicit null clears it; an ISO string is parsed to a Date.
+  function toDateOrUndefined(
+    value: string | null | undefined,
+  ): Date | null | undefined {
+    if (value === undefined) return undefined;
+    return value === null ? null : new Date(value);
+  }
+
+  // Json column back-compat (fields added 2026-09-25 and later): a missing
+  // key must leave the target column untouched (undefined); an explicit
+  // null clears it (Prisma.DbNull); anything else is passed through for
+  // Prisma to cast as InputJsonValue.
+  function toJsonOrUndefined(
+    value: unknown,
+  ): Prisma.InputJsonValue | typeof Prisma.DbNull | undefined {
+    if (value === undefined) return undefined;
+    return (value as Prisma.InputJsonValue | null) ?? Prisma.DbNull;
+  }
+
   // ── 3a. Business config UPDATE only (never touch identity/stripe/domain fields)
   try {
     const biz = content.business;
@@ -220,13 +244,28 @@ export async function importStoreBundle(args: {
         supportEmail: biz.supportEmail ?? null,
         phoneNumber: biz.phoneNumber ?? null,
         businessAddress: biz.businessAddress ?? null,
+        // Structured address parts — absent in pre-2026-09-25 bundles, so a
+        // missing key leaves the target's existing value untouched.
+        addressStreet: biz.addressStreet,
+        addressCity: biz.addressCity,
+        addressState: biz.addressState,
+        addressPostalCode: biz.addressPostalCode,
+        // Map pin coordinates — absent in pre-2026-09-25 bundles, so a
+        // missing key leaves the target's existing value untouched.
+        latitude: biz.latitude,
+        longitude: biz.longitude,
         templateId: biz.templateId,
         testimonialsAutoApprove: biz.testimonialsAutoApprove,
         maintenanceMode: biz.maintenanceMode,
         maintenanceVariant: biz.maintenanceVariant,
+        // Image URLs in the message are rewritten like Page.content. This runs
+        // before galleries/forms are imported (3b/3b2), so their id maps are
+        // empty here — fine, the maintenance editor doesn't enable those embeds.
         maintenanceMessage:
-          (normalizeMaintenanceMessage(
-            biz.maintenanceMessage,
+          (rewriteTiptapDoc(
+            normalizeMaintenanceMessage(biz.maintenanceMessage),
+            urlMap,
+            new Map(),
           ) as Prisma.InputJsonValue | null) ?? Prisma.DbNull,
         // v1 exports predate maintenanceCta; ?? clears the column for both
         // null and absent values, matching the DbNull convention the
@@ -240,7 +279,10 @@ export async function importStoreBundle(args: {
         // key clears the column — the bundle is authoritative.
         maintenanceOverline: normalizeMaintenanceText(biz.maintenanceOverline),
         maintenanceHeadline: normalizeMaintenanceText(biz.maintenanceHeadline),
-        maintenanceImage: normalizeMaintenanceText(biz.maintenanceImage),
+        maintenanceImage: (() => {
+          const img = normalizeMaintenanceText(biz.maintenanceImage);
+          return img ? rewriteUrl(img, urlMap) : null;
+        })(),
         maintenanceLaunchAt: toDateOrNull(biz.maintenanceLaunchAt),
         maintenanceLaunchEndAt: toDateOrNull(biz.maintenanceLaunchEndAt),
         maintenanceLocation: normalizeMaintenanceText(biz.maintenanceLocation),
@@ -254,6 +296,9 @@ export async function importStoreBundle(args: {
         localPresence: resolveImportedLocalPresence(biz),
         areaServed: normalizeAreaServed(biz.areaServed ?? []),
         allowAiCrawlers: biz.allowAiCrawlers,
+        // Absent in bundles exported before 2026-09-25 — a missing key
+        // leaves the target's current value untouched.
+        sendAbandonedCheckoutEmails: biz.sendAbandonedCheckoutEmails,
         shippingType: biz.shippingType,
         shippingFlatRate: biz.shippingFlatRate ?? null,
         freeShippingThreshold: biz.freeShippingThreshold ?? null,
@@ -266,6 +311,13 @@ export async function importStoreBundle(args: {
         shippingFallbackRate: biz.shippingFallbackRate ?? null,
         shippingDefaultItemWeightLb: biz.shippingDefaultItemWeightLb ?? null,
         salesCountries: biz.salesCountries,
+        // Donations / Tips — absent in bundles exported before 2026-09-25.
+        donationLabel: biz.donationLabel,
+        donationPresetAmounts: toJsonOrUndefined(biz.donationPresetAmounts),
+        venmoHandle: biz.venmoHandle,
+        cashAppHandle: biz.cashAppHandle,
+        donationShowInHeader: biz.donationShowInHeader,
+        donationShowInFooter: biz.donationShowInFooter,
         featureFlags: biz.featureFlags ?? undefined,
         // `timeZone` is optional in the schema (backward-compat with ZIPs
         // exported before the field existed) — fall back to the Business
@@ -357,6 +409,108 @@ export async function importStoreBundle(args: {
     }
   }
 
+  // ── 3b2. Forms + QuoteCalculators — BEFORE SiteContent/Products/Services/
+  // Pages, so formIdMap / quoteCalculatorIdMap exist before any TipTap or
+  // custom-field rewriting embeds them. Neither model has a natural unique
+  // key, so rows match on (businessId, name) with findFirst — same approach
+  // as BaseInventoryUnit (3d). Each definition is re-validated with the
+  // feature's own stored-definition parser (the read schema: it migrates
+  // older blob versions and tolerates a since-tightened owner rule, exactly
+  // like the admin/storefront read paths) and its normalized output is what
+  // gets written. A row that fails is skipped with a warning and gets no map
+  // entry, so embeds pointing at it keep their (dangling) source id.
+  const formIdMap = new Map<string, string>(); // exportId → newId
+  const quoteCalculatorIdMap = new Map<string, string>(); // exportId → newId
+
+  for (const form of content.forms) {
+    try {
+      const parsed = parseStoredFormDefinition(form.definition);
+      if (!parsed.success) {
+        result.warnings.push(
+          `Form "${form.name}" skipped — invalid definition: ${parsed.error.issues[0]?.message ?? "unknown error"}`,
+        );
+        continue;
+      }
+      const definition = parsed.data as Prisma.InputJsonValue;
+      const existing = await db.form.findFirst({
+        where: { businessId: targetBusinessId, name: form.name },
+        select: { id: true },
+      });
+      let newId: string;
+      if (existing) {
+        await db.form.update({
+          where: { id: existing.id },
+          data: { definition, published: form.published },
+        });
+        newId = existing.id;
+        track("Form", false);
+      } else {
+        const created = await db.form.create({
+          data: {
+            businessId: targetBusinessId,
+            name: form.name,
+            definition,
+            published: form.published,
+          },
+        });
+        newId = created.id;
+        track("Form", true);
+      }
+      formIdMap.set(form.exportId, newId);
+    } catch (err) {
+      result.warnings.push(`Form "${form.name}" failed: ${String(err)}`);
+    }
+  }
+
+  for (const calc of content.quoteCalculators) {
+    try {
+      const parsed = parseStoredQuoteDefinition(calc.definition);
+      if (!parsed.success) {
+        result.warnings.push(
+          `QuoteCalculator "${calc.name}" skipped — invalid definition: ${parsed.error.issues[0]?.message ?? "unknown error"}`,
+        );
+        continue;
+      }
+      const definition = parsed.data as Prisma.InputJsonValue;
+      const existing = await db.quoteCalculator.findFirst({
+        where: { businessId: targetBusinessId, name: calc.name },
+        select: { id: true },
+      });
+      let newId: string;
+      if (existing) {
+        await db.quoteCalculator.update({
+          where: { id: existing.id },
+          data: { definition, published: calc.published },
+        });
+        newId = existing.id;
+        track("QuoteCalculator", false);
+      } else {
+        const created = await db.quoteCalculator.create({
+          data: {
+            businessId: targetBusinessId,
+            name: calc.name,
+            definition,
+            published: calc.published,
+          },
+        });
+        newId = created.id;
+        track("QuoteCalculator", true);
+      }
+      quoteCalculatorIdMap.set(calc.exportId, newId);
+    } catch (err) {
+      result.warnings.push(
+        `QuoteCalculator "${calc.name}" failed: ${String(err)}`,
+      );
+    }
+  }
+
+  // Passed to EVERY rewriteJsonValue / rewriteTiptapDoc call below so form
+  // and quote-calculator embeds point at the target's rows.
+  const embedIdMaps: EmbedIdMaps = {
+    form: formIdMap,
+    quoteCalculator: quoteCalculatorIdMap,
+  };
+
   // ── 3c. SiteContent upsert
   if (content.siteContent) {
     const sc = content.siteContent;
@@ -366,28 +520,51 @@ export async function importStoreBundle(args: {
         urlMap,
         galleryIdMap,
         { templateId },
+        embedIdMaps,
       );
       const rewrittenPreviewCustomFields = rewriteJsonValue(
         sc.previewCustomFields,
         urlMap,
         galleryIdMap,
         { templateId },
+        embedIdMaps,
       );
       const rewrittenFeatures = rewriteJsonValue(
         sc.features,
         urlMap,
         galleryIdMap,
+        undefined,
+        embedIdMaps,
       );
       const rewrittenBannerConfig = rewriteJsonValue(
         sc.bannerConfig,
         urlMap,
         galleryIdMap,
+        undefined,
+        embedIdMaps,
       );
       const rewrittenPopupConfig = rewriteJsonValue(
         sc.popupConfig,
         urlMap,
         galleryIdMap,
+        undefined,
+        embedIdMaps,
       );
+      // pageMeta's `ogImage` sub-values are storage URLs — rewrite them, but
+      // WITHOUT templateId opts (pageMeta isn't a template-fields object, so
+      // gallery-field detection doesn't apply here).
+      const rewrittenPageMeta = toJsonOrUndefined(
+        rewriteJsonValue(
+          sc.pageMeta,
+          urlMap,
+          galleryIdMap,
+          undefined,
+          embedIdMaps,
+        ),
+      );
+      // emailOverrides holds copy text only (subject/introText) — no URLs to
+      // rewrite.
+      const rewrittenEmailOverrides = toJsonOrUndefined(sc.emailOverrides);
 
       await db.siteContent.upsert({
         where: { businessId: targetBusinessId },
@@ -412,6 +589,7 @@ export async function importStoreBundle(args: {
           metaKeywords: sc.metaKeywords ?? null,
           ogImage: sc.ogImage ? rewriteUrl(sc.ogImage, urlMap) : null,
           faviconUrl: sc.faviconUrl ? rewriteUrl(sc.faviconUrl, urlMap) : null,
+          seoBrandName: sc.seoBrandName,
           logoUrl: sc.logoUrl ? rewriteUrl(sc.logoUrl, urlMap) : null,
           logoAltText: sc.logoAltText ?? null,
           primaryColor: sc.primaryColor ?? null,
@@ -421,6 +599,8 @@ export async function importStoreBundle(args: {
           customFields: rewrittenCustomFields ?? undefined,
           bannerConfig: rewrittenBannerConfig ?? undefined,
           popupConfig: rewrittenPopupConfig ?? undefined,
+          pageMeta: rewrittenPageMeta,
+          emailOverrides: rewrittenEmailOverrides,
           previewCustomFields: rewrittenPreviewCustomFields ?? undefined,
           previewUpdatedAt: sc.previewUpdatedAt
             ? new Date(sc.previewUpdatedAt)
@@ -448,6 +628,7 @@ export async function importStoreBundle(args: {
           metaKeywords: sc.metaKeywords ?? null,
           ogImage: sc.ogImage ? rewriteUrl(sc.ogImage, urlMap) : null,
           faviconUrl: sc.faviconUrl ? rewriteUrl(sc.faviconUrl, urlMap) : null,
+          seoBrandName: sc.seoBrandName,
           logoUrl: sc.logoUrl ? rewriteUrl(sc.logoUrl, urlMap) : null,
           logoAltText: sc.logoAltText ?? null,
           primaryColor: sc.primaryColor ?? null,
@@ -457,6 +638,8 @@ export async function importStoreBundle(args: {
           customFields: rewrittenCustomFields ?? undefined,
           bannerConfig: rewrittenBannerConfig ?? undefined,
           popupConfig: rewrittenPopupConfig ?? undefined,
+          pageMeta: rewrittenPageMeta,
+          emailOverrides: rewrittenEmailOverrides,
           previewCustomFields: rewrittenPreviewCustomFields ?? undefined,
           previewUpdatedAt: sc.previewUpdatedAt
             ? new Date(sc.previewUpdatedAt)
@@ -631,7 +814,13 @@ export async function importStoreBundle(args: {
         urlMap,
         galleryIdMap,
         { templateId },
+        embedIdMaps,
       );
+      // Absent in bundles exported before 2026-09-25.
+      const subscriptionIntervals = toJsonOrUndefined(
+        prod.subscriptionIntervals,
+      );
+      const scheduledPublishAt = toDateOrUndefined(prod.scheduledPublishAt);
 
       const existing = await db.product.findUnique({
         where: {
@@ -651,6 +840,9 @@ export async function importStoreBundle(args: {
             price: prod.price,
             compareAtPrice: prod.compareAtPrice ?? null,
             cost: prod.cost ?? null,
+            subscriptionEnabled: prod.subscriptionEnabled,
+            subscriptionIntervals,
+            subscriptionDiscountPercent: prod.subscriptionDiscountPercent,
             sku: prod.sku ?? null,
             barcode: prod.barcode ?? null,
             trackInventory: prod.trackInventory,
@@ -662,6 +854,7 @@ export async function importStoreBundle(args: {
             weightUnit: prod.weightUnit ?? null,
             published: prod.published,
             featured: prod.featured,
+            scheduledPublishAt,
             sortOrder: prod.sortOrder,
             metaTitle: prod.metaTitle ?? null,
             metaDescription: prod.metaDescription ?? null,
@@ -690,6 +883,9 @@ export async function importStoreBundle(args: {
             price: prod.price,
             compareAtPrice: prod.compareAtPrice ?? null,
             cost: prod.cost ?? null,
+            subscriptionEnabled: prod.subscriptionEnabled,
+            subscriptionIntervals,
+            subscriptionDiscountPercent: prod.subscriptionDiscountPercent,
             sku: prod.sku ?? null,
             barcode: prod.barcode ?? null,
             trackInventory: prod.trackInventory,
@@ -701,6 +897,7 @@ export async function importStoreBundle(args: {
             weightUnit: prod.weightUnit ?? null,
             published: prod.published,
             featured: prod.featured,
+            scheduledPublishAt,
             sortOrder: prod.sortOrder,
             metaTitle: prod.metaTitle ?? null,
             metaDescription: prod.metaDescription ?? null,
@@ -887,6 +1084,7 @@ export async function importStoreBundle(args: {
         urlMap,
         galleryIdMap,
         { templateId },
+        embedIdMaps,
       );
 
       const existing = await db.service.findUnique({
@@ -910,6 +1108,7 @@ export async function importStoreBundle(args: {
             sortOrder: svc.sortOrder,
             metaTitle: svc.metaTitle ?? null,
             metaDescription: svc.metaDescription ?? null,
+            metaKeywords: svc.metaKeywords,
             ogImage: svc.ogImage ? rewriteUrl(svc.ogImage, urlMap) : null,
           },
         });
@@ -929,6 +1128,7 @@ export async function importStoreBundle(args: {
             sortOrder: svc.sortOrder,
             metaTitle: svc.metaTitle ?? null,
             metaDescription: svc.metaDescription ?? null,
+            metaKeywords: svc.metaKeywords,
             ogImage: svc.ogImage ? rewriteUrl(svc.ogImage, urlMap) : null,
           },
         });
@@ -954,6 +1154,12 @@ export async function importStoreBundle(args: {
                 image: item.image ? rewriteUrl(item.image, urlMap) : null,
                 priceLabel: item.priceLabel ?? null,
                 durationLabel: item.durationLabel ?? null,
+                // Absent in bundles exported before 2026-09-25.
+                compareAtPriceLabel: item.compareAtPriceLabel,
+                priceTiers: toJsonOrUndefined(item.priceTiers),
+                addOns: toJsonOrUndefined(item.addOns),
+                category: item.category,
+                isSignature: item.isSignature,
                 bookingEmbedSrc: item.bookingEmbedSrc ?? null,
                 bookingEmbedHeight: item.bookingEmbedHeight ?? null,
                 published: item.published,
@@ -970,6 +1176,11 @@ export async function importStoreBundle(args: {
                 image: item.image ? rewriteUrl(item.image, urlMap) : null,
                 priceLabel: item.priceLabel ?? null,
                 durationLabel: item.durationLabel ?? null,
+                compareAtPriceLabel: item.compareAtPriceLabel,
+                priceTiers: toJsonOrUndefined(item.priceTiers),
+                addOns: toJsonOrUndefined(item.addOns),
+                category: item.category,
+                isSignature: item.isSignature,
                 bookingEmbedSrc: item.bookingEmbedSrc ?? null,
                 bookingEmbedHeight: item.bookingEmbedHeight ?? null,
                 published: item.published,
@@ -995,6 +1206,42 @@ export async function importStoreBundle(args: {
         page.content,
         urlMap,
         galleryIdMap,
+        embedIdMaps,
+      );
+
+      // previewDraft is { title, excerpt, content } — only its `content` key
+      // gets the same TipTap URL/gallery/embed rewrite as the live `content`
+      // above; other keys are copied as-is. Absent in bundles exported
+      // before 2026-09-25.
+      let rewrittenPreviewDraft:
+        | Prisma.InputJsonValue
+        | typeof Prisma.DbNull
+        | undefined;
+      if (page.previewDraft === undefined) {
+        rewrittenPreviewDraft = undefined;
+      } else if (page.previewDraft === null) {
+        rewrittenPreviewDraft = Prisma.DbNull;
+      } else if (
+        typeof page.previewDraft === "object" &&
+        !Array.isArray(page.previewDraft) &&
+        "content" in page.previewDraft
+      ) {
+        const draft = page.previewDraft as Record<string, unknown>;
+        rewrittenPreviewDraft = {
+          ...draft,
+          content: rewriteTiptapDoc(
+            draft.content,
+            urlMap,
+            galleryIdMap,
+            embedIdMaps,
+          ),
+        } as Prisma.InputJsonValue;
+      } else {
+        rewrittenPreviewDraft = page.previewDraft as Prisma.InputJsonValue;
+      }
+      const scheduledPublishAt = toDateOrUndefined(page.scheduledPublishAt);
+      const previewDraftUpdatedAt = toDateOrUndefined(
+        page.previewDraftUpdatedAt,
       );
 
       const existing = await db.page.findUnique({
@@ -1018,6 +1265,9 @@ export async function importStoreBundle(args: {
             ogImage: page.ogImage ? rewriteUrl(page.ogImage, urlMap) : null,
             published: page.published,
             sortOrder: page.sortOrder,
+            scheduledPublishAt,
+            previewDraft: rewrittenPreviewDraft,
+            previewDraftUpdatedAt,
             type: page.type,
             template: page.template,
           },
@@ -1038,6 +1288,9 @@ export async function importStoreBundle(args: {
             ogImage: page.ogImage ? rewriteUrl(page.ogImage, urlMap) : null,
             published: page.published,
             sortOrder: page.sortOrder,
+            scheduledPublishAt,
+            previewDraft: rewrittenPreviewDraft,
+            previewDraftUpdatedAt,
             type: page.type,
             template: page.template,
           },
@@ -1065,7 +1318,13 @@ export async function importStoreBundle(args: {
             type: dc.type,
             value: dc.value,
             active: dc.active,
+            // "loyalty" codes are never exported (see fetchDiscountCodes) —
+            // set explicitly on import too, so a hand-edited manifest can't
+            // sneak a loyalty-sourced code past the export-side filter.
+            source: "manual",
             usageLimit: dc.usageLimit ?? null,
+            // Absent in bundles exported before 2026-09-25.
+            perCustomerLimit: dc.perCustomerLimit,
             usageCount: 0,
             startsAt: dc.startsAt ? new Date(dc.startsAt) : null,
             expiresAt: dc.expiresAt ? new Date(dc.expiresAt) : null,
@@ -1082,7 +1341,9 @@ export async function importStoreBundle(args: {
             type: dc.type,
             value: dc.value,
             active: dc.active,
+            source: "manual",
             usageLimit: dc.usageLimit ?? null,
+            perCustomerLimit: dc.perCustomerLimit ?? null,
             usageCount: 0,
             startsAt: dc.startsAt ? new Date(dc.startsAt) : null,
             expiresAt: dc.expiresAt ? new Date(dc.expiresAt) : null,
@@ -1094,6 +1355,119 @@ export async function importStoreBundle(args: {
       }
     } catch (err) {
       result.warnings.push(`DiscountCode "${dc.code}" failed: ${String(err)}`);
+    }
+  }
+
+  // ── 3j2. LoyaltyProgram + LoyaltyRewardTiers. A null/absent block (older
+  // bundle, or a source with no program) leaves the target's program alone.
+  // Config only — member accounts and the points ledger never transfer.
+  if (content.loyaltyProgram) {
+    const lp = content.loyaltyProgram;
+    try {
+      const programData = {
+        earnOnOrders: lp.earnOnOrders,
+        pointsPerDollar: lp.pointsPerDollar,
+        signupEnabled: lp.signupEnabled,
+        signupBonus: lp.signupBonus,
+        firstOrderEnabled: lp.firstOrderEnabled,
+        firstOrderBonus: lp.firstOrderBonus,
+        birthdayEnabled: lp.birthdayEnabled,
+        birthdayBonus: lp.birthdayBonus,
+        socialEnabled: lp.socialEnabled,
+        socialFollowBonus: lp.socialFollowBonus,
+        rewardCodeExpiryDays: lp.rewardCodeExpiryDays,
+      };
+      const existingProgram = await db.loyaltyProgram.findUnique({
+        where: { businessId: targetBusinessId },
+        select: { id: true },
+      });
+      const program = await db.loyaltyProgram.upsert({
+        where: { businessId: targetBusinessId },
+        update: programData,
+        create: { businessId: targetBusinessId, ...programData },
+        select: { id: true },
+      });
+      track("LoyaltyProgram", !existingProgram);
+
+      // Tiers match on (programId, label): update if found, else create.
+      // Tiers present in the target but absent from the bundle are NOT
+      // deleted — the loyalty ledger's metadata.tierId references them, and
+      // removing one would orphan redemption history. The owner can
+      // deactivate/delete leftovers in admin.
+      for (const tier of lp.tiers) {
+        try {
+          const tierData = {
+            pointsCost: tier.pointsCost,
+            type: tier.type,
+            value: tier.value,
+            minPurchase: tier.minPurchase ?? null,
+            sortOrder: tier.sortOrder,
+            active: tier.active,
+          };
+          const existingTier = await db.loyaltyRewardTier.findFirst({
+            where: { programId: program.id, label: tier.label },
+            select: { id: true },
+          });
+          if (existingTier) {
+            await db.loyaltyRewardTier.update({
+              where: { id: existingTier.id },
+              data: tierData,
+            });
+            track("LoyaltyRewardTier", false);
+          } else {
+            await db.loyaltyRewardTier.create({
+              data: {
+                programId: program.id,
+                // Denormalized for tenant-scoped redeem lookups.
+                businessId: targetBusinessId,
+                label: tier.label,
+                ...tierData,
+              },
+            });
+            track("LoyaltyRewardTier", true);
+          }
+        } catch (err) {
+          result.warnings.push(
+            `LoyaltyRewardTier "${tier.label}" failed: ${String(err)}`,
+          );
+        }
+      }
+    } catch (err) {
+      result.warnings.push(`LoyaltyProgram upsert failed: ${String(err)}`);
+    }
+  }
+
+  // ── 3j3. InvoiceSettings — upsert on businessId. A null/absent block
+  // leaves the target's settings alone. `paymentMethods` is never exported
+  // (see types.ts header) and never written here, so the target keeps its
+  // own. defaultNotes/defaultTerms are @encrypted columns — the
+  // prisma-field-encryption extension on `db` encrypts them transparently.
+  if (content.invoiceSettings) {
+    const inv = content.invoiceSettings;
+    try {
+      const settingsData = {
+        numberPrefix: inv.numberPrefix,
+        numberPadding: inv.numberPadding,
+        startingNumber: inv.startingNumber,
+        defaultDueTerms: inv.defaultDueTerms,
+        defaultTaxRateBps: inv.defaultTaxRateBps,
+        defaultNotes: inv.defaultNotes ?? null,
+        defaultTerms: inv.defaultTerms ?? null,
+        overdueAlertsEnabled: inv.overdueAlertsEnabled,
+        weeklyDigestEnabled: inv.weeklyDigestEnabled,
+      };
+      const existingSettings = await db.invoiceSettings.findUnique({
+        where: { businessId: targetBusinessId },
+        select: { id: true },
+      });
+      await db.invoiceSettings.upsert({
+        where: { businessId: targetBusinessId },
+        update: settingsData,
+        create: { businessId: targetBusinessId, ...settingsData },
+      });
+      track("InvoiceSettings", !existingSettings);
+    } catch (err) {
+      result.warnings.push(`InvoiceSettings upsert failed: ${String(err)}`);
     }
   }
 

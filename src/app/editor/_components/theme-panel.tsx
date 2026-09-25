@@ -2,6 +2,7 @@
 
 import { Check, X } from "lucide-react";
 
+import type { PanelVariant } from "./panel-variant";
 import type { SpThemeSelection } from "~/lib/sp-meta";
 import type {
   TemplateFontPairing,
@@ -11,6 +12,12 @@ import type {
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 
+import {
+  PANEL_ASIDE_CLASS,
+  PANEL_CLOSE_BUTTON_CLASS,
+  PANEL_SHEET_BODY_CLASS,
+} from "./panel-variant";
+
 export type ThemePanelProps = {
   theme: TemplateTheme;
   /** Current stored selection (empty object = stock design). */
@@ -19,6 +26,8 @@ export type ThemePanelProps = {
   onSelect: (kind: "palette" | "fonts", presetId: string | undefined) => void;
   /** Freeze inputs while publish/discard is settling. */
   disabled?: boolean;
+  /** Desktop right column (default) or compact bottom-sheet content. */
+  variant?: PanelVariant;
   onClose: () => void;
 };
 
@@ -100,10 +109,11 @@ export function ThemePanel({
   selection,
   onSelect,
   disabled = false,
+  variant = "sidebar",
   onClose,
 }: ThemePanelProps) {
   return (
-    <aside className="bg-card animate-in slide-in-from-right-8 fade-in flex w-[380px] shrink-0 flex-col border-l duration-200">
+    <aside className={PANEL_ASIDE_CLASS[variant]}>
       <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold">Theme</h2>
@@ -116,7 +126,7 @@ export function ThemePanel({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-7 w-7 shrink-0"
+          className={PANEL_CLOSE_BUTTON_CLASS[variant]}
           aria-label="Close theme panel"
           onClick={onClose}
         >
@@ -129,6 +139,7 @@ export function ThemePanel({
         className={cn(
           "flex-1 space-y-6 overflow-y-auto px-4 py-4",
           disabled && "pointer-events-none opacity-60",
+          variant === "sheet" && PANEL_SHEET_BODY_CLASS,
         )}
       >
         {theme.palettes.length > 0 && (

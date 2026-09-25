@@ -1,14 +1,20 @@
+import {
+  googleMapsUrls,
+  resolveMapCoordinates,
+} from "~/lib/address/coordinates";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { isPreviewRequest } from "~/lib/preview/preview-context";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
+  getRawCustomFieldString,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { DEFAULT_BAMBOO_VALUE_BAND } from ".";
-import { resolveFields } from "..";
+import { computePrecedingTone } from "../shared/preceding-tone";
 import { BambooAboutTeaserSection } from "./bamboo-about-teaser-section";
 import { BambooFeaturedSection } from "./bamboo-featured-section";
 import { BambooHeroSection } from "./bamboo-hero-section";
@@ -35,19 +41,23 @@ export async function BambooHomepage() {
   const customFields = homepage?.siteContent?.customFields;
   const address = homepage?.businessAddress;
 
-  const f = resolveFields(customFields, [
-    "bamboo.global.map-lat",
-    "bamboo.global.map-lng",
-  ]);
-
-  const latRaw = f["bamboo.global.map-lat"]?.trim();
-  const lngRaw = f["bamboo.global.map-lng"]?.trim();
-  const lat = latRaw ? Number(latRaw) : NaN;
-  const lng = lngRaw ? Number(lngRaw) : NaN;
-  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
-  const mapDest = address ? encodeURIComponent(address) : `${lat},${lng}`;
-  const viewUrl = `https://www.google.com/maps/search/?api=1&query=${mapDest}`;
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapDest}`;
+  // Map pin: Settings → General (Business.latitude/longitude) wins. The
+  // legacy per-template fields are a read-only fallback for sites that saved
+  // coordinates before the pin moved to Settings (retired 2026-09-25) — the
+  // saved values are never written to or cleared from here.
+  const coords = resolveMapCoordinates(
+    homepage,
+    getRawCustomFieldString(customFields, "bamboo.global.map-lat"),
+    getRawCustomFieldString(customFields, "bamboo.global.map-lng"),
+  );
+  const hasCoords = coords !== null;
+  // A blank (but present) address string must still fall through to coords —
+  // `||`, not `??`, is deliberate here.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const mapDest = address || coords || { latitude: 0, longitude: 0 };
+  const { viewUrl, directionsUrl } = googleMapsUrls(mapDest);
+  const lat = coords?.latitude ?? 0;
+  const lng = coords?.longitude ?? 0;
 
   // Mirrors the value band's own render gate exactly (same visibility flag +
   // same item-count check the band uses to bail to `null`) so the hero knows
@@ -73,6 +83,38 @@ export async function BambooHomepage() {
   const hasLocation =
     hasCoords && isSectionVisible(customFields, "bamboo", "homepage.location");
 
+  const hasAboutTeaser = isSectionVisible(
+    customFields,
+    "bamboo",
+    "homepage.aboutTeaser",
+  );
+
+  // Featured also hides itself on the live storefront when the store has no
+  // products (a public "No products found" placeholder reads as broken, not
+  // "coming soon") — but stays rendered inside the editor preview so an
+  // owner setting up a fresh store still has the section's hover/click
+  // hotspot to find. See `bamboo-featured-section.tsx`'s own empty state.
+  const isPreview = await isPreviewRequest();
+  const hasProducts = (homepage?.products?.length ?? 0) > 0;
+  const hasFeatured =
+    isSectionVisible(customFields, "bamboo", "homepage.featured") &&
+    (hasProducts || isPreview);
+
+  // The sustainability band's top wave paints no backing color of its own
+  // (docs/templates/bamboo/design.md "Sustainability band, both edges"), so
+  // it needs to know what actually renders directly above it, nearest
+  // section first: Featured (cream) -> aboutTeaser (cream-deep) -> value
+  // band (forest) -> the hero's own bottom edge, which always fades back to
+  // flat cream regardless of a background photo (signature moment #6).
+  const sustainabilityPrecedingTone = computePrecedingTone(
+    [
+      { visible: hasFeatured, tone: "cream" },
+      { visible: hasAboutTeaser, tone: "cream-deep" },
+      { visible: hasValueBand, tone: "forest" },
+    ],
+    "cream",
+  );
+
   return (
     <HydrateClient>
       <PageTransition>
@@ -85,12 +127,16 @@ export async function BambooHomepage() {
 
         {/* Order mirrors happy-bamboo: the about teaser sits between the hero
             band and the product grid, so the story lands before the shelf. */}
-        <BambooAboutTeaserSection customFields={customFields} />
+        {hasAboutTeaser && (
+          <BambooAboutTeaserSection customFields={customFields} />
+        )}
 
-        <BambooFeaturedSection
-          customFields={customFields}
-          products={homepage?.products ?? []}
-        />
+        {hasFeatured && (
+          <BambooFeaturedSection
+            customFields={customFields}
+            products={homepage?.products ?? []}
+          />
+        )}
 
         {isSectionVisible(
           customFields,
@@ -100,6 +146,7 @@ export async function BambooHomepage() {
           <BambooSustainabilitySection
             customFields={customFields}
             hasFollowingSection={hasTestimonials || hasLocation}
+            precedingTone={sustainabilityPrecedingTone}
           />
         )}
 

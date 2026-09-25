@@ -65,3 +65,18 @@ export async function getAuthorizedPreviewBusinessId(
 
   return null;
 }
+
+/**
+ * True when the current request carries the editor-preview signal
+ * (`x-sp-preview: 1`, set by middleware from `?__preview=1` — see
+ * `src/middleware.ts`). Display-only: unlike `getAuthorizedPreviewBusinessId`
+ * above, this does NOT check session/membership, so it must never gate
+ * access to non-public data or draft content — only cosmetic editor-preview
+ * affordances a template wants to show even when the live storefront would
+ * hide them (e.g. an empty-state placeholder for a section with no data yet,
+ * so an owner browsing a fresh store still has something to click into).
+ */
+export async function isPreviewRequest(): Promise<boolean> {
+  const headersList = await headers();
+  return headersList.get("x-sp-preview") === "1";
+}

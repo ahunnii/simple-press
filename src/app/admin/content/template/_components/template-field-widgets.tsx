@@ -11,18 +11,26 @@
 "use client";
 
 import type { Content } from "@tiptap/react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { useUploadFile } from "@better-upload/client";
+import { useId, useRef, useCallback, useEffect, useState } from "react";
+import type { DragEndEvent } from "@dnd-kit/core";
 import {
-  ChevronDown,
-  ChevronUp,
-  Images,
-  Plus,
-  Trash,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import type {
@@ -30,12 +38,7 @@ import type {
   EmbedDisplayMode,
   EmbedWidth,
 } from "~/lib/embed";
-import type {
-  TemplateField,
-  TemplateFieldGroup,
-  TemplateListItemField,
-  TemplateListRow,
-} from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import {
   DEFAULT_EMBED_HEIGHT,
   EMBED_ASPECT_RATIOS,
@@ -44,13 +47,9 @@ import {
   parseEmbedInput,
 } from "~/lib/embed";
 import {
-  getLucideTemplateIcon,
-  TEMPLATE_LUCIDE_ICON_NAMES,
-} from "~/lib/lucide-template-icons";
-import {
-  parseFaqPickerIds,
+  buildFieldsByKey,
+  isFieldVisible,
   parseTemplateIframeValue,
-  parseTemplateListRows,
 } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -79,12 +78,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { uploadRichTextImage } from "~/components/inputs/minimal-tiptap-form-field";
 import { EmbedFrame } from "~/components/embed-frame";
-import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
 
-import { AdminThumb } from "../../../_components/admin-thumb";
+import type { TemplateListFocusRequest } from "./template-list-field-editor";
+import { TemplateListFieldEditor } from "./template-list-field-editor";
+import {
+  TemplateImageUploadField,
+  TemplateVideoUploadField,
+} from "./template-media-upload-fields";
+
+// Re-exported so existing imports from this module keep resolving after the
+// list editor + upload widgets moved to their own files.
+export {
+  ListItemSubFieldInput,
+  TemplateListFieldEditor,
+} from "./template-list-field-editor";
+export type { TemplateListFocusRequest } from "./template-list-field-editor";
+export {
+  TemplateImageUploadField,
+  TemplateVideoUploadField,
+} from "./template-media-upload-fields";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -102,20 +119,6 @@ export function isRichTextValue(value: unknown): value is Content {
   );
 }
 
-function isImageFile(file: File): boolean {
-  return (
-    file.type.startsWith("image/") ||
-    /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(file.name)
-  );
-}
-
-function isVideoFile(file: File): boolean {
-  return (
-    file.type.startsWith("video/") ||
-    /\.(mp4|mov|webm|ogg|avi|m4v|3gp|mkv)$/i.test(file.name)
-  );
-}
-
 // ─── FieldGroup ───────────────────────────────────────────────────────────────
 
 export function FieldGroup({
@@ -123,6 +126,7 @@ export function FieldGroup({
   page,
   groupMeta,
   fields,
+  allFields,
   customFields,
   modifiedFields,
   onFieldChange,
@@ -134,6 +138,13 @@ export function FieldGroup({
   page: string;
   groupMeta?: TemplateFieldGroup;
   fields: TemplateField[];
+  /**
+   * Full field list to resolve `visibleWhen` controlling fields against —
+   * a controlling field may live in a different group than the field it
+   * gates. Defaults to `fields` when omitted (fine when every field on the
+   * page is passed in already).
+   */
+  allFields?: TemplateField[];
   customFields: Record<string, unknown>;
   modifiedFields?: Set<string>;
   onFieldChange: (key: string, value: unknown) => void;
@@ -142,6 +153,10 @@ export function FieldGroup({
   mediaLibraryEnabled?: boolean;
 }) {
   const columns = groupMeta?.columns ?? 1;
+  const fieldsByKey = buildFieldsByKey(allFields ?? fields);
+  const visibleFields = fields.filter((field) =>
+    isFieldVisible(field, customFields, fieldsByKey),
+  );
 
   return (
     <Card id={`fieldgroup-${page}-${groupId}`} tabIndex={-1}>
@@ -175,7 +190,7 @@ export function FieldGroup({
                 : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
           }`}
         >
-          {fields.map((field) => (
+          {visibleFields.map((field) => (
             <div key={field.key} className={field.gridColumn ?? "col-span-1"}>
               <FieldInput
                 field={field}
@@ -195,6 +210,18 @@ export function FieldGroup({
 
 // ─── FieldInput ───────────────────────────────────────────────────────────────
 
+/** Field types whose blank-string ("unsaved") value should render as the
+ *  template's own `defaultValue` instead of a bare empty widget. An
+ *  explicitly saved `""` still displays empty — see `FieldInput` below. */
+function showsDefaultWhenUnset(fieldType: TemplateField["type"]): boolean {
+  return (
+    fieldType === "text" ||
+    fieldType === "textarea" ||
+    fieldType === "url" ||
+    fieldType === "number"
+  );
+}
+
 export function FieldInput({
   field,
   value,
@@ -202,6 +229,7 @@ export function FieldInput({
   onChange,
   embedsEnabled,
   mediaLibraryEnabled,
+  listFocusRequest,
 }: {
   field: TemplateField;
   value: unknown;
@@ -209,9 +237,22 @@ export function FieldInput({
   onChange: (value: unknown) => void;
   embedsEnabled?: boolean;
   mediaLibraryEnabled?: boolean;
+  /** `list` fields only: expand + focus a row. Ignored for other types. */
+  listFocusRequest?: TemplateListFocusRequest | null;
 }) {
+  // `value === undefined` means the key was never saved — distinct from an
+  // explicitly saved "" (which owners use to hide optional text/colors).
+  const isUnset = value === undefined;
   const stringValue = typeof value === "string" ? value : "";
   const richTextValue = isRichTextValue(value) ? value : EMPTY_TIPTAP_DOC;
+
+  const displayValue =
+    isUnset && showsDefaultWhenUnset(field.type)
+      ? (field.defaultValue ?? "")
+      : stringValue;
+  const colorDisplayValue = isUnset ? (field.defaultValue ?? "") : stringValue;
+
+  const descId = field.description ? `${field.key}-desc` : undefined;
 
   return (
     <div className="space-y-2">
@@ -224,11 +265,19 @@ export function FieldInput({
         )}
       </Label>
 
+      {field.description && (
+        <p id={descId} className="text-muted-foreground text-xs">
+          {field.description}
+        </p>
+      )}
+
       {field.type === "list" ? (
         <TemplateListFieldEditor
           field={field}
           value={value}
           onChange={onChange}
+          mediaLibraryEnabled={mediaLibraryEnabled}
+          focusRequest={listFocusRequest}
         />
       ) : field.type === "faq" ? (
         <FaqFieldEditor field={field} value={value} onChange={onChange} />
@@ -236,23 +285,25 @@ export function FieldInput({
         <TemplateImageUploadField
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
-          description={field.description}
           mediaLibraryEnabled={mediaLibraryEnabled}
         />
       ) : field.type === "video" ? (
         <TemplateVideoUploadField
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
-          description={field.description}
           mediaLibraryEnabled={mediaLibraryEnabled}
         />
       ) : field.type === "gallery" ? (
         <GalleryFieldSelect
+          id={field.key}
+          descId={descId}
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
         />
       ) : field.type === "collection" ? (
         <CollectionFieldSelect
+          id={field.key}
+          descId={descId}
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
         />
@@ -273,44 +324,49 @@ export function FieldInput({
           value={richTextValue}
           onChange={(nextValue) => onChange(nextValue)}
           output="json"
-          placeholder={field.placeholder ?? field.description}
+          placeholder={field.placeholder}
           className="w-full"
-          editorContentClassName="min-h-[220px] p-4"
+          editorContentClassName="min-h-[220px] p-4 text-base md:text-sm"
           editorClassName="focus:outline-hidden"
           editable
           embedsEnabled={embedsEnabled}
+          uploader={uploadRichTextImage}
         />
       ) : field.type === "textarea" ? (
         <Textarea
           id={field.key}
-          value={stringValue}
+          value={displayValue}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder ?? field.description}
+          placeholder={field.placeholder}
+          aria-describedby={descId}
           rows={3}
         />
       ) : field.type === "boolean" ? (
         <Switch
-          checked={stringValue === "true"}
-          defaultChecked={field.defaultValue === "true"}
+          id={field.key}
+          checked={isUnset ? field.defaultValue === "true" : stringValue === "true"}
           onCheckedChange={(checked) => onChange(checked ? "true" : "false")}
+          aria-describedby={descId}
         />
       ) : field.type === "color" ? (
         <div className="flex items-center gap-2">
           {/* Native color inputs have no empty state (an unset value renders
-              as black), so the current value is echoed as text — "None" when
-              unset — and Clear writes "" back, which templates treat as
-              "no color". */}
+              as black), so an unsaved field shows the template's default
+              swatch, and an explicitly-cleared field ("" saved) is echoed
+              as text — "None" — with no Clear button. Clear writes "" back,
+              which templates treat as "no color". */}
           <Input
             id={field.key}
             type="color"
-            value={stringValue || "#000000"}
+            value={colorDisplayValue || "#000000"}
             onChange={(e) => onChange(e.target.value)}
+            aria-describedby={descId}
             className="w-16 shrink-0 cursor-pointer"
           />
           <span className="text-muted-foreground text-xs tabular-nums">
-            {stringValue ? stringValue.toUpperCase() : "None"}
+            {colorDisplayValue ? colorDisplayValue.toUpperCase() : "None"}
           </span>
-          {stringValue ? (
+          {colorDisplayValue ? (
             <Button
               type="button"
               variant="ghost"
@@ -323,294 +379,132 @@ export function FieldInput({
             </Button>
           ) : null}
         </div>
+      ) : field.type === "number" ? (
+        field.control === "slider" ? (
+          <NumberSliderWidget
+            id={field.key}
+            descId={descId}
+            displayValue={displayValue}
+            defaultValue={field.defaultValue}
+            min={field.min}
+            max={field.max}
+            step={field.step}
+            unit={field.unit}
+            onChange={onChange}
+          />
+        ) : (
+          <div className="flex items-center gap-2">
+            <Input
+              id={field.key}
+              type="number"
+              min={field.min}
+              max={field.max}
+              step={field.step}
+              value={displayValue}
+              onChange={(e) => onChange(e.target.value)}
+              aria-describedby={descId}
+            />
+            {field.unit && (
+              <span className="text-muted-foreground shrink-0 text-xs">
+                {field.unit}
+              </span>
+            )}
+          </div>
+        )
       ) : (
         <Input
           id={field.key}
-          type={
-            field.type === "url"
-              ? "url"
-              : field.type === "number"
-                ? "number"
-                : "text"
-          }
-          value={stringValue}
+          type={field.type === "url" ? "url" : "text"}
+          value={displayValue}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder ?? field.description}
+          placeholder={field.placeholder}
+          aria-describedby={descId}
         />
       )}
-
-      {field.type !== "image" &&
-        field.type !== "video" &&
-        field.type !== "iframe" && (
-          <p className="text-muted-foreground text-xs">{field.description}</p>
-        )}
     </div>
   );
 }
 
-// ─── ListItemSubFieldInput ────────────────────────────────────────────────────
-
-export function ListItemSubFieldInput({
-  subField,
-  value,
+/**
+ * Slider control for a `number` field with `control: "slider"`. Drags update
+ * only a local draft position — `onChange` (which drives a debounced draft
+ * save + preview reload upstream) fires once, on commit, not per tick.
+ *
+ * A `""` display value (unsaved, no default, or explicitly reset) can't be
+ * rendered as a slider position, so the thumb falls back to `defaultValue`
+ * (or `min`) purely for that purpose — the saved value itself is untouched.
+ */
+function NumberSliderWidget({
+  id,
+  descId,
+  displayValue,
+  defaultValue,
+  min,
+  max,
+  step,
+  unit,
   onChange,
 }: {
-  subField: TemplateListItemField;
-  value: string;
-  onChange: (v: string) => void;
+  id: string;
+  descId?: string;
+  displayValue: string;
+  defaultValue?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  onChange: (value: string) => void;
 }) {
-  const baseId = useId();
-  const labelId = `${baseId}-${subField.key}`;
+  const sliderMin = min ?? 0;
+  const sliderMax = max ?? 100;
+  const sliderStep = step ?? 1;
 
-  if (subField.type === "textarea") {
-    return (
-      <div className="space-y-1.5">
-        <Label htmlFor={labelId} className="text-muted-foreground text-xs">
-          {subField.label}
-        </Label>
-        <Textarea
-          id={labelId}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={subField.placeholder ?? subField.description}
-          rows={3}
-        />
-      </div>
-    );
-  }
-
-  if (subField.type === "image") {
-    return (
-      <div className="space-y-1.5">
-        <Label className="text-muted-foreground text-xs">
-          {subField.label}
-        </Label>
-        <TemplateImageUploadField
-          value={value}
-          onChange={onChange}
-          description={subField.description}
-        />
-      </div>
-    );
-  }
-
-  if (subField.type === "video") {
-    return (
-      <div className="space-y-1.5">
-        <Label className="text-muted-foreground text-xs">
-          {subField.label}
-        </Label>
-        <TemplateVideoUploadField
-          value={value}
-          onChange={onChange}
-          description={subField.description}
-        />
-      </div>
-    );
-  }
-
-  if (subField.type === "icon") {
-    const selected = value || TEMPLATE_LUCIDE_ICON_NAMES[0];
-    const Preview = getLucideTemplateIcon(selected ?? "");
-    return (
-      <div className="space-y-1.5">
-        <Label className="text-muted-foreground text-xs">
-          {subField.label}
-        </Label>
-        <div className="flex items-center gap-2">
-          {Preview ? (
-            <Preview className="text-muted-foreground h-5 w-5 shrink-0" />
-          ) : null}
-          <Select value={selected} onValueChange={(v) => onChange(v)}>
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Icon" />
-            </SelectTrigger>
-            <SelectContent>
-              {TEMPLATE_LUCIDE_ICON_NAMES.map((name) => {
-                const Icon = getLucideTemplateIcon(name);
-                return (
-                  <SelectItem key={name} value={name}>
-                    <span className="flex items-center gap-2">
-                      {Icon ? <Icon className="h-4 w-4 shrink-0" /> : null}
-                      {name}
-                    </span>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    );
-  }
-
-  if (subField.type === "boolean") {
-    return (
-      <div className="space-y-1.5">
-        <Label className="text-muted-foreground text-xs">
-          {subField.label}
-        </Label>
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={value === "true"}
-            onCheckedChange={(checked) => onChange(checked ? "true" : "false")}
-          />
-          {subField.description && (
-            <span className="text-muted-foreground text-xs">
-              {subField.description}
-            </span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const inputType = subField.type === "url" ? "url" : "text";
-
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={labelId} className="text-muted-foreground text-xs">
-        {subField.label}
-      </Label>
-      <Input
-        id={labelId}
-        type={inputType}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={subField.placeholder ?? subField.description}
-      />
-    </div>
+  const resolveNumeric = useCallback(
+    (raw: string): number => {
+      const n = raw !== "" ? Number(raw) : Number(defaultValue ?? sliderMin);
+      if (!Number.isFinite(n)) return sliderMin;
+      return Math.min(sliderMax, Math.max(sliderMin, n));
+    },
+    [defaultValue, sliderMin, sliderMax],
   );
-}
 
-// ─── TemplateListFieldEditor ──────────────────────────────────────────────────
+  const [draft, setDraft] = useState<number>(() => resolveNumeric(displayValue));
 
-export function TemplateListFieldEditor({
-  field,
-  value,
-  onChange,
-}: {
-  field: Extract<TemplateField, { type: "list" }>;
-  value: unknown;
-  onChange: (value: unknown) => void;
-}) {
-  const rows = parseTemplateListRows(value);
-  const minItems = field.minItems ?? 0;
-  const maxItems = field.maxItems ?? 50;
-
-  const setRows = (next: TemplateListRow[]) => onChange(next);
-
-  const addRow = () => {
-    if (rows.length >= maxItems) return;
-    const item: TemplateListRow = { _id: crypto.randomUUID() };
-    for (const sf of field.itemSchema) {
-      item[sf.key] = sf.type === "icon" ? TEMPLATE_LUCIDE_ICON_NAMES[0] : "";
-    }
-    setRows([...rows, item]);
-  };
-
-  const removeRow = (index: number) => {
-    if (rows.length <= minItems) return;
-    setRows(rows.filter((_, i) => i !== index));
-  };
-
-  const moveRow = (index: number, delta: -1 | 1) => {
-    const j = index + delta;
-    if (j < 0 || j >= rows.length) return;
-    const next = [...rows];
-    const a = next[index]!;
-    const b = next[j]!;
-    next[index] = b;
-    next[j] = a;
-    setRows(next);
-  };
-
-  const updateCell = (rowIndex: number, key: string, v: string) => {
-    const next = [...rows];
-    const row = { ...next[rowIndex]! };
-    row[key] = v;
-    next[rowIndex] = row;
-    setRows(next);
-  };
+  useEffect(() => {
+    setDraft(resolveNumeric(displayValue));
+  }, [displayValue, resolveNumeric]);
 
   return (
-    <div className="space-y-3">
-      {rows.length === 0 && (
-        <p className="text-muted-foreground text-sm">
-          No items yet. Add one below.
-        </p>
-      )}
-      {rows.map((row, rowIndex) => (
-        <div
-          key={String(row._id ?? rowIndex)}
-          className="border-border bg-muted/50 rounded-lg border p-4"
-        >
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <span className="text-foreground text-sm font-medium">
-              Item {rowIndex + 1}
-            </span>
-            <div className="flex items-center gap-0.5">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                aria-label="Move up"
-                disabled={rowIndex === 0}
-                onClick={() => moveRow(rowIndex, -1)}
-              >
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                aria-label="Move down"
-                disabled={rowIndex >= rows.length - 1}
-                onClick={() => moveRow(rowIndex, 1)}
-              >
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-red-600 hover:text-red-700"
-                aria-label="Remove item"
-                disabled={rows.length <= minItems}
-                onClick={() => removeRow(rowIndex)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {field.itemSchema.map((sf) => {
-              const raw = row[sf.key];
-              const cell =
-                typeof raw === "string" ? raw : raw == null ? "" : "";
-              return (
-                <ListItemSubFieldInput
-                  key={sf.key}
-                  subField={sf}
-                  value={cell}
-                  onChange={(v) => updateCell(rowIndex, sf.key, v)}
-                />
-              );
-            })}
-          </div>
-        </div>
-      ))}
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        <Slider
+          id={id}
+          aria-describedby={descId}
+          min={sliderMin}
+          max={sliderMax}
+          step={sliderStep}
+          value={[draft]}
+          onValueChange={([v]) => {
+            if (v !== undefined) setDraft(v);
+          }}
+          onValueCommit={([v]) => {
+            if (v !== undefined) onChange(String(v));
+          }}
+          className="flex-1"
+        />
+        <span className="text-muted-foreground w-14 shrink-0 text-right text-xs tabular-nums">
+          {draft}
+          {unit ?? ""}
+        </span>
+      </div>
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         size="sm"
-        onClick={addRow}
-        disabled={rows.length >= maxItems}
+        className="text-muted-foreground h-7 px-2 text-xs"
+        onClick={() => onChange("")}
       >
-        <Plus className="mr-2 h-4 w-4" />
-        Add item
+        Reset
       </Button>
     </div>
   );
@@ -975,9 +869,13 @@ export function IframeFieldEditor({
 // ─── GalleryFieldSelect ───────────────────────────────────────────────────────
 
 export function GalleryFieldSelect({
+  id,
+  descId,
   value,
   onChange,
 }: {
+  id?: string;
+  descId?: string;
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -985,7 +883,7 @@ export function GalleryFieldSelect({
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger id={id} aria-describedby={descId}>
         <SelectValue placeholder="Select a gallery..." />
       </SelectTrigger>
       <SelectContent>
@@ -1003,9 +901,13 @@ export function GalleryFieldSelect({
 // ─── CollectionFieldSelect ────────────────────────────────────────────────────
 
 export function CollectionFieldSelect({
+  id,
+  descId,
   value,
   onChange,
 }: {
+  id?: string;
+  descId?: string;
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -1016,7 +918,7 @@ export function CollectionFieldSelect({
       value={value || "none"}
       onValueChange={(v) => onChange(v === "none" ? "" : v)}
     >
-      <SelectTrigger>
+      <SelectTrigger id={id} aria-describedby={descId}>
         <SelectValue placeholder="Select a collection..." />
       </SelectTrigger>
       <SelectContent>
@@ -1033,6 +935,139 @@ export function CollectionFieldSelect({
 
 const FAQ_NONE = "__none__";
 
+type FaqOption = { id: string; question: string; published: boolean };
+
+/**
+ * Leniently reads the stored `faq` field value as a flat array of FAQ ids,
+ * preserving `""` entries (an unselected row) instead of dropping them.
+ *
+ * `parseFaqPickerIds` (in `~/lib/template-fields`, used by the storefront
+ * renderer) intentionally strips blanks — right for rendering, wrong for this
+ * editor's own round trip: clearing a row back to "Select a question..."
+ * must keep its (now-empty) slot in place, not delete it.
+ */
+function parseFaqRowIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((v) => (typeof v === "string" ? v : ""));
+}
+
+function SortableFaqRow({
+  sortId,
+  index,
+  total,
+  id,
+  options,
+  onSelect,
+  onMove,
+  onDelete,
+  canDelete,
+}: {
+  sortId: string;
+  index: number;
+  total: number;
+  id: string;
+  options: FaqOption[];
+  onSelect: (id: string) => void;
+  onMove: (delta: -1 | 1) => void;
+  onDelete: () => void;
+  canDelete: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: sortId });
+
+  const position = index + 1;
+
+  return (
+    <div
+      ref={setNodeRef}
+      data-row-id={sortId}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(
+        "border-border bg-muted/50 flex items-center gap-2 rounded-lg border p-3",
+        isDragging && "relative z-10 opacity-90 shadow-md",
+      )}
+    >
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        aria-label={`Reorder question ${position}`}
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md outline-none focus-visible:ring-[3px] active:cursor-grabbing pointer-coarse:size-11"
+      >
+        <GripVertical className="size-4" aria-hidden="true" />
+      </button>
+
+      <Select
+        value={id || FAQ_NONE}
+        onValueChange={(v) => onSelect(v === FAQ_NONE ? "" : v)}
+      >
+        <SelectTrigger className="flex-1">
+          <SelectValue placeholder="Select a question..." />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={FAQ_NONE}>Select a question...</SelectItem>
+          {options.map((item) => (
+            <SelectItem key={item.id} value={item.id}>
+              {item.question}
+              {item.published ? "" : " (unpublished)"}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <div className="flex shrink-0 items-center gap-0.5">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 pointer-coarse:size-11"
+              aria-label={`More actions for question ${position}`}
+            >
+              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              disabled={index === 0}
+              onSelect={() => onMove(-1)}
+            >
+              Move up
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={index >= total - 1}
+              onSelect={() => onMove(1)}
+            >
+              Move down
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-red-600 hover:text-red-700 pointer-coarse:size-11"
+          aria-label={`Delete question ${position}`}
+          disabled={!canDelete}
+          onClick={onDelete}
+        >
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function FaqFieldEditor({
   field,
   value,
@@ -1045,40 +1080,104 @@ export function FaqFieldEditor({
   const { data: items } = api.faq.adminList.useQuery();
   const maxItems = field.maxItems ?? 10;
   const minItems = field.minItems ?? 0;
-  const ids = parseFaqPickerIds(value) ?? [];
+  const ids = parseFaqRowIds(value);
   const published = (items ?? []).filter((item) => item.published);
   const byId = new Map((items ?? []).map((item) => [item.id, item]));
 
-  const setIds = (next: string[]) => onChange(next);
+  // Latest ids for callbacks that outlive the render that created them
+  // (toast Undo). `commit` also writes it so two commits in the same tick
+  // compose instead of the second clobbering the first.
+  const idsRef = useRef(ids);
+  idsRef.current = ids;
+
+  // Stable identity per row, for dnd-kit and for React's `key`: the selected
+  // FAQ id when set, else a generated key held here. Rows used to be keyed
+  // `${id}-${rowIndex}`, which remounted every row on each move. Every
+  // mutation below (add/move/delete/drag) keeps this array's length and
+  // order in lockstep with `ids`; the guard is only a safety net (e.g. first
+  // mount, or an unexpected external length change).
+  const keysRef = useRef<string[]>([]);
+  if (keysRef.current.length !== ids.length) {
+    const prev = keysRef.current;
+    keysRef.current = ids.map((_, i) => prev[i] ?? crypto.randomUUID());
+  }
+  const sortIds = ids.map((id, i) => id || keysRef.current[i]!);
+
+  const commit = (nextIds: string[], nextKeys: string[]) => {
+    idsRef.current = nextIds;
+    keysRef.current = nextKeys;
+    onChange(nextIds);
+  };
 
   const addRow = () => {
     if (ids.length >= maxItems) return;
     const used = new Set(ids);
     const nextId = published.find((item) => !used.has(item.id))?.id ?? "";
-    setIds([...ids, nextId]);
+    commit([...ids, nextId], [...keysRef.current, crypto.randomUUID()]);
   };
 
   const removeRow = (index: number) => {
     if (ids.length <= minItems) return;
-    setIds(ids.filter((_, i) => i !== index));
+    const removedId = ids[index]!;
+    const removedKey = keysRef.current[index]!;
+
+    commit(
+      ids.filter((_, i) => i !== index),
+      keysRef.current.filter((_, i) => i !== index),
+    );
+
+    toast("Question deleted", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          const latestIds = idsRef.current;
+          const latestKeys = keysRef.current;
+          // Already back (double click, or restored some other way).
+          if (latestKeys.includes(removedKey)) return;
+          const at = Math.min(index, latestIds.length);
+          const nextIds = [...latestIds];
+          nextIds.splice(at, 0, removedId);
+          const nextKeys = [...latestKeys];
+          nextKeys.splice(at, 0, removedKey);
+          commit(nextIds, nextKeys);
+        },
+      },
+    });
   };
 
   const moveRow = (index: number, delta: -1 | 1) => {
     const j = index + delta;
     if (j < 0 || j >= ids.length) return;
-    const next = [...ids];
-    const a = next[index]!;
-    const b = next[j]!;
-    next[index] = b;
-    next[j] = a;
-    setIds(next);
+    const nextIds = [...ids];
+    const nextKeys = [...keysRef.current];
+    [nextIds[index], nextIds[j]] = [nextIds[j]!, nextIds[index]!];
+    [nextKeys[index], nextKeys[j]] = [nextKeys[j]!, nextKeys[index]!];
+    commit(nextIds, nextKeys);
   };
 
   const updateRow = (index: number, id: string) => {
-    const next = [...ids];
-    next[index] = id;
-    setIds(next);
+    const nextIds = [...ids];
+    nextIds[index] = id;
+    commit(nextIds, keysRef.current);
   };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+  const dndId = useId();
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    const from = sortIds.indexOf(String(active.id));
+    const to = sortIds.indexOf(String(over.id));
+    if (from < 0 || to < 0) return;
+    commit(arrayMove(ids, from, to), arrayMove(keysRef.current, from, to));
+  };
+
+  const canDelete = ids.length > minItems;
 
   return (
     <div className="space-y-3">
@@ -1096,83 +1195,50 @@ export function FaqFieldEditor({
           .
         </p>
       )}
-      {ids.map((id, rowIndex) => {
-        const usedElsewhere = new Set(
-          ids.filter((_, i) => i !== rowIndex && i >= 0),
-        );
-        const current = byId.get(id);
-        const options = published.filter(
-          (item) => item.id === id || !usedElsewhere.has(item.id),
-        );
-        if (
-          current &&
-          !current.published &&
-          !options.some((o) => o.id === id)
-        ) {
-          options.unshift(current);
-        }
-        return (
-          <div
-            key={`${id || "empty"}-${rowIndex}`}
-            className="border-border bg-muted/50 flex items-center gap-2 rounded-lg border p-3"
-          >
-            <Select
-              value={id || FAQ_NONE}
-              onValueChange={(v) =>
-                updateRow(rowIndex, v === FAQ_NONE ? "" : v)
-              }
-            >
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Select a question..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={FAQ_NONE}>Select a question...</SelectItem>
-                {options.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.question}
-                    {item.published ? "" : " (unpublished)"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex shrink-0 items-center gap-0.5">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                aria-label="Move up"
-                disabled={rowIndex === 0}
-                onClick={() => moveRow(rowIndex, -1)}
-              >
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                aria-label="Move down"
-                disabled={rowIndex >= ids.length - 1}
-                onClick={() => moveRow(rowIndex, 1)}
-              >
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-red-600 hover:text-red-700"
-                aria-label="Remove question"
-                disabled={ids.length <= minItems}
-                onClick={() => removeRow(rowIndex)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+      {ids.length > 0 && (
+        <DndContext
+          id={dndId}
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={sortIds} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {ids.map((id, rowIndex) => {
+                const usedElsewhere = new Set(
+                  ids.filter((_, i) => i !== rowIndex),
+                );
+                const current = byId.get(id);
+                const options = published.filter(
+                  (item) => item.id === id || !usedElsewhere.has(item.id),
+                );
+                if (
+                  current &&
+                  !current.published &&
+                  !options.some((o) => o.id === id)
+                ) {
+                  options.unshift(current);
+                }
+                return (
+                  <SortableFaqRow
+                    key={sortIds[rowIndex]}
+                    sortId={sortIds[rowIndex]!}
+                    index={rowIndex}
+                    total={ids.length}
+                    id={id}
+                    options={options}
+                    onSelect={(v) => updateRow(rowIndex, v)}
+                    onMove={(delta) => moveRow(rowIndex, delta)}
+                    onDelete={() => removeRow(rowIndex)}
+                    canDelete={canDelete}
+                  />
+                );
+              })}
             </div>
-          </div>
-        );
-      })}
+          </SortableContext>
+        </DndContext>
+      )}
       <Button
         type="button"
         variant="outline"
@@ -1183,551 +1249,6 @@ export function FaqFieldEditor({
         <Plus className="mr-2 h-4 w-4" />
         Add question
       </Button>
-    </div>
-  );
-}
-
-// ─── TemplateImageUploadField ─────────────────────────────────────────────────
-
-type TemplateImageUploadFieldProps = {
-  value: string;
-  onChange: (url: string) => void;
-  label?: string;
-  description?: string;
-  disabled?: boolean;
-  /** Show a "Choose from library" button next to the upload UI. Only pass
-   *  `true` when the `media` feature flag is enabled — the picker's query
-   *  is gated server-side and would error otherwise. */
-  mediaLibraryEnabled?: boolean;
-};
-
-export function TemplateImageUploadField({
-  value,
-  onChange,
-  label,
-  description,
-  disabled,
-  mediaLibraryEnabled,
-}: TemplateImageUploadFieldProps) {
-  const [localFile, setLocalFile] = useState<File | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const uploader = useUploadFile({
-    api: "/api/upload",
-    route: "image",
-    onError: (error) => {
-      toast.error(error.message ?? "Image upload failed");
-      setLocalFile(null);
-    },
-  });
-
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  useEffect(() => {
-    if (!localFile || !isImageFile(localFile)) {
-      setObjectUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(localFile);
-    setObjectUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [localFile]);
-
-  const previewUrl = objectUrl ?? (value && !localFile ? value : null);
-  const hasFile = localFile instanceof File;
-
-  const triggerFileInput = useCallback(() => {
-    if (disabled || uploader.isPending) return;
-    fileInputRef.current?.click();
-  }, [disabled, uploader.isPending]);
-
-  const handleFileSelect = useCallback(
-    async (file: File) => {
-      if (!isImageFile(file)) {
-        toast.error("Please select a valid image file");
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image must be less than 5MB");
-        return;
-      }
-      setLocalFile(file);
-      try {
-        const response = await uploader.upload(file);
-        const fileLocation =
-          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
-          "";
-        if (fileLocation) {
-          onChange(fileLocation);
-          toast.success("Image uploaded successfully");
-          setLocalFile(null);
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-        toast.error("Failed to upload image");
-        setLocalFile(null);
-      }
-    },
-    [onChange, uploader],
-  );
-
-  const handleRemove = useCallback(() => {
-    onChange("");
-    setLocalFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }, [onChange]);
-
-  const isUploading = uploader.isPending;
-
-  return (
-    <div className="space-y-2">
-      {label && <Label>{label}</Label>}
-      <div className="space-y-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          disabled={disabled ?? isUploading}
-          aria-label={label ?? "Choose image file"}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              void handleFileSelect(file);
-            }
-            e.target.value = "";
-          }}
-        />
-
-        {previewUrl ? (
-          <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
-            <AdminThumb
-              src={previewUrl}
-              alt={hasFile ? localFile.name : "Preview"}
-              className="h-16 w-16 shrink-0 rounded-md object-cover"
-            />
-            <div className="min-w-0 flex-1">
-              {hasFile && (
-                <p className="truncate text-sm font-medium">{localFile.name}</p>
-              )}
-              <p className="text-muted-foreground text-xs">
-                {isUploading
-                  ? "Uploading..."
-                  : hasFile
-                    ? "Uploading..."
-                    : "Current image"}
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              disabled={disabled ?? isUploading}
-              aria-label="Remove image"
-              className="text-muted-foreground hover:text-destructive shrink-0"
-              onClick={handleRemove}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : null}
-
-        {mediaLibraryEnabled ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={disabled ?? isUploading}
-                className="w-full"
-              >
-                {isUploading ? (
-                  <>
-                    <span
-                      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
-                      aria-hidden="true"
-                    />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {previewUrl ? "Replace image" : "Choose image"}
-                    <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
-                  </>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="w-(--radix-dropdown-menu-trigger-width)"
-            >
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  queueMicrotask(() => triggerFileInput());
-                }}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload from device
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  queueMicrotask(() => setPickerOpen(true));
-                }}
-              >
-                <Images className="mr-2 h-4 w-4" />
-                Choose from library
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={disabled ?? isUploading}
-            onClick={triggerFileInput}
-            className="w-full"
-          >
-            {isUploading ? (
-              <>
-                <span
-                  className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
-                  aria-hidden="true"
-                />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                {previewUrl ? "Replace image" : "Choose image"}
-              </>
-            )}
-          </Button>
-        )}
-
-        <div
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              triggerFileInput();
-            }
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (disabled || isUploading) return;
-            const file = e.dataTransfer.files?.[0];
-            if (file && isImageFile(file)) {
-              void handleFileSelect(file);
-            }
-          }}
-          onDragOver={(e) => e.preventDefault()}
-          className={cn(
-            "border-muted-foreground/25 rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors",
-            "hover:border-muted-foreground/50 hover:bg-muted/50",
-            (disabled ?? isUploading) && "pointer-events-none opacity-50",
-          )}
-          onClick={triggerFileInput}
-        >
-          Drag and drop an image here, or click to browse
-        </div>
-      </div>
-      {description && (
-        <p className="text-muted-foreground text-xs">{description}</p>
-      )}
-
-      {mediaLibraryEnabled && (
-        <MediaPickerDialog
-          kind="image"
-          open={pickerOpen}
-          onOpenChange={setPickerOpen}
-          onSelect={(url) => {
-            setLocalFile(null);
-            onChange(url);
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-// ─── TemplateVideoUploadField ─────────────────────────────────────────────────
-
-type TemplateVideoUploadFieldProps = {
-  value: string;
-  onChange: (url: string) => void;
-  label?: string;
-  description?: string;
-  disabled?: boolean;
-  /** Show a "Choose from library" button next to the upload UI. Only pass
-   *  `true` when the `media` feature flag is enabled — the picker's query
-   *  is gated server-side and would error otherwise. */
-  mediaLibraryEnabled?: boolean;
-};
-
-export function TemplateVideoUploadField({
-  value,
-  onChange,
-  label,
-  description,
-  disabled,
-  mediaLibraryEnabled,
-}: TemplateVideoUploadFieldProps) {
-  const [localFile, setLocalFile] = useState<File | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const uploader = useUploadFile({
-    api: "/api/upload",
-    route: "video",
-    onError: (error) => {
-      toast.error(error.message ?? "Video upload failed");
-      setLocalFile(null);
-    },
-  });
-
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  useEffect(() => {
-    if (!localFile || !isVideoFile(localFile)) {
-      setObjectUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(localFile);
-    setObjectUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [localFile]);
-
-  const previewUrl = objectUrl ?? (value && !localFile ? value : null);
-  const hasFile = localFile instanceof File;
-
-  const triggerFileInput = useCallback(() => {
-    if (disabled || uploader.isPending) return;
-    fileInputRef.current?.click();
-  }, [disabled, uploader.isPending]);
-
-  const handleFileSelect = useCallback(
-    async (file: File) => {
-      if (!isVideoFile(file)) {
-        toast.error("Please select a valid video file");
-        return;
-      }
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error("Video must be less than 50MB");
-        return;
-      }
-      setLocalFile(file);
-      try {
-        const response = await uploader.upload(file);
-        const fileLocation =
-          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
-          "";
-        if (fileLocation) {
-          onChange(fileLocation);
-          toast.success("Video uploaded successfully");
-          setLocalFile(null);
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-        toast.error("Failed to upload video");
-        setLocalFile(null);
-      }
-    },
-    [onChange, uploader],
-  );
-
-  const handleRemove = useCallback(() => {
-    onChange("");
-    setLocalFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }, [onChange]);
-
-  const isUploading = uploader.isPending;
-
-  return (
-    <div className="space-y-2">
-      {label && <Label>{label}</Label>}
-      <div className="space-y-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="video/*"
-          className="hidden"
-          disabled={disabled ?? isUploading}
-          aria-label={label ?? "Choose video file"}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              void handleFileSelect(file);
-            }
-            e.target.value = "";
-          }}
-        />
-
-        {previewUrl ? (
-          <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
-            <video
-              src={previewUrl}
-              controls
-              muted
-              className="h-16 w-24 shrink-0 rounded-md bg-black object-cover"
-            >
-              Your browser does not support the video tag.
-            </video>
-            <div className="min-w-0 flex-1">
-              {hasFile && (
-                <p className="truncate text-sm font-medium">{localFile.name}</p>
-              )}
-              <p className="text-muted-foreground text-xs">
-                {isUploading
-                  ? "Uploading..."
-                  : hasFile
-                    ? "Uploading..."
-                    : "Current video"}
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              disabled={disabled ?? isUploading}
-              aria-label="Remove video"
-              className="text-muted-foreground hover:text-destructive shrink-0"
-              onClick={handleRemove}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : null}
-
-        {mediaLibraryEnabled ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={disabled ?? isUploading}
-                className="w-full"
-              >
-                {isUploading ? (
-                  <>
-                    <span
-                      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
-                      aria-hidden="true"
-                    />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {previewUrl ? "Replace video" : "Choose video"}
-                    <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
-                  </>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="w-(--radix-dropdown-menu-trigger-width)"
-            >
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  queueMicrotask(() => triggerFileInput());
-                }}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload from device
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  queueMicrotask(() => setPickerOpen(true));
-                }}
-              >
-                <Images className="mr-2 h-4 w-4" />
-                Choose from library
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={disabled ?? isUploading}
-            onClick={triggerFileInput}
-            className="w-full"
-          >
-            {isUploading ? (
-              <>
-                <span
-                  className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
-                  aria-hidden="true"
-                />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                {previewUrl ? "Replace video" : "Choose video"}
-              </>
-            )}
-          </Button>
-        )}
-
-        <div
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              triggerFileInput();
-            }
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (disabled || isUploading) return;
-            const file = e.dataTransfer.files?.[0];
-            if (file && isVideoFile(file)) {
-              void handleFileSelect(file);
-            }
-          }}
-          onDragOver={(e) => e.preventDefault()}
-          className={cn(
-            "border-muted-foreground/25 rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors",
-            "hover:border-muted-foreground/50 hover:bg-muted/50",
-            (disabled ?? isUploading) && "pointer-events-none opacity-50",
-          )}
-          onClick={triggerFileInput}
-        >
-          Drag and drop a video here, or click to browse (max 50MB)
-        </div>
-      </div>
-      {description && (
-        <p className="text-muted-foreground text-xs">{description}</p>
-      )}
-
-      {mediaLibraryEnabled && (
-        <MediaPickerDialog
-          kind="video"
-          open={pickerOpen}
-          onOpenChange={setPickerOpen}
-          onSelect={(url) => {
-            setLocalFile(null);
-            onChange(url);
-          }}
-        />
-      )}
     </div>
   );
 }

@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
       amount_total: session.amount_total,
       currency: session.currency,
       payment_status: session.payment_status,
+      delivery_method: session.metadata?.deliveryMethod ?? null,
     });
   } catch (error: unknown) {
     console.error("Retrieve session error:", error);

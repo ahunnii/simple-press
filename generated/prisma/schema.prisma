@@ -192,6 +192,10 @@ model Business {
   addressCity       String?
   addressState      String?
   addressPostalCode String?
+  // Map pin for storefront maps + LocalBusiness `geo` (storefront mode only).
+  // Both or neither. DDL: prisma/manual/2026-09-25-business-coordinates.sql
+  latitude          Float?
+  longitude         Float?
 
   // Integrations
   stripeAccountId             String? @unique

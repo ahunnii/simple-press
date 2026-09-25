@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -7,7 +8,16 @@ import { ArrowLeft } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
+import {
+  getListFieldValue,
+  parseTemplateTrustBadgesListRows,
+} from "~/lib/template-fields";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
@@ -23,13 +33,27 @@ import {
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
+import { resolveFields } from "..";
+import {
+  BambooAccordion,
+  BambooAccordionItem,
+} from "../shared/bamboo-accordion";
 import { BambooHorizontalProductCard } from "../shared/bamboo-product-card";
-import { DEFAULT_LUCIDE_ICONS_WITH_LABELS } from "../shop";
 import { BambooProductActions } from "./bamboo-product-actions";
+
+const TRUST_BADGES_KEY = "bamboo.product.trust-badges";
+
+type StoreBadge = {
+  Icon: LucideIcon | undefined;
+  label: string;
+  /** Position in the saved list, for the editor's click-to-row targeting. */
+  index: number;
+};
 
 export function BambooProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
@@ -39,18 +63,47 @@ export function BambooProductPage({
     isOnSale,
   } = useProduct(product);
 
-  const displayTrustBadges =
-    !!additionalFields?.productFeatures &&
-    additionalFields?.productFeatures?.length > 0
-      ? buildLucideIconsWithLabels(
-          additionalFields,
-          DEFAULT_LUCIDE_ICONS_WITH_LABELS,
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
+    "bamboo.product.shipping-summary",
+    "bamboo.product.returns-summary",
+    "bamboo.product.question-text",
+    "bamboo.product.related-heading",
+    "bamboo.product.coming-soon-heading",
+    "bamboo.product.coming-soon-body",
+  ]);
+  const shippingSummary = (f["bamboo.product.shipping-summary"] ?? "").trim();
+  const returnsSummary = (f["bamboo.product.returns-summary"] ?? "").trim();
+  const questionText = (f["bamboo.product.question-text"] ?? "").trim();
+  const relatedHeading = f["bamboo.product.related-heading"] ?? "";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // A product's own features (Products → features) win; otherwise the
+  // store-wide badges from the editor. No built-in fallback rows — an empty
+  // list renders no badges at all.
+  const productBadges = additionalFields
+    ? buildLucideIconsWithLabels(additionalFields)
+    : [];
+  const storeBadges: StoreBadge[] =
+    productBadges.length > 0
+      ? []
+      : (
+          parseTemplateTrustBadgesListRows(
+            getListFieldValue(customFields, TRUST_BADGES_KEY),
+          ) ?? []
         )
-      : [];
+          .map((row, index) => ({
+            Icon: row.icon,
+            label: row.label.trim(),
+            index,
+          }))
+          .filter((row) => row.label.length > 0);
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
+  const hasRelatedProducts = (relatedProducts?.length ?? 0) > 0;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -128,22 +181,117 @@ export function BambooProductPage({
 
             <Separator />
 
-            {/* Quantity + Add to Cart Actions*/}
-            <BambooProductActions product={product} business={business} />
+            {/* Buy panel — everything the "Product page" editor section
+                controls sits inside this wrapper so its hotspot covers it. */}
+            <div
+              {...sectionGroupAttr("product", "details")}
+              className="flex flex-col gap-6"
+            >
+              <BambooProductActions
+                product={product}
+                business={business}
+                comingSoonHeading={
+                  f["bamboo.product.coming-soon-heading"] ?? ""
+                }
+                comingSoonBody={f["bamboo.product.coming-soon-body"] ?? ""}
+              />
 
-            {/* Trust / Feature badges */}
-            <div className="grid grid-cols-2 gap-3">
-              {displayTrustBadges?.map((badge) => (
-                <div
-                  key={badge.label}
-                  className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
-                >
-                  <badge.Icon className="text-primary size-4" />
-                  <span className="text-secondary-foreground text-xs font-medium">
-                    {badge.label}
-                  </span>
+              {/* Trust / feature badges */}
+              {productBadges.length > 0 ? (
+                <ul className="grid grid-cols-2 gap-3">
+                  {productBadges.map((badge) => (
+                    <li
+                      key={badge.label}
+                      className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
+                    >
+                      <badge.Icon
+                        className="text-primary size-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="text-secondary-foreground text-xs font-medium">
+                        {badge.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : storeBadges.length > 0 ? (
+                <ul className="grid grid-cols-2 gap-3">
+                  {storeBadges.map((badge) => (
+                    <li
+                      key={badge.index}
+                      {...listItemAttr(TRUST_BADGES_KEY, badge.index)}
+                      className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
+                    >
+                      {badge.Icon ? (
+                        <badge.Icon
+                          className="text-primary size-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <span className="text-secondary-foreground text-xs font-medium">
+                        {badge.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              {/* Shipping / Returns — each row only when its note is set */}
+              {shippingSummary || returnsSummary ? (
+                <div>
+                  <h2 className="sr-only">Shipping and returns</h2>
+                  <BambooAccordion className="space-y-3">
+                    {shippingSummary ? (
+                      <BambooAccordionItem id="shipping" title="Shipping">
+                        <p
+                          {...fieldAttr("bamboo.product.shipping-summary")}
+                          className="text-sm leading-relaxed whitespace-pre-line"
+                        >
+                          {shippingSummary}
+                        </p>
+                        {hasShippingPolicy ? (
+                          <Link
+                            href="/shipping-policy"
+                            className="mt-3 inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]"
+                          >
+                            Read the full shipping policy
+                          </Link>
+                        ) : null}
+                      </BambooAccordionItem>
+                    ) : null}
+                    {returnsSummary ? (
+                      <BambooAccordionItem id="returns" title="Returns">
+                        <p
+                          {...fieldAttr("bamboo.product.returns-summary")}
+                          className="text-sm leading-relaxed whitespace-pre-line"
+                        >
+                          {returnsSummary}
+                        </p>
+                        {hasRefundPolicy ? (
+                          <Link
+                            href="/refund-policy"
+                            className="mt-3 inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]"
+                          >
+                            Read the full returns policy
+                          </Link>
+                        ) : null}
+                      </BambooAccordionItem>
+                    ) : null}
+                  </BambooAccordion>
                 </div>
-              ))}
+              ) : null}
+
+              {questionText ? (
+                <p className="text-sm">
+                  <Link
+                    href="/contact"
+                    {...fieldAttr("bamboo.product.question-text")}
+                    className="font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]"
+                  >
+                    {questionText}
+                  </Link>
+                </p>
+              ) : null}
             </div>
           </FadeIn>
         </div>
@@ -163,38 +311,34 @@ export function BambooProductPage({
           }}
         />
 
-        {/* Related Products — mirrors happy-bamboo's plain mb-20 wrapper
-            (no divider); the "no related products" message below is
-            bamboo's own empty state and is preserved as-is. */}
-        <div className="mb-20">
-          <FadeIn direction="up">
-            <h2 className="text-[var(--bam-forest-deep)] font-serif text-2xl font-bold tracking-tight md:text-3xl">
-              You Might Also Like
-            </h2>
-          </FadeIn>
-          <StaggerContainer
-            className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
-            staggerDelay={0.12}
-          >
-            {relatedProducts?.map((p, index) => {
-              return (
+        {/* Related Products — the whole block (heading included) only
+            renders when there is something to show. */}
+        {hasRelatedProducts ? (
+          <section aria-labelledby="bamboo-related-heading" className="mb-20">
+            <FadeIn direction="up">
+              <h2
+                id="bamboo-related-heading"
+                {...fieldAttr("bamboo.product.related-heading")}
+                className="font-serif text-2xl font-bold tracking-tight text-[var(--bam-forest-deep)] md:text-3xl"
+              >
+                {relatedHeading}
+              </h2>
+            </FadeIn>
+            <StaggerContainer
+              className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
+              staggerDelay={0.12}
+            >
+              {relatedProducts?.map((p, index) => (
                 <StaggerItem key={p.id}>
                   <BambooHorizontalProductCard
                     product={p as Product}
                     index={index}
                   />
                 </StaggerItem>
-              );
-            })}
-            {relatedProducts?.length === 0 && (
-              <div className="col-span-full text-center">
-                <p className="text-muted-foreground">
-                  No related products found
-                </p>
-              </div>
-            )}
-          </StaggerContainer>
-        </div>
+              ))}
+            </StaggerContainer>
+          </section>
+        ) : null}
       </section>
     </PageTransition>
   );

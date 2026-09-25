@@ -3,9 +3,17 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import {
+  googleMapsUrls,
+  resolveMapCoordinates,
+} from "~/lib/address/coordinates";
+import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { resolveFaqPickerItems } from "~/lib/template-fields";
+import {
+  getRawCustomFieldString,
+  resolveFaqPickerItems,
+} from "~/lib/template-fields";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -32,10 +40,11 @@ export function BambooContactPage({
     "bamboo.contact.header",
     "bamboo.contact.subheader",
     "bamboo.contact.hero-image",
-    "bamboo.contact.hours",
+    "bamboo.contact.form-success-heading",
+    "bamboo.contact.form-success-body",
+    "bamboo.contact.map-eyebrow",
     "bamboo.contact.map-heading",
-    "bamboo.global.map-lat",
-    "bamboo.global.map-lng",
+    "bamboo.contact.faq-eyebrow",
     "bamboo.contact.faq-heading",
     "bamboo.contact.faq-lede",
     "bamboo.contact.hero-bg-image",
@@ -60,23 +69,48 @@ export function BambooContactPage({
   const email = business?.supportEmail?.trim();
   const location = business?.businessAddress?.trim();
   const phone = business?.phoneNumber?.trim();
-  const hours = f["bamboo.contact.hours"]?.trim();
 
-  const latRaw = f["bamboo.global.map-lat"]?.trim();
-  const lngRaw = f["bamboo.global.map-lng"]?.trim();
-  const lat = latRaw ? Number(latRaw) : NaN;
-  const lng = lngRaw ? Number(lngRaw) : NaN;
-  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
-  const mapDest = location ? encodeURIComponent(location) : `${lat},${lng}`;
-  const viewUrl = `https://www.google.com/maps/search/?api=1&query=${mapDest}`;
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapDest}`;
+  // Hours: Settings → Business Hours wins (rendered as compact label/value
+  // rows); else the legacy saved single-line text (retired 2026-09-25, a
+  // read-only fallback — never written or cleared from here); else omitted.
+  const hoursRows = formatBusinessHours(
+    parseBusinessHours(business?.businessHours),
+  );
+  const legacyHours = getRawCustomFieldString(
+    business?.siteContent?.customFields,
+    "bamboo.contact.hours",
+  )?.trim();
+
+  // Map pin: Settings → General (Business.latitude/longitude) wins. The
+  // legacy per-template fields are a read-only fallback for sites that saved
+  // coordinates before the pin moved to Settings (retired 2026-09-25) — the
+  // saved values are never written to or cleared from here.
+  const coords = resolveMapCoordinates(
+    business,
+    getRawCustomFieldString(
+      business?.siteContent?.customFields,
+      "bamboo.global.map-lat",
+    ),
+    getRawCustomFieldString(
+      business?.siteContent?.customFields,
+      "bamboo.global.map-lng",
+    ),
+  );
+  const hasCoords = coords !== null;
+  // A blank (but present) address string must still fall through to coords —
+  // `||`, not `??`, is deliberate here (same reasoning as heroBgImage above).
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const mapDest = location || coords || { latitude: 0, longitude: 0 };
+  const { viewUrl, directionsUrl } = googleMapsUrls(mapDest);
+  const lat = coords?.latitude ?? 0;
+  const lng = coords?.longitude ?? 0;
 
   const contactInfo: {
     icon: typeof Mail;
     label: string;
-    value: string;
+    value?: string;
     href?: string;
-    field?: string;
+    lines?: { label: string; value: string }[];
   }[] = [
     ...(email
       ? [{ icon: Mail, label: "Email", value: email, href: `mailto:${email}` }]
@@ -87,17 +121,11 @@ export function BambooContactPage({
     ...(phone
       ? [{ icon: Phone, label: "Phone", value: phone, href: `tel:${phone}` }]
       : []),
-    ...(hours
-      ? [
-          {
-            icon: Clock,
-            label: "Hours",
-            value: hours,
-            href: undefined,
-            field: "bamboo.contact.hours",
-          },
-        ]
-      : []),
+    ...(hoursRows.length > 0
+      ? [{ icon: Clock, label: "Hours", lines: hoursRows }]
+      : legacyHours
+        ? [{ icon: Clock, label: "Hours", value: legacyHours, href: undefined }]
+        : []),
   ];
 
   return (
@@ -117,7 +145,10 @@ export function BambooContactPage({
         <FadeIn direction="up">
           <div className="flex w-full flex-col gap-12 lg:flex-row">
             {/* Form */}
-            <BambooContactForm />
+            <BambooContactForm
+              successHeading={f["bamboo.contact.form-success-heading"] ?? ""}
+              successBody={f["bamboo.contact.form-success-body"] ?? ""}
+            />
 
             {/* Contact Info Sidebar. The sr-only h2 keeps the outline
                 h1 → h2 → h3 (hb itself skips to h3 here — a bug we don't copy). */}
@@ -133,23 +164,35 @@ export function BambooContactPage({
                       <div className={iconCircleClass} aria-hidden="true">
                         <info.icon className="size-5 text-[var(--bam-forest)]" />
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <h3 className="text-foreground text-sm font-semibold">
                           {info.label}
                         </h3>
-                        {info.href ? (
+                        {info.lines ? (
+                          <dl className="mt-1 space-y-0.5">
+                            {info.lines.map((line, i) => (
+                              <div
+                                key={line.label + String(i)}
+                                className="flex items-baseline justify-between gap-3 text-sm"
+                              >
+                                <dt className="text-muted-foreground">
+                                  {line.label}
+                                </dt>
+                                <dd className="text-muted-foreground">
+                                  {line.value}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : info.href ? (
                           <a
                             href={info.href}
                             className="text-muted-foreground text-sm transition-colors hover:text-[var(--bam-forest)]"
-                            {...(info.field ? fieldAttr(info.field) : {})}
                           >
                             {info.value}
                           </a>
                         ) : (
-                          <p
-                            className="text-muted-foreground text-sm"
-                            {...(info.field ? fieldAttr(info.field) : {})}
-                          >
+                          <p className="text-muted-foreground text-sm">
                             {info.value}
                           </p>
                         )}
@@ -176,7 +219,14 @@ export function BambooContactPage({
             <div className="mx-auto max-w-7xl px-4 lg:px-8">
               <FadeIn direction="up">
                 <div className="mb-12 text-center">
-                  <span className={eyebrowClass + " text-center"}>Find Us</span>
+                  {f["bamboo.contact.map-eyebrow"] ? (
+                    <span
+                      className={eyebrowClass + " text-center"}
+                      {...fieldAttr("bamboo.contact.map-eyebrow")}
+                    >
+                      {f["bamboo.contact.map-eyebrow"]}
+                    </span>
+                  ) : null}
                   <h2 className="text-foreground font-serif text-4xl font-bold tracking-tight md:text-5xl">
                     <span
                       className="text-balance"
@@ -209,7 +259,14 @@ export function BambooContactPage({
           >
             <FadeIn direction="up">
               <div className="mb-12 text-center">
-                <span className={eyebrowClass + " text-center"}>Answers</span>
+                {f["bamboo.contact.faq-eyebrow"] ? (
+                  <span
+                    className={eyebrowClass + " text-center"}
+                    {...fieldAttr("bamboo.contact.faq-eyebrow")}
+                  >
+                    {f["bamboo.contact.faq-eyebrow"]}
+                  </span>
+                ) : null}
                 <h2 className="text-foreground font-serif text-4xl font-bold tracking-tight md:text-5xl">
                   <span
                     className="text-balance"

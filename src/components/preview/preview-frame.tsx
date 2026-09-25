@@ -9,7 +9,9 @@ import {
 } from "react";
 import { Loader2 } from "lucide-react";
 
+import type { PreviewEditTarget } from "~/lib/preview/preview-target";
 import type { PreviewMessage } from "~/lib/preview/use-preview-bridge";
+import { sanitizeEditTarget } from "~/lib/preview/preview-target";
 import {
   postToIframe,
   PREVIEW_SOURCE,
@@ -29,8 +31,15 @@ export type PreviewFrameHandle = {
 type Props = {
   /** Storefront path to preview (e.g. "/" or "/about"). Defaults to "/". */
   path?: string;
-  /** Called when the overlay inside the iframe sends sp:edit-group. */
-  onEditGroup?: (page: string, group: string) => void;
+  /**
+   * Called when the overlay inside the iframe sends sp:edit-group. `target`
+   * (validated) narrows the click to one field / list row when present.
+   */
+  onEditGroup?: (
+    page: string,
+    group: string,
+    target?: PreviewEditTarget,
+  ) => void;
   /** Called when the iframe acks a live text patch (sp:patched). */
   onPatched?: (applied: string[], missed: string[]) => void;
   /** Whether a draft save is in-flight — shows a shimmer over the iframe. */
@@ -39,6 +48,12 @@ type Props = {
   width?: string;
   /** Extra className applied to the outer wrapper. */
   className?: string;
+  /**
+   * Minimum iframe height. Defaults to 600px so the desktop canvas never
+   * collapses; the compact (phone) editor passes 0 so the iframe fills exactly
+   * the space it is given instead of forcing a nested scroll.
+   */
+  minHeight?: string | number;
 };
 
 /**
@@ -55,6 +70,7 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
       isUpdating = false,
       width = "100%",
       className,
+      minHeight = "600px",
     },
     ref,
   ) {
@@ -178,7 +194,8 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
         }
       }
       if (msg.type === "sp:edit-group") {
-        onEditGroup?.(msg.page, msg.group);
+        const target = sanitizeEditTarget(msg.field, msg.item);
+        onEditGroup?.(msg.page, msg.group, target ?? undefined);
       }
       if (msg.type === "sp:patched") {
         onPatched?.(msg.applied, msg.missed);
@@ -244,7 +261,7 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
           title="Live storefront preview"
           onLoad={handleLoad}
           className="h-full w-full border-0"
-          style={{ minHeight: "600px" }}
+          style={{ minHeight }}
         />
 
         {/* Navigation overlay: the editor chrome (rail, page select) updates

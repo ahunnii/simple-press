@@ -18,12 +18,27 @@ import type {
 } from "~/lib/template-fields";
 
 ///HOMEPAGE
+
+// Hero — split into two groups: `homepage.hero` (copy & buttons, in the
+// order they read on the page) and `homepage.heroImage` (the photo fields).
+// Both groups render under the single `homepage.hero` section — see
+// `../sections.ts` — so the field-panel header shows both group headers.
 const homepageHeroData: TemplateField[] = [
   {
+    key: "bamboo.homepage.hero-tagline",
+    label: "Small label",
+    description: "Short text above the headline. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Purpose in Every Roll",
+    placeholder: "Purpose in Every Roll",
+  },
+  {
     key: "bamboo.homepage.hero-title",
-    label: "Homepage Hero Title (line one)",
-    description:
-      "First line of the two-line hero headline. Rendered in deep forest green.",
+    label: "Headline, first line",
+    description: "First line of the two-line headline.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -33,9 +48,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.hero-title-accent",
-    label: "Homepage Hero Title (line two)",
-    description:
-      "Second line of the hero headline, set in gold directly beneath line one.",
+    label: "Headline, second line",
+    description: "Shown under the first line in the accent colour.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -44,76 +58,9 @@ const homepageHeroData: TemplateField[] = [
     placeholder: "Kind to Earth.",
   },
   {
-    key: "bamboo.homepage.hero-tagline",
-    label: "Homepage Hero Tagline",
-    description:
-      "Small gold kicker above the hero headline. Leave blank to hide.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Purpose in Every Roll",
-    placeholder: "Purpose in Every Roll",
-  },
-  {
-    key: "bamboo.homepage.hero-image",
-    label: "Homepage Hero Image",
-    description:
-      "Photograph shown beside the hero headline, in an arched frame. This is the main focal point of the hero section.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "bamboo.homepage.hero-bg-image",
-    label: "Homepage Hero Background Image",
-    description:
-      "Optional photo that fills the whole hero band behind the headline. When set, a cream wash keeps the text readable, and the hero image (if one is chosen) floats over the scene without its arched frame — leave the hero image as the placeholder to let the background photo stand alone. Leave empty for the solid cream look.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-full",
-    defaultValue: "",
-  },
-  {
-    key: "bamboo.homepage.hero-bg-tint",
-    label: "Homepage Hero Background Tint",
-    description:
-      "Optional color wash blended over the hero background photo. Only applies when a background image is set. Use Clear to remove the tint.",
-    type: "color",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "bamboo.homepage.hero-show-full-photo",
-    label: "Show Full Background Photo",
-    description:
-      "When on, removes the cream wash behind the hero text so the entire background photo shows. Check that the text is still easy to read on your photo. Only applies when a background image is set.",
-    type: "boolean",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "false",
-  },
-  {
-    key: "bamboo.homepage.hero-wash-strength",
-    label: "Background Wash Strength",
-    description:
-      "0-100, how strongly the cream wash fades the photo behind the hero text; 100 is the standard look, lower shows more of the photo; ignored when Show Full Background Photo is on.",
-    type: "number",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "100",
-  },
-  {
     key: "bamboo.homepage.hero-description",
-    label: "Homepage Hero Description",
-    description: "Short paragraph below the hero headline.",
+    label: "Intro text",
+    description: "Short paragraph below the headline.",
     type: "textarea",
     page: "homepage",
     group: "homepage.hero",
@@ -123,41 +70,9 @@ const homepageHeroData: TemplateField[] = [
       "Premium bamboo paper that's eco-friendly, chemical-free, and made for your family and our future.",
   },
   {
-    key: "bamboo.homepage.hero-badges",
-    label: "Hero Badges",
-    description:
-      "Small icon badges in a row beneath the hero copy (icon + short caption per item, up to 6). Deleting every row reverts to the default badges shown here rather than hiding the row.",
-    type: "list",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-full",
-    itemSchema: [
-      {
-        key: "icon",
-        label: "Icon",
-        type: "icon",
-        description: "Icon shown inside the outlined circle",
-      },
-      {
-        key: "title",
-        label: "Caption",
-        type: "text",
-        description: "Short uppercase caption, e.g. Chemical Free",
-      },
-      {
-        key: "description",
-        label: "Supporting line",
-        type: "text",
-        description: "Optional. Leave blank for a caption-only badge.",
-      },
-    ],
-    minItems: 0,
-    maxItems: 6,
-  },
-  {
     key: "bamboo.homepage.hero-primary-button-text",
-    label: "Hero Primary Button Text",
-    description: "Primary CTA button text (e.g. Shop Now)",
+    label: "Primary button text",
+    description: "Text on the main button, e.g. Shop Now.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -167,8 +82,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.hero-primary-button-link",
-    label: "Hero Primary Button Link",
-    description: "Primary CTA button URL",
+    label: "Primary button link",
+    description: "Where the button goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
@@ -178,8 +93,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.hero-secondary-button-text",
-    label: "Hero Secondary Button Text",
-    description: "Quiet text link beside the primary CTA (e.g. Our Story)",
+    label: "Secondary button text",
+    description:
+      "Text for the quiet text link beside the main button, e.g. Our Story. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -189,8 +105,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.hero-secondary-button-link",
-    label: "Hero Secondary Button Link",
-    description: "Secondary button URL",
+    label: "Secondary button link",
+    description: "Where the link goes, e.g. /about.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
@@ -198,14 +114,125 @@ const homepageHeroData: TemplateField[] = [
     placeholder: "/about",
     defaultValue: "/about",
   },
+  {
+    key: "bamboo.homepage.hero-show-badges",
+    label: "Show badges",
+    description:
+      "Show the row of small badges below the intro text. Turn off to hide them without deleting your badge list below.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "bamboo.homepage.hero-badges",
+    label: "Badges",
+    description:
+      "Row of small icon badges below the intro text, up to 6. To hide them, turn off Show badges.",
+    type: "list",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    visibleWhen: { key: "bamboo.homepage.hero-show-badges", equals: "true" },
+    itemSchema: [
+      {
+        key: "icon",
+        label: "Icon",
+        type: "icon",
+        description: "Icon shown inside the outlined circle.",
+      },
+      {
+        key: "title",
+        label: "Caption",
+        type: "text",
+        description: "Short caption, e.g. Chemical Free.",
+      },
+      {
+        key: "description",
+        label: "Supporting line",
+        type: "text",
+        description: "Smaller text under the caption.",
+        optional: true,
+      },
+    ],
+    minItems: 0,
+    maxItems: 6,
+    itemLabel: "badge",
+    defaultsWhenEmpty: true,
+  },
+  {
+    key: "bamboo.homepage.hero-image",
+    label: "Hero photo",
+    description:
+      "The main photo in the hero, normally shown in an arched frame. When a background photo is set below, this photo floats over it instead, without the frame. Remove this image to let the background photo stand alone.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.heroImage",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "bamboo.homepage.hero-bg-image",
+    label: "Background photo",
+    description:
+      "Optional photo that fills the whole hero area behind the headline. When set, a translucent overlay keeps the text readable (adjust with Photo fade below), and the hero photo above (if one is set) floats over it without its frame. Leave this blank for the plain look.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.heroImage",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "bamboo.homepage.hero-bg-tint",
+    label: "Background tint",
+    description:
+      "Optional colour overlay blended over the background photo, for mood. Only applies when a background photo is set above. Choose Clear to remove it.",
+    type: "color",
+    page: "homepage",
+    group: "homepage.heroImage",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "bamboo.homepage.hero-show-full-photo",
+    label: "Show the whole photo",
+    description:
+      "Removes the fade behind the text so the entire background photo shows. Check that the text stays readable on your photo. Only applies when a background photo is set above.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.heroImage",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+  {
+    key: "bamboo.homepage.hero-wash-strength",
+    label: "Photo fade",
+    description:
+      "How strongly the background photo is faded behind the hero text. 100% is the standard look and keeps text easy to read (recommended); lower values show more of the photo, but text may become harder to read. Only applies when a background photo is set above and Show the whole photo is off.",
+    type: "number",
+    page: "homepage",
+    group: "homepage.heroImage",
+    gridColumn: "col-span-1",
+    defaultValue: "100",
+    control: "slider",
+    min: 0,
+    max: 100,
+    step: 5,
+    unit: "%",
+    visibleWhen: {
+      key: "bamboo.homepage.hero-show-full-photo",
+      equals: "false",
+    },
+  },
 ];
 
 const homepageValueBandData: TemplateField[] = [
   {
     key: "bamboo.homepage.value-band-items",
-    label: "Value Band Items",
+    label: "Statements",
     description:
-      "Four short value statements shown on the deep green band directly below the hero. To hide the whole band, use its section visibility toggle — deleting every row reverts to the defaults shown here instead of hiding it.",
+      "Up to four short statements shown on the band directly below the hero. To hide the band, turn off this section's visibility.",
     type: "list",
     page: "homepage",
     group: "homepage.valueBand",
@@ -215,7 +242,7 @@ const homepageValueBandData: TemplateField[] = [
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown inside the gold outlined circle",
+        description: "Icon shown inside the outlined circle.",
       },
       {
         key: "title",
@@ -227,20 +254,81 @@ const homepageValueBandData: TemplateField[] = [
         key: "description",
         label: "Supporting line",
         type: "text",
-        description: "Optional. Leave blank for a statement-only item.",
+        description: "Smaller text under the statement.",
+        optional: true,
       },
     ],
     minItems: 0,
     maxItems: 4,
+    itemLabel: "statement",
+    defaultsWhenEmpty: true,
+  },
+];
+
+const homepageAboutTeaserData: TemplateField[] = [
+  {
+    key: "bamboo.homepage.about-teaser-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Story",
+    placeholder: "Our Story",
+  },
+  {
+    key: "bamboo.homepage.about-teaser-heading",
+    label: "Heading",
+    description: "Heading for the story preview block.",
+    type: "text",
+    page: "homepage",
+    gridColumn: "col-span-1",
+    group: "homepage.aboutTeaser",
+    defaultValue: "From Detroit, With Purpose",
+    placeholder: "From Detroit, With Purpose",
+  },
+  {
+    key: "bamboo.homepage.about-teaser-body",
+    label: "Body text",
+    description: "Paragraph below the heading, introducing your story.",
+    type: "textarea",
+    page: "homepage",
+    gridColumn: "col-span-full",
+    group: "homepage.aboutTeaser",
+    placeholder: "We started our business with a simple belief...",
+    defaultValue:
+      "We started our business with a simple belief: the everyday products in your home should be better -- better for your family, and better for the planet. Our roots in Detroit drive everything we do.",
+  },
+  {
+    key: "bamboo.homepage.about-teaser-button-text",
+    label: "Button text",
+    description:
+      "Label for the link to your full About page. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "Learn More",
+  },
+  {
+    key: "bamboo.homepage.about-teaser-button-link",
+    label: "Button link",
+    description: "Where the button goes, e.g. /about.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "/about",
+    placeholder: "/about",
   },
 ];
 
 const homepageFeaturedData: TemplateField[] = [
   {
     key: "bamboo.homepage.featured-eyebrow",
-    label: "Featured Section Eyebrow",
-    description:
-      "Small gold label above the featured products heading. Leave blank to hide.",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -250,8 +338,8 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.featured-title",
-    label: "Featured Section Title",
-    description: "Title for the featured products section",
+    label: "Heading",
+    description: "Heading for the featured products section.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -261,8 +349,8 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.featured-description",
-    label: "Featured Section Description",
-    description: "Description below the featured section title",
+    label: "Intro text",
+    description: "Short text below the heading, above the product grid.",
     type: "textarea",
     page: "homepage",
     group: "homepage.featured",
@@ -273,8 +361,9 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.featured-button-text",
-    label: "Featured Section Button Text",
-    description: "Label for the link to the full shop below the product grid",
+    label: "Button text",
+    description:
+      "Label for the link to the full shop, shown below the product grid. Leave blank to hide the button.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -282,72 +371,24 @@ const homepageFeaturedData: TemplateField[] = [
     defaultValue: "View All Products",
     placeholder: "View All Products",
   },
-];
-
-const homepageAboutTeaserData: TemplateField[] = [
   {
-    key: "bamboo.homepage.about-teaser-eyebrow",
-    label: "About Teaser Eyebrow",
-    description:
-      "Small gold label above the about teaser heading. Leave blank to hide.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.aboutTeaser",
-    gridColumn: "col-span-1",
-    defaultValue: "Our Story",
-    placeholder: "Our Story",
-  },
-  {
-    key: "bamboo.homepage.about-teaser-heading",
-    label: "About Teaser Heading",
-    description: "Heading for the about teaser block",
-    type: "text",
-    page: "homepage",
-    gridColumn: "col-span-1",
-    group: "homepage.aboutTeaser",
-    defaultValue: "From Detroit, With Purpose",
-    placeholder: "From Detroit, With Purpose",
-  },
-  {
-    key: "bamboo.homepage.about-teaser-body",
-    label: "About Teaser Body",
-    description: "Body text for the about teaser",
-    type: "textarea",
-    page: "homepage",
-    gridColumn: "col-span-full",
-    group: "homepage.aboutTeaser",
-    placeholder: "We started our business with a simple belief...",
-    defaultValue: `We started our business with a simple belief:
-        the everyday products in your home should be better -- better for your
-        family, and better for the planet. Our roots in Detroit drive everything we do.`,
-  },
-  {
-    key: "bamboo.homepage.about-teaser-button-text",
-    label: "About Teaser Button Text",
-    description: "Learn More button text",
-    type: "text",
-    page: "homepage",
-    group: "homepage.aboutTeaser",
-    defaultValue: "Learn More",
-  },
-  {
-    key: "bamboo.homepage.about-teaser-button-link",
-    label: "About Teaser Button Link",
-    description: "Link for the about teaser button",
+    key: "bamboo.homepage.featured-button-link",
+    label: "Button link",
+    description: "Where the button goes, e.g. /shop.",
     type: "url",
     page: "homepage",
-    group: "homepage.aboutTeaser",
-    defaultValue: "/about",
-    placeholder: "/about",
+    group: "homepage.featured",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+    placeholder: "/shop",
   },
 ];
 
 const homepageSustainabilityData: TemplateField[] = [
   {
     key: "bamboo.homepage.sustainability-eyebrow",
-    label: "Sustainability Eyebrow",
-    description:
-      "Small gold label above the sustainability banner heading. Leave blank to hide.",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.sustainability",
@@ -357,8 +398,8 @@ const homepageSustainabilityData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.sustainability-heading",
-    label: "Sustainability Heading",
-    description: "Heading on the deep green sustainability banner",
+    label: "Heading",
+    description: "Heading on the dark banner below the featured products.",
     type: "text",
     page: "homepage",
     group: "homepage.sustainability",
@@ -368,9 +409,9 @@ const homepageSustainabilityData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.sustainability-list",
-    label: "Sustainability Cards",
+    label: "Highlights",
     description:
-      "Cards for the Sustainability Banner section (icon, title, and description per item).",
+      "Up to four highlight cards on the banner (icon, title, and description per item).",
     type: "list",
     page: "homepage",
     group: "homepage.sustainability",
@@ -381,32 +422,34 @@ const homepageSustainabilityData: TemplateField[] = [
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "Supporting text.",
+        optional: true,
       },
     ],
     minItems: 0,
     maxItems: 4,
+    itemLabel: "highlight",
+    defaultsWhenEmpty: true,
   },
 ];
 
 const homepageTestimonialsData: TemplateField[] = [
   {
     key: "bamboo.homepage.testimonials-eyebrow",
-    label: "Testimonials Eyebrow",
-    description:
-      "Small gold label above the testimonials heading. Leave blank to hide.",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.testimonials",
@@ -416,8 +459,8 @@ const homepageTestimonialsData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.testimonials-heading",
-    label: "Testimonials Heading",
-    description: "Heading for the homepage testimonials section",
+    label: "Heading",
+    description: "Heading for the homepage testimonials section.",
     type: "text",
     page: "homepage",
     group: "homepage.testimonials",
@@ -427,9 +470,9 @@ const homepageTestimonialsData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.testimonials-button-text",
-    label: "Testimonials Button Text",
+    label: "Button text",
     description:
-      "Label for the link to the full testimonials page below the quotes",
+      "Label for the link to the full testimonials page, shown below the quotes. Leave blank to hide the button.",
     type: "text",
     page: "homepage",
     group: "homepage.testimonials",
@@ -437,14 +480,24 @@ const homepageTestimonialsData: TemplateField[] = [
     defaultValue: "Read All Testimonials",
     placeholder: "Read All Testimonials",
   },
+  {
+    key: "bamboo.homepage.testimonials-button-link",
+    label: "Button link",
+    description: "Where the button goes, e.g. /testimonials.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.testimonials",
+    gridColumn: "col-span-1",
+    defaultValue: "/testimonials",
+    placeholder: "/testimonials",
+  },
 ];
 
 const homepageLocationData: TemplateField[] = [
   {
     key: "bamboo.homepage.location-eyebrow",
-    label: "Location Eyebrow",
-    description:
-      "Small gold label above the location heading. Leave blank to hide.",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.location",
@@ -454,8 +507,8 @@ const homepageLocationData: TemplateField[] = [
   },
   {
     key: "bamboo.homepage.location-heading",
-    label: "Location Heading",
-    description: "Heading for the location section",
+    label: "Heading",
+    description: "Heading above the map.",
     type: "text",
     page: "homepage",
     group: "homepage.location",
@@ -521,11 +574,14 @@ export const DEFAULT_BAMBOO_VALUE_BAND: GenericIconRow[] = [
   },
 ];
 
+// Declaration order mirrors render order: hero → valueBand → aboutTeaser →
+// featured → sustainability → testimonials → location (see
+// `bamboo-homepage.tsx`).
 export const homepageBambooData = [
   ...homepageHeroData,
   ...homepageValueBandData,
-  ...homepageFeaturedData,
   ...homepageAboutTeaserData,
+  ...homepageFeaturedData,
   ...homepageSustainabilityData,
   ...homepageTestimonialsData,
   ...homepageLocationData,
@@ -534,54 +590,64 @@ export const homepageBambooData = [
 export const bambooHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
-    title: "Hero Section",
-    description: "Main banner area at the top of homepage",
+    title: "Text & buttons",
+    description: "The headline, intro text, and buttons in the hero.",
     icon: "🎯",
     columns: 2,
   },
   {
+    id: "homepage.heroImage",
+    title: "Hero image & background",
+    description: "The hero photo and optional full-bleed background photo.",
+    icon: "🖼️",
+    columns: 2,
+  },
+  {
     id: "homepage.valueBand",
-    title: "Value Band",
+    title: "Statements band",
     description:
-      "Deep green band of four value statements under the hero wave.",
+      "A row of up to four short statements directly below the hero.",
     icon: "🌊",
     columns: 2,
   },
   {
-    id: "homepage.featured",
-    title: "Featured Products",
-    description: "Featured products section title and description",
-    icon: "📦",
-    columns: 2,
-  },
-  {
     id: "homepage.aboutTeaser",
-    title: "About Teaser",
-    description: "About teaser block on homepage",
+    title: "Our story",
+    description:
+      "Short introduction to your business on the homepage, with a link to the full About page.",
     icon: "📄",
     columns: 2,
   },
   {
-    id: "homepage.sustainability",
-    title: "Sustainability Banner",
+    id: "homepage.featured",
+    title: "Featured products",
     description:
-      "Three feature highlights (e.g. Premium Quality, Competitive Prices)",
-    icon: "🌿",
+      "Grid of products from your shop, with a link below to see everything.",
+    icon: "📦",
     columns: 2,
   },
   {
-    id: "homepage.location",
-    title: "Location Section",
-    description: "Location heading on homepage",
-    icon: "📍",
+    id: "homepage.sustainability",
+    title: "Sustainability banner",
+    description:
+      "Up to four highlight cards below the featured products (e.g. Premium Quality, Competitive Prices).",
+    icon: "🌿",
     columns: 2,
   },
   {
     id: "homepage.testimonials",
     title: "Testimonials",
     description:
-      "Heading for the testimonials section. Testimonials themselves are managed under Admin → Testimonials.",
+      "Heading and button text for the testimonials section on the homepage. Testimonials themselves are managed under Admin → Testimonials.",
     icon: "💬",
+    columns: 2,
+  },
+  {
+    id: "homepage.location",
+    title: "Location",
+    description:
+      "Heading above the map of your location. The map appears once you set a map pin in Settings → General.",
+    icon: "📍",
     columns: 2,
   },
 ];

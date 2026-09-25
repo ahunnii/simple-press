@@ -20,8 +20,8 @@ import type {
 const aboutHeroData: TemplateField[] = [
   {
     key: "bamboo.about.hero-tagline",
-    label: "About Hero Tagline",
-    description: "Tagline for the about page, above the title.",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -31,18 +31,19 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "bamboo.about.hero-heading",
-    label: "About Hero Heading",
-    description: "Main heading for the about page",
+    label: "Heading",
+    description: "Main heading at the top of the about page.",
     type: "text",
     page: "about",
     group: "about.hero",
+    gridColumn: "col-span-1",
     defaultValue: "Finally, Results That Matter",
     placeholder: "Finally, Results That Matter",
   },
   {
     key: "bamboo.about.hero-intro",
-    label: "About Hero Intro",
-    description: "Intro paragraph below the heading",
+    label: "Intro text",
+    description: "Paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.hero",
@@ -52,8 +53,8 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "bamboo.about.hero-image",
-    label: "About Hero Image",
-    description: "Image for the about page",
+    label: "Hero image",
+    description: "Portrait photo shown beside the hero text.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -62,7 +63,7 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "bamboo.about.hero-bg-image",
-    label: "About Hero Background (override)",
+    label: "Background image override",
     description:
       "Overrides the site-wide Page Hero Background for this page only. Blank = use the site-wide image, or the flat band if none is set.",
     type: "image",
@@ -75,9 +76,20 @@ const aboutHeroData: TemplateField[] = [
 
 const aboutMissionData: TemplateField[] = [
   {
+    key: "bamboo.about.mission-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.mission",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Story",
+    placeholder: "Our Story",
+  },
+  {
     key: "bamboo.about.mission-heading",
-    label: "Why We Started Heading",
-    description: "Heading for the Why We Started section",
+    label: "Heading",
+    description: "Heading introducing why you started the business.",
     type: "text",
     page: "about",
     group: "about.mission",
@@ -86,37 +98,48 @@ const aboutMissionData: TemplateField[] = [
     placeholder: "Why We Started",
   },
   {
-    key: "bamboo.about.mission-image",
-    label: "Why We Started Image",
-    description: "Image for the Why We Started section",
-    type: "image",
-    page: "about",
-    group: "about.mission",
-    defaultValue: "/placeholder.svg",
-    gridColumn: "col-span-full",
-  },
-  {
     key: "bamboo.about.mission-paragraph",
-    label: "Why We Started Text",
-    description: "Text for the Why We Started section",
+    label: "Story text",
+    description: "Paragraph telling your founding story.",
     type: "textarea",
     page: "about",
     group: "about.mission",
     gridColumn: "col-span-full",
     placeholder: `We started our business with a simple belief...`,
     defaultValue: `We started Finally Results LLC with a question that wouldn't go away: why do the most basic products in our homes have to be the most wasteful? Traditional toilet paper relies on virgin wood pulp from forests that take decades to regrow. We knew there had to be a better way.
-  
+
   Bamboo was our answer. As one of the fastest-growing plants on Earth, it can be harvested repeatedly without replanting. It's naturally antibacterial, incredibly soft, and requires no pesticides. When we discovered how remarkable this material was, we built our entire company around it.
-  
+
   Today, every product we make is 100% bamboo, tree-free, septic-safe, and hypoallergenic -- delivering superior absorbency in recycled, plastic-free packaging.`,
+  },
+  {
+    key: "bamboo.about.mission-image",
+    label: "Image",
+    description: "Photo shown beside the story text.",
+    type: "image",
+    page: "about",
+    group: "about.mission",
+    defaultValue: "/placeholder.svg",
+    gridColumn: "col-span-full",
   },
 ];
 
 const aboutValuesData: TemplateField[] = [
   {
+    key: "bamboo.about.values-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.values",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Values",
+    placeholder: "Our Values",
+  },
+  {
     key: "bamboo.about.values-heading",
-    label: "Values Section Heading",
-    description: "What We Stand For heading",
+    label: "Heading",
+    description: "Heading above the value cards.",
     type: "text",
     page: "about",
     group: "about.values",
@@ -127,31 +150,34 @@ const aboutValuesData: TemplateField[] = [
 
   {
     key: "bamboo.about.values-list",
-    label: "Values List",
+    label: "Value cards",
     description:
-      "Cards for the Values section (icon, title, and description per item).",
+      "Up to 4 cards, each with an icon, title, and description. Leave empty to show the default cards.",
     type: "list",
     page: "about",
     group: "about.values",
     gridColumn: "col-span-full",
+    itemLabel: "value",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "Supporting text below the title.",
+        optional: true,
       },
     ],
     minItems: 0,
@@ -161,9 +187,20 @@ const aboutValuesData: TemplateField[] = [
 
 const aboutSupplierData: TemplateField[] = [
   {
+    key: "bamboo.about.supplier-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.supplier",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Promise",
+    placeholder: "Our Promise",
+  },
+  {
     key: "bamboo.about.supplier-heading",
-    label: "Supplier Heading",
-    description: "Heading for the Supplier section",
+    label: "Heading",
+    description: "Heading for this section.",
     type: "text",
     page: "about",
     group: "about.supplier",
@@ -173,21 +210,21 @@ const aboutSupplierData: TemplateField[] = [
   },
   {
     key: "bamboo.about.supplier-text",
-    label: "Supplier Text",
-    description: "Text for the Supplier section",
+    label: "Text",
+    description: "Paragraph describing your commitment to customers.",
     type: "textarea",
     page: "about",
     gridColumn: "col-span-full",
     group: "about.supplier",
     defaultValue: `At Finally Results LLC, our commitment extends beyond transactions. We take pride in providing top-notch household paper products that cater to a wide spectrum of needs -- from individual households to restaurants, hotels, schools, gas stations, local stores, and businesses of all sizes.
-  
+
   We operate with the ethos of respecting every customer, valuing the relationships we build, and contributing to the collective well-being of the communities we serve. Located in the heart of Detroit, we extend our warmest welcome to you -- every customer is a member of our extended family.`,
-    placeholder: "Here, our commitment extends beyond transactions...",
+    placeholder: "At Finally Results LLC, our commitment extends beyond transactions...",
   },
   {
     key: "bamboo.about.supplier-image",
-    label: "Supplier Image",
-    description: "Image for the Supplier section",
+    label: "Image",
+    description: "Photo shown beside the text.",
     type: "image",
     page: "about",
     group: "about.supplier",
@@ -198,9 +235,20 @@ const aboutSupplierData: TemplateField[] = [
 
 const aboutWhyBambooData: TemplateField[] = [
   {
+    key: "bamboo.about.why-bamboo-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.whyBamboo",
+    gridColumn: "col-span-1",
+    defaultValue: "The Science",
+    placeholder: "The Science",
+  },
+  {
     key: "bamboo.about.why-bamboo-heading",
-    label: "Why Bamboo Heading",
-    description: "Why Bamboo? section heading",
+    label: "Heading",
+    description: "Heading for this section.",
     type: "text",
     page: "about",
     group: "about.whyBamboo",
@@ -211,8 +259,8 @@ const aboutWhyBambooData: TemplateField[] = [
 
   {
     key: "bamboo.about.why-bamboo-intro",
-    label: "Why Bamboo Intro",
-    description: "Intro line for Why Bamboo section",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.whyBamboo",
@@ -224,31 +272,34 @@ const aboutWhyBambooData: TemplateField[] = [
 
   {
     key: "bamboo.about.why-bamboo-facts-list",
-    label: "Why Bamboo Facts List",
+    label: "Bamboo facts",
     description:
-      "Cards for the Why Bamboo section (icon, title, and description per item).",
+      "Up to 3 cards, each with an icon, title, and description. Leave empty to show the default cards.",
     type: "list",
     page: "about",
     group: "about.whyBamboo",
     gridColumn: "col-span-full",
+    itemLabel: "fact",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "Supporting text below the title.",
+        optional: true,
       },
     ],
     minItems: 0,
@@ -258,9 +309,20 @@ const aboutWhyBambooData: TemplateField[] = [
 
 const aboutNationwideData: TemplateField[] = [
   {
+    key: "bamboo.about.nationwide-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.nationwide",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Reach",
+    placeholder: "Our Reach",
+  },
+  {
     key: "bamboo.about.nationwide-heading",
-    label: "Nationwide Distribution Heading",
-    description: "Heading for the Nationwide Distribution section",
+    label: "Heading",
+    description: "Heading for this section.",
     type: "text",
     page: "about",
     group: "about.nationwide",
@@ -270,8 +332,8 @@ const aboutNationwideData: TemplateField[] = [
   },
   {
     key: "bamboo.about.nationwide-text",
-    label: "Nationwide Distribution Text",
-    description: "Text for the Nationwide Distribution section",
+    label: "Text",
+    description: "Paragraph describing your shipping and service reach.",
     type: "textarea",
     page: "about",
     group: "about.nationwide",
@@ -281,8 +343,8 @@ const aboutNationwideData: TemplateField[] = [
   },
   {
     key: "bamboo.about.nationwide-image",
-    label: "Nationwide Distribution Image",
-    description: "Image for the Nationwide Distribution section",
+    label: "Image",
+    description: "Photo shown beside the text.",
     type: "image",
     page: "about",
     group: "about.nationwide",
@@ -292,31 +354,34 @@ const aboutNationwideData: TemplateField[] = [
 
   {
     key: "bamboo.about.nationwide-facts-list",
-    label: "Nationwide Distribution Facts List",
+    label: "Reach facts",
     description:
-      "Cards for the Nationwide Distribution section (icon, title, and description per item).",
+      "Up to 4 cards, each with an icon, title, and description. Leave empty to show the default cards.",
     type: "list",
     page: "about",
     group: "about.nationwide",
     gridColumn: "col-span-full",
+    itemLabel: "fact",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "Supporting text below the title.",
+        optional: true,
       },
     ],
     minItems: 0,
@@ -326,19 +391,31 @@ const aboutNationwideData: TemplateField[] = [
 
 const aboutDetroitData: TemplateField[] = [
   {
-    key: "bamboo.about.detroit-heading",
-    label: "Detroit Section Heading",
-    description: "Rooted in Detroit heading",
+    key: "bamboo.about.detroit-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.detroit",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Roots",
+    placeholder: "Our Roots",
+  },
+  {
+    key: "bamboo.about.detroit-heading",
+    label: "Heading",
+    description: "Heading for this section.",
+    type: "text",
+    page: "about",
+    group: "about.detroit",
+    gridColumn: "col-span-1",
     defaultValue: "Rooted in Detroit",
     placeholder: "Rooted in Detroit",
   },
   {
     key: "bamboo.about.detroit-body",
-    label: "Detroit Section Body",
-    description: "Detroit roots paragraph",
+    label: "Text",
+    description: "Paragraph about your local roots and community ties.",
     type: "textarea",
     page: "about",
     group: "about.detroit",
@@ -351,9 +428,20 @@ const aboutDetroitData: TemplateField[] = [
 
 const aboutCTAData: TemplateField[] = [
   {
+    key: "bamboo.about.cta-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Join Us",
+    placeholder: "Join Us",
+  },
+  {
     key: "bamboo.about.cta-heading",
-    label: "CTA Heading",
-    description: "CTA heading",
+    label: "Heading",
+    description: "Heading for the closing banner.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -363,8 +451,8 @@ const aboutCTAData: TemplateField[] = [
   },
   {
     key: "bamboo.about.cta-text",
-    label: "CTA Text",
-    description: "CTA text",
+    label: "Body text",
+    description: "Paragraph below the heading.",
     type: "textarea",
     page: "about",
     group: "about.cta",
@@ -374,8 +462,8 @@ const aboutCTAData: TemplateField[] = [
   },
   {
     key: "bamboo.about.cta-button-text",
-    label: "CTA Button Text",
-    description: "First button in the CTA section, typically for shopping",
+    label: "Main button text",
+    description: "Label for the main button, typically to shop.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -385,8 +473,8 @@ const aboutCTAData: TemplateField[] = [
   },
   {
     key: "bamboo.about.cta-button-link",
-    label: "CTA Button Link",
-    description: "First button in the CTA section, typically for shopping",
+    label: "Main button link",
+    description: "Where the button goes, e.g. /shop",
     type: "url",
     page: "about",
     group: "about.cta",
@@ -397,9 +485,8 @@ const aboutCTAData: TemplateField[] = [
 
   {
     key: "bamboo.about.cta-secondary-button-text",
-    label: "CTA Secondary Button Text",
-    description:
-      "Second button in the CTA section, typically for getting in touch",
+    label: "Second button text",
+    description: "Label for the second button, typically to get in touch.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -409,9 +496,8 @@ const aboutCTAData: TemplateField[] = [
   },
   {
     key: "bamboo.about.cta-secondary-button-link",
-    label: "CTA Secondary Button Link",
-    description:
-      "Second button in the CTA section, typically for getting in touch",
+    label: "Second button link",
+    description: "Where the button goes, e.g. /contact",
     type: "url",
     page: "about",
     group: "about.cta",
@@ -435,57 +521,57 @@ export const aboutBambooData = [
 export const bambooAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "About Hero",
-    description: "About page hero heading and intro",
+    title: "Hero",
+    description: "Tagline, heading, and intro at the top of the about page.",
     icon: "📖",
     columns: 2,
   },
   {
     id: "about.mission",
-    title: "Our Mission",
-    description: "Mission section heading and paragraphs",
+    title: "Why we started",
+    description: "Story text and photo explaining why you started the business.",
     icon: "🎯",
     columns: 2,
   },
   {
     id: "about.values",
-    title: "What We Stand For",
-    description: "Values section with three value cards",
+    title: "What we stand for",
+    description: "Value cards below the mission section.",
     icon: "❤️",
     columns: 2,
   },
   {
     id: "about.supplier",
     title: "Supplier",
-    description: "Supplier section heading and text",
+    description: "More Than a Supplier section.",
     icon: "🏪",
     columns: 2,
   },
   {
     id: "about.whyBamboo",
-    title: "Why Bamboo",
-    description: "Why Bamboo section and bamboo facts",
+    title: "Why bamboo",
+    description: "Bamboo benefit facts cards.",
     icon: "🎋",
     columns: 2,
   },
   {
     id: "about.nationwide",
-    title: "Nationwide Distribution",
-    description: "Nationwide distribution section",
+    title: "Nationwide reach",
+    description: "Nationwide reach heading, text, and fact cards.",
     icon: "🗺️",
     columns: 2,
   },
   {
     id: "about.detroit",
     title: "Rooted in Detroit",
-    description: "Detroit roots section",
+    description: "Short story about your local roots and community ties.",
     icon: "🏙️",
     columns: 2,
   },
   {
     id: "about.cta",
-    title: "About CTA",
-    description: "About CTA section",
+    title: "Closing banner",
+    description: "Banner with a heading, short text, and up to two buttons at the bottom of the about page.",
     icon: "💬",
     columns: 2,
   },

@@ -4,6 +4,7 @@ import {
   getServiceTemplateFieldGroups,
   getServiceTemplateFieldsByGroup,
   SERVICE_TEMPLATE_DEFS,
+  SERVICE_TEMPLATE_FIELDS,
 } from "~/lib/service-templates";
 import { Card, CardContent } from "~/components/ui/card";
 import { FieldGroup } from "~/app/admin/content/template/_components/template-field-widgets";
@@ -71,6 +72,7 @@ export function ServiceTemplateFieldsEditor({
               page="service"
               groupMeta={groupMeta}
               fields={fields}
+              allFields={SERVICE_TEMPLATE_FIELDS[serviceTemplateId]}
               customFields={customFields}
               onFieldChange={onFieldChange}
               isUngrouped={isUngrouped}

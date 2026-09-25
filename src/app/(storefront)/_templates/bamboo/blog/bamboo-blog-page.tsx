@@ -33,6 +33,7 @@ type Props = DefaultBlogPageTemplateProps & {
 
 export function BambooBlogPage({ pages, customFields }: Props) {
   const f = resolveFields(customFields, [
+    "bamboo.blog.listing-eyebrow",
     "bamboo.blog.listing-title",
     "bamboo.blog.listing-intro",
     "bamboo.blog.listing-image",
@@ -40,6 +41,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
     "bamboo.global.page-hero-bg-image",
   ]);
 
+  const pageEyebrow = f["bamboo.blog.listing-eyebrow"];
   const pageTitle = f["bamboo.blog.listing-title"];
   const pageIntro = f["bamboo.blog.listing-intro"];
   const blogImage = f["bamboo.blog.listing-image"];
@@ -97,14 +99,19 @@ export function BambooBlogPage({ pages, customFields }: Props) {
         >
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="text-center">
-              <span className="text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
-                Stories &amp; Insights
-              </span>
+              {pageEyebrow ? (
+                <span
+                  className="text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase"
+                  {...fieldAttr("bamboo.blog.listing-eyebrow")}
+                >
+                  {pageEyebrow}
+                </span>
+              ) : null}
               <h1
                 className="text-foreground mt-3 font-serif text-4xl font-bold tracking-tight md:text-5xl"
                 {...fieldAttr("bamboo.blog.listing-title")}
               >
-                {pageTitle ?? "Blog"}
+                {pageTitle}
               </h1>
               <div
                 className="mx-auto mt-6 h-px w-16 bg-[var(--bam-gold)]/40"
@@ -142,9 +149,10 @@ export function BambooBlogPage({ pages, customFields }: Props) {
     <PageTransition>
       <BambooPageHero
         sectionAttrs={sectionGroupAttr("blog", "listing")}
-        eyebrow="Stories & Insights"
+        eyebrow={pageEyebrow}
+        eyebrowFieldKey="bamboo.blog.listing-eyebrow"
         eyebrowIcon={Leaf}
-        title={pageTitle ?? "Blog"}
+        title={pageTitle}
         titleFieldKey="bamboo.blog.listing-title"
         lede={pageIntro}
         ledeFieldKey="bamboo.blog.listing-intro"

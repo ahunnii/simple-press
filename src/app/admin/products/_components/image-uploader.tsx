@@ -27,6 +27,7 @@ import { ChevronDown, Images, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import type { FormProductImage } from "../_validators/schema";
+import { prepareImageForUpload } from "~/lib/image-prep";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
@@ -107,16 +108,41 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
       }),
     );
 
+    const [isPreparing, setIsPreparing] = useState(false);
+
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-    const getValidImageFiles = (fileList: FileList | File[]): File[] => {
+    const getValidImageFiles = async (
+      fileList: FileList | File[],
+    ): Promise<File[]> => {
       const files = Array.from(fileList);
-      const valid: File[] = [];
+      const candidates: File[] = [];
       for (const file of files) {
-        if (!file.type.startsWith("image/")) {
+        // Some browsers (notably Android Chrome) leave `file.type` empty for
+        // HEIC/HEIF, so fall back to the extension for those.
+        if (
+          file.type.startsWith("image/") ||
+          /\.(heic|heif)$/i.test(file.name)
+        ) {
+          candidates.push(file);
+        } else {
           toast.error(`Skipped "${file.name}": not an image`);
-          continue;
         }
+      }
+      if (candidates.length === 0) return [];
+
+      setIsPreparing(true);
+      let prepared: File[];
+      try {
+        prepared = await Promise.all(
+          candidates.map((file) => prepareImageForUpload(file)),
+        );
+      } finally {
+        setIsPreparing(false);
+      }
+
+      const valid: File[] = [];
+      for (const file of prepared) {
         if (file.size > MAX_FILE_SIZE) {
           toast.error(`Skipped "${file.name}": must be less than 5MB`);
           continue;
@@ -144,10 +170,12 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files?.length) return;
-      const valid = getValidImageFiles(files);
-      if (valid.length === 0) return;
       e.target.value = "";
-      addPendingFiles(valid);
+      void (async () => {
+        const valid = await getValidImageFiles(files);
+        if (valid.length === 0) return;
+        addPendingFiles(valid);
+      })();
     };
 
     const handleDrop = (e: React.DragEvent) => {
@@ -155,9 +183,11 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
       e.currentTarget.setAttribute("data-drag", "false");
       const files = e.dataTransfer.files;
       if (!files?.length) return;
-      const valid = getValidImageFiles(files);
-      if (valid.length === 0) return;
-      addPendingFiles(valid);
+      void (async () => {
+        const valid = await getValidImageFiles(files);
+        if (valid.length === 0) return;
+        addPendingFiles(valid);
+      })();
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -236,10 +266,22 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
       showLibraryPicker ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline">
-              <Upload className="mr-2 h-4 w-4" />
-              {label}
-              <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+            <Button type="button" variant="outline" disabled={isPreparing}>
+              {isPreparing ? (
+                <>
+                  <span
+                    className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                    aria-hidden="true"
+                  />
+                  Preparing photos…
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  {label}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                </>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -264,9 +306,26 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Button type="button" variant="outline" onClick={triggerFileInput}>
-          <Upload className="mr-2 h-4 w-4" />
-          {label}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={triggerFileInput}
+          disabled={isPreparing}
+        >
+          {isPreparing ? (
+            <>
+              <span
+                className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                aria-hidden="true"
+              />
+              Preparing photos…
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              {label}
+            </>
+          )}
         </Button>
       );
 
@@ -289,6 +348,7 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
                   id={inputId}
                   accept="image/*"
                   multiple
+                  disabled={isPreparing}
                   onChange={handleFileSelect}
                   className="hidden"
                   title="Upload images"

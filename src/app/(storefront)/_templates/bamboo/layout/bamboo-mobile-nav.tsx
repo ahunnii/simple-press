@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Heart, Leaf } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -48,6 +49,8 @@ type MobileNavProps = {
    * `!!session?.user`.
    */
   isAuthenticated: boolean;
+  /** Short line at the bottom of the sheet, below socials. Blank hides it. */
+  menuTagline: string;
 } & DefaultHeaderTemplateProps;
 
 /** The stagger keyframe's own timing — kept in one place so the class and
@@ -98,6 +101,7 @@ export function BambooMobileNav({
   onOpenChange,
   business,
   isAuthenticated,
+  menuTagline,
 }: MobileNavProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
@@ -376,9 +380,14 @@ export function BambooMobileNav({
             onLinkClick={() => onOpenChange(false)}
           />
 
-          <p className="mt-4 text-xs text-[var(--bam-cream)]/70">
-            Tree-free products · Crafted with care
-          </p>
+          {!!menuTagline && (
+            <p
+              className="mt-4 text-xs text-[var(--bam-cream)]/70"
+              {...fieldAttr("bamboo.global.menu-tagline")}
+            >
+              {menuTagline}
+            </p>
+          )}
         </div>
       </SheetContent>
     </Sheet>

@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Edit2 } from "lucide-react";
 
+import type { PreviewEditTarget } from "~/lib/preview/preview-target";
+import {
+  resolvePreviewTarget,
+  resolvePreviewTargetFromStack,
+} from "~/lib/preview/preview-target";
 import {
   isPreviewMessage,
   PREVIEW_SOURCE,
@@ -12,6 +17,12 @@ type Hotspot = {
   group: string; // full "page.group" value from data-sp-group
   rect: DOMRect;
   label: string;
+};
+
+/** A tapped-and-confirmed section in touch mode — persists until replaced/cleared. */
+type Selection = {
+  group: string;
+  rect: DOMRect;
 };
 
 /**
@@ -45,15 +56,40 @@ function findGroup(target: EventTarget | null): HTMLElement | null {
  * Safe to mount in the always-rendered storefront layout — self-disables for normal
  * visitors (not in an iframe with `?__preview=1`).
  *
- * Behaviour:
+ * Behaviour (mouse / hover-capable devices):
  * - Delegated mouseover/mouseout find the nearest [data-sp-group] ancestor.
  * - Hovering draws a fixed-position highlight + "Edit" pill.
  * - Clicking anywhere inside the highlight box posts `sp:edit-group` to the parent.
+ *   Pointer clicks also resolve the page element under the pointer (through
+ *   the highlight button, via `elementsFromPoint`) and, when it sits in a
+ *   `[data-sp-item]` list row or `[data-sp-field]` text element of the same
+ *   section, add `field` / `item` so the editor opens that exact row/field.
+ *   Keyboard activation sends the group only.
  * - Listens for `sp:focus-group` from the parent → scrollIntoView + pulse.
  * - A11y: the highlight box is a focusable `<button>` with aria-label; each hotspot
  *   also has a sr-only companion `<button>` (Tab + Enter).
  * - Posts `sp:ready` on mount so the editor knows the iframe is interactive.
  * - Respects `prefers-reduced-motion` — no smooth scroll or pulse animation.
+ *
+ * Touch mode:
+ * - Detected via `matchMedia("(hover: none) and (pointer: coarse)")` for the
+ *   initial guess, then kept current per-input by a capture-phase `pointerdown`
+ *   listener that flips a ref based on `event.pointerType` (touch/pen → touch
+ *   mode, mouse → hover mode) — hybrid devices (touchscreen laptops) behave
+ *   correctly for whichever input actually drove the interaction.
+ * - The hover mouseover/mouseout delegation is suppressed in touch mode so
+ *   iOS's emulated `mouseover` on first tap never draws a hover highlight
+ *   (that emulated DOM change is what used to swallow the following `click`
+ *   and force a two-tap flow).
+ * - Instead, a dedicated capture-phase click listener fires `sendEditGroup()`
+ *   immediately on any tap inside a `[data-sp-group]` and draws a persistent
+ *   "selected" outline (same look as the focus-group pulse, but non-fading)
+ *   that tracks the section's rect on scroll/resize until another group is
+ *   tapped or the parent focuses a different group. That listener calls
+ *   `preventDefault()` for in-group taps only — taps outside any group are
+ *   left alone so the capture-phase nav guard in preview-frame.tsx and the
+ *   bubble-phase dead-zone hint listener below still see them untouched.
+ * - Desktop mouse behaviour is unchanged.
  */
 export function PreviewOverlay() {
   // Hydration-safe iframe detection — false on SSR/first render, true after mount if in preview iframe.
@@ -62,9 +98,15 @@ export function PreviewOverlay() {
   const [hovered, setHovered] = useState<Hotspot | null>(null);
   const [pulsing, setPulsing] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Selection | null>(null);
   const raftRef = useRef<number | null>(null);
+  const selectedRaftRef = useRef<number | null>(null);
   const prefersReducedRef = useRef(false);
   const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Whether the most recent pointer input was touch/pen (vs mouse). Starts
+  // from a coarse-pointer media query guess and is kept current per-input by
+  // the pointerdown listener below, so hybrid devices behave per-interaction.
+  const touchModeRef = useRef(false);
 
   // Detect whether we're running inside a preview iframe.
   useEffect(() => {
@@ -76,6 +118,38 @@ export function PreviewOverlay() {
     prefersReducedRef.current = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+  }, []);
+
+  // Seed the touch-mode guess once on mount.
+  useEffect(() => {
+    touchModeRef.current = window.matchMedia(
+      "(hover: none) and (pointer: coarse)",
+    ).matches;
+  }, []);
+
+  // Keep touch-mode current per-input: any real pointerdown tells us for sure
+  // whether this interaction is touch/pen or mouse, overriding the initial
+  // media-query guess. Capture + passive since we only read pointerType.
+  useEffect(() => {
+    if (!isPreviewFrame()) return;
+
+    function onPointerDown(e: PointerEvent) {
+      if (e.pointerType === "mouse") {
+        touchModeRef.current = false;
+      } else if (e.pointerType === "touch" || e.pointerType === "pen") {
+        touchModeRef.current = true;
+      }
+    }
+
+    document.addEventListener("pointerdown", onPointerDown, {
+      capture: true,
+      passive: true,
+    });
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, {
+        capture: true,
+      });
+    };
   }, []);
 
   // Post sp:ready so the parent editor knows the overlay is live.
@@ -111,6 +185,11 @@ export function PreviewOverlay() {
       // Pulse the section briefly.
       setPulsing(groupId);
       setTimeout(() => setPulsing(null), 1200);
+
+      // If touch mode has a different section selected, clear it — the
+      // parent just focused elsewhere, so the stale selected outline
+      // shouldn't linger. Focusing the same group leaves it as-is.
+      setSelected((prev) => (prev && prev.group !== groupId ? null : prev));
     }
 
     window.addEventListener("message", onMessage);
@@ -132,21 +211,49 @@ export function PreviewOverlay() {
     });
   }, []);
 
+  // Recompute the persistent touch-mode selection rect on scroll/resize, same
+  // approach as updateRect above (own rAF ref so the two never cancel each other).
+  const updateSelectedRect = useCallback(() => {
+    if (selectedRaftRef.current !== null) {
+      cancelAnimationFrame(selectedRaftRef.current);
+    }
+    selectedRaftRef.current = requestAnimationFrame(() => {
+      setSelected((prev) => {
+        if (!prev) return null;
+        const el = document.querySelector<HTMLElement>(
+          `[data-sp-group="${CSS.escape(prev.group)}"]`,
+        );
+        if (!el) return null;
+        return { ...prev, rect: el.getBoundingClientRect() };
+      });
+    });
+  }, []);
+
   useEffect(() => {
     if (!isPreviewFrame()) return;
     window.addEventListener("scroll", updateRect, { passive: true });
     window.addEventListener("resize", updateRect);
+    window.addEventListener("scroll", updateSelectedRect, { passive: true });
+    window.addEventListener("resize", updateSelectedRect);
     return () => {
       window.removeEventListener("scroll", updateRect);
       window.removeEventListener("resize", updateRect);
+      window.removeEventListener("scroll", updateSelectedRect);
+      window.removeEventListener("resize", updateSelectedRect);
     };
-  }, [updateRect]);
+  }, [updateRect, updateSelectedRect]);
 
   // Delegated mouse handlers.
   useEffect(() => {
     if (!isPreviewFrame()) return;
 
     function onMouseOver(e: MouseEvent) {
+      // In touch mode, ignore mouseover entirely — iOS fires an emulated
+      // mouseover on the first tap of a section, and drawing the hover
+      // highlight there is what used to eat the subsequent click (forcing a
+      // two-tap flow). Touch taps are handled by the click listener below.
+      if (touchModeRef.current) return;
+
       // Ignore events over our own highlight button so it doesn't flicker
       // (the button sits on top of the section but isn't a [data-sp-group]).
       if ((e.target as HTMLElement | null)?.closest?.("[data-sp-overlay]")) {
@@ -175,6 +282,42 @@ export function PreviewOverlay() {
     return () => {
       document.removeEventListener("mouseover", onMouseOver);
       document.removeEventListener("mouseout", onMouseOut);
+    };
+  }, []);
+
+  // Touch-mode tap-to-edit: a capture-phase click listener that fires
+  // sendEditGroup() immediately for a tap inside a [data-sp-group] section
+  // and sets a persistent "selected" outline (cleared by tapping another
+  // group). Runs in capture phase so it sees the tap before the bubble-phase
+  // dead-zone listener below (which already no-ops for in-group clicks) and
+  // alongside the capture-phase nav guard in preview-frame.tsx — neither
+  // listener calls stopPropagation, so registration order between them
+  // doesn't matter. preventDefault() is only called for in-group taps; taps
+  // outside any group are left completely alone (no preventDefault) so the
+  // nav guard and the dead-zone hint logic still see the untouched event.
+  useEffect(() => {
+    if (!isPreviewFrame()) return;
+
+    function onTouchClick(e: MouseEvent) {
+      if (!touchModeRef.current) return;
+
+      const target = e.target as HTMLElement | null;
+      const el = findGroup(target);
+      if (!el) return; // outside any group — leave for nav guard / dead-zone hint
+
+      const group = el.dataset.spGroup ?? "";
+      if (!group) return;
+
+      e.preventDefault();
+      setSelected({ group, rect: el.getBoundingClientRect() });
+      // Touch taps land on the page element itself (no highlight button in
+      // touch mode), so the event target is already the most specific hit.
+      sendEditGroup(group, resolvePreviewTarget(target, group));
+    }
+
+    document.addEventListener("click", onTouchClick, true);
+    return () => {
+      document.removeEventListener("click", onTouchClick, true);
     };
   }, []);
 
@@ -244,11 +387,22 @@ export function PreviewOverlay() {
     };
   }, [showHint]);
 
-  function sendEditGroup(groupId: string) {
+  function sendEditGroup(groupId: string, target?: PreviewEditTarget | null) {
     const page = groupId.split(".")[0];
     if (!page) return;
     window.parent.postMessage(
-      { source: PREVIEW_SOURCE, type: "sp:edit-group", page, group: groupId },
+      {
+        source: PREVIEW_SOURCE,
+        type: "sp:edit-group",
+        page,
+        group: groupId,
+        ...(target
+          ? {
+              field: target.field,
+              ...(target.item !== undefined ? { item: target.item } : {}),
+            }
+          : {}),
+      },
       window.location.origin,
     );
   }
@@ -303,7 +457,20 @@ export function PreviewOverlay() {
             padding: 0,
             transition: prefersReducedRef.current ? "none" : "all 0.1s ease",
           }}
-          onClick={() => sendEditGroup(hovered.group)}
+          onClick={(e) => {
+            // `detail === 0` → synthesized by keyboard (Enter/Space are
+            // already handled in onKeyDown, but guard anyway): group only.
+            // A real pointer click narrows to the element under the pointer,
+            // looking THROUGH this button (elementsFromPoint, overlay skipped).
+            const target =
+              e.detail > 0
+                ? resolvePreviewTargetFromStack(
+                    document.elementsFromPoint(e.clientX, e.clientY),
+                    hovered.group,
+                  )
+                : null;
+            sendEditGroup(hovered.group, target);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
@@ -354,6 +521,28 @@ export function PreviewOverlay() {
             />
           );
         })()}
+
+      {/* Persistent touch-mode selection outline — same look as the pulse
+          ring above but non-fading; cleared by tapping another group or by
+          the parent focusing a different one. */}
+      {selected && (
+        <div
+          aria-hidden="true"
+          data-sp-selected=""
+          style={{
+            position: "fixed",
+            top: selected.rect.top,
+            left: selected.rect.left,
+            width: selected.rect.width,
+            height: selected.rect.height,
+            pointerEvents: "none",
+            zIndex: 9997,
+            outline: "3px solid hsl(214, 84%, 56%)",
+            outlineOffset: "2px",
+            borderRadius: "2px",
+          }}
+        />
+      )}
 
       {/* Keyboard-accessible companion buttons (screen-reader visible) */}
       <div className="sr-only">

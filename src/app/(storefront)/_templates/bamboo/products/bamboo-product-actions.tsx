@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -11,9 +12,18 @@ import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe
 
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 
+type BambooProductActionsProps = DefaultProductPageTemplateProps & {
+  /** Resolved `bamboo.product.coming-soon-heading` (page resolves fields). */
+  comingSoonHeading: string;
+  /** Resolved `bamboo.product.coming-soon-body`; blank hides the line. */
+  comingSoonBody: string;
+};
+
 export function BambooProductActions({
   product,
-}: DefaultProductPageTemplateProps) {
+  comingSoonHeading,
+  comingSoonBody,
+}: BambooProductActionsProps) {
   const {
     formatPrice,
     inStock,
@@ -44,13 +54,21 @@ export function BambooProductActions({
   return (
     <>
       {additionalFields?.comingSoon ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
-          <p className="font-semibold text-amber-700 dark:text-amber-300">
-            Coming Soon
+        <div className="rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] px-5 py-4">
+          <p
+            {...fieldAttr("bamboo.product.coming-soon-heading")}
+            className="text-foreground font-semibold"
+          >
+            {comingSoonHeading}
           </p>
-          <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
-            This product isn&apos;t available yet. Check back later!
-          </p>
+          {comingSoonBody.trim() ? (
+            <p
+              {...fieldAttr("bamboo.product.coming-soon-body")}
+              className="text-muted-foreground mt-1 text-sm"
+            >
+              {comingSoonBody}
+            </p>
+          ) : null}
         </div>
       ) : hasVariants ? (
         <BambooVariantSelector

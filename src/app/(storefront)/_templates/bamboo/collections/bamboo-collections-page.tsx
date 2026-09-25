@@ -21,6 +21,7 @@ export function BambooCollectionsPage({
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
   const f = resolveFields(business.siteContent?.customFields, [
+    "bamboo.collections.listing-eyebrow",
     "bamboo.collections.listing-title",
     "bamboo.collections.listing-intro",
   ]);
@@ -32,9 +33,14 @@ export function BambooCollectionsPage({
           {...sectionGroupAttr("collections", "listing")}
           className="bg-[var(--bam-cream-deep)] px-4 py-16 text-center sm:px-6 md:py-24 lg:px-8"
         >
-          <p className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
-            Collections
-          </p>
+          {f["bamboo.collections.listing-eyebrow"] ? (
+            <p
+              className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase"
+              {...fieldAttr("bamboo.collections.listing-eyebrow")}
+            >
+              {f["bamboo.collections.listing-eyebrow"]}
+            </p>
+          ) : null}
           <h1
             className="font-serif text-foreground mt-3 text-4xl font-bold tracking-tight md:text-5xl"
             {...fieldAttr("bamboo.collections.listing-title")}
