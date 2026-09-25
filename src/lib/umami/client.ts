@@ -66,6 +66,15 @@ let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
 
 /**
+ * Thrown when the platform service account can't sign in to Umami — missing
+ * password, or the login endpoint rejects the credentials. Distinct from
+ * network/outage errors so the admin UI can say which one happened.
+ */
+export class UmamiAuthError extends Error {
+  override name = "UmamiAuthError";
+}
+
+/**
  * Resolve the service-account password from env.
  *
  * Prefers the base64-encoded form (`UMAMI_API_PASSWORD_B64`) so the secret can
@@ -80,7 +89,7 @@ function resolvePassword(): string {
   if (env.UMAMI_API_PASSWORD) {
     return env.UMAMI_API_PASSWORD;
   }
-  throw new Error(
+  throw new UmamiAuthError(
     "Umami API password is not configured (set UMAMI_API_PASSWORD or UMAMI_API_PASSWORD_B64)",
   );
 }
@@ -98,9 +107,9 @@ async function fetchToken(): Promise<string> {
   });
 
   if (!res.ok) {
-    throw new Error(
-      `Umami auth failed: ${res.status} ${await res.text().catch(() => "")}`,
-    );
+    const message = `Umami auth failed: ${res.status} ${await res.text().catch(() => "")}`;
+    // 4xx = Umami rejected the credentials; 5xx = Umami itself is unhealthy.
+    throw res.status < 500 ? new UmamiAuthError(message) : new Error(message);
   }
 
   const data = (await res.json()) as { token?: string };
@@ -125,6 +134,25 @@ async function getToken(): Promise<string> {
 function invalidateToken() {
   cachedToken = null;
   tokenExpiresAt = 0;
+}
+
+export type UmamiConnectionStatus = "ok" | "auth_failed" | "unavailable";
+
+/**
+ * Check that the service account can sign in. Cheap once a token is cached.
+ * The data wrappers below swallow errors into empty defaults, so without this
+ * a credentials problem is indistinguishable from "no visitors".
+ */
+export async function getConnectionStatus(): Promise<UmamiConnectionStatus> {
+  try {
+    await getToken();
+    return "ok";
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { service: "umami", endpoint: "auth" },
+    });
+    return err instanceof UmamiAuthError ? "auth_failed" : "unavailable";
+  }
 }
 
 // ─── Core fetch helper ────────────────────────────────────────────────────────

@@ -56,7 +56,8 @@ export default async function SEOPage({ searchParams }: Props) {
           subdomain: business.subdomain,
           customDomain: business.customDomain,
           domainStatus: business.domainStatus,
-          localBusinessEnabled: business.localBusinessEnabled,
+          localPresence: business.localPresence,
+          areaServed: business.areaServed,
           allowAiCrawlers: business.allowAiCrawlers,
         }}
         siteContent={business.siteContent}

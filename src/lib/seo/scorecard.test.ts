@@ -63,7 +63,8 @@ const BASE_BUSINESS: BusinessForScorecard = {
   name: "Bloom Apothecary",
   domainStatus: "ACTIVE",
   allowAiCrawlers: true,
-  localBusinessEnabled: false,
+  localPresence: "none",
+  areaServed: [],
   businessAddress: null,
   phoneNumber: null,
   businessHours: [],
@@ -186,7 +187,7 @@ describe("computeSeoScorecard — local-address", () => {
     const scorecard = await computeSeoScorecard({
       businessId: "biz_1",
       isEnabled: NEVER_ENABLED,
-      business: { ...BASE_BUSINESS, localBusinessEnabled: true },
+      business: { ...BASE_BUSINESS, localPresence: "storefront" },
       siteContent: BASE_SITE_CONTENT,
     });
     const item = localAddressItem(scorecard);
@@ -200,7 +201,7 @@ describe("computeSeoScorecard — local-address", () => {
       isEnabled: NEVER_ENABLED,
       business: {
         ...BASE_BUSINESS,
-        localBusinessEnabled: true,
+        localPresence: "storefront",
         businessAddress: "123 Main St, Detroit, MI 48201",
       },
       siteContent: BASE_SITE_CONTENT,
@@ -218,7 +219,7 @@ describe("computeSeoScorecard — local-address", () => {
       isEnabled: NEVER_ENABLED,
       business: {
         ...BASE_BUSINESS,
-        localBusinessEnabled: true,
+        localPresence: "storefront",
         addressCity: "Detroit",
         addressState: "MI",
         addressPostalCode: "48201",
@@ -238,7 +239,7 @@ describe("computeSeoScorecard — local-address", () => {
       isEnabled: NEVER_ENABLED,
       business: {
         ...BASE_BUSINESS,
-        localBusinessEnabled: true,
+        localPresence: "storefront",
         addressCity: "Detroit",
       },
       siteContent: BASE_SITE_CONTENT,
@@ -253,7 +254,7 @@ describe("computeSeoScorecard — local-address", () => {
       isEnabled: NEVER_ENABLED,
       business: {
         ...BASE_BUSINESS,
-        localBusinessEnabled: true,
+        localPresence: "storefront",
         businessAddress: "123 Main St, Detroit, MI 48201",
         addressCity: "Detroit",
         addressState: "MI",
@@ -266,6 +267,110 @@ describe("computeSeoScorecard — local-address", () => {
     expect(item?.detail).toBe(
       "Emitted as a structured PostalAddress in your LocalBusiness schema",
     );
+  });
+});
+
+describe("computeSeoScorecard — local presence modes", () => {
+  function localGroup(scorecard: Scorecard) {
+    return scorecard.groups.find((g) => g.id === "local");
+  }
+
+  function areaServedItem(scorecard: Scorecard) {
+    return localGroup(scorecard)?.items.find(
+      (i) => i.key === "local-area-served",
+    );
+  }
+
+  it("scores nothing and explains the off state when localPresence is 'none'", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: BASE_BUSINESS,
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const group = localGroup(scorecard);
+    expect(group?.items).toEqual([]);
+    expect(group?.note).toContain("Local presence is set to None");
+  });
+
+  it("service_area: labels the address check 'City & state' and gives full credit for city+state with no street/ZIP", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: {
+        ...BASE_BUSINESS,
+        localPresence: "service_area",
+        addressCity: "Detroit",
+        addressState: "MI",
+      },
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = localAddressItem(scorecard);
+    expect(item?.label).toBe("City & state");
+    expect(item?.score).toBe(1);
+  });
+
+  it("service_area: scores 0 for the address check when only city is set (no state)", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: {
+        ...BASE_BUSINESS,
+        localPresence: "service_area",
+        addressCity: "Detroit",
+      },
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = localAddressItem(scorecard);
+    expect(item?.score).toBe(0);
+  });
+
+  it("service_area: does not credit the legacy free-text businessAddress", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: {
+        ...BASE_BUSINESS,
+        localPresence: "service_area",
+        businessAddress: "123 Main St, Detroit, MI 48201",
+      },
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = localAddressItem(scorecard);
+    expect(item?.score).toBe(0);
+  });
+
+  it("scores 'Areas served' as 0 when empty, for both modes", async () => {
+    const storefront = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: { ...BASE_BUSINESS, localPresence: "storefront" },
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const serviceArea = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: { ...BASE_BUSINESS, localPresence: "service_area" },
+      siteContent: BASE_SITE_CONTENT,
+    });
+    expect(areaServedItem(storefront)?.score).toBe(0);
+    expect(areaServedItem(serviceArea)?.score).toBe(0);
+  });
+
+  it("scores 'Areas served' as 1 once populated", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: {
+        ...BASE_BUSINESS,
+        localPresence: "service_area",
+        areaServed: ["Detroit", "Ferndale"],
+      },
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = areaServedItem(scorecard);
+    expect(item?.score).toBe(1);
+    expect(item?.detail).toBe("2 areas listed");
   });
 });
 

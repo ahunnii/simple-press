@@ -4,6 +4,7 @@ import { permanentRedirect } from "next/navigation";
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
 import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
+import { parseLocalPresence } from "~/lib/seo/local-presence";
 import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
@@ -153,7 +154,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
         data={[
           buildOrganizationSchema(business),
           buildWebSiteSchema(business),
-          ...(business.localBusinessEnabled
+          ...(parseLocalPresence(business.localPresence) !== "none"
             ? [buildLocalBusinessSchema(business)]
             : []),
         ]}

@@ -93,7 +93,14 @@ export interface ExportedBusiness {
   maintenanceLaunchEndAt: string | null;
   maintenanceLocation: string | null;
   // SEO
-  localBusinessEnabled: boolean;
+  // `localBusinessEnabled` is deprecated (superseded by `localPresence` /
+  // `areaServed`) but stays in this DTO, optional, so an older export ZIP
+  // that only has the boolean still round-trips — `importStoreContent` maps
+  // `localBusinessEnabled: true` with no `localPresence` to `"storefront"`.
+  localBusinessEnabled?: boolean;
+  /** `"none" | "service_area" | "storefront"` — see `~/lib/seo/local-presence`. */
+  localPresence?: string;
+  areaServed?: string[];
   allowAiCrawlers: boolean;
   // Shipping
   shippingType: string;

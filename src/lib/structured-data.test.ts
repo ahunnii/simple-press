@@ -376,73 +376,205 @@ describe("buildProductSchema", () => {
 });
 
 describe("buildLocalBusinessSchema", () => {
-  it("emits a full PostalAddress from structured parts, including addressCountry US", () => {
-    const schema = buildLocalBusinessSchema({
-      ...business,
-      addressStreet: "123 Main St",
-      addressCity: "Detroit",
-      addressState: "MI",
-      addressPostalCode: "48201",
+  describe("storefront mode", () => {
+    it("emits @type Store", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+      });
+
+      expect(schema["@type"]).toBe("Store");
     });
 
-    expect(schema.address).toEqual({
-      "@type": "PostalAddress",
-      streetAddress: "123 Main St",
-      addressLocality: "Detroit",
-      addressRegion: "MI",
-      postalCode: "48201",
-      addressCountry: "US",
+    it("emits a full PostalAddress from structured parts, including addressCountry US", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        addressStreet: "123 Main St",
+        addressCity: "Detroit",
+        addressState: "MI",
+        addressPostalCode: "48201",
+      });
+
+      expect(schema.address).toEqual({
+        "@type": "PostalAddress",
+        streetAddress: "123 Main St",
+        addressLocality: "Detroit",
+        addressRegion: "MI",
+        postalCode: "48201",
+        addressCountry: "US",
+      });
+    });
+
+    it("includes only the non-blank structured parts", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        addressStreet: "123 Main St",
+        addressCity: "  ", // blank after trim
+        addressState: null,
+        addressPostalCode: undefined,
+      });
+
+      expect(schema.address).toEqual({
+        "@type": "PostalAddress",
+        streetAddress: "123 Main St",
+        addressCountry: "US",
+      });
+    });
+
+    it("falls back to the legacy free-text businessAddress as streetAddress when no structured parts are set", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        businessAddress: "456 Legacy Ave, Ferndale, MI",
+      });
+
+      expect(schema.address).toEqual({
+        "@type": "PostalAddress",
+        streetAddress: "456 Legacy Ave, Ferndale, MI",
+      });
+    });
+
+    it("prefers structured parts over the legacy businessAddress when both are present", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        businessAddress: "456 Legacy Ave, Ferndale, MI",
+        addressStreet: "123 Main St",
+        addressCity: "Detroit",
+      });
+
+      expect(schema.address).toEqual({
+        "@type": "PostalAddress",
+        streetAddress: "123 Main St",
+        addressLocality: "Detroit",
+        addressCountry: "US",
+      });
+    });
+
+    it("omits address entirely when neither structured parts nor businessAddress are set", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+      });
+
+      expect(schema).not.toHaveProperty("address");
+    });
+
+    it("emits areaServed when non-empty", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        areaServed: ["Detroit", "Ferndale"],
+      });
+
+      expect(schema.areaServed).toEqual(["Detroit", "Ferndale"]);
     });
   });
 
-  it("includes only the non-blank structured parts", () => {
-    const schema = buildLocalBusinessSchema({
-      ...business,
-      addressStreet: "123 Main St",
-      addressCity: "  ", // blank after trim
-      addressState: null,
-      addressPostalCode: undefined,
+  describe("service_area mode", () => {
+    it("emits @type LocalBusiness", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        addressCity: "Detroit",
+        addressState: "MI",
+      });
+
+      expect(schema["@type"]).toBe("LocalBusiness");
     });
 
-    expect(schema.address).toEqual({
-      "@type": "PostalAddress",
-      streetAddress: "123 Main St",
-      addressCountry: "US",
+    it("emits only city/state/postalCode — never streetAddress", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        addressStreet: "123 Main St",
+        addressCity: "Detroit",
+        addressState: "MI",
+        addressPostalCode: "48201",
+      });
+
+      expect(schema.address).toEqual({
+        "@type": "PostalAddress",
+        addressLocality: "Detroit",
+        addressRegion: "MI",
+        postalCode: "48201",
+        addressCountry: "US",
+      });
+    });
+
+    it("never falls back to the legacy free-text businessAddress (it's a street address)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        businessAddress: "456 Legacy Ave, Ferndale, MI",
+      });
+
+      expect(schema).not.toHaveProperty("address");
+    });
+
+    it("omits address when neither city nor state is present, even with a postal code", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        addressPostalCode: "48201",
+      });
+
+      expect(schema).not.toHaveProperty("address");
+    });
+
+    it("emits address from city alone", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        addressCity: "Detroit",
+      });
+
+      expect(schema.address).toEqual({
+        "@type": "PostalAddress",
+        addressLocality: "Detroit",
+        addressCountry: "US",
+      });
+    });
+
+    it("emits areaServed when non-empty", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        areaServed: ["Detroit", "Ferndale", "Royal Oak"],
+      });
+
+      expect(schema.areaServed).toEqual(["Detroit", "Ferndale", "Royal Oak"]);
+    });
+
+    it("includes telephone, email, and openingHoursSpecification when set", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        phoneNumber: "313-555-0100",
+        supportEmail: "hi@example.com",
+        businessHours: [
+          { days: ["mon"], open: "09:00", close: "17:00", closed: false },
+        ],
+      });
+
+      expect(schema.telephone).toBe("313-555-0100");
+      expect(schema.email).toBe("hi@example.com");
+      expect(schema.openingHoursSpecification).toBeDefined();
     });
   });
 
-  it("falls back to the legacy free-text businessAddress as streetAddress when no structured parts are set", () => {
-    const schema = buildLocalBusinessSchema({
-      ...business,
-      businessAddress: "456 Legacy Ave, Ferndale, MI",
+  describe("areaServed normalization", () => {
+    it("omits areaServed entirely when empty", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        areaServed: [],
+      });
+
+      expect(schema).not.toHaveProperty("areaServed");
     });
-
-    expect(schema.address).toEqual({
-      "@type": "PostalAddress",
-      streetAddress: "456 Legacy Ave, Ferndale, MI",
-    });
-  });
-
-  it("prefers structured parts over the legacy businessAddress when both are present", () => {
-    const schema = buildLocalBusinessSchema({
-      ...business,
-      businessAddress: "456 Legacy Ave, Ferndale, MI",
-      addressStreet: "123 Main St",
-      addressCity: "Detroit",
-    });
-
-    expect(schema.address).toEqual({
-      "@type": "PostalAddress",
-      streetAddress: "123 Main St",
-      addressLocality: "Detroit",
-      addressCountry: "US",
-    });
-  });
-
-  it("omits address entirely when neither structured parts nor businessAddress are set", () => {
-    const schema = buildLocalBusinessSchema(business);
-
-    expect(schema).not.toHaveProperty("address");
   });
 });
 

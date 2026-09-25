@@ -27,6 +27,11 @@ import type {
 } from "~/lib/validators/site-seo";
 import { env } from "~/env";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
+import {
+  LOCAL_PRESENCE_MODES,
+  normalizeAreaServed,
+  parseLocalPresence,
+} from "~/lib/seo/local-presence";
 import { renderSeoTitle } from "~/lib/seo/title";
 import { cn } from "~/lib/utils";
 import {
@@ -58,6 +63,7 @@ import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import {
@@ -80,7 +86,10 @@ type Props = {
     customDomain: string | null;
     /** `BusinessDomainStatus` — only `"ACTIVE"` means the custom domain resolves. */
     domainStatus: string;
-    localBusinessEnabled: boolean;
+    /** `"none" | "service_area" | "storefront"` — see `~/lib/seo/local-presence`. */
+    localPresence: string;
+    /** Owner-listed cities/regions served. */
+    areaServed: string[];
     allowAiCrawlers: boolean;
   };
   siteContent: {
@@ -171,7 +180,12 @@ const seoFormSchema = z.object({
   seoBrandName: z.string().nullable().optional(),
   ogImage: z.string().nullable().optional(),
   ogImageFile: z.instanceof(File).optional().nullable(),
-  localBusinessEnabled: z.boolean(),
+  localPresence: z.enum(LOCAL_PRESENCE_MODES),
+  // Comma-separated display string, not the stored array — parsed with
+  // `normalizeAreaServed` on submit and joined back with ", " for display
+  // (see `buildFormValues`). A plain text input is far friendlier here than
+  // a tag/chip widget for a field most owners fill in once.
+  areaServed: z.string(),
   allowAiCrawlers: z.boolean(),
   pageMeta: z.object(pageMetaShape),
   siteVerification: z.object({
@@ -225,7 +239,8 @@ const TAB_FOR_FIELD = {
   ogImageFile: "store",
   pageMeta: "pages",
   siteVerification: "search",
-  localBusinessEnabled: "search",
+  localPresence: "search",
+  areaServed: "search",
   allowAiCrawlers: "search",
 } satisfies Record<keyof SeoFormValues, SeoEditTab>;
 
@@ -305,7 +320,8 @@ function buildFormValues(args: {
     pageMeta: unknown;
     siteVerification: unknown;
   };
-  localBusinessEnabled: boolean;
+  localPresence: string;
+  areaServed: string[];
   allowAiCrawlers: boolean;
 }): SeoFormValues {
   const storedPageMeta = parsePageMeta(args.siteContent.pageMeta);
@@ -330,7 +346,9 @@ function buildFormValues(args: {
     seoBrandName: args.siteContent.seoBrandName ?? "",
     ogImage: args.siteContent.ogImage ?? "",
     ogImageFile: null,
-    localBusinessEnabled: args.localBusinessEnabled,
+    localPresence: parseLocalPresence(args.localPresence),
+    // Joined for display; split + normalized again on submit.
+    areaServed: args.areaServed.join(", "),
     allowAiCrawlers: args.allowAiCrawlers,
     // Safe by construction: the loop above walks STATIC_SEO_ROUTES, and
     // `pageMetaShape` is pinned to that same key set by its `satisfies` clause.
@@ -412,7 +430,8 @@ export function SEOEditor({
 
   const savedValues = buildFormValues({
     siteContent,
-    localBusinessEnabled: business.localBusinessEnabled,
+    localPresence: business.localPresence,
+    areaServed: business.areaServed,
     allowAiCrawlers: business.allowAiCrawlers,
   });
 
@@ -510,7 +529,8 @@ export function SEOEditor({
             pageMeta: data.siteContent?.pageMeta,
             siteVerification: data.siteContent?.siteVerification,
           },
-          localBusinessEnabled: data.localBusinessEnabled,
+          localPresence: data.localPresence,
+          areaServed: data.areaServed,
           allowAiCrawlers: data.allowAiCrawlers,
         }),
       );
@@ -603,13 +623,18 @@ export function SEOEditor({
     const google = normalizeVerificationToken(data.siteVerification.google);
     const bing = normalizeVerificationToken(data.siteVerification.bing);
 
+    // The input is free-typed comma-separated text; normalize it into the
+    // stored array here (trim/dedupe/cap) rather than on every keystroke.
+    const areaServed = normalizeAreaServed(data.areaServed.split(","));
+
     updateSiteContent.mutate({
       metaTitle: data.metaTitle ?? undefined,
       metaDescription: data.metaDescription ?? undefined,
       metaKeywords: data.metaKeywords ?? undefined,
       seoBrandName: data.seoBrandName ?? undefined,
       ogImage: ogImageUrl,
-      localBusinessEnabled: data.localBusinessEnabled,
+      localPresence: data.localPresence,
+      areaServed,
       allowAiCrawlers: data.allowAiCrawlers,
       pageMeta,
       siteVerification: {
@@ -648,6 +673,7 @@ export function SEOEditor({
   const storeDescriptionLength = storeDescription?.length ?? 0;
   const inheritedDescription = firstFilled([storeDescription], "");
   const watchedOgImageFile = form.watch("ogImageFile");
+  const watchedLocalPresence = form.watch("localPresence");
 
   // The brand every rendered `<title>` gets suffixed with — reacts live to the
   // "Short name for page titles" field so every counter and preview on this
@@ -1297,22 +1323,100 @@ export function SEOEditor({
                       <CardHeader>
                         <CardTitle>What crawlers may do here</CardTitle>
                         <CardDescription>
-                          Two switches that change what search engines and AI
+                          Settings that change what search engines and AI
                           assistants are told about your store.
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <SwitchFormField
+                        <RadioFormField
                           form={form}
-                          name="localBusinessEnabled"
-                          label="Show as a local business in search & AI results"
-                          description="Publishes your address and phone number in the machine-readable format search engines read, so your store can show up in local results and map panels. Turn this on only if you have a physical or local presence — an online-only store that claims one is misleading. Your address and phone number come from Settings → General."
+                          name="localPresence"
+                          label="Local presence"
+                          radioGroupClassName="gap-4"
+                          options={[
+                            {
+                              value: "none",
+                              className: "items-start",
+                              label: (
+                                <span className="flex flex-col gap-0.5">
+                                  <span className="text-foreground font-medium">
+                                    None
+                                  </span>
+                                  <span className="text-muted-foreground text-sm">
+                                    Online only — don&apos;t publish a location.
+                                  </span>
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "service_area",
+                              className: "items-start",
+                              label: (
+                                <span className="flex flex-col gap-0.5">
+                                  <span className="text-foreground font-medium">
+                                    Service area
+                                  </span>
+                                  <span className="text-muted-foreground text-sm">
+                                    Based in a city but no public storefront.
+                                    Your city and state show; your street
+                                    address doesn&apos;t.
+                                  </span>
+                                </span>
+                              ),
+                            },
+                            {
+                              value: "storefront",
+                              className: "items-start",
+                              label: (
+                                <span className="flex flex-col gap-0.5">
+                                  <span className="text-foreground font-medium">
+                                    Storefront
+                                  </span>
+                                  <span className="text-muted-foreground text-sm">
+                                    Customers can visit you. Publishes your full
+                                    address, phone and hours.
+                                  </span>
+                                </span>
+                              ),
+                            },
+                          ]}
                         />
+
+                        <p className="text-muted-foreground text-sm">
+                          Your address and phone number come from{" "}
+                          <Link
+                            href="/admin/settings/general"
+                            className="text-foreground focus-visible:outline-ring font-medium underline underline-offset-4 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                          >
+                            Settings → General
+                          </Link>
+                          .
+                        </p>
+
+                        {watchedLocalPresence !== "none" && (
+                          <InputFormField
+                            form={form}
+                            name="areaServed"
+                            label="Areas served"
+                            placeholder="Detroit, Ferndale, Royal Oak"
+                            description={
+                              <>
+                                Comma-separated cities or regions.
+                                <span className="mt-1 block">
+                                  Map results come mainly from your Google
+                                  Business Profile; this backs it up.
+                                </span>
+                              </>
+                            }
+                            descriptionClassName="text-xs text-muted-foreground"
+                          />
+                        )}
+
                         <SwitchFormField
                           form={form}
                           name="allowAiCrawlers"
                           label="Allow AI answer engines to crawl this store"
-                          description="Controls whether AI assistants — ChatGPT (GPTBot), Perplexity (PerplexityBot) and Google AI (Google-Extended) — may read your storefront when answering questions. Turning this off asks them to stay away. Most stores benefit from leaving it on: it is how you get mentioned in AI answers."
+                          description="Controls whether AI assistants — ChatGPT, Claude, Perplexity, Gemini, Meta AI, Apple and others — may read your storefront when answering questions. Turning this off asks them to stay away. Google's AI Overviews use the regular Google crawler, so they aren't affected either way. Most stores benefit from leaving it on: it is how you get mentioned in AI answers."
                         />
                       </CardContent>
                     </Card>

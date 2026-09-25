@@ -17,13 +17,29 @@ const AI_CRAWLERS = [
   "CCBot",
   "Bytespider",
   "Applebot-Extended",
+  "Claude-User",
+  "Claude-SearchBot",
+  "Perplexity-User",
+  "meta-externalagent",
+  "Amazonbot",
+  "DuckAssistBot",
+  "cohere-ai",
+  "MistralAI-User",
 ];
 
 /**
- * Shared disallow list for both the `*` rule and every AI-crawler rule below.
+ * Base disallow list for both the `*` rule and the AI-crawler rule below.
  * Hoisted so the two rule sets can never drift from each other.
+ *
+ * Robots rules are prefix matches, so a bare `/order` would also block an
+ * owner's custom page at `/order-online` (likewise `/account` → `/accounting`,
+ * `/auth` → `/authentic-goods`). Each base path is therefore expanded into
+ * `P$` (the path itself), `P/` (anything under it) and `P?` (it with a query).
+ * Google and Bing honour the `$` anchor; a crawler that doesn't just never
+ * matches that line, leaving the bare path crawlable — harmless, since these
+ * routes carry nothing indexable.
  */
-const DISALLOWED_PATHS = [
+const DISALLOWED_PATHS_BASE = [
   "/admin",
   "/api",
   "/invoice",
@@ -38,6 +54,12 @@ const DISALLOWED_PATHS = [
   "/subscriptions",
   "/editor",
 ];
+
+const DISALLOWED_PATHS = DISALLOWED_PATHS_BASE.flatMap((path) => [
+  `${path}$`,
+  `${path}/`,
+  `${path}?`,
+]);
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const headersList = await headers();
@@ -56,18 +78,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     },
   });
 
-  const aiCrawlerRules: MetadataRoute.Robots["rules"] = AI_CRAWLERS.map(
-    (agent) => ({
-      userAgent: agent,
-      ...(business === null || business.allowAiCrawlers
-        ? {
-            allow: "/",
-            disallow: DISALLOWED_PATHS,
-          }
-        : { disallow: "/" }),
-    }),
-  );
-
   return {
     rules: [
       {
@@ -75,7 +85,15 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         allow: "/",
         disallow: DISALLOWED_PATHS,
       },
-      ...aiCrawlerRules,
+      {
+        userAgent: AI_CRAWLERS,
+        ...(business === null || business.allowAiCrawlers
+          ? {
+              allow: "/",
+              disallow: DISALLOWED_PATHS,
+            }
+          : { disallow: "/" }),
+      },
     ],
     sitemap:
       business !== null

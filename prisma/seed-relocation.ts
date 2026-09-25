@@ -121,7 +121,7 @@ async function main() {
     data: {
       templateId: "relocation",
       featureFlags: mergedFlags,
-      localBusinessEnabled: true,
+      localPresence: "storefront",
       phoneNumber: "(313) 241-0291",
       businessAddress: "440 Burroughs St Suite 131, Detroit, MI 48202",
       timeZone: "America/Detroit",

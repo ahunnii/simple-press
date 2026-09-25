@@ -205,7 +205,7 @@ async function main() {
     data: {
       templateId: "default",
       featureFlags: mergedFlags,
-      localBusinessEnabled: true,
+      localPresence: "storefront",
       phoneNumber: "(313) 555-0100",
       supportEmail: "support@demostore.example",
       businessAddress: "123 Market Street, Detroit, MI 48201",

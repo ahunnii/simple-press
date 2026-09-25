@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
+import { parseLocalPresence } from "~/lib/seo/local-presence";
 import {
   buildBreadcrumbSchema,
   buildLocalBusinessSchema,
@@ -32,7 +33,7 @@ export default async function ContactPage() {
     breadcrumbSchema,
   ];
 
-  if (business.localBusinessEnabled) {
+  if (parseLocalPresence(business.localPresence) !== "none") {
     schemas.push(buildLocalBusinessSchema(business));
   }
 

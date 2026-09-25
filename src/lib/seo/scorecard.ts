@@ -6,6 +6,7 @@ import type { ChecklistItem, ChecklistSummary } from "~/lib/admin/checklist";
 import { summarizeChecklist } from "~/lib/admin/checklist";
 import { parseBusinessHours } from "~/lib/business-hours";
 import { preferNonBlank } from "~/lib/seo/blank";
+import { parseLocalPresence } from "~/lib/seo/local-presence";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import {
   parsePageMeta,
@@ -83,7 +84,10 @@ export type BusinessForScorecard = {
   name: string;
   domainStatus: string;
   allowAiCrawlers: boolean;
-  localBusinessEnabled: boolean;
+  /** `"none" | "service_area" | "storefront"` — see `~/lib/seo/local-presence`. */
+  localPresence: string;
+  /** Owner-listed cities/regions served. */
+  areaServed: string[];
   /** Legacy free-text address — still scored, but the structured columns below win. */
   businessAddress: string | null;
   phoneNumber: string | null;
@@ -558,10 +562,23 @@ export async function computeSeoScorecard({
   );
 
   // ── Local presence ─────────────────────────────────────────────────────────
-  // Scored only when the owner opted into LocalBusiness JSON-LD. The SEO editor
-  // explicitly tells online-only stores to leave this off, so scoring it as a
-  // gap would contradict the app's own advice.
-  if (business.localBusinessEnabled) {
+  // Scored only when the owner opted into a local presence (service_area or
+  // storefront). The SEO editor explicitly tells online-only stores to leave
+  // this on "None", so scoring it as a gap would contradict the app's own
+  // advice.
+  const localPresence = parseLocalPresence(business.localPresence);
+  const hasAreaServed = business.areaServed.length > 0;
+  const areaServedItem: ChecklistItem = {
+    key: "local-area-served",
+    label: "Areas served",
+    href: seoEditorHref("search"),
+    score: binary(hasAreaServed),
+    detail: hasAreaServed
+      ? `${business.areaServed.length} area${business.areaServed.length === 1 ? "" : "s"} listed`
+      : "List the cities or regions you serve",
+  };
+
+  if (localPresence === "storefront") {
     const hasHours = parseBusinessHours(business.businessHours).length > 0;
     // Full credit for the structured columns the JSON-LD builder actually
     // reads city/state/ZIP off of; half credit for the legacy free-text
@@ -603,6 +620,46 @@ export async function computeSeoScorecard({
             ? "Emitted as OpeningHoursSpecification"
             : "Not set — search results will not show when you're open",
         },
+        areaServedItem,
+      ]),
+    );
+  } else if (localPresence === "service_area") {
+    // Only city + state are ever emitted in this mode — no street
+    // requirement, and no credit for the legacy free-text address (it's a
+    // street address the schema never reads here). Phone and hours are still
+    // scored: the JSON-LD builder emits telephone/openingHoursSpecification
+    // in service_area mode exactly as it does for storefront.
+    const hasHours = parseBusinessHours(business.businessHours).length > 0;
+    const hasCityState =
+      isNonBlank(business.addressCity) && isNonBlank(business.addressState);
+    groups.push(
+      toGroup("local", "Local presence", [
+        {
+          key: "local-address",
+          label: "City & state",
+          href: "/admin/settings/general",
+          score: binary(hasCityState),
+          detail: hasCityState
+            ? "Emitted as a structured PostalAddress in your LocalBusiness schema"
+            : "Add a city and state so search engines can place your service area",
+        },
+        {
+          key: "local-phone",
+          label: "Phone number",
+          href: "/admin/settings/general",
+          score: binary(isNonBlank(business.phoneNumber)),
+          detail: "Emitted as telephone in your LocalBusiness schema",
+        },
+        {
+          key: "local-hours",
+          label: "Opening hours",
+          href: "/admin/settings/hours",
+          score: binary(hasHours),
+          detail: hasHours
+            ? "Emitted as OpeningHoursSpecification"
+            : "Not set — search results will not show when you're open",
+        },
+        areaServedItem,
       ]),
     );
   } else {
@@ -611,7 +668,7 @@ export async function computeSeoScorecard({
         "local",
         "Local presence",
         [],
-        "Local business results are turned off, so these checks don't apply. Turn them on in Search & AI settings if your store has a physical location.",
+        "Local presence is set to None, so these checks don't apply. Switch to Service area or Storefront in Search & AI settings if your store has a physical or local presence.",
       ),
     );
   }

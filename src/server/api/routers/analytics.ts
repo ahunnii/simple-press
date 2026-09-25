@@ -12,6 +12,7 @@ import { z } from "zod";
 
 import {
   getActive,
+  getConnectionStatus,
   getMetrics,
   getPageviewsSeries,
   getStats,
@@ -24,24 +25,59 @@ import {
 } from "~/server/api/trpc";
 
 const rangeSchema = z.object({
-  range: z.enum(["7d", "30d", "90d"]).default("30d"),
+  range: z.enum(["24h", "7d", "30d", "90d"]).default("30d"),
 });
 
-/** Resolve a range string to epoch-ms startAt/endAt. */
-function resolveRange(range: "7d" | "30d" | "90d"): {
+/** The set of range values accepted by every analytics procedure. */
+export type AnalyticsRange = z.infer<typeof rangeSchema>["range"];
+
+/**
+ * Resolve a range string to epoch-ms startAt/endAt, plus the Umami bucket
+ * `unit` it should be charted at ("hour" for 24h, "day" otherwise).
+ */
+function resolveRange(range: AnalyticsRange): {
   startAt: number;
   endAt: number;
+  unit: "hour" | "day";
 } {
   const endAt = Date.now();
+
+  if (range === "24h") {
+    return { startAt: endAt - 24 * 60 * 60 * 1000, endAt, unit: "hour" };
+  }
+
   const days = range === "7d" ? 7 : range === "30d" ? 30 : 90;
   const startAt = endAt - days * 24 * 60 * 60 * 1000;
-  return { startAt, endAt };
+  return { startAt, endAt, unit: "day" };
 }
 
 /** Sentinel returned when analytics is not configured for this business. */
 const NOT_CONFIGURED = { configured: false as const };
 
 export const analyticsRouter = createTRPCRouter({
+  /**
+   * connection — whether the platform service account can sign in to Umami.
+   * The page checks this first so it can explain an auth failure instead of
+   * rendering all-zero stats.
+   */
+  connection: ownerAdminProcedure
+    .use(featureGate("analytics"))
+    .query(async ({ ctx }) => {
+      const business = await ctx.db.business.findFirst({
+        where: { id: ctx.businessId },
+        select: { umamiWebsiteId: true, umamiEnabled: true },
+      });
+
+      if (!business?.umamiEnabled || !business.umamiWebsiteId) {
+        return NOT_CONFIGURED;
+      }
+
+      return {
+        configured: true as const,
+        status: await getConnectionStatus(),
+      };
+    }),
+
   /**
    * overview — aggregate stats + active visitor count + daily pageviews series.
    */
@@ -60,7 +96,7 @@ export const analyticsRouter = createTRPCRouter({
         return NOT_CONFIGURED;
       }
 
-      const { startAt, endAt } = resolveRange(input.range);
+      const { startAt, endAt, unit } = resolveRange(input.range);
       const websiteId = business.umamiWebsiteId;
 
       const [stats, active, pageviewsSeries] = await Promise.all([
@@ -70,7 +106,7 @@ export const analyticsRouter = createTRPCRouter({
           websiteId,
           startAt,
           endAt,
-          unit: "day",
+          unit,
           timezone: "UTC",
         }),
       ]);

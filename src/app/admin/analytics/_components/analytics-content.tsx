@@ -22,6 +22,7 @@ import {
   YAxis,
 } from "recharts";
 
+import type { AnalyticsRange } from "~/server/api/routers/analytics";
 import type {
   UmamiMetricRow,
   UmamiPageviewSeries,
@@ -304,6 +305,7 @@ type EmbedEngagementResult =
   | { configured: true; engagements: number; dwellSessions: number };
 
 type AnalyticsContentProps = {
+  range: AnalyticsRange;
   overview: OverviewResult;
   topPages: PagesResult;
   topReferrers: ReferrersResult;
@@ -319,7 +321,31 @@ function formatSeconds(totalSeconds: number): string {
   return `${m}m ${s}s`;
 }
 
+// ─── Chart x-axis label formatting ────────────────────────────────────────────
+
+/**
+ * Parse a Umami pageviews-series `x` value into a Date.
+ *
+ * Umami returns space-separated timestamps like "2026-09-24 13:00:00" for
+ * hour/day buckets — treated as UTC since every series request passes
+ * `timezone: "UTC"` — but also tolerate a proper ISO string.
+ */
+function parseUmamiTimestamp(x: string): Date {
+  if (x.includes("T") || x.endsWith("Z")) {
+    return new Date(x);
+  }
+  return new Date(`${x.replace(" ", "T")}Z`);
+}
+
+/** Format a 24h-range x value as a local-time hour label, e.g. "3 PM". */
+function formatHourLabel(x: string): string {
+  const date = parseUmamiTimestamp(x);
+  if (Number.isNaN(date.getTime())) return x;
+  return date.toLocaleTimeString(undefined, { hour: "numeric" });
+}
+
 export function AnalyticsContent({
+  range,
   overview,
   topPages,
   topReferrers,
@@ -427,6 +453,7 @@ export function AnalyticsContent({
                   angle={-35}
                   textAnchor="end"
                   height={60}
+                  tickFormatter={range === "24h" ? formatHourLabel : undefined}
                 />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip
@@ -434,6 +461,9 @@ export function AnalyticsContent({
                     value.toLocaleString(),
                     "Pageviews",
                   ]}
+                  labelFormatter={
+                    range === "24h" ? formatHourLabel : undefined
+                  }
                   contentStyle={{
                     backgroundColor: "var(--popover)",
                     border: "1px solid var(--border)",
