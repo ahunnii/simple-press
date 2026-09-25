@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { type Icon } from "@tabler/icons-react";
 
 import {
@@ -12,14 +11,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-
-/** True for absolute http(s) URLs — a different host than the app itself. */
-export function isExternalUrl(url: string) {
-  return /^https?:\/\//i.test(url);
-}
+import { isExternalUrl } from "~/app/admin/_lib/admin-nav";
 
 export function NavSecondary({
   items,
+  activeHref,
   ...props
 }: {
   items: {
@@ -27,10 +23,10 @@ export function NavSecondary({
     url: string;
     icon: Icon;
   }[];
+  /** The single active href across the whole sidebar — see `getActiveNavHref`. */
+  activeHref?: string | null;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
-  const pathname = usePathname();
-  const isActive = (url: string) =>
-    !isExternalUrl(url) && (pathname === url || pathname.startsWith(url + "/"));
+  const isActive = (url: string) => url === activeHref;
 
   return (
     <SidebarGroup {...props}>
@@ -51,6 +47,7 @@ export function NavSecondary({
                         ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary active:bg-primary/20 font-semibold"
                         : ""
                     }
+                    aria-current={isActive(item.url) ? "page" : undefined}
                   >
                     <item.icon />
                     <span>{item.title}</span>

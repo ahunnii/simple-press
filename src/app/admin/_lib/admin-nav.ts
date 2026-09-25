@@ -722,6 +722,35 @@ export const HUB_CARDS: HubCard[] = [
   },
 ];
 
+/** True for absolute http(s) URLs — a different host than the app itself. */
+export function isExternalUrl(url: string) {
+  return /^https?:\/\//i.test(url);
+}
+
+/**
+ * Most specific href matching `pathname` (exact match or "/"-segment
+ * prefix), or `null` if none match. External URLs (a different host, e.g.
+ * the platform-admin subdomain) never match — a pathname is always relative
+ * to the current host, so it cannot equal or be "under" an absolute URL.
+ *
+ * Used to compute a single active nav item across the whole sidebar so a
+ * parent hub link (e.g. "/admin/content") and a more specific child link
+ * (e.g. "/admin/content/pages") don't both highlight at once — the longest
+ * matching href wins regardless of the order `hrefs` is given in.
+ */
+export function getActiveNavHref(
+  pathname: string,
+  hrefs: readonly string[],
+): string | null {
+  let best: string | null = null;
+  for (const href of hrefs) {
+    if (isExternalUrl(href)) continue;
+    if (pathname !== href && !pathname.startsWith(`${href}/`)) continue;
+    if (best === null || href.length > best.length) best = href;
+  }
+  return best;
+}
+
 /**
  * Whether a nav item is visible to the given membership role.
  * `role === null` means PLATFORM_ADMIN (or unknown) — no role filtering.

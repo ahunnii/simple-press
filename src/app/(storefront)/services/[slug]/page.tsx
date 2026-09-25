@@ -11,8 +11,9 @@ import {
   buildBreadcrumbSchema,
   buildServiceSchema,
 } from "~/lib/structured-data";
+import { collectGalleryIds } from "~/lib/tiptap/gallery-ids";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 
 import { getServiceTemplateComponent } from "../../_templates/_service-pages/registry";
@@ -52,8 +53,20 @@ export default async function ServiceDetailPage({ params }: Props) {
     { name: service.name, path: `/services/${service.slug}` },
   ]);
 
+  // Every service template's rich-text intro body lives in
+  // `service.customFields`, under a different key per template (e.g.
+  // "service-one.intro-body", "vii-ledger.intro-body") and stored as a
+  // string-encoded Tiptap doc — walk the whole blob rather than each
+  // template's field name.
+  const galleryIds = collectGalleryIds(service.customFields);
+  await Promise.all(
+    galleryIds.map((galleryId) =>
+      api.gallery.getByIdPublic.prefetch(galleryId).catch(() => undefined),
+    ),
+  );
+
   return (
-    <>
+    <HydrateClient>
       <JsonLd data={[serviceSchema, breadcrumbSchema]} />
       <Component
         business={business}
@@ -61,7 +74,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         items={service.items}
         embedsEnabled={embedsEnabled}
       />
-    </>
+    </HydrateClient>
   );
 }
 

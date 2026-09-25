@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { IconCompass, IconHelp, IconSettings } from "@tabler/icons-react";
 
 import type { AdminRole, NavSection } from "~/app/admin/_lib/admin-nav";
@@ -21,6 +22,7 @@ import { NavMain } from "~/app/admin/_components/nav-main";
 import { NavSecondary } from "~/app/admin/_components/nav-secondary";
 import { NavUser } from "~/app/admin/_components/nav-user";
 import {
+  getActiveNavHref,
   isNavItemAllowedForRole,
   isNavFeatureEnabled,
   NAV_ITEMS,
@@ -84,6 +86,7 @@ export function AppSidebar({
   pendingReviewCount,
   ...props
 }: AppSidebarProps) {
+  const pathname = usePathname();
   const { isEnabled, isDisabledByDependency } = useFeatureFlags({
     flags: featureData?.flags ?? {},
   });
@@ -134,6 +137,19 @@ export function AppSidebar({
     );
   }, [session?.user.platformRole]);
 
+  // Longest-match-wins across every href rendered in the sidebar, so a
+  // parent hub link (e.g. "/admin/content") and a more specific child link
+  // (e.g. "/admin/content/pages") never both highlight at once. Computed
+  // once here rather than per nav item — see `getActiveNavHref`.
+  const activeHref = useMemo(() => {
+    const allHrefs = [
+      ...groupedNav.flatMap((group) => group.items.map((item) => item.url)),
+      ...platformItems.map((item) => item.url),
+      ...secondaryItems.map((item) => item.url),
+    ];
+    return getActiveNavHref(pathname, allHrefs);
+  }, [pathname, groupedNav, platformItems, secondaryItems]);
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -158,12 +174,21 @@ export function AppSidebar({
             key={group.section}
             items={group.items}
             label={group.label}
+            activeHref={activeHref}
           />
         ))}
         {platformItems.length > 0 && (
-          <NavMain items={platformItems} label={NAV_SECTION_LABELS.platform} />
+          <NavMain
+            items={platformItems}
+            label={NAV_SECTION_LABELS.platform}
+            activeHref={activeHref}
+          />
         )}
-        <NavSecondary items={secondaryItems} className="mt-auto" />
+        <NavSecondary
+          items={secondaryItems}
+          activeHref={activeHref}
+          className="mt-auto"
+        />
       </SidebarContent>
       <SidebarFooter>
         <WelcomeNotification

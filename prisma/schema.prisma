@@ -224,7 +224,9 @@ model Business {
   onboardingComplete Boolean @default(false)
 
   // SEO / AEO / GEO controls
-  localBusinessEnabled        Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
+  localBusinessEnabled        Boolean @default(false) // DEPRECATED — superseded by localPresence (backfilled by prisma/manual/2026-09-24-local-presence.sql); no longer read, drop in a later pass
+  localPresence               String   @default("none") // none | service_area | storefront — which LocalBusiness JSON-LD (if any) the storefront emits
+  areaServed                  String[] @default([]) // owner-listed cities/regions served; emitted as LocalBusiness `areaServed`
   allowAiCrawlers             Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
   sendAbandonedCheckoutEmails Boolean @default(false) // recovery email to shoppers who abandon a Stripe checkout (needs their email on the expired session)
 

@@ -76,7 +76,17 @@ const exportedBusinessSchema = z.object({
   maintenanceLaunchAt: nullableString.optional(),
   maintenanceLaunchEndAt: nullableString.optional(),
   maintenanceLocation: nullableString.optional(),
-  localBusinessEnabled: z.boolean(),
+  // `localBusinessEnabled` is deprecated (superseded by `localPresence` /
+  // `areaServed`) but a bundle exported before the migration only has this
+  // boolean — kept optional, forever, so those ZIPs still parse.
+  // `import.ts`'s `resolveImportedLocalPresence` maps `true` with no
+  // `localPresence` present to `"storefront"`.
+  localBusinessEnabled: z.boolean().optional(),
+  // Added alongside `localBusinessEnabled`'s deprecation. Also optional: a
+  // pre-migration export has neither field, and even a current export could
+  // in principle omit it — the fallback lives in `import.ts`, not here.
+  localPresence: z.string().optional(),
+  areaServed: z.array(z.string()).optional(),
   allowAiCrawlers: z.boolean(),
   shippingType: z.string(),
   shippingFlatRate: nullableNumber.optional(),

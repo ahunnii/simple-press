@@ -25,6 +25,10 @@ import {
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { dollarsToCents } from "~/lib/prices";
+import {
+  LOCAL_PRESENCE_MODES,
+  normalizeAreaServed,
+} from "~/lib/seo/local-presence";
 import { stripeClient } from "~/lib/stripe/client";
 import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
@@ -91,7 +95,8 @@ export const businessRouter = createTRPCRouter({
         customDomain: true,
         domainStatus: true,
         subdomain: true,
-        localBusinessEnabled: true,
+        localPresence: true,
+        areaServed: true,
         shippingType: true,
         shippingFlatRate: true,
         freeShippingThreshold: true,
@@ -197,7 +202,8 @@ export const businessRouter = createTRPCRouter({
         subdomain: true,
         customDomain: true,
         domainStatus: true,
-        localBusinessEnabled: true,
+        localPresence: true,
+        areaServed: true,
         shippingType: true,
         shippingFlatRate: true,
         freeShippingThreshold: true,
@@ -1218,7 +1224,8 @@ export const businessRouter = createTRPCRouter({
         metaKeywords: z.string().optional(),
         seoBrandName: z.string().trim().max(60).optional(),
         ogImage: z.string().optional(),
-        localBusinessEnabled: z.boolean().optional(),
+        localPresence: z.enum(LOCAL_PRESENCE_MODES).optional(),
+        areaServed: z.array(z.string()).optional(),
         allowAiCrawlers: z.boolean().optional(),
         pageMeta: pageMetaSchema.optional(),
         siteVerification: siteVerificationSchema.optional(),
@@ -1232,7 +1239,8 @@ export const businessRouter = createTRPCRouter({
         metaKeywords,
         seoBrandName,
         ogImage,
-        localBusinessEnabled,
+        localPresence,
+        areaServed,
         allowAiCrawlers,
         pageMeta,
         siteVerification,
@@ -1255,7 +1263,10 @@ export const businessRouter = createTRPCRouter({
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
         data: {
-          ...(localBusinessEnabled !== undefined && { localBusinessEnabled }),
+          ...(localPresence !== undefined && { localPresence }),
+          ...(areaServed !== undefined && {
+            areaServed: normalizeAreaServed(areaServed),
+          }),
           ...(allowAiCrawlers !== undefined && { allowAiCrawlers }),
           siteContent: {
             upsert: {

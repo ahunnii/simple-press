@@ -17,6 +17,8 @@ import path from "node:path";
 import { Prisma } from "generated/prisma";
 import JSZip from "jszip";
 
+import type { LocalPresence } from "~/lib/seo/local-presence";
+import type { ExportedBusiness } from "~/lib/store-transfer/types";
 import {
   normalizeMaintenanceMessage,
   normalizeMaintenanceText,
@@ -28,6 +30,10 @@ import {
   putStoredObject,
 } from "~/lib/s3/put";
 import { keyToPublicUrl } from "~/lib/s3/url";
+import {
+  normalizeAreaServed,
+  parseLocalPresence,
+} from "~/lib/seo/local-presence";
 import { generateEventSlug } from "~/lib/slug";
 import {
   normalizeUrl,
@@ -48,6 +54,25 @@ export interface StoreImportResult {
   warnings: string[];
   errors: string[];
   perModel: Record<string, { created: number; updated: number }>;
+}
+
+// ─── Local presence back-compat ────────────────────────────────────────────────
+
+/**
+ * Resolve the imported business's local-presence mode.
+ *
+ * A bundle exported after `localPresence` shipped carries it directly — used
+ * verbatim (defensively re-parsed in case of a hand-edited/corrupt ZIP). An
+ * older bundle only has the now-deprecated `localBusinessEnabled` boolean;
+ * since that switch only ever meant "yes, publish my address", `true` maps
+ * to `"storefront"` and anything else (including a bundle with neither
+ * field) falls back to `"none"`.
+ */
+function resolveImportedLocalPresence(biz: ExportedBusiness): LocalPresence {
+  if (biz.localPresence !== undefined) {
+    return parseLocalPresence(biz.localPresence);
+  }
+  return biz.localBusinessEnabled === true ? "storefront" : "none";
 }
 
 // ─── Bounded concurrency helper ───────────────────────────────────────────────
@@ -219,7 +244,15 @@ export async function importStoreBundle(args: {
         maintenanceLaunchAt: toDateOrNull(biz.maintenanceLaunchAt),
         maintenanceLaunchEndAt: toDateOrNull(biz.maintenanceLaunchEndAt),
         maintenanceLocation: normalizeMaintenanceText(biz.maintenanceLocation),
-        localBusinessEnabled: biz.localBusinessEnabled,
+        // `localPresence` was added after the original export format shipped
+        // (which only had the now-deprecated `localBusinessEnabled`
+        // boolean). A bundle carrying the new field wins outright; one that
+        // predates it but has `localBusinessEnabled: true` maps to
+        // "storefront" (the boolean only ever meant "yes, show my address"),
+        // and anything else falls back to "none" — see
+        // `resolveImportedLocalPresence` below.
+        localPresence: resolveImportedLocalPresence(biz),
+        areaServed: normalizeAreaServed(biz.areaServed ?? []),
         allowAiCrawlers: biz.allowAiCrawlers,
         shippingType: biz.shippingType,
         shippingFlatRate: biz.shippingFlatRate ?? null,

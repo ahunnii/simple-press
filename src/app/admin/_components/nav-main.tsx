@@ -2,7 +2,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import {
   SidebarGroup,
@@ -13,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { isExternalUrl } from "~/app/admin/_components/nav-secondary";
+import { isExternalUrl } from "~/app/admin/_lib/admin-nav";
 
 /** Caps a nav badge count at "99+" so it never blows out the sidebar width. */
 function formatBadgeCount(count: number): string {
@@ -23,6 +22,7 @@ function formatBadgeCount(count: number): string {
 export function NavMain({
   items,
   label,
+  activeHref,
 }: {
   items: {
     title: string;
@@ -32,10 +32,10 @@ export function NavMain({
     badge?: number;
   }[];
   label?: string;
+  /** The single active href across the whole sidebar — see `getActiveNavHref`. */
+  activeHref?: string | null;
 }) {
-  const pathname = usePathname();
-  const isActive = (url: string) =>
-    !isExternalUrl(url) && (pathname === url || pathname.startsWith(url + "/"));
+  const isActive = (url: string) => url === activeHref;
   return (
     <SidebarGroup>
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}

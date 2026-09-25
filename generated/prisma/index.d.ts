@@ -13475,6 +13475,7 @@ export namespace Prisma {
     status: string | null
     onboardingComplete: boolean | null
     localBusinessEnabled: boolean | null
+    localPresence: string | null
     allowAiCrawlers: boolean | null
     sendAbandonedCheckoutEmails: boolean | null
     shippingType: string | null
@@ -13532,6 +13533,7 @@ export namespace Prisma {
     status: string | null
     onboardingComplete: boolean | null
     localBusinessEnabled: boolean | null
+    localPresence: string | null
     allowAiCrawlers: boolean | null
     sendAbandonedCheckoutEmails: boolean | null
     shippingType: string | null
@@ -13591,6 +13593,8 @@ export namespace Prisma {
     status: number
     onboardingComplete: number
     localBusinessEnabled: number
+    localPresence: number
+    areaServed: number
     allowAiCrawlers: number
     sendAbandonedCheckoutEmails: number
     featureFlags: number
@@ -13669,6 +13673,7 @@ export namespace Prisma {
     status?: true
     onboardingComplete?: true
     localBusinessEnabled?: true
+    localPresence?: true
     allowAiCrawlers?: true
     sendAbandonedCheckoutEmails?: true
     shippingType?: true
@@ -13726,6 +13731,7 @@ export namespace Prisma {
     status?: true
     onboardingComplete?: true
     localBusinessEnabled?: true
+    localPresence?: true
     allowAiCrawlers?: true
     sendAbandonedCheckoutEmails?: true
     shippingType?: true
@@ -13785,6 +13791,8 @@ export namespace Prisma {
     status?: true
     onboardingComplete?: true
     localBusinessEnabled?: true
+    localPresence?: true
+    areaServed?: true
     allowAiCrawlers?: true
     sendAbandonedCheckoutEmails?: true
     featureFlags?: true
@@ -13936,6 +13944,8 @@ export namespace Prisma {
     status: string
     onboardingComplete: boolean
     localBusinessEnabled: boolean
+    localPresence: string
+    areaServed: string[]
     allowAiCrawlers: boolean
     sendAbandonedCheckoutEmails: boolean
     featureFlags: JsonValue
@@ -14019,6 +14029,8 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: boolean
+    areaServed?: boolean
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
@@ -14125,6 +14137,8 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: boolean
+    areaServed?: boolean
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
@@ -14189,6 +14203,8 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: boolean
+    areaServed?: boolean
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
@@ -14253,6 +14269,8 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: boolean
+    areaServed?: boolean
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
@@ -14276,7 +14294,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -14410,6 +14428,8 @@ export namespace Prisma {
       status: string
       onboardingComplete: boolean
       localBusinessEnabled: boolean
+      localPresence: string
+      areaServed: string[]
       allowAiCrawlers: boolean
       sendAbandonedCheckoutEmails: boolean
       featureFlags: Prisma.JsonValue
@@ -14935,6 +14955,8 @@ export namespace Prisma {
     readonly status: FieldRef<"Business", 'String'>
     readonly onboardingComplete: FieldRef<"Business", 'Boolean'>
     readonly localBusinessEnabled: FieldRef<"Business", 'Boolean'>
+    readonly localPresence: FieldRef<"Business", 'String'>
+    readonly areaServed: FieldRef<"Business", 'String[]'>
     readonly allowAiCrawlers: FieldRef<"Business", 'Boolean'>
     readonly sendAbandonedCheckoutEmails: FieldRef<"Business", 'Boolean'>
     readonly featureFlags: FieldRef<"Business", 'Json'>
@@ -84352,6 +84374,8 @@ export namespace Prisma {
     status: 'status',
     onboardingComplete: 'onboardingComplete',
     localBusinessEnabled: 'localBusinessEnabled',
+    localPresence: 'localPresence',
+    areaServed: 'areaServed',
     allowAiCrawlers: 'allowAiCrawlers',
     sendAbandonedCheckoutEmails: 'sendAbandonedCheckoutEmails',
     featureFlags: 'featureFlags',
@@ -86140,6 +86164,8 @@ export namespace Prisma {
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
+    localPresence?: StringFilter<"Business"> | string
+    areaServed?: StringNullableListFilter<"Business">
     allowAiCrawlers?: BoolFilter<"Business"> | boolean
     sendAbandonedCheckoutEmails?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
@@ -86245,6 +86271,8 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
+    localPresence?: SortOrder
+    areaServed?: SortOrder
     allowAiCrawlers?: SortOrder
     sendAbandonedCheckoutEmails?: SortOrder
     featureFlags?: SortOrder
@@ -86353,6 +86381,8 @@ export namespace Prisma {
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
+    localPresence?: StringFilter<"Business"> | string
+    areaServed?: StringNullableListFilter<"Business">
     allowAiCrawlers?: BoolFilter<"Business"> | boolean
     sendAbandonedCheckoutEmails?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
@@ -86458,6 +86488,8 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
+    localPresence?: SortOrder
+    areaServed?: SortOrder
     allowAiCrawlers?: SortOrder
     sendAbandonedCheckoutEmails?: SortOrder
     featureFlags?: SortOrder
@@ -86530,6 +86562,8 @@ export namespace Prisma {
     status?: StringWithAggregatesFilter<"Business"> | string
     onboardingComplete?: BoolWithAggregatesFilter<"Business"> | boolean
     localBusinessEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
+    localPresence?: StringWithAggregatesFilter<"Business"> | string
+    areaServed?: StringNullableListFilter<"Business">
     allowAiCrawlers?: BoolWithAggregatesFilter<"Business"> | boolean
     sendAbandonedCheckoutEmails?: BoolWithAggregatesFilter<"Business"> | boolean
     featureFlags?: JsonWithAggregatesFilter<"Business">
@@ -93060,6 +93094,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -93165,6 +93201,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -93270,6 +93308,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -93375,6 +93415,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -93480,6 +93522,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -93544,6 +93588,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -93608,6 +93654,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -100988,6 +101036,14 @@ export namespace Prisma {
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -101032,14 +101088,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
   }
 
   export type ProductListRelationFilter = {
@@ -101413,6 +101461,8 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
+    localPresence?: SortOrder
+    areaServed?: SortOrder
     allowAiCrawlers?: SortOrder
     sendAbandonedCheckoutEmails?: SortOrder
     featureFlags?: SortOrder
@@ -101482,6 +101532,7 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
+    localPresence?: SortOrder
     allowAiCrawlers?: SortOrder
     sendAbandonedCheckoutEmails?: SortOrder
     shippingType?: SortOrder
@@ -101539,6 +101590,7 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
+    localPresence?: SortOrder
     allowAiCrawlers?: SortOrder
     sendAbandonedCheckoutEmails?: SortOrder
     shippingType?: SortOrder
@@ -105776,6 +105828,10 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAccountsInput, UserUpdateWithoutAccountsInput>, UserUncheckedUpdateWithoutAccountsInput>
   }
 
+  export type BusinessCreateareaServedInput = {
+    set: string[]
+  }
+
   export type BusinessCreatesalesCountriesInput = {
     set: string[]
   }
@@ -106348,6 +106404,11 @@ export namespace Prisma {
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
     set?: $Enums.BusinessDomainStatus
+  }
+
+  export type BusinessUpdateareaServedInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -111838,6 +111899,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -111942,6 +112005,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -112113,6 +112178,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -112217,6 +112284,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116025,6 +116094,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116129,6 +116200,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116249,6 +116322,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116353,6 +116428,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116457,6 +116534,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116561,6 +116640,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116681,6 +116762,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116785,6 +116868,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -116938,6 +117023,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -117042,6 +117129,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -117591,6 +117680,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -117695,6 +117786,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -118444,6 +118537,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -118548,6 +118643,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -118690,6 +118787,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -118794,6 +118893,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -119206,6 +119307,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -119310,6 +119413,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -119482,6 +119587,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -119586,6 +119693,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -119823,6 +119932,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -119927,6 +120038,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120047,6 +120160,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120151,6 +120266,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120255,6 +120372,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120359,6 +120478,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120527,6 +120648,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120631,6 +120754,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120786,6 +120911,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -120890,6 +121017,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -121051,6 +121180,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -121155,6 +121286,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -121360,6 +121493,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -121464,6 +121599,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -121691,6 +121828,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -121795,6 +121934,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -121944,6 +122085,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -122048,6 +122191,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -122747,6 +122892,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -122851,6 +122998,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -123579,6 +123728,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -123683,6 +123834,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -124273,6 +124426,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -124377,6 +124532,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -125402,6 +125559,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -125506,6 +125665,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -125753,6 +125914,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -125857,6 +126020,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -126209,6 +126374,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -126313,6 +126480,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -126811,6 +126980,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -126915,6 +127086,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -127206,6 +127379,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -127310,6 +127485,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -127614,6 +127791,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -127718,6 +127897,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -127870,6 +128051,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -127974,6 +128157,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -128217,6 +128402,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -128321,6 +128508,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -128545,6 +128734,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -128649,6 +128840,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -128861,6 +129054,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -128965,6 +129160,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129124,6 +129321,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129228,6 +129427,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129348,6 +129549,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129452,6 +129655,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129556,6 +129761,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129660,6 +129867,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129780,6 +129989,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129884,6 +130095,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -129988,6 +130201,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130092,6 +130307,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130257,6 +130474,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130361,6 +130580,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130516,6 +130737,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130620,6 +130843,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130740,6 +130965,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130844,6 +131071,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -130948,6 +131177,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -131052,6 +131283,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -131204,6 +131437,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -131308,6 +131543,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -131527,6 +131764,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -131631,6 +131870,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -131816,6 +132057,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -131920,6 +132163,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -132095,6 +132340,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -132199,6 +132446,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -132384,6 +132633,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -132488,6 +132739,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -133353,6 +133606,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -133457,6 +133712,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -133622,6 +133879,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -133726,6 +133985,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -133881,6 +134142,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -133985,6 +134248,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -134105,6 +134370,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -134209,6 +134476,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -134313,6 +134582,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -134417,6 +134688,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -134559,6 +134832,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -134663,6 +134938,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -134942,6 +135219,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -135046,6 +135325,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -135273,6 +135554,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -135377,6 +135660,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -135481,6 +135766,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -135585,6 +135872,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -135757,6 +136046,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -135861,6 +136152,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136070,6 +136363,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136174,6 +136469,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136341,6 +136638,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136445,6 +136744,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136549,6 +136850,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136653,6 +136956,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136811,6 +137116,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -136915,6 +137222,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137060,6 +137369,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137164,6 +137475,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137315,6 +137628,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137419,6 +137734,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137523,6 +137840,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137627,6 +137946,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137747,6 +138068,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137851,6 +138174,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -137955,6 +138280,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138059,6 +138386,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138226,6 +138555,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138330,6 +138661,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138487,6 +138820,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138591,6 +138926,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138711,6 +139048,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138815,6 +139154,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -138919,6 +139260,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -139023,6 +139366,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -139272,6 +139617,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -139376,6 +139723,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -139691,6 +140040,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -139795,6 +140146,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -140016,6 +140369,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -140120,6 +140475,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -140420,6 +140777,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -140524,6 +140883,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -140986,6 +141347,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -141090,6 +141453,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -141484,6 +141849,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -141588,6 +141955,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -141708,6 +142077,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -141812,6 +142183,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -141916,6 +142289,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -142020,6 +142395,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -142178,6 +142555,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -142282,6 +142661,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -142508,6 +142889,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -142612,6 +142995,8 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
     allowAiCrawlers?: boolean
     sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -142929,6 +143314,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
@@ -143033,6 +143420,8 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue

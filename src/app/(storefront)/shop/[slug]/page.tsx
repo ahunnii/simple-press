@@ -12,7 +12,8 @@ import {
   buildBreadcrumbSchema,
   buildProductSchema,
 } from "~/lib/structured-data";
-import { api } from "~/trpc/server";
+import { collectGalleryIds } from "~/lib/tiptap/gallery-ids";
+import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 
 import { VariantImageProvider } from "../../_components/product-page/variant-image-context";
@@ -56,6 +57,38 @@ export default async function ProductDetailPage({ params }: Props) {
     ? await api.review.listByProduct({ productId: product.id }).catch(() => [])
     : [];
 
+  // Prefetch everything the client components on this page re-fetch via
+  // `useQuery` (product-reviews.tsx, every template's `getRelated.useQuery`,
+  // and any `GalleryBlock` inside the additional-information rich text) so
+  // their data lands in the server-rendered HTML — crawlers never run the
+  // client JS that would otherwise be the only thing fetching it. Each is
+  // wrapped so one failing prefetch (e.g. a disabled feature) never breaks
+  // the page; the inputs must match the client `useQuery` calls exactly or
+  // the hydration cache key misses.
+  const galleryIds = collectGalleryIds(product.additionalFields);
+  await Promise.all([
+    reviewsEnabled
+      ? api.review.getProductStats
+          .prefetch({ productId: product.id })
+          .catch(() => undefined)
+      : undefined,
+    reviewsEnabled
+      ? api.review.listByProduct
+          .prefetch({
+            productId: product.id,
+            sortBy: "recent",
+            rating: undefined,
+          })
+          .catch(() => undefined)
+      : undefined,
+    api.product.getRelated
+      .prefetch({ productId: product.id })
+      .catch(() => undefined),
+    ...galleryIds.map((galleryId) =>
+      api.gallery.getByIdPublic.prefetch(galleryId).catch(() => undefined),
+    ),
+  ]);
+
   const t = getTemplate(business.templateId);
 
   const productSchema = buildProductSchema(
@@ -71,12 +104,12 @@ export default async function ProductDetailPage({ params }: Props) {
   ]);
 
   return (
-    <>
+    <HydrateClient>
       <JsonLd data={[productSchema, breadcrumbSchema]} />
       <VariantImageProvider>
         <t.ProductPage product={product} business={business} />
       </VariantImageProvider>
-    </>
+    </HydrateClient>
   );
 }
 

@@ -11,7 +11,8 @@ import {
   buildBreadcrumbSchema,
   buildWebPageSchema,
 } from "~/lib/structured-data";
-import { api } from "~/trpc/server";
+import { collectGalleryIds } from "~/lib/tiptap/gallery-ids";
+import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 
 import { getTemplate } from "../_templates/registry";
@@ -54,11 +55,18 @@ export default async function PageView({ params }: Props) {
     { name: pageTitle, path: `/${slug}` },
   ]);
 
+  const galleryIds = collectGalleryIds(page.content);
+  await Promise.all(
+    galleryIds.map((galleryId) =>
+      api.gallery.getByIdPublic.prefetch(galleryId).catch(() => undefined),
+    ),
+  );
+
   return (
-    <>
+    <HydrateClient>
       <JsonLd data={[webPageSchema, breadcrumbSchema]} />
       <t.GenericPage business={business} page={page} />
-    </>
+    </HydrateClient>
   );
 }
 

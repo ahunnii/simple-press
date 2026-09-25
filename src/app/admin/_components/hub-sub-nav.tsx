@@ -6,7 +6,11 @@ import { usePathname } from "next/navigation";
 import type { NavHub } from "~/app/admin/_lib/admin-nav";
 import { api } from "~/trpc/react";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
-import { getHubCards, isHubCardEnabled } from "~/app/admin/_lib/admin-nav";
+import {
+  getActiveNavHref,
+  getHubCards,
+  isHubCardEnabled,
+} from "~/app/admin/_lib/admin-nav";
 
 const HUB_LABELS: Record<NavHub, string> = {
   settings: "Settings",
@@ -29,8 +33,10 @@ export function HubSubNav({ hub }: Props) {
   const { isEnabled } = useFeatureFlags({ flags: flagsData?.flags ?? {} });
   const cards = allCards.filter((card) => isHubCardEnabled(card, isEnabled));
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
+  const activeHref = getActiveNavHref(
+    pathname,
+    cards.map((card) => card.href),
+  );
 
   return (
     <nav
@@ -40,7 +46,7 @@ export function HubSubNav({ hub }: Props) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="no-scrollbar -mb-px flex min-h-[2.75rem] overflow-x-auto">
           {cards.map((card) => {
-            const active = isActive(card.href);
+            const active = card.href === activeHref;
             return (
               <Link
                 key={card.key}

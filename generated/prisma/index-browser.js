@@ -225,6 +225,8 @@ exports.Prisma.BusinessScalarFieldEnum = {
   status: 'status',
   onboardingComplete: 'onboardingComplete',
   localBusinessEnabled: 'localBusinessEnabled',
+  localPresence: 'localPresence',
+  areaServed: 'areaServed',
   allowAiCrawlers: 'allowAiCrawlers',
   sendAbandonedCheckoutEmails: 'sendAbandonedCheckoutEmails',
   featureFlags: 'featureFlags',

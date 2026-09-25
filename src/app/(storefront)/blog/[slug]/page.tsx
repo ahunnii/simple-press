@@ -11,9 +11,10 @@ import {
   buildBlogPostingSchema,
   buildBreadcrumbSchema,
 } from "~/lib/structured-data";
+import { collectGalleryIds } from "~/lib/tiptap/gallery-ids";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 
 import { getTemplate } from "../../_templates/registry";
@@ -73,8 +74,18 @@ export default async function PageView({ params }: Props) {
     { name: page.title, path: `/blog/${page.slug}` },
   ]);
 
+  // relatedPosts have their `content` nulled out above (see comment on
+  // RELATED_POSTS_CAP) — only the post actually being rendered can contain
+  // galleries to prefetch.
+  const galleryIds = collectGalleryIds(page.content);
+  await Promise.all(
+    galleryIds.map((galleryId) =>
+      api.gallery.getByIdPublic.prefetch(galleryId).catch(() => undefined),
+    ),
+  );
+
   return (
-    <>
+    <HydrateClient>
       <JsonLd data={[blogPostingSchema, breadcrumbSchema]} />
       <t.BlogPostPage
         page={page}
@@ -85,7 +96,7 @@ export default async function PageView({ params }: Props) {
           ? { featuredProducts: homepage?.products ?? [] }
           : {})}
       />
-    </>
+    </HydrateClient>
   );
 }
 

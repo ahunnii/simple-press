@@ -2,19 +2,18 @@ import { AlertTriangle } from "lucide-react";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
+import type { AnalyticsRange } from "~/server/api/routers/analytics";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 import { TrailHeader } from "../_components/trail-header";
 import { AnalyticsContent } from "./_components/analytics-content";
 import { RangeSelector } from "./_components/range-selector";
 
-type Range = "7d" | "30d" | "90d";
+const VALID_RANGES: AnalyticsRange[] = ["24h", "7d", "30d", "90d"];
 
-const VALID_RANGES: Range[] = ["7d", "30d", "90d"];
-
-function parseRange(raw: string | undefined): Range {
+function parseRange(raw: string | undefined): AnalyticsRange {
   if (raw && (VALID_RANGES as string[]).includes(raw)) {
-    return raw as Range;
+    return raw as AnalyticsRange;
   }
   return "30d";
 }
@@ -28,6 +27,53 @@ export default async function AnalyticsPage({ searchParams }: Props) {
   const range = parseRange(params.range);
 
   const flags = await getBusinessFlags();
+
+  // The Umami data calls swallow errors into empty results, so a broken
+  // service-account login would otherwise look like a store with no traffic.
+  // Check the login first and, if it fails, explain that instead of
+  // rendering zeros (and skip the data calls that would fail the same way).
+  const connection = await api.analytics.connection().catch(() => null);
+  const connectionStatus = connection?.configured ? connection.status : "ok";
+
+  if (connectionStatus !== "ok") {
+    return (
+      <>
+        <TrailHeader breadcrumbs={[{ label: "Analytics" }]} />
+        <div className="admin-container">
+          <div className="admin-header">
+            <div>
+              <h1>Analytics</h1>
+              <p>Visitor and traffic data for your storefront</p>
+            </div>
+            <RangeSelector current={range} />
+          </div>
+
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            {connectionStatus === "auth_failed" ? (
+              <>
+                <AlertTitle>Analytics can&apos;t connect</AlertTitle>
+                <AlertDescription>
+                  SimplePress couldn&apos;t sign in to the analytics service,
+                  so your stats can&apos;t be shown right now. Your storefront
+                  is still recording visits, so no data is lost. This is on
+                  our side. Contact support if it lasts more than a few hours.
+                </AlertDescription>
+              </>
+            ) : (
+              <>
+                <AlertTitle>Analytics is temporarily unavailable</AlertTitle>
+                <AlertDescription>
+                  The analytics service isn&apos;t responding right now. Try
+                  refreshing in a few minutes.
+                </AlertDescription>
+              </>
+            )}
+          </Alert>
+        </div>
+      </>
+    );
+  }
 
   // Promise.allSettled (not Promise.all) so a single failing Umami call
   // (outage, misconfiguration, network error) can't throw and crash the
@@ -103,6 +149,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
         )}
 
         <AnalyticsContent
+          range={range}
           overview={overview}
           topPages={topPages}
           topReferrers={topReferrers}

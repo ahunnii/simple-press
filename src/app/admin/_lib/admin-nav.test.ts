@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isPathAllowedForRole } from "./admin-nav";
+import { getActiveNavHref, isPathAllowedForRole } from "./admin-nav";
 
 describe("isPathAllowedForRole", () => {
   describe("OWNER role", () => {
@@ -99,5 +99,60 @@ describe("isPathAllowedForRole", () => {
     it("allows access to /admin/anything", () => {
       expect(isPathAllowedForRole("/admin/anything", null)).toBe(true);
     });
+  });
+});
+
+describe("getActiveNavHref", () => {
+  it("picks the more specific href when both a hub and its child match", () => {
+    expect(
+      getActiveNavHref("/admin/content/pages", [
+        "/admin/content",
+        "/admin/content/pages",
+      ]),
+    ).toBe("/admin/content/pages");
+  });
+
+  it("falls back to the hub href when no child href matches", () => {
+    expect(
+      getActiveNavHref("/admin/content/seo", [
+        "/admin/content",
+        "/admin/content/pages",
+      ]),
+    ).toBe("/admin/content");
+  });
+
+  it("matches a deeper sub-route to its nearest ancestor href", () => {
+    expect(
+      getActiveNavHref("/admin/content/pages/abc/edit", [
+        "/admin/content",
+        "/admin/content/pages",
+      ]),
+    ).toBe("/admin/content/pages");
+  });
+
+  it("does not treat a href as a prefix match without a segment boundary", () => {
+    expect(
+      getActiveNavHref("/admin/contentfoo", [
+        "/admin/content",
+        "/admin/content/pages",
+      ]),
+    ).toBeNull();
+  });
+
+  it("never matches an external href, even against an unusual pathname", () => {
+    expect(
+      getActiveNavHref("https://help.example.com", [
+        "https://help.example.com",
+      ]),
+    ).toBeNull();
+  });
+
+  it("is independent of href order — the longer href still wins when listed first", () => {
+    expect(
+      getActiveNavHref("/admin/content/pages", [
+        "/admin/content/pages",
+        "/admin/content",
+      ]),
+    ).toBe("/admin/content/pages");
   });
 });

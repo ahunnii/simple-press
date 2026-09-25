@@ -25,6 +25,10 @@ import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { getEffectivePrice } from "~/lib/prices";
 import { firstNonBlank } from "~/lib/seo/blank";
+import {
+  normalizeAreaServed,
+  parseLocalPresence,
+} from "~/lib/seo/local-presence";
 import { resolveVariantPrice } from "~/lib/variant-price";
 import { youtubeEmbedUrl, youtubeWatchUrl } from "~/lib/youtube/parse";
 
@@ -513,6 +517,14 @@ export function buildCollectionSchema(
 
 interface BusinessForLocalBusiness extends CanonicalBusiness {
   name: string;
+  /**
+   * `"none" | "service_area" | "storefront"` — see `~/lib/seo/local-presence`.
+   * Parsed defensively (`parseLocalPresence`) so an unknown/legacy value
+   * degrades to "none" rather than throwing.
+   */
+  localPresence: string;
+  /** Owner-listed cities/regions served — normalized before emission. */
+  areaServed?: string[];
   businessAddress?: string | null;
   /**
    * Structured address parts (Business.addressStreet/City/State/PostalCode).
@@ -534,20 +546,30 @@ interface BusinessForLocalBusiness extends CanonicalBusiness {
 }
 
 /**
- * Build a schema.org Store (LocalBusiness subtype) object for the homepage.
+ * Build a schema.org LocalBusiness object for the homepage/contact page.
  *
- * Only emits optional fields when they are non-empty.
- * Callers are responsible for gating on `business.localBusinessEnabled` and
- * only rendering this schema when the business opts in.
+ * Only emits optional fields when they are non-empty. Callers are
+ * responsible for gating on `parseLocalPresence(business.localPresence) !==
+ * "none"` and only rendering this schema when the business opts in.
+ *
+ * - `storefront`: `@type: "Store"`, full PostalAddress (street included),
+ *   hours, etc. — the original "Show as a local business" behavior.
+ * - `service_area`: `@type: "LocalBusiness"`, PostalAddress limited to
+ *   city/state/ZIP (no street — a service-area business has no public
+ *   storefront to send customers to, and the legacy free-text
+ *   `businessAddress` is skipped for the same reason: it's a street
+ *   address). Address is only emitted when city or state is present.
  */
 export function buildLocalBusinessSchema(
   business: BusinessForLocalBusiness,
 ): Record<string, unknown> {
   const baseUrl = getCanonicalBaseUrl(business);
+  const mode = parseLocalPresence(business.localPresence);
+  const areaServed = normalizeAreaServed(business.areaServed ?? []);
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
-    "@type": "Store",
+    "@type": mode === "storefront" ? "Store" : "LocalBusiness",
     name: business.name,
     url: baseUrl,
   };
@@ -560,25 +582,42 @@ export function buildLocalBusinessSchema(
     schema.email = business.supportEmail;
   }
 
-  const streetAddress = nonBlank(business.addressStreet);
   const addressLocality = nonBlank(business.addressCity);
   const addressRegion = nonBlank(business.addressState);
   const postalCode = nonBlank(business.addressPostalCode);
 
-  if (streetAddress || addressLocality || addressRegion || postalCode) {
+  if (mode === "storefront") {
+    const streetAddress = nonBlank(business.addressStreet);
+
+    if (streetAddress || addressLocality || addressRegion || postalCode) {
+      schema.address = {
+        "@type": "PostalAddress",
+        ...(streetAddress ? { streetAddress } : {}),
+        ...(addressLocality ? { addressLocality } : {}),
+        ...(addressRegion ? { addressRegion } : {}),
+        ...(postalCode ? { postalCode } : {}),
+        addressCountry: "US",
+      };
+    } else if (business.businessAddress) {
+      schema.address = {
+        "@type": "PostalAddress",
+        streetAddress: business.businessAddress,
+      };
+    }
+  } else if (addressLocality || addressRegion) {
+    // service_area: city/state only — never streetAddress, never the legacy
+    // free-text businessAddress (that field is a street address).
     schema.address = {
       "@type": "PostalAddress",
-      ...(streetAddress ? { streetAddress } : {}),
       ...(addressLocality ? { addressLocality } : {}),
       ...(addressRegion ? { addressRegion } : {}),
       ...(postalCode ? { postalCode } : {}),
       addressCountry: "US",
     };
-  } else if (business.businessAddress) {
-    schema.address = {
-      "@type": "PostalAddress",
-      streetAddress: business.businessAddress,
-    };
+  }
+
+  if (areaServed.length > 0) {
+    schema.areaServed = areaServed;
   }
 
   const logoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
