@@ -52,11 +52,21 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   inventory: {
     key: "inventory",
     label: "Inventory Management",
-    description: "Track stock levels and get low-stock alerts",
+    description:
+      "Track stock levels, manage standalone inventory items, and get low-stock alerts",
     category: "ecommerce",
     enabledByDefault: true,
     ownerCanToggle: true,
-    dependsOn: ["products"],
+  },
+  inventoryRentals: {
+    key: "inventoryRentals",
+    label: "Rental Check-outs",
+    description:
+      "Check rentable inventory items out to events or clients and check them back in, with due dates, partial returns, and damaged/lost tracking",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    dependsOn: ["inventory"],
   },
   coupons: {
     key: "coupons",
@@ -300,6 +310,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     label: "QuickBooks Invoicing",
     description:
       "Send deposit and final invoices through a connected QuickBooks Online company",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
+  invoices: {
+    key: "invoices",
+    label: "Invoices",
+    description:
+      "Build and send invoices, get paid by bank transfer, PayPal, Venmo, Cash App, Zelle, or cash",
     category: "ecommerce",
     enabledByDefault: false,
     ownerCanToggle: true,

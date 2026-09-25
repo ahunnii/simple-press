@@ -37,6 +37,17 @@ const NETWORKS = [
   { key: "youtube", label: "YouTube", Icon: YouTubeIcon },
 ] as const;
 
+/**
+ * True when `BambooSocialIcons` would render at least one link — i.e. the same
+ * non-empty-href test it runs internally, over the same known networks. Lets a
+ * caller render chrome that only makes sense beside the row (a divider).
+ */
+export function hasBambooSocialLinks(
+  socialLinks: BambooSocialLinks | undefined,
+): boolean {
+  return NETWORKS.some(({ key }) => !!socialLinks?.[key]?.trim());
+}
+
 type BambooSocialIconsProps = {
   socialLinks: BambooSocialLinks | undefined;
   /** Class list for the wrapping row. */

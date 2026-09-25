@@ -154,6 +154,12 @@ export interface ExportedBaseInventoryUnit {
   lowInventoryThreshold: number | null;
   allowBackorders: boolean;
   // inventoryQty / reservedQty / *AlertSent excluded
+  /** Optional: absent in files exported before this field existed. */
+  itemType?: "stock" | "rental";
+  sku?: string | null;
+  category?: string | null;
+  storageLocation?: string | null;
+  unitCostCents?: number | null;
 }
 
 export interface ExportedCollection {

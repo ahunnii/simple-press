@@ -27,6 +27,12 @@ import {
 import { resolveFields } from "..";
 import { BambooPageHero } from "../shared/bamboo-page-hero";
 import { BambooWaveDivider } from "../shared/bamboo-wave-divider";
+import {
+  BambooWaveLeaves,
+  BambooWaveSprig,
+  BAND_WAVE_SPRIG_ROOT,
+  BAND_WAVE_SPRIG_SIZE,
+} from "../shared/bamboo-wave-leaves";
 
 // Eyebrow-over-serif-h2 rhythm (docs/templates/bamboo/design.md "Section
 // rhythm"). Section eyebrows below are decorative labels -- not bound to any
@@ -410,11 +416,18 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
         "bamboo",
         "about.cta",
       ) && (
-        <section {...sectionGroupAttr("about", "cta")}>
+        <section
+          {...sectionGroupAttr("about", "cta")}
+          className="relative overflow-x-clip"
+        >
           {/* Top wave only -- the preceding Detroit section is cream, so the
               divider's transparent-above area composites correctly; the
-              footer brings its own lip below, so no bottom wave here. */}
-          <BambooWaveDivider className="-mb-px h-14 md:h-24" />
+              footer brings its own lip below, so no bottom wave here. The
+              vivid hairline line matches the value band. */}
+          <BambooWaveDivider
+            variant="hairline"
+            className="-mb-px h-14 md:h-24"
+          />
           <div className="bg-gradient-to-b from-[var(--bam-forest)] to-[var(--bam-forest-deep)] py-20 md:py-28">
             <ScaleIn>
               <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 px-4 text-center">
@@ -469,6 +482,20 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
               </div>
             </ScaleIn>
           </div>
+
+          {/* Wave sprigs rising from the top wave into the Detroit section's
+              bottom padding (py-16 md:py-20), which is deeper than their
+              ~32px rise, so they never reach the forest card. */}
+          <BambooWaveLeaves className="z-[2]">
+            <BambooWaveSprig
+              side="left"
+              className={`${BAND_WAVE_SPRIG_ROOT.left} ${BAND_WAVE_SPRIG_SIZE}`}
+            />
+            <BambooWaveSprig
+              side="right"
+              className={`${BAND_WAVE_SPRIG_ROOT.right} ${BAND_WAVE_SPRIG_SIZE}`}
+            />
+          </BambooWaveLeaves>
         </section>
       )}
     </PageTransition>

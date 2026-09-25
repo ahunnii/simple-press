@@ -438,6 +438,34 @@ export async function importStoreBundle(args: {
   // ── 3d. BaseInventoryUnit — match by (businessId, name) → baseUnitMap
   const baseUnitMap = new Map<string, string>(); // exportId → newId
 
+  // Resolves the sku to write for a pool: drops it (with a warning) instead
+  // of failing the import when another pool in the target business already
+  // has that sku (case-insensitive). `currentPoolId` excludes the pool being
+  // updated from its own collision check.
+  async function resolvePoolSku(
+    unitName: string,
+    sku: string | null | undefined,
+    currentPoolId: string | null,
+  ): Promise<string | null> {
+    const trimmed = sku?.trim();
+    if (!trimmed) return null;
+    const collision = await db.baseInventoryUnit.findFirst({
+      where: {
+        businessId: targetBusinessId,
+        sku: { equals: trimmed, mode: "insensitive" },
+        ...(currentPoolId ? { id: { not: currentPoolId } } : {}),
+      },
+      select: { id: true },
+    });
+    if (collision) {
+      result.warnings.push(
+        `BaseInventoryUnit "${unitName}": sku "${trimmed}" already in use in target business — dropped`,
+      );
+      return null;
+    }
+    return trimmed;
+  }
+
   for (const unit of content.baseInventoryUnits) {
     try {
       const existing = await db.baseInventoryUnit.findFirst({
@@ -446,17 +474,36 @@ export async function importStoreBundle(args: {
       });
       let newId: string;
       if (existing) {
+        const resolvedSku =
+          unit.sku !== undefined
+            ? await resolvePoolSku(unit.name, unit.sku, existing.id)
+            : undefined;
         await db.baseInventoryUnit.update({
           where: { id: existing.id },
           data: {
             description: unit.description ?? null,
             lowInventoryThreshold: unit.lowInventoryThreshold ?? null,
             allowBackorders: unit.allowBackorders,
+            ...(unit.itemType !== undefined && { itemType: unit.itemType }),
+            ...(resolvedSku !== undefined && { sku: resolvedSku }),
+            ...(unit.category !== undefined && {
+              category: unit.category ?? null,
+            }),
+            ...(unit.storageLocation !== undefined && {
+              storageLocation: unit.storageLocation ?? null,
+            }),
+            ...(unit.unitCostCents !== undefined && {
+              unitCostCents: unit.unitCostCents ?? null,
+            }),
           },
         });
         newId = existing.id;
         track("BaseInventoryUnit", false);
       } else {
+        const resolvedSku =
+          unit.sku !== undefined
+            ? await resolvePoolSku(unit.name, unit.sku, null)
+            : null;
         const created = await db.baseInventoryUnit.create({
           data: {
             businessId: targetBusinessId,
@@ -464,6 +511,11 @@ export async function importStoreBundle(args: {
             description: unit.description ?? null,
             lowInventoryThreshold: unit.lowInventoryThreshold ?? null,
             allowBackorders: unit.allowBackorders,
+            ...(unit.itemType !== undefined && { itemType: unit.itemType }),
+            sku: resolvedSku,
+            category: unit.category ?? null,
+            storageLocation: unit.storageLocation ?? null,
+            unitCostCents: unit.unitCostCents ?? null,
           },
         });
         newId = created.id;

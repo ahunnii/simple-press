@@ -212,6 +212,15 @@ export const subscriptionManageLimiter = makeLazy({
   keyPrefix: "rl:subscription-manage",
 });
 
+// 60 hosted invoice-page loads (`invoice.getByToken`) per 15 minutes per IP+host.
+// Generous on purpose: it's a read behind an HMAC-signed token, and a customer
+// may reload while copying account numbers; this only blunts scripted probing.
+export const invoiceViewLimiter = makeLazy({
+  points: 60,
+  duration: 900,
+  keyPrefix: "rl:invoice-view",
+});
+
 // 20 loyalty rewards customer actions (social-follow claims, redemptions) per 15 minutes per IP+host
 export const loyaltyActionLimiter = makeLazy({
   points: 20,

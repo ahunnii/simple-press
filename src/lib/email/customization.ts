@@ -136,6 +136,22 @@ export const CUSTOMIZABLE_EMAILS = [
     defaultSubject: "Your subscription status has changed",
     supportsIntro: false,
   },
+  {
+    id: "invoice-sent",
+    label: "Invoice Sent",
+    description:
+      "Sent to the customer when you send an invoice, with a link to view and pay it.",
+    defaultSubject: "Invoice {invoiceNumber} from {businessName}",
+    supportsIntro: false,
+  },
+  {
+    id: "invoice-reminder",
+    label: "Invoice Reminder",
+    description:
+      "Sent when you manually remind a customer about an outstanding invoice.",
+    defaultSubject: "Reminder: invoice {invoiceNumber} from {businessName}",
+    supportsIntro: false,
+  },
 ] as const satisfies readonly CustomizableEmail[];
 
 export type CustomizableEmailId = (typeof CUSTOMIZABLE_EMAILS)[number]["id"];
@@ -173,17 +189,22 @@ export const emailOverridesSchema = z.record(
 export type EmailOverrides = z.infer<typeof emailOverridesSchema>;
 
 /**
- * Replace `{orderNumber}` / `{businessName}` tokens in an owner-provided
- * subject pattern.
+ * Replace `{orderNumber}` / `{businessName}` / `{invoiceNumber}` tokens in an
+ * owner-provided subject pattern.
  */
 export function applySubjectTemplate(
   subject: string,
-  vars: { orderNumber?: number | string; businessName?: string },
+  vars: {
+    orderNumber?: number | string;
+    businessName?: string;
+    invoiceNumber?: string;
+  },
 ): string {
   return subject
     .replaceAll(
       "{orderNumber}",
       vars.orderNumber !== undefined ? String(vars.orderNumber) : "",
     )
-    .replaceAll("{businessName}", vars.businessName ?? "");
+    .replaceAll("{businessName}", vars.businessName ?? "")
+    .replaceAll("{invoiceNumber}", vars.invoiceNumber ?? "");
 }

@@ -190,10 +190,16 @@ export default async function AdminDashboardPage() {
         .slice(0, 5);
     }),
 
-    // Low stock pools — pools with inventory at or near zero
+    // Low stock pools — pools with inventory at or near zero. Scoped to
+    // `itemType: "stock"`: a rental item sitting at "2 on hand" can simply
+    // mean the other 8 are out with customers (see `outQty` on
+    // `baseInventoryUnit.items`), not that the business is short. Every
+    // pool that existed before rentals shipped is "stock" by default, so
+    // this is a no-op for any business without rental items.
     db.baseInventoryUnit.findMany({
       where: {
         businessId: business.id,
+        itemType: "stock",
         inventoryQty: { lte: 10 },
       },
       orderBy: { inventoryQty: "asc" },

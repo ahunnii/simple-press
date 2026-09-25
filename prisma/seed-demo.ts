@@ -153,6 +153,7 @@ async function main() {
     blog: true,
     services: true,
     reviews: true,
+    invoices: true,
     analytics: true,
   };
 

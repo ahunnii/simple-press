@@ -3,7 +3,15 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BookUser, Lock, Package, Repeat, Settings } from "lucide-react";
+import {
+  Bell,
+  BookUser,
+  FileText,
+  Lock,
+  Package,
+  Repeat,
+  Settings,
+} from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -11,14 +19,32 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { DreamH1 } from "../shared/dream-h1";
 import { DreamReveal } from "../shared/dream-reveal";
 
-const BASE_NAV_ITEMS = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof Package;
+  flag?: string;
+};
+
+const BASE_NAV_ITEMS: NavItem[] = [
   { href: "/account/orders", label: "Orders", icon: Package },
-  { href: "/account/subscriptions", label: "Subscriptions", icon: Repeat },
+  {
+    href: "/account/subscriptions",
+    label: "Subscriptions",
+    icon: Repeat,
+    flag: "subscriptions",
+  },
+  {
+    href: "/account/invoices",
+    label: "Invoices",
+    icon: FileText,
+    flag: "invoices",
+  },
   { href: "/account/settings", label: "Settings", icon: Settings },
   { href: "/account/security", label: "Security", icon: Lock },
   { href: "/account/address-book", label: "Address Book", icon: BookUser },
   { href: "/account/preferences", label: "Preferences", icon: Bell },
-] as const;
+];
 
 type Props = {
   children: ReactNode;
@@ -40,9 +66,7 @@ export function DreamAccountLayout({ children, heading, breadcrumb }: Props) {
   const flags = useStorefrontFlags();
 
   const navItems = BASE_NAV_ITEMS.filter(
-    (item) =>
-      item.href !== "/account/subscriptions" ||
-      flags.isEnabled("subscriptions"),
+    (item) => !item.flag || flags.isEnabled(item.flag),
   );
 
   return (

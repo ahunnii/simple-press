@@ -22,6 +22,7 @@ import { NavSecondary } from "~/app/admin/_components/nav-secondary";
 import { NavUser } from "~/app/admin/_components/nav-user";
 import {
   isNavItemAllowedForRole,
+  isNavFeatureEnabled,
   NAV_ITEMS,
   NAV_SECTION_LABELS,
 } from "~/app/admin/_lib/admin-nav";
@@ -98,9 +99,9 @@ export function AppSidebar({
       const items = NAV_ITEMS.filter((item) => {
         if (item.section !== section) return false;
         if (!isNavItemAllowedForRole(item, roleForFiltering)) return false;
-        if (!item.featureKey) return true;
-        return (
-          isEnabled(item.featureKey) && !isDisabledByDependency(item.featureKey)
+        return isNavFeatureEnabled(
+          item,
+          (key) => isEnabled(key) && !isDisabledByDependency(key),
         );
       }).map((item) => ({
         title: item.title,

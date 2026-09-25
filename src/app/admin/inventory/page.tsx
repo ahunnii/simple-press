@@ -1,5 +1,10 @@
+import Link from "next/link";
+import { Info } from "lucide-react";
+
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 import { TrailHeader } from "../_components/trail-header";
 import {
@@ -7,8 +12,10 @@ import {
   matchesAllTokens,
   pickParam,
 } from "../_lib/table-query";
+import { InventoryImportExport } from "./_components/inventory-import-export";
+import { InventoryTabs } from "./_components/inventory-tabs";
+import { ItemsTable } from "./_components/items-table";
 import { PoolCreateButton } from "./_components/pool-create-button";
-import { PoolsTable } from "./_components/pools-table";
 import { isLowStock, isOutOfStock, isUnavailable } from "./_lib/stock-state";
 
 type Props = {
@@ -16,6 +23,8 @@ type Props = {
     search?: string;
     stock?: string;
     availability?: string;
+    type?: string;
+    category?: string;
     sort?: string;
     page?: string;
   }>;
@@ -24,12 +33,13 @@ type Props = {
 /** Rows per page. Matches Collections — the density the admin tables settled on. */
 const PAGE_SIZE = 25;
 
-/** Pools have no `published` flag, so Collections' status filter doesn't map.
+/** Items have no `published` flag, so Collections' status filter doesn't map.
  *  What an owner scans this page for is stock state. */
 const VALID_STOCK = ["all", "low", "out"] as const;
 /** Separate axis from `VALID_STOCK` — see `AVAILABILITY_FILTER` in
- *  pools-table.tsx for why this isn't a third stock value. */
+ *  items-table.tsx for why this isn't a third stock value. */
 const VALID_AVAILABILITY = ["all", "unavailable"] as const;
+const VALID_TYPE = ["all", "stock", "rental"] as const;
 const VALID_SORT = [
   "name-asc",
   "name-desc",
@@ -41,15 +51,19 @@ const VALID_SORT = [
   "sold-asc",
   "products-desc",
   "products-asc",
+  "sku-asc",
+  "category-asc",
 ] as const;
 
 type ValidStock = (typeof VALID_STOCK)[number];
 type ValidAvailability = (typeof VALID_AVAILABILITY)[number];
+type ValidType = (typeof VALID_TYPE)[number];
 type ValidSort = (typeof VALID_SORT)[number];
 
 const DEFAULT_STOCK: ValidStock = "all";
 const DEFAULT_AVAILABILITY: ValidAvailability = "all";
-/** The router's own `orderBy: { name: "asc" }`, named rather than implied. */
+const DEFAULT_TYPE: ValidType = "all";
+/** The router's own `orderBy: [{ name: "asc" }, { id: "asc" }]`, named rather than implied. */
 const DEFAULT_SORT: ValidSort = "name-asc";
 
 export default async function InventoryPage({ searchParams }: Props) {
@@ -62,36 +76,57 @@ export default async function InventoryPage({ searchParams }: Props) {
     VALID_AVAILABILITY,
     DEFAULT_AVAILABILITY,
   );
+  const type = pickParam(params.type, VALID_TYPE, DEFAULT_TYPE);
   const sort = pickParam(params.sort, VALID_SORT, DEFAULT_SORT);
 
-  const pools = await api.baseInventoryUnit
-    .list()
-    .catch(rethrowTrpcForErrorBoundary);
+  const [{ items, categories, canManage }, flags] = await Promise.all([
+    api.baseInventoryUnit.items().catch(rethrowTrpcForErrorBoundary),
+    getBusinessFlags(),
+  ]);
+  const rentalsEnabled = flags.isEnabled("inventoryRentals");
 
-  // `list` intentionally stays input-free — /admin/products/new and
-  // /admin/products/[id] both call it for the base-unit picker and want every
-  // pool — so the narrowing happens here instead.
-  //
-  // It also has to happen here: the stock filter and the units-sold sort read
-  // `sales`, which only exists once the router has merged its `inventoryHistory`
-  // groupBy onto each pool. Neither is expressible as a Prisma `where`/`orderBy`.
-  const matching = pools.filter((pool) => {
-    // Description is meaningful on a pool ("6 rolls per case"), so search covers
-    // it as well as the name. Tokenized via `matchesAllTokens` so a multi-word
-    // query can match across the two fields rather than needing to appear
-    // whole in a single one.
+  // Category is the one filter whose valid set isn't known until the items
+  // come back (it's every distinct category in use), so it's whitelisted
+  // here instead of against a static tuple.
+  const category =
+    params.category && categories.includes(params.category)
+      ? params.category
+      : "all";
+
+  // `items()` intentionally stays a single unfiltered fetch — the stock
+  // filter and the units-sold sort read `sales`/`outQty`, which only exist
+  // once the router has merged its aggregates onto each item. Neither is
+  // expressible as a Prisma `where`/`orderBy`. See `buildTablePage`'s doc for
+  // the in-memory filter/sort/paginate pipeline this and Collections share.
+  const matching = items.filter((item) => {
+    // Description, SKU, category and storage location are all meaningful
+    // ways an owner might search for an item ("throne", "CHR-GLD-01",
+    // "Seating", "Warehouse B") — tokenized via `matchesAllTokens` so a
+    // multi-word query can match across fields rather than needing to
+    // appear whole in a single one.
     const matchesSearch = matchesAllTokens(search, [
-      pool.name,
-      pool.description,
+      item.name,
+      item.description,
+      item.sku,
+      item.category,
+      item.storageLocation,
     ]);
     const matchesStock =
       stock === "all" ||
-      (stock === "low" && isLowStock(pool)) ||
-      (stock === "out" && isOutOfStock(pool));
+      (stock === "low" && isLowStock(item)) ||
+      (stock === "out" && isOutOfStock(item));
     const matchesAvailability =
       availability === "all" ||
-      (availability === "unavailable" && isUnavailable(pool));
-    return matchesSearch && matchesStock && matchesAvailability;
+      (availability === "unavailable" && isUnavailable(item));
+    const matchesType = type === "all" || item.itemType === type;
+    const matchesCategory = category === "all" || item.category === category;
+    return (
+      matchesSearch &&
+      matchesStock &&
+      matchesAvailability &&
+      matchesType &&
+      matchesCategory
+    );
   });
 
   // Primary ordering only: non-name sorts fall back to name A–Z here, and
@@ -137,6 +172,19 @@ export default async function InventoryPage({ searchParams }: Props) {
             a._count.products - b._count.products ||
             a.name.localeCompare(b.name)
           );
+        case "sku-asc":
+          // No-SKU rows sort after every SKU'd row, then by name.
+          if (!a.sku && !b.sku) return a.name.localeCompare(b.name);
+          if (!a.sku) return 1;
+          if (!b.sku) return -1;
+          return a.sku.localeCompare(b.sku) || a.name.localeCompare(b.name);
+        case "category-asc":
+          if (!a.category && !b.category) return a.name.localeCompare(b.name);
+          if (!a.category) return 1;
+          if (!b.category) return -1;
+          return (
+            a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+          );
         case "name-asc":
         default:
           return a.name.localeCompare(b.name);
@@ -144,34 +192,77 @@ export default async function InventoryPage({ searchParams }: Props) {
     },
   });
 
+  // When rentals is off, the Check-outs tab and Out/Total column disappear —
+  // but a check-out created while the flag was on can still leave units
+  // outstanding. This is the one place that state stays visible: a link back
+  // to the (still-readable) checkouts list, so nothing is silently stranded.
+  const outstandingWhileRentalsOff = rentalsEnabled
+    ? 0
+    : items.reduce((sum, item) => sum + item.outQty, 0);
+
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Inventory" }]} />
       <div className="admin-container">
+        <InventoryTabs rentalsEnabled={rentalsEnabled} />
+
         {/* `gap-4`: `admin-header` itself has no gap, and this page's
-            description is long enough to run right into the create button. */}
-        <div className="admin-header gap-4">
+            description is long enough to run right into the create button.
+            `flex-col`/`sm:flex-row`: `admin-header` doesn't wrap, and three
+            header buttons (Import, Export, New item) beside even a one-line
+            description clip "New item" off-screen on a phone — stack title
+            and buttons instead of changing the shared class. */}
+        <div className="admin-header flex-col items-start gap-4 sm:flex-row sm:items-center">
           <div>
             <h1>Inventory</h1>
             <p>
-              Manage shared inventory pools. Products can draw from a base unit
-              — for example, a &ldquo;4-pack Roll&rdquo; pool powers your
-              24-pack (6 rolls) and 48-pack (12 rolls) listings.
+              Track standalone stock and rentals, and link products to share an
+              item&apos;s stock.
             </p>
           </div>
-          {/* Collections' create action is a <Link>, so it can live in this
-              server component directly. Inventory's opens a dialog, so the
-              button and its open state ship together as one client island. */}
-          <PoolCreateButton label="New Base Unit" />
+          {canManage && (
+            <div className="flex flex-wrap items-center gap-2">
+              <InventoryImportExport />
+              {/* Collections' create action is a <Link>, so it can live in this
+                  server component directly. Inventory's opens a dialog, so the
+                  button and its open state ship together as one client island. */}
+              <PoolCreateButton
+                label="New item"
+                categories={categories}
+                rentalsEnabled={rentalsEnabled}
+              />
+            </div>
+          )}
         </div>
 
-        <PoolsTable
-          pools={pageItems}
-          totalPools={pools.length}
+        {outstandingWhileRentalsOff > 0 && (
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertTitle>
+              {outstandingWhileRentalsOff} unit
+              {outstandingWhileRentalsOff === 1 ? " is" : "s are"} still checked
+              out
+            </AlertTitle>
+            <AlertDescription>
+              Rental Check-outs is off, but earlier check-outs are still open.{" "}
+              <Link href="/admin/inventory/checkouts">
+                Check them in from the check-outs list
+              </Link>
+              .
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <ItemsTable
+          items={pageItems}
+          totalItems={items.length}
           totalCount={totalCount}
           totalPages={totalPages}
           page={page}
           pageSize={PAGE_SIZE}
+          categories={categories}
+          canManage={canManage}
+          rentalsEnabled={rentalsEnabled}
         />
       </div>
     </>

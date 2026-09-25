@@ -89,6 +89,28 @@ const homepageHeroData: TemplateField[] = [
     defaultValue: "",
   },
   {
+    key: "bamboo.homepage.hero-show-full-photo",
+    label: "Show Full Background Photo",
+    description:
+      "When on, removes the cream wash behind the hero text so the entire background photo shows. Check that the text is still easy to read on your photo. Only applies when a background image is set.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+  {
+    key: "bamboo.homepage.hero-wash-strength",
+    label: "Background Wash Strength",
+    description:
+      "0-100, how strongly the cream wash fades the photo behind the hero text; 100 is the standard look, lower shows more of the photo; ignored when Show Full Background Photo is on.",
+    type: "number",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "100",
+  },
+  {
     key: "bamboo.homepage.hero-description",
     label: "Homepage Hero Description",
     description: "Short paragraph below the hero headline.",

@@ -608,6 +608,20 @@ export const customerRouter = createTRPCRouter({
           },
         });
 
+        // Invoices keep their money columns (they are financial records the
+        // business must retain) but drop every copy of the customer's
+        // contact details. `customerName` is non-null on Invoice, so it gets
+        // the same "Anonymized" placeholder the shipping-address scrub uses.
+        await tx.invoice.updateMany({
+          where: { businessId, customerId: input.id },
+          data: {
+            customerName: "Anonymized",
+            customerEmail: placeholder,
+            customerPhone: null,
+            billingAddress: null,
+          },
+        });
+
         await tx.testimonial.updateMany({
           where: { customerId: input.id },
           data: {

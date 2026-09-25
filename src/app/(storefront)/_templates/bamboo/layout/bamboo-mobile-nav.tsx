@@ -18,7 +18,11 @@ import {
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
-import { BambooSocialIcons, readBambooSocialLinks } from "./bamboo-social-icons";
+import { BambooLeafSprig } from "../shared/bamboo-leaf-sprig";
+import {
+  BambooSocialIcons,
+  readBambooSocialLinks,
+} from "./bamboo-social-icons";
 
 type NavChild = { label: string; href: string; external?: boolean };
 type NavLink = {
@@ -76,9 +80,9 @@ const activeRule = (
 );
 
 /** Smaller sans styling for expanded child links. */
-const childLinkBase =
-  "block py-2 pl-1 text-lg transition-colors";
-const childLinkIdle = "text-[var(--bam-cream)]/85 hover:text-[var(--bam-gold-soft)]";
+const childLinkBase = "block py-2 pl-1 text-lg transition-colors";
+const childLinkIdle =
+  "text-[var(--bam-cream)]/85 hover:text-[var(--bam-gold-soft)]";
 const childLinkActive = "text-[var(--bam-gold-soft)]";
 
 /**
@@ -145,7 +149,7 @@ export function BambooMobileNav({
         }}
         className={cn(
           "flex w-full flex-col gap-0 border-l-0 bg-[var(--bam-forest)] p-0 sm:max-w-none",
-          "[&>button]:bg-transparent [&>button]:text-[var(--bam-cream)] [&>button]:opacity-80 [&>button]:transition-colors [&>button]:data-[state=open]:bg-transparent [&>button]:hover:bg-[var(--bam-forest-deep)] [&>button]:hover:text-[var(--bam-gold-soft)] [&>button]:hover:opacity-100 [&>button]:focus-visible:ring-[var(--bam-gold-soft)]",
+          "[&>button]:bg-transparent [&>button]:text-[var(--bam-cream)] [&>button]:opacity-80 [&>button]:transition-colors [&>button]:hover:bg-[var(--bam-forest-deep)] [&>button]:hover:text-[var(--bam-gold-soft)] [&>button]:hover:opacity-100 [&>button]:focus-visible:ring-[var(--bam-gold-soft)] [&>button]:data-[state=open]:bg-transparent",
         )}
       >
         {/* Local entrance keyframe + a reduced-motion guard for the per-item
@@ -174,6 +178,18 @@ export function BambooMobileNav({
           }
         `}</style>
 
+        {/* Corner sprig, bottom-right: the nav bar's top-left sprig answered
+            from the opposite corner. `-z-[1]` paints it behind every link
+            and control but above the sheet's own forest background (the
+            fixed, z-indexed SheetContent is the stacking context). The
+            bottom block's content is left-aligned and narrow, so the sprig
+            keeps to the empty right side; sized per breakpoint so it never
+            reaches the tagline, socials or auth pair. */}
+        <BambooLeafSprig
+          flip
+          className="absolute right-0 bottom-0 -z-[1] w-24 opacity-80 min-[375px]:w-36 sm:w-48"
+        />
+
         {/* Top row — brand cluster, pinned */}
         <div className="shrink-0 px-6 pt-12 pr-14 pb-6 sm:px-8 sm:pr-16">
           <SheetTitle className="flex items-center gap-3 text-left text-lg font-normal text-[var(--bam-cream)]">
@@ -186,7 +202,7 @@ export function BambooMobileNav({
                   alt=""
                   fill
                   sizes="40px"
-                  className="object-contain p-1.5"
+                  className="object-contain p-0.5"
                 />
               ) : (
                 <Leaf
@@ -251,7 +267,9 @@ export function BambooMobileNav({
                           key={child.href}
                           href={child.href}
                           target={child.external ? "_blank" : undefined}
-                          rel={child.external ? "noopener noreferrer" : undefined}
+                          rel={
+                            child.external ? "noopener noreferrer" : undefined
+                          }
                           onClick={() => onOpenChange(false)}
                           aria-current={
                             pathname === child.href ? "page" : undefined

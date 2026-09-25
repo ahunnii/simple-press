@@ -21,6 +21,7 @@ import {
 import {
   HUB_CARDS,
   isHubCardEnabled,
+  isNavFeatureEnabled,
   isNavItemAllowedForRole,
   NAV_ITEMS,
   PALETTE_ACTIONS,
@@ -93,7 +94,7 @@ export function AdminCommandPalette({
       PALETTE_ACTIONS.filter(
         (a) =>
           isNavItemAllowedForRole(a, roleForFiltering) &&
-          (!a.featureKey || isEnabled(a.featureKey)),
+          isNavFeatureEnabled(a, isEnabled),
       ),
     [roleForFiltering, isEnabled],
   );
@@ -105,7 +106,7 @@ export function AdminCommandPalette({
         if (item.section === "platform")
           return session?.user.platformRole === "PLATFORM_ADMIN";
         if (!isNavItemAllowedForRole(item, roleForFiltering)) return false;
-        return !item.featureKey || isEnabled(item.featureKey);
+        return isNavFeatureEnabled(item, isEnabled);
       }),
     [roleForFiltering, isEnabled, session?.user.platformRole],
   );

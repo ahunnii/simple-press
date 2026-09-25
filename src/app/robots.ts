@@ -26,6 +26,7 @@ const AI_CRAWLERS = [
 const DISALLOWED_PATHS = [
   "/admin",
   "/api",
+  "/invoice",
   "/platform",
   "/cart",
   "/checkout",

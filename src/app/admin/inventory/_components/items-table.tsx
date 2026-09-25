@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
+  ArrowLeftRight,
   Edit,
   Eye,
   MoreVertical,
   Package,
+  PackageMinus,
+  PackagePlus,
   Search,
   Trash,
 } from "lucide-react";
@@ -16,6 +19,7 @@ import { toast } from "sonner";
 
 import type { AdminFilterDef } from "../../_components/admin-filters";
 import type { RouterOutputs } from "~/trpc/react";
+import { formatPrice } from "~/lib/prices";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -27,12 +31,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import {
@@ -49,6 +55,7 @@ import {
   isLowStock,
   isOutOfStock,
   isUnavailable,
+  totalOwned,
   unavailableMessage,
 } from "../_lib/stock-state";
 import { AdminEmpty } from "../../_components/admin-empty";
@@ -65,36 +72,38 @@ import {
   dismissLoadingToast,
   loadingToast,
 } from "../../_lib/admin-mutation-toast";
+import { MoveStockDialog } from "./move-stock-dialog";
 import { PoolAdjustInventory } from "./pool-adjust-inventory";
 import { PoolCreateButton } from "./pool-create-button";
 import { PoolDialog } from "./pool-dialog";
 
-type Pool = RouterOutputs["baseInventoryUnit"]["list"][number];
+type Item = RouterOutputs["baseInventoryUnit"]["items"]["items"][number];
 
 type Props = {
   /** The current page slice only — filtering/sorting/paging happen server-side. */
-  pools: Pool[];
-  /** Unfiltered total — distinguishes "no base units yet" from "no matches". */
-  totalPools: number;
+  items: Item[];
+  /** Unfiltered total — distinguishes "no items yet" from "no matches". */
+  totalItems: number;
   totalCount: number;
   totalPages: number;
   page: number;
   pageSize: number;
+  categories: string[];
+  canManage: boolean;
+  rentalsEnabled: boolean;
 };
 
 const BASE_PATH = "/admin/inventory";
-const ITEM_NOUN = { one: "base unit", many: "base units" } as const;
+const ITEM_NOUN = { one: "item", many: "items" } as const;
 
 // Aliased to the short names this file reads with.
 const TH = TABLE_HEAD;
 const TD = TABLE_CELL;
-/** Full-width padding, matching Services/Collections — see the TABLE_HEAD_TIGHT
- *  docblock for why the tight variant is reserved for checkbox columns now. */
 const TH_ACTIONS = TABLE_HEAD;
 const TD_ACTIONS = TABLE_CELL;
 
 /**
- * Deliberately NO AdminBulkBar: there is no bulk endpoint for pools, and
+ * Deliberately NO AdminBulkBar: there is no bulk endpoint for items, and
  * deleting one detaches every linked product and zeroes its stock. That is not
  * an operation to make available behind a checkbox and a single click. The
  * primitives are independently adoptable; this is the page that proves it.
@@ -104,7 +113,7 @@ const STOCK_FILTER: AdminFilterDef = {
   label: "Stock",
   defaultValue: "all",
   options: [
-    { value: "all", label: "All base units" },
+    { value: "all", label: "All items" },
     // "Low stock" includes out of stock — see the isLowStock note in page.tsx.
     { value: "low", label: "Low or out of stock" },
     { value: "out", label: "Out of stock" },
@@ -123,11 +132,22 @@ const AVAILABILITY_FILTER: AdminFilterDef = {
   label: "Availability",
   defaultValue: "all",
   options: [
-    { value: "all", label: "All base units" },
+    { value: "all", label: "All items" },
     {
       value: "unavailable",
       label: "Unsellable (reserved out)",
     },
+  ],
+};
+
+const TYPE_FILTER: AdminFilterDef = {
+  key: "type",
+  label: "Type",
+  defaultValue: "all",
+  options: [
+    { value: "all", label: "All types" },
+    { value: "stock", label: "Stock" },
+    { value: "rental", label: "Rental" },
   ],
 };
 
@@ -146,6 +166,8 @@ const SORT_FILTER: AdminFilterDef = {
     { value: "sold-asc", label: "Fewest units sold" },
     { value: "products-desc", label: "Most products" },
     { value: "products-asc", label: "Fewest products" },
+    { value: "sku-asc", label: "SKU A–Z" },
+    { value: "category-asc", label: "Category A–Z" },
   ],
 };
 
@@ -162,9 +184,9 @@ const SORT_FILTER: AdminFilterDef = {
  * warning treatment below instead, the same way oversell events do — a
  * distinct signal that never recolours the primary number.
  */
-function qtyTone(pool: Pool) {
-  if (isOutOfStock(pool)) return `font-semibold ${DANGER_TEXT}`;
-  if (isLowStock(pool)) return `font-semibold ${WARNING_TEXT}`;
+function qtyTone(item: Item) {
+  if (isOutOfStock(item)) return `font-semibold ${DANGER_TEXT}`;
+  if (isLowStock(item)) return `font-semibold ${WARNING_TEXT}`;
   return "text-foreground";
 }
 
@@ -173,69 +195,101 @@ function oversellMessage(events: number) {
   return `${events} sale${events === 1 ? "" : "s"} could not be deducted — units sold may be understated`;
 }
 
-export function PoolsTable({
-  pools,
-  totalPools,
+export function ItemsTable({
+  items,
+  totalItems,
   totalCount,
   totalPages,
   page,
   pageSize,
+  categories,
+  canManage,
+  rentalsEnabled,
 }: Props) {
   const router = useRouter();
   const apiUtils = api.useUtils();
 
-  // `editPool` deliberately survives the close. Radix keeps dialog content mounted
-  // through its ~200ms exit animation, so clearing the pool at the same moment as
-  // the open flag makes the title flip to "New Base Unit" and the fields blank out
-  // while it fades. Holding the last pool until the next open replaces it keeps the
+  // `editItem` deliberately survives the close. Radix keeps dialog content mounted
+  // through its ~200ms exit animation, so clearing the item at the same moment as
+  // the open flag makes the title flip to "New item" and the fields blank out
+  // while it fades. Holding the last item until the next open replaces it keeps the
   // dialog showing what it was showing.
-  const [editPool, setEditPool] = useState<Pool | null>(null);
+  const [editItem, setEditItem] = useState<Item | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [adjustPool, setAdjustPool] = useState<Pool | null>(null);
+  const [adjustItem, setAdjustItem] = useState<Item | null>(null);
+  const [moveItem, setMoveItem] = useState<{
+    item: Item;
+    mode: "use" | "restock";
+  } | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteName, setDeleteName] = useState<string>("");
   // Threaded alongside deleteName for the same reason it isn't cleared on
-  // close: `pool._count.products` only exists on the row that was clicked, so
+  // close: `item._count.products` only exists on the row that was clicked, so
   // it has to be captured at that moment rather than looked up again later.
   const [deleteProductCount, setDeleteProductCount] = useState<number>(0);
 
-  // Deleting a pool detaches every linked product, so it can take a moment. The
-  // loading toast is the same one Collections and Services show — this table had
-  // none, which read as nothing happening until the row disappeared.
-  const deletePool = api.baseInventoryUnit.delete.useMutation({
-    onMutate: loadingToast("Deleting base unit…"),
+  // Deleting an item detaches every linked product, so it can take a moment. The
+  // loading toast is the same one Collections and Services show.
+  const deleteItem = api.baseInventoryUnit.delete.useMutation({
+    onMutate: loadingToast("Deleting item…"),
     onSuccess: (_data, _variables, context) => {
       dismissLoadingToast(context);
-      toast.success("Base unit deleted");
+      toast.success("Item deleted");
       setDeleteId(null);
       void apiUtils.baseInventoryUnit.invalidate();
       router.refresh();
     },
     onError: (err, _variables, context) => {
       dismissLoadingToast(context);
-      toast.error(err.message ?? "Failed to delete base unit");
+      toast.error(err.message ?? "Failed to delete item");
     },
   });
 
-  const hasPools = totalPools > 0;
-  const hasResults = pools.length > 0;
+  const hasItems = totalItems > 0;
+  const hasResults = items.length > 0;
+
+  const categoryFilter: AdminFilterDef = {
+    key: "category",
+    label: "Category",
+    defaultValue: "all",
+    options: [
+      { value: "all", label: "All categories" },
+      ...categories.map((category) => ({ value: category, label: category })),
+    ],
+  };
+
+  const filters: AdminFilterDef[] = [
+    STOCK_FILTER,
+    AVAILABILITY_FILTER,
+    TYPE_FILTER,
+    ...(categories.length > 0 ? [categoryFilter] : []),
+    SORT_FILTER,
+  ];
 
   return (
     <>
-      {!hasPools ? (
+      {!hasItems ? (
         <AdminEmpty
           icon={Package}
-          title="No base units yet"
-          description="Create your first base unit to start tracking shared inventory."
-          action={<PoolCreateButton label="Create Base Unit" />}
+          title="No inventory items yet"
+          description="Create your first item to start tracking stock — consumables you use up, or rentals you lend out and get back."
+          action={
+            canManage ? (
+              <PoolCreateButton
+                label="Create item"
+                categories={categories}
+                rentalsEnabled={rentalsEnabled}
+              />
+            ) : undefined
+          }
         />
       ) : (
         <>
           <AdminFilters
             basePath={BASE_PATH}
-            searchPlaceholder="Search base units…"
-            searchAriaLabel="Search base units by name or description"
-            filters={[STOCK_FILTER, AVAILABILITY_FILTER, SORT_FILTER]}
+            searchPlaceholder="Search items…"
+            searchAriaLabel="Search items by name, description, SKU, category, or location"
+            filters={filters}
             resultCount={totalCount}
             itemNoun={ITEM_NOUN}
           />
@@ -243,7 +297,7 @@ export function PoolsTable({
           {!hasResults ? (
             <AdminEmpty
               icon={Search}
-              title="No base units match your filters"
+              title="No items match your filters"
               // AdminEmpty renders its own "Try adjusting your search or
               // filters." line when `filtered` — don't say it twice.
               filtered
@@ -258,36 +312,78 @@ export function PoolsTable({
               <Card className={TABLE_CARD}>
                 <Table>
                   <TableCaption className="sr-only">
-                    Inventory base units
+                    Inventory items
                   </TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead scope="col" className={TH}>
+                      {/* min-w-[14rem]: without it "4-pack roll" and longer
+                          names wrap one word per line in the auto-layout
+                          table, since this column has no other pressure
+                          keeping it wide. */}
+                      <TableHead scope="col" className={`min-w-[14rem] ${TH}`}>
                         Name
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
+                        Type
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`hidden lg:table-cell ${TH}`}
+                      >
+                        Category
+                      </TableHead>
+                      {/* xl, not lg: with Category, On hand, Out/Total, Units
+                          sold and Products all already showing by lg, adding
+                          Location at the same breakpoint is what was pushing
+                          the actions column out of view at 1280–1535px. */}
+                      <TableHead
+                        scope="col"
+                        className={`hidden xl:table-cell ${TH}`}
+                      >
+                        Location
                       </TableHead>
                       {/* Never hidden at any breakpoint: the Adjust button lives
                           in this column, and it is the reason this page exists. */}
                       <TableHead scope="col" className={TH}>
-                        Current Qty
+                        On hand
                       </TableHead>
+                      {rentalsEnabled && (
+                        <TableHead
+                          scope="col"
+                          className={`hidden md:table-cell ${TH}`}
+                        >
+                          Out / Total
+                        </TableHead>
+                      )}
+                      {canManage && (
+                        <TableHead
+                          scope="col"
+                          className={`hidden 2xl:table-cell ${TH}`}
+                        >
+                          Unit cost
+                        </TableHead>
+                      )}
                       <TableHead
                         scope="col"
                         className={`hidden md:table-cell ${TH}`}
                       >
                         Units sold
                       </TableHead>
-                      <TableHead
-                        scope="col"
-                        className={`hidden md:table-cell ${TH}`}
-                      >
-                        Products
-                      </TableHead>
-                      <TableHead
-                        scope="col"
-                        className={`hidden md:table-cell ${TH}`}
-                      >
-                        Threshold
-                      </TableHead>
+                      {/* 2xl: the last column before Actions, and the one
+                          admins lean on least day-to-day — cutting it is what
+                          keeps Actions from needing a horizontal scroll at
+                          1280–1535px. Still surfaced in the <md reflow row. */}
+                      {canManage && (
+                        <TableHead
+                          scope="col"
+                          className={`hidden 2xl:table-cell ${TH}`}
+                        >
+                          Products
+                        </TableHead>
+                      )}
                       <TableHead
                         scope="col"
                         className={`${TH_ACTIONS} text-right`}
@@ -297,59 +393,62 @@ export function PoolsTable({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {pools.map((pool) => {
-                      const netSold = pool.sales.netSoldUnits;
-                      const returned = pool.sales.returnedUnits;
-                      const oversells = pool.sales.oversellEvents;
-                      const productCount = pool._count.products;
-                      const reserved = pool.reservedQty;
-                      const unavailable = isUnavailable(pool);
+                    {items.map((item) => {
+                      const netSold = item.sales.netSoldUnits;
+                      const returned = item.sales.returnedUnits;
+                      const oversells = item.sales.oversellEvents;
+                      const productCount = item._count.products;
+                      const reserved = item.reservedQty;
+                      const unavailable = isUnavailable(item);
+                      const isRental = item.itemType === "rental";
 
                       return (
-                        <TableRow key={pool.id}>
-                          <TableCell className={`${TD} whitespace-normal`}>
+                        <TableRow key={item.id}>
+                          <TableCell
+                            className={`min-w-[14rem] ${TD} whitespace-normal`}
+                          >
                             <Link
-                              href={`${BASE_PATH}/${pool.id}`}
+                              href={`${BASE_PATH}/${item.id}`}
                               className="text-foreground font-medium hover:underline"
                             >
-                              {pool.name}
+                              {item.name}
                             </Link>
-                            {pool.description && (
-                              <div className="text-muted-foreground text-sm">
-                                {pool.description}
+                            {item.sku && (
+                              <div className="text-muted-foreground text-xs">
+                                {item.sku}
+                              </div>
+                            )}
+                            {item.description && (
+                              <div className="text-muted-foreground line-clamp-2 text-sm">
+                                {item.description}
                               </div>
                             )}
 
-                            {/* Below md the Units sold, Products and Threshold
-                                columns are hidden — reflow them here rather than
-                                lose them. Current Qty is NOT reflowed: it keeps
-                                its own column so Adjust stays one click away. */}
+                            {/* Below md/lg several columns are hidden — reflow
+                                them here rather than lose them. On hand is NOT
+                                reflowed: it keeps its own column so Adjust
+                                stays one click away. */}
                             <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm md:hidden">
+                              <Badge
+                                variant={isRental ? "secondary" : "outline"}
+                                className="capitalize"
+                              >
+                                {isRental ? "Rental" : "Stock"}
+                              </Badge>
+                              {item.category && <span>{item.category}</span>}
                               <span>{netSold} sold</span>
-                              {returned > 0 && (
-                                <>
-                                  <span aria-hidden="true">·</span>
-                                  <span>{returned} returned</span>
-                                </>
-                              )}
-                              {reserved > 0 && (
-                                <>
-                                  <span aria-hidden="true">·</span>
-                                  <span>{reserved} reserved</span>
-                                </>
-                              )}
-                              <span aria-hidden="true">·</span>
+                              {returned > 0 && <span>{returned} returned</span>}
+                              {reserved > 0 && <span>{reserved} reserved</span>}
                               <span>
                                 {productCount}{" "}
                                 {productCount === 1 ? "product" : "products"}
                               </span>
-                              <span aria-hidden="true">·</span>
-                              <span>
-                                {pool.lowInventoryThreshold !== null
-                                  ? `Low at ${pool.lowInventoryThreshold}`
-                                  : "No threshold"}
-                              </span>
                             </div>
+                            {isRental && rentalsEnabled && (
+                              <div className="text-muted-foreground mt-0.5 text-sm tabular-nums md:hidden">
+                                {item.outQty} out / {totalOwned(item)} total
+                              </div>
+                            )}
                             {oversells > 0 && (
                               <div
                                 className={`mt-1 flex items-start gap-1 md:hidden ${WARNING_TEXT}`}
@@ -364,11 +463,6 @@ export function PoolsTable({
                                 </span>
                               </div>
                             )}
-                            {/* Mobile counterpart to the desktop-only warning
-                                inside the Current Qty cell below — that cell
-                                stays number+button only on small screens so
-                                Adjust doesn't get crowded, so the "nothing
-                                available" signal reflows here instead. */}
                             {unavailable && (
                               <div
                                 className={`mt-1 flex items-start gap-1 md:hidden ${WARNING_TEXT}`}
@@ -379,36 +473,54 @@ export function PoolsTable({
                                 />
                                 <span className="text-xs">
                                   <span className="sr-only">Warning: </span>
-                                  {unavailableMessage(pool)}
+                                  {unavailableMessage(item)}
                                 </span>
                               </div>
+                            )}
+                          </TableCell>
+
+                          <TableCell className={`hidden md:table-cell ${TD}`}>
+                            <Badge variant={isRental ? "secondary" : "outline"}>
+                              {isRental ? "Rental" : "Stock"}
+                            </Badge>
+                          </TableCell>
+
+                          <TableCell
+                            className={`text-foreground hidden lg:table-cell ${TD}`}
+                          >
+                            {item.category ?? (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+
+                          <TableCell
+                            className={`text-foreground hidden xl:table-cell ${TD}`}
+                          >
+                            {item.storageLocation ?? (
+                              <span className="text-muted-foreground">—</span>
                             )}
                           </TableCell>
 
                           <TableCell className={TD}>
                             <div className="flex items-center gap-2">
                               <span
-                                className={`min-w-[4ch] text-right tabular-nums ${qtyTone(pool)}`}
+                                className={`min-w-[4ch] text-right tabular-nums ${qtyTone(item)}`}
                               >
-                                {pool.inventoryQty}
+                                {item.inventoryQty}
                               </span>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 className="h-8 px-2 text-xs"
-                                onClick={() => setAdjustPool(pool)}
+                                onClick={() => setAdjustItem(item)}
                               >
                                 Adjust
                                 <span className="sr-only">
                                   {" "}
-                                  quantity for {pool.name}
+                                  quantity for {item.name}
                                 </span>
                               </Button>
                             </div>
-                            {/* Same "one value plus caveat" idiom as Units
-                                sold's "N returned" line below netSoldUnits.
-                                Hidden on mobile — see the reflow comment under
-                                the Name cell for why. */}
                             {reserved > 0 && (
                               <div className="text-muted-foreground hidden text-sm tabular-nums md:block">
                                 {reserved} reserved
@@ -424,11 +536,35 @@ export function PoolsTable({
                                 />
                                 <span className="text-xs">
                                   <span className="sr-only">Warning: </span>
-                                  {unavailableMessage(pool)}
+                                  {unavailableMessage(item)}
                                 </span>
                               </div>
                             )}
                           </TableCell>
+
+                          {rentalsEnabled && (
+                            <TableCell
+                              className={`text-foreground hidden tabular-nums md:table-cell ${TD}`}
+                            >
+                              {isRental ? (
+                                `${item.outQty} / ${totalOwned(item)}`
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          )}
+
+                          {canManage && (
+                            <TableCell
+                              className={`text-foreground hidden tabular-nums 2xl:table-cell ${TD}`}
+                            >
+                              {item.unitCostCents != null ? (
+                                formatPrice(item.unitCostCents)
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          )}
 
                           {/* whitespace-normal so the oversell sentence wraps —
                               TableCell is nowrap by default, which would push the
@@ -462,24 +598,13 @@ export function PoolsTable({
                             )}
                           </TableCell>
 
-                          <TableCell
-                            className={`text-foreground hidden tabular-nums md:table-cell ${TD}`}
-                          >
-                            {productCount}
-                          </TableCell>
-
-                          <TableCell
-                            className={`text-foreground hidden tabular-nums md:table-cell ${TD}`}
-                          >
-                            {pool.lowInventoryThreshold ?? (
-                              <span className="text-muted-foreground">
-                                <span aria-hidden="true">—</span>
-                                <span className="sr-only">
-                                  No threshold set
-                                </span>
-                              </span>
-                            )}
-                          </TableCell>
+                          {canManage && (
+                            <TableCell
+                              className={`text-foreground hidden tabular-nums 2xl:table-cell ${TD}`}
+                            >
+                              {productCount}
+                            </TableCell>
+                          )}
 
                           <TableCell className={`${TD_ACTIONS} text-right`}>
                             <DropdownMenu>
@@ -491,37 +616,72 @@ export function PoolsTable({
                                 >
                                   <MoreVertical className="h-4 w-4" />
                                   <span className="sr-only">
-                                    Actions for {pool.name}
+                                    Actions for {item.name}
                                   </span>
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                  <Link href={`${BASE_PATH}/${pool.id}`}>
+                                  <Link href={`${BASE_PATH}/${item.id}`}>
                                     <Eye className="mr-2 h-4 w-4" />
                                     View details
                                   </Link>
                                 </DropdownMenuItem>
+                                {!isRental && (
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setMoveItem({ item, mode: "use" })
+                                    }
+                                  >
+                                    <PackageMinus className="mr-2 h-4 w-4" />
+                                    Use
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem
-                                  onClick={() => {
-                                    setEditPool(pool);
-                                    setEditOpen(true);
-                                  }}
+                                  onClick={() =>
+                                    setMoveItem({ item, mode: "restock" })
+                                  }
                                 >
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
+                                  <PackagePlus className="mr-2 h-4 w-4" />
+                                  Restock
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive focus:text-destructive"
-                                  onClick={() => {
-                                    setDeleteId(pool.id);
-                                    setDeleteName(pool.name);
-                                    setDeleteProductCount(pool._count.products);
-                                  }}
-                                >
-                                  <Trash className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
+                                {isRental && rentalsEnabled && (
+                                  <DropdownMenuItem asChild>
+                                    <Link
+                                      href={`/admin/inventory/checkouts/new?item=${item.id}`}
+                                    >
+                                      <ArrowLeftRight className="mr-2 h-4 w-4" />
+                                      Check out
+                                    </Link>
+                                  </DropdownMenuItem>
+                                )}
+                                {canManage && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setEditItem(item);
+                                        setEditOpen(true);
+                                      }}
+                                    >
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="text-destructive focus:text-destructive"
+                                      onClick={() => {
+                                        setDeleteId(item.id);
+                                        setDeleteName(item.name);
+                                        setDeleteProductCount(
+                                          item._count.products,
+                                        );
+                                      }}
+                                    >
+                                      <Trash className="mr-2 h-4 w-4" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -545,18 +705,33 @@ export function PoolsTable({
         </>
       )}
 
-      <PoolDialog
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        pool={editPool ?? undefined}
-      />
+      {canManage && (
+        <PoolDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          item={editItem ?? undefined}
+          categories={categories}
+          rentalsEnabled={rentalsEnabled}
+        />
+      )}
 
-      {adjustPool && (
+      {adjustItem && (
         <PoolAdjustInventory
-          pool={adjustPool}
-          open={!!adjustPool}
+          pool={adjustItem}
+          open={!!adjustItem}
           onOpenChange={(open) => {
-            if (!open) setAdjustPool(null);
+            if (!open) setAdjustItem(null);
+          }}
+        />
+      )}
+
+      {moveItem && (
+        <MoveStockDialog
+          item={moveItem.item}
+          mode={moveItem.mode}
+          open={!!moveItem}
+          onOpenChange={(open) => {
+            if (!open) setMoveItem(null);
           }}
         />
       )}
@@ -573,7 +748,7 @@ export function PoolsTable({
               Delete &ldquo;{deleteName}&rdquo;?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the pool.{" "}
+              This will permanently delete the item.{" "}
               {deleteProductCount > 0 ? (
                 <>
                   {deleteProductCount} linked product
@@ -584,29 +759,28 @@ export function PoolsTable({
                   purchasable again.
                 </>
               ) : (
-                "No products are currently linked to this pool."
+                "No products are currently linked to this item."
               )}{" "}
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletePool.isPending}>
+            <AlertDialogCancel disabled={deleteItem.isPending}>
               Cancel
             </AlertDialogCancel>
             {/* `variant`, NOT className. AlertDialogAction wraps a `Button ...
                 asChild`, so a className lands on the inner Radix element while
                 Button still supplies `bg-primary` — and Slot concatenates the
-                two without tailwind-merge, so CSS order decides. The old
-                `className="bg-red-600"` was fighting that and losing. */}
+                two without tailwind-merge, so CSS order decides. */}
             <AlertDialogAction
               variant="destructive"
-              disabled={deletePool.isPending}
+              disabled={deleteItem.isPending}
               onClick={(e) => {
                 e.preventDefault();
-                if (deleteId) deletePool.mutate({ id: deleteId });
+                if (deleteId) deleteItem.mutate({ id: deleteId });
               }}
             >
-              {deletePool.isPending ? "Deleting…" : "Delete"}
+              {deleteItem.isPending ? "Deleting…" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

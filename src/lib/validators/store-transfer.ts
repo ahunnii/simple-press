@@ -135,6 +135,15 @@ const exportedBaseInventoryUnitSchema = z.object({
   description: nullableString.optional(),
   lowInventoryThreshold: nullableNumber.optional(),
   allowBackorders: z.boolean(),
+  itemType: z.enum(["stock", "rental"]).optional(),
+  sku: nullableString.optional(),
+  category: nullableString.optional(),
+  storageLocation: nullableString.optional(),
+  unitCostCents: nullableNumber
+    .refine((v) => v === null || (Number.isInteger(v) && v >= 0), {
+      message: "unitCostCents must be a non-negative integer",
+    })
+    .optional(),
 });
 
 const exportedCollectionSchema = z.object({

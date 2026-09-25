@@ -69,7 +69,7 @@ export async function HappyBambooFooter({
               {socialLinks?.facebook && (
                 <a
                   href={socialLinks.facebook}
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   aria-label="Facebook"
                 >
                   <FacebookIcon className="h-5 w-5" aria-hidden="true" />
@@ -79,7 +79,7 @@ export async function HappyBambooFooter({
               {socialLinks?.instagram && (
                 <a
                   href={socialLinks.instagram}
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   aria-label="Instagram"
                 >
                   <InstagramIcon className="h-5 w-5" aria-hidden="true" />
@@ -88,7 +88,7 @@ export async function HappyBambooFooter({
               {socialLinks?.twitter && (
                 <a
                   href={socialLinks.twitter}
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   aria-label="Twitter"
                 >
                   <TwitterLogoIcon className="h-5 w-5" aria-hidden="true" />
@@ -97,7 +97,7 @@ export async function HappyBambooFooter({
               {socialLinks?.tiktok && (
                 <a
                   href={socialLinks.tiktok}
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   aria-label="TikTok"
                 >
                   <TikTokIcon className="h-5 w-5" aria-hidden="true" />
@@ -106,7 +106,7 @@ export async function HappyBambooFooter({
               {socialLinks?.youtube && (
                 <a
                   href={socialLinks.youtube}
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   aria-label="YouTube"
                 >
                   <YouTubeIcon className="h-5 w-5" aria-hidden="true" />
@@ -123,7 +123,7 @@ export async function HappyBambooFooter({
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-muted hover:text-primary text-sm transition-colors"
+                    className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   >
                     {link.label}
                   </Link>
@@ -143,7 +143,7 @@ export async function HappyBambooFooter({
               {!!phone && (
                 <a
                   href={`tel:${phone.replace(/\D/g, "")}`}
-                  className="hover:text-primary transition-colors"
+                  className="transition-colors hover:text-[var(--hb-primary-on-dark)]"
                 >
                   {phone}
                 </a>
@@ -151,7 +151,7 @@ export async function HappyBambooFooter({
               {!!email && (
                 <a
                   href={`mailto:${email}`}
-                  className="hover:text-primary transition-colors"
+                  className="transition-colors hover:text-[var(--hb-primary-on-dark)]"
                 >
                   {email}
                 </a>
@@ -168,7 +168,7 @@ export async function HappyBambooFooter({
                   <li key={link.id}>
                     <Link
                       href={`/${link.slug}`}
-                      className="text-muted hover:text-primary text-sm transition-colors"
+                      className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
                     >
                       {link.title}
                     </Link>

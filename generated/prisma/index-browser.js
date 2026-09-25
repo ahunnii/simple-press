@@ -633,6 +633,7 @@ exports.Prisma.InventoryHistoryScalarFieldEnum = {
   reason: 'reason',
   note: 'note',
   orderId: 'orderId',
+  checkoutId: 'checkoutId',
   userId: 'userId'
 };
 
@@ -648,7 +649,41 @@ exports.Prisma.BaseInventoryUnitScalarFieldEnum = {
   lowInventoryAlertSent: 'lowInventoryAlertSent',
   outOfStockAlertSent: 'outOfStockAlertSent',
   allowBackorders: 'allowBackorders',
+  itemType: 'itemType',
+  sku: 'sku',
+  category: 'category',
+  storageLocation: 'storageLocation',
+  unitCostCents: 'unitCostCents',
   businessId: 'businessId'
+};
+
+exports.Prisma.InventoryCheckoutScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  label: 'label',
+  customerName: 'customerName',
+  notes: 'notes',
+  status: 'status',
+  checkedOutAt: 'checkedOutAt',
+  dueBackOn: 'dueBackOn',
+  closedAt: 'closedAt',
+  createdById: 'createdById'
+};
+
+exports.Prisma.InventoryCheckoutLineScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  checkoutId: 'checkoutId',
+  businessId: 'businessId',
+  itemId: 'itemId',
+  itemName: 'itemName',
+  qtyOut: 'qtyOut',
+  qtyReturned: 'qtyReturned',
+  qtyDamaged: 'qtyDamaged',
+  qtyLost: 'qtyLost'
 };
 
 exports.Prisma.InventoryReservationScalarFieldEnum = {
@@ -983,6 +1018,93 @@ exports.Prisma.QuickBooksInvoiceScalarFieldEnum = {
   lastError: 'lastError'
 };
 
+exports.Prisma.InvoiceSettingsScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  numberPrefix: 'numberPrefix',
+  numberPadding: 'numberPadding',
+  startingNumber: 'startingNumber',
+  defaultDueTerms: 'defaultDueTerms',
+  defaultTaxRateBps: 'defaultTaxRateBps',
+  defaultNotes: 'defaultNotes',
+  defaultTerms: 'defaultTerms',
+  paymentMethods: 'paymentMethods',
+  overdueAlertsEnabled: 'overdueAlertsEnabled',
+  weeklyDigestEnabled: 'weeklyDigestEnabled',
+  lastDigestWeekKey: 'lastDigestWeekKey',
+  lastDigestSentAt: 'lastDigestSentAt'
+};
+
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  invoiceNumber: 'invoiceNumber',
+  numberPrefix: 'numberPrefix',
+  status: 'status',
+  customerId: 'customerId',
+  customerName: 'customerName',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  billingAddress: 'billingAddress',
+  currency: 'currency',
+  lineItems: 'lineItems',
+  subtotalCents: 'subtotalCents',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  discountCents: 'discountCents',
+  taxRateBps: 'taxRateBps',
+  taxCents: 'taxCents',
+  totalCents: 'totalCents',
+  amountPaidCents: 'amountPaidCents',
+  dueTerms: 'dueTerms',
+  issueDate: 'issueDate',
+  dueDate: 'dueDate',
+  notes: 'notes',
+  terms: 'terms',
+  paymentMethodIds: 'paymentMethodIds',
+  paymentInstructions: 'paymentInstructions',
+  issuerSnapshot: 'issuerSnapshot',
+  sentAt: 'sentAt',
+  sentVia: 'sentVia',
+  paidAt: 'paidAt',
+  cancelledAt: 'cancelledAt',
+  cancelReason: 'cancelReason',
+  lastReminderSentAt: 'lastReminderSentAt',
+  reminderCount: 'reminderCount',
+  overdueNotifiedAt: 'overdueNotifiedAt',
+  firstViewedAt: 'firstViewedAt',
+  lastViewedAt: 'lastViewedAt',
+  createdByUserId: 'createdByUserId'
+};
+
+exports.Prisma.InvoicePaymentScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  invoiceId: 'invoiceId',
+  businessId: 'businessId',
+  amountCents: 'amountCents',
+  paidOn: 'paidOn',
+  method: 'method',
+  reference: 'reference',
+  note: 'note',
+  recordedByUserId: 'recordedByUserId',
+  receiptSentAt: 'receiptSentAt'
+};
+
+exports.Prisma.InvoiceEventScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  invoiceId: 'invoiceId',
+  businessId: 'businessId',
+  type: 'type',
+  actorUserId: 'actorUserId',
+  metadata: 'metadata'
+};
+
 exports.Prisma.SubscriptionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1169,6 +1291,8 @@ exports.Prisma.ModelName = {
   DiscountCode: 'DiscountCode',
   InventoryHistory: 'InventoryHistory',
   BaseInventoryUnit: 'BaseInventoryUnit',
+  InventoryCheckout: 'InventoryCheckout',
+  InventoryCheckoutLine: 'InventoryCheckoutLine',
   InventoryReservation: 'InventoryReservation',
   Page: 'Page',
   EditorNote: 'EditorNote',
@@ -1191,6 +1315,10 @@ exports.Prisma.ModelName = {
   FormSubmission: 'FormSubmission',
   QuickBooksConnection: 'QuickBooksConnection',
   QuickBooksInvoice: 'QuickBooksInvoice',
+  InvoiceSettings: 'InvoiceSettings',
+  Invoice: 'Invoice',
+  InvoicePayment: 'InvoicePayment',
+  InvoiceEvent: 'InvoiceEvent',
   Subscription: 'Subscription',
   Donation: 'Donation',
   LoyaltyProgram: 'LoyaltyProgram',

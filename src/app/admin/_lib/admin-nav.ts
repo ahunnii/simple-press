@@ -100,7 +100,7 @@ export const ROLE_DESCRIPTIONS: Record<
   STAFF: {
     label: "Staff",
     summary:
-      "Fulfillment access only — can view and manage orders and customers.",
+      "Fulfillment access only — can view and manage orders, customers, and inventory counts/check-outs.",
   },
 };
 
@@ -112,10 +112,12 @@ export interface NavItem {
   icon: TablerIcon | LucideIcon;
   section: NavSection;
   featureKey?: string;
+  /** Visible when ANY of these flags is on; takes precedence over featureKey. */
+  featureKeysAny?: string[];
   /**
    * Membership roles that can see this item. Defaults to OWNER + MANAGER
    * (`DEFAULT_NAV_ROLES`). Include "STAFF" only for fulfillment-safe pages
-   * (orders, customers). PLATFORM_ADMIN always sees everything.
+   * (orders, customers, inventory counts/check-outs). PLATFORM_ADMIN always sees everything.
    */
   roles?: AdminRole[];
   /** Keyword synonyms for command palette matching. */
@@ -168,6 +170,8 @@ export interface PaletteAction {
   icon: TablerIcon | LucideIcon;
   keywords?: string[];
   featureKey?: string;
+  /** Visible when ANY of these flags is on; takes precedence over featureKey. */
+  featureKeysAny?: string[];
   /**
    * Membership roles that can see this action. Defaults to OWNER + MANAGER
    * (`DEFAULT_NAV_ROLES`). PLATFORM_ADMIN always sees everything.
@@ -221,8 +225,16 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/admin/invoices",
     icon: IconFileInvoice,
     section: "sell",
-    featureKey: "quickbooks",
-    keywords: ["quickbooks", "invoice", "deposit", "bill", "final bill"],
+    featureKeysAny: ["invoices", "quickbooks"],
+    keywords: [
+      "quickbooks",
+      "invoice",
+      "deposit",
+      "bill",
+      "final bill",
+      "billing",
+      "payment",
+    ],
   },
   {
     key: "subscriptions",
@@ -266,6 +278,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconPackages,
     section: "catalog",
     featureKey: "inventory",
+    roles: ["OWNER", "MANAGER", "STAFF"],
+    keywords: ["stock", "items", "rentals", "check out", "check in"],
   },
   {
     key: "collections",
@@ -562,6 +576,18 @@ export const HUB_CARDS: HubCard[] = [
     keywords: ["tips", "support", "donate", "venmo", "cash app", "fundraiser"],
   },
   {
+    key: "settings-invoices",
+    title: "Invoices",
+    description: "Payment methods, numbering, and reminders",
+    body: "Configure invoice settings, payment methods, and payment reminders",
+    href: "/admin/settings/invoices",
+    hub: "settings",
+    color: "amber",
+    icon: IconFileInvoice,
+    featureKey: "invoices",
+    keywords: ["invoice", "bill", "payment", "numbering"],
+  },
+  {
     key: "settings-loyalty",
     title: "Rewards",
     description: "Points, bonuses, and reward tiers",
@@ -709,13 +735,17 @@ export function isNavItemAllowedForRole(
 }
 
 /** Path prefixes a STAFF member may visit inside /admin. */
-const STAFF_ALLOWED_PATH_PREFIXES = ["/admin/orders", "/admin/customers"];
+const STAFF_ALLOWED_PATH_PREFIXES = [
+  "/admin/orders",
+  "/admin/customers",
+  "/admin/inventory",
+];
 
 /**
  * Whether an /admin pathname is accessible to the given role.
  * OWNER and MANAGER can visit everything; STAFF is limited to fulfillment
- * pages (orders + customers). Consumed by src/lib/require-admin-access.ts —
- * hard enforcement lives in the tRPC procedure roles.
+ * pages (orders + customers) and inventory counts/check-outs. Consumed by
+ * src/lib/require-admin-access.ts — hard enforcement lives in the tRPC procedure roles.
  */
 export function isPathAllowedForRole(
   pathname: string,
@@ -759,6 +789,25 @@ export function isHubCardEnabled(
     return card.featureKeysAny.some((k) => isEnabled(k));
   }
   return !card.featureKey || isEnabled(card.featureKey);
+}
+
+/**
+ * Whether a nav item (NavItem or PaletteAction) should be shown given the
+ * business's enabled feature flags. Items gated on a single `featureKey` need
+ * that flag on; items gated on `featureKeysAny` need at least one of those on.
+ * An item with neither is always shown.
+ *
+ * Use this everywhere nav items are filtered by flags rather than
+ * re-deriving the feature visibility logic.
+ */
+export function isNavFeatureEnabled(
+  item: Pick<NavItem | PaletteAction, "featureKey" | "featureKeysAny">,
+  isEnabled: (key: string) => boolean,
+): boolean {
+  if (item.featureKeysAny?.length) {
+    return item.featureKeysAny.some((k) => isEnabled(k));
+  }
+  return !item.featureKey || isEnabled(item.featureKey);
 }
 
 // ─── Palette actions ────────────────────────────────────────────────────────
@@ -848,6 +897,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
   {
     key: "new-invoice",
     title: "New invoice",
+    href: "/admin/invoices/new",
+    icon: Plus,
+    featureKey: "invoices",
+    keywords: ["invoice", "bill", "create", "send"],
+  },
+  {
+    key: "new-quickbooks-invoice",
+    title: "New QuickBooks invoice",
     href: "/admin/invoices?new=1",
     icon: Plus,
     featureKey: "quickbooks",

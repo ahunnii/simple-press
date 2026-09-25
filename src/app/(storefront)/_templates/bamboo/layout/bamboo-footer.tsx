@@ -8,6 +8,10 @@ import { api } from "~/trpc/server";
 import { resolveFields } from "..";
 import { BambooWaveDivider } from "../shared/bamboo-wave-divider";
 import {
+  BambooWaveLeaves,
+  BambooWaveSprig,
+} from "../shared/bamboo-wave-leaves";
+import {
   BambooSocialIcons,
   readBambooSocialLinks,
 } from "./bamboo-social-icons";
@@ -35,7 +39,19 @@ const columnLinkClass =
  * transparent-above area composite over whatever the previous section painted
  * (cream, cream-deep, or forest-deep), and the forest background starts on the
  * inner div below the curve. Every page's final section carries at least
- * `py-16`, so the 40/56px overlap never reaches content.
+ * `py-16`, so the 40/56px overlap never reaches content. The wave is the
+ * vivid metallic `hairline` line, like the value band's.
+ *
+ * A single wave sprig (`shared/bamboo-wave-leaves.tsx`) grows from the gold
+ * line at the RIGHT edge, the diagonal mirror of the nav bar's top-left
+ * corner sprig. The wave and its leaf layer share one `relative` wrapper
+ * that carries the negative margin (the value band's pattern), so the
+ * sprig's `top-*` is its root depth measured from the wave's top edge, and
+ * `z-[2]` lifts it over the previous section's positioned layers (the
+ * sustainability band's flipped bottom wave is `z-[1]`). The sprig tops out
+ * 12-20px above the wave, so its intrusion into the previous section
+ * (overlap + rise, ≤69px) stays in that section's bottom padding; its root
+ * sits well above the footer's own `py-16` content.
  */
 export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
@@ -61,7 +77,16 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
 
   return (
     <footer>
-      <BambooWaveDivider className="pointer-events-none -mt-10 -mb-px block h-10 md:-mt-14 md:h-14" />
+      <div className="pointer-events-none relative -mt-10 -mb-px md:-mt-14">
+        <BambooWaveDivider variant="hairline" className="h-10 md:h-14" />
+
+        <BambooWaveLeaves className="z-[2]">
+          <BambooWaveSprig
+            side="right"
+            className="top-11 w-24 opacity-90 md:top-[4.5rem] md:w-32 lg:top-[5.25rem] lg:w-36"
+          />
+        </BambooWaveLeaves>
+      </div>
 
       <div className="bg-[var(--bam-forest)] text-[var(--bam-cream)]">
         <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8">

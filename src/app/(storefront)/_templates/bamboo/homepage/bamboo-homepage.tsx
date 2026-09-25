@@ -1,8 +1,13 @@
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isSectionVisible } from "~/lib/sp-meta";
+import {
+  getListFieldValue,
+  parseTemplateIconListRows,
+} from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
+import { DEFAULT_BAMBOO_VALUE_BAND } from ".";
 import { resolveFields } from "..";
 import { BambooAboutTeaserSection } from "./bamboo-about-teaser-section";
 import { BambooFeaturedSection } from "./bamboo-featured-section";
@@ -44,14 +49,39 @@ export async function BambooHomepage() {
   const viewUrl = `https://www.google.com/maps/search/?api=1&query=${mapDest}`;
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapDest}`;
 
+  // Mirrors the value band's own render gate exactly (same visibility flag +
+  // same item-count check the band uses to bail to `null`) so the hero knows
+  // — before the band ever renders — whether it needs to leave its bottom
+  // seam open for the band's composited wave, or close its own seam because
+  // nothing follows.
+  const valueBandItems =
+    parseTemplateIconListRows(
+      getListFieldValue(customFields, "bamboo.homepage.value-band-items"),
+      DEFAULT_BAMBOO_VALUE_BAND,
+    ) ?? [];
+  const hasValueBand =
+    isSectionVisible(customFields, "bamboo", "homepage.valueBand") &&
+    valueBandItems.length > 0;
+
+  // Same idea for the sustainability band's bottom seam: its flipped bottom
+  // wave composites 56/96px down over whatever follows, which is only safe
+  // over a band padded `py-20 md:py-32`. When nothing follows, the footer
+  // brings its own wave (the About CTA's contract) and the band skips it.
+  const hasTestimonials =
+    testimonials.length > 0 &&
+    isSectionVisible(customFields, "bamboo", "homepage.testimonials");
+  const hasLocation =
+    hasCoords && isSectionVisible(customFields, "bamboo", "homepage.location");
+
   return (
     <HydrateClient>
       <PageTransition>
-        <BambooHeroSection customFields={customFields} />
+        <BambooHeroSection
+          customFields={customFields}
+          hasValueBand={hasValueBand}
+        />
 
-        {isSectionVisible(customFields, "bamboo", "homepage.valueBand") && (
-          <BambooValueBandSection customFields={customFields} />
-        )}
+        {hasValueBand && <BambooValueBandSection customFields={customFields} />}
 
         {/* Order mirrors happy-bamboo: the about teaser sits between the hero
             band and the product grid, so the story lands before the shelf. */}
@@ -66,28 +96,31 @@ export async function BambooHomepage() {
           customFields,
           "bamboo",
           "homepage.sustainability",
-        ) && <BambooSustainabilitySection customFields={customFields} />}
+        ) && (
+          <BambooSustainabilitySection
+            customFields={customFields}
+            hasFollowingSection={hasTestimonials || hasLocation}
+          />
+        )}
 
-        {testimonials.length > 0 &&
-          isSectionVisible(customFields, "bamboo", "homepage.testimonials") && (
-            <BambooTestimonialsSection
-              customFields={customFields}
-              testimonials={testimonials}
-            />
-          )}
+        {hasTestimonials && (
+          <BambooTestimonialsSection
+            customFields={customFields}
+            testimonials={testimonials}
+          />
+        )}
 
-        {hasCoords &&
-          isSectionVisible(customFields, "bamboo", "homepage.location") && (
-            <BambooLocationSection
-              customFields={customFields}
-              businessName={homepage?.name ?? ""}
-              address={address ?? undefined}
-              latitude={lat}
-              longitude={lng}
-              viewUrl={viewUrl}
-              directionsUrl={directionsUrl}
-            />
-          )}
+        {hasLocation && (
+          <BambooLocationSection
+            customFields={customFields}
+            businessName={homepage?.name ?? ""}
+            address={address ?? undefined}
+            latitude={lat}
+            longitude={lng}
+            viewUrl={viewUrl}
+            directionsUrl={directionsUrl}
+          />
+        )}
       </PageTransition>
     </HydrateClient>
   );

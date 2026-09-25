@@ -126,6 +126,11 @@ function mapBaseInventoryUnit(
     description: u.description,
     lowInventoryThreshold: u.lowInventoryThreshold,
     allowBackorders: u.allowBackorders,
+    itemType: u.itemType === "rental" ? "rental" : "stock",
+    sku: u.sku,
+    category: u.category,
+    storageLocation: u.storageLocation,
+    unitCostCents: u.unitCostCents,
   };
 }
 
@@ -553,6 +558,11 @@ async function fetchBaseInventoryUnits(businessId: string) {
       description: true,
       lowInventoryThreshold: true,
       allowBackorders: true,
+      itemType: true,
+      sku: true,
+      category: true,
+      storageLocation: true,
+      unitCostCents: true,
     },
     orderBy: { createdAt: "asc" },
   });

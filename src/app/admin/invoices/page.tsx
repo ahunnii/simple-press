@@ -1,24 +1,26 @@
+import { redirect } from "next/navigation";
+
 import type { FilterDefFor } from "../_components/admin-filters";
+import type { InvoiceListStatusFilter } from "~/lib/validators/invoice";
 import type { QboDepositMode } from "~/lib/validators/quickbooks";
-import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
-  compareInvoiceRows,
-  QBO_INVOICE_KIND_FILTER_DEFAULT,
-  QBO_INVOICE_KIND_FILTER_VALUES,
-  QBO_INVOICE_KIND_LABELS,
-  QBO_INVOICE_SORT_DEFAULT,
-  QBO_INVOICE_SORT_VALUES,
-  QBO_INVOICE_STATUS_FILTER_DEFAULT,
-  QBO_INVOICE_STATUS_FILTER_VALUES,
-  QBO_INVOICE_STATUS_LABELS,
-} from "~/lib/validators/quickbooks";
+  INVOICE_LIST_SORT_DEFAULT,
+  INVOICE_LIST_SORT_LABELS,
+  INVOICE_LIST_SORT_VALUES,
+  INVOICE_LIST_SOURCE_FILTER_DEFAULT,
+  INVOICE_LIST_SOURCE_FILTER_LABELS,
+  INVOICE_LIST_SOURCE_FILTER_VALUES,
+  INVOICE_LIST_STATUS_FILTER_DEFAULT,
+  INVOICE_LIST_STATUS_FILTER_VALUES,
+  INVOICE_SEARCH_MAX_LENGTH,
+} from "~/lib/validators/invoice";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
 import {
-  buildTablePage,
-  matchesAllTokens,
+  canonicalPageHref,
+  parsePageParam,
   pickParam,
 } from "../_lib/table-query";
 import { InvoicesClient } from "./_components/invoices-client";
@@ -27,23 +29,24 @@ type Props = {
   searchParams: Promise<{
     search?: string;
     status?: string;
-    kind?: string;
+    source?: string;
     sort?: string;
     page?: string;
     new?: string;
+    /** Retired QuickBooks-only filter — read by nothing, listed so old bookmarks type-check as known. */
+    kind?: string;
   }>;
 };
 
-/** Rows per page — the platform standard (docs/admin-table-migration.md §2). */
-const PAGE_SIZE = 25;
+const BASE_PATH = "/admin/invoices";
 
 /**
  * Fallback deposit rule / due-days when no `QuickBooksConnection` row exists
  * yet (the owner has never connected). Mirrors the column defaults on
  * `QuickBooksConnection` in prisma/schema.prisma (`depositMode: "percent"`,
  * `depositPercent: 25`, `depositFixedCents: 0`, `defaultDueDays: 7`) so the
- * "New invoice" dialog's due-date default is sensible even before a
- * connection row is created — the row itself is only created at OAuth
+ * QuickBooks "New invoice" dialog's due-date default is sensible even before
+ * a connection row is created — the row itself is only created at OAuth
  * callback time.
  */
 const DEFAULT_DEPOSIT_RULE = {
@@ -53,67 +56,53 @@ const DEFAULT_DEPOSIT_RULE = {
 };
 const DEFAULT_DUE_DAYS = 7;
 
-// Pinned to the validator tuples in `~/lib/validators/quickbooks` — same
-// contract `STATUS_FILTER`/`SORT_FILTER` follow on the Quotes page.
-const STATUS_FILTER: FilterDefFor<typeof QBO_INVOICE_STATUS_FILTER_VALUES> = {
-  key: "status",
-  label: "Status",
-  defaultValue: QBO_INVOICE_STATUS_FILTER_DEFAULT,
-  options: [
-    { value: "all", label: "Any status" },
-    { value: "pending", label: QBO_INVOICE_STATUS_LABELS.pending },
-    { value: "created", label: QBO_INVOICE_STATUS_LABELS.created },
-    { value: "sent", label: QBO_INVOICE_STATUS_LABELS.sent },
-    { value: "paid", label: QBO_INVOICE_STATUS_LABELS.paid },
-    { value: "overdue", label: QBO_INVOICE_STATUS_LABELS.overdue },
-    { value: "voided", label: QBO_INVOICE_STATUS_LABELS.voided },
-    { value: "error", label: QBO_INVOICE_STATUS_LABELS.error },
-  ],
-};
-
-const KIND_FILTER: FilterDefFor<typeof QBO_INVOICE_KIND_FILTER_VALUES> = {
-  key: "kind",
-  label: "Kind",
-  defaultValue: QBO_INVOICE_KIND_FILTER_DEFAULT,
-  options: [
-    { value: "all", label: "Any kind" },
-    { value: "deposit", label: QBO_INVOICE_KIND_LABELS.deposit },
-    { value: "final", label: QBO_INVOICE_KIND_LABELS.final },
-    { value: "custom", label: QBO_INVOICE_KIND_LABELS.custom },
-  ],
-};
-
 /**
- * Newest/oldest key on `createdAt`, which is exactly what the table's Created
- * column renders — the playbook's "one Date column = the sort key" rule. Due
- * stays as a SECOND date column rather than being folded in: it is a distinct,
- * owner-meaningful field (when the money is expected, not when the record was
- * made) and it has its own sort. That's the Orders-style exception, stated
- * here so the next reader doesn't "fix" it by deleting a column.
- *
- * Customer A–Z / Z–A are the "always include name asc/desc" pair from §7,
- * spelled `customer-*` because an invoice's name is its customer's.
+ * Bookmarks from the QuickBooks-only page used QuickBooks' own status
+ * vocabulary. `paid` and `overdue` exist in both and pass straight through;
+ * these three have an obvious unified home. `pending`/`error` have no tab (they
+ * only appear under All), so they fall back to the default like any unknown
+ * value.
  */
-const SORT_FILTER: FilterDefFor<typeof QBO_INVOICE_SORT_VALUES> = {
+const LEGACY_QBO_STATUS: Record<string, InvoiceListStatusFilter> = {
+  created: "outstanding",
+  sent: "outstanding",
+  voided: "cancelled",
+};
+
+// Pinned to the validator tuples `invoiceListParamsSchema` enforces — the same
+// `FilterDefFor` contract every migrated admin table follows. Status is NOT
+// here: it's the tab strip above the table, not a popover field.
+const SOURCE_FILTER: FilterDefFor<typeof INVOICE_LIST_SOURCE_FILTER_VALUES> = {
+  key: "source",
+  label: "Source",
+  defaultValue: INVOICE_LIST_SOURCE_FILTER_DEFAULT,
+  options: [
+    { value: "all", label: INVOICE_LIST_SOURCE_FILTER_LABELS.all },
+    { value: "native", label: INVOICE_LIST_SOURCE_FILTER_LABELS.native },
+    {
+      value: "quickbooks",
+      label: INVOICE_LIST_SOURCE_FILTER_LABELS.quickbooks,
+    },
+  ],
+};
+
+const SORT_FILTER: FilterDefFor<typeof INVOICE_LIST_SORT_VALUES> = {
   key: "sort",
   label: "Sort",
-  defaultValue: QBO_INVOICE_SORT_DEFAULT,
+  defaultValue: INVOICE_LIST_SORT_DEFAULT,
   options: [
-    { value: "newest", label: "Newest first" },
-    { value: "oldest", label: "Oldest first" },
-    { value: "customer-asc", label: "Customer A–Z" },
-    { value: "customer-desc", label: "Customer Z–A" },
-    { value: "amount-desc", label: "Highest amount" },
-    { value: "amount-asc", label: "Lowest amount" },
-    { value: "due-asc", label: "Due soonest" },
+    { value: "newest", label: INVOICE_LIST_SORT_LABELS.newest },
+    { value: "oldest", label: INVOICE_LIST_SORT_LABELS.oldest },
+    { value: "due-asc", label: INVOICE_LIST_SORT_LABELS["due-asc"] },
+    { value: "amount-desc", label: INVOICE_LIST_SORT_LABELS["amount-desc"] },
+    { value: "amount-asc", label: INVOICE_LIST_SORT_LABELS["amount-asc"] },
   ],
 };
 
 /**
- * `QuickBooksConnection.depositMode` is a plain `String` column (see the
- * schema comment on that field), narrowed here the same way `toInvoiceStatus`
- * narrows `status` in the router — an unrecognized value falls back to
- * `"percent"`, the DB column default, rather than throwing.
+ * `QuickBooksConnection.depositMode` is a plain `String` column, narrowed the
+ * same way the QuickBooks router narrows `status` — an unrecognized value
+ * falls back to `"percent"`, the DB column default, rather than throwing.
  */
 function toDepositMode(mode: string): QboDepositMode {
   return mode === "fixed" ? "fixed" : "percent";
@@ -122,96 +111,111 @@ function toDepositMode(mode: string): QboDepositMode {
 export default async function AdminInvoicesPage({ searchParams }: Props) {
   const params = await searchParams;
 
-  // No layout.tsx gates this subtree — `quickbooks` is `ownerCanToggle: true`,
-  // so the page (and the read procedures it calls) must stay reachable while
-  // the flag is off, same as `/admin/quotes`. `featureEnabled` is threaded
-  // through to the client to disable write actions instead.
-  const flags = await getBusinessFlags();
-  const featureEnabled = flags.isEnabled("quickbooks");
-
-  const [connectionData, { rows: allRows, totalCount: lifetimeTotal }] =
-    await Promise.all([
-      api.quickbooks.getConnection().catch(rethrowTrpcForErrorBoundary),
-      api.quickbooks.listInvoices().catch(rethrowTrpcForErrorBoundary),
-    ]);
+  // No layout.tsx gates this subtree: the nav shows Invoices when EITHER the
+  // `invoices` or the `quickbooks` flag is on, both are `ownerCanToggle`, and
+  // every read here is ungated — turning a feature off disables its write
+  // actions (threaded to the client as flags), never the records.
 
   // Whitelist everything going in. `pickParam` falls back rather than
-  // throwing, so `?status=bogus` / `?sort=bogus` render the default view with
-  // no chip and no 500; `buildTablePage` does the same for `?page=abc` and
-  // clamps an over-range `?page=` onto the last real page.
-  const search = params.search?.trim() ?? "";
-  const status = pickParam(
-    params.status,
-    QBO_INVOICE_STATUS_FILTER_VALUES,
-    QBO_INVOICE_STATUS_FILTER_DEFAULT,
+  // throwing, so `?status=bogus` / `?sort=customer-asc` (a retired QuickBooks
+  // sort) render the default view with no chip and no 500; `parsePageParam`
+  // does the same for `?page=abc`. Search is clipped to the validator's max so
+  // a pasted essay narrows instead of error-boundarying the page.
+  const search = (params.search?.trim() ?? "").slice(
+    0,
+    INVOICE_SEARCH_MAX_LENGTH,
   );
-  const kind = pickParam(
-    params.kind,
-    QBO_INVOICE_KIND_FILTER_VALUES,
-    QBO_INVOICE_KIND_FILTER_DEFAULT,
+  const status = pickParam(
+    params.status !== undefined
+      ? (LEGACY_QBO_STATUS[params.status] ?? params.status)
+      : undefined,
+    INVOICE_LIST_STATUS_FILTER_VALUES,
+    INVOICE_LIST_STATUS_FILTER_DEFAULT,
+  );
+  const source = pickParam(
+    params.source,
+    INVOICE_LIST_SOURCE_FILTER_VALUES,
+    INVOICE_LIST_SOURCE_FILTER_DEFAULT,
   );
   const sort = pickParam(
     params.sort,
-    QBO_INVOICE_SORT_VALUES,
-    QBO_INVOICE_SORT_DEFAULT,
+    INVOICE_LIST_SORT_VALUES,
+    INVOICE_LIST_SORT_DEFAULT,
   );
+  const requestedPage = parsePageParam(params.page) ?? 1;
   const openNew = params.new === "1";
 
-  const matching = allRows.filter((row) => {
-    // Exactly the four strings a row puts on screen: the customer name and
-    // email in the identity cell, the QuickBooks document number under them,
-    // and the linked lead's contact name in the Lead column. Tokenized, so
-    // "acme deposit" can match across two of them — and named in the client's
-    // `searchAriaLabel`, per §5b.
-    const matchesSearch = matchesAllTokens(search, [
-      row.customerName,
-      row.customerEmail,
-      row.qboDocNumber,
-      row.quoteSubmission?.contactName,
-    ]);
-    const matchesStatus = status === "all" || row.status === status;
-    const matchesKind = kind === "all" || row.kind === kind;
-    return matchesSearch && matchesStatus && matchesKind;
-  });
+  const [list, summary, connectionData] = await Promise.all([
+    api.invoice
+      .listUnified({
+        search: search || undefined,
+        status,
+        source,
+        sort,
+        page: requestedPage,
+      })
+      .catch(rethrowTrpcForErrorBoundary),
+    api.invoice.summary().catch(rethrowTrpcForErrorBoundary),
+    api.quickbooks.getConnection().catch(rethrowTrpcForErrorBoundary),
+  ]);
 
-  // `compareInvoiceRows` lives in the validators file next to the sort tuple it
-  // switches on, so the two can't drift and the ordering is unit-testable
-  // without an RSC render (Pages/Blog precedent). `buildTablePage` appends the
-  // `id` tie-break that keeps pagination stable.
-  const { pageItems, totalCount, totalPages, page } = buildTablePage(matching, {
-    pageParam: params.page,
-    pageSize: PAGE_SIZE,
-    comparePrimary: (a, b) => compareInvoiceRows(sort, a, b),
-  });
+  // Put the URL back in step with the page the router clamped to — see
+  // `canonicalPageHref`. Before the render, because `redirect` throws.
+  const canonicalHref = canonicalPageHref(BASE_PATH, params, list.page);
+  if (canonicalHref) redirect(canonicalHref);
+
+  // `sort` and `page` are excluded: neither changes WHICH invoices match.
+  const filtersNarrow = search !== "" || status !== "all" || source !== "all";
+
+  // "No invoices yet" vs "no matches" — `listUnified` computes this ignoring
+  // every filter, so no second round trip is needed here.
+  const hasAnyInvoices = list.hasAnyInvoices;
+
+  // `UnifiedInvoiceRow.qbo` now carries the QuickBooks-only fields the row
+  // actions and cells need (Intuit id for Refresh / Open in QuickBooks,
+  // `lastError`, kind, linked lead) straight from `listUnified` — no second
+  // `quickbooks.listInvoices` call.
+  const qboListCap = list.qboListCap;
+
+  const { connection } = connectionData;
 
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Invoices" }]} />
       <InvoicesClient
-        connection={connectionData.connection}
-        environment={connectionData.environment}
-        timeZone={connectionData.timeZone}
-        featureEnabled={featureEnabled}
-        rows={pageItems}
-        totalCount={totalCount}
-        totalPages={totalPages}
-        page={page}
-        pageSize={PAGE_SIZE}
-        lifetimeTotal={lifetimeTotal}
-        totalInvoices={allRows.length}
-        filters={[STATUS_FILTER, KIND_FILTER, SORT_FILTER]}
-        openNew={openNew}
-        defaultDueDays={
-          connectionData.connection?.defaultDueDays ?? DEFAULT_DUE_DAYS
+        rows={list.rows}
+        qboListCap={qboListCap}
+        totalCount={list.totalCount}
+        page={list.page}
+        pageCount={list.pageCount}
+        pageSize={list.pageSize}
+        status={status}
+        hasAnyInvoices={hasAnyInvoices}
+        filtersNarrow={filtersNarrow}
+        filters={
+          // The source filter only means something once QuickBooks rows
+          // exist — but stays while a `?source=` is applied, so its chip can
+          // still be removed.
+          list.hasQboRows || source !== "all"
+            ? [SOURCE_FILTER, SORT_FILTER]
+            : [SORT_FILTER]
         }
+        hasQboRows={list.hasQboRows}
+        invoicesEnabled={list.invoicesEnabled}
+        qboEnabled={list.qboEnabled}
+        summary={summary}
+        timeZone={list.timeZone}
+        connection={connection}
+        environment={connectionData.environment}
+        platformConfigured={connectionData.platformConfigured}
+        openNew={openNew}
+        defaultDueDays={connection?.defaultDueDays ?? DEFAULT_DUE_DAYS}
         depositRule={
-          connectionData.connection
+          connection
             ? {
-                depositMode: toDepositMode(
-                  connectionData.connection.depositMode,
-                ),
-                depositPercent: connectionData.connection.depositPercent,
-                depositFixedCents: connectionData.connection.depositFixedCents,
+                depositMode: toDepositMode(connection.depositMode),
+                depositPercent: connection.depositPercent,
+                depositFixedCents: connection.depositFixedCents,
               }
             : DEFAULT_DEPOSIT_RULE
         }

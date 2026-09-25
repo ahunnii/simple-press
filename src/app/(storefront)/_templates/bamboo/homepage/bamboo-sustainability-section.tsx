@@ -12,9 +12,23 @@ import {
 import { DEFAULT_BAMBOO_FEATURES } from ".";
 import { resolveFields } from "..";
 import { BambooWaveDivider } from "../shared/bamboo-wave-divider";
+import {
+  BambooWaveLeaves,
+  BambooWaveSprig,
+  BAND_WAVE_SPRIG_ROOT,
+  BAND_WAVE_SPRIG_SIZE,
+} from "../shared/bamboo-wave-leaves";
 import { BambooSectionHeading } from "./bamboo-section-heading";
 
-type Props = { customFields: unknown };
+type Props = {
+  customFields: unknown;
+  /**
+   * Whether a homepage band (Testimonials or Location) renders after this
+   * one. When false the footer follows directly and brings its own wave, so
+   * the bottom wave is skipped (see the note on the bottom wave below).
+   */
+  hasFollowingSection: boolean;
+};
 
 /**
  * Forest banner — the only place on the homepage where the icon rows go
@@ -23,9 +37,22 @@ type Props = { customFields: unknown };
  * full-bleed inner div, framed top and bottom by the shared wave divider so
  * the cream sections above (Featured) and below (Testimonials) flow in
  * instead of hitting a hard edge. The bottom wave uses `flip` so the crest
- * lands on the opposite side and the forest hugs the seam.
+ * lands on the opposite side and the forest hugs the seam. Both edges use the
+ * vivid metallic `hairline` line, like the value band.
+ *
+ * Leaves grow on the TOP wave only (the value band's wave-sprig treatment,
+ * via `shared/bamboo-wave-leaves.tsx`), rising over the bottom padding of the
+ * cream Featured band above. The bottom edge stays plain: the footer, which
+ * carries its own sprig, can follow it directly (and when it does, the bottom
+ * wave is skipped entirely, see `hasFollowingSection`). The section is `relative`
+ * so the leaf layer's `top-*` is measured from the top wave's top edge, and
+ * `overflow-x-clip` (clip, not hidden, so the upward overflow still paints)
+ * keeps horizontal scroll at zero.
  */
-export function BambooSustainabilitySection({ customFields }: Props) {
+export function BambooSustainabilitySection({
+  customFields,
+  hasFollowingSection,
+}: Props) {
   const f = resolveFields(customFields, [
     "bamboo.homepage.sustainability-eyebrow",
     "bamboo.homepage.sustainability-heading",
@@ -41,8 +68,9 @@ export function BambooSustainabilitySection({ customFields }: Props) {
     <section
       {...sectionGroupAttr("homepage", "sustainability")}
       aria-label="Sustainability"
+      className="relative overflow-x-clip"
     >
-      <BambooWaveDivider className="-mb-px h-14 md:h-24" />
+      <BambooWaveDivider variant="hairline" className="-mb-px h-14 md:h-24" />
 
       <div className="bg-[var(--bam-forest)]">
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-32 lg:px-8">
@@ -96,11 +124,29 @@ export function BambooSustainabilitySection({ customFields }: Props) {
           neighbor up beneath the wave so its own background shows through the
           transparent side — same composite contract as the footer lip. Both
           possible neighbors pad py-20 md:py-32, comfortably deeper than the
-          h-14/md:h-24 overlap. */}
-      <BambooWaveDivider
-        flip
-        className="pointer-events-none relative z-[1] -mt-px -mb-14 h-14 md:-mb-24 md:h-24"
-      />
+          h-14/md:h-24 overlap. The footer pads only py-16, so when it follows
+          directly this z-[1] wave would cover its first row (it hid the
+          "Connect" heading) and stack a second gold line under the footer's
+          own; like the About CTA, the band then ends flat and lets the
+          footer's wave mark the seam. */}
+      {hasFollowingSection && (
+        <BambooWaveDivider
+          flip
+          variant="hairline"
+          className="pointer-events-none relative z-[1] -mt-px -mb-14 h-14 md:-mb-24 md:h-24"
+        />
+      )}
+
+      <BambooWaveLeaves className="z-[2]">
+        <BambooWaveSprig
+          side="left"
+          className={`${BAND_WAVE_SPRIG_ROOT.left} ${BAND_WAVE_SPRIG_SIZE}`}
+        />
+        <BambooWaveSprig
+          side="right"
+          className={`${BAND_WAVE_SPRIG_ROOT.right} ${BAND_WAVE_SPRIG_SIZE}`}
+        />
+      </BambooWaveLeaves>
     </section>
   );
 }

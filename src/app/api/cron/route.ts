@@ -12,6 +12,8 @@
 //   7. quickbooksInvoiceSync — sync payment status for QuickBooks-issued invoices
 //   8. subscriptionSync    — re-derive due Subscription rows from Stripe
 //   9. loyaltyBirthday      — award birthday points to customers whose month/day is today (business time zone)
+//  10. invoiceOverdueAlerts — email an owner the first time one of their invoices goes past due
+//  11. invoiceWeeklyDigest  — Monday 8am (business time zone) owner summary of open invoices
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401 — and logs a one-time
@@ -34,6 +36,8 @@ import { sendBackInStockEmail } from "~/lib/email/templates";
 import { archivePastEvents } from "~/lib/events/archive";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
+import { notifyOverdueInvoices } from "~/lib/invoices/overdue-alerts";
+import { sendInvoiceDigests } from "~/lib/invoices/weekly-digest";
 import { awardBirthdayPoints } from "~/lib/loyalty/birthday";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
@@ -365,6 +369,27 @@ const JOBS: readonly CronJob[] = [
     key: "loyaltyBirthday",
     name: "loyalty-birthday",
     run: () => awardBirthdayPoints(db),
+  },
+  // Invoice overdue alert: emails an owner the tick their invoice first goes
+  // past due (business-time-zone local-midnight rule), stamping
+  // `overdueNotifiedAt` so it never fires twice. Per-business `invoices` flag
+  // gating and per-business error isolation live inside `notifyOverdueInvoices`.
+  // Alerts are also stamped (never emailed) when disabled in settings or more
+  // than 7 days overdue, so re-enabling the setting doesn't blast a backlog.
+  {
+    key: "invoiceOverdueAlerts",
+    name: "invoice-overdue-alerts",
+    run: () => notifyOverdueInvoices(db),
+  },
+  // Weekly invoice digest: a Monday-8am-local owner summary of open native
+  // invoices, deduped per calendar week via `InvoiceSettings.lastDigestWeekKey`.
+  // Per-business `invoices` flag gating and error isolation live inside
+  // `sendInvoiceDigests`. Steady state for a tenant with the digest off is a
+  // single cheap SELECT returning 0 rows.
+  {
+    key: "invoiceWeeklyDigest",
+    name: "invoice-weekly-digest",
+    run: () => sendInvoiceDigests(db),
   },
 ];
 

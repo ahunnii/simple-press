@@ -536,6 +536,13 @@ export function createBaseInventoryUnit(
     inventoryQty?: number;
     lowInventoryThreshold?: number | null;
     allowBackorders?: boolean;
+    /** "stock" (default) | "rental" */
+    itemType?: string;
+    sku?: string | null;
+    category?: string | null;
+    storageLocation?: string | null;
+    unitCostCents?: number | null;
+    reservedQty?: number;
   } = {},
 ) {
   return db.baseInventoryUnit.create({
@@ -546,7 +553,78 @@ export function createBaseInventoryUnit(
       inventoryQty: opts.inventoryQty ?? 0,
       lowInventoryThreshold: opts.lowInventoryThreshold ?? null,
       allowBackorders: opts.allowBackorders ?? false,
+      itemType: opts.itemType ?? "stock",
+      sku: opts.sku ?? null,
+      category: opts.category ?? null,
+      storageLocation: opts.storageLocation ?? null,
+      unitCostCents: opts.unitCostCents ?? null,
+      ...(opts.reservedQty !== undefined
+        ? { reservedQty: opts.reservedQty }
+        : {}),
     },
+  });
+}
+
+export type CreateInventoryCheckoutLineInput = {
+  itemId?: string | null;
+  itemName?: string;
+  qtyOut?: number;
+  qtyReturned?: number;
+  qtyDamaged?: number;
+  qtyLost?: number;
+};
+
+/**
+ * Creates an InventoryCheckout with its lines. Does NOT touch pool
+ * quantities (inventoryQty/reservedQty) on the referenced items — tests
+ * that need "units actually taken off hand" should apply that movement
+ * themselves (e.g. via the manual-movement helper or the checkout router),
+ * the same way this checkout would in production.
+ */
+export function createInventoryCheckout(
+  businessId: string,
+  opts: {
+    label?: string;
+    customerName?: string | null;
+    notes?: string | null;
+    status?: string;
+    checkedOutAt?: Date;
+    dueBackOn?: Date | null;
+    closedAt?: Date | null;
+    createdById?: string | null;
+    lines?: CreateInventoryCheckoutLineInput[];
+  } = {},
+) {
+  return db.inventoryCheckout.create({
+    data: {
+      businessId,
+      label: opts.label ?? "Test Checkout",
+      customerName: opts.customerName ?? null,
+      notes: opts.notes ?? null,
+      status: opts.status ?? "open",
+      ...(opts.checkedOutAt !== undefined
+        ? { checkedOutAt: opts.checkedOutAt }
+        : {}),
+      dueBackOn: opts.dueBackOn ?? null,
+      closedAt: opts.closedAt ?? null,
+      createdById: opts.createdById ?? null,
+      ...(opts.lines
+        ? {
+            lines: {
+              create: opts.lines.map((line) => ({
+                businessId,
+                itemId: line.itemId ?? null,
+                itemName: line.itemName ?? "Test Item",
+                qtyOut: line.qtyOut ?? 1,
+                qtyReturned: line.qtyReturned ?? 0,
+                qtyDamaged: line.qtyDamaged ?? 0,
+                qtyLost: line.qtyLost ?? 0,
+              })),
+            },
+          }
+        : {}),
+    },
+    include: { lines: true },
   });
 }
 

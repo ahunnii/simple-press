@@ -665,7 +665,7 @@ export function DashboardContent({
                               {pool.name}
                             </p>
                             <p className="text-muted-foreground text-xs">
-                              Inventory pool
+                              Inventory item
                             </p>
                           </div>
                         </div>
