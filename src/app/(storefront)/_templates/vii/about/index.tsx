@@ -5,9 +5,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const aboutHeroData: TemplateField[] = [
   {
     key: "vii.about.hero-image",
-    label: "Hero Background Image",
+    label: "Background photo",
     description:
-      "Full-width banner image at the top of the About page. Use a high-quality landscape photo.",
+      "Full-width banner photo at the top of the about page. Use a high-quality landscape photo.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -15,8 +15,8 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "vii.about.hero-overline",
-    label: "Hero Overline",
-    description: "Small uppercase label shown above the page title.",
+    label: "Small label",
+    description: "Small label shown above the page title. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -25,8 +25,8 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "vii.about.hero-heading",
-    label: "Hero Heading",
-    description: "The main page title overlaid on the hero image.",
+    label: "Heading",
+    description: "The main page title overlaid on the banner photo.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -40,8 +40,8 @@ const aboutHeroData: TemplateField[] = [
 const aboutMissionData: TemplateField[] = [
   {
     key: "vii.about.mission-overline",
-    label: "Mission Overline",
-    description: "Small uppercase label above the mission heading.",
+    label: "Small label",
+    description: "Small label above the mission heading.",
     type: "text",
     page: "about",
     group: "about.mission",
@@ -50,9 +50,9 @@ const aboutMissionData: TemplateField[] = [
   },
   {
     key: "vii.about.mission-heading",
-    label: "Mission Heading",
+    label: "Heading",
     description:
-      "The plain part of the two-part mission heading (e.g. 'A new sense of').",
+      "The plain part of the mission heading (e.g. 'A new sense of').",
     type: "text",
     page: "about",
     group: "about.mission",
@@ -61,9 +61,8 @@ const aboutMissionData: TemplateField[] = [
   },
   {
     key: "vii.about.mission-heading-accent",
-    label: "Mission Heading Accent Word",
-    description:
-      "The italic copper accent word completing the mission heading (e.g. 'skin').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "about",
     group: "about.mission",
@@ -72,9 +71,9 @@ const aboutMissionData: TemplateField[] = [
   },
   {
     key: "vii.about.mission-body",
-    label: "Mission Body Text",
+    label: "Body text",
     description:
-      "Opening paragraph introducing the studio, its mission, and what makes it different.",
+      "Opening paragraph introducing the business, its mission, and what makes it different. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.mission",
@@ -84,13 +83,13 @@ const aboutMissionData: TemplateField[] = [
   },
 ];
 
-// ─── Facial Steps ─────────────────────────────────────────────────────────────
+// ─── Steps ─────────────────────────────────────────────────────────────────
 
 const aboutStepsData: TemplateField[] = [
   {
     key: "vii.about.steps-overline",
-    label: "Steps Overline",
-    description: "Small uppercase label above the facial-steps heading.",
+    label: "Small label",
+    description: "Small label above the steps heading.",
     type: "text",
     page: "about",
     group: "about.steps",
@@ -99,9 +98,9 @@ const aboutStepsData: TemplateField[] = [
   },
   {
     key: "vii.about.steps-heading",
-    label: "Steps Heading",
+    label: "Heading",
     description:
-      "The plain part of the facial-steps heading (e.g. 'Your facial, step by').",
+      "The plain part of the steps heading (e.g. 'Your facial, step by').",
     type: "text",
     page: "about",
     group: "about.steps",
@@ -110,9 +109,8 @@ const aboutStepsData: TemplateField[] = [
   },
   {
     key: "vii.about.steps-heading-accent",
-    label: "Steps Heading Accent Word",
-    description:
-      "The italic copper accent word completing the steps heading (e.g. 'step').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "about",
     group: "about.steps",
@@ -121,9 +119,8 @@ const aboutStepsData: TemplateField[] = [
   },
   {
     key: "vii.about.steps-intro",
-    label: "Steps Intro Text",
-    description:
-      "Short paragraph introducing the six-step facial below the heading.",
+    label: "Intro text",
+    description: "Short paragraph introducing the steps below the heading.",
     type: "textarea",
     page: "about",
     group: "about.steps",
@@ -133,45 +130,52 @@ const aboutStepsData: TemplateField[] = [
   },
   {
     key: "vii.about.steps",
-    label: "Facial Steps",
+    label: "Steps",
     description:
-      "The steps of your signature facial, each shown as an alternating image-and-text row. Up to 6 steps. Leave empty to use the built-in example steps.",
+      "Each step is shown as an alternating photo-and-text row. Up to 6 steps. Shows built-in example steps when this list is empty.",
     type: "list",
     page: "about",
     group: "about.steps",
     gridColumn: "col-span-full",
+    itemLabel: "step",
+    defaultsWhenEmpty: true,
     maxItems: 6,
     itemSchema: [
       {
         key: "image",
-        label: "Step Image",
+        label: "Photo",
         type: "image",
-        placeholder: "Upload an image for this step",
+        description: "Photo for this step. Shows a plain color fill when blank.",
+        placeholder: "Upload a photo for this step",
+        optional: true,
       },
       {
         key: "title",
-        label: "Step Title",
+        label: "Title",
         type: "text",
+        description: "Short name for this step.",
         placeholder: "e.g. Cleanse",
       },
       {
         key: "body",
-        label: "Step Description",
+        label: "Description",
         type: "textarea",
+        description: "A sentence or two describing this step. Leave blank to hide.",
         placeholder: "Describe what happens during this step",
+        optional: true,
       },
     ],
   },
 ];
 
-// ─── Atmospheric Band ─────────────────────────────────────────────────────────
+// ─── Statement banner ─────────────────────────────────────────────────────────
 
 const aboutBandData: TemplateField[] = [
   {
     key: "vii.about.band-image",
-    label: "Band Background Image",
+    label: "Background photo",
     description:
-      "Full-width image behind the brand statement. A calm, atmospheric photo works best.",
+      "Full-width photo behind the statement below. A calm, atmospheric photo works best.",
     type: "image",
     page: "about",
     group: "about.band",
@@ -179,8 +183,8 @@ const aboutBandData: TemplateField[] = [
   },
   {
     key: "vii.about.band-label",
-    label: "Band Label",
-    description: "Small uppercase label shown above the statement (optional).",
+    label: "Small label",
+    description: "Small label shown above the statement. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.band",
@@ -189,9 +193,9 @@ const aboutBandData: TemplateField[] = [
   },
   {
     key: "vii.about.band-statement",
-    label: "Band Statement",
+    label: "Statement",
     description:
-      "A short, evocative brand statement shown over the dark image band. Leave empty to hide this section.",
+      "A short, evocative statement shown over the banner photo. Leave blank to hide this whole section.",
     type: "textarea",
     page: "about",
     group: "about.band",
@@ -201,13 +205,13 @@ const aboutBandData: TemplateField[] = [
   },
 ];
 
-// ─── Meet the Team: Owner Spotlight ───────────────────────────────────────────
+// ─── Meet the owner ────────────────────────────────────────────────────────────
 
 const aboutOwnerData: TemplateField[] = [
   {
     key: "vii.about.owner-overline",
-    label: "Owner Overline",
-    description: "Small uppercase label above the owner heading.",
+    label: "Small label",
+    description: "Small label above the owner heading. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.owner",
@@ -216,7 +220,7 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "vii.about.owner-heading",
-    label: "Owner Heading",
+    label: "Heading",
     description: "The plain part of the owner heading (e.g. 'Meet').",
     type: "text",
     page: "about",
@@ -226,9 +230,9 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "vii.about.owner-heading-accent",
-    label: "Owner Name (Accent)",
+    label: "Heading, highlighted words",
     description:
-      "The italic copper accent word completing the heading — typically the owner's name (e.g. 'Simone').",
+      "Shown in italics after the heading — typically the owner's name.",
     type: "text",
     page: "about",
     group: "about.owner",
@@ -237,9 +241,9 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "vii.about.owner-role",
-    label: "Owner Role",
+    label: "Role",
     description:
-      "The owner's title or credentials (e.g. 'Founder & Lead Esthetician').",
+      "The owner's title or credentials (e.g. 'Founder & Lead Esthetician'). Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.owner",
@@ -248,9 +252,9 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "vii.about.owner-body",
-    label: "Owner Bio",
+    label: "Bio",
     description:
-      "A paragraph introducing the owner — their story, expertise, and what they bring to your skin.",
+      "A paragraph introducing the owner — their story, expertise, and what they bring to your skin. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.owner",
@@ -260,8 +264,8 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "vii.about.owner-image",
-    label: "Owner Portrait",
-    description: "A portrait photo of the owner (shown in the right column).",
+    label: "Portrait",
+    description: "A portrait photo of the owner, shown in the right column.",
     type: "image",
     page: "about",
     group: "about.owner",
@@ -269,14 +273,13 @@ const aboutOwnerData: TemplateField[] = [
   },
 ];
 
-// ─── Meet the Team: Grid ──────────────────────────────────────────────────────
+// ─── Meet the team ─────────────────────────────────────────────────────────────
 
 const aboutTeamData: TemplateField[] = [
   {
     key: "vii.about.team-overline",
-    label: "Team Overline",
-    description:
-      "Small uppercase label above the team grid heading (optional).",
+    label: "Small label",
+    description: "Small label above the team heading. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.team",
@@ -285,8 +288,8 @@ const aboutTeamData: TemplateField[] = [
   },
   {
     key: "vii.about.team-heading",
-    label: "Team Heading",
-    description: "Heading for the team grid section.",
+    label: "Heading",
+    description: "Heading above the team grid.",
     type: "text",
     page: "about",
     group: "about.team",
@@ -295,8 +298,8 @@ const aboutTeamData: TemplateField[] = [
   },
   {
     key: "vii.about.team-intro",
-    label: "Team Intro Text",
-    description: "Short paragraph introducing the team grid below (optional).",
+    label: "Intro text",
+    description: "Short paragraph introducing the team grid below. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.team",
@@ -306,50 +309,59 @@ const aboutTeamData: TemplateField[] = [
   },
   {
     key: "vii.about.team",
-    label: "Team Members",
+    label: "Team members",
     description:
-      "Your estheticians and staff, shown as a grid of cards. Leave empty to use the built-in example team.",
+      "Your staff, shown as a grid of cards. Shows built-in example team members when this list is empty.",
     type: "list",
     page: "about",
     group: "about.team",
     gridColumn: "col-span-full",
+    itemLabel: "team member",
+    defaultsWhenEmpty: true,
     maxItems: 8,
     itemSchema: [
       {
         key: "image",
         label: "Photo",
         type: "image",
+        description: "Portrait photo. Shows a plain color fill when blank.",
         placeholder: "Upload a portrait photo",
+        optional: true,
       },
       {
         key: "name",
         label: "Name",
         type: "text",
-        placeholder: "e.g. Maya Brooks",
+        description: "This team member's name.",
+        placeholder: "e.g. Jane Doe",
       },
       {
         key: "role",
         label: "Role",
         type: "text",
+        description: "Job title or role. Leave blank to hide.",
         placeholder: "e.g. Licensed Esthetician",
+        optional: true,
       },
       {
         key: "bio",
-        label: "Short Bio",
+        label: "Short bio",
         type: "textarea",
-        placeholder: "A sentence or two about this team member (optional)",
+        description: "A sentence or two about this team member. Leave blank to hide.",
+        placeholder: "A sentence or two about this team member",
+        optional: true,
       },
     ],
   },
 ];
 
-// ─── Contact CTA ──────────────────────────────────────────────────────────────
+// ─── Contact ──────────────────────────────────────────────────────────────────
 
 const aboutCtaData: TemplateField[] = [
   {
     key: "vii.about.cta-image",
-    label: "CTA Background Image",
-    description: "Dark background image behind the closing contact section.",
+    label: "Background photo",
+    description: "Photo behind this closing contact section.",
     type: "image",
     page: "about",
     group: "about.cta",
@@ -357,8 +369,8 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "vii.about.cta-heading",
-    label: "CTA Heading",
-    description: "Large italic heading for the closing contact section.",
+    label: "Heading",
+    description: "Large italic heading for this closing contact section.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -367,8 +379,8 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "vii.about.cta-subheading",
-    label: "CTA Subheading",
-    description: "Small uppercase label below the CTA heading.",
+    label: "Small label",
+    description: "Small label below the heading.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -377,7 +389,7 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "vii.about.cta-body",
-    label: "CTA Body Text",
+    label: "Body text",
     description: "Short invitation to book or reach out.",
     type: "textarea",
     page: "about",
@@ -388,9 +400,9 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "vii.about.cta-button-label",
-    label: "Button Label",
+    label: "Button text",
     description:
-      "Text for the primary call-to-action button. Leave empty to hide the button.",
+      "Text for the primary button. Leave blank to hide it.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -399,9 +411,9 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "vii.about.cta-button-link",
-    label: "Button Link",
+    label: "Button link",
     description:
-      "Where the button sends visitors — your services page or an external booking link (e.g. Vagaro).",
+      "Where the button sends visitors — your services page or an external booking link.",
     type: "url",
     page: "about",
     group: "about.cta",
@@ -409,30 +421,10 @@ const aboutCtaData: TemplateField[] = [
     defaultValue: "/services",
   },
   {
-    key: "vii.about.cta-phone",
-    label: "Phone Number",
-    description: "Phone number displayed in the contact section.",
-    type: "text",
-    page: "about",
-    group: "about.cta",
-    gridColumn: "col-span-1",
-    placeholder: "e.g. +1 (313) 555-0100",
-  },
-  {
-    key: "vii.about.cta-email",
-    label: "Contact Email",
-    description: "Email address displayed in the contact section.",
-    type: "text",
-    page: "about",
-    group: "about.cta",
-    gridColumn: "col-span-1",
-    placeholder: "e.g. hello@skinbarvii.com",
-  },
-  {
     key: "vii.about.cta-show-phone",
-    label: "Show phone number in this section",
+    label: "Show phone number",
     description:
-      "Display the phone number above in the contact section. Turn off for booking-only CTAs.",
+      "Display your business phone number (from Settings) in this section. Turn off for booking-only sections.",
     type: "boolean",
     page: "about",
     group: "about.cta",
@@ -441,9 +433,9 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "vii.about.cta-show-email",
-    label: "Show email in this section",
+    label: "Show email",
     description:
-      "Display the email above in the contact section. Turn off for booking-only CTAs.",
+      "Display your business email (from Settings) in this section. Turn off for booking-only sections.",
     type: "boolean",
     page: "about",
     group: "about.cta",
@@ -469,38 +461,38 @@ export const viiAboutData: TemplateField[] = [
 export const viiAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "About Hero",
-    description: "Full-width banner image with overline and page title",
+    title: "Page header",
+    description: "Full-width banner photo with a small label and page title",
     icon: "🌿",
     columns: 2,
   },
   {
     id: "about.mission",
-    title: "Mission Statement",
+    title: "Mission",
     description:
-      "Centered two-part heading and opening paragraph introducing the studio",
+      "Centered two-part heading and opening paragraph introducing the business",
     icon: "✨",
     columns: 2,
   },
   {
     id: "about.steps",
-    title: "Facial Steps",
+    title: "Steps",
     description:
-      "Heading, intro, and the alternating image-and-text rows for your six-step facial",
+      "Heading, intro, and the alternating photo-and-text rows for your process",
     icon: "💆",
     columns: 2,
   },
   {
     id: "about.band",
-    title: "Brand Statement Band",
+    title: "Statement banner",
     description:
-      "Dark image band with a short, evocative brand statement overlaid",
+      "Full-width photo banner with a short, evocative statement overlaid",
     icon: "🎯",
     columns: 2,
   },
   {
     id: "about.owner",
-    title: "Meet the Owner",
+    title: "Meet the owner",
     description:
       "Two-column owner spotlight: heading, role, bio, and a portrait photo",
     icon: "👤",
@@ -508,16 +500,16 @@ export const viiAboutFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "about.team",
-    title: "Meet the Team",
-    description: "Heading, intro, and a grid of your estheticians and staff",
+    title: "Meet the team",
+    description: "Heading, intro, and a grid of your staff",
     icon: "🧑‍🤝‍🧑",
     columns: 2,
   },
   {
     id: "about.cta",
-    title: "Closing Contact CTA",
+    title: "Contact",
     description:
-      "Dark contact section with heading, body, a booking button, phone, and email",
+      "Closing contact section with heading, body text, a booking button, phone, and email",
     icon: "📞",
     columns: 2,
   },

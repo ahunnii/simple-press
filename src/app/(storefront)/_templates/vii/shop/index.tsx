@@ -1,12 +1,12 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
-// ─── Shop: Intro ────────────────────────────────────────────────────────────
+// ─── Shop page ──────────────────────────────────────────────────────────────
 
 const shopIntroData: TemplateField[] = [
   {
     key: "vii.shop.intro-overline",
-    label: "Shop Overline",
-    description: "Small caps label above the shop heading.",
+    label: "Small label",
+    description: "Small label above the shop heading.",
     type: "text",
     page: "shop",
     group: "shop.intro",
@@ -15,9 +15,9 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "vii.shop.intro-heading",
-    label: "Shop Heading",
+    label: "Heading",
     description:
-      "The plain part of the shop heading (e.g. 'Discover'). Pairs with the accent word.",
+      "The plain part of the shop heading (e.g. 'Discover'). Pairs with the highlighted words.",
     type: "text",
     page: "shop",
     group: "shop.intro",
@@ -26,9 +26,8 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "vii.shop.intro-accent",
-    label: "Shop Heading Accent Word",
-    description:
-      "The italic copper accent word completing the shop heading (e.g. 'our edit').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "shop",
     group: "shop.intro",
@@ -37,7 +36,7 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "vii.shop.intro-body",
-    label: "Shop Intro Text",
+    label: "Body text",
     description:
       "Short paragraph beneath the shop heading introducing your products.",
     type: "textarea",
@@ -49,9 +48,9 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "vii.shop.collections-overline",
-    label: "Collections Strip Overline",
+    label: "Small label",
     description:
-      "Small caps label above the collections strip at the bottom of the shop page.",
+      "Small label above the collections strip at the bottom of the shop page.",
     type: "text",
     page: "shop",
     group: "shop.intro",
@@ -60,7 +59,7 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "vii.shop.collections-heading",
-    label: "Collections Strip Heading",
+    label: "Collections strip heading",
     description:
       "Heading for the collections strip at the bottom of the shop page. Leave blank to hide the strip.",
     type: "text",
@@ -71,15 +70,14 @@ const shopIntroData: TemplateField[] = [
   },
 ];
 
-// ─── Shop: Beyond the Catalog (promo band + brands toggle) ──────────────────
+// ─── Promo panels ────────────────────────────────────────────────────────────
 
 const shopBeyondData: TemplateField[] = [
-  // Left / navy half — gift cards
+  // First panel — e.g. gift cards
   {
     key: "vii.shop.promo-left-overline",
-    label: "Left Panel Overline",
-    description:
-      "Small caps label above the heading in the navy (gift cards) panel.",
+    label: "First panel: small label",
+    description: "Small label above the heading in the first promo panel.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -88,9 +86,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-left-heading",
-    label: "Left Panel Heading",
+    label: "First panel: heading",
     description:
-      'Plain heading text for the navy panel (e.g. "Give the gift of"). Pairs with the accent word.',
+      "Plain heading text for the first panel (e.g. 'Give the gift of'). Pairs with the highlighted words.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -99,9 +97,8 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-left-accent",
-    label: "Left Panel Accent Word",
-    description:
-      'Italic copper-light accent word completing the navy panel heading (e.g. "ritual").',
+    label: "First panel: heading, highlighted words",
+    description: "Shown in italics after the first panel's heading.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -110,9 +107,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-left-body",
-    label: "Left Panel Body",
+    label: "First panel: body text",
     description:
-      "Short supporting copy for the navy (gift cards) panel. One to two sentences.",
+      "Short supporting copy for the first panel. One to two sentences.",
     type: "textarea",
     page: "shop",
     group: "shop.beyond",
@@ -122,9 +119,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-left-image",
-    label: "Left Panel Image",
+    label: "First panel: photo",
     description:
-      "Optional small decorative or brand image shown above the heading in the navy panel.",
+      "Optional small decorative or brand photo shown above the heading in the first panel. Leave blank to hide it.",
     type: "image",
     page: "shop",
     group: "shop.beyond",
@@ -133,9 +130,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-left-button-label",
-    label: "Left Panel Button Label",
+    label: "First panel: button text",
     description:
-      'CTA button label for the navy panel (e.g. "Buy a gift card").',
+      "Button text for the first panel (e.g. 'Buy a gift card'). Both this and the button link must be set for the button to appear.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -144,8 +141,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-left-button-link",
-    label: "Left Panel Button Link",
-    description: 'Destination URL for the navy panel CTA (e.g. "/gift-cards").',
+    label: "First panel: button link",
+    description:
+      "Where the first panel's button sends visitors (e.g. '/gift-cards').",
     type: "url",
     page: "shop",
     group: "shop.beyond",
@@ -153,12 +151,11 @@ const shopBeyondData: TemplateField[] = [
     defaultValue: "/gift-cards",
   },
 
-  // Right / cream half — haircare
+  // Second panel — e.g. haircare
   {
     key: "vii.shop.promo-right-overline",
-    label: "Right Panel Overline",
-    description:
-      "Small caps label above the heading in the cream (haircare) panel.",
+    label: "Second panel: small label",
+    description: "Small label above the heading in the second promo panel.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -167,9 +164,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-right-heading",
-    label: "Right Panel Heading",
+    label: "Second panel: heading",
     description:
-      'Plain heading text for the cream panel (e.g. "The products we"). Pairs with the accent word.',
+      "Plain heading text for the second panel (e.g. 'The products we'). Pairs with the highlighted words.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -178,9 +175,8 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-right-accent",
-    label: "Right Panel Accent Word",
-    description:
-      'Italic copper accent word completing the cream panel heading (e.g. "trust").',
+    label: "Second panel: heading, highlighted words",
+    description: "Shown in italics after the second panel's heading.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -189,9 +185,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-right-body",
-    label: "Right Panel Body",
+    label: "Second panel: body text",
     description:
-      "Short supporting copy for the cream (haircare) panel. One to two sentences.",
+      "Short supporting copy for the second panel. One to two sentences.",
     type: "textarea",
     page: "shop",
     group: "shop.beyond",
@@ -201,9 +197,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-right-image",
-    label: "Right Panel Logo",
+    label: "Second panel: logo",
     description:
-      "Optional brand logo shown above the heading in the cream panel. Displayed at roughly 40–64px tall with auto width.",
+      "Optional brand logo shown above the heading in the second panel. Displayed at roughly 40–64px tall with auto width. Leave blank to hide it.",
     type: "image",
     page: "shop",
     group: "shop.beyond",
@@ -212,8 +208,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-right-button-label",
-    label: "Right Panel Button Label",
-    description: 'CTA button label for the cream panel (e.g. "Shop haircare").',
+    label: "Second panel: button text",
+    description:
+      "Button text for the second panel (e.g. 'Shop haircare'). Both this and the button link must be set for the button to appear.",
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -222,9 +219,9 @@ const shopBeyondData: TemplateField[] = [
   },
   {
     key: "vii.shop.promo-right-button-link",
-    label: "Right Panel Button Link",
+    label: "Second panel: button link",
     description:
-      "Destination URL for the cream panel CTA. Leave blank to hide the button.",
+      "Where the second panel's button sends visitors. Leave blank to hide the button.",
     type: "url",
     page: "shop",
     group: "shop.beyond",
@@ -235,9 +232,9 @@ const shopBeyondData: TemplateField[] = [
   // Brands marquee toggle
   {
     key: "vii.shop.show-brands",
-    label: "Show 'Brands We Carry' Marquee",
+    label: "Show brand logos",
     description:
-      "When enabled, shows the brands marquee section at the bottom of the shop page. Logo images are reused from the homepage Brands fields — configure them under the Homepage settings.",
+      "When on, shows a row of brand logos at the bottom of the shop page. The logos are reused from the homepage Brands field — configure them under the Homepage settings.",
     type: "boolean",
     page: "shop",
     group: "shop.beyond",
@@ -256,17 +253,17 @@ export const viiShopData: TemplateField[] = [
 export const viiShopFieldGroups: TemplateFieldGroup[] = [
   {
     id: "shop.intro",
-    title: "Shop Page",
+    title: "Shop page",
     description:
-      "Editorial intro (overline, heading, body) and the collections strip shown on the shop page",
+      "Editorial intro (small label, heading, body) and the collections strip shown on the shop page",
     icon: "🛍️",
     columns: 2,
   },
   {
     id: "shop.beyond",
-    title: "Beyond the Catalog",
+    title: "Promo panels",
     description:
-      "Dual-color promo band shown below the product grid — a navy panel (e.g. gift cards) and a cream panel (e.g. haircare). Also controls the brands marquee at the bottom of the page.",
+      "Two-panel promo band shown below the product grid — e.g. one panel for gift cards and one for a featured category. Also controls the brand logos at the bottom of the page.",
     icon: "✦",
     columns: 2,
   },

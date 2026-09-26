@@ -192,6 +192,9 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         featureFlags: true,
         businessAddress: true,
+        // City only (public, like `businessAddress`) — vii's wordmark
+        // location tag. See `_templates/vii/shared/vii-location-tag.ts`.
+        addressCity: true,
         // Map pin. Public by design — see `~/lib/address/coordinates`.
         latitude: true,
         longitude: true,
@@ -1050,8 +1053,10 @@ export const businessRouter = createTRPCRouter({
         })
         .refine(
           (data) => {
-            const latSet = data.latitude !== null && data.latitude !== undefined;
-            const lngSet = data.longitude !== null && data.longitude !== undefined;
+            const latSet =
+              data.latitude !== null && data.latitude !== undefined;
+            const lngSet =
+              data.longitude !== null && data.longitude !== undefined;
             return latSet === lngSet;
           },
           {

@@ -3,6 +3,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { resolveViiLocationTag } from "../shared/vii-location-tag";
 import { ViiBlogClient } from "./vii-blog-client";
 import { ViiBlogHero } from "./vii-blog-hero";
 import { ViiBlogReadLink } from "./vii-blog-read-link";
@@ -33,6 +34,7 @@ export function ViiBlogPage({ pages, business, customFields }: Props) {
   const coverImage = f["vii.blog.hero-image"]?.trim()
     ? f["vii.blog.hero-image"]
     : undefined;
+  const locationTag = resolveViiLocationTag(business, fields);
 
   return (
     <PageTransition>
@@ -42,6 +44,7 @@ export function ViiBlogPage({ pages, business, customFields }: Props) {
         headingAccent={headingAccent}
         intro={intro}
         storyCount={pages.length}
+        locationTag={locationTag}
       />
 
       {/* 2. Posts — or empty state */}

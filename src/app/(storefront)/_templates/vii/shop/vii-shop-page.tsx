@@ -2,6 +2,7 @@ import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 
@@ -97,6 +98,7 @@ export async function ViiShopPage({
       {/* Editorial intro */}
       <section
         aria-labelledby="vii-shop-heading"
+        {...sectionGroupAttr("shop", "intro")}
         style={{
           background: "var(--vii-cream)",
           // Clear the fixed header (≈106px) plus generous editorial breathing room.
@@ -111,6 +113,7 @@ export async function ViiShopPage({
             <ViiOverline
               align="center"
               tone="light"
+              fieldKey="vii.shop.intro-overline"
               style={{ marginBottom: 14 }}
             >
               {overline}
@@ -130,13 +133,17 @@ export async function ViiShopPage({
             {heading}
             {heading && accent ? " " : ""}
             {accent && (
-              <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+              <em
+                {...fieldAttr("vii.shop.intro-accent")}
+                style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+              >
                 {accent}
               </em>
             )}
           </h1>
           {f["vii.shop.intro-body"] && (
             <p
+              {...fieldAttr("vii.shop.intro-body")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.4vw, 17px)",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { TemplateListItemField } from "./template-fields";
+
 import {
   getListRowSummary,
   getRawCustomFieldString,
@@ -8,6 +9,8 @@ import {
   parseFaqPickerIds,
   parseTemplateListRows,
   resolveFaqPickerItems,
+  RETIRED_TEMPLATE_KEYS,
+  TEMPLATE_FIELDS,
 } from "./template-fields";
 
 /**
@@ -192,10 +195,9 @@ describe("getListRowSummary", () => {
       getListRowSummary({ title: "  ", body: "\n\t " }, itemSchema),
     ).toBeNull();
     expect(
-      getListRowSummary(
-        { icon: "star" },
-        [{ key: "icon", label: "Icon", type: "icon" }],
-      ),
+      getListRowSummary({ icon: "star" }, [
+        { key: "icon", label: "Icon", type: "icon" },
+      ]),
     ).toBeNull();
   });
 });
@@ -231,6 +233,17 @@ describe("isRetiredTemplateKey", () => {
     expect(isRetiredTemplateKey("bamboo.global.map-lat")).toBe(true);
     expect(isRetiredTemplateKey("bamboo.global.map-lng")).toBe(true);
     expect(isRetiredTemplateKey("bamboo.contact.hours")).toBe(true);
+    expect(isRetiredTemplateKey("vii.contact.map-lat")).toBe(true);
+    expect(isRetiredTemplateKey("vii.global.footer-tagline")).toBe(true);
+    expect(isRetiredTemplateKey("vii.homepage.instagram-embed")).toBe(true);
+  });
+
+  it("is never still declared by a template", () => {
+    const declared = Object.values(TEMPLATE_FIELDS)
+      .flat()
+      .map((field) => field.key)
+      .filter((key) => RETIRED_TEMPLATE_KEYS.has(key));
+    expect(declared).toEqual([]);
   });
 
   it("returns false for an active key", () => {

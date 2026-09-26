@@ -115,4 +115,10 @@ export const SECTION_LINKS = {
     href: "/admin/settings/hours",
     description: "Opening hours shown on your contact page.",
   },
+  // No featureKey: Content → Branding is core site content, not a flag.
+  branding: {
+    label: "Brand & appearance",
+    href: "/admin/content/branding",
+    description: "Your footer tagline and social media links.",
+  },
 } as const satisfies Record<string, SectionLink>;

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -223,6 +224,7 @@ export function ViiTestimonialsClient({
       {/* ── Hero (cream) ────────────────────────────────────────────────────── */}
       <section
         aria-labelledby="vii-testimonials-heading"
+        {...sectionGroupAttr("testimonials", "hero")}
         style={{
           background: "var(--vii-cream)",
           padding:
@@ -238,6 +240,7 @@ export function ViiTestimonialsClient({
             <ViiOverline
               align="center"
               tone="light"
+              fieldKey="vii.testimonials.overline"
               style={{ marginBottom: 14 }}
             >
               {overline}
@@ -256,13 +259,17 @@ export function ViiTestimonialsClient({
             }}
           >
             {heading}{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+            <em
+              {...fieldAttr("vii.testimonials.heading-accent")}
+              style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+            >
               {headingAccent}
             </em>
           </h1>
 
           {intro && (
             <p
+              {...fieldAttr("vii.testimonials.intro")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.4vw, 17px)",
@@ -387,6 +394,7 @@ export function ViiTestimonialsClient({
       ) : (
         /* ── Empty state ──────────────────────────────────────────────────── */
         <section
+          {...sectionGroupAttr("testimonials", "hero")}
           style={{
             background: "var(--vii-paper)",
             padding: "clamp(72px, 12vw, 140px) clamp(24px, 8vw, 120px)",
@@ -394,6 +402,7 @@ export function ViiTestimonialsClient({
         >
           <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
             <p
+              {...fieldAttr("vii.testimonials.empty-message")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: 16,
@@ -436,6 +445,7 @@ export function ViiTestimonialsClient({
       {/* ── CTA band ────────────────────────────────────────────────────────── */}
       <section
         aria-labelledby="vii-testimonials-cta-heading"
+        {...sectionGroupAttr("testimonials", "cta")}
         style={{
           background: "var(--vii-cream)",
           padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
@@ -458,13 +468,17 @@ export function ViiTestimonialsClient({
             }}
           >
             {ctaHeading}{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+            <em
+              {...fieldAttr("vii.testimonials.cta-heading-accent")}
+              style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+            >
               {ctaHeadingAccent}
             </em>
           </h2>
 
           {ctaBody && (
             <p
+              {...fieldAttr("vii.testimonials.cta-body")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.4vw, 17px)",
@@ -481,6 +495,7 @@ export function ViiTestimonialsClient({
           <Link
             href="/testimonials/submit"
             className="vii-cta-btn"
+            {...fieldAttr("vii.testimonials.cta-button")}
             style={{
               display: "inline-block",
               position: "relative",

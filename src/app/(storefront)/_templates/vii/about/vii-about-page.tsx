@@ -2,11 +2,15 @@ import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TemplateListRow } from "~/lib/template-fields";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import {
+  getRawCustomFieldString,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
+import { nonBlank } from "../shared/vii-non-blank";
 import { ViiAboutBand } from "./vii-about-band";
 import { ViiAboutHero } from "./vii-about-hero";
 import { ViiAboutMission } from "./vii-about-mission";
@@ -121,8 +125,6 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
     "vii.about.cta-body",
     "vii.about.cta-button-label",
     "vii.about.cta-button-link",
-    "vii.about.cta-phone",
-    "vii.about.cta-email",
     "vii.about.cta-show-phone",
     "vii.about.cta-show-email",
   ]);
@@ -132,6 +134,18 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
   const parsedTeam = parseTemplateListRows(customFields?.["vii.about.team"]);
   const team = parsedTeam.length > 0 ? parsedTeam : DEFAULT_TEAM;
+
+  // CTA phone/email: Settings → General wins; else the legacy per-template
+  // fields (retired 2026-09-25, a read-only fallback — never written or
+  // cleared from here). The show-phone/show-email toggles still apply.
+  const ctaPhone =
+    nonBlank(business.phoneNumber) ??
+    nonBlank(getRawCustomFieldString(customFields, "vii.about.cta-phone")) ??
+    "";
+  const ctaEmail =
+    nonBlank(business.supportEmail) ??
+    nonBlank(getRawCustomFieldString(customFields, "vii.about.cta-email")) ??
+    "";
 
   return (
     <PageTransition>
@@ -143,46 +157,56 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
       />
 
       {/* 2. Mission */}
-      <ViiAboutMission
-        overline={f["vii.about.mission-overline"] ?? ""}
-        heading={f["vii.about.mission-heading"] ?? ""}
-        headingAccent={f["vii.about.mission-heading-accent"] ?? ""}
-        body={f["vii.about.mission-body"] ?? ""}
-      />
+      {isSectionVisible(customFields, "vii", "about.mission") && (
+        <ViiAboutMission
+          overline={f["vii.about.mission-overline"] ?? ""}
+          heading={f["vii.about.mission-heading"] ?? ""}
+          headingAccent={f["vii.about.mission-heading-accent"] ?? ""}
+          body={f["vii.about.mission-body"] ?? ""}
+        />
+      )}
 
       {/* 3. Six-step facial ritual */}
-      <ViiAboutSteps
-        overline={f["vii.about.steps-overline"] ?? ""}
-        heading={f["vii.about.steps-heading"] ?? ""}
-        headingAccent={f["vii.about.steps-heading-accent"] ?? ""}
-        intro={f["vii.about.steps-intro"] ?? ""}
-        steps={steps}
-      />
+      {isSectionVisible(customFields, "vii", "about.steps") && (
+        <ViiAboutSteps
+          overline={f["vii.about.steps-overline"] ?? ""}
+          heading={f["vii.about.steps-heading"] ?? ""}
+          headingAccent={f["vii.about.steps-heading-accent"] ?? ""}
+          intro={f["vii.about.steps-intro"] ?? ""}
+          steps={steps}
+        />
+      )}
 
       {/* 4. Atmospheric brand-statement band */}
-      <ViiAboutBand
-        bandImage={f["vii.about.band-image"] ?? undefined}
-        label={f["vii.about.band-label"] ?? ""}
-        statement={f["vii.about.band-statement"] ?? ""}
-      />
+      {isSectionVisible(customFields, "vii", "about.band") && (
+        <ViiAboutBand
+          bandImage={f["vii.about.band-image"] ?? undefined}
+          label={f["vii.about.band-label"] ?? ""}
+          statement={f["vii.about.band-statement"] ?? ""}
+        />
+      )}
 
       {/* 5. Meet the team — owner spotlight */}
-      <ViiAboutTeamOwner
-        overline={f["vii.about.owner-overline"] ?? ""}
-        heading={f["vii.about.owner-heading"] ?? ""}
-        headingAccent={f["vii.about.owner-heading-accent"] ?? ""}
-        role={f["vii.about.owner-role"] ?? ""}
-        body={f["vii.about.owner-body"] ?? ""}
-        ownerImage={f["vii.about.owner-image"] ?? undefined}
-      />
+      {isSectionVisible(customFields, "vii", "about.owner") && (
+        <ViiAboutTeamOwner
+          overline={f["vii.about.owner-overline"] ?? ""}
+          heading={f["vii.about.owner-heading"] ?? ""}
+          headingAccent={f["vii.about.owner-heading-accent"] ?? ""}
+          role={f["vii.about.owner-role"] ?? ""}
+          body={f["vii.about.owner-body"] ?? ""}
+          ownerImage={f["vii.about.owner-image"] ?? undefined}
+        />
+      )}
 
       {/* 6. Meet the team — grid */}
-      <ViiAboutTeam
-        overline={f["vii.about.team-overline"] ?? ""}
-        heading={f["vii.about.team-heading"] ?? ""}
-        intro={f["vii.about.team-intro"] ?? ""}
-        members={team}
-      />
+      {isSectionVisible(customFields, "vii", "about.team") && (
+        <ViiAboutTeam
+          overline={f["vii.about.team-overline"] ?? ""}
+          heading={f["vii.about.team-heading"] ?? ""}
+          intro={f["vii.about.team-intro"] ?? ""}
+          members={team}
+        />
+      )}
 
       {/* 7. Closing contact CTA */}
       {isSectionVisible(customFields, "vii", "about.cta") && (
@@ -193,8 +217,8 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
           body={f["vii.about.cta-body"] ?? ""}
           buttonLabel={f["vii.about.cta-button-label"] ?? ""}
           buttonHref={f["vii.about.cta-button-link"] ?? ""}
-          phone={f["vii.about.cta-phone"] ?? ""}
-          email={f["vii.about.cta-email"] ?? ""}
+          phone={ctaPhone}
+          email={ctaEmail}
           showPhone={f["vii.about.cta-show-phone"] !== "false"}
           showEmail={f["vii.about.cta-show-email"] !== "false"}
           sectionAttrs={sectionGroupAttr("about", "cta")}

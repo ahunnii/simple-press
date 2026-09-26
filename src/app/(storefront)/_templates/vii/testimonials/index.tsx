@@ -5,8 +5,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const testimonialsHeroData: TemplateField[] = [
   {
     key: "vii.testimonials.overline",
-    label: "Hero Overline",
-    description: "Small uppercase label shown above the page title.",
+    label: "Small label",
+    description: "Small label shown above the page title.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -15,9 +15,9 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "vii.testimonials.heading",
-    label: "Hero Heading",
+    label: "Heading",
     description:
-      "The plain part of the two-part page heading (e.g. 'What our').",
+      "The plain part of the page heading (e.g. 'What our').",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -26,9 +26,8 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "vii.testimonials.heading-accent",
-    label: "Hero Heading Accent",
-    description:
-      "The italic copper accent word completing the heading (e.g. 'clients say').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -37,9 +36,9 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "vii.testimonials.intro",
-    label: "Hero Intro Text",
+    label: "Intro text",
     description:
-      "Short paragraph below the heading introducing the testimonials section.",
+      "Short paragraph below the heading introducing this page.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.hero",
@@ -49,9 +48,9 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "vii.testimonials.empty-message",
-    label: "Empty State Message",
+    label: "Empty state message",
     description:
-      "Text shown when there are no testimonials yet. Leave as-is or personalise.",
+      "Text shown when there are no testimonials yet.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.hero",
@@ -60,14 +59,14 @@ const testimonialsHeroData: TemplateField[] = [
   },
 ];
 
-// ─── CTA ──────────────────────────────────────────────────────────────────────
+// ─── Review invite ────────────────────────────────────────────────────────────
 
 const testimonialsCTAData: TemplateField[] = [
   {
     key: "vii.testimonials.cta-heading",
-    label: "CTA Heading",
+    label: "Heading",
     description:
-      "The plain part of the two-part CTA heading (e.g. 'Tried something you').",
+      "The plain part of the heading (e.g. 'Tried something you').",
     type: "text",
     page: "testimonials",
     group: "testimonials.cta",
@@ -76,9 +75,8 @@ const testimonialsCTAData: TemplateField[] = [
   },
   {
     key: "vii.testimonials.cta-heading-accent",
-    label: "CTA Heading Accent",
-    description:
-      "The italic copper accent word completing the CTA heading (e.g. 'loved?').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "testimonials",
     group: "testimonials.cta",
@@ -87,7 +85,7 @@ const testimonialsCTAData: TemplateField[] = [
   },
   {
     key: "vii.testimonials.cta-body",
-    label: "CTA Body Text",
+    label: "Body text",
     description: "Short invitation encouraging clients to leave a review.",
     type: "textarea",
     page: "testimonials",
@@ -98,8 +96,8 @@ const testimonialsCTAData: TemplateField[] = [
   },
   {
     key: "vii.testimonials.cta-button",
-    label: "CTA Button Label",
-    description: "Text for the submit-a-testimonial button.",
+    label: "Button text",
+    description: "Text for the button that lets clients submit a testimonial.",
     type: "text",
     page: "testimonials",
     group: "testimonials.cta",
@@ -120,17 +118,17 @@ export const viiTestimonialsData: TemplateField[] = [
 export const viiTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.hero",
-    title: "Testimonials Hero",
+    title: "Page header",
     description:
-      "Overline, heading, intro paragraph, and empty-state message for the testimonials page",
+      "Small label, heading, intro paragraph, and empty-state message for the testimonials page",
     icon: "💬",
     columns: 2,
   },
   {
     id: "testimonials.cta",
-    title: "Testimonials CTA",
+    title: "Review invite",
     description:
-      "Call-to-action band at the bottom of the testimonials page encouraging clients to submit a review",
+      "Section at the bottom of the testimonials page encouraging clients to submit a review",
     icon: "✍️",
     columns: 2,
   },

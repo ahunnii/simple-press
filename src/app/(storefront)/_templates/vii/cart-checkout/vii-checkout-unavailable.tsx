@@ -1,15 +1,50 @@
 import Link from "next/link";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { api } from "~/trpc/server";
+
+import { resolveFields } from "..";
 import { ViiReveal } from "../shared/vii-reveal";
+
+type Props = {
+  /**
+   * Passed by `ViiCheckoutPage`'s guard, which already holds the business.
+   * Omitted by `checkout/page.tsx`, which renders `<t.CheckoutUnavailable />`
+   * with no props at all — see the note below.
+   */
+  customFields?: unknown;
+};
 
 /**
  * ViiCheckoutUnavailable — rendered inside ViiLayout when the store has not
  * yet connected Stripe. ViiLayout already provides the skip link, header,
  * and footer landmarks, so this component renders only its inner content.
+ *
+ * `checkout/page.tsx` renders `<t.CheckoutUnavailable />` with zero props,
+ * so when none are given this component reads the tenant itself through the
+ * tRPC server caller purely so the owner's own copy resolves. The `.catch`
+ * matters: if that read fails for any reason, `resolveFields` substitutes
+ * the field defaults and the shopper still gets a finished screen instead
+ * of a broken page.
  */
-export function ViiCheckoutUnavailable() {
+export async function ViiCheckoutUnavailable({ customFields }: Props = {}) {
+  const resolved =
+    customFields !== undefined
+      ? customFields
+      : ((await api.business.simplifiedGet().catch(() => null))?.siteContent
+          ?.customFields ?? undefined);
+
+  const f = resolveFields(resolved, [
+    "vii.checkout.unavailable-heading",
+    "vii.checkout.unavailable-body",
+  ]);
+
+  const heading = f["vii.checkout.unavailable-heading"] ?? "";
+  const body = f["vii.checkout.unavailable-body"] ?? "";
+
   return (
     <div
+      {...sectionGroupAttr("checkout", "unavailable")}
       style={{
         display: "flex",
         flex: 1,
@@ -34,31 +69,34 @@ export function ViiCheckoutUnavailable() {
         />
 
         <h1
+          {...fieldAttr("vii.checkout.unavailable-heading")}
           style={{
             fontFamily: "var(--font-serif)",
             fontSize: "clamp(24px, 4vw, 36px)",
             fontWeight: 500,
             lineHeight: 1.2,
             color: "var(--vii-navy)",
-            marginBottom: 20,
+            marginBottom: body ? 20 : 40,
           }}
         >
-          Checkout unavailable
+          {heading}
         </h1>
 
-        <p
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: 15,
-            lineHeight: 1.6,
-            letterSpacing: "0.02em",
-            color: "var(--vii-ink-soft)",
-            marginBottom: 40,
-          }}
-        >
-          This store hasn&apos;t set up payment processing yet. Please contact
-          the store owner.
-        </p>
+        {body ? (
+          <p
+            {...fieldAttr("vii.checkout.unavailable-body")}
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: 15,
+              lineHeight: 1.6,
+              letterSpacing: "0.02em",
+              color: "var(--vii-ink-soft)",
+              marginBottom: 40,
+            }}
+          >
+            {body}
+          </p>
+        ) : null}
 
         <Link
           href="/shop"

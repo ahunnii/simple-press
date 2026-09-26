@@ -2,16 +2,10 @@
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { LinkedinIcon } from "~/components/icons/linkedin-icon";
-import { PinterestIcon } from "~/components/icons/pinterest-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { TwitterIcon } from "~/components/icons/twitter-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
+import { hasViiSocialLinks, ViiSocialLinks } from "../shared/vii-social-links";
 import { ViiContactForm } from "./vii-contact-form";
 
 type Props = {
@@ -21,18 +15,13 @@ type Props = {
   body: string;
   hourRows: { label: string; value: string }[];
   formHeading: string;
+  formSuccessHeading: string;
+  formSuccessBody: string;
   address?: string;
   phone?: string;
   email?: string;
-  socialLinks?: {
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
-    tiktok?: string;
-    youtube?: string;
-    linkedin?: string;
-    pinterest?: string;
-  };
+  /** Raw `siteContent.socialLinks` JSON (Content → Branding). */
+  socialLinks?: unknown;
 };
 
 function InfoBlock({
@@ -78,6 +67,8 @@ export function ViiContactMain({
   body,
   hourRows,
   formHeading,
+  formSuccessHeading,
+  formSuccessBody,
   address,
   phone,
   email,
@@ -222,13 +213,7 @@ export function ViiContactMain({
             )}
           </div>
 
-          {(socialLinks?.instagram ??
-            socialLinks?.facebook ??
-            socialLinks?.twitter ??
-            socialLinks?.tiktok ??
-            socialLinks?.youtube ??
-            socialLinks?.linkedin ??
-            socialLinks?.pinterest) && (
+          {hasViiSocialLinks(socialLinks) && (
             <div style={{ marginTop: "clamp(28px, 4vw, 40px)" }}>
               <p
                 style={{
@@ -242,113 +227,7 @@ export function ViiContactMain({
               >
                 Follow us on
               </p>
-              <div className="flex gap-4">
-                {socialLinks?.instagram && (
-                  <a
-                    href={socialLinks.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="Instagram"
-                  >
-                    <InstagramIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.facebook && (
-                  <a
-                    href={socialLinks.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="Facebook"
-                  >
-                    <FacebookIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.twitter && (
-                  <a
-                    href={socialLinks.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="X (Twitter)"
-                  >
-                    <TwitterIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.tiktok && (
-                  <a
-                    href={socialLinks.tiktok}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="TikTok"
-                  >
-                    <TikTokIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.youtube && (
-                  <a
-                    href={socialLinks.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="YouTube"
-                  >
-                    <YouTubeIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.linkedin && (
-                  <a
-                    href={socialLinks.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="LinkedIn"
-                  >
-                    <LinkedinIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.pinterest && (
-                  <a
-                    href={socialLinks.pinterest}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="Pinterest"
-                  >
-                    <PinterestIcon className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
+              <ViiSocialLinks socialLinks={socialLinks} />
             </div>
           )}
         </div>
@@ -365,7 +244,11 @@ export function ViiContactMain({
               "0 1px 40px color-mix(in srgb, var(--vii-navy) 6%, transparent)",
           }}
         >
-          <ViiContactForm heading={formHeading} />
+          <ViiContactForm
+            heading={formHeading}
+            successHeading={formSuccessHeading}
+            successBody={formSuccessBody}
+          />
         </div>
       </div>
     </section>

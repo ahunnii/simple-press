@@ -5,8 +5,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 export const viiCheckoutData: TemplateField[] = [
   {
     key: "vii.checkout.heading",
-    label: "Checkout Heading",
-    description: "The serif heading shown in the checkout header bar.",
+    label: "Heading",
+    description: "The heading shown in the checkout header bar.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -15,8 +15,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.contact-overline",
-    label: "Contact Information Overline",
-    description: "Small uppercase label above the contact fieldset.",
+    label: "Contact information: small label",
+    description: "Small label above the contact information fields.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -25,8 +25,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.contact-heading",
-    label: "Contact Information Heading",
-    description: "Serif heading for the contact information fieldset.",
+    label: "Contact information: heading",
+    description: "Heading for the contact information fields.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -35,8 +35,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.delivery-overline",
-    label: "Delivery Overline",
-    description: "Small uppercase label above the delivery method section.",
+    label: "Delivery: small label",
+    description: "Small label above the delivery method section.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -45,8 +45,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.delivery-heading",
-    label: "Delivery Heading",
-    description: "Serif heading for the delivery method section.",
+    label: "Delivery: heading",
+    description: "Heading for the delivery method section.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -55,8 +55,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.shipping-overline",
-    label: "Shipping Address Overline",
-    description: "Small uppercase label above the shipping address fieldset.",
+    label: "Shipping address: small label",
+    description: "Small label above the shipping address fields.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -65,8 +65,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.shipping-heading",
-    label: "Shipping Address Heading",
-    description: "Serif heading for the shipping address fieldset.",
+    label: "Shipping address: heading",
+    description: "Heading for the shipping address fields.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -75,8 +75,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.summary-overline",
-    label: "Order Summary Overline",
-    description: "Small uppercase label on the order summary panel.",
+    label: "Order summary: small label",
+    description: "Small label on the order summary panel.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -85,8 +85,8 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.summary-heading",
-    label: "Order Summary Heading",
-    description: "Serif heading for the order summary panel.",
+    label: "Order summary: heading",
+    description: "Heading for the order summary panel.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -95,7 +95,7 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.submit-label",
-    label: "Submit Button Label",
+    label: "Submit button text",
     description: "Text on the primary checkout submit button.",
     type: "text",
     page: "checkout",
@@ -104,31 +104,9 @@ export const viiCheckoutData: TemplateField[] = [
     defaultValue: "Continue to payment",
   },
   {
-    key: "vii.checkout.unavailable-heading",
-    label: "Checkout Unavailable Heading",
-    description:
-      "Heading shown when the store has not yet set up payment processing.",
-    type: "text",
-    page: "checkout",
-    group: "checkout.main",
-    gridColumn: "col-span-1",
-    defaultValue: "Checkout unavailable",
-  },
-  {
-    key: "vii.checkout.unavailable-body",
-    label: "Checkout Unavailable Body",
-    description: "Body copy shown when checkout is unavailable.",
-    type: "textarea",
-    page: "checkout",
-    group: "checkout.main",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "This store hasn't set up payment processing yet. Please contact the store owner.",
-  },
-  {
     key: "vii.checkout.empty-heading",
-    label: "Empty Bag Heading",
-    description: "Serif heading shown when the bag is empty.",
+    label: "Empty bag heading",
+    description: "Heading shown when the bag is empty.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -137,25 +115,56 @@ export const viiCheckoutData: TemplateField[] = [
   },
   {
     key: "vii.checkout.empty-cta",
-    label: "Empty Bag CTA Label",
-    description: "Label on the CTA button shown when the bag is empty.",
+    label: "Empty bag button text",
+    description: "Text on the button shown when the bag is empty.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
     defaultValue: "Continue shopping",
   },
+  {
+    key: "vii.checkout.unavailable-heading",
+    label: "Heading",
+    description:
+      "Heading shown on the checkout page when the store hasn't set up online payments yet.",
+    type: "text",
+    page: "checkout",
+    group: "checkout.unavailable",
+    gridColumn: "col-span-1",
+    defaultValue: "Checkout unavailable",
+    placeholder: "Checkout unavailable",
+  },
+  {
+    key: "vii.checkout.unavailable-body",
+    label: "Body text",
+    description: "Message shown below the heading. Leave blank to hide it.",
+    type: "textarea",
+    page: "checkout",
+    group: "checkout.unavailable",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "This store hasn't set up payment processing yet. Please contact the store owner.",
+  },
 ];
 
-// ─── Field group ──────────────────────────────────────────────────────────────
+// ─── Field groups ─────────────────────────────────────────────────────────────
 
 export const viiCheckoutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "checkout.main",
     title: "Checkout",
     description:
-      "Headings, overlines, button labels, and messaging for the checkout flow",
+      "Headings, small labels, button text, and messaging for the checkout flow",
     icon: "💳",
     columns: 2,
   },
+  {
+    id: "checkout.unavailable",
+    title: "Checkout unavailable",
+    description:
+      "Shown on the checkout page when online payments aren't set up yet.",
+    icon: "⏸️",
+    columns: 2,
+  } satisfies TemplateFieldGroup,
 ];

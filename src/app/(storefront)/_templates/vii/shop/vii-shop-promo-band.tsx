@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -37,7 +38,10 @@ export function ViiShopPromoBand({ left, right }: Props) {
   const columnCount = hasLeft && hasRight ? 2 : 1;
 
   return (
-    <section aria-label="Gift cards and haircare">
+    <section
+      aria-label="Gift cards and haircare"
+      {...sectionGroupAttr("shop", "beyond")}
+    >
       <div
         className="vii-shop-promo-grid"
         style={{
@@ -89,6 +93,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
                 <ViiOverline
                   tone="dark"
                   align="left"
+                  fieldKey="vii.shop.promo-left-overline"
                   style={{ marginBottom: 20 }}
                 >
                   {left.overline}
@@ -113,6 +118,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
                 {left.heading && left.accent ? " " : ""}
                 {left.accent && (
                   <em
+                    {...fieldAttr("vii.shop.promo-left-accent")}
                     style={{
                       fontStyle: "italic",
                       color: "var(--vii-copper-light)",
@@ -125,6 +131,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
 
               {left.body && (
                 <p
+                  {...fieldAttr("vii.shop.promo-left-body")}
                   style={{
                     fontFamily: "var(--font-sans)",
                     fontSize: 15,
@@ -145,6 +152,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
                   <Link
                     href={left.buttonLink}
                     className="vii-cta-btn"
+                    {...fieldAttr("vii.shop.promo-left-button-label")}
                     style={{
                       display: "inline-block",
                       position: "relative",
@@ -212,6 +220,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
                 <ViiOverline
                   tone="light"
                   align="left"
+                  fieldKey="vii.shop.promo-right-overline"
                   style={{ marginBottom: 20 }}
                 >
                   {right.overline}
@@ -236,6 +245,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
                 {right.heading && right.accent ? " " : ""}
                 {right.accent && (
                   <em
+                    {...fieldAttr("vii.shop.promo-right-accent")}
                     style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
                   >
                     {right.accent}
@@ -245,6 +255,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
 
               {right.body && (
                 <p
+                  {...fieldAttr("vii.shop.promo-right-body")}
                   style={{
                     fontFamily: "var(--font-sans)",
                     fontSize: 15,
@@ -264,6 +275,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
                   <Link
                     href={right.buttonLink}
                     className="vii-cta-btn"
+                    {...fieldAttr("vii.shop.promo-right-button-label")}
                     style={{
                       display: "inline-block",
                       position: "relative",

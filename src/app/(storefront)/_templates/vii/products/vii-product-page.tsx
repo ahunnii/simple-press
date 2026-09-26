@@ -1,11 +1,13 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
+import { fieldAttr, listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
 import {
   getListFieldValue,
@@ -28,9 +30,19 @@ import { ViiOverline } from "../shared/vii-overline";
 import { ViiProductGrid } from "../shared/vii-product-grid";
 import { ViiProductActions } from "./vii-product-actions";
 
+const TRUST_BADGES_KEY = "vii.global.product-trust-badges";
+
+type StoreBadge = {
+  Icon: LucideIcon;
+  label: string;
+  /** Position in the saved list, for the editor's click-to-row targeting. */
+  index: number;
+};
+
 export function ViiProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
@@ -52,25 +64,47 @@ export function ViiProductPage({
   const isAdditionalEmpty = isContentEmpty(
     additionalFields?.additionalInformation as TiptapJSON,
   );
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
     "vii.global.product-shipping-description",
     "vii.global.product-question-description",
+    "vii.product.question-link-text",
+    "vii.product.related-overline",
+    "vii.product.related-heading",
+    "vii.product.related-heading-accent",
+    "vii.product.related-link-text",
+    "vii.product.coming-soon-heading",
+    "vii.product.coming-soon-body",
   ]);
-  const globalProductTrustBadges = parseTemplateTrustBadgesListRows(
-    getListFieldValue(
-      business?.siteContent?.customFields,
-      "vii.global.product-trust-badges",
-    ),
-    [
-      { label: "Ships in 1-2 business days" },
-      { label: "Free returns within 30 days" },
-    ],
-  );
 
-  const trustBadges =
-    displayTrustBadges.length > 0
-      ? displayTrustBadges
-      : (globalProductTrustBadges ?? []);
+  const shippingDescription = (
+    f["vii.global.product-shipping-description"] ?? ""
+  ).trim();
+  const questionDescription = (
+    f["vii.global.product-question-description"] ?? ""
+  ).trim();
+  const questionLinkText = (f["vii.product.question-link-text"] ?? "").trim();
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // A product's own features (Products → features) win; otherwise the
+  // store-wide badges from the editor. No built-in fallback rows — an empty
+  // list renders no badges at all.
+  const productBadges = displayTrustBadges;
+  const storeBadges: StoreBadge[] =
+    productBadges.length > 0
+      ? []
+      : (
+          parseTemplateTrustBadgesListRows(
+            getListFieldValue(customFields, TRUST_BADGES_KEY),
+          ) ?? []
+        )
+          .map((row, index) => ({
+            Icon: row.icon ?? Check,
+            label: row.label.trim(),
+            index,
+          }))
+          .filter((row) => row.label.length > 0);
 
   return (
     <PageTransition>
@@ -247,108 +281,190 @@ export function ViiProductPage({
               </p>
             )}
 
-            {/* Actions */}
-            <ViiProductActions
-              product={product}
-              business={business}
-              selectedVariantId={selectedVariantId}
-              setSelectedVariantId={setSelectedVariantId}
-            />
+            {/* Buy panel — everything the "Product page" editor section
+                controls sits inside this wrapper so its hotspot covers it. */}
+            <div
+              {...sectionGroupAttr("product", "details")}
+              style={{ display: "flex", flexDirection: "column", gap: 24 }}
+            >
+              {/* Actions */}
+              <ViiProductActions
+                product={product}
+                business={business}
+                selectedVariantId={selectedVariantId}
+                setSelectedVariantId={setSelectedVariantId}
+                comingSoonHeading={f["vii.product.coming-soon-heading"] ?? ""}
+                comingSoonBody={f["vii.product.coming-soon-body"] ?? ""}
+              />
 
-            {/* Trust signals */}
-            {trustBadges.length > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  columnGap: 24,
-                  rowGap: 6,
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 13,
-                  color: "var(--vii-ink-soft)",
-                }}
-              >
-                {trustBadges.map((badge) => (
-                  <span
-                    key={badge.label}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Check
-                      aria-hidden="true"
-                      style={{
-                        width: 14,
-                        height: 14,
-                        color: "var(--vii-copper)",
-                        flexShrink: 0,
-                      }}
-                    />
-                    {badge.label}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Accordion */}
-            <ViiAccordion style={{ marginTop: 8 }}>
-              {!isAdditionalEmpty && (
-                <ViiAccordionItem title="Details" defaultOpen>
-                  <TiptapRenderer
-                    content={
-                      additionalFields?.additionalInformation as TiptapJSON
-                    }
-                    className="prose prose-sm max-w-none"
-                  />
-                </ViiAccordionItem>
-              )}
-              <ViiAccordionItem title="Shipping &amp; returns">
-                {f["vii.global.product-shipping-description"] && (
-                  <p style={{ margin: "0 0 8px" }}>
-                    {f["vii.global.product-shipping-description"]}
-                  </p>
-                )}
-                <p style={{ margin: 0 }}>
-                  Calculated at checkout.{" "}
-                  <Link
-                    href="/shipping-policy"
-                    style={{
-                      color: "var(--vii-navy)",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 2,
-                    }}
-                  >
-                    View shipping policy
-                  </Link>
-                </p>
-              </ViiAccordionItem>
-            </ViiAccordion>
-
-            {/* Ask a question — inline */}
-            {f["vii.global.product-question-description"] && (
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 12,
-                  color: "var(--vii-ink-soft)",
-                  margin: 0,
-                }}
-              >
-                {f["vii.global.product-question-description"]}{" "}
-                <Link
-                  href="/contact"
+              {/* Trust signals — a product's own features win; otherwise the
+                  store-wide badges from the editor. */}
+              {productBadges.length > 0 ? (
+                <div
                   style={{
-                    color: "var(--vii-navy)",
-                    textDecoration: "underline",
-                    textUnderlineOffset: 2,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    columnGap: 24,
+                    rowGap: 6,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 13,
+                    color: "var(--vii-ink-soft)",
                   }}
                 >
-                  You can reach out to us here.
-                </Link>
-              </p>
-            )}
+                  {productBadges.map((badge) => (
+                    <span
+                      key={badge.label}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <badge.Icon
+                        aria-hidden="true"
+                        style={{
+                          width: 14,
+                          height: 14,
+                          color: "var(--vii-copper)",
+                          flexShrink: 0,
+                        }}
+                      />
+                      {badge.label}
+                    </span>
+                  ))}
+                </div>
+              ) : storeBadges.length > 0 ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    columnGap: 24,
+                    rowGap: 6,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 13,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  {storeBadges.map((badge) => (
+                    <span
+                      key={badge.index}
+                      {...listItemAttr(TRUST_BADGES_KEY, badge.index)}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <badge.Icon
+                        aria-hidden="true"
+                        style={{
+                          width: 14,
+                          height: 14,
+                          color: "var(--vii-copper)",
+                          flexShrink: 0,
+                        }}
+                      />
+                      {badge.label}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+
+              {/* Accordion */}
+              {(!isAdditionalEmpty || shippingDescription) && (
+                <ViiAccordion style={{ marginTop: 8 }}>
+                  {!isAdditionalEmpty && (
+                    <ViiAccordionItem title="Details" defaultOpen>
+                      <TiptapRenderer
+                        content={
+                          additionalFields?.additionalInformation as TiptapJSON
+                        }
+                        className="prose prose-sm max-w-none"
+                      />
+                    </ViiAccordionItem>
+                  )}
+                  {shippingDescription && (
+                    <ViiAccordionItem title="Shipping &amp; returns">
+                      <p
+                        {...fieldAttr("vii.global.product-shipping-description")}
+                        style={{ margin: "0 0 8px", whiteSpace: "pre-line" }}
+                      >
+                        {shippingDescription}
+                      </p>
+                      {(hasShippingPolicy || hasRefundPolicy) && (
+                        <p
+                          style={{
+                            margin: 0,
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 16,
+                          }}
+                        >
+                          {hasShippingPolicy && (
+                            <Link
+                              href="/shipping-policy"
+                              style={{
+                                color: "var(--vii-navy)",
+                                textDecoration: "underline",
+                                textUnderlineOffset: 2,
+                              }}
+                            >
+                              View shipping policy
+                            </Link>
+                          )}
+                          {hasRefundPolicy && (
+                            <Link
+                              href="/refund-policy"
+                              style={{
+                                color: "var(--vii-navy)",
+                                textDecoration: "underline",
+                                textUnderlineOffset: 2,
+                              }}
+                            >
+                              View returns policy
+                            </Link>
+                          )}
+                        </p>
+                      )}
+                    </ViiAccordionItem>
+                  )}
+                </ViiAccordion>
+              )}
+
+              {/* Ask a question — inline */}
+              {questionDescription && (
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                    margin: 0,
+                  }}
+                >
+                  <span
+                    {...fieldAttr("vii.global.product-question-description")}
+                  >
+                    {questionDescription}
+                  </span>
+                  {questionLinkText && (
+                    <>
+                      {" "}
+                      <Link
+                        href="/contact"
+                        {...fieldAttr("vii.product.question-link-text")}
+                        style={{
+                          color: "var(--vii-navy)",
+                          textDecoration: "underline",
+                          textUnderlineOffset: 2,
+                        }}
+                      >
+                        {questionLinkText}
+                      </Link>
+                    </>
+                  )}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -388,8 +504,9 @@ export function ViiProductPage({
                     align="left"
                     tone="light"
                     style={{ marginBottom: 6 }}
+                    fieldKey="vii.product.related-overline"
                   >
-                    Pair it with
+                    {f["vii.product.related-overline"] ?? ""}
                   </ViiOverline>
                   <h2
                     id="vii-related-heading"
@@ -402,14 +519,17 @@ export function ViiProductPage({
                       margin: 0,
                     }}
                   >
-                    You may also{" "}
+                    <span {...fieldAttr("vii.product.related-heading")}>
+                      {f["vii.product.related-heading"] ?? ""}
+                    </span>{" "}
                     <em
+                      {...fieldAttr("vii.product.related-heading-accent")}
                       style={{
                         fontStyle: "italic",
                         color: "var(--vii-copper)",
                       }}
                     >
-                      like
+                      {f["vii.product.related-heading-accent"] ?? ""}
                     </em>
                   </h2>
                 </div>
@@ -431,7 +551,9 @@ export function ViiProductPage({
                     paddingBottom: 4,
                   }}
                 >
-                  All products
+                  <span {...fieldAttr("vii.product.related-link-text")}>
+                    {f["vii.product.related-link-text"] ?? ""}
+                  </span>
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>

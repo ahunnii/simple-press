@@ -8,6 +8,7 @@ import type { PromoHalf } from "./vii-shop-promo-band";
 import type { TemplateListRow } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
@@ -317,6 +318,7 @@ export function ViiShopClient({
       {collectionsHeading.trim() && collections.length > 0 && (
         <section
           aria-labelledby="vii-shop-collections-heading"
+          {...sectionGroupAttr("shop", "intro")}
           style={{
             background: "var(--vii-cream)",
             padding: "clamp(64px, 9vw, 112px) clamp(24px, 6vw, 96px)",
@@ -335,6 +337,7 @@ export function ViiShopClient({
                 <ViiOverline
                   align="left"
                   tone="light"
+                  fieldKey="vii.shop.collections-overline"
                   style={{ marginBottom: 6 }}
                 >
                   {collectionsOverline}
@@ -342,6 +345,7 @@ export function ViiShopClient({
               )}
               <h2
                 id="vii-shop-collections-heading"
+                {...fieldAttr("vii.shop.collections-heading")}
                 style={{
                   fontFamily: "var(--font-serif)",
                   fontWeight: 400,

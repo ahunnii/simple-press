@@ -207,7 +207,6 @@ export function getRichTextFieldValue(
 /** One row in a template list field; `_id` is for admin/editor stable keys. */
 export type TemplateListRow = Record<string, unknown> & { _id?: string };
 
-
 /**
  * Row keys the templates render as an `href`.
  *
@@ -399,6 +398,21 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "bamboo.global.map-lat",
   "bamboo.global.map-lng",
   "bamboo.contact.hours",
+  // vii, retired 2026-09-25 — the data now comes from Settings (map pin,
+  // phone/email, city), Content → Branding (footer tagline, Instagram link),
+  // or Admin → Testimonials. The Instagram feed/embed pair was already
+  // declaration-free (orphaned saved values).
+  "vii.contact.map-lat",
+  "vii.contact.map-lng",
+  "vii.about.cta-phone",
+  "vii.about.cta-email",
+  "vii.global.footer-tagline",
+  "vii.global.location-tag",
+  "vii.homepage.instagram-handle",
+  "vii.homepage.testimonial-quote",
+  "vii.homepage.testimonial-author",
+  "vii.homepage.instagram-feed-url",
+  "vii.homepage.instagram-embed",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

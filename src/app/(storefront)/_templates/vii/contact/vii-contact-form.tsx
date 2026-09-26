@@ -17,9 +17,15 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type Props = {
   heading: string;
+  successHeading: string;
+  successBody: string;
 };
 
-export function ViiContactForm({ heading }: Props) {
+export function ViiContactForm({
+  heading,
+  successHeading,
+  successBody,
+}: Props) {
   const {
     form,
     messageLength,
@@ -77,6 +83,7 @@ export function ViiContactForm({ heading }: Props) {
           <h3
             ref={successHeadingRef}
             tabIndex={-1}
+            {...fieldAttr("vii.contact.form-success-heading")}
             className="leading-none"
             style={{
               fontFamily: "var(--font-serif)",
@@ -85,18 +92,21 @@ export function ViiContactForm({ heading }: Props) {
               color: "var(--vii-paper)",
             }}
           >
-            Message sent
+            {successHeading}
           </h3>
-          <p
-            className="mt-3 text-[11px] uppercase"
-            style={{
-              fontFamily: "var(--font-sans)",
-              letterSpacing: "0.18em",
-              color: "var(--vii-tan)",
-            }}
-          >
-            We&apos;ll be in touch shortly.
-          </p>
+          {successBody ? (
+            <p
+              {...fieldAttr("vii.contact.form-success-body")}
+              className="mt-3 text-[11px] uppercase"
+              style={{
+                fontFamily: "var(--font-sans)",
+                letterSpacing: "0.18em",
+                color: "var(--vii-tan)",
+              }}
+            >
+              {successBody}
+            </p>
+          ) : null}
         </div>
         <button
           type="button"

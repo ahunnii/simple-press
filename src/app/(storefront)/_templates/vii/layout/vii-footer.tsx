@@ -5,20 +5,18 @@ import type { DefaultFooterTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { TwitterIcon } from "~/components/icons/twitter-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
-import { resolveFields } from "../index";
+import { resolveViiLocationTag } from "../shared/vii-location-tag";
+import { nonBlank } from "../shared/vii-non-blank";
+import { hasViiSocialLinks, ViiSocialLinks } from "../shared/vii-social-links";
 
 export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
-  const email = business?.supportEmail;
-  const phone = business?.phoneNumber;
-  const address = business?.businessAddress;
+  const email = business?.supportEmail?.trim();
+  const phone = business?.phoneNumber?.trim();
+  const address = business?.businessAddress?.trim();
   const hourRows = formatBusinessHours(
     parseBusinessHours(business?.businessHours),
   );
@@ -28,28 +26,20 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
 
   const { isEnabled } = await getBusinessFlags();
 
-  const customFields = business?.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
+  const customFields = business?.siteContent?.customFields;
 
-  const g = resolveFields(customFields, [
-    "vii.global.location-tag",
-    "vii.global.footer-tagline",
-  ]);
-  const locationTag = g["vii.global.location-tag"] ?? "";
+  const locationTag = resolveViiLocationTag(business, customFields);
+
+  // Tagline: Content → Branding → Footer tagline wins; else the legacy
+  // `vii.global.footer-tagline` field (retired 2026-09-25, a read-only
+  // fallback — never written or cleared from here); else hidden.
   const footerTagline =
-    g["vii.global.footer-tagline"] ??
-    "A sanctuary for the senses. Personalized wellness experiences crafted for your body, mind, and spirit.";
+    nonBlank(business?.siteContent?.footerText) ??
+    nonBlank(
+      getRawCustomFieldString(customFields, "vii.global.footer-tagline"),
+    );
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const socialLinks = business?.siteContent?.socialLinks;
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
   const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
@@ -117,7 +107,6 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                 </div>
                 {locationTag && (
                   <div
-                    {...fieldAttr("vii.global.location-tag")}
                     style={{
                       fontFamily: "var(--font-sans)",
                       fontSize: "9px",
@@ -137,7 +126,6 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             {/* Tagline */}
             {footerTagline && (
               <p
-                {...fieldAttr("vii.global.footer-tagline")}
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "13px",
@@ -151,78 +139,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             )}
 
             {/* Social icons */}
-            {(socialLinks?.instagram ??
-              socialLinks?.facebook ??
-              socialLinks?.twitter ??
-              socialLinks?.tiktok ??
-              socialLinks?.youtube) && (
-              <div className="flex gap-4">
-                {socialLinks?.instagram && (
-                  <a
-                    href={socialLinks.instagram}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="Instagram"
-                  >
-                    <InstagramIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.facebook && (
-                  <a
-                    href={socialLinks.facebook}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="Facebook"
-                  >
-                    <FacebookIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.twitter && (
-                  <a
-                    href={socialLinks.twitter}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="X (Twitter)"
-                  >
-                    <TwitterIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.tiktok && (
-                  <a
-                    href={socialLinks.tiktok}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="TikTok"
-                  >
-                    <TikTokIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.youtube && (
-                  <a
-                    href={socialLinks.youtube}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="YouTube"
-                  >
-                    <YouTubeIcon className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
+            {hasViiSocialLinks(socialLinks) && (
+              <ViiSocialLinks socialLinks={socialLinks} />
             )}
           </div>
 
@@ -241,7 +159,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           />
 
           {/* ── Col 4: Contact info ── */}
-          {(address ?? email ?? phone ?? hourRows.length > 0) && (
+          {(!!address || !!email || !!phone || hourRows.length > 0) && (
             <div>
               <h2
                 style={{
@@ -330,7 +248,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                 </div>
               )}
 
-              {(email ?? phone) && (
+              {(!!email || !!phone) && (
                 <div>
                   <p
                     style={{

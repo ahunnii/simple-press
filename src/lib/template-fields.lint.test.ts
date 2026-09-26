@@ -17,7 +17,7 @@ import { getSectionsForTemplate } from "./template-sections";
  * checks below will then start enforcing it in CI. Every other template
  * still gets the cheap universal checks at the bottom of this file.
  */
-const STRICT_TEMPLATES: readonly string[] = ["bamboo"];
+const STRICT_TEMPLATES: readonly string[] = ["bamboo", "vii"];
 
 /**
  * Merchant-facing jargon that should never appear in a field *label* — the
@@ -43,6 +43,8 @@ const PALETTE_COLOR_WORDS: readonly string[] = [
   "forest",
   "cream",
   "deep green",
+  "copper",
+  "navy",
 ];
 
 /** Escapes regex-special characters in a literal word/phrase. */

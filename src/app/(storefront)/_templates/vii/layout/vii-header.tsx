@@ -28,6 +28,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 import { resolveFields } from "../index";
+import { resolveViiLocationTag } from "../shared/vii-location-tag";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
 
 type NavChild = { label: string; href: string; external?: boolean };
@@ -232,11 +233,10 @@ export function ViiHeader({
   const g = resolveFields(customFields, [
     "vii.global.book-cta-text",
     "vii.global.book-cta-link",
-    "vii.global.location-tag",
   ]);
   const bookCtaText = g["vii.global.book-cta-text"] ?? "Book Now";
   const bookCtaLink = g["vii.global.book-cta-link"] ?? "/contact";
-  const locationTag = g["vii.global.location-tag"] ?? "";
+  const locationTag = resolveViiLocationTag(business, customFields);
   const phone = business?.phoneNumber ?? "";
 
   const businessName = business?.name ?? "";
@@ -288,7 +288,6 @@ export function ViiHeader({
         <em>{businessName}</em>
         {locationTag ? (
           <span
-            {...fieldAttr("vii.global.location-tag")}
             style={{
               fontFamily: "var(--font-sans)",
               fontStyle: "normal",

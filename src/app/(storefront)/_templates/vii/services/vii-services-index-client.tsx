@@ -17,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateIframeValue } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
@@ -72,6 +73,7 @@ function ServicesHero({
     return (
       <section
         aria-label="Services"
+        {...sectionGroupAttr("services", "hero")}
         style={{
           position: "relative",
           width: "100%",
@@ -153,6 +155,7 @@ function ServicesHero({
             <ViiOverline
               tone="dark"
               align="left"
+              fieldKey="vii.services.hero-overline"
               style={{
                 ...heroRevealStyle(shown, reduced, 0),
                 marginBottom: 16,
@@ -178,6 +181,7 @@ function ServicesHero({
           >
             {displayHeading}{" "}
             <em
+              {...fieldAttr("vii.services.hero-heading-accent")}
               style={{ fontStyle: "italic", color: "var(--vii-copper-light)" }}
             >
               {displayAccent}
@@ -186,6 +190,7 @@ function ServicesHero({
 
           {intro && (
             <p
+              {...fieldAttr("vii.services.hero-intro")}
               style={{
                 ...heroRevealStyle(shown, reduced, 0.3),
                 fontFamily: "var(--font-sans)",
@@ -210,6 +215,7 @@ function ServicesHero({
   return (
     <section
       aria-label="Services"
+      {...sectionGroupAttr("services", "hero")}
       style={{
         background: "var(--vii-cream)",
         padding:
@@ -221,6 +227,7 @@ function ServicesHero({
           <ViiOverline
             tone="light"
             align="left"
+            fieldKey="vii.services.hero-overline"
             style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 28 }}
           >
             {overline}
@@ -243,13 +250,17 @@ function ServicesHero({
           }}
         >
           {displayHeading}{" "}
-          <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+          <em
+            {...fieldAttr("vii.services.hero-heading-accent")}
+            style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+          >
             {displayAccent}
           </em>
         </h1>
 
         {intro && (
           <p
+            {...fieldAttr("vii.services.hero-intro")}
             style={{
               ...heroRevealStyle(shown, reduced, 0.25),
               fontFamily: "var(--font-sans)",
@@ -299,6 +310,7 @@ function ServicesIntro({
   return (
     <section
       aria-label="About our services"
+      {...sectionGroupAttr("services", "intro")}
       style={{
         background: "var(--vii-cream)",
         padding:
@@ -314,6 +326,7 @@ function ServicesIntro({
             <ViiOverline
               align="center"
               tone="light"
+              fieldKey="vii.services.intro-overline"
               style={{ marginBottom: 14 }}
             >
               {overline}
@@ -334,7 +347,10 @@ function ServicesIntro({
               {heading}
               {heading && headingAccent ? " " : ""}
               {headingAccent && (
-                <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+                <em
+                  {...fieldAttr("vii.services.intro-heading-accent")}
+                  style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+                >
                   {headingAccent}
                 </em>
               )}
@@ -349,6 +365,7 @@ function ServicesIntro({
               className={cn("vii-reveal", bodyVisible && "is-visible")}
             >
               <p
+                {...fieldAttr("vii.services.intro-body")}
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "clamp(15px, 1.4vw, 17px)",
@@ -511,6 +528,7 @@ function GalleryStrip({ images }: { images: ServicesGalleryImage[] }) {
   return (
     <section
       aria-label="Gallery"
+      {...sectionGroupAttr("services", "gallery")}
       style={{
         background: "var(--vii-navy)",
         padding: "0",
@@ -779,6 +797,11 @@ export function ViiServicesIndexClient({
         embedReveal={ctaEmbedReveal}
         showPhone={f["vii.services.cta-show-phone"] !== "false"}
         showEmail={f["vii.services.cta-show-email"] !== "false"}
+        sectionAttrs={sectionGroupAttr("services", "cta")}
+        headingFieldKey="vii.services.cta-heading"
+        subheadingFieldKey="vii.services.cta-subheading"
+        bodyFieldKey="vii.services.cta-body"
+        buttonLabelFieldKey="vii.services.cta-button-label"
       />
     </PageTransition>
   );

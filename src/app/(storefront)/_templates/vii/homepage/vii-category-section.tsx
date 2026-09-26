@@ -4,7 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -88,6 +92,7 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
               href={link}
               aria-label={title || `Category ${i + 1}`}
               className="group vii-reveal-item"
+              {...listItemAttr("vii.homepage.categories-cards", i)}
               style={
                 {
                   "--i": Math.min(i, 7),
