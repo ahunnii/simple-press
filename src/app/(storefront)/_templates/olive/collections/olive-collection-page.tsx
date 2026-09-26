@@ -3,7 +3,9 @@ import Image from "next/image";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import type { OliveCardProduct } from "../shared";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { resolveFields } from "..";
 import {
   hasOliveImage,
   OliveBreadcrumb,
@@ -21,12 +23,16 @@ const HEADING_ID = "olive-collection-heading";
 /**
  * OliveCollectionPage — one page from the swatch book, opened flat.
  *
- * No template fields: the whole page is driven by the collection record
- * itself (design.md, "CollectionPage — no fields"). The route already 404s
- * for an unpublished collection before this ever renders.
+ * Mostly driven by the collection record itself (design.md, "CollectionPage
+ * — no fields"), plus a small `collections.detail` field group for the
+ * empty-collection message and the "More collections" heading, which are
+ * owner copy shared across every collection rather than per-collection data.
+ * The route already 404s for an unpublished collection before this ever
+ * renders.
  */
 export function OliveCollectionPage({
   collection,
+  business,
   additionalCollections,
 }: DefaultCollectionPageTemplateProps) {
   const products: OliveCardProduct[] = collection.collectionProducts
@@ -36,6 +42,24 @@ export function OliveCollectionPage({
   const others = additionalCollections
     .filter((c) => c.slug !== collection.slug)
     .slice(0, 3);
+
+  const customFields = business.siteContent?.customFields as
+    | Record<string, unknown>
+    | undefined;
+
+  const f = resolveFields(customFields, [
+    "olive.collections.detail-empty-heading",
+    "olive.collections.detail-empty-body",
+    "olive.collections.more-heading",
+  ]);
+
+  const emptyHeading =
+    f["olive.collections.detail-empty-heading"] ??
+    "Nothing in this collection yet.";
+  const emptyBody =
+    f["olive.collections.detail-empty-body"] ??
+    "New pieces land here first — until then, shop everything else.";
+  const moreHeading = f["olive.collections.more-heading"] ?? "More collections";
 
   return (
     <div>
@@ -77,21 +101,28 @@ export function OliveCollectionPage({
       <OliveSection
         aria-label={`${collection.name} products`}
         style={{ paddingTop: 0 }}
+        {...sectionGroupAttr("collections", "detail")}
       >
         <OliveProductGrid
           headingLevel={2}
           products={products}
           priorityCount={4}
-          emptyHeading="Nothing in this collection yet."
-          emptyBody="New pieces land here first — until then, shop everything else."
+          emptyHeading={emptyHeading}
+          emptyBody={emptyBody}
+          emptyHeadingFieldKey="olive.collections.detail-empty-heading"
+          emptyBodyFieldKey="olive.collections.detail-empty-body"
           emptyCta={{ label: "Shop everything", href: "/shop" }}
         />
       </OliveSection>
 
       {others.length > 0 ? (
-        <OliveSection aria-label="More collections">
+        <OliveSection
+          aria-label="More collections"
+          {...sectionGroupAttr("collections", "detail")}
+        >
           <OliveSectionHeading
-            heading="More collections"
+            heading={moreHeading}
+            headingFieldKey="olive.collections.more-heading"
             link={{ label: "All collections", href: "/collections" }}
             className="mb-8"
           />

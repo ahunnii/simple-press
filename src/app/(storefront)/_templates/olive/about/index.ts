@@ -6,7 +6,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 const aboutHeroData: TemplateField[] = [
   {
     key: "olive.about.hero-image",
-    label: "Hero Image",
+    label: "Photo",
     description:
       "Full-bleed photo at the top of the About page, with the page title on a card over it.",
     type: "image",
@@ -17,13 +17,13 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "olive.about.hero-heading",
-    label: "Hero Heading",
-    description: "The page title, shown on a white card over the photo.",
+    label: "Heading",
+    description: "The page title, shown on a card over the photo.",
     type: "text",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-1",
-    defaultValue: "About Olive Mode",
+    defaultValue: "About us",
   },
 ];
 
@@ -32,17 +32,17 @@ const aboutHeroData: TemplateField[] = [
 const aboutManifestoData: TemplateField[] = [
   {
     key: "olive.about.manifesto-heading",
-    label: "Manifesto Heading",
+    label: "Heading",
     description: "Centred display heading below the hero.",
     type: "text",
     page: "about",
     group: "about.manifesto",
     gridColumn: "col-span-full",
-    defaultValue: "Made for the woman who dresses on purpose.",
+    defaultValue: "Made for people who dress on purpose.",
   },
   {
     key: "olive.about.manifesto-body",
-    label: "Manifesto Body",
+    label: "Body",
     description: "One short paragraph under the manifesto heading.",
     type: "textarea",
     page: "about",
@@ -58,7 +58,7 @@ const aboutManifestoData: TemplateField[] = [
 const aboutStoryData: TemplateField[] = [
   {
     key: "olive.about.story",
-    label: "Our Story",
+    label: "Our story",
     description:
       "Alternating photo-and-text rows telling the shop's story, up to 4. Leave empty to use the built-in example story.",
     type: "list",
@@ -66,24 +66,31 @@ const aboutStoryData: TemplateField[] = [
     group: "about.story",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "row",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "image",
         label: "Photo",
         type: "image",
+        description: "Photo for this row. Shown at 4:3, alternating sides.",
         placeholder: "Upload a photo for this row",
+        optional: true,
       },
       {
         key: "heading",
         label: "Heading",
         type: "text",
+        description: "Short heading for this row. Leave blank to skip it.",
         placeholder: "e.g. Started on a card table",
       },
       {
         key: "body",
         label: "Body",
         type: "textarea",
+        description: "A short paragraph for this row.",
         placeholder: "A short paragraph for this row",
+        optional: true,
       },
     ],
   },
@@ -94,14 +101,14 @@ const aboutStoryData: TemplateField[] = [
 const aboutFoundingData: TemplateField[] = [
   {
     key: "olive.about.founding-line",
-    label: "Founding Line",
+    label: "Line",
     description:
-      "One centred, tracked-uppercase line between two hairlines (e.g. your founding year and city).",
+      "One centred, tracked-uppercase line between two hairlines (e.g. your founding year and city). Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.founding",
     gridColumn: "col-span-full",
-    defaultValue: "Est. 2020 · Detroit · Designed for you",
+    defaultValue: "",
   },
 ];
 
@@ -110,7 +117,7 @@ const aboutFoundingData: TemplateField[] = [
 const aboutCtaData: TemplateField[] = [
   {
     key: "olive.about.cta",
-    label: "Where to Next Tiles",
+    label: "Tiles",
     description:
       "Up to 3 photo tiles linking elsewhere on the site, shown at the bottom of the About page. Leave empty to use the built-in defaults.",
     type: "list",
@@ -118,24 +125,31 @@ const aboutCtaData: TemplateField[] = [
     group: "about.cta",
     gridColumn: "col-span-full",
     maxItems: 3,
+    itemLabel: "tile",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "image",
         label: "Photo",
         type: "image",
+        description: "Photo for this tile.",
         placeholder: "Upload a photo for this tile",
+        optional: true,
       },
       {
         key: "label",
         label: "Label",
         type: "text",
+        description: "The word or two printed on the tile's card.",
         placeholder: "e.g. Shop new",
       },
       {
         key: "link",
         label: "Link",
         type: "url",
+        description: "Where the tile goes.",
         placeholder: "e.g. /shop",
+        optional: true,
       },
     ],
   },
@@ -154,7 +168,7 @@ export const oliveAboutData: TemplateField[] = [
 export const oliveAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "About Hero",
+    title: "Hero",
     description: "Full-bleed photo with the page title on a card",
     icon: "🌿",
     columns: 2,
@@ -168,21 +182,21 @@ export const oliveAboutFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "about.story",
-    title: "Our Story",
+    title: "Our story",
     description: "Alternating photo-and-text rows telling the shop's story",
     icon: "📖",
     columns: 1,
   },
   {
     id: "about.founding",
-    title: "Founding Line",
+    title: "Founding line",
     description: "One small centred line between two hairlines",
     icon: "🏷️",
     columns: 1,
   },
   {
     id: "about.cta",
-    title: "Where to Next",
+    title: "Where to next",
     description: "Up to three photo tiles linking elsewhere on the site",
     icon: "🔗",
     columns: 1,
@@ -206,30 +220,30 @@ export const oliveAboutSections: TemplateSection[] = [
     description: "Centred brand statement",
     groupIds: ["about.manifesto"],
     order: 1,
-    hideable: false,
+    hideable: true,
   },
   {
     id: "about.story",
     page: "about",
-    title: "Our Story",
+    title: "Our story",
     description: "Alternating photo-and-text story rows",
     groupIds: ["about.story"],
     order: 2,
-    hideable: false,
+    hideable: true,
   },
   {
     id: "about.founding",
     page: "about",
-    title: "Founding Line",
+    title: "Founding line",
     description: "Small centred line between two hairlines",
     groupIds: ["about.founding"],
     order: 3,
-    hideable: false,
+    hideable: true,
   },
   {
     id: "about.cta",
     page: "about",
-    title: "Where to Next",
+    title: "Where to next",
     description: "Up to three photo tiles linking elsewhere on the site",
     groupIds: ["about.cta"],
     order: 4,

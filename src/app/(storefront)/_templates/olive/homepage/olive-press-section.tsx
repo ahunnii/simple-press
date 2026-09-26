@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { listItemAttr } from "~/lib/preview/section-attrs";
+
 import {
   OliveMarquee,
   OliveReveal,
@@ -11,6 +13,8 @@ export type OlivePressLogo = {
   id: string;
   image: string;
   name: string;
+  /** Original (pre-filter) position in the owner's `press-logos` list. */
+  index: number;
 };
 
 type Props = {
@@ -58,6 +62,7 @@ export function OlivePressSection({
         {shown.map((logo) => (
           <span
             key={logo.id}
+            {...listItemAttr("olive.homepage.press-logos", logo.index)}
             className="relative block shrink-0"
             style={{
               width: "clamp(88px, 12vw, 136px)",

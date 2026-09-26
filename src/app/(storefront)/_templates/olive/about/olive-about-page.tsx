@@ -1,6 +1,10 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
@@ -15,7 +19,7 @@ const DEFAULT_STORY: TemplateListRow[] = [
     _id: "default-story-1",
     image: "",
     heading: "Started on a card table",
-    body: "Olive Mode began as a folding table at Eastern Market — a rack of dresses and a handwritten sign. We sold out by noon and ordered more the next week.",
+    body: "We began as a folding table at a weekend market — a rack of dresses and a handwritten sign. We sold out by noon and ordered more the next week.",
   },
   {
     _id: "default-story-2",
@@ -32,7 +36,7 @@ const DEFAULT_STORY: TemplateListRow[] = [
   {
     _id: "default-story-4",
     image: "",
-    heading: "Still here, still Detroit",
+    heading: "Still here, still local",
     body: "We've grown from one folding table to a real shop on a real block, and neither has changed much. Come try things on and stay as long as you like.",
   },
 ];
@@ -80,59 +84,79 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
   ]);
 
   const storyRows = parseTemplateListRows(customFields?.["olive.about.story"]);
-  const story = storyRows.length > 0 ? storyRows : DEFAULT_STORY;
+  const hasOwnerStory = storyRows.length > 0;
+  const story = hasOwnerStory ? storyRows : DEFAULT_STORY;
 
+  const founding = (f["olive.about.founding-line"] ?? "").trim();
+
+  // Carry the ORIGINAL (pre-filter) row index through the label filter so a
+  // click on a rendered tile still targets the row it actually came from,
+  // even when an earlier row was skipped for having no label. Built-in
+  // `DEFAULT_CTA_TILES` rows get `index: null` — they have no saved row to
+  // click-target.
   const ctaRows = parseTemplateListRows(customFields?.["olive.about.cta"]);
-  const labelledCtaRows = ctaRows.filter(
-    (row) => readString(row, "label").trim().length > 0,
-  );
-  const ctaTiles =
-    labelledCtaRows.length > 0 ? labelledCtaRows : DEFAULT_CTA_TILES;
+  const labelledCtaRows = ctaRows
+    .map((row, index) => ({ row, index }))
+    .filter(({ row }) => readString(row, "label").trim().length > 0);
+  const ctaTiles: { row: TemplateListRow; index: number | null }[] =
+    labelledCtaRows.length > 0
+      ? labelledCtaRows
+      : DEFAULT_CTA_TILES.map((row) => ({ row, index: null }));
 
   return (
     <>
       <OliveAboutHero
         image={f["olive.about.hero-image"] ?? "/placeholder.svg"}
-        heading={f["olive.about.hero-heading"] ?? "About Olive Mode"}
+        heading={f["olive.about.hero-heading"] ?? "About us"}
       />
 
-      <OliveSection
-        as="section"
-        aria-label="Our approach"
-        tone="paper"
-        {...sectionGroupAttr("about", "manifesto")}
-        className="mx-auto flex max-w-[52rem] flex-col items-center gap-4 text-center"
-      >
-        <h2
-          className="olive-display"
-          {...fieldAttr("olive.about.manifesto-heading")}
+      {isSectionVisible(customFields, "olive", "about.manifesto") && (
+        <OliveSection
+          as="section"
+          aria-label="Our approach"
+          tone="paper"
+          {...sectionGroupAttr("about", "manifesto")}
+          className="mx-auto flex max-w-[52rem] flex-col items-center gap-4 text-center"
         >
-          {f["olive.about.manifesto-heading"] ?? ""}
-        </h2>
-        {f["olive.about.manifesto-body"] ? (
-          <p
-            className="max-w-[62ch] text-[0.9375rem] leading-relaxed"
-            style={{ color: "var(--olive-ink-soft)" }}
-            {...fieldAttr("olive.about.manifesto-body")}
+          <h2
+            className="olive-display"
+            {...fieldAttr("olive.about.manifesto-heading")}
           >
-            {f["olive.about.manifesto-body"]}
-          </p>
-        ) : null}
-      </OliveSection>
+            {f["olive.about.manifesto-heading"] ?? ""}
+          </h2>
+          {f["olive.about.manifesto-body"] ? (
+            <p
+              className="max-w-[62ch] text-[0.9375rem] leading-relaxed"
+              style={{ color: "var(--olive-ink-soft)" }}
+              {...fieldAttr("olive.about.manifesto-body")}
+            >
+              {f["olive.about.manifesto-body"]}
+            </p>
+          ) : null}
+        </OliveSection>
+      )}
 
-      <OliveAboutStory rows={story} />
+      {isSectionVisible(customFields, "olive", "about.story") && (
+        <OliveAboutStory rows={story} isOwnerData={hasOwnerStory} />
+      )}
 
-      <OliveSection
-        as="section"
-        aria-label="Since"
-        tone="white"
-        {...sectionGroupAttr("about", "founding")}
-        className="mx-auto flex max-w-[520px] flex-col items-center border-y border-[var(--olive-hairline)] py-8 text-center"
-      >
-        <p className="olive-label" {...fieldAttr("olive.about.founding-line")}>
-          {f["olive.about.founding-line"] ?? ""}
-        </p>
-      </OliveSection>
+      {isSectionVisible(customFields, "olive", "about.founding") &&
+        founding.length > 0 && (
+          <OliveSection
+            as="section"
+            aria-label="Since"
+            tone="white"
+            {...sectionGroupAttr("about", "founding")}
+            className="mx-auto flex max-w-[520px] flex-col items-center border-y border-[var(--olive-hairline)] py-8 text-center"
+          >
+            <p
+              className="olive-label"
+              {...fieldAttr("olive.about.founding-line")}
+            >
+              {founding}
+            </p>
+          </OliveSection>
+        )}
 
       {isSectionVisible(customFields, "olive", "about.cta") && (
         <OliveSection
@@ -143,7 +167,7 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
         >
           {/* Grid sizes adapt to tile count: 1 tile centers at 640px, 2 tiles split 50/50, 3+ tiles split into thirds */}
           <OliveRevealGroup fan className={ctaGridClass(ctaTiles.length)}>
-            {ctaTiles.map((row, i) => {
+            {ctaTiles.map(({ row, index }, i) => {
               const image = readString(row, "image");
               const label = readString(row, "label");
               const link = readString(row, "link") || "/";
@@ -151,6 +175,9 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
               return (
                 <div
                   key={row._id ?? i}
+                  {...(index !== null
+                    ? listItemAttr("olive.about.cta", index)
+                    : {})}
                   className="olive-reveal-item"
                   style={{ "--i": Math.min(i, 8) } as React.CSSProperties}
                 >

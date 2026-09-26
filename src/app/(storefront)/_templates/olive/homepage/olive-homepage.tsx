@@ -3,6 +3,7 @@ import type { OliveCardProduct } from "../shared";
 import type { OliveBlogTeaser } from "./olive-blog-section";
 import type { OliveCategoryEntry } from "./olive-category-section";
 import type { OliveFeedImage } from "./olive-feed-section";
+import type { OliveHeroImage } from "./olive-hero-section";
 import type { OlivePressLogo } from "./olive-press-section";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -168,6 +169,7 @@ export async function OliveHomepage({
       image: rowText(row, "image"),
       label: rowText(row, "label"),
       href: rowLink(row, "/shop"),
+      sourceIndex: index,
     }))
     .filter((entry) => entry.label.length > 0);
 
@@ -195,11 +197,11 @@ export async function OliveHomepage({
   // Blank/placeholder rows are dropped here so the dots and the count only
   // ever see real photos; the first survivor is both the arrival frame and
   // the priority (LCP) frame the hero component pins to slide 0.
-  const heroImages: string[] = parseTemplateListRows(
+  const heroImages: OliveHeroImage[] = parseTemplateListRows(
     customFields?.["olive.homepage.hero-images"],
   )
-    .map((row) => rowText(row, "image"))
-    .filter(hasOliveImage)
+    .map((row, index) => ({ src: rowText(row, "image"), index }))
+    .filter((entry) => hasOliveImage(entry.src))
     .slice(0, 6);
 
   // ── Feed and press lists ──────────────────────────────────────────────────
@@ -210,6 +212,7 @@ export async function OliveHomepage({
       id: typeof row._id === "string" ? row._id : `feed-${index}`,
       image: rowText(row, "image"),
       caption: rowText(row, "caption"),
+      index,
     }))
     .filter((item) => hasOliveImage(item.image));
 
@@ -220,6 +223,7 @@ export async function OliveHomepage({
       id: typeof row._id === "string" ? row._id : `press-${index}`,
       image: rowText(row, "image"),
       name: rowText(row, "name"),
+      index,
     }))
     .filter((logo) => hasOliveImage(logo.image));
 

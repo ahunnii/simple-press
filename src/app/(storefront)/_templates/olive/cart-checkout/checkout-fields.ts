@@ -9,7 +9,7 @@ import type { TemplateSection } from "~/lib/template-sections";
  *
  *  - `checkout.main`        — the form column: title, the four semantic
  *                             section headings, submit, empty-bag copy.
- *  - `checkout.summary`     — the sticky slate-tint bag card beside it.
+ *  - `checkout.summary`     — the sticky bag card beside it.
  *  - `checkout.unavailable` — the ghost card shown when the store has not
  *                             connected payments.
  *  - `checkout.success`     — the order confirmation page.
@@ -25,7 +25,7 @@ export const oliveCheckoutData: TemplateField[] = [
   // ── checkout.main ─────────────────────────────────────────────────────────
   {
     key: "olive.checkout.heading",
-    label: "Checkout Heading",
+    label: "Heading",
     description: "The page title above the checkout form.",
     type: "text",
     page: "checkout",
@@ -35,7 +35,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.intro",
-    label: "Checkout Intro Line",
+    label: "Intro line",
     description:
       "One line under the checkout heading. Leave blank to show the heading on its own.",
     type: "textarea",
@@ -47,7 +47,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.details-heading",
-    label: "Contact Section Heading",
+    label: "Contact heading",
     description: "Heading over the email, name and phone fields.",
     type: "text",
     page: "checkout",
@@ -57,7 +57,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.delivery-heading",
-    label: "Delivery Section Heading",
+    label: "Delivery heading",
     description:
       "Heading over the ship-or-pick-up choice. Only shown when the store offers in-store pickup.",
     type: "text",
@@ -68,7 +68,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.shipping-heading",
-    label: "Address Section Heading",
+    label: "Address heading",
     description:
       "Heading over the shipping address fields. Hidden when the shopper chooses in-store pickup.",
     type: "text",
@@ -79,7 +79,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.payment-heading",
-    label: "Payment Section Heading",
+    label: "Payment heading",
     description: "Heading over the submit button and the payment note.",
     type: "text",
     page: "checkout",
@@ -89,7 +89,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.payment-note",
-    label: "Payment Note",
+    label: "Payment note",
     description:
       "One line above the submit button explaining what happens on the next screen. Leave blank to hide.",
     type: "textarea",
@@ -101,7 +101,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.submit-label",
-    label: "Submit Button Label",
+    label: "Submit button label",
     description: "Label on the primary button that opens the payment page.",
     type: "text",
     page: "checkout",
@@ -111,7 +111,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.back-label",
-    label: "Back Link Label",
+    label: "Back link label",
     description: "The quiet text link back to the bag.",
     type: "text",
     page: "checkout",
@@ -121,7 +121,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.empty-heading",
-    label: "Empty Bag Heading",
+    label: "Empty bag heading",
     description: "Heading shown if checkout is opened with an empty bag.",
     type: "text",
     page: "checkout",
@@ -131,7 +131,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.empty-body",
-    label: "Empty Bag Body",
+    label: "Empty bag body",
     description: "One line under the empty-bag heading on checkout.",
     type: "textarea",
     page: "checkout",
@@ -141,7 +141,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.empty-cta",
-    label: "Empty Bag Button Label",
+    label: "Empty bag button label",
     description: "Label on the button back to the shop from an empty checkout.",
     type: "text",
     page: "checkout",
@@ -153,7 +153,7 @@ export const oliveCheckoutData: TemplateField[] = [
   // ── checkout.summary ──────────────────────────────────────────────────────
   {
     key: "olive.checkout.summary-heading",
-    label: "Bag Card Heading",
+    label: "Heading",
     description: "Heading at the top of the sticky bag card beside the form.",
     type: "text",
     page: "checkout",
@@ -163,7 +163,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.summary-discount-label",
-    label: "Discount Field Label",
+    label: "Discount label",
     description:
       "Label above the discount-code box in the bag card. Only shown when discount codes are turned on.",
     type: "text",
@@ -174,7 +174,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.summary-apply-label",
-    label: "Discount Apply Button Label",
+    label: "Apply button label",
     description: "Label on the button that applies a discount code.",
     type: "text",
     page: "checkout",
@@ -184,7 +184,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.summary-note",
-    label: "Bag Card Note",
+    label: "Note",
     description:
       "Quiet line at the bottom of the bag card. Leave blank to hide.",
     type: "textarea",
@@ -197,7 +197,7 @@ export const oliveCheckoutData: TemplateField[] = [
   // ── checkout.unavailable ──────────────────────────────────────────────────
   {
     key: "olive.checkout.unavailable-heading",
-    label: "Checkout Unavailable Heading",
+    label: "Heading",
     description:
       "Heading shown instead of the form when the store has not connected payments yet.",
     type: "text",
@@ -208,7 +208,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.unavailable-body",
-    label: "Checkout Unavailable Body",
+    label: "Body",
     description: "Body copy on the checkout-unavailable card.",
     type: "textarea",
     page: "checkout",
@@ -219,7 +219,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.unavailable-cta",
-    label: "Checkout Unavailable Button Label",
+    label: "Button label",
     description: "Label on the button back to the shop.",
     type: "text",
     page: "checkout",
@@ -231,7 +231,7 @@ export const oliveCheckoutData: TemplateField[] = [
   // ── checkout.success ──────────────────────────────────────────────────────
   {
     key: "olive.checkout.success-heading",
-    label: "Thank-You Heading",
+    label: "Heading",
     description: "The heading on the order confirmation page.",
     type: "text",
     page: "checkout",
@@ -241,7 +241,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.success-body",
-    label: "Thank-You Body",
+    label: "Body",
     description: "One line under the thank-you heading. Leave blank to hide.",
     type: "textarea",
     page: "checkout",
@@ -251,7 +251,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.success-next-heading",
-    label: "Next Steps Heading",
+    label: "Next steps heading",
     description: "Heading over the list of what happens after the order.",
     type: "text",
     page: "checkout",
@@ -261,7 +261,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.success-next-steps",
-    label: "Next Steps",
+    label: "Next steps list",
     description:
       "One step per line. Each line becomes a row in the list. Leave blank to hide the list.",
     type: "textarea",
@@ -269,11 +269,11 @@ export const oliveCheckoutData: TemplateField[] = [
     group: "checkout.success",
     gridColumn: "col-span-full",
     defaultValue:
-      "A confirmation email is on its way.\nWe pack every order by hand here in Detroit.\nYou will get a tracking link the moment it leaves.",
+      "A confirmation email is on its way.\nWe pack every order by hand.\nYou will get a tracking link the moment it leaves.",
   },
   {
     key: "olive.checkout.success-continue-label",
-    label: "Keep Shopping Button Label",
+    label: "Keep shopping button label",
     description:
       "Label on the button back to the shop from the thank-you page.",
     type: "text",
@@ -284,7 +284,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.success-loading",
-    label: "Confirming Text",
+    label: "Confirming text",
     description:
       "Shown while the order is being read back from the payment provider.",
     type: "text",
@@ -295,7 +295,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.success-no-order-heading",
-    label: "No Order Heading",
+    label: "No order heading",
     description:
       "Heading shown when the thank-you page is opened without an order attached.",
     type: "text",
@@ -306,7 +306,7 @@ export const oliveCheckoutData: TemplateField[] = [
   },
   {
     key: "olive.checkout.success-no-order-body",
-    label: "No Order Body",
+    label: "No order body",
     description: "One line under the no-order heading.",
     type: "textarea",
     page: "checkout",
@@ -320,7 +320,7 @@ export const oliveCheckoutData: TemplateField[] = [
 export const oliveCheckoutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "checkout.main",
-    title: "Checkout Form",
+    title: "Checkout form",
     description:
       "Title, the four section headings, submit button and empty-bag copy",
     icon: "💳",
@@ -328,7 +328,7 @@ export const oliveCheckoutFieldGroups: TemplateFieldGroup[] = [
   } satisfies TemplateFieldGroup,
   {
     id: "checkout.summary",
-    title: "Checkout Bag Card",
+    title: "Checkout bag card",
     description:
       "Heading, discount label and closing note on the sticky bag card",
     icon: "🧾",
@@ -336,14 +336,14 @@ export const oliveCheckoutFieldGroups: TemplateFieldGroup[] = [
   } satisfies TemplateFieldGroup,
   {
     id: "checkout.unavailable",
-    title: "Checkout Unavailable",
+    title: "Checkout unavailable",
     description: "The card shown when the store has not connected payments yet",
     icon: "🚫",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "checkout.success",
-    title: "Order Confirmation",
+    title: "Order confirmation",
     description:
       "Thank-you heading, what-happens-next list, and the loading and no-order states",
     icon: "🌿",
@@ -361,7 +361,7 @@ export const oliveCheckoutSections: TemplateSection[] = [
   {
     id: "checkout.main",
     page: "checkout",
-    title: "Checkout Form",
+    title: "Checkout form",
     description:
       "Title block, contact, delivery, address and payment sections, plus the empty-bag state",
     groupIds: ["checkout.main"],
@@ -371,9 +371,9 @@ export const oliveCheckoutSections: TemplateSection[] = [
   {
     id: "checkout.summary",
     page: "checkout",
-    title: "Checkout Bag Card",
+    title: "Checkout bag card",
     description:
-      "The sticky slate bag card: line items, discount code and totals",
+      "The sticky bag card: line items, discount code and totals",
     groupIds: ["checkout.summary"],
     order: 1,
     hideable: false,
@@ -381,7 +381,7 @@ export const oliveCheckoutSections: TemplateSection[] = [
   {
     id: "checkout.unavailable",
     page: "checkout",
-    title: "Checkout Unavailable",
+    title: "Checkout unavailable",
     description:
       "Shown instead of the form when the store has not connected payments yet",
     groupIds: ["checkout.unavailable"],
@@ -391,7 +391,7 @@ export const oliveCheckoutSections: TemplateSection[] = [
   {
     id: "checkout.success",
     page: "checkout",
-    title: "Order Confirmation",
+    title: "Order confirmation",
     description: "The thank-you page shown after a successful payment",
     groupIds: ["checkout.success"],
     order: 3,

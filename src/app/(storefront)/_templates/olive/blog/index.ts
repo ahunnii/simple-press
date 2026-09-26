@@ -29,9 +29,9 @@ export const oliveBlogData: TemplateField[] = [
   // ── blog.hero (not hideable) ─────────────────────────────────────────────
   {
     key: "olive.blog.hero-image",
-    label: "Journal Cover Image",
+    label: "Cover photo",
     description:
-      "Optional full-width photo behind the journal heading. Leave blank for the quiet slate-toned header instead of a photo.",
+      "Optional full-width photo behind the journal heading. Leave blank for the plain header instead of a photo.",
     type: "image",
     page: "blog",
     group: "blog.hero",
@@ -40,7 +40,7 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.hero-heading",
-    label: "Journal Heading",
+    label: "Heading",
     description: "The journal index page's H1.",
     type: "text",
     page: "blog",
@@ -50,7 +50,7 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.hero-subtitle",
-    label: "Journal Subtitle",
+    label: "Subtitle",
     description: "One line under the heading.",
     type: "textarea",
     page: "blog",
@@ -61,7 +61,7 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.empty-heading",
-    label: "Empty Journal Heading",
+    label: "Empty journal heading",
     description: "Shown when there are no published posts yet.",
     type: "text",
     page: "blog",
@@ -71,7 +71,7 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.empty-body",
-    label: "Empty Journal Body",
+    label: "Empty journal body",
     description: "One line under the empty-journal heading.",
     type: "textarea",
     page: "blog",
@@ -82,7 +82,7 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.empty-cta-label",
-    label: "Empty Journal Button Text",
+    label: "Empty journal button label",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "blog",
@@ -92,7 +92,7 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.empty-cta-link",
-    label: "Empty Journal Button Link",
+    label: "Empty journal button link",
     description:
       "Where the empty-state button goes. Leave blank to hide the button.",
     type: "url",
@@ -103,7 +103,7 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.search-empty-message",
-    label: "Search — No Results Message",
+    label: "No search results message",
     description: "Shown when a visitor's search doesn't match any post.",
     type: "text",
     page: "blog",
@@ -115,7 +115,7 @@ export const oliveBlogData: TemplateField[] = [
   // ── blog.post (hideable, renderContext: blog-post) ───────────────────────
   {
     key: "olive.blog.post-related-heading",
-    label: "Related Posts Heading",
+    label: "Related posts heading",
     description:
       "Heading over the related-posts band at the end of every post.",
     type: "text",
@@ -126,9 +126,9 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.post-cta-heading",
-    label: "Closing CTA Heading",
+    label: "Heading",
     description:
-      "Heading on the sage-tint card shown at the end of every post. Leave the whole section hidden via the section toggle if you'd rather not show it.",
+      "Heading on the tinted card shown at the end of every post. Leave the whole section hidden via the section toggle if you'd rather not show it.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -137,8 +137,8 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.post-cta-body",
-    label: "Closing CTA Body",
-    description: "One line under the closing CTA heading.",
+    label: "Body",
+    description: "One line under the closing card's heading.",
     type: "textarea",
     page: "blog",
     group: "blog.post",
@@ -147,8 +147,8 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.post-cta-button-text",
-    label: "Closing CTA Button Text",
-    description: "Label for the closing CTA button.",
+    label: "Button label",
+    description: "Label for the closing card's button.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -157,8 +157,8 @@ export const oliveBlogData: TemplateField[] = [
   },
   {
     key: "olive.blog.post-cta-button-link",
-    label: "Closing CTA Button Link",
-    description: "Where the closing CTA button goes.",
+    label: "Button link",
+    description: "Where the closing card's button goes.",
     type: "url",
     page: "blog",
     group: "blog.post",
@@ -170,7 +170,7 @@ export const oliveBlogData: TemplateField[] = [
 export const oliveBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.hero",
-    title: "Journal Header",
+    title: "Journal header",
     description:
       "Cover image, heading and subtitle on the journal index, plus its empty state and search message.",
     icon: "📰",
@@ -178,7 +178,7 @@ export const oliveBlogFieldGroups: TemplateFieldGroup[] = [
   } satisfies TemplateFieldGroup,
   {
     id: "blog.post",
-    title: "Blog Post — Keep Reading & CTA",
+    title: "End of post",
     description:
       "The related-posts heading and closing call-to-action card shown at the end of every journal post.",
     icon: "📚",
@@ -190,7 +190,7 @@ export const oliveBlogSections: TemplateSection[] = [
   {
     id: "blog.hero",
     page: "blog",
-    title: "Journal Header",
+    title: "Journal header",
     description:
       "Cover image, heading, subtitle, and the empty/search states on the journal index.",
     groupIds: ["blog.hero"],
@@ -206,7 +206,7 @@ export const oliveBlogSections: TemplateSection[] = [
     id: "blog.post",
     page: "blog",
     renderContext: "blog-post",
-    title: "Blog Post — Keep Reading & CTA",
+    title: "End of post",
     description:
       "Related posts and the closing call-to-action shown at the end of every post.",
     groupIds: ["blog.post"],

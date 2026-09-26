@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Pause, Play } from "lucide-react";
 
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
@@ -16,8 +16,17 @@ import {
   OliveRevealGroup,
 } from "../shared";
 
+/** One hero photograph, paired with its original (pre-filter) row index in
+ *  the owner's `olive.homepage.hero-images` list, so the currently shown
+ *  leaf can carry `listItemAttr` back to the right row. */
+export type OliveHeroImage = {
+  src: string;
+  /** Position in the saved list before blank/placeholder rows were dropped. */
+  index: number;
+};
+
 type Props = {
-  images: string[];
+  images: OliveHeroImage[];
   video: string;
   showCard: boolean;
   heading: string;
@@ -108,7 +117,7 @@ export function OliveHeroSection({
   const photos = hasVideo ? [] : images;
   const count = photos.length;
   const carousel = count > 1;
-  const poster = images[0];
+  const poster = images[0]?.src;
   const hasMedia = hasVideo || images.length > 0;
 
   /** The requested slide. */
@@ -221,7 +230,7 @@ export function OliveHeroSection({
    *  rest are eager so a turn never waits on a lazy loader. `fetchPriority`
    *  is set by hand: Next 15 does not derive it from `priority`. */
   const photo = (position: number) => {
-    const src = photos[position];
+    const src = photos[position]?.src;
     if (!src) return null;
     return (
       <Image
@@ -301,6 +310,12 @@ export function OliveHeroSection({
                 ) : null}
                 <div
                   key={`leaf-${index}`}
+                  {...(photos[index]
+                    ? listItemAttr(
+                        "olive.homepage.hero-images",
+                        photos[index].index,
+                      )
+                    : {})}
                   className={cn(
                     "absolute inset-0",
                     turning && "olive-swatch-turn",

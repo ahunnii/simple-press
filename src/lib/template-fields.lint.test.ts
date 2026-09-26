@@ -23,6 +23,7 @@ const STRICT_TEMPLATES: readonly string[] = [
   "noise",
   "happy-bamboo",
   "pollen",
+  "olive",
 ];
 
 /**

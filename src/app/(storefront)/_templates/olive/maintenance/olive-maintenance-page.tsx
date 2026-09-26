@@ -42,14 +42,14 @@ const fontBody = Figtree({
  * heading (craft-floor ban); the state is folded into the sentence itself.
  */
 const COPY = {
-  maintenance: { heading: "We're tidying the racks." },
+  maintenance: { heading: "We'll be right back." },
   coming_soon: { heading: "Opening day is almost here." },
 } as const;
 
 /**
  * OliveMaintenancePage — a white page, a centred `olive-card` with the leaf
  * mark, the wordmark, the maintenance heading/body, and the wordmark
- * tagline ("Detroit · Est. 2020" by default).
+ * tagline (blank/hidden by default; the owner can set one).
  *
  * Owner-editable fields (mirroring vii-maintenance-page.tsx): an optional
  * headline override, an announcement flyer image, a when/where line, and a

@@ -1,17 +1,22 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   isContentEmpty,
-  parseTemplateListRows,
+  parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
@@ -104,6 +109,7 @@ const containerStyle: CSSProperties = {
 export function OliveProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const {
     additionalFields,
@@ -200,6 +206,9 @@ export function OliveProductPage({
     "olive.global.product-related-link-label",
     "olive.global.product-coming-soon-heading",
     "olive.global.product-coming-soon-body",
+    "olive.global.product-related-empty",
+    "olive.global.product-preorder-note",
+    "olive.global.product-max-in-bag",
   ]);
 
   const shippingText = (
@@ -213,22 +222,48 @@ export function OliveProductPage({
   const relatedLinkLabel = f["olive.global.product-related-link-label"] ?? "";
   const comingSoonHeading = f["olive.global.product-coming-soon-heading"] ?? "";
   const comingSoonBody = f["olive.global.product-coming-soon-body"] ?? "";
+  const relatedEmptyText =
+    f["olive.global.product-related-empty"] ??
+    "Nothing to pair with this one yet";
+  const preorderNote =
+    f["olive.global.product-preorder-note"] ??
+    "Pre-order — ships when available";
+  const maxInBagNote =
+    f["olive.global.product-max-in-bag"] ??
+    "Everything we have is already in your bag.";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
 
   // Product-level badges (icon + text, set per product) win over the store-wide
   // list; a product that says something specific should not be talked over.
-  const globalBadges = parseTemplateListRows(
-    getListFieldValue(customFields, "olive.global.product-trust-badges"),
+  // Olive's own list field is label-only (see products/index.ts itemSchema),
+  // so `row.icon` is always undefined here and the Check glyph carries every
+  // store-wide badge — kept for parity with `displayTrustBadges`, which does
+  // supply real icons. Index is assigned AFTER the parser has already
+  // dropped any invalid rows (mirrors bamboo's `bamboo-product-page.tsx`
+  // :97-102), so a row that fails validation shifts the indexes of the rows
+  // after it; there is no cheap way to recover the pre-validation index
+  // through this shared helper.
+  const globalBadges = (
+    parseTemplateTrustBadgesListRows(
+      getListFieldValue(customFields, "olive.global.product-trust-badges"),
+    ) ?? []
   )
-    .map((row) => (typeof row.label === "string" ? row.label.trim() : ""))
-    .filter((label) => label.length > 0);
+    .map((row, index) => ({
+      Icon: row.icon ?? Check,
+      label: row.label.trim(),
+      index,
+    }))
+    .filter((row) => row.label.length > 0);
 
-  const badges =
+  const badges: { Icon: LucideIcon; label: string; index: number | null }[] =
     displayTrustBadges.length > 0
       ? displayTrustBadges.map((badge) => ({
           Icon: badge.Icon,
           label: badge.label,
+          index: null,
         }))
-      : globalBadges.map((label) => ({ Icon: Check, label }));
+      : globalBadges;
 
   const comingSoon = additionalFields?.comingSoon === true;
   const tagline = additionalFields?.productTagline?.trim() ?? "";
@@ -280,7 +315,7 @@ export function OliveProductPage({
             refuses. */}
         <div
           className="lg:sticky lg:top-[calc(var(--olive-header-h)+1.5rem)] lg:self-start"
-          {...sectionGroupAttr("global", "product")}
+          {...sectionGroupAttr("product", "details")}
         >
           <OliveRevealGroup className="flex flex-col gap-5">
             <div
@@ -377,7 +412,8 @@ export function OliveProductPage({
                 product.inventoryQty === 0 ? (
                   <OliveStatusBadge
                     status="pre-order"
-                    label="Pre-order — ships when available"
+                    label={preorderNote}
+                    labelFieldKey="olive.global.product-preorder-note"
                   />
                 ) : isInventoryTracked && remainingStock > 0 ? (
                   remainingStock <= LOW_STOCK ? (
@@ -391,8 +427,11 @@ export function OliveProductPage({
                 ) : null}
 
                 {!canAddMore ? (
-                  <p className="olive-caption">
-                    Everything we have is already in your bag.
+                  <p
+                    className="olive-caption"
+                    {...fieldAttr("olive.global.product-max-in-bag")}
+                  >
+                    {maxInBagNote}
                   </p>
                 ) : null}
               </div>
@@ -416,9 +455,15 @@ export function OliveProductPage({
                 className="olive-reveal-item flex flex-col gap-1.5"
                 style={{ "--i": 2 } as CSSProperties}
               >
-                {badges.map(({ Icon, label }, index) => (
+                {badges.map(({ Icon, label, index }, position) => (
                   <li
-                    key={`${label}-${index}`}
+                    key={`${label}-${position}`}
+                    {...(index !== null
+                      ? listItemAttr(
+                          "olive.global.product-trust-badges",
+                          index,
+                        )
+                      : {})}
                     className="flex items-start gap-2 text-[0.8125rem] leading-relaxed"
                     style={{ color: "var(--olive-ink-soft)" }}
                   >
@@ -466,6 +511,19 @@ export function OliveProductPage({
                       >
                         {shippingText}
                       </p>
+                      {hasShippingPolicy ? (
+                        <Link
+                          href="/shipping-policy"
+                          className="mt-3 inline-block underline"
+                          style={{
+                            color: "var(--olive-leaf)",
+                            textDecorationColor: "var(--olive-sage-bright)",
+                            textUnderlineOffset: "5px",
+                          }}
+                        >
+                          Read the full shipping policy
+                        </Link>
+                      ) : null}
                     </OliveAccordionItem>
                   ) : null}
 
@@ -482,6 +540,19 @@ export function OliveProductPage({
                       >
                         {returnsText}
                       </p>
+                      {hasRefundPolicy ? (
+                        <Link
+                          href="/refund-policy"
+                          className="mt-3 inline-block underline"
+                          style={{
+                            color: "var(--olive-leaf)",
+                            textDecorationColor: "var(--olive-sage-bright)",
+                            textUnderlineOffset: "5px",
+                          }}
+                        >
+                          Read the full returns policy
+                        </Link>
+                      ) : null}
                     </OliveAccordionItem>
                   ) : null}
                 </OliveAccordion>
@@ -516,6 +587,7 @@ export function OliveProductPage({
           aria-labelledby="olive-related-heading"
           className="pt-12 pb-16 md:pt-16 md:pb-24"
           style={{ borderTop: "1px solid var(--olive-hairline)" }}
+          {...sectionGroupAttr("product", "details")}
         >
           {/* The grid below deals its cards in, so without this the heading
               would arrive after the row it labels. Wrapped here rather than
@@ -535,7 +607,8 @@ export function OliveProductPage({
           <OliveProductGrid
             products={relatedProducts}
             columns={4}
-            emptyHeading="Nothing to pair with this one yet"
+            emptyHeading={relatedEmptyText}
+            emptyHeadingFieldKey="olive.global.product-related-empty"
           />
         </section>
       ) : null}

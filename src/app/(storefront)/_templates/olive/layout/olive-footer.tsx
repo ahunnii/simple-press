@@ -4,22 +4,14 @@ import type { DefaultFooterTemplateProps } from "../../types";
 import type { OliveNavCollection } from "./olive-nav-overlay";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { PinterestIcon } from "~/components/icons/pinterest-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
 
 import { resolveFields } from "..";
 import { OliveLeafMark } from "../shared/olive-leaf-mark";
 
 type FooterLink = { href: string; label: string };
-
-type SocialLink = {
-  href: string;
-  label: string;
-  Icon: React.ComponentType<{ className?: string }>;
-};
 
 type OliveFooterProps = DefaultFooterTemplateProps & {
   /** Published collections, resolved once by the layout. */
@@ -30,6 +22,19 @@ type OliveFooterProps = DefaultFooterTemplateProps & {
 const MAX_COLLECTION_LINKS = 5;
 /** How many policy pages the Help column will list before it stops. */
 const MAX_POLICY_LINKS = 4;
+
+/** Retired per-template social URL keys, read only as a legacy fallback. */
+const LEGACY_SOCIAL_KEYS = [
+  "instagram",
+  "tiktok",
+  "facebook",
+  "pinterest",
+] as const;
+
+function nonBlank(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed?.length ? trimmed : undefined;
+}
 
 /**
  * The book cover. A sage field carrying the call-to-action card and three
@@ -56,19 +61,21 @@ export async function OliveFooter({
     | undefined;
 
   const f = resolveFields(customFields, [
-    "olive.global.footer-tagline",
     "olive.global.footer-cta-heading",
     "olive.global.footer-cta-body",
     "olive.global.footer-cta-label",
     "olive.global.footer-cta-link",
     "olive.global.wordmark-tagline",
-    "olive.global.social-instagram",
-    "olive.global.social-tiktok",
-    "olive.global.social-facebook",
-    "olive.global.social-pinterest",
   ]);
 
-  const footerTagline = f["olive.global.footer-tagline"] ?? "";
+  // Tagline: Content → Branding → Footer tagline wins; else the legacy
+  // `olive.global.footer-tagline` field (retired 2026-09-26, a read-only
+  // fallback — never written or cleared from here); else hidden.
+  const footerTagline =
+    nonBlank(business?.siteContent?.footerText) ??
+    nonBlank(
+      getRawCustomFieldString(customFields, "olive.global.footer-tagline"),
+    );
   const ctaHeading = f["olive.global.footer-cta-heading"] ?? "";
   const ctaBody = f["olive.global.footer-cta-body"] ?? "";
   const ctaLabel = f["olive.global.footer-cta-label"] ?? "";
@@ -144,28 +151,27 @@ export async function OliveFooter({
     ...(accountsEnabled ? [{ href: "/account/orders", label: "Account" }] : []),
   ];
 
-  const socials: SocialLink[] = [
-    {
-      href: (f["olive.global.social-instagram"] ?? "").trim(),
-      label: "Instagram",
-      Icon: InstagramIcon,
-    },
-    {
-      href: (f["olive.global.social-tiktok"] ?? "").trim(),
-      label: "TikTok",
-      Icon: TikTokIcon,
-    },
-    {
-      href: (f["olive.global.social-facebook"] ?? "").trim(),
-      label: "Facebook",
-      Icon: FacebookIcon,
-    },
-    {
-      href: (f["olive.global.social-pinterest"] ?? "").trim(),
-      label: "Pinterest",
-      Icon: PinterestIcon,
-    },
-  ].filter((social) => social.href.length > 0);
+  // Social links: Content → Branding (`SiteContent.socialLinks`) wins; if it
+  // resolves nothing, the legacy `olive.global.social-*` URLs (retired
+  // 2026-09-26, read-only fallback) are run through the same resolver so they
+  // get the same `safeHref` scheme allowlist and canonical icon/order.
+  const brandingSocials = resolveSocialLinks(
+    business?.siteContent?.socialLinks,
+  );
+  const socials =
+    brandingSocials.length > 0
+      ? brandingSocials
+      : resolveSocialLinks(
+          Object.fromEntries(
+            LEGACY_SOCIAL_KEYS.map((network) => [
+              network,
+              getRawCustomFieldString(
+                customFields,
+                `olive.global.social-${network}`,
+              ),
+            ]),
+          ),
+        );
 
   const ctaIsExternal = /^https?:\/\//i.test(ctaLink);
   const showCta = ctaLink.length > 0 && ctaLabel.length > 0;
@@ -221,7 +227,6 @@ export async function OliveFooter({
             <p
               className="max-w-[34ch] text-[1.0625rem] leading-relaxed"
               style={{ color: "var(--olive-white)" }}
-              {...fieldAttr("olive.global.footer-tagline")}
             >
               {footerTagline}
             </p>
@@ -255,13 +260,13 @@ export async function OliveFooter({
 
           {socials.length > 0 ? (
             <ul className="m-0 flex list-none items-center gap-1 p-0">
-              {socials.map(({ href, label, Icon }) => (
-                <li key={label}>
+              {socials.map(({ key, url, ariaLabel, Icon }) => (
+                <li key={key}>
                   <a
-                    href={href}
+                    href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`${label} (opens in new tab)`}
+                    aria-label={`${ariaLabel} (opens in new tab)`}
                     className="olive-icon-btn olive-icon-btn-invert"
                   >
                     <Icon className="h-[18px] w-[18px]" />

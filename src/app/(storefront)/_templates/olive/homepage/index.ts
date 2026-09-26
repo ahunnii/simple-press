@@ -4,10 +4,10 @@ import type { TemplateSection } from "~/lib/template-sections";
 /**
  * Olive Mode — homepage fields, groups and curated sections.
  *
- * Ten sections, in render order: the hero swatch card, the category fan, two
- * mood tiles, the swatch grid of new arrivals, the promo band or takeover,
- * the sage cover band, the feed, the press strip, one customer quote and the
- * journal teaser. Group ids and default copy come straight from
+ * Ten sections, in render order: the hero card, the category fan, two photo
+ * tiles, the grid of new arrivals, the promo band or takeover, the feature
+ * band, the feed, the press strip, one customer quote and the journal
+ * teaser. Group ids and default copy come straight from
  * docs/templates/olive/design.md § Homepage.
  *
  * Every user-visible string on the page is a default in this file. Lists have
@@ -21,21 +21,28 @@ import type { TemplateSection } from "~/lib/template-sections";
 const homepageHeroData: TemplateField[] = [
   {
     key: "olive.homepage.hero-images",
-    label: "Hero Photographs",
+    label: "Photos",
     description:
-      "Up to six full-width photographs behind the hero, shown one at a time and turned like the leaves of a swatch book. The first is the one shoppers see on arrival, and the still frame for the hero video. One photograph stays put; none shows the sage cover panel instead.",
+      "Up to six full-width photographs behind the hero, shown one at a time and turned like the leaves of a swatch book. The first is the one shoppers see on arrival, and the still frame for the hero video. One photograph stays put; none shows a plain cover panel instead.",
     type: "list",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "photo",
     itemSchema: [
-      { key: "image", label: "Photograph", type: "image", placeholder: "Upload a landscape photograph" },
+      {
+        key: "image",
+        label: "Photograph",
+        type: "image",
+        description: "One full-width hero photograph.",
+        placeholder: "Upload a landscape photograph",
+      },
     ],
   },
   {
     key: "olive.homepage.hero-video",
-    label: "Hero Video",
+    label: "Video",
     description:
       "Optional silent video for the hero. When set it plays instead of the photographs, muted and looping, with a pause control. Leave blank to use the photographs.",
     type: "video",
@@ -46,9 +53,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "olive.homepage.hero-show-card",
-    label: "Show Swatch Card",
+    label: "Show card",
     description:
-      "On: the white card with the heading, line and button sits in the hero's corner. Off: the photographs stand alone — the heading is still read out to screen readers, but nothing is drawn over the picture.",
+      "On: the card with the heading, line and button sits in the hero's corner. Off: the photographs stand alone — the heading is still read out to screen readers, but nothing is drawn over the picture.",
     type: "boolean",
     page: "homepage",
     group: "homepage.hero",
@@ -57,9 +64,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "olive.homepage.hero-heading",
-    label: "Hero Heading",
+    label: "Heading",
     description:
-      "The first line a shopper reads, on the white card over the photograph. This is the page's main heading.",
+      "The first line a shopper reads, on the card over the photograph. This is the page's main heading.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -68,34 +75,38 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "olive.homepage.hero-body",
-    label: "Hero Line",
-    description: "One line under the hero heading. Keep it to a sentence.",
+    label: "Line",
+    description:
+      "One line under the hero heading. Keep it to a sentence. Only shown when Show card is on.",
     type: "textarea",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue:
       "This week's pieces are hung, steamed and waiting on the rail.",
+    visibleWhen: { key: "olive.homepage.hero-show-card", equals: "true" },
   },
   {
     key: "olive.homepage.hero-cta-label",
-    label: "Hero Button Label",
-    description: "Label of the hero's button.",
+    label: "Button label",
+    description: "Label of the hero's button. Only shown when Show card is on.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "Shop new",
+    visibleWhen: { key: "olive.homepage.hero-show-card", equals: "true" },
   },
   {
     key: "olive.homepage.hero-cta-link",
-    label: "Hero Button Link",
-    description: "Where the hero button goes.",
+    label: "Button link",
+    description: "Where the hero button goes. Only shown when Show card is on.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "/shop",
+    visibleWhen: { key: "olive.homepage.hero-show-card", equals: "true" },
   },
 ];
 
@@ -104,7 +115,7 @@ const homepageHeroData: TemplateField[] = [
 const homepageCategoriesData: TemplateField[] = [
   {
     key: "olive.homepage.categories-heading",
-    label: "Categories Heading",
+    label: "Heading",
     description: "Heading above the row of category cards.",
     type: "text",
     page: "homepage",
@@ -114,7 +125,7 @@ const homepageCategoriesData: TemplateField[] = [
   },
   {
     key: "olive.homepage.categories-cards",
-    label: "Category Cards",
+    label: "Cards",
     description:
       "Up to four photographic cards, each with a label and a link. Leave the list empty and your published collections fill the row instead.",
     type: "list",
@@ -122,36 +133,41 @@ const homepageCategoriesData: TemplateField[] = [
     group: "homepage.categories",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "card",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "image",
         label: "Photograph",
         type: "image",
+        description: "Photo for this card.",
         placeholder: "Upload a category photograph",
       },
       {
         key: "label",
         label: "Label",
         type: "text",
+        description: "The category name printed on the card's tab.",
         placeholder: "e.g. Dresses",
       },
       {
         key: "link",
         label: "Link",
         type: "text",
+        description: "Where the card goes.",
         placeholder: "e.g. /collections/dresses",
       },
     ],
   },
 ];
 
-// ─── 3. Mood tiles ────────────────────────────────────────────────────────────
+// ─── 3. Photo tiles ───────────────────────────────────────────────────────────
 
 const homepageMoodData: TemplateField[] = [
   {
     key: "olive.homepage.mood-one-image",
-    label: "First Tile Photograph",
-    description: "The left-hand photograph of the two big tiles.",
+    label: "First tile photo",
+    description: "The left-hand photograph of the two tiles.",
     type: "image",
     page: "homepage",
     group: "homepage.mood",
@@ -160,8 +176,8 @@ const homepageMoodData: TemplateField[] = [
   },
   {
     key: "olive.homepage.mood-one-label",
-    label: "First Tile Label",
-    description: "The label on the white card in the tile's bottom corner.",
+    label: "First tile label",
+    description: "The label on the card in the tile's bottom corner.",
     type: "text",
     page: "homepage",
     group: "homepage.mood",
@@ -170,7 +186,7 @@ const homepageMoodData: TemplateField[] = [
   },
   {
     key: "olive.homepage.mood-one-link",
-    label: "First Tile Link",
+    label: "First tile link",
     description: "Where the first tile goes.",
     type: "url",
     page: "homepage",
@@ -180,8 +196,8 @@ const homepageMoodData: TemplateField[] = [
   },
   {
     key: "olive.homepage.mood-two-image",
-    label: "Second Tile Photograph",
-    description: "The right-hand photograph of the two big tiles.",
+    label: "Second tile photo",
+    description: "The right-hand photograph of the two tiles.",
     type: "image",
     page: "homepage",
     group: "homepage.mood",
@@ -190,8 +206,8 @@ const homepageMoodData: TemplateField[] = [
   },
   {
     key: "olive.homepage.mood-two-label",
-    label: "Second Tile Label",
-    description: "The label on the white card in the tile's bottom corner.",
+    label: "Second tile label",
+    description: "The label on the card in the tile's bottom corner.",
     type: "text",
     page: "homepage",
     group: "homepage.mood",
@@ -200,7 +216,7 @@ const homepageMoodData: TemplateField[] = [
   },
   {
     key: "olive.homepage.mood-two-link",
-    label: "Second Tile Link",
+    label: "Second tile link",
     description: "Where the second tile goes.",
     type: "url",
     page: "homepage",
@@ -215,7 +231,7 @@ const homepageMoodData: TemplateField[] = [
 const homepageProductRailData: TemplateField[] = [
   {
     key: "olive.homepage.rail-heading",
-    label: "New Arrivals Heading",
+    label: "Heading",
     description: "Heading above the grid of products.",
     type: "text",
     page: "homepage",
@@ -225,7 +241,7 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "olive.homepage.rail-collection",
-    label: "Featured Collection",
+    label: "Featured collection",
     description:
       "Show one collection here instead of your latest products. Leave empty for the eight most recent pieces.",
     type: "collection",
@@ -236,7 +252,7 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "olive.homepage.rail-link-label",
-    label: "Rail Link Label",
+    label: "Link label",
     description: "The text link beside the heading.",
     type: "text",
     page: "homepage",
@@ -246,7 +262,7 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "olive.homepage.rail-link",
-    label: "Rail Link",
+    label: "Link",
     description: "Where the text link beside the heading goes.",
     type: "url",
     page: "homepage",
@@ -256,7 +272,7 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "olive.homepage.rail-empty-heading",
-    label: "Empty Rail Heading",
+    label: "Empty state heading",
     description: "Shown in place of the grid while the shop has no products.",
     type: "text",
     page: "homepage",
@@ -266,8 +282,8 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "olive.homepage.rail-empty-body",
-    label: "Empty Rail Line",
-    description: "One line under the empty-rail heading.",
+    label: "Empty state body",
+    description: "One line under the empty-state heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.productRail",
@@ -281,7 +297,7 @@ const homepageProductRailData: TemplateField[] = [
 const homepagePromoData: TemplateField[] = [
   {
     key: "olive.homepage.promo-takeover",
-    label: "Full-Photo Takeover",
+    label: "Full-photo takeover",
     description:
       "On: the promo photo fills the width of the page with the copy on a card in its corner. Off: a photo-and-text band. Needs a photo to take effect.",
     type: "boolean",
@@ -292,7 +308,7 @@ const homepagePromoData: TemplateField[] = [
   },
   {
     key: "olive.homepage.promo-image",
-    label: "Promo Photo",
+    label: "Photo",
     description:
       "The photograph for the promo. Leave blank for a copy-only band.",
     type: "image",
@@ -303,7 +319,7 @@ const homepagePromoData: TemplateField[] = [
   },
   {
     key: "olive.homepage.promo-heading",
-    label: "Promo Heading",
+    label: "Heading",
     description:
       "Heading of the promo. Leave heading and text blank to hide the whole section.",
     type: "text",
@@ -314,7 +330,7 @@ const homepagePromoData: TemplateField[] = [
   },
   {
     key: "olive.homepage.promo-body",
-    label: "Promo Text",
+    label: "Text",
     description: "A line or two under the promo heading.",
     type: "textarea",
     page: "homepage",
@@ -325,7 +341,7 @@ const homepagePromoData: TemplateField[] = [
   },
   {
     key: "olive.homepage.promo-button-label",
-    label: "Promo Button Label",
+    label: "Button label",
     description: "Label of the promo button. Leave blank to hide the button.",
     type: "text",
     page: "homepage",
@@ -335,7 +351,7 @@ const homepagePromoData: TemplateField[] = [
   },
   {
     key: "olive.homepage.promo-button-link",
-    label: "Promo Button Link",
+    label: "Button link",
     description:
       "Where the promo button goes — the rewards page by default, but it can point anywhere.",
     type: "url",
@@ -346,22 +362,22 @@ const homepagePromoData: TemplateField[] = [
   },
 ];
 
-// ─── 5. Sage band ─────────────────────────────────────────────────────────────
+// ─── 5. Feature band ──────────────────────────────────────────────────────────
 
 const homepageBandData: TemplateField[] = [
   {
     key: "olive.homepage.band-heading",
-    label: "Band Heading",
-    description: "Heading on the sage band, in white type.",
+    label: "Heading",
+    description: "Heading on the feature band.",
     type: "text",
     page: "homepage",
     group: "homepage.band",
     gridColumn: "col-span-full",
-    defaultValue: "Made for Detroit days.",
+    defaultValue: "Made for everyday wear.",
   },
   {
     key: "olive.homepage.band-body",
-    label: "Band Line",
+    label: "Body",
     description: "One line under the band heading.",
     type: "textarea",
     page: "homepage",
@@ -372,7 +388,7 @@ const homepageBandData: TemplateField[] = [
   },
   {
     key: "olive.homepage.band-cta-label",
-    label: "Band Button Label",
+    label: "Button label",
     description: "Label of the band's button.",
     type: "text",
     page: "homepage",
@@ -382,7 +398,7 @@ const homepageBandData: TemplateField[] = [
   },
   {
     key: "olive.homepage.band-cta-link",
-    label: "Band Button Link",
+    label: "Button link",
     description: "Where the band's button goes.",
     type: "url",
     page: "homepage",
@@ -392,9 +408,9 @@ const homepageBandData: TemplateField[] = [
   },
   {
     key: "olive.homepage.band-image",
-    label: "Band Photograph",
+    label: "Photo",
     description:
-      "The photograph card on the right of the sage band. Leave blank to show the paper panel instead.",
+      "The photograph on the right of the feature band. Leave blank to show a plain panel instead.",
     type: "image",
     page: "homepage",
     group: "homepage.band",
@@ -408,7 +424,7 @@ const homepageBandData: TemplateField[] = [
 const homepageFeedData: TemplateField[] = [
   {
     key: "olive.homepage.feed-heading",
-    label: "Feed Heading",
+    label: "Heading",
     description: "Heading above the six square photographs.",
     type: "text",
     page: "homepage",
@@ -418,7 +434,7 @@ const homepageFeedData: TemplateField[] = [
   },
   {
     key: "olive.homepage.feed-handle",
-    label: "Social Handle",
+    label: "Handle",
     description:
       "Your handle, shown under the heading (e.g. @yourshop). Leave blank to hide it.",
     type: "text",
@@ -430,7 +446,7 @@ const homepageFeedData: TemplateField[] = [
   },
   {
     key: "olive.homepage.feed-url",
-    label: "Profile Link",
+    label: "Profile link",
     description:
       "Full URL of the profile the photographs link to. Leave blank and the photographs are shown without links.",
     type: "url",
@@ -441,7 +457,7 @@ const homepageFeedData: TemplateField[] = [
   },
   {
     key: "olive.homepage.feed-images",
-    label: "Feed Photographs",
+    label: "Photos",
     description:
       "Up to six square photographs. Leave the list empty to hide the whole section.",
     type: "list",
@@ -449,18 +465,23 @@ const homepageFeedData: TemplateField[] = [
     group: "homepage.feed",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "photo",
     itemSchema: [
       {
         key: "image",
         label: "Photograph",
         type: "image",
+        description: "One square photograph.",
         placeholder: "Upload a square photograph",
       },
       {
         key: "caption",
         label: "Description",
         type: "text",
+        description:
+          "What is in the photo, read out by screen readers. Leave blank for a decorative photo with no description.",
         placeholder: "What is in the photo, for screen readers",
+        optional: true,
       },
     ],
   },
@@ -471,7 +492,7 @@ const homepageFeedData: TemplateField[] = [
 const homepagePressData: TemplateField[] = [
   {
     key: "olive.homepage.press-heading",
-    label: "Press Heading",
+    label: "Heading",
     description: "Heading above the row of logos.",
     type: "text",
     page: "homepage",
@@ -481,7 +502,7 @@ const homepagePressData: TemplateField[] = [
   },
   {
     key: "olive.homepage.press-logos",
-    label: "Press Logos",
+    label: "Logos",
     description:
       "Up to six logos of publications that have covered you. This section stays hidden until you turn it on and add logos.",
     type: "list",
@@ -489,18 +510,23 @@ const homepagePressData: TemplateField[] = [
     group: "homepage.press",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "logo",
     itemSchema: [
       {
         key: "image",
         label: "Logo",
         type: "image",
+        description: "The publication's logo.",
         placeholder: "Upload a logo",
       },
       {
         key: "name",
         label: "Publication",
         type: "text",
+        description:
+          "The publication's name, read out by screen readers as the logo's description.",
         placeholder: "The publication's name",
+        optional: true,
       },
     ],
   },
@@ -511,7 +537,7 @@ const homepagePressData: TemplateField[] = [
 const homepageTestimonialData: TemplateField[] = [
   {
     key: "olive.homepage.testimonial-link-label",
-    label: "Testimonial Link Label",
+    label: "Link label",
     description:
       "Text link under the quote. Leave blank to show the quote on its own.",
     type: "text",
@@ -522,7 +548,7 @@ const homepageTestimonialData: TemplateField[] = [
   },
   {
     key: "olive.homepage.testimonial-link",
-    label: "Testimonial Link",
+    label: "Link",
     description: "Where the link under the quote goes.",
     type: "url",
     page: "homepage",
@@ -537,7 +563,7 @@ const homepageTestimonialData: TemplateField[] = [
 const homepageBlogData: TemplateField[] = [
   {
     key: "olive.homepage.blog-heading",
-    label: "Journal Heading",
+    label: "Heading",
     description: "Heading above the three most recent posts.",
     type: "text",
     page: "homepage",
@@ -547,7 +573,7 @@ const homepageBlogData: TemplateField[] = [
   },
   {
     key: "olive.homepage.blog-link-label",
-    label: "Journal Link Label",
+    label: "Link label",
     description: "The text link beside the journal heading.",
     type: "text",
     page: "homepage",
@@ -557,7 +583,7 @@ const homepageBlogData: TemplateField[] = [
   },
   {
     key: "olive.homepage.blog-link",
-    label: "Journal Link",
+    label: "Link",
     description: "Where the text link beside the journal heading goes.",
     type: "url",
     page: "homepage",
@@ -587,13 +613,13 @@ export const oliveHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "Up to six full-width photographs or a video, turned like a swatch book, and the white swatch card over them",
+      "Up to six full-width photographs or a video, turned like a swatch book, and the card over them",
     icon: "🌿",
     columns: 2,
   },
   {
     id: "homepage.categories",
-    title: "Category Cards",
+    title: "Category cards",
     description:
       "Heading and up to four photographic cards — your collections fill the row when the list is empty",
     icon: "🗂️",
@@ -601,14 +627,14 @@ export const oliveHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.mood",
-    title: "Two Big Tiles",
-    description: "The pair of large photographs with labels on white cards",
+    title: "Two photo tiles",
+    description: "The pair of large photographs with labels on cards",
     icon: "🖼️",
     columns: 2,
   },
   {
     id: "homepage.productRail",
-    title: "New Arrivals",
+    title: "New arrivals",
     description:
       "Heading, link and the grid of products — your latest eight, or one collection",
     icon: "🛍️",
@@ -624,8 +650,8 @@ export const oliveHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.band",
-    title: "Sage Band",
-    description: "The full-width sage band with a photograph and a button",
+    title: "Feature band",
+    description: "The full-width band with a photograph and a button",
     icon: "🟩",
     columns: 2,
   },
@@ -638,7 +664,7 @@ export const oliveHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.press",
-    title: "Press Logos",
+    title: "Press logos",
     description:
       "The scrolling row of publication logos — hidden until you turn it on",
     icon: "📰",
@@ -646,8 +672,8 @@ export const oliveHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.testimonial",
-    title: "Customer Quote",
-    description: "One approved review on a slate card, with a link to the rest",
+    title: "Customer quote",
+    description: "One approved review on a card, with a link to the rest",
     icon: "❝",
     columns: 2,
   },
@@ -666,7 +692,7 @@ export const oliveHomepageSections: TemplateSection[] = [
     page: "homepage",
     title: "Hero",
     description:
-      "Full-width photographs or video, turned like a swatch book, with the white swatch card over them",
+      "Full-width photographs or video, turned like a swatch book, with the card over them",
     groupIds: ["homepage.hero"],
     order: 0,
     hideable: false,
@@ -674,7 +700,7 @@ export const oliveHomepageSections: TemplateSection[] = [
   {
     id: "homepage.categories",
     page: "homepage",
-    title: "Category Cards",
+    title: "Category cards",
     description: "Row of photographic category cards, dealt in like swatches",
     groupIds: ["homepage.categories"],
     order: 1,
@@ -683,8 +709,8 @@ export const oliveHomepageSections: TemplateSection[] = [
   {
     id: "homepage.mood",
     page: "homepage",
-    title: "Two Big Tiles",
-    description: "The pair of large photographs with labels on white cards",
+    title: "Two photo tiles",
+    description: "The pair of large photographs with labels on cards",
     groupIds: ["homepage.mood"],
     order: 2,
     hideable: true,
@@ -692,8 +718,8 @@ export const oliveHomepageSections: TemplateSection[] = [
   {
     id: "homepage.productRail",
     page: "homepage",
-    title: "New Arrivals",
-    description: "The swatch grid of your latest products or one collection",
+    title: "New arrivals",
+    description: "The grid of your latest products or one collection",
     groupIds: ["homepage.productRail"],
     order: 3,
     hideable: false,
@@ -710,8 +736,8 @@ export const oliveHomepageSections: TemplateSection[] = [
   {
     id: "homepage.band",
     page: "homepage",
-    title: "Sage Band",
-    description: "Full-width sage band with a photograph and a button",
+    title: "Feature band",
+    description: "Full-width band with a photograph and a button",
     groupIds: ["homepage.band"],
     order: 5,
     hideable: true,
@@ -728,7 +754,7 @@ export const oliveHomepageSections: TemplateSection[] = [
   {
     id: "homepage.press",
     page: "homepage",
-    title: "Press Logos",
+    title: "Press logos",
     description: "Scrolling row of publication logos",
     groupIds: ["homepage.press"],
     order: 7,
@@ -738,8 +764,8 @@ export const oliveHomepageSections: TemplateSection[] = [
   {
     id: "homepage.testimonial",
     page: "homepage",
-    title: "Customer Quote",
-    description: "One approved review as a large quote on a slate card",
+    title: "Customer quote",
+    description: "One approved review as a large quote on a card",
     groupIds: ["homepage.testimonial"],
     order: 8,
     hideable: true,
@@ -748,7 +774,7 @@ export const oliveHomepageSections: TemplateSection[] = [
     id: "homepage.blog",
     page: "homepage",
     title: "Journal",
-    description: "The three most recent posts as white cards",
+    description: "The three most recent posts as cards",
     groupIds: ["homepage.blog"],
     order: 9,
     hideable: true,

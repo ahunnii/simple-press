@@ -447,6 +447,15 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "pollen.services.testimonial-title",
   "pollen.services.testimonial-subtitle",
   "pollen.global.image-overlay-color",
+  // olive, retired 2026-09-26 — map pin / hours come from Settings (Business), footer tagline + social links from Content → Branding (SiteContent). Saved values are read as a silent fallback.
+  "olive.contact.map-lat",
+  "olive.contact.map-lng",
+  "olive.contact.info-hours-body",
+  "olive.global.footer-tagline",
+  "olive.global.social-instagram",
+  "olive.global.social-tiktok",
+  "olive.global.social-facebook",
+  "olive.global.social-pinterest",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

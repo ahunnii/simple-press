@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 import type { OliveChipState } from "./olive-chip";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { OliveChip } from "./olive-chip";
@@ -81,6 +82,8 @@ type OliveStatusBadgeProps = {
   status: OliveStatus;
   /** Override the default wording (an owner's own order status, say). */
   label?: string;
+  /** Full template field key, when `label` is a live-patchable field. */
+  labelFieldKey?: string;
   size?: "sm" | "md";
   className?: string;
   style?: CSSProperties;
@@ -97,6 +100,7 @@ type OliveStatusBadgeProps = {
 export function OliveStatusBadge({
   status,
   label,
+  labelFieldKey,
   size = "md",
   className,
   style,
@@ -128,6 +132,7 @@ export function OliveStatusBadge({
           color: spec.textColor ?? "var(--olive-ink)",
           fontSize: size === "sm" ? "0.6875rem" : "0.75rem",
         }}
+        {...(labelFieldKey ? fieldAttr(labelFieldKey) : {})}
       >
         {text}
       </span>
