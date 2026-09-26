@@ -424,6 +424,29 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   // on save.
   "happy-bamboo.about.mission-rich-content",
   "happy-bamboo.homepage.about-body",
+  // pollen, retired 2026-09-26 — orphan saved keys with no declaration and
+  // no runtime reader; the data now comes from Settings (address, phone),
+  // Content → FAQ (the services-page `type: "faq"` picker), or Admin →
+  // Testimonials. `image-overlay-color` was declared but never read by the
+  // auth shell. Hidden from the admin's custom pairs and preserved on save.
+  "pollen.contact.address",
+  "pollen.contact.phone",
+  "pollen.global.phone-number",
+  "pollen.services.faq-question-1",
+  "pollen.services.faq-question-2",
+  "pollen.services.faq-question-3",
+  "pollen.services.faq-answer-1",
+  "pollen.services.faq-answer-2",
+  "pollen.services.faq-answer-3",
+  "pollen.services.testimonial-quote-1",
+  "pollen.services.testimonial-quote-2",
+  "pollen.services.testimonial-quote-3",
+  "pollen.services.testimonial-author-1",
+  "pollen.services.testimonial-author-2",
+  "pollen.services.testimonial-author-3",
+  "pollen.services.testimonial-title",
+  "pollen.services.testimonial-subtitle",
+  "pollen.global.image-overlay-color",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

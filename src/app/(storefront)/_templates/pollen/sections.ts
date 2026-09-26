@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Curated section registry for the `pollen` storefront template.
@@ -9,11 +10,17 @@ import type { TemplateSection } from "~/lib/template-sections";
  * fallback (one section per group, titled from `TemplateFieldGroup`
  * metadata) already gives owners a clean rail with no curation needed.
  *
- * `global.*` groups (header background, CTA band, services-page
- * testimonials heading) render across several of these pages but are left
- * to the derived fallback too — `TEMPLATE_FIELD_GROUPS.pollen` already
- * gives them accurate titles/descriptions/icons, and they're pinned in the
- * rail's "Global" page regardless of curation here.
+ * `global.*` groups (header, authentication) render across several pages
+ * and are left to the derived fallback — `TEMPLATE_FIELD_GROUPS.pollen`
+ * already gives them titles/descriptions/icons, and they're pinned in the
+ * rail's "Global" page. `global.testimonials` (services-page testimonials
+ * band), `global.cart` (full cart page), and `global.cta` (the CTA band
+ * shown at the bottom of most pages) are curated below to make them
+ * hideable and/or link Admin → Testimonials. Each keeps `page: "global"`:
+ * the field panel resolves a section's fields by `section.page`, and their
+ * fields are `page: "global"`, so a page-specific section would render
+ * empty (this is also why the about-page testimonials band below gets its
+ * own `about.testimonials` group instead of reusing `global.testimonials`).
  *
  * `order` reflects the visual top-to-bottom order sections render in on
  * each page (see the corresponding page component), not field declaration
@@ -56,12 +63,21 @@ export const pollenSections: Record<string, TemplateSection[]> = {
 
     // ── About ─────────────────────────────────────────────────────────────
     {
+      id: "about.hero",
+      page: "about",
+      title: "Page heading",
+      description: "Heading and small label at the top of the about page.",
+      groupIds: ["about.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
       id: "about.main",
       page: "about",
       title: "About Us",
       description: "Intro heading, story text, and image.",
       groupIds: ["about.main"],
-      order: 0,
+      order: 1,
       hideable: false,
     },
     {
@@ -70,18 +86,45 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       title: "Owner",
       description: "Featured owner section with photo and bio.",
       groupIds: ["about.owner"],
-      order: 1,
-      hideable: false,
+      order: 2,
+      hideable: true,
+    },
+    {
+      id: "about.testimonials",
+      page: "about",
+      title: "Testimonials band",
+      description:
+        "Small label and heading above the customer quotes on the about page. The quotes themselves come from Admin → Testimonials.",
+      groupIds: ["about.testimonials"],
+      order: 3,
+      hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
 
     // ── Contact ───────────────────────────────────────────────────────────
     {
       id: "contact.main",
       page: "contact",
-      title: "Contact Form",
-      description: "Page heading, form title/description, and form image.",
+      title: "Page heading",
+      description:
+        "Heading at the top of the contact page. Your address, email, phone, and hours come from Settings.",
       groupIds: ["contact.main"],
       order: 0,
+      hideable: false,
+      links: [
+        SECTION_LINKS.businessContact,
+        SECTION_LINKS.businessLocation,
+        SECTION_LINKS.businessHours,
+      ],
+    },
+    {
+      id: "contact.form",
+      page: "contact",
+      title: "Contact form",
+      description:
+        "Title, intro, and photo beside the contact form, plus the message shown after it's sent.",
+      groupIds: ["contact.form"],
+      order: 1,
       hideable: false,
     },
 
@@ -89,7 +132,7 @@ export const pollenSections: Record<string, TemplateSection[]> = {
     {
       id: "products.main",
       page: "services",
-      title: "Services Overview",
+      title: "Services overview",
       description: "Page hero, intro copy, and service cards.",
       groupIds: ["products.main"],
       order: 0,
@@ -103,6 +146,7 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       groupIds: ["products.faq"],
       order: 1,
       hideable: true,
+      links: [SECTION_LINKS.faq],
     },
     {
       id: "products.resources",
@@ -110,6 +154,59 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       title: "Helpful Resources",
       description: "Optional free-resource links band.",
       groupIds: ["products.resources"],
+      order: 2,
+      hideable: true,
+    },
+
+    // ── Product (every product page; previewed on a representative product) ─
+    {
+      id: "product.details",
+      page: "product",
+      title: "Product page",
+      description: "Text shown on every product page, around the buy button.",
+      groupIds: ["product.details"],
+      order: 0,
+      links: [SECTION_LINKS.products],
+    },
+
+    // ── Checkout ──────────────────────────────────────────────────────────
+    {
+      id: "checkout.unavailable",
+      page: "checkout",
+      title: "Checkout unavailable",
+      description:
+        "Shown on the checkout page when online payments aren't set up yet.",
+      groupIds: ["checkout.unavailable"],
+      order: 0,
+    },
+
+    // ── Global ────────────────────────────────────────────────────────────
+    {
+      id: "global.testimonials",
+      page: "global",
+      title: "Testimonials band",
+      description:
+        "Heading and link text for the customer quotes shown on the services page. The quotes themselves come from Admin → Testimonials.",
+      groupIds: ["global.testimonials"],
+      order: 0,
+      hideable: true,
+      links: [SECTION_LINKS.testimonials],
+    },
+    {
+      id: "global.cart",
+      page: "global",
+      title: "Cart",
+      description: "Wording shown on the full cart page.",
+      groupIds: ["global.cart"],
+      order: 1,
+    },
+    {
+      id: "global.cta",
+      page: "global",
+      title: "Closing banner",
+      description:
+        "Heading, text, image, and button for the banner shown near the bottom of most pages.",
+      groupIds: ["global.cta"],
       order: 2,
       hideable: true,
     },

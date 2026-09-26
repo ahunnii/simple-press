@@ -104,6 +104,7 @@ export function PollenHero({
                 : { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }
             }
             className="text-3xl leading-tight font-bold text-balance text-white sm:text-5xl md:text-6xl lg:text-7xl"
+            {...fieldAttr("pollen.homepage.hero-subtitle")}
           >
             {subtitle?.trim() ? subtitle : title}
           </motion.h1>

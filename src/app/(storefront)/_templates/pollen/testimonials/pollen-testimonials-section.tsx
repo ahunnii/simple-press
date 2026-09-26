@@ -23,6 +23,10 @@ type Props = {
   sectionLabel?: string;
   sectionHeading?: string;
   viewAllText?: string;
+  /** Field key backing `sectionLabel` (preview click-to-field + live text). */
+  sectionLabelFieldKey?: string;
+  /** Field key backing `sectionHeading` (preview click-to-field + live text). */
+  sectionHeadingFieldKey?: string;
   /** Spread on root <section> for the preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 };
@@ -32,6 +36,8 @@ export function PollenTestimonialsSection({
   sectionLabel = "Testimonials",
   sectionHeading = "Hear From Our Clients",
   viewAllText = "View all testimonials",
+  sectionLabelFieldKey = "pollen.global.testimonials-label",
+  sectionHeadingFieldKey = "pollen.global.testimonials-heading",
   sectionAttrs,
 }: Props) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -65,15 +71,17 @@ export function PollenTestimonialsSection({
         />
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <FadeIn direction="up">
-            <p
-              className="mb-4 text-center text-sm font-medium tracking-wider text-[#A8D081] uppercase"
-              {...fieldAttr("pollen.testimonials.section-label")}
-            >
-              {sectionLabel}
-            </p>
+            {sectionLabel ? (
+              <p
+                className="mb-4 text-center text-sm font-medium tracking-wider text-[#A8D081] uppercase"
+                {...fieldAttr(sectionLabelFieldKey)}
+              >
+                {sectionLabel}
+              </p>
+            ) : null}
             <h2
               className="mb-12 text-center text-3xl font-bold text-white md:text-4xl"
-              {...fieldAttr("pollen.testimonials.section-heading")}
+              {...fieldAttr(sectionHeadingFieldKey)}
             >
               {sectionHeading}
             </h2>

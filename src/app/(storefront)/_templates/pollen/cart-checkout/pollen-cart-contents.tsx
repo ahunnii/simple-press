@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   calculateShipping,
@@ -22,6 +23,7 @@ import {
 } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
 
+import { resolveFields } from "..";
 import { PollenCartItem } from "./pollen-cart-item";
 
 type Props = {
@@ -33,6 +35,7 @@ type Props = {
     offersInStorePickup: boolean;
     siteContent: {
       primaryColor: string | null;
+      customFields: unknown;
     } | null;
   };
 };
@@ -40,6 +43,12 @@ type Props = {
 export function PollenCartContents({ business }: Props) {
   const { items, subtotal, itemCount } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
+  const f = resolveFields(business.siteContent?.customFields, [
+    "pollen.global.cart-label",
+    "pollen.global.cart-empty-text",
+  ]);
+  const cartLabel = f["pollen.global.cart-label"] ?? "";
+  const cartEmptyText = f["pollen.global.cart-empty-text"] ?? "";
   // Zone+weight rates depend on the destination address, which isn't known in
   // the cart — defer to checkout rather than showing a misleading "Free".
   const isZoneWeight =
@@ -69,9 +78,14 @@ export function PollenCartContents({ business }: Props) {
             <h1 className="mt-6 text-2xl font-bold text-[#2a351f]">
               Your cart is empty
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-[#4c566a]">
-              Looks like you haven&apos;t added anything to your cart yet.
-            </p>
+            {cartEmptyText ? (
+              <p
+                {...fieldAttr("pollen.global.cart-empty-text")}
+                className="mx-auto mt-2 max-w-md text-[#4c566a]"
+              >
+                {cartEmptyText}
+              </p>
+            ) : null}
             <Button
               className="mt-8 bg-[#215935] text-white hover:bg-[#1a4729]"
               size="lg"
@@ -89,8 +103,11 @@ export function PollenCartContents({ business }: Props) {
     <PageTransition>
       <section className="mx-auto max-w-7xl px-4 py-40 sm:px-6 lg:px-8">
         <FadeIn direction="up">
-          <h1 className="mb-8 text-3xl font-bold text-[#2a351f] md:text-4xl">
-            Your Cart
+          <h1
+            {...fieldAttr("pollen.global.cart-label")}
+            className="mb-8 text-3xl font-bold text-[#2a351f] md:text-4xl"
+          >
+            {cartLabel}
           </h1>
         </FadeIn>
         <div className="flex flex-col gap-8 lg:flex-row">

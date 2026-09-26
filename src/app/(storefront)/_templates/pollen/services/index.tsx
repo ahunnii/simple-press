@@ -5,15 +5,16 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 export const pollenServicesFieldGroups: TemplateFieldGroup[] = [
   {
     id: "products.main",
-    title: "Services Main",
-    description: "Page hero and main section for the services page",
+    title: "Services overview",
+    description: "Page hero, intro copy, and service cards.",
     icon: "🎯",
     columns: 2,
   },
   {
     id: "products.faq",
-    title: "Frequently Asked Questions",
-    description: "FAQs section for the services page",
+    title: "FAQ",
+    description:
+      "Questions and answers below the services overview, plus an image and a contact button.",
     icon: "💬",
     columns: 2,
   },
@@ -21,7 +22,7 @@ export const pollenServicesFieldGroups: TemplateFieldGroup[] = [
     id: "products.resources",
     title: "Helpful Resources",
     description:
-      "Up to 5 free resources (name + link) for clients. Leave name and link blank to hide a slot.",
+      "Up to 12 free resource links for clients. The section only appears once you add at least one.",
     icon: "🔗",
     columns: 2,
   },
@@ -30,8 +31,8 @@ export const pollenServicesFieldGroups: TemplateFieldGroup[] = [
 const servicesPageData: TemplateField[] = [
   {
     key: "pollen.services.page-title",
-    label: "Page Title",
-    description: "Main heading shown in the services page hero",
+    label: "Page title",
+    description: "Main heading shown in the services page hero.",
     type: "text",
     page: "services",
     group: "products.main",
@@ -41,8 +42,8 @@ const servicesPageData: TemplateField[] = [
   },
   {
     key: "pollen.services.page-subtitle",
-    label: "Page Subtitle",
-    description: "Small label shown above the page title",
+    label: "Page subtitle",
+    description: "Small label shown above the page title.",
     type: "text",
     page: "services",
     group: "products.main",
@@ -52,8 +53,8 @@ const servicesPageData: TemplateField[] = [
   },
   {
     key: "pollen.services.title",
-    label: "Services Section Heading",
-    description: "Heading for the services overview section",
+    label: "Heading",
+    description: "Heading for the services overview, beside the service cards.",
     type: "text",
     page: "services",
     group: "products.main",
@@ -63,8 +64,8 @@ const servicesPageData: TemplateField[] = [
   },
   {
     key: "pollen.services.subtitle",
-    label: "Services Section Label",
-    description: "Small label above the services heading",
+    label: "Small label",
+    description: "Short line above the heading in the services overview.",
     type: "text",
     page: "services",
     group: "products.main",
@@ -74,8 +75,8 @@ const servicesPageData: TemplateField[] = [
   },
   {
     key: "pollen.services.text",
-    label: "Services Text",
-    description: "Paragraph below the services section heading",
+    label: "Body text",
+    description: "Paragraph below the heading in the services overview.",
     type: "textarea",
     page: "services",
     group: "products.main",
@@ -87,8 +88,8 @@ const servicesPageData: TemplateField[] = [
   },
   {
     key: "pollen.services.contact-button-text",
-    label: "Contact Button Text",
-    description: "Text for the contact button in the services overview",
+    label: "Button text",
+    description: "Label on the button in the services overview.",
     type: "text",
     page: "services",
     group: "products.main",
@@ -98,8 +99,8 @@ const servicesPageData: TemplateField[] = [
   },
   {
     key: "pollen.services.contact-button-link",
-    label: "Contact Button Link",
-    description: "Link for the contact button in the services overview",
+    label: "Button link",
+    description: "Where the button in the services overview goes.",
     type: "url",
     page: "services",
     group: "products.main",
@@ -109,31 +110,34 @@ const servicesPageData: TemplateField[] = [
   },
   {
     key: "pollen.services.services-list",
-    label: "Service Cards",
+    label: "Service cards",
     description:
-      "Cards shown in the services section (icon, title, and description per item). Add up to 8.",
+      "Cards shown beside the overview text (icon, name, and description per card). Falls back to ready-made examples until you add your own. Add up to 8.",
     type: "list",
     page: "services",
     group: "products.main",
     gridColumn: "col-span-full",
+    itemLabel: "service",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
-        label: "Title",
+        label: "Name",
         type: "text",
-        description: "Service name",
+        description: "Service name.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Brief description of the service",
+        description: "One or two sentences about the service.",
       },
     ],
     minItems: 0,
@@ -144,8 +148,8 @@ const servicesPageData: TemplateField[] = [
 const servicesQuestionsData: TemplateField[] = [
   {
     key: "pollen.services.faq-label",
-    label: "FAQ Section Label",
-    description: "Small label shown above the FAQ heading",
+    label: "Small label",
+    description: "Short line above the FAQ heading.",
     type: "text",
     page: "services",
     group: "products.faq",
@@ -155,8 +159,8 @@ const servicesQuestionsData: TemplateField[] = [
   },
   {
     key: "pollen.services.faq-heading",
-    label: "FAQ Section Heading",
-    description: "Main heading for the FAQ section",
+    label: "Heading",
+    description: "Heading above the FAQ accordion.",
     type: "text",
     page: "services",
     group: "products.faq",
@@ -166,32 +170,30 @@ const servicesQuestionsData: TemplateField[] = [
   },
   {
     key: "pollen.services.faq-description",
-    label: "FAQ Section Description",
-    description: "Quick little blurb explaining the importance of the FAQs",
+    label: "Body text",
+    description: "Line below the FAQ heading.",
     type: "textarea",
     page: "services",
     group: "products.faq",
     gridColumn: "col-span-full",
     defaultValue:
       "Have questions? We have answers. Browse our most frequently asked questions below.",
-    placeholder:
-      "Have questions? We have answers. Browse our most frequently asked questions below.",
+    placeholder: "A line inviting people to browse the questions below...",
   },
   {
     key: "pollen.services.faq-image",
-    label: "FAQ Section Image",
-    description: "Image for the FAQ section",
+    label: "Image",
+    description: "Photo beside the FAQ accordion.",
     type: "image",
     page: "services",
     group: "products.faq",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
-    placeholder: "/placeholder.svg",
   },
   {
     key: "pollen.services.faq-contact-button-text",
-    label: "FAQ Contact Button Text",
-    description: "Text for the contact button below the FAQs",
+    label: "Button text",
+    description: "Label on the button below the FAQ accordion.",
     type: "text",
     page: "services",
     group: "products.faq",
@@ -201,8 +203,8 @@ const servicesQuestionsData: TemplateField[] = [
   },
   {
     key: "pollen.services.faq-contact-button-link",
-    label: "FAQ Contact Button Link",
-    description: "Link for the contact button below the FAQs",
+    label: "Button link",
+    description: "Where the button below the FAQ accordion goes.",
     type: "url",
     page: "services",
     group: "products.faq",
@@ -212,29 +214,13 @@ const servicesQuestionsData: TemplateField[] = [
   },
   {
     key: "pollen.services.faq-list",
-    label: "Frequently Asked Questions",
+    label: "Questions",
     description:
-      "Questions and answers shown in the FAQ accordion. Add up to 10.",
-    type: "list",
+      "Pick questions from Content → FAQ for the services page accordion. Leave empty to show the first 10 published questions; the section hides when there are none.",
+    type: "faq",
     page: "services",
     group: "products.faq",
     gridColumn: "col-span-full",
-    itemSchema: [
-      {
-        key: "question",
-        label: "Question",
-        type: "text",
-        description: "The question",
-        placeholder: "e.g. How do I get started?",
-      },
-      {
-        key: "answer",
-        label: "Answer",
-        type: "textarea",
-        description: "The answer",
-        placeholder: "e.g. Simply reach out through our contact form...",
-      },
-    ],
     minItems: 0,
     maxItems: 10,
   },
@@ -243,8 +229,8 @@ const servicesQuestionsData: TemplateField[] = [
 const servicesResourcesData: TemplateField[] = [
   {
     key: "pollen.services.resources-label",
-    label: "Resources Section Label",
-    description: "Small label shown above the resources heading",
+    label: "Small label",
+    description: "Short line above the resources heading.",
     type: "text",
     page: "services",
     group: "products.resources",
@@ -254,9 +240,8 @@ const servicesResourcesData: TemplateField[] = [
   },
   {
     key: "pollen.services.resources-title",
-    label: "Section Heading",
-    description:
-      "Heading for the helpful resources section (e.g. Helpful Resources)",
+    label: "Heading",
+    description: "Heading for the resources section, e.g. Helpful Resources.",
     type: "text",
     page: "services",
     group: "products.resources",
@@ -266,26 +251,29 @@ const servicesResourcesData: TemplateField[] = [
   },
   {
     key: "pollen.services.resources-list",
-    label: "Resources List",
-    description: "Resources shown in the resources section. Add up to 10.",
+    label: "Resources",
+    description:
+      "Links shown in this section (name and link each). The section only appears once you add at least one. Add up to 12.",
     type: "list",
     page: "services",
     group: "products.resources",
     gridColumn: "col-span-full",
+    itemLabel: "resource",
+    summaryKey: "name",
     itemSchema: [
       {
         key: "name",
         label: "Name",
         type: "text",
-        description: "The name",
-        placeholder: "e.g. Resource Name",
+        description: "Link text shown to visitors.",
+        placeholder: "e.g. Care Guide",
       },
       {
         key: "url",
-        label: "URL",
-        type: "textarea",
-        description: "The URL",
-        placeholder: "e.g. https://...",
+        label: "Link",
+        type: "url",
+        description: "Where the link goes.",
+        placeholder: "https://...",
       },
     ],
     minItems: 0,
@@ -302,44 +290,22 @@ export const pollenServicesData = [
 export const DEFAULT_POLLEN_SERVICES = [
   {
     icon: Flower2,
-    title: "Service One",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
+    title: "Custom Orders",
+    description: "One-of-a-kind pieces made to your specifications.",
   },
   {
     icon: HandHelping,
-    title: "Service Two",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
+    title: "Personal Consultations",
+    description: "One-on-one guidance to help you find the right fit.",
   },
   {
     icon: MapIcon,
-    title: "Service Three",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
+    title: "Local Delivery",
+    description: "Fast, friendly delivery right to your door.",
   },
   {
     icon: BookOpen,
-    title: "Service Four",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
-  },
-];
-
-export const DEFAULT_POLLEN_FAQS = [
-  {
-    question: "How do I get started?",
-    answer:
-      "Simply reach out through our contact form and we'll get back to you within one business day.",
-  },
-  {
-    question: "What areas do you serve?",
-    answer:
-      "We serve clients locally and remotely. Contact us to confirm availability in your area.",
-  },
-  {
-    question: "Do you offer free consultations?",
-    answer:
-      "Yes! We offer a free 30-minute consultation to discuss your needs and how we can help.",
+    title: "Workshops & Classes",
+    description: "Hands-on sessions to learn the craft yourself.",
   },
 ];

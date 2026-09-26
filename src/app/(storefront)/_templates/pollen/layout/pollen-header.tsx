@@ -9,8 +9,10 @@ import { Heart, MessageSquare, ShoppingBag, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
@@ -18,6 +20,8 @@ import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+
+import { PollenAnnouncementBar } from "./pollen-announcement-bar";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -35,8 +39,23 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
   ).filter((el) => !el.closest("[inert]"));
 }
 
-export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
+type PollenHeaderProps = DefaultHeaderTemplateProps & {
+  /** Resolved platform announcement bar, or null when off/empty. */
+  banner?: BannerConfig | null;
+  /** `pollen.global.header-button-text` — blank hides the button. */
+  buttonText?: string;
+  /** `pollen.global.header-button-link`, already defaulted to /contact. */
+  buttonLink?: string;
+};
+
+export function PollenHeader({
+  business,
+  banner = null,
+  buttonText = "",
+  buttonLink = "/contact",
+}: PollenHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession();
   const { isEnabled } = useFeatureFlags({
@@ -54,12 +73,25 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const mobileMenuId = useId();
 
+  // Header button: hidden when its text is blank or the contact form is off.
+  const showHeaderButton =
+    buttonText.trim().length > 0 && isStorefrontEnabled("contactForm");
+
   const links =
     (business?.siteContent?.navigationItems as {
       label: string;
       href: string;
     }[]) ??
     NAV_LINKS.filter((l) => l.href !== "/services" || isEnabled("services"));
+
+  // --- Announcement bar collapses once the page scrolls (mirrors vii) ---
+  useEffect(() => {
+    if (!banner) return;
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [banner]);
 
   // --- Lock body scroll when menu is open ---
   useEffect(() => {
@@ -197,6 +229,8 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
     <>
       {/* C-1: add class so inert targeting works */}
       <header className="pollen-header bg-background border-border fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-md">
+        {/* Platform announcement bar — top row, hides once the page scrolls */}
+        {banner && !scrolled && <PollenAnnouncementBar banner={banner} />}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-28 items-center justify-between">
             <Link
@@ -287,17 +321,21 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
 
               <div className="hidden items-center gap-3 md:flex">
                 {/* C-2 item 4: changed text-green-600 → text-green-700 hover:text-green-800 */}
-                <Button
-                  size="sm"
-                  asChild
-                  className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 dark:border-green-400/30 dark:bg-green-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 dark:hover:text-rose-300"
-                  variant="outline"
-                >
-                  <Link href="/contact">
-                    <MessageSquare className="mr-1.5 h-4 w-4" />
-                    Get in Touch
-                  </Link>
-                </Button>
+                {showHeaderButton && (
+                  <Button
+                    size="sm"
+                    asChild
+                    className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 dark:border-green-400/30 dark:bg-green-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 dark:hover:text-rose-300"
+                    variant="outline"
+                  >
+                    <Link href={buttonLink}>
+                      <MessageSquare className="mr-1.5 h-4 w-4" />
+                      <span {...fieldAttr("pollen.global.header-button-text")}>
+                        {buttonText}
+                      </span>
+                    </Link>
+                  </Button>
+                )}
 
                 {isStorefrontEnabled("customerAccounts") && (
                   <>
@@ -431,17 +469,21 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                 className="mt-12 flex flex-col items-center gap-4"
               >
                 {/* C-2 item 4: changed text-green-600 → text-green-700 hover:text-green-800 */}
-                <Button
-                  size="sm"
-                  asChild
-                  className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800"
-                  variant="outline"
-                >
-                  <Link href="/contact" onClick={closeMenu}>
-                    <MessageSquare className="mr-1.5 h-4 w-4" />
-                    Get in Touch
-                  </Link>
-                </Button>
+                {showHeaderButton && (
+                  <Button
+                    size="sm"
+                    asChild
+                    className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800"
+                    variant="outline"
+                  >
+                    <Link href={buttonLink} onClick={closeMenu}>
+                      <MessageSquare className="mr-1.5 h-4 w-4" />
+                      <span {...fieldAttr("pollen.global.header-button-text")}>
+                        {buttonText}
+                      </span>
+                    </Link>
+                  </Button>
+                )}
 
                 {/* Same `customerAccounts` gate the desktop cluster uses — the
                     drawer was offering sign-in links on stores that have

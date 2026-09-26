@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
+import { listItemAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIframeValue,
@@ -133,6 +134,7 @@ export function PollenBloomServicePage({
               {galleryImages.map((img, idx) => (
                 <StaggerItem key={idx}>
                   <div
+                    {...listItemAttr("pollen-bloom.gallery", idx)}
                     className={`relative overflow-hidden rounded-2xl ${
                       idx === 0 && galleryImages.length === 4
                         ? "row-span-2 aspect-[3/4]"

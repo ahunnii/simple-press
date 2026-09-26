@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -32,7 +33,8 @@ export function PollenGeneralLayout({
   titleFieldKey,
   subtitleFieldKey,
 }: Props) {
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
     "pollen.global.header-background",
     "pollen.global.cta-title",
     "pollen.global.cta-subtitle",
@@ -84,7 +86,7 @@ export function PollenGeneralLayout({
 
         {children}
 
-        {showCTA && (
+        {showCTA && isSectionVisible(customFields, "pollen", "global.cta") && (
           <div className="py-16">
             <PollenCallToAction
               title={f["pollen.global.cta-title"]}

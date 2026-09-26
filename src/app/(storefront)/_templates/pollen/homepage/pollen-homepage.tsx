@@ -86,20 +86,22 @@ export async function PollenHomepage() {
             sectionLabel={f["pollen.homepage.gallery-label"] ?? ""}
             sectionHeading={f["pollen.homepage.gallery-heading"] ?? ""}
             buttonText={f["pollen.homepage.gallery-button-text"]}
-            buttonLink={f["pollen.homepage.gallery-button-link"] ?? "/gallery"}
+            buttonLink={f["pollen.homepage.gallery-button-link"] ?? "/contact"}
             galleryItems={galleryItems ?? []}
             sectionAttrs={sectionGroupAttr("homepage", "gallery")}
           />
         )}
-        <PollenCallToAction
-          title={f["pollen.global.cta-title"] ?? ""}
-          subtitle={f["pollen.global.cta-subtitle"] ?? ""}
-          description={f["pollen.global.cta-text"] ?? ""}
-          buttonText={f["pollen.global.cta-button-text"] ?? ""}
-          buttonLink={f["pollen.global.cta-button-link"] ?? "/contact"}
-          imageUrl={f["pollen.global.cta-image"] ?? "/placeholder.svg"}
-          sectionAttrs={sectionGroupAttr("global", "cta")}
-        />{" "}
+        {isSectionVisible(customFields, "pollen", "global.cta") && (
+          <PollenCallToAction
+            title={f["pollen.global.cta-title"] ?? ""}
+            subtitle={f["pollen.global.cta-subtitle"] ?? ""}
+            description={f["pollen.global.cta-text"] ?? ""}
+            buttonText={f["pollen.global.cta-button-text"] ?? ""}
+            buttonLink={f["pollen.global.cta-button-link"] ?? "/contact"}
+            imageUrl={f["pollen.global.cta-image"] ?? "/placeholder.svg"}
+            sectionAttrs={sectionGroupAttr("global", "cta")}
+          />
+        )}
       </div>
     </PageTransition>
   );

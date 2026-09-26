@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const testimonialsData: TemplateField[] = [
   {
     key: "pollen.testimonials.section-label",
-    label: "Section Label",
-    description: "Small label shown above the testimonials heading",
+    label: "Small label",
+    description: "Short line above the testimonials heading.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -14,8 +14,8 @@ const testimonialsData: TemplateField[] = [
   },
   {
     key: "pollen.testimonials.section-heading",
-    label: "Section Heading",
-    description: "Main heading for the testimonials block",
+    label: "Heading",
+    description: "Main heading at the top of the testimonials page.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -25,8 +25,9 @@ const testimonialsData: TemplateField[] = [
   },
   {
     key: "pollen.testimonials.call-to-action-header",
-    label: "Call to Action Header",
-    description: "Header for the call to action section",
+    label: "Banner heading",
+    description:
+      "Heading in the banner below the testimonials, inviting customers to leave their own.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.page",
@@ -36,19 +37,20 @@ const testimonialsData: TemplateField[] = [
   },
   {
     key: "pollen.testimonials.call-to-action-text",
-    label: "Call to Action Text",
-    description: "Text for the call to action section",
+    label: "Banner text",
+    description: "Line below the banner heading.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.page",
     gridColumn: "col-span-full",
     defaultValue: "Loved shopping with us? We'd love to hear from you.",
-    placeholder: "Loved shopping with us? We'd love to hear from you.",
+    placeholder: "A short invitation to leave feedback...",
   },
   {
     key: "pollen.testimonials.call-to-action-button-text",
-    label: "Call to Action Button Text",
-    description: "Text for the call to action button",
+    label: "Banner button text",
+    description:
+      "Label on the banner's button, which links to the testimonial submission form.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -64,8 +66,9 @@ export const pollenTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.page",
     title: "Testimonials page",
-    description: "Heading and subheading for the testimonials page",
-    icon: "�",
+    description:
+      "Heading and small label at the top of the page, plus the banner inviting customers to leave a testimonial.",
+    icon: "⭐",
     columns: 2,
   },
 ];

@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const collectionsPageData: TemplateField[] = [
   {
     key: "pollen.collections.page-title",
-    label: "Page Title",
-    description: "Main heading shown in the collections page hero",
+    label: "Page title",
+    description: "Main heading shown at the top of the collections page.",
     type: "text",
     page: "collections",
     group: "collections.main",
@@ -14,8 +14,8 @@ const collectionsPageData: TemplateField[] = [
   },
   {
     key: "pollen.collections.page-subtitle",
-    label: "Page Subtitle",
-    description: "Small label shown above the page title in the hero",
+    label: "Page subtitle",
+    description: "Small label shown above the page title.",
     type: "text",
     page: "collections",
     group: "collections.main",
@@ -25,9 +25,8 @@ const collectionsPageData: TemplateField[] = [
   },
   {
     key: "pollen.collections.listing-intro",
-    label: "Collections Page Intro",
-    description:
-      "Short intro shown below the hero on the collections listing page",
+    label: "Intro text",
+    description: "Short line below the page title.",
     type: "textarea",
     page: "collections",
     group: "collections.main",
@@ -42,8 +41,8 @@ export const pollenCollectionsData = [...collectionsPageData];
 export const pollenCollectionsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.main",
-    title: "Collections Page",
-    description: "Heading and intro text for the collections listing page",
+    title: "Collections",
+    description: "Heading and intro text at the top of the collections page.",
     icon: "📦",
     columns: 2,
   },

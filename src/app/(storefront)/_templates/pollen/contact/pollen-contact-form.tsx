@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -19,6 +20,10 @@ type Props = {
   businessName: string;
   formTitle?: string;
   formDescription?: string;
+  /** `pollen.contact.form-success-heading` — shown in place of the form after a send. */
+  successHeading?: string;
+  /** `pollen.contact.form-success-body`. */
+  successBody?: string;
 };
 
 const inputClassName =
@@ -29,6 +34,8 @@ export function PollenContactForm({
   businessName: _businessName,
   formTitle = "Send us a message",
   formDescription = "We'd love to hear from you!",
+  successHeading = "Message sent",
+  successBody = "Thanks for reaching out. We'll get back to you soon.",
 }: Props) {
   const {
     form,
@@ -42,13 +49,57 @@ export function PollenContactForm({
     onSubmit,
     formRef,
     isDirty,
+    isSuccess,
+    resetSuccess,
   } = useContactForm({ messageMaxLength: 180 });
+
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  // Move focus to the success heading so screen readers announce it.
+  useEffect(() => {
+    if (isSuccess) successHeadingRef.current?.focus();
+  }, [isSuccess]);
+
   const { isEnabled } = useStorefrontFlags();
   if (!isEnabled("contactForm")) return null;
+
+  if (isSuccess) {
+    return (
+      <div
+        role="status"
+        className="flex flex-col items-center gap-4 py-8 text-center"
+      >
+        <div className="flex size-16 items-center justify-center rounded-full bg-[#E5E8E0]">
+          <CheckCircle2 className="size-8 text-[#215935]" aria-hidden="true" />
+        </div>
+        <h2
+          ref={successHeadingRef}
+          tabIndex={-1}
+          className="text-xl font-bold text-gray-900 outline-none md:text-2xl"
+          {...fieldAttr("pollen.contact.form-success-heading")}
+        >
+          {successHeading}
+        </h2>
+        <p
+          className="max-w-md text-sm text-gray-600"
+          {...fieldAttr("pollen.contact.form-success-body")}
+        >
+          {successBody}
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={resetSuccess}
+          className="mt-2 rounded-md border-[#215935] text-[#215935] hover:bg-[#215935] hover:text-white"
+        >
+          Send another message
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>

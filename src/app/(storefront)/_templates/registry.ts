@@ -304,6 +304,7 @@ import { PollenBlogPage } from "./pollen/blog/pollen-blog-page";
 import { PollenBlogPostPage } from "./pollen/blog/pollen-blog-post-page";
 import { PollenCartPage } from "./pollen/cart-checkout/pollen-cart-page";
 import { PollenCheckoutPage } from "./pollen/cart-checkout/pollen-checkout-page";
+import { PollenCheckoutUnavailable } from "./pollen/cart-checkout/pollen-checkout-unavailable";
 import { PollenOrderSuccessPage } from "./pollen/cart-checkout/pollen-order-success-page";
 import { PollenCollectionPage } from "./pollen/collections/pollen-collection-page";
 import { PollenCollectionsPage } from "./pollen/collections/pollen-collections-page";
@@ -892,6 +893,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: PollenBlogPostPage,
     CartPage: PollenCartPage,
     CheckoutPage: PollenCheckoutPage,
+    CheckoutUnavailable: PollenCheckoutUnavailable,
     OrderSuccessPage: PollenOrderSuccessPage,
     CollectionPage: PollenCollectionPage,
     CollectionsPage: PollenCollectionsPage,

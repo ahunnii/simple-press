@@ -4,12 +4,17 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
   parseTemplateListRows,
+  resolveFaqPickerItems,
 } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import {
@@ -25,16 +30,18 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
-import { DEFAULT_POLLEN_FAQS, DEFAULT_POLLEN_SERVICES } from ".";
+import { DEFAULT_POLLEN_SERVICES } from ".";
 import { resolveFields } from "..";
 import { PollenGeneralLayout } from "../layout/pollen-general-layout";
 import { PollenTestimonialsSection } from "../testimonials/pollen-testimonials-section";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  /** Published Content → FAQ items (from `services/page.tsx`). */
+  faqItems?: RouterOutputs["faq"]["list"];
 };
 
-export async function PollenServicesPage({ business }: Props) {
+export async function PollenServicesPage({ business, faqItems = [] }: Props) {
   const customFields = business?.siteContent?.customFields;
 
   const f = resolveFields(customFields, [
@@ -53,8 +60,8 @@ export async function PollenServicesPage({ business }: Props) {
     "pollen.services.faq-contact-button-link",
     "pollen.services.resources-label",
     "pollen.services.resources-title",
-    "pollen.testimonials.section-label",
-    "pollen.testimonials.section-heading",
+    "pollen.global.testimonials-label",
+    "pollen.global.testimonials-heading",
     "pollen.testimonials.view-all-text",
   ]);
 
@@ -68,26 +75,20 @@ export async function PollenServicesPage({ business }: Props) {
     DEFAULT_POLLEN_SERVICES,
   );
 
-  const rawFaqRows = parseTemplateListRows(
-    getListFieldValue(customFields, "pollen.services.faq-list"),
-  );
-
   const resources = parseTemplateListRows(
     getListFieldValue(customFields, "pollen.services.resources-list"),
   ) as { name: string; url: string }[];
 
-  const faqs =
-    rawFaqRows.length > 0
-      ? rawFaqRows
-          .filter(
-            (row): row is { question: string; answer: string } =>
-              typeof row.question === "string" && !!row.question,
-          )
-          .map((row) => ({
-            question: row.question,
-            answer: typeof row.answer === "string" ? row.answer : "",
-          }))
-      : DEFAULT_POLLEN_FAQS;
+  // Content → FAQ picker. An unset value — or a legacy saved list of
+  // `{question, answer}` rows from before the picker — falls back to the
+  // first published questions; none published hides the section.
+  const faqs = resolveFaqPickerItems(
+    (customFields as Record<string, unknown> | null | undefined)?.[
+      "pollen.services.faq-list"
+    ],
+    faqItems,
+    10,
+  );
 
   return (
     <PollenGeneralLayout
@@ -96,7 +97,6 @@ export async function PollenServicesPage({ business }: Props) {
       subtitle={f["pollen.services.page-subtitle"]}
       titleFieldKey="pollen.services.page-title"
       subtitleFieldKey="pollen.services.page-subtitle"
-      sectionAttrs={sectionGroupAttr("products", "main")}
     >
       {/* Services Overview */}
       <section
@@ -143,9 +143,12 @@ export async function PollenServicesPage({ business }: Props) {
             </FadeIn>
 
             <StaggerContainer className="grid gap-6 sm:grid-cols-2">
-              {services?.map((service) => (
+              {services?.map((service, index) => (
                 <StaggerItem key={service.title}>
-                  <div className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm">
+                  <div
+                    className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm"
+                    {...listItemAttr("pollen.services.services-list", index)}
+                  >
                     <div className="mb-4 flex h-12 w-12 items-center justify-center">
                       <service.icon className="h-6 w-6 text-[#5e8b4a]" />
                     </div>
@@ -164,81 +167,83 @@ export async function PollenServicesPage({ business }: Props) {
       </section>
 
       {/* FAQ Section */}
-      {isSectionVisible(customFields, "pollen", "products.faq") && (
-        <section
-          className="bg-white py-20 md:py-32"
-          {...sectionGroupAttr("products", "faq")}
-        >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-              <FadeIn
-                direction="right"
-                className="relative aspect-square overflow-hidden rounded-2xl"
-              >
-                <Image
-                  src={f["pollen.services.faq-image"]!}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              </FadeIn>
+      {faqs.length > 0 &&
+        isSectionVisible(customFields, "pollen", "products.faq") && (
+          <section
+            className="bg-white py-20 md:py-32"
+            {...sectionGroupAttr("products", "faq")}
+          >
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                <FadeIn
+                  direction="right"
+                  className="relative aspect-square overflow-hidden rounded-2xl"
+                >
+                  <Image
+                    src={f["pollen.services.faq-image"]!}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                </FadeIn>
 
-              <FadeIn direction="left" delay={0.1}>
-                <div>
-                  <p
-                    className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase"
-                    {...fieldAttr("pollen.services.faq-label")}
-                  >
-                    {f["pollen.services.faq-label"]}
-                  </p>
-                  <h2
-                    className="mb-4 text-3xl font-bold text-[#374151] md:text-4xl"
-                    {...fieldAttr("pollen.services.faq-heading")}
-                  >
-                    {f["pollen.services.faq-heading"]}
-                  </h2>
-                  <p
-                    className="mb-8 leading-relaxed text-[#6b7280]"
-                    {...fieldAttr("pollen.services.faq-description")}
-                  >
-                    {f["pollen.services.faq-description"]}
-                  </p>
+                <FadeIn direction="left" delay={0.1}>
+                  <div>
+                    <p
+                      className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase"
+                      {...fieldAttr("pollen.services.faq-label")}
+                    >
+                      {f["pollen.services.faq-label"]}
+                    </p>
+                    <h2
+                      className="mb-4 text-3xl font-bold text-[#374151] md:text-4xl"
+                      {...fieldAttr("pollen.services.faq-heading")}
+                    >
+                      {f["pollen.services.faq-heading"]}
+                    </h2>
+                    <p
+                      className="mb-8 leading-relaxed text-[#6b7280]"
+                      {...fieldAttr("pollen.services.faq-description")}
+                    >
+                      {f["pollen.services.faq-description"]}
+                    </p>
 
-                  <Accordion type="single" collapsible className="mb-8">
-                    {faqs.map((faq, index) => (
-                      <AccordionItem key={index} value={`faq-${index}`}>
-                        <AccordionTrigger className="text-left text-[#374151]">
-                          {faq.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-[#6b7280]">
-                          {faq.answer}
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
+                    <Accordion type="single" collapsible className="mb-8">
+                      {faqs.map((faq) => (
+                        <AccordionItem key={faq.id} value={faq.id}>
+                          <AccordionTrigger className="text-left text-[#374151]">
+                            {faq.question}
+                          </AccordionTrigger>
+                          <AccordionContent className="text-[#6b7280]">
+                            {faq.answer}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
 
-                  <Link
-                    href={
-                      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
-                      f["pollen.services.faq-contact-button-link"] || "/contact"
-                    }
-                    className={buttonVariants({
-                      size: "lg",
-                      variant: "outline",
-                      className:
-                        "border-[#374151] text-[#374151] hover:bg-[#374151] hover:text-white",
-                    })}
-                    {...fieldAttr("pollen.services.faq-contact-button-text")}
-                  >
-                    {f["pollen.services.faq-contact-button-text"]}
-                  </Link>
-                </div>
-              </FadeIn>
+                    <Link
+                      href={
+                        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+                        f["pollen.services.faq-contact-button-link"] ||
+                        "/contact"
+                      }
+                      className={buttonVariants({
+                        size: "lg",
+                        variant: "outline",
+                        className:
+                          "border-[#374151] text-[#374151] hover:bg-[#374151] hover:text-white",
+                      })}
+                      {...fieldAttr("pollen.services.faq-contact-button-text")}
+                    >
+                      {f["pollen.services.faq-contact-button-text"]}
+                    </Link>
+                  </div>
+                </FadeIn>
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
       {/* Helpful Resources Section */}
       {resources?.length > 0 &&
@@ -271,9 +276,10 @@ export async function PollenServicesPage({ business }: Props) {
                       : "sm:grid-cols-2 lg:grid-cols-3"
                 }`}
               >
-                {resources.map((resource) => (
+                {resources.map((resource, index) => (
                   <StaggerItem key={resource.url} className="h-full">
                     <Link
+                      {...listItemAttr("pollen.services.resources-list", index)}
                       href={resource.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -296,13 +302,15 @@ export async function PollenServicesPage({ business }: Props) {
         )}
 
       {/* Testimonials Section */}
-      <PollenTestimonialsSection
-        testimonials={testimonials}
-        sectionLabel={f["pollen.testimonials.section-label"]}
-        sectionHeading={f["pollen.testimonials.section-heading"]}
-        viewAllText={f["pollen.testimonials.view-all-text"]}
-        sectionAttrs={sectionGroupAttr("global", "testimonials")}
-      />
+      {isSectionVisible(customFields, "pollen", "global.testimonials") && (
+        <PollenTestimonialsSection
+          testimonials={testimonials}
+          sectionLabel={f["pollen.global.testimonials-label"]}
+          sectionHeading={f["pollen.global.testimonials-heading"]}
+          viewAllText={f["pollen.testimonials.view-all-text"]}
+          sectionAttrs={sectionGroupAttr("global", "testimonials")}
+        />
+      )}
     </PollenGeneralLayout>
   );
 }
