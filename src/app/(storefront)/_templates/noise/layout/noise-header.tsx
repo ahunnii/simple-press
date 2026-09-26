@@ -28,7 +28,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
@@ -39,8 +39,9 @@ import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
+import { resolveNoiseCartCopy } from "../cart-checkout/noise-cart-copy";
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
-import { resolveFields } from "../index";
+import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
 
 type NavChild = { label: string; href: string; external?: boolean };
 type NavLink = {
@@ -231,7 +232,7 @@ export function NoiseHeader({
     { href: "/about", label: "About" },
     ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
     ...(isEnabled("testimonials")
-      ? [{ href: "/testimonials", label: "Reviews" }]
+      ? [{ href: "/testimonials", label: "Testimonials" }]
       : []),
     { href: "/contact", label: "Contact" },
   ];
@@ -277,8 +278,7 @@ export function NoiseHeader({
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const g = resolveFields(customFields, ["noise.global.location-tag"]);
-  const locationTag = g["noise.global.location-tag"] ?? "";
+  const locationTag = resolveNoiseLocationTag(business, customFields);
 
   const isLinkActive = (href: string) =>
     href === "/"
@@ -340,12 +340,7 @@ export function NoiseHeader({
     <>
       <span>{businessName.toUpperCase()}</span>
       {locationTag ? (
-        <span
-          className="vn-wordmark-sub"
-          {...fieldAttr("noise.global.location-tag")}
-        >
-          {locationTag}
-        </span>
+        <span className="vn-wordmark-sub">{locationTag}</span>
       ) : null}
     </>
   );
@@ -976,7 +971,10 @@ export function NoiseHeader({
         ) : null}
       </AnimatePresence>
 
-      <NoiseCartDrawer shippingConfig={shippingConfigFromBusiness(business)} />
+      <NoiseCartDrawer
+        shippingConfig={shippingConfigFromBusiness(business)}
+        copy={resolveNoiseCartCopy(customFields)}
+      />
     </>
   );
 }

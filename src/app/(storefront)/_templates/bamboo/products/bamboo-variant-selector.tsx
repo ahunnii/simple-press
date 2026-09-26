@@ -123,86 +123,90 @@ export function BambooVariantSelector({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        {/* Quantity Selection */}
-        {selectedVariant && (
-          <div>
-            <Label className="mb-3 block text-sm font-medium">Quantity</Label>
-            <div className="border-border flex items-center gap-1 rounded-lg border">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-11"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
-              >
-                <Minus className="size-4" aria-hidden="true" />
-              </Button>
-              <span
-                className="text-foreground w-10 text-center text-base font-semibold"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                {quantity}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-11"
-                onClick={() =>
-                  setQuantity(Math.min(effectiveMax, quantity + 1))
-                }
-                disabled={quantity >= effectiveMax}
-                aria-label="Increase quantity"
-              >
-                <Plus className="size-4" aria-hidden="true" />
-              </Button>
-            </div>{" "}
-            {selectedVariant && product.trackInventory && (
-              <span className="text-sm">
-                {isBackordered
-                  ? "Backordered — ships when available"
-                  : `${selectedVariant?.inventoryQty ?? 0} available`}
-              </span>
-            )}
-          </div>
-        )}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+          {/* Quantity Selection */}
+          {selectedVariant && (
+            <div>
+              <Label className="mb-3 block text-sm font-medium">
+                Quantity
+              </Label>
+              <div className="border-border flex h-12 items-center gap-1 rounded-lg border">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-11"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  aria-label="Decrease quantity"
+                >
+                  <Minus className="size-4" aria-hidden="true" />
+                </Button>
+                <span
+                  className="text-foreground w-10 text-center text-base font-semibold"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {quantity}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-11"
+                  onClick={() =>
+                    setQuantity(Math.min(effectiveMax, quantity + 1))
+                  }
+                  disabled={quantity >= effectiveMax}
+                  aria-label="Increase quantity"
+                >
+                  <Plus className="size-4" aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+          )}
 
-        {/* Add to Cart */}
-        {(() => {
-          const isUnavailable =
-            !selectedVariant ||
-            (product.trackInventory &&
-              selectedVariant.inventoryQty === 0 &&
-              !product.allowBackorders);
-          return (
-            <Button
-              type="button"
-              onClick={() => {
-                if (isUnavailable) return;
-                handleAddToCart();
-              }}
-              aria-disabled={isUnavailable ? "true" : undefined}
-              className={`flex-1 rounded-full hover:bg-[var(--bam-forest-deep)] ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-              {isAdded ? (
-                <>
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                  Added to Cart
-                </>
-              ) : (
-                `Add ${quantity} to Cart`
-              )}
-            </Button>
-          );
-        })()}
-        {/* S-1: live region announces add-to-cart confirmation */}
-        <div aria-live="polite" aria-atomic="true" className="sr-only">
-          {isAdded && selectedVariant
-            ? `${product.name} — ${selectedVariant.name} added to cart`
-            : ""}
+          {/* Add to Cart */}
+          {(() => {
+            const isUnavailable =
+              !selectedVariant ||
+              (product.trackInventory &&
+                selectedVariant.inventoryQty === 0 &&
+                !product.allowBackorders);
+            return (
+              <Button
+                type="button"
+                onClick={() => {
+                  if (isUnavailable) return;
+                  handleAddToCart();
+                }}
+                aria-disabled={isUnavailable ? "true" : undefined}
+                className={`h-12 rounded-full sm:flex-1 hover:bg-[var(--bam-forest-deep)] ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
+              >
+                {isAdded ? (
+                  <>
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                    Added to Cart
+                  </>
+                ) : (
+                  `Add ${quantity} to Cart`
+                )}
+              </Button>
+            );
+          })()}
+          {/* S-1: live region announces add-to-cart confirmation */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only">
+            {isAdded && selectedVariant
+              ? `${product.name} — ${selectedVariant.name} added to cart`
+              : ""}
+          </div>
         </div>
+        {selectedVariant && product.trackInventory && (
+          <span className="text-muted-foreground text-sm">
+            {isBackordered
+              ? "Backordered — ships when available"
+              : `${selectedVariant?.inventoryQty ?? 0} available`}
+          </span>
+        )}
       </div>
 
       {/* Notify me when the selected variant is back in stock */}

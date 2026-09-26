@@ -4,6 +4,7 @@ import { Quote } from "lucide-react";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
@@ -15,6 +16,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "../";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
 function getInitials(name: string): string {
   return name
@@ -43,7 +45,10 @@ export async function BambooTestimonialsPage({
     <PageTransition>
       <section
         {...sectionGroupAttr("testimonials", "page")}
-        className="bg-[var(--bam-cream-deep)] py-20 md:py-28"
+        className={cn(
+          "bg-[var(--bam-cream-deep)] py-20 md:py-28",
+          BAMBOO_EMBLEM_CLEAR,
+        )}
       >
         <div className="mx-auto max-w-7xl px-4 text-center lg:px-8">
           <FadeIn>

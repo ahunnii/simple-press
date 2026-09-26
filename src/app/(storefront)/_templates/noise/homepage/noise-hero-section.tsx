@@ -10,13 +10,16 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type NoiseHeroSectionProps = {
-  heroVideo?: string;
-  heroImage?: string;
+  /** Resolved field values — blank video/image falls through to the next. */
+  heroVideo: string;
+  heroImage: string;
   heroOverline?: string;
-  heroTitle?: string;
-  heroTagline?: string;
-  heroPrimaryButtonText?: string;
-  heroPrimaryButtonLink?: string;
+  heroTitle: string;
+  heroTagline: string;
+  heroPrimaryButtonText: string;
+  heroPrimaryButtonLink: string;
+  /** Initials painted as the watermark when there's no image or video. */
+  monogram: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
   /** Business name shown in the bottom credit strip. */
@@ -36,6 +39,7 @@ export function NoiseHeroSection({
   sectionAttrs,
   wordmark,
   locationTag,
+  monogram,
 }: NoiseHeroSectionProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reduce = useReducedMotion();
@@ -72,12 +76,16 @@ export function NoiseHeroSection({
     }
   };
 
-  const title = heroTitle ?? "Made with intention.";
-  const tagline =
-    heroTagline ??
-    "Considered apparel made in small batches. Built to be worn, mended, and worn again.";
-  const btnText = heroPrimaryButtonText ?? "Shop the Edit";
-  const btnLink = heroPrimaryButtonLink ?? "/shop";
+  const title = heroTitle;
+  const tagline = heroTagline;
+  const btnText = heroPrimaryButtonText;
+  const btnLink = heroPrimaryButtonLink;
+  // The overlay + centered content cover the background media, so the
+  // click-to-edit target for "the background" sits on the content layer
+  // (text children carry their own, nearer, field targets).
+  const backgroundFieldKey = heroVideo
+    ? "noise.homepage.hero-video"
+    : "noise.homepage.hero-image";
 
   return (
     <section
@@ -136,7 +144,7 @@ export function NoiseHeroSection({
                 opacity: 0.05,
               }}
             >
-              VN
+              {monogram}
             </p>
           </div>
         </div>
@@ -148,7 +156,10 @@ export function NoiseHeroSection({
       <div className="vn-hero-overlay absolute inset-0" />
 
       {/* Centered content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+      <div
+        className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
+        {...fieldAttr(backgroundFieldKey)}
+      >
         <motion.div
           initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 18 }}
           animate={{ opacity: 1, y: 0 }}

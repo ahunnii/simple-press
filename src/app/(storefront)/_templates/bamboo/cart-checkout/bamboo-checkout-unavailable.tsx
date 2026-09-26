@@ -2,11 +2,13 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
 type Props = {
   /**
@@ -54,7 +56,10 @@ export async function BambooCheckoutUnavailable({ customFields }: Props = {}) {
   return (
     <PageTransition>
       <section
-        className="flex min-h-[50vh] flex-1 items-center justify-center bg-[var(--bam-forest)] p-4"
+        className={cn(
+          "flex min-h-[50vh] flex-1 items-center justify-center bg-[var(--bam-forest)] p-4",
+          BAMBOO_EMBLEM_CLEAR,
+        )}
         {...sectionGroupAttr("checkout", "unavailable")}
       >
         <FadeIn direction="up" className="max-w-md text-center">

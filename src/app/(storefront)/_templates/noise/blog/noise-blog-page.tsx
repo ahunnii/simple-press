@@ -35,10 +35,8 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
     "noise.blog-listing-intro",
   ]);
 
-  const heading = f["noise.blog-listing-heading"] ?? "The Journal.";
-  const intro =
-    f["noise.blog-listing-intro"] ??
-    "Notes from the studio, the mills, and the streets that keep us thinking. We publish when we have something to say.";
+  const heading = f["noise.blog-listing-heading"] ?? "";
+  const intro = f["noise.blog-listing-intro"];
 
   const [query, setQuery] = useState("");
 
@@ -82,17 +80,19 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
           >
             {heading}
           </h1>
-          <p
-            className="mx-auto mt-6 font-sans leading-[1.85]"
-            style={{
-              fontSize: "15px",
-              color: "var(--vn-ink-soft)",
-              maxWidth: "52ch",
-            }}
-            {...fieldAttr("noise.blog-listing-intro")}
-          >
-            {intro}
-          </p>
+          {intro && (
+            <p
+              className="mx-auto mt-6 font-sans leading-[1.85]"
+              style={{
+                fontSize: "15px",
+                color: "var(--vn-ink-soft)",
+                maxWidth: "52ch",
+              }}
+              {...fieldAttr("noise.blog-listing-intro")}
+            >
+              {intro}
+            </p>
+          )}
         </FadeIn>
 
         {/* Search bar */}

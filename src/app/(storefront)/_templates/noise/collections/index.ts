@@ -10,8 +10,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const collectionsListingData: TemplateField[] = [
   {
     key: "noise.collections.overline",
-    label: "Collections Overline",
-    description: "Small caps label above the collections index heading",
+    label: "Small label",
+    description: "Small label above the heading on the collections page.",
     type: "text",
     page: "collections",
     group: "collections.listing",
@@ -20,8 +20,8 @@ const collectionsListingData: TemplateField[] = [
   },
   {
     key: "noise.collections.heading",
-    label: "Collections Heading",
-    description: "Main H1 on the collections index",
+    label: "Heading",
+    description: "Main heading on the collections page.",
     type: "text",
     page: "collections",
     group: "collections.listing",
@@ -30,8 +30,8 @@ const collectionsListingData: TemplateField[] = [
   },
   {
     key: "noise.collections.cta-text",
-    label: "Collections CTA Text",
-    description: "Link below the heading pointing at the shop",
+    label: "Button text",
+    description: "Text for the link below the heading that points to the shop.",
     type: "text",
     page: "collections",
     group: "collections.listing",
@@ -40,8 +40,8 @@ const collectionsListingData: TemplateField[] = [
   },
   {
     key: "noise.collections.empty-text",
-    label: "Empty State Text",
-    description: "Shown when the business has no published collections",
+    label: "Empty state text",
+    description: "Shown when you have no published collections yet.",
     type: "text",
     page: "collections",
     group: "collections.listing",
@@ -53,8 +53,8 @@ const collectionsListingData: TemplateField[] = [
 const collectionsDetailData: TemplateField[] = [
   {
     key: "noise.collections.detail-overline",
-    label: "Detail Overline",
-    description: "Small caps label above the collection name on a detail page",
+    label: "Small label",
+    description: "Small label above the collection name on a collection page.",
     type: "text",
     page: "collections",
     group: "collections.detail",
@@ -63,8 +63,8 @@ const collectionsDetailData: TemplateField[] = [
   },
   {
     key: "noise.collections.detail-empty-text",
-    label: "Detail Empty State Text",
-    description: "Shown when a collection has no published products",
+    label: "Empty state text",
+    description: "Shown when a collection has no published products yet.",
     type: "text",
     page: "collections",
     group: "collections.detail",
@@ -73,8 +73,8 @@ const collectionsDetailData: TemplateField[] = [
   },
   {
     key: "noise.collections.detail-browse-text",
-    label: "Detail Empty State Link",
-    description: "Link text shown below the empty-state message",
+    label: "Empty state link text",
+    description: "Link text shown below the empty-state message.",
     type: "text",
     page: "collections",
     group: "collections.detail",
@@ -83,8 +83,8 @@ const collectionsDetailData: TemplateField[] = [
   },
   {
     key: "noise.collections.detail-back-label",
-    label: "Back Link Label",
-    description: "Label for the back-to-collections link in the product grid",
+    label: "Back link text",
+    description: "Label for the back-to-collections link in the product grid.",
     type: "text",
     page: "collections",
     group: "collections.detail",
@@ -93,8 +93,8 @@ const collectionsDetailData: TemplateField[] = [
   },
   {
     key: "noise.collections.more-overline",
-    label: "More Collections Overline",
-    description: "Small caps label above the \"more collections\" heading",
+    label: "Small label",
+    description: 'Small label above the "more collections" heading.',
     type: "text",
     page: "collections",
     group: "collections.detail",
@@ -103,8 +103,8 @@ const collectionsDetailData: TemplateField[] = [
   },
   {
     key: "noise.collections.more-heading",
-    label: "More Collections Heading",
-    description: "Heading above the related-collections grid",
+    label: "Heading",
+    description: "Heading above the related-collections grid.",
     type: "text",
     page: "collections",
     group: "collections.detail",
@@ -121,16 +121,17 @@ export const noiseCollectionsData: TemplateField[] = [
 export const noiseCollectionsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.listing",
-    title: "Collections — Listing",
-    description: "Overline, heading, CTA, and empty state on the collections index",
+    title: "Collections page",
+    description:
+      "Small label, heading, button, and empty state on the collections page.",
     icon: "🗂️",
     columns: 2,
   },
   {
     id: "collections.detail",
-    title: "Collections — Detail",
+    title: "Collection page",
     description:
-      "Overline, empty state, back link, and \"more collections\" heading on a collection detail page",
+      'Small label, empty state, back link, and "more collections" heading on a collection page.',
     icon: "🧵",
     columns: 2,
   },

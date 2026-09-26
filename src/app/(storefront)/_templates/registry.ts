@@ -46,6 +46,9 @@ import { BambooAddressBookPage } from "./bamboo/account/bamboo-address-book-page
 import { BambooOrderDetailPage } from "./bamboo/account/bamboo-order-detail-page";
 import { BambooOrdersPage } from "./bamboo/account/bamboo-orders-page";
 import { BambooPreferencesPage } from "./bamboo/account/bamboo-preferences-page";
+import { BambooSubscriptionsPage } from "./bamboo/account/bamboo-subscriptions-page";
+import { BambooInvoicesPage } from "./bamboo/account/bamboo-invoices-page";
+import { BambooRewardsPage } from "./bamboo/account/bamboo-rewards-page";
 import { BambooGenericPage } from "./bamboo/bamboo-generic-page";
 import { BambooBlogPage } from "./bamboo/blog/bamboo-blog-page";
 import { BambooBlogPostPage } from "./bamboo/blog/bamboo-blog-post-page";
@@ -210,13 +213,17 @@ import { NoiseAboutPage } from "./noise/about/noise-about-page";
 import { NoiseAccountSecurityPage } from "./noise/account/noise-account-security-page";
 import { NoiseAccountSettingsPage } from "./noise/account/noise-account-settings-page";
 import { NoiseAddressBookPage } from "./noise/account/noise-address-book-page";
+import { NoiseInvoicesPage } from "./noise/account/noise-invoices-page";
 import { NoiseOrderDetailPage } from "./noise/account/noise-order-detail-page";
 import { NoiseOrdersPage } from "./noise/account/noise-orders-page";
 import { NoisePreferencesPage } from "./noise/account/noise-preferences-page";
+import { NoiseRewardsPage } from "./noise/account/noise-rewards-page";
+import { NoiseSubscriptionsPage } from "./noise/account/noise-subscriptions-page";
 import { NoiseBlogPage } from "./noise/blog/noise-blog-page";
 import { NoiseBlogPostPage } from "./noise/blog/noise-blog-post-page";
 import { NoiseCartPage } from "./noise/cart-checkout/noise-cart-page";
 import { NoiseCheckoutPage } from "./noise/cart-checkout/noise-checkout-page";
+import { NoiseCheckoutUnavailable } from "./noise/cart-checkout/noise-checkout-unavailable";
 import { NoiseOrderSuccessPage } from "./noise/cart-checkout/noise-order-success-page";
 import { NoiseCollectionPage } from "./noise/collections/noise-collection-page";
 import { NoiseCollectionsPage } from "./noise/collections/noise-collections-page";
@@ -558,6 +565,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: BambooOrderDetailPage,
     OrdersPage: BambooOrdersPage,
     PreferencesPage: BambooPreferencesPage,
+    SubscriptionsPage: BambooSubscriptionsPage,
+    InvoicesPage: BambooInvoicesPage,
+    RewardsPage: BambooRewardsPage,
   },
 
   "animated-bamboo": {
@@ -826,6 +836,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: NoiseBlogPostPage,
     CartPage: NoiseCartPage,
     CheckoutPage: NoiseCheckoutPage,
+    CheckoutUnavailable: NoiseCheckoutUnavailable,
     OrderSuccessPage: NoiseOrderSuccessPage,
     CollectionPage: NoiseCollectionPage,
     CollectionsPage: NoiseCollectionsPage,
@@ -840,6 +851,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: NoiseOrderDetailPage,
     OrdersPage: NoiseOrdersPage,
     PreferencesPage: NoisePreferencesPage,
+    SubscriptionsPage: NoiseSubscriptionsPage,
+    InvoicesPage: NoiseInvoicesPage,
+    RewardsPage: NoiseRewardsPage,
   },
 
   olive: {

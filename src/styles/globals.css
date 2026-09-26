@@ -229,9 +229,13 @@
 
 /* ─── Bamboo template — accessibility enhancements ──────────────────────────
    Focus-visible outlines for every interactive element (WCAG 2.4.7 / 2.4.11).
+   `tabindex="-1"` elements are skipped: they aren't reachable by Tab and only
+   take focus programmatically (e.g. the order-confirmation heading, focused
+   so screen readers announce it), where Chrome's focus-visible heuristic
+   would otherwise draw a stray box on page load.
    prefers-reduced-motion support (WCAG 2.3.3 / best practice at AA).         */
 
-.bamboo *:focus-visible {
+.bamboo *:focus-visible:not([tabindex="-1"]) {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
@@ -244,6 +248,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Routes that fall back to Default pages (wishlist, FAQ, order status, ...)
+   know nothing about the hanging emblem; bamboo pages mark their first
+   section with .bam-top (shared/bamboo-emblem-clearance.ts). */
+@media (min-width: 64rem) {
+  .bamboo #bamboo-main-content:not(:has(.bam-top)) {
+    padding-top: 4.5rem;
   }
 }
 

@@ -127,6 +127,23 @@ describe("BambooOrderConfirmation", () => {
     expect(screen.queryByText("Pickup location")).not.toBeInTheDocument();
   });
 
+  it("shows the order total from the Stripe session", async () => {
+    searchParams = new URLSearchParams({ session_id: "cs_test_4" });
+    mockFetchResponse({
+      customer_email: "shopper@example.com",
+      amount_total: 4599,
+      currency: "usd",
+      payment_status: "paid",
+      delivery_method: "ship",
+    });
+
+    render(<BambooOrderConfirmation business={BUSINESS} />);
+
+    await waitFor(() => expect(screen.getByText("$45.99")).toBeInTheDocument());
+    expect(screen.getByText(/Order total:/)).toBeInTheDocument();
+    expect(screen.getByText("shopper@example.com")).toBeInTheDocument();
+  });
+
   it("renders the note when provided, and hides it when blank", async () => {
     searchParams = new URLSearchParams({ session_id: "cs_test_3" });
     mockFetchResponse({

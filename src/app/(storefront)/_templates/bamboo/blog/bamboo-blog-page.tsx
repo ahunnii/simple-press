@@ -9,7 +9,7 @@ import { ArrowRight, CalendarDays, Leaf, Search, Tag } from "lucide-react";
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { formatDate } from "~/lib/utils";
+import { cn, formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -25,6 +25,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 import { BambooPageHero } from "../shared/bamboo-page-hero";
 
 type Props = DefaultBlogPageTemplateProps & {
@@ -95,7 +96,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
       <PageTransition>
         <section
           {...sectionGroupAttr("blog", "listing")}
-          className="bg-[var(--bam-cream-deep)] py-20"
+          className={cn("bg-[var(--bam-cream-deep)] py-20", BAMBOO_EMBLEM_CLEAR)}
         >
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="text-center">

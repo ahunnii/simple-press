@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
   FadeIn,
@@ -13,6 +14,8 @@ import {
 } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
 
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
+import { BambooPageShelf } from "../shared/bamboo-page-shelf";
 import { BambooCartItem } from "./bamboo-cart-item";
 import { BambooCartSummary } from "./bamboo-cart-summary";
 
@@ -36,7 +39,12 @@ export function BambooCartContents({ business }: Props) {
   if (items.length === 0) {
     return (
       <PageTransition>
-        <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8">
+        <section
+          className={cn(
+            "mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8",
+            BAMBOO_EMBLEM_CLEAR,
+          )}
+        >
           <FadeIn direction="up">
             <div
               className="bg-primary/10 mx-auto flex size-20 items-center justify-center rounded-full"
@@ -66,12 +74,15 @@ export function BambooCartContents({ business }: Props) {
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
+      <BambooPageShelf>
         <FadeIn direction="up">
-          <h1 className="text-foreground mb-8 font-serif text-3xl font-bold tracking-tight md:text-4xl">
+          <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
             Your Cart
           </h1>
         </FadeIn>
+      </BambooPageShelf>
+
+      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
         <div className="flex flex-col gap-8 lg:flex-row">
           <StaggerContainer
             className="flex flex-1 flex-col gap-4"

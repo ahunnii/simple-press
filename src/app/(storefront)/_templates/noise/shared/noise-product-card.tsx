@@ -42,15 +42,9 @@ export function NoiseProductCard({ product, index }: Props) {
   const productImage = product.images[0]?.url ?? "/placeholder.svg";
   const additional = parseCardAdditionalFields(product.additionalFields);
 
-  /* Corner stamp label — combine edition + status if flagged */
+  /* Badge label info */
   const isNew = productStatus.badgeLabel?.toLowerCase() === "new";
   const isSoldOut = productStatus.isOutOfStock;
-  const editionBase = `N° ${String(index + 1).padStart(2, "0")}`;
-  const editionLabel = isNew
-    ? `${editionBase} · NEW`
-    : isSoldOut
-      ? `${editionBase} · SOLD`
-      : editionBase;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();

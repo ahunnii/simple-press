@@ -10,6 +10,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { formatCurrency } from "~/lib/utils";
 
 type DeliveryMethod = "ship" | "pickup" | null;
 
@@ -252,14 +253,29 @@ export function BambooOrderConfirmation({ business, note = "" }: Props) {
               </p>
             </div>
           ) : (
-            orderDetails?.customer_email && (
-              <div className="border-border mt-6 border-t pt-6 text-sm">
-                <p className="text-muted-foreground">
-                  Confirmation sent to:{" "}
-                  <span className="text-foreground font-semibold">
-                    {orderDetails.customer_email}
-                  </span>
-                </p>
+            orderDetails &&
+            (orderDetails.customer_email ||
+              typeof orderDetails.amount_total === "number") && (
+              <div className="border-border mt-6 space-y-2 border-t pt-6 text-sm">
+                {typeof orderDetails.amount_total === "number" && (
+                  <p className="text-muted-foreground">
+                    Order total:{" "}
+                    <span className="text-foreground font-semibold">
+                      {formatCurrency(
+                        orderDetails.amount_total,
+                        (orderDetails.currency || "usd").toUpperCase(),
+                      )}
+                    </span>
+                  </p>
+                )}
+                {orderDetails.customer_email && (
+                  <p className="text-muted-foreground">
+                    Confirmation sent to:{" "}
+                    <span className="text-foreground font-semibold">
+                      {orderDetails.customer_email}
+                    </span>
+                  </p>
+                )}
               </div>
             )
           )}

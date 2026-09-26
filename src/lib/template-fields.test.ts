@@ -236,6 +236,8 @@ describe("isRetiredTemplateKey", () => {
     expect(isRetiredTemplateKey("vii.contact.map-lat")).toBe(true);
     expect(isRetiredTemplateKey("vii.global.footer-tagline")).toBe(true);
     expect(isRetiredTemplateKey("vii.homepage.instagram-embed")).toBe(true);
+    expect(isRetiredTemplateKey("noise.global.location-tag")).toBe(true);
+    expect(isRetiredTemplateKey("noise.global.footer-tagline")).toBe(true);
   });
 
   it("is never still declared by a template", () => {

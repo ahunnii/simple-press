@@ -4,43 +4,82 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
-const NEXT_STEPS = [
-  {
+/** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
+type DeliveryMethod = "ship" | "pickup" | null;
+
+type OrderDetails = {
+  customer_email: string;
+  amount_total: number;
+  currency: string;
+  payment_status: string;
+  delivery_method: DeliveryMethod;
+};
+
+/**
+ * Neutral, structural copy that holds for every store — no shipping-speed,
+ * packing, or tracking promises (those belong in the owner's
+ * `noise.checkout.success-note`). Keyed by the Stripe session's delivery
+ * method; unknown (older sessions, or no pickup offered) stays generic.
+ */
+function confirmationCopy(deliveryMethod: DeliveryMethod): {
+  lead: string;
+  steps: { icon: string; text: string }[];
+} {
+  const email = {
     icon: "✉",
     text: "You'll receive an email confirmation at the address provided.",
-  },
-  { icon: "✦", text: "Each piece is carefully prepared before it ships." },
-  {
-    icon: "↗",
-    text: "We'll notify you with a tracking number when your order ships.",
-  },
-  {
-    icon: "✓",
-    text: "Your order will be packed and shipped within five working days.",
-  },
-] as const;
+  };
+  if (deliveryMethod === "pickup") {
+    return {
+      lead: "Your order is queued for preparation. We'll let you know when it's ready for pickup.",
+      steps: [
+        email,
+        {
+          icon: "↗",
+          text: "We'll let you know when your order is ready for pickup.",
+        },
+      ],
+    };
+  }
+  if (deliveryMethod === "ship") {
+    return {
+      lead: "Your order is queued for preparation. We'll email you when it ships.",
+      steps: [
+        email,
+        { icon: "↗", text: "We'll email you when your order ships." },
+      ],
+    };
+  }
+  return {
+    lead: "Your order is queued for preparation. We'll email you with updates.",
+    steps: [
+      email,
+      { icon: "↗", text: "We'll email you with updates about your order." },
+    ],
+  };
+}
 
 type Props = {
   business: {
     id: string;
     name: string;
     siteContent: { primaryColor: string | null } | null;
+    pickupLocation?: string | null;
+    pickupInstructions?: string | null;
   };
+  /** Owner-authored note (`noise.checkout.success-note`); blank hides it. */
+  note?: string;
 };
 
-export function NoiseOrderConfirmation({ business }: Props) {
+export function NoiseOrderConfirmation({ business, note = "" }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
-  const [orderDetails, setOrderDetails] = useState<{
-    customer_email: string;
-    amount_total: number;
-    currency: string;
-    payment_status: string;
-  } | null>(null);
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const confirmationH1Ref = useRef<HTMLHeadingElement>(null);
 
@@ -58,12 +97,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
           `/api/stripe/session?session_id=${sessionId}`,
         );
         if (response.ok) {
-          const data = (await response.json()) as {
-            customer_email: string;
-            amount_total: number;
-            currency: string;
-            payment_status: string;
-          };
+          const data = (await response.json()) as OrderDetails;
           setOrderDetails(data);
         }
       } catch (error) {
@@ -119,8 +153,17 @@ export function NoiseOrderConfirmation({ business }: Props) {
     );
   }
 
+  const deliveryMethod = orderDetails?.delivery_method ?? null;
+  const { lead, steps } = confirmationCopy(deliveryMethod);
+  const pickupLocation =
+    deliveryMethod === "pickup" ? (business.pickupLocation?.trim() ?? "") : "";
+  const pickupInstructions = pickupLocation
+    ? (business.pickupInstructions?.trim() ?? "")
+    : "";
+  const trimmedNote = note.trim();
+
   return (
-    <>
+    <div {...sectionGroupAttr("checkout", "success")}>
       {/* Fire purchase analytics event once — idempotent via sessionStorage */}
       {orderDetails && (
         <TrackPurchase
@@ -160,8 +203,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
               className="max-w-[40ch] font-sans text-[15px] leading-relaxed"
               style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              Your order is queued for preparation. We&apos;ll have everything
-              packed and shipped within five working days.
+              {lead}
             </p>
           </div>
 
@@ -214,7 +256,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
               What happens next
             </h2>
             <div className="flex flex-col gap-3.5">
-              {NEXT_STEPS.map((step) => (
+              {steps.map((step) => (
                 <div key={step.icon} className="flex items-start gap-3">
                   <span
                     aria-hidden="true"
@@ -238,6 +280,41 @@ export function NoiseOrderConfirmation({ business }: Props) {
                 </div>
               ))}
             </div>
+
+            {pickupLocation ? (
+              <div className="mt-6">
+                <h3
+                  className="mb-2 font-mono text-[9px] tracking-[0.22em] uppercase"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                >
+                  Pickup location
+                </h3>
+                <p
+                  className="font-sans text-[14px] leading-relaxed whitespace-pre-line"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  {pickupLocation}
+                </p>
+                {pickupInstructions ? (
+                  <p
+                    className="mt-1 font-sans text-[13px] leading-relaxed whitespace-pre-line"
+                    style={{ color: "rgba(255,255,255,0.6)" }}
+                  >
+                    {pickupInstructions}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
+            {trimmedNote ? (
+              <p
+                className="mt-6 font-sans text-[14px] leading-relaxed whitespace-pre-line"
+                style={{ color: "rgba(255,255,255,0.75)" }}
+                {...fieldAttr("noise.checkout.success-note")}
+              >
+                {trimmedNote}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -269,6 +346,6 @@ export function NoiseOrderConfirmation({ business }: Props) {
           Back to Home
         </Link>
       </div>
-    </>
+    </div>
   );
 }

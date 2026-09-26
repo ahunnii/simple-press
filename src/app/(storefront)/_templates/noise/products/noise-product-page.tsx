@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
@@ -23,13 +24,80 @@ import {
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
+import { resolveFields } from "..";
+import { noiseMonogram } from "../shared/noise-monogram";
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
+
+/** Mono label + short note row under the buy button (shipping / returns). */
+function PolicyNote({
+  label,
+  fieldKey,
+  note,
+  policyHref,
+  policyLabel,
+}: {
+  label: string;
+  fieldKey: string;
+  note: string;
+  /** Only passed when the matching policy page is published. */
+  policyHref?: string;
+  policyLabel: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h3
+        className="font-mono text-[10px] tracking-[0.22em] uppercase"
+        style={{ color: "var(--vn-steel)" }}
+      >
+        {label}
+      </h3>
+      <p
+        className="font-sans text-[13px] leading-relaxed whitespace-pre-line"
+        style={{ color: "var(--vn-ink-soft)" }}
+        {...fieldAttr(fieldKey)}
+      >
+        {note}
+      </p>
+      {policyHref ? (
+        <Link
+          href={policyHref}
+          className="self-start font-mono text-[10px] tracking-[0.18em] uppercase underline underline-offset-4 transition-opacity hover:opacity-60"
+          style={{ color: "var(--vn-ink)" }}
+        >
+          {policyLabel} →
+        </Link>
+      ) : null}
+    </div>
+  );
+}
 
 export function NoiseProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "noise.product.shipping-note",
+    "noise.product.returns-note",
+    "noise.product.question-text",
+    "noise.product.coming-soon-heading",
+    "noise.product.coming-soon-body",
+    "noise.product.sold-out-text",
+    "noise.product.sold-out-message",
+    "noise.product.related-overline",
+    "noise.product.related-heading",
+    "noise.product.related-link-text",
+  ]);
+  const shippingNote = (f["noise.product.shipping-note"] ?? "").trim();
+  const returnsNote = (f["noise.product.returns-note"] ?? "").trim();
+  const questionText = (f["noise.product.question-text"] ?? "").trim();
+  const relatedOverline = f["noise.product.related-overline"] ?? "";
+  const relatedHeading = f["noise.product.related-heading"] ?? "";
+  const relatedLinkText = f["noise.product.related-link-text"] ?? "";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
@@ -92,12 +160,6 @@ export function NoiseProductPage({
     product as unknown as { collectionProducts?: CollectionRef[] }
   ).collectionProducts;
   const firstCollection = colProds?.[0]?.collection ?? null;
-
-  /* Simple in-stock check for the status indicator */
-  const inStock =
-    !product.trackInventory ||
-    (product.inventoryQty ?? 0) > 0 ||
-    product.allowBackorders;
 
   const images = product.images.length > 0 ? product.images : [];
   const activeImage = images[activeImg];
@@ -172,14 +234,6 @@ export function NoiseProductPage({
             </li>
           </ol>
         </nav>
-        {product.sku && (
-          <span
-            className="ml-4 hidden flex-shrink-0 font-mono text-[10px] tracking-[0.16em] uppercase md:block"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            SKU · {product.sku}
-          </span>
-        )}
       </div>
 
       {/* ── Main layout: 3 columns on desktop ── */}
@@ -296,7 +350,7 @@ export function NoiseProductPage({
                     opacity: 0.12,
                   }}
                 >
-                  VN
+                  {noiseMonogram(business.name)}
                 </span>
               </div>
             )}
@@ -345,6 +399,7 @@ export function NoiseProductPage({
             delay={0.12}
             className="flex flex-col gap-6"
             style={{ paddingLeft: "20px" }}
+            {...sectionGroupAttr("product", "details")}
           >
             {/* Category eyebrow */}
             {firstCollection && (
@@ -385,7 +440,58 @@ export function NoiseProductPage({
             )}
 
             {/* Variant + add to cart + trust badges */}
-            <NoiseProductActions product={product} business={business} />
+            <NoiseProductActions
+              product={product}
+              copy={{
+                comingSoonHeading: f["noise.product.coming-soon-heading"] ?? "",
+                comingSoonBody: f["noise.product.coming-soon-body"] ?? "",
+                soldOutText: f["noise.product.sold-out-text"] ?? "",
+                soldOutMessage: f["noise.product.sold-out-message"] ?? "",
+              }}
+            />
+
+            {/* Shipping / returns — each row only when its note is set; the
+                policy link only when that policy page is published. */}
+            {shippingNote || returnsNote ? (
+              <div
+                className="flex flex-col gap-5 border-t pt-5"
+                style={{ borderColor: "var(--vn-rule)" }}
+              >
+                <h2 className="sr-only">Shipping and returns</h2>
+                {shippingNote ? (
+                  <PolicyNote
+                    label="Shipping"
+                    fieldKey="noise.product.shipping-note"
+                    note={shippingNote}
+                    policyHref={
+                      hasShippingPolicy ? "/shipping-policy" : undefined
+                    }
+                    policyLabel="Shipping policy"
+                  />
+                ) : null}
+                {returnsNote ? (
+                  <PolicyNote
+                    label="Returns"
+                    fieldKey="noise.product.returns-note"
+                    note={returnsNote}
+                    policyHref={hasRefundPolicy ? "/refund-policy" : undefined}
+                    policyLabel="Returns policy"
+                  />
+                ) : null}
+              </div>
+            ) : null}
+
+            {questionText ? (
+              <Link
+                href="/contact"
+                className="self-start font-mono text-[10px] tracking-[0.18em] uppercase underline underline-offset-4 transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-ink)" }}
+              >
+                <span {...fieldAttr("noise.product.question-text")}>
+                  {questionText}
+                </span>
+              </Link>
+            ) : null}
           </FadeIn>
         </div>
       </section>
@@ -411,39 +517,51 @@ export function NoiseProductPage({
 
       {/* ── Related products ── */}
       {relatedProducts && relatedProducts.length > 0 && (
-        <section className="px-7 py-16">
+        <section
+          className="px-7 py-16"
+          {...sectionGroupAttr("product", "details")}
+        >
           <div className="mx-auto max-w-[1440px]">
             <FadeIn
               className="mb-10 flex items-end justify-between pb-6"
               style={{ borderColor: "var(--vn-rule)" }}
             >
               <div>
-                <p
-                  className="mb-3 font-mono text-[9.5px] tracking-[0.28em] uppercase"
-                  style={{ color: "var(--vn-steel-mist)" }}
-                >
-                  You may also like
-                </p>
-                <h2
-                  className="font-serif leading-none tracking-tight italic"
-                  style={{
-                    fontSize: "clamp(2rem, 4vw, 3rem)",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  More from the collection.
-                </h2>
+                {relatedOverline ? (
+                  <p
+                    className="mb-3 font-mono text-[9.5px] tracking-[0.28em] uppercase"
+                    style={{ color: "var(--vn-steel-mist)" }}
+                    {...fieldAttr("noise.product.related-overline")}
+                  >
+                    {relatedOverline}
+                  </p>
+                ) : null}
+                {relatedHeading ? (
+                  <h2
+                    className="font-serif leading-none tracking-tight italic"
+                    style={{
+                      fontSize: "clamp(2rem, 4vw, 3rem)",
+                      letterSpacing: "-0.02em",
+                    }}
+                    {...fieldAttr("noise.product.related-heading")}
+                  >
+                    {relatedHeading}
+                  </h2>
+                ) : null}
               </div>
-              <Link
-                href="/shop"
-                className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
-                style={{
-                  border: "1px solid var(--vn-ink)",
-                  color: "var(--vn-ink)",
-                }}
-              >
-                View all →
-              </Link>
+              {relatedLinkText ? (
+                <Link
+                  href="/shop"
+                  className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
+                  style={{
+                    border: "1px solid var(--vn-ink)",
+                    color: "var(--vn-ink)",
+                  }}
+                  {...fieldAttr("noise.product.related-link-text")}
+                >
+                  {relatedLinkText}
+                </Link>
+              ) : null}
             </FadeIn>
 
             <StaggerContainer

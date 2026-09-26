@@ -16,6 +16,8 @@ import {
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "../index";
+import { noiseMonogram } from "../shared/noise-monogram";
+import { nonBlank } from "../shared/noise-non-blank";
 
 function fmtDate(d: Date | string) {
   const dt = typeof d === "string" ? new Date(d) : d;
@@ -48,13 +50,10 @@ export function NoiseBlogPostPage({
     "noise.blog.post-shop-cta-subheading",
   ]);
 
-  const shopCtaText = f["noise.global.shop-cta-text"] ?? "Shop the Collection";
-  const shopCtaLink = f["noise.global.shop-cta-link"] ?? "/shop";
-  const shopCtaHeading =
-    f["noise.blog.post-shop-cta-heading"] ?? "Shop the Collection.";
-  const shopCtaSubheading =
-    f["noise.blog.post-shop-cta-subheading"] ??
-    "Discover pieces made with intention.";
+  const shopCtaText = f["noise.global.shop-cta-text"] ?? "";
+  const shopCtaLink = nonBlank(f["noise.global.shop-cta-link"]) ?? "/shop";
+  const shopCtaHeading = f["noise.blog.post-shop-cta-heading"] ?? "";
+  const shopCtaSubheading = f["noise.blog.post-shop-cta-subheading"] ?? "";
 
   const filtered = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
 
@@ -125,7 +124,7 @@ export function NoiseBlogPostPage({
                 opacity: 0.12,
               }}
             >
-              VN
+              {noiseMonogram(business?.name)}
             </span>
           </div>
         )}
@@ -243,7 +242,7 @@ export function NoiseBlogPostPage({
                         color: "var(--vn-ink)",
                       }}
                     >
-                      The Journal
+                      Blog
                     </div>
                   </div>
 

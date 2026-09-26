@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import type { RouterOutputs } from "~/trpc/react";
 import { PageTransition } from "~/components/page-animations";
 
+import { resolveFields } from "..";
 import { NoiseOrderConfirmation } from "./noise-order-confirmation";
 
 export function NoiseOrderSuccessPage({
@@ -10,6 +11,10 @@ export function NoiseOrderSuccessPage({
 }: {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "noise.checkout.success-note",
+  ]);
+
   return (
     <PageTransition>
       <Suspense
@@ -27,7 +32,10 @@ export function NoiseOrderSuccessPage({
           </div>
         }
       >
-        <NoiseOrderConfirmation business={business} />
+        <NoiseOrderConfirmation
+          business={business}
+          note={f["noise.checkout.success-note"] ?? ""}
+        />
       </Suspense>
     </PageTransition>
   );

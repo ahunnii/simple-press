@@ -39,6 +39,7 @@ import {
   BambooAccordionItem,
 } from "../shared/bamboo-accordion";
 import { BambooHorizontalProductCard } from "../shared/bamboo-product-card";
+import { BambooPageShelf } from "../shared/bamboo-page-shelf";
 import { BambooProductActions } from "./bamboo-product-actions";
 
 const TRUST_BADGES_KEY = "bamboo.product.trust-badges";
@@ -115,14 +116,14 @@ export function BambooProductPage({
         event={ANALYTICS_EVENTS.PRODUCT_VIEW}
         data={{ productId: product.id }}
       />
-      <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+      <BambooPageShelf variant="compact">
         {/* Breadcrumb */}
         <FadeIn direction="none" duration={0.3}>
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className="text-muted-foreground mb-6 gap-1"
+            className="text-muted-foreground gap-1"
           >
             <Link href="/shop">
               <ArrowLeft className="size-4" aria-hidden="true" />
@@ -130,7 +131,9 @@ export function BambooProductPage({
             </Link>
           </Button>
         </FadeIn>
+      </BambooPageShelf>
 
+      <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
         <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
           {/* Image Gallery */}
           <FadeIn direction="left" className="flex-1">

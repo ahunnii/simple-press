@@ -20,6 +20,7 @@ import {
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "../index";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
 type Props = DefaultBlogPostPageTemplateProps & {
   customFields?: Record<string, string>;
@@ -51,6 +52,7 @@ export function BambooBlogPostPage({
         className={cn(
           "bg-[var(--bam-cream-deep)] pt-12 md:pt-16",
           page?.image ? "pb-24 md:pb-28" : "pb-14 md:pb-16",
+          BAMBOO_EMBLEM_CLEAR,
         )}
       >
         <div className="mx-auto max-w-7xl px-4 lg:px-8">

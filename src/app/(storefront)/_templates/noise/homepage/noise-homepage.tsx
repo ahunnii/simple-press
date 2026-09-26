@@ -1,6 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { isPreviewRequest } from "~/lib/preview/preview-context";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { getRichTextFieldValue } from "~/lib/template-fields";
@@ -9,6 +10,9 @@ import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
+import { noiseMonogram } from "../shared/noise-monogram";
+import { nonBlank } from "../shared/noise-non-blank";
 import { NoiseAboutTeaser } from "./noise-about-teaser";
 import { NoiseCollectionShowcase } from "./noise-collection-showcase";
 import { NoiseEditorialSplit } from "./noise-editorial-split";
@@ -52,7 +56,7 @@ function parseCollectionsCount(raw: string | undefined): number {
   return Math.min(6, Math.max(2, n));
 }
 
-export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
+export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
   const [homepage, flags] = await Promise.all([
     api.business.getHomepage(),
     getBusinessFlags(),
@@ -72,6 +76,8 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     | undefined;
 
   const businessName = homepage?.name ?? "";
+  const monogram = noiseMonogram(businessName);
+  const locationTag = resolveNoiseLocationTag(props?.business, themeFields);
 
   const f = resolveFields(themeFields, [
     "noise.homepage.intro-gallery",
@@ -89,6 +95,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage-testimonials-heading",
     "noise.homepage.philosophy-overline",
     "noise.homepage.philosophy-quote",
+    "noise.homepage-guarantee-overline",
     "noise.homepage-guarantee-heading",
     "noise.homepage-guarantee-headingAccent",
     "noise.homepage-guarantee-quote",
@@ -98,16 +105,20 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage.rail-two-title",
     "noise.homepage.latest-button-text",
     "noise.homepage.latest-button-link",
-    "noise.global.shop-cta-text",
-    "noise.global.shop-cta-link",
-    "noise.global.location-tag",
     "noise.homepage-guarantee-stamp",
     "noise.homepage-guarantee-image",
     "noise.homepage.editorial-marquee-text",
+    "noise.homepage-about-overline",
     "noise.homepage-about-image",
     "noise.homepage-about-heading",
     "noise.homepage-about-button-text",
     "noise.homepage-about-button-link",
+    "noise.homepage.blog-teaser-overline",
+    "noise.homepage.blog-teaser-heading",
+    "noise.homepage.blog-teaser-body",
+    "noise.homepage.blog-teaser-button-text",
+    "noise.homepage.blog-teaser-button-link",
+    "noise.homepage.blog-teaser-image",
   ]);
 
   const aboutTeaserBody = getRichTextFieldValue(
@@ -153,42 +164,43 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     (p) => !isComingSoon(p.additionalFields),
   );
 
+  // The showcase and latest-arrivals rail hide themselves on the live
+  // storefront when they have nothing to show, but stay rendered (with a
+  // placeholder note) inside the editor preview so an owner setting up a
+  // fresh store still has the section's hotspot to click (bamboo pattern).
+  const isPreview = await isPreviewRequest();
+  const visible = (sectionId: string) =>
+    isSectionVisible(themeFields, "noise", sectionId);
+
   return (
     <HydrateClient>
       <NoiseIntroWrapper
         introImages={introImages}
         wordmark={businessName.length > 0 ? businessName : undefined}
-        locationTag={f["noise.global.location-tag"] ?? undefined}
+        locationTag={locationTag}
       >
         <PageTransition>
           {/* 1. Hero */}
           <NoiseHeroSection
-            heroVideo={f["noise.homepage.hero-video"] ?? undefined}
-            heroImage={f["noise.homepage.hero-image"] ?? undefined}
-            heroOverline={
-              (f["noise.homepage.hero-overline"] ?? "").length > 0
-                ? f["noise.homepage.hero-overline"]
-                : undefined
-            }
-            heroTitle={f["noise.homepage.hero-title"] ?? undefined}
-            heroTagline={f["noise.homepage.hero-tagline"] ?? undefined}
+            heroVideo={f["noise.homepage.hero-video"] ?? ""}
+            heroImage={f["noise.homepage.hero-image"] ?? ""}
+            heroOverline={nonBlank(f["noise.homepage.hero-overline"])}
+            heroTitle={f["noise.homepage.hero-title"] ?? ""}
+            heroTagline={f["noise.homepage.hero-tagline"] ?? ""}
             heroPrimaryButtonText={
-              f["noise.homepage.hero-primary-button-text"] ?? undefined
+              f["noise.homepage.hero-primary-button-text"] ?? ""
             }
             heroPrimaryButtonLink={
-              f["noise.homepage.hero-primary-button-link"] ?? undefined
+              nonBlank(f["noise.homepage.hero-primary-button-link"]) ?? "/shop"
             }
             wordmark={businessName.length > 0 ? businessName : undefined}
-            locationTag={
-              (f["noise.global.location-tag"] ?? "").length > 0
-                ? f["noise.global.location-tag"]
-                : undefined
-            }
+            locationTag={locationTag}
+            monogram={monogram}
             sectionAttrs={sectionGroupAttr("homepage", "hero")}
           />
 
           {/* 2. Scrolling marquee band beneath the hero */}
-          {isSectionVisible(themeFields, "noise", "homepage.editorial") && (
+          {visible("homepage.editorial") && (
             <NoiseMarqueeStrip
               text={f["noise.homepage.editorial-marquee-text"]}
               sectionAttrs={sectionGroupAttr("homepage", "editorial")}
@@ -196,94 +208,100 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           )}
 
           {/* 3. Philosophy */}
-          <NoisePhilosophySection
-            overline={f["noise.homepage.philosophy-overline"]}
-            quote={f["noise.homepage.philosophy-quote"]}
-            sectionAttrs={sectionGroupAttr("homepage", "philosophy")}
-          />
+          {visible("homepage.philosophy") && (
+            <NoisePhilosophySection
+              overline={f["noise.homepage.philosophy-overline"]}
+              quote={f["noise.homepage.philosophy-quote"]}
+              sectionAttrs={sectionGroupAttr("homepage", "philosophy")}
+            />
+          )}
 
           {/* 4. Brand story teaser */}
-          {isSectionVisible(themeFields, "noise", "homepage.aboutTeaser") && (
+          {visible("homepage.aboutTeaser") && (
             <NoiseAboutTeaser
-              heading={f["noise.homepage-about-heading"] ?? undefined}
+              overline={f["noise.homepage-about-overline"] ?? ""}
+              heading={f["noise.homepage-about-heading"] ?? ""}
               body={aboutTeaserBody as TiptapJSON | null}
-              image={f["noise.homepage-about-image"] ?? undefined}
-              buttonText={f["noise.homepage-about-button-text"] ?? undefined}
-              buttonLink={f["noise.homepage-about-button-link"] ?? undefined}
+              image={f["noise.homepage-about-image"] ?? ""}
+              buttonText={f["noise.homepage-about-button-text"] ?? ""}
+              buttonLink={
+                nonBlank(f["noise.homepage-about-button-link"]) ?? "/about"
+              }
+              monogram={monogram}
               sectionAttrs={sectionGroupAttr("homepage", "aboutTeaser")}
             />
           )}
 
           {/* 5. Collections showcase */}
-          <NoiseCollectionShowcase
-            overline={
-              (f["noise.homepage.rail-one-overline"] ?? "").trim() || undefined
-            }
-            title={
-              (f["noise.homepage-featured-title"] ?? "").trim() ||
-              "The Collections"
-            }
-            description={
-              (f["noise.homepage-featured-description"] ?? "").trim() ||
-              undefined
-            }
-            ctaText={
-              (f["noise.homepage-featured-button-text"] ?? "").trim() ||
-              "View All Collections"
-            }
-            ctaHref={
-              (f["noise.homepage-featured-button-link"] ?? "").trim() ||
-              "/collections"
-            }
-            collections={showcaseCollections}
-            sectionAttrs={sectionGroupAttr("homepage", "collections")}
-          />
+          {visible("homepage.collections") && (
+            <NoiseCollectionShowcase
+              overline={nonBlank(f["noise.homepage.rail-one-overline"])}
+              title={nonBlank(f["noise.homepage-featured-title"])}
+              description={nonBlank(f["noise.homepage-featured-description"])}
+              ctaText={nonBlank(f["noise.homepage-featured-button-text"])}
+              ctaHref={
+                nonBlank(f["noise.homepage-featured-button-link"]) ??
+                "/collections"
+              }
+              collections={showcaseCollections}
+              sectionAttrs={sectionGroupAttr("homepage", "collections")}
+              showWhenEmpty={isPreview && flags.isEnabled("collections")}
+            />
+          )}
 
-          {/* 6. Editorial split — links to the journal */}
-          {flags.isEnabled("blog") && <NoiseEditorialSplit />}
+          {/* 6. Blog teaser — only while the Blog feature is on */}
+          {flags.isEnabled("blog") && visible("homepage.blogTeaser") && (
+            <NoiseEditorialSplit
+              overline={f["noise.homepage.blog-teaser-overline"] ?? ""}
+              heading={f["noise.homepage.blog-teaser-heading"] ?? ""}
+              body={f["noise.homepage.blog-teaser-body"] ?? ""}
+              ctaText={f["noise.homepage.blog-teaser-button-text"] ?? ""}
+              ctaHref={
+                nonBlank(f["noise.homepage.blog-teaser-button-link"]) ?? "/blog"
+              }
+              image={f["noise.homepage.blog-teaser-image"] ?? ""}
+              sectionAttrs={sectionGroupAttr("homepage", "blogTeaser")}
+            />
+          )}
 
-          {/* 7. Latest arrivals — hidden when nothing is live */}
-          {latestProducts.length > 0 && (
+          {/* 7. Latest arrivals — hidden on the live site when nothing is live */}
+          {visible("homepage.featured") && (
             <NoiseProductRail
-              overline={
-                (f["noise.homepage.rail-two-overline"] ?? "").trim() ||
-                undefined
-              }
+              overline={nonBlank(f["noise.homepage.rail-two-overline"])}
               overlineFieldKey="noise.homepage.rail-two-overline"
-              title={
-                (f["noise.homepage.rail-two-title"] ?? "").trim() ||
-                "Latest Arrivals"
-              }
+              title={nonBlank(f["noise.homepage.rail-two-title"])}
               titleFieldKey="noise.homepage.rail-two-title"
-              ctaText={
-                (f["noise.homepage.latest-button-text"] ?? "").trim() ||
-                "Shop All"
-              }
+              ctaText={nonBlank(f["noise.homepage.latest-button-text"])}
               ctaTextFieldKey="noise.homepage.latest-button-text"
               ctaHref={
-                (f["noise.homepage.latest-button-link"] ?? "").trim() || "/shop"
+                nonBlank(f["noise.homepage.latest-button-link"]) ?? "/shop"
               }
               products={latestProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
+              showWhenEmpty={isPreview && flags.isEnabled("products")}
             />
           )}
 
           {/* 8. Guarantee */}
-          <NoiseGuaranteeSection
-            heading={f["noise.homepage-guarantee-heading"]}
-            headingAccent={f["noise.homepage-guarantee-headingAccent"]}
-            body={f["noise.homepage-guarantee-quote"]}
-            stamp={f["noise.homepage-guarantee-stamp"] ?? undefined}
-            image={f["noise.homepage-guarantee-image"] ?? undefined}
-            sectionAttrs={sectionGroupAttr("homepage", "guarantee")}
-          />
+          {visible("homepage.guarantee") && (
+            <NoiseGuaranteeSection
+              overline={f["noise.homepage-guarantee-overline"] ?? ""}
+              heading={f["noise.homepage-guarantee-heading"] ?? ""}
+              headingAccent={f["noise.homepage-guarantee-headingAccent"] ?? ""}
+              body={nonBlank(f["noise.homepage-guarantee-quote"])}
+              stamp={nonBlank(f["noise.homepage-guarantee-stamp"])}
+              image={nonBlank(f["noise.homepage-guarantee-image"])}
+              monogram={monogram}
+              sectionAttrs={sectionGroupAttr("homepage", "guarantee")}
+            />
+          )}
 
           {/* 9. Rotating testimonial strip */}
           {flags.isEnabled("testimonials") &&
-            isSectionVisible(themeFields, "noise", "homepage.testimonials") && (
+            visible("homepage.testimonials") && (
               <NoiseTestimonialStrip
                 testimonials={testimonials}
-                heading={f["noise.homepage-testimonials-heading"] ?? undefined}
+                heading={f["noise.homepage-testimonials-heading"] ?? ""}
                 sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
               />
             )}

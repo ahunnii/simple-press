@@ -17,6 +17,7 @@ import { FadeIn } from "~/components/page-animations";
 
 import { DEFAULT_BAMBOO_HERO_BADGES } from ".";
 import { resolveFields } from "..";
+import { BAMBOO_TOP_MARKER } from "../shared/bamboo-emblem-clearance";
 import { BambooLeafGlyph } from "../shared/bamboo-leaf-sprig";
 
 type Props = { customFields: unknown; hasValueBand: boolean };
@@ -145,6 +146,7 @@ export function BambooHeroSection({ customFields, hasValueBand }: Props) {
       aria-label="Introduction"
       className={cn(
         "relative overflow-hidden bg-[var(--bam-cream)]",
+        BAMBOO_TOP_MARKER,
         // Sub-lg photo-box height (read by the img and the cap layer below;
         // unused at lg+, where the img goes back to full-bleed). It is
         // WIDTH-derived on purpose: it mirrors the right column's aspect

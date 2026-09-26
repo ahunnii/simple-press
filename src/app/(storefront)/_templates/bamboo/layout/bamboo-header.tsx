@@ -48,18 +48,32 @@ const NAV_LINKS: NavLink[] = [
  * Desktop (lg and up) is three stable cells that never re-order: an empty
  * spacer on the left, the split nav + emblem in the middle, and the right
  * cluster — socials · gold hairline · account · wishlist · cart. The outer
- * cells are both `flex-1 basis-0`, which is what keeps the nav centred on the
- * bar in BOTH states:
+ * cells are both `flex-1 basis-0`, which centres the NAV as a whole on the
+ * bar; that alone isn't enough to centre the EMBLEM inside it once the two
+ * link halves differ in width (e.g. an odd link count splits 3/2), so the
+ * nav itself is a `[1fr_auto_1fr]` grid rather than a flex row — with no
+ * `flex-1` on the nav, the two `1fr` tracks size off the nav's own
+ * max-content and settle equal (each = the wider half), keeping the emblem
+ * (the `auto` middle column) on the nav's true centre regardless of how the
+ * labels split. That symmetric nav is what keeps the nav — and the emblem
+ * inside it — centred on the bar in BOTH states:
  *
  * - **Expanded** (page not scrolled): cream links split into two halves around
- *   a big circular logo (lg:size-36 / xl:size-44 at top-2 — 176px is 2.2x the
- *   80px bar) hanging deep into the hero, with a full gold ring-[3px] and
- *   shadow-lg so it reads as a seal pressed onto the page.
+ *   a big circular logo at top-2 with a full gold ring-[3px] and shadow-lg so
+ *   it reads as a seal pressed onto the page. Its size depends on the route:
+ *   the HOMEPAGE gets the full lg:size-36 / xl:size-44 (176px at xl, 2.2x the
+ *   80px bar) because the hero band below is generous enough to land it on.
+ *   Every OTHER route holds a constant lg:size-36 (144px) at every lg+ width
+ *   — inner pages have no hero built to receive a 176px disc, and a constant
+ *   size keeps the overhang predictable (see `shared/bamboo-emblem-clearance.ts`,
+ *   which computes the 72px overhang other pages pad for). `usePathname()`
+ *   drives the split; the existing width/height transitions below mean the
+ *   size change animates naturally on client navigation between the two.
  * - **Compact** (once scrolled): the emblem SHRINKS IN PLACE — never migrating
- *   to a corner — into a 72px "mini-hang": size-18 at top-6, so 24 + 72 = 96
- *   against the 80px bar still leaves a 16px lip breaking the forest edge. The
- *   ring eases down to a softer ring-2 at /70 and the shadow to shadow-sm (both
- *   live in `box-shadow`, so they interpolate with the size). The gesture
+ *   to a corner — into a 64px seal that docks fully inside the 80px bar: size-16
+ *   at top-2, so 8 + 64 = 72 within the bar with 8px above and below, no lip.
+ *   The ring eases down to a softer ring-2 at /70 and the shadow to shadow-sm
+ *   (both live in `box-shadow`, so they interpolate with the size). The gesture
  *   survives the scroll instead of collapsing into an avatar-sized chip.
  *
  * The one exception is the merchant `nav-wordmark`: a horizontal wordmark has
@@ -167,6 +181,12 @@ export function BambooHeader({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [openDropdown]);
+
+  // The full lg:size-36 / xl:size-44 expanded disc is homepage-only — inner
+  // pages have no hero built to receive a 176px seal, so every other route
+  // holds a constant lg:size-36 (144px) at every lg+ width (see
+  // `shared/bamboo-emblem-clearance.ts` for the 72px overhang this implies).
+  const isHome = pathname === "/";
 
   const links =
     (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
@@ -430,14 +450,29 @@ export function BambooHeader({
             the two link halves and nothing else, so the bar's rhythm holds.
             `self-stretch` gives the emblem slot the full bar height to hang
             from.
+
+            Three-column grid (`1fr auto 1fr`), not a flex row: with an
+            uneven link split (e.g. 3 links left / 2 right) a flex row's
+            `justify-center` centres the NAV's own box, not the emblem inside
+            it, so the emblem drifts toward the wider half. The nav has no
+            `flex-1` here, so it sizes to its own max-content; under intrinsic
+            sizing the two `1fr` tracks resolve equal (each = the larger
+            half), which makes the nav symmetric about the middle (auto)
+            column regardless of how the labels split. The outer bar cells
+            are both `flex-1 basis-0` (see below), so that symmetric nav —
+            and therefore the emblem — lands on the bar's true centre.
+            `shrink-0` keeps the flex row from squashing the nav back down
+            before the grid can size it.
           */}
           <nav
-            className="hidden flex-1 items-center justify-center gap-8 self-stretch lg:flex"
+            className="hidden shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-8 self-stretch lg:grid"
             aria-label="Main navigation"
           >
-            {links
-              .slice(0, splitIndex)
-              .map((link, i) => renderNavItem(link, i))}
+            <div className="flex items-center justify-end gap-8">
+              {links
+                .slice(0, splitIndex)
+                .map((link, i) => renderNavItem(link, i))}
+            </div>
 
             {/*
               The emblem slot — ALWAYS mounted, and always exactly one <Link>,
@@ -455,7 +490,13 @@ export function BambooHeader({
               <div
                 className={cn(
                   "relative h-full shrink-0 transition-[width] duration-300",
-                  compact ? (wordmarkUrl ? "w-44" : "w-20") : "lg:w-36 xl:w-44",
+                  compact
+                    ? wordmarkUrl
+                      ? "w-44"
+                      : "w-20"
+                    : isHome
+                      ? "lg:w-36 xl:w-44"
+                      : "lg:w-36",
                 )}
               >
                 <Link
@@ -466,34 +507,46 @@ export function BambooHeader({
                     compact
                       ? wordmarkUrl
                         ? "top-1/2 -translate-y-1/2"
-                        : "top-6 translate-y-0"
+                        : "top-2 translate-y-0"
                       : "top-2 translate-y-0",
                   )}
                 >
                   {/* Disc — expanded lg:size-36 / xl:size-44 (144 → 176px, 2.2x
-                      the bar) with a full gold ring-[3px] + shadow-lg; shrinks
-                      in place to the 72px mini-hang (top-6 + 72 = 96 against
-                      the 80px bar, so a 16px lip still breaks the forest edge)
-                      with the lighter ring-2 /70 + shadow-sm. Ring and shadow
-                      are both `box-shadow`, so they interpolate with the size.
-                      No base size: the nav only renders at lg+. Cross-fades
-                      out only when a wordmark takes the compact centre. */}
+                      the bar) on the HOMEPAGE only; a constant lg:size-36
+                      (144px) on every other route, since inner pages have no
+                      hero built to receive the bigger disc. Full gold
+                      ring-[3px] + shadow-lg either way; shrinks in place to a
+                      64px seal docked inside the bar (top-2 + 64 = 72 within
+                      the 80px bar) with the lighter ring-2 /70 + shadow-sm.
+                      Ring and shadow are both `box-shadow`, so they interpolate
+                      with the size, and the width/height transition below
+                      animates the home ↔ inner size change on client
+                      navigation too. No base size: the nav only renders at
+                      lg+. Cross-fades out only when a wordmark takes the
+                      compact centre. */}
                   <span
                     className={cn(
                       "relative block rounded-full bg-[var(--bam-cream)] transition-[width,height,opacity,visibility,box-shadow] duration-300",
                       compact
-                        ? "size-18 shadow-sm ring-2 ring-[var(--bam-gold-soft)]/70"
-                        : "shadow-lg ring-[3px] ring-[var(--bam-gold-soft)] lg:size-36 xl:size-44",
+                        ? "size-16 shadow-sm ring-2 ring-[var(--bam-gold-soft)]/70"
+                        : isHome
+                          ? "shadow-lg ring-[3px] ring-[var(--bam-gold-soft)] lg:size-36 xl:size-44"
+                          : "shadow-lg ring-[3px] ring-[var(--bam-gold-soft)] lg:size-36",
                       compact && wordmarkUrl && "invisible opacity-0",
                     )}
                   >
                     {/* Decorative: the wrapping Link already carries the
-                        accessible name via aria-label. */}
+                        accessible name via aria-label. Inner pages never
+                        render past lg:size-36 (144px), so they skip the
+                        1280px breakpoint the homepage needs for its 176px
+                        disc. */}
                     <Image
                       src={logoUrl}
                       alt=""
                       fill
-                      sizes="(min-width: 1280px) 176px, 144px"
+                      sizes={
+                        isHome ? "(min-width: 1280px) 176px, 144px" : "144px"
+                      }
                       className={cn(
                         "object-contain transition-[padding] duration-300",
                         compact ? "p-1" : "p-1.5 xl:p-2",
@@ -570,9 +623,11 @@ export function BambooHeader({
               </div>
             )}
 
-            {links
-              .slice(splitIndex)
-              .map((link, i) => renderNavItem(link, splitIndex + i))}
+            <div className="flex items-center justify-start gap-8">
+              {links
+                .slice(splitIndex)
+                .map((link, i) => renderNavItem(link, splitIndex + i))}
+            </div>
           </nav>
 
           {/*

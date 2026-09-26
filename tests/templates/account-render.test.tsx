@@ -1,7 +1,7 @@
 import type { AuthClient } from "@better-auth-ui/react";
 import type { ComponentType, ReactNode } from "react";
 import { QueryClient } from "@tanstack/react-query";
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -18,8 +18,16 @@ import { AuthProvider } from "~/components/auth/auth-provider";
 // project (no Node `crypto` global in happy-dom) long before any test body
 // runs. Importing only the 22 account components sidesteps that unrelated,
 // pre-existing graph problem entirely.
+import type {
+  InvoicesPageTemplateProps,
+  RewardsPageTemplateProps,
+  SubscriptionsPageTemplateProps,
+} from "~/app/(storefront)/_templates/types";
 import { BambooAccountSecurityPage } from "~/app/(storefront)/_templates/bamboo/account/bamboo-account-security-page";
 import { BambooAccountSettingsPage } from "~/app/(storefront)/_templates/bamboo/account/bamboo-account-settings-page";
+import { BambooInvoicesPage } from "~/app/(storefront)/_templates/bamboo/account/bamboo-invoices-page";
+import { BambooRewardsPage } from "~/app/(storefront)/_templates/bamboo/account/bamboo-rewards-page";
+import { BambooSubscriptionsPage } from "~/app/(storefront)/_templates/bamboo/account/bamboo-subscriptions-page";
 import { DarkTrendAccountSecurityPage } from "~/app/(storefront)/_templates/dark-trend/account/dark-trend-account-security-page";
 import { DarkTrendAccountSettingsPage } from "~/app/(storefront)/_templates/dark-trend/account/dark-trend-account-settings-page";
 import { DefaultAccountSecurityPage } from "~/app/(storefront)/_templates/default/account/default-account-security-page";
@@ -250,4 +258,168 @@ describe("account settings/security pages render for every template", () => {
       });
     },
   );
+});
+
+// ---------------------------------------------------------------------------
+// bamboo Subscriptions/Invoices/Rewards — flag-gated account pages added
+// 2026-09-25. `business` is required by each page's props type but unused by
+// the bamboo components themselves, so a minimal object cast (same pattern as
+// `checkout-render.test.tsx`'s `BusinessProp` fixture) stands in for it.
+// ---------------------------------------------------------------------------
+
+const fakeBusiness = { id: "biz_test", name: "Test Store" } as unknown;
+
+const noSubscriptions: SubscriptionsPageTemplateProps["subscriptions"] = [];
+
+const oneSubscription: SubscriptionsPageTemplateProps["subscriptions"] = [
+  {
+    id: "sub_1",
+    status: "active",
+    productName: "Coffee Beans",
+    variantName: "Dark Roast",
+    productSlug: "coffee-beans",
+    quantity: 2,
+    intervalKey: "month:1",
+    intervalLabel: "Every month",
+    unitAmountCents: 1800,
+    shippingCents: 500,
+    perDeliveryCents: 4100,
+    deliveryMethod: "ship",
+    nextBillingAt: new Date("2026-10-15T00:00:00Z"),
+    currentPeriodEnd: new Date("2026-10-15T00:00:00Z"),
+    pauseResumesAt: null,
+    cancelledAt: null,
+    createdAt: new Date("2026-01-01T00:00:00Z"),
+    manageUrl: "https://teststore.example.com/subscriptions/manage?token=abc",
+  },
+];
+
+const oneInvoice: InvoicesPageTemplateProps["invoices"] = [
+  {
+    id: "inv_1",
+    displayNumber: "INV-0001",
+    status: "SENT",
+    isOverdue: false,
+    totalCents: 12000,
+    amountPaidCents: 0,
+    balanceCents: 12000,
+    issueDate: "2026-09-01",
+    dueDate: "2026-09-30",
+    sentAt: new Date("2026-09-01T00:00:00Z"),
+    viewPath: "/invoices/view?token=xyz",
+  },
+];
+
+const joinedRewards: RewardsPageTemplateProps["rewards"] = {
+  flags: { loyalty: true, coupons: true },
+  program: {
+    rules: {
+      earnOnOrders: true,
+      pointsPerDollar: 1,
+      signupEnabled: false,
+      signupBonus: 0,
+      firstOrderEnabled: false,
+      firstOrderBonus: 0,
+      birthdayEnabled: false,
+      birthdayBonus: 0,
+      socialEnabled: false,
+      socialFollowBonus: 0,
+      rewardCodeExpiryDays: 90,
+    },
+    tiers: [],
+  },
+  customer: {
+    id: "cust_1",
+    loyaltyPoints: 240,
+    loyaltyJoinedAt: new Date("2026-01-01T00:00:00Z"),
+    birthMonth: null,
+    birthDay: null,
+  },
+  entries: [],
+  codes: [],
+  social: [],
+};
+
+// Loyalty flag paused (owner turned the feature off) — the balance and
+// "paused" banner both need to render from the same joined-member shape, so
+// this only flips `flags.loyalty`.
+const pausedRewards: RewardsPageTemplateProps["rewards"] = {
+  ...joinedRewards,
+  flags: { loyalty: false, coupons: true },
+};
+
+describe("bamboo Subscriptions/Invoices/Rewards pages render", () => {
+  it("Subscriptions renders the empty state with a manage-by-email link", () => {
+    render(
+      <BambooSubscriptionsPage
+        business={fakeBusiness as SubscriptionsPageTemplateProps["business"]}
+        subscriptions={noSubscriptions}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: /you don.t have any subscriptions yet/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /look up your subscription by email/i }),
+    ).toHaveAttribute("href", "/subscriptions/manage");
+  });
+
+  it("Subscriptions renders a subscription's name, status, and manage link", () => {
+    render(
+      <BambooSubscriptionsPage
+        business={fakeBusiness as SubscriptionsPageTemplateProps["business"]}
+        subscriptions={oneSubscription}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Coffee Beans — Dark Roast" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /manage/i })).toHaveAttribute(
+      "href",
+      oneSubscription[0]!.manageUrl,
+    );
+  });
+
+  it("Invoices renders an invoice row", () => {
+    render(
+      <BambooInvoicesPage
+        business={fakeBusiness as InvoicesPageTemplateProps["business"]}
+        invoices={oneInvoice}
+      />,
+    );
+
+    expect(screen.getByText("INV-0001")).toBeInTheDocument();
+    expect(screen.getByText(/awaiting payment/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /view invoice/i }),
+    ).toHaveAttribute("href", "/invoices/view?token=xyz");
+  });
+
+  it("Rewards renders a joined member's points balance", () => {
+    render(
+      <BambooRewardsPage
+        business={fakeBusiness as RewardsPageTemplateProps["business"]}
+        rewards={joinedRewards}
+      />,
+    );
+
+    expect(screen.getByText("240")).toBeInTheDocument();
+    expect(screen.getByText("points")).toBeInTheDocument();
+  });
+
+  it("Rewards shows the paused banner when the loyalty flag is off", () => {
+    render(
+      <BambooRewardsPage
+        business={fakeBusiness as RewardsPageTemplateProps["business"]}
+        rewards={pausedRewards}
+      />,
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent(/paused right now/i);
+  });
 });

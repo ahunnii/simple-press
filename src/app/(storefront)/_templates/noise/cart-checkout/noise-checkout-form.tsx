@@ -7,6 +7,11 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
@@ -27,6 +32,8 @@ import {
   SavedAddressPicker,
 } from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
+import { CART_NOTES_KEY } from "./index";
+import { noiseNoteGlyph, resolveNoiseCartCopy } from "./noise-cart-copy";
 import { NoiseOrderSummary } from "./noise-order-summary";
 
 type CheckoutFormProps = {
@@ -101,6 +108,8 @@ export function NoiseCheckoutForm({
     termsDisclosure,
   } = useCheckoutForm(business, merchantPolicies);
 
+  const cartCopy = resolveNoiseCartCopy(business.siteContent?.customFields);
+
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
@@ -116,16 +125,27 @@ export function NoiseCheckoutForm({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-6 py-20 text-center">
+      <div
+        className="flex flex-col items-center gap-6 py-20 text-center"
+        {...sectionGroupAttr("global", "cart")}
+      >
         <p
           className="font-serif text-2xl italic"
           style={{ color: "var(--vn-steel-mist)" }}
         >
           Nothing to checkout.
         </p>
-        <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
-          Shop the Collection →
-        </Link>
+        {cartCopy.emptyButtonText ? (
+          <Link
+            href={cartCopy.emptyButtonLink}
+            className="vn-stamp vn-stamp-solid text-[10px]"
+          >
+            <span {...fieldAttr("noise.global.cart-empty-button-text")}>
+              {cartCopy.emptyButtonText}
+            </span>{" "}
+            →
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -161,7 +181,7 @@ export function NoiseCheckoutForm({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@frequency.com"
+                placeholder="you@example.com"
                 required
                 aria-required="true"
                 aria-invalid={submitAttempted && !email ? true : undefined}
@@ -204,7 +224,7 @@ export function NoiseCheckoutForm({
               autoComplete="tel"
               value={phone}
               onChange={(val) => setPhone(val)}
-              placeholder="+1 313 555 0000"
+              placeholder="Phone number"
               required
               aria-required="true"
               aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
@@ -233,7 +253,7 @@ export function NoiseCheckoutForm({
                     setDiscountCodeInput(e.target.value.toUpperCase());
                     setDiscountFieldError(null);
                   }}
-                  placeholder="VND-SUMMER-26"
+                  placeholder="Enter code"
                   autoComplete="off"
                   aria-invalid={!!discountFieldError}
                   aria-describedby={
@@ -304,7 +324,7 @@ export function NoiseCheckoutForm({
                       : {}
                   }
                 >
-                  {method === "ship" ? "Ship to address" : "Studio pickup"}
+                  {method === "ship" ? "Ship to address" : "Pickup"}
                 </button>
               ))}
             </div>
@@ -443,7 +463,7 @@ export function NoiseCheckoutForm({
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   required={deliveryMethod === "ship"}
-                  placeholder="e.g. Detroit"
+                  placeholder="City"
                   aria-required="true"
                   aria-invalid={
                     submitAttempted && !city.trim() ? true : undefined
@@ -498,7 +518,7 @@ export function NoiseCheckoutForm({
                   id="postal"
                   type="text"
                   autoComplete="shipping postal-code"
-                  placeholder="e.g. 48207"
+                  placeholder="ZIP / postal code"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                   required={deliveryMethod === "ship"}
@@ -593,14 +613,38 @@ export function NoiseCheckoutForm({
             linkClassName="underline"
           />
 
-          {/* Reassurance */}
-          <div className="flex flex-col gap-2.5">
-            {[
-              { ic: "🔒", text: "Encrypted with TLS · Powered by Stripe" },
-              { ic: "✦", text: "Ships within five working days" },
-              { ic: "↺", text: "14-day exchange on stock pieces" },
-            ].map((note) => (
-              <div key={note.ic} className="flex items-start gap-2.5">
+          {/* Payment security (true for every store — checkout always runs
+              through Stripe) + the owner's own checkout notes, if any. */}
+          <ul
+            className="flex flex-col gap-2.5"
+            {...sectionGroupAttr("global", "cart")}
+          >
+            <li className="flex items-start gap-2.5">
+              <span
+                aria-hidden="true"
+                className="flex flex-shrink-0 items-center justify-center border font-serif italic"
+                style={{
+                  width: "22px",
+                  height: "22px",
+                  borderColor: "var(--vn-rule)",
+                  fontSize: "12px",
+                }}
+              >
+                🔒
+              </span>
+              <p
+                className="font-mono text-[9.5px] leading-relaxed tracking-[0.14em] uppercase"
+                style={{ color: "var(--vn-steel-mist)" }}
+              >
+                Encrypted with TLS · Powered by Stripe
+              </p>
+            </li>
+            {cartCopy.notes.map((text, index) => (
+              <li
+                key={`${index}-${text}`}
+                className="flex items-start gap-2.5"
+                {...listItemAttr(CART_NOTES_KEY, index)}
+              >
                 <span
                   aria-hidden="true"
                   className="flex flex-shrink-0 items-center justify-center border font-serif italic"
@@ -611,17 +655,17 @@ export function NoiseCheckoutForm({
                     fontSize: "12px",
                   }}
                 >
-                  {note.ic}
+                  {noiseNoteGlyph(index)}
                 </span>
                 <p
                   className="font-mono text-[9.5px] leading-relaxed tracking-[0.14em] uppercase"
                   style={{ color: "var(--vn-steel-mist)" }}
                 >
-                  {note.text}
+                  {text}
                 </p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
     </form>

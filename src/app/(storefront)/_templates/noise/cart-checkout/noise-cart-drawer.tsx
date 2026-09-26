@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
+import type { NoiseCartCopy } from "./noise-cart-copy";
 import type { ShippingConfig } from "~/lib/shipping-utils";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   getAmountUntilFreeShipping,
@@ -23,9 +25,14 @@ import { useCart } from "~/providers/cart-context";
 
 type NoiseCartDrawerProps = {
   shippingConfig: ShippingConfig;
+  /** Resolved `global.cart` copy — see `resolveNoiseCartCopy`. */
+  copy: NoiseCartCopy;
 };
 
-export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
+export function NoiseCartDrawer({
+  shippingConfig,
+  copy,
+}: NoiseCartDrawerProps) {
   const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
     useCart();
   const reduce = useReducedMotion();
@@ -47,8 +54,9 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
           background: "var(--vn-paper)",
           color: "var(--vn-ink)",
         }}
+        {...sectionGroupAttr("global", "cart")}
       >
-        {/* ── Header — "Your Bag" + close (× provided by SheetContent) ── */}
+        {/* ── Header — cart label + close (× provided by SheetContent) ── */}
         <SheetHeader
           className="flex-none border-b"
           style={{ borderColor: "var(--vn-rule)" }}
@@ -58,12 +66,19 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
               className="flex items-center justify-between px-6 py-5"
               style={{ background: "var(--vn-paper)" }}
             >
-              <span
-                className="font-mono text-[10px] tracking-[0.32em] uppercase"
-                style={{ color: "var(--vn-ink)" }}
-              >
-                Your Bag
-              </span>
+              {/* The sheet always needs an accessible title — keep one for
+                  screen readers when the owner hides the visible label. */}
+              {copy.label ? (
+                <span
+                  className="font-mono text-[10px] tracking-[0.32em] uppercase"
+                  style={{ color: "var(--vn-ink)" }}
+                  {...fieldAttr("noise.global.cart-label")}
+                >
+                  {copy.label}
+                </span>
+              ) : (
+                <span className="sr-only">Cart</span>
+              )}
               {items.length > 0 && (
                 <span
                   className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
@@ -90,28 +105,37 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
               <p
                 className="font-serif leading-none italic"
                 style={{ fontSize: "24px", letterSpacing: "-0.01em" }}
+                {...fieldAttr("noise.global.cart-empty-heading")}
               >
-                Your bag is empty.
+                {copy.emptyHeading}
               </p>
-              <p
-                className="mt-2 font-sans text-[13px]"
-                style={{ color: "var(--vn-steel-mist)" }}
-              >
-                Anything you add will appear here.
-              </p>
+              {copy.emptyBody ? (
+                <p
+                  className="mt-2 font-sans text-[13px]"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                  {...fieldAttr("noise.global.cart-empty-body")}
+                >
+                  {copy.emptyBody}
+                </p>
+              ) : null}
             </div>
-            <Link
-              href="/shop"
-              onClick={() => setIsOpen(false)}
-              className="mt-2 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-70"
-              style={{
-                borderBottom: "1px solid var(--vn-ink)",
-                paddingBottom: "4px",
-                color: "var(--vn-ink)",
-              }}
-            >
-              Browse the Collection →
-            </Link>
+            {copy.emptyButtonText ? (
+              <Link
+                href={copy.emptyButtonLink}
+                onClick={() => setIsOpen(false)}
+                className="mt-2 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-70"
+                style={{
+                  borderBottom: "1px solid var(--vn-ink)",
+                  paddingBottom: "4px",
+                  color: "var(--vn-ink)",
+                }}
+              >
+                <span {...fieldAttr("noise.global.cart-empty-button-text")}>
+                  {copy.emptyButtonText}
+                </span>{" "}
+                →
+              </Link>
+            ) : null}
           </div>
         )}
 
@@ -285,7 +309,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                   className="font-sans"
                   style={{ fontSize: "14px", fontWeight: 500 }}
                 >
-                  {formatPrice(subtotal)} USD
+                  {formatPrice(subtotal)}
                 </span>
               </div>
 

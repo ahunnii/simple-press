@@ -12,15 +12,32 @@ import { NoiseCollectionCard } from "../shared/noise-collection-card";
 
 type NoiseCollectionShowcaseProps = {
   overline?: string;
-  title: string;
+  title?: string;
   description?: string;
-  ctaText: string;
+  ctaText?: string;
   ctaHref: string;
   /** Already filtered (non-empty) and sliced to the owner's count by the caller. */
   collections: (NoiseCollectionCardData & { id: string })[];
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
+  /**
+   * Editor preview only: render the header plus a placeholder note when
+   * there are no collections to show, so the owner can still click into the
+   * section. The live storefront always hides an empty showcase.
+   */
+  showWhenEmpty?: boolean;
 };
+
+function EmptyNote({ children }: { children: string }) {
+  return (
+    <p
+      className="mx-auto max-w-md border border-dashed px-6 py-10 text-center font-mono text-[10px] tracking-[0.18em] uppercase"
+      style={{ borderColor: "var(--vn-rule)", color: "var(--vn-steel-mist)" }}
+    >
+      {children}
+    </p>
+  );
+}
 
 /**
  * Homepage collections showcase (homepage.collections) — same header as the
@@ -36,8 +53,9 @@ export function NoiseCollectionShowcase({
   ctaHref,
   collections,
   sectionAttrs,
+  showWhenEmpty = false,
 }: NoiseCollectionShowcaseProps) {
-  if (collections.length === 0) return null;
+  if (collections.length === 0 && !showWhenEmpty) return null;
 
   return (
     <section
@@ -57,16 +75,18 @@ export function NoiseCollectionShowcase({
               {overline}
             </p>
           )}
-          <h2
-            className="font-serif leading-tight tracking-tight italic"
-            style={{
-              fontSize: "clamp(2rem, 4vw, 3rem)",
-              letterSpacing: "-0.02em",
-            }}
-            {...fieldAttr("noise.homepage-featured-title")}
-          >
-            {title}
-          </h2>
+          {title && (
+            <h2
+              className="font-serif leading-tight tracking-tight italic"
+              style={{
+                fontSize: "clamp(2rem, 4vw, 3rem)",
+                letterSpacing: "-0.02em",
+              }}
+              {...fieldAttr("noise.homepage-featured-title")}
+            >
+              {title}
+            </h2>
+          )}
           {description && (
             <p
               className="max-w-md text-center text-sm opacity-60"
@@ -75,20 +95,28 @@ export function NoiseCollectionShowcase({
               {description}
             </p>
           )}
-          <Link
-            href={ctaHref}
-            className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
-            style={{
-              border: "1px solid var(--vn-ink)",
-              color: "var(--vn-ink)",
-            }}
-          >
-            <span {...fieldAttr("noise.homepage-featured-button-text")}>
-              {ctaText}
-            </span>{" "}
-            →
-          </Link>
+          {ctaText && (
+            <Link
+              href={ctaHref}
+              className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
+              style={{
+                border: "1px solid var(--vn-ink)",
+                color: "var(--vn-ink)",
+              }}
+            >
+              <span {...fieldAttr("noise.homepage-featured-button-text")}>
+                {ctaText}
+              </span>{" "}
+              →
+            </Link>
+          )}
         </FadeIn>
+
+        {collections.length === 0 && (
+          <EmptyNote>
+            Collections with published products will appear here.
+          </EmptyNote>
+        )}
 
         {/* Centered wrap row — widths subtract the gap share (gap-5 = 20px) */}
         <StaggerContainer

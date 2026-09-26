@@ -4,6 +4,7 @@ import { ArrowRight, Package, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
 export function BambooCollectionsPage({
   business,
@@ -31,7 +33,10 @@ export function BambooCollectionsPage({
         {/* Header */}
         <FadeIn
           {...sectionGroupAttr("collections", "listing")}
-          className="bg-[var(--bam-cream-deep)] px-4 py-16 text-center sm:px-6 md:py-24 lg:px-8"
+          className={cn(
+            "bg-[var(--bam-cream-deep)] px-4 py-16 text-center sm:px-6 md:py-24 lg:px-8",
+            BAMBOO_EMBLEM_CLEAR,
+          )}
         >
           {f["bamboo.collections.listing-eyebrow"] ? (
             <p

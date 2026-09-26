@@ -97,59 +97,47 @@ export function BambooProductActions({
       ) : (
         <>
           {canAddMore && (
-            <>
+            <div className="flex flex-col gap-2">
               {/* Quantity Selector */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex flex-col gap-1.5">
-                  <div className="border-border flex items-center gap-1 rounded-lg border">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-11"
-                      onClick={() => handleDecrement()}
-                      disabled={quantity <= 1}
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="size-4" aria-hidden="true" />
-                    </Button>
-                    <span
-                      className="text-foreground w-10 text-center text-base font-semibold"
-                      aria-live="polite"
-                      aria-atomic="true"
-                    >
-                      {quantity}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-11"
-                      onClick={() => handleIncrement()}
-                      disabled={quantity >= remainingStock}
-                      aria-label="Increase quantity"
-                      aria-describedby={
-                        isInventoryTracked
-                          ? "bamboo-actions-stock-msg"
-                          : undefined
-                      }
-                    >
-                      <Plus className="size-4" aria-hidden="true" />
-                    </Button>
-                  </div>
-                  {isInventoryTracked && !product.allowBackorders && (
-                    <span
-                      id="bamboo-actions-stock-msg"
-                      className="text-muted-foreground text-sm"
-                    >
-                      {remainingStock > 1
-                        ? `${remainingStock} available`
-                        : "Last one!"}
-                    </span>
-                  )}
+                <div className="border-border flex h-12 items-center gap-1 rounded-lg border">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-11"
+                    onClick={() => handleDecrement()}
+                    disabled={quantity <= 1}
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="size-4" aria-hidden="true" />
+                  </Button>
+                  <span
+                    className="text-foreground w-10 text-center text-base font-semibold"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-11"
+                    onClick={() => handleIncrement()}
+                    disabled={quantity >= remainingStock}
+                    aria-label="Increase quantity"
+                    aria-describedby={
+                      isInventoryTracked
+                        ? "bamboo-actions-stock-msg"
+                        : undefined
+                    }
+                  >
+                    <Plus className="size-4" aria-hidden="true" />
+                  </Button>
                 </div>
                 <Button
                   size="lg"
                   onClick={handleAddToCart}
-                  className="flex-1 gap-2 rounded-full hover:bg-[var(--bam-forest-deep)] sm:flex-none"
+                  className="h-12 gap-2 rounded-full hover:bg-[var(--bam-forest-deep)]"
                 >
                   {justAdded ? (
                     <>
@@ -168,6 +156,16 @@ export function BambooProductActions({
                   {justAdded ? `${product.name} added to cart` : ""}
                 </div>
               </div>
+              {isInventoryTracked && !product.allowBackorders && (
+                <span
+                  id="bamboo-actions-stock-msg"
+                  className="text-muted-foreground text-sm"
+                >
+                  {remainingStock > 1
+                    ? `${remainingStock} available`
+                    : "Last one!"}
+                </span>
+              )}
               {product.trackInventory &&
                 product.allowBackorders &&
                 (product.inventoryQty ?? 0) === 0 && (
@@ -175,7 +173,7 @@ export function BambooProductActions({
                     Backordered — ships when available
                   </p>
                 )}
-            </>
+            </div>
           )}
 
           {!canAddMore && inStock && (

@@ -6,6 +6,8 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
 
+import { BAMBOO_TOP_MARKER } from "./bamboo-emblem-clearance";
+
 type Props = {
   /** Uppercase gold kicker above the headline. Omit for no eyebrow. */
   eyebrow?: string;
@@ -124,6 +126,7 @@ export function BambooPageHero({
       {...sectionAttrs}
       className={cn(
         "bg-[var(--bam-cream-deep)]",
+        BAMBOO_TOP_MARKER,
         hasBg && "relative isolate overflow-hidden",
         className,
       )}

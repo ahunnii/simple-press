@@ -7,21 +7,28 @@ import { FadeIn } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type NoiseAboutTeaserProps = {
-  heading?: string;
+  /** Small label above the heading; blank hides it. */
+  overline: string;
+  heading: string;
   body?: TiptapJSON | null;
-  image?: string;
-  buttonText?: string;
-  buttonLink?: string;
+  /** Blank shows the striped monogram panel. */
+  image: string;
+  buttonText: string;
+  buttonLink: string;
+  /** Initials painted on the striped panel when there's no image. */
+  monogram: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 };
 
 export function NoiseAboutTeaser({
+  overline,
   heading,
   body,
   image,
   buttonText,
   buttonLink,
+  monogram,
   sectionAttrs,
 }: NoiseAboutTeaserProps) {
   return (
@@ -31,11 +38,12 @@ export function NoiseAboutTeaser({
         <div
           className="border-foreground relative order-2 overflow-hidden border md:order-1"
           style={{ aspectRatio: "4/5", background: "var(--vn-steel)" }}
+          {...fieldAttr("noise.homepage-about-image")}
         >
           {image ? (
             <Image
               src={image}
-              alt={heading ?? "The Art of Noise"}
+              alt={heading}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -55,7 +63,7 @@ export function NoiseAboutTeaser({
                   opacity: 0.12,
                 }}
               >
-                VN
+                {monogram}
               </p>
             </div>
           )}
@@ -63,12 +71,15 @@ export function NoiseAboutTeaser({
 
         {/* Text side */}
         <div className="order-1 md:order-2">
-          <p
-            className="mb-6 font-mono text-[9.5px] tracking-[.28em] uppercase"
-            style={{ color: "var(--vn-steel)" }}
-          >
-            Our Story
-          </p>
+          {overline ? (
+            <p
+              className="mb-6 font-mono text-[9.5px] tracking-[.28em] uppercase"
+              style={{ color: "var(--vn-steel)" }}
+              {...fieldAttr("noise.homepage-about-overline")}
+            >
+              {overline}
+            </p>
+          ) : null}
           <h2
             className="font-serif leading-tight tracking-tight italic"
             style={{
@@ -78,7 +89,7 @@ export function NoiseAboutTeaser({
             }}
             {...fieldAttr("noise.homepage-about-heading")}
           >
-            {heading ?? "The Art of Noise"}
+            {heading}
           </h2>
 
           <div
@@ -88,7 +99,11 @@ export function NoiseAboutTeaser({
               color: "var(--vn-ink-soft)",
               lineHeight: 1.85,
             }}
+            {...fieldAttr("noise.homepage-about-body")}
           >
+            {/* A saved-but-empty doc (e.g. one blank paragraph) is still a
+                doc, so it renders an empty body — the fallback paragraph only
+                shows when the field was never saved. */}
             {body ? (
               <TiptapRenderer
                 content={body}
@@ -104,7 +119,7 @@ export function NoiseAboutTeaser({
           </div>
 
           <Link
-            href={buttonLink ?? "/about"}
+            href={buttonLink}
             className="mt-8 inline-block font-mono uppercase transition-opacity hover:opacity-60"
             style={{
               fontSize: "11px",
@@ -115,7 +130,7 @@ export function NoiseAboutTeaser({
             }}
           >
             <span {...fieldAttr("noise.homepage-about-button-text")}>
-              {buttonText ?? "Our Story"}
+              {buttonText}
             </span>{" "}
             →
           </Link>

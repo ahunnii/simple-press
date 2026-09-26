@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   getAmountUntilFreeShipping,
@@ -13,6 +14,7 @@ import {
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
 
+import { resolveNoiseCartCopy } from "./noise-cart-copy";
 import { NoiseCartItem } from "./noise-cart-item";
 import { NoiseCartSummary } from "./noise-cart-summary";
 
@@ -23,13 +25,14 @@ type Props = {
     shippingFlatRate: number | null;
     freeShippingThreshold: number | null;
     offersInStorePickup: boolean;
-    siteContent: { primaryColor: string | null } | null;
+    siteContent: { primaryColor: string | null; customFields?: unknown } | null;
   };
 };
 
 export function NoiseCartContents({ business }: Props) {
   const { items, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
+  const copy = resolveNoiseCartCopy(business.siteContent?.customFields);
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
   const hasFreeBar =
@@ -44,6 +47,7 @@ export function NoiseCartContents({ business }: Props) {
         <section
           className="border-foreground flex flex-col items-center justify-center border-b-2 px-7 py-32 text-center"
           style={{ background: "var(--vn-paper)" }}
+          {...sectionGroupAttr("global", "cart")}
         >
           <FadeIn direction="up" className="flex flex-col items-center gap-6">
             <div
@@ -62,22 +66,31 @@ export function NoiseCartContents({ business }: Props) {
                   fontSize: "clamp(2.5rem, 5vw, 4rem)",
                   letterSpacing: "-0.02em",
                 }}
+                {...fieldAttr("noise.global.cart-empty-heading")}
               >
-                The bag is empty.
+                {copy.emptyHeading}
               </h1>
-              <p
-                className="mx-auto mt-3 max-w-xs font-sans text-sm"
-                style={{ color: "var(--vn-steel-mist)" }}
-              >
-                Browse the collection and add pieces you love.
-              </p>
+              {copy.emptyBody ? (
+                <p
+                  className="mx-auto mt-3 max-w-xs font-sans text-sm"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                  {...fieldAttr("noise.global.cart-empty-body")}
+                >
+                  {copy.emptyBody}
+                </p>
+              ) : null}
             </div>
-            <Link
-              href="/shop"
-              className="vn-stamp vn-stamp-solid mt-2 text-[10.5px]"
-            >
-              Shop the Collection →
-            </Link>
+            {copy.emptyButtonText ? (
+              <Link
+                href={copy.emptyButtonLink}
+                className="vn-stamp vn-stamp-solid mt-2 text-[10.5px]"
+              >
+                <span {...fieldAttr("noise.global.cart-empty-button-text")}>
+                  {copy.emptyButtonText}
+                </span>{" "}
+                →
+              </Link>
+            ) : null}
           </FadeIn>
         </section>
       </PageTransition>
@@ -90,14 +103,18 @@ export function NoiseCartContents({ business }: Props) {
       <section
         className="border-foreground/15 border-b px-6 pt-16 pb-12 text-center"
         style={{ background: "var(--vn-paper)" }}
+        {...sectionGroupAttr("global", "cart")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "880px" }}>
-          <p
-            className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            Your Bag
-          </p>
+          {copy.label ? (
+            <p
+              className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
+              style={{ color: "var(--vn-steel-mist)" }}
+              {...fieldAttr("noise.global.cart-label")}
+            >
+              {copy.label}
+            </p>
+          ) : null}
           <h1
             className="font-serif leading-none tracking-tight italic"
             style={{
@@ -166,7 +183,7 @@ export function NoiseCartContents({ business }: Props) {
               className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              Garment
+              Item
             </span>
             <span
               className="text-right font-mono text-[9.5px] tracking-[0.22em] uppercase"
@@ -219,7 +236,10 @@ export function NoiseCartContents({ business }: Props) {
         {/* Sticky summary */}
         <div className="px-7 py-8 lg:px-6">
           <div className="sticky top-24">
-            <NoiseCartSummary shippingConfig={shippingConfig} />
+            <NoiseCartSummary
+              shippingConfig={shippingConfig}
+              notes={copy.notes}
+            />
           </div>
         </div>
       </div>

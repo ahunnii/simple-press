@@ -1,18 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
-import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
-import { resolveFields } from "../index";
+import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
+import { nonBlank } from "../shared/noise-non-blank";
+import {
+  hasNoiseSocialLinks,
+  NoiseSocialLinks,
+} from "../shared/noise-social-links";
 
 export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
@@ -27,13 +28,19 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const g = resolveFields(customFields, [
-    "noise.global.location-tag",
-    "noise.global.footer-tagline",
-  ]);
-  const locationTag = g["noise.global.location-tag"] ?? "";
+
+  const locationTag = resolveNoiseLocationTag(business, customFields);
+
+  // Tagline: Content → Branding → Footer tagline wins; else the legacy
+  // `noise.global.footer-tagline` field (retired 2026-09-25, a read-only
+  // fallback — never written or cleared from here); else hidden.
   const footerTagline =
-    g["noise.global.footer-tagline"] ?? "Independent goods, made with care.";
+    nonBlank(business?.siteContent?.footerText) ??
+    nonBlank(
+      getRawCustomFieldString(customFields, "noise.global.footer-tagline"),
+    );
+
+  const socialLinks = business?.siteContent?.socialLinks;
 
   const QUICK_LINKS = [
     { href: "/about", label: "About Us" },
@@ -44,16 +51,6 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
     { href: "/contact", label: "Contact" },
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop All" }] : []),
   ] as const;
-
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-      }
-    | undefined;
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
@@ -126,7 +123,6 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                           color: "var(--vn-steel-mist)",
                           fontWeight: 500,
                         }}
-                        {...fieldAttr("noise.global.location-tag")}
                       >
                         {locationTag}
                       </div>
@@ -144,70 +140,14 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     color: "var(--vn-steel-mist)",
                     maxWidth: "280px",
                   }}
-                  {...fieldAttr("noise.global.footer-tagline")}
                 >
                   {footerTagline}
                 </p>
               )}
 
               {/* Social icons */}
-              {(socialLinks?.instagram ??
-                socialLinks?.facebook ??
-                socialLinks?.twitter ??
-                socialLinks?.tiktok ??
-                socialLinks?.youtube) && (
-                <div className="flex gap-4">
-                  {socialLinks?.instagram && (
-                    <a
-                      href={socialLinks.instagram}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="Instagram"
-                    >
-                      <InstagramIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.facebook && (
-                    <a
-                      href={socialLinks.facebook}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="Facebook"
-                    >
-                      <FacebookIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.twitter && (
-                    <a
-                      href={socialLinks.twitter}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="X / Twitter"
-                    >
-                      <TwitterLogoIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.tiktok && (
-                    <a
-                      href={socialLinks.tiktok}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="TikTok"
-                    >
-                      <TikTokIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.youtube && (
-                    <a
-                      href={socialLinks.youtube}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="YouTube"
-                    >
-                      <YouTubeIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                </div>
+              {hasNoiseSocialLinks(socialLinks) && (
+                <NoiseSocialLinks socialLinks={socialLinks} />
               )}
             </div>
 
@@ -233,7 +173,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 ...(isEnabled("collections")
                   ? [{ href: "/collections", label: "Collections" }]
                   : []),
-                { href: "/shop?sort_by=new", label: "New arrivals" },
+                { href: "/shop?sort_by=newest", label: "New arrivals" },
               ]}
             />
 
@@ -245,7 +185,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 
             {/* ── Col 4: Contact info ── */}
             <div>
-              {(address ?? email ?? phone) && (
+              {(!!address || !!email || !!phone) && (
                 <>
                   <h2
                     className="mb-5 font-mono"
@@ -278,7 +218,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 </div>
               )}
 
-              {(email ?? phone) && (
+              {(!!email || !!phone) && (
                 <div>
                   <p
                     className="mb-0.5 font-sans font-semibold"

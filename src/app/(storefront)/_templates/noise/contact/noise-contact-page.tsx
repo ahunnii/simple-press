@@ -30,28 +30,29 @@ export function NoiseContactPage({
     10,
   );
 
-  const f = resolveFields(customFields as Record<string, string> | undefined, [
+  const f = resolveFields(customFields, [
+    "noise.contact.overline",
     "noise.contact.header",
     "noise.contact.subheader",
     "noise.contact-image",
     "noise.contact-faq-title",
     "noise.contact-faq-subtitle",
+    "noise.contact.form-success-heading",
+    "noise.contact.form-success-body",
   ]);
 
   const email = business.supportEmail;
   const phone = business.phoneNumber;
   const address = business.businessAddress;
 
-  const contactHeader = f["noise.contact.header"] ?? "Contact";
-  const contactSubheader =
-    f["noise.contact.subheader"] ??
-    "We read every message. For order questions, returns, or anything thoughtful you'd like to share — drop us a line below or write directly. We respond within one business day, Monday through Friday.";
+  const contactOverline = f["noise.contact.overline"] ?? "";
+  const contactHeader = f["noise.contact.header"] ?? "";
+  const contactSubheader = f["noise.contact.subheader"] ?? "";
   const contactImage = f["noise.contact-image"] ?? "";
-  const faqTitle =
-    f["noise.contact-faq-title"] ?? "Frequently asked questions.";
-  const faqSubtitle =
-    f["noise.contact-faq-subtitle"] ??
-    "Can't find what you're looking for? Send us a message.";
+  const faqTitle = f["noise.contact-faq-title"] ?? "";
+  const faqSubtitle = f["noise.contact-faq-subtitle"] ?? "";
+  const successHeading = f["noise.contact.form-success-heading"] ?? "";
+  const successBody = f["noise.contact.form-success-body"] ?? "";
 
   return (
     <PageTransition>
@@ -61,9 +62,14 @@ export function NoiseContactPage({
         {...sectionGroupAttr("contact", "info")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "880px" }}>
-          <p className="mb-5 font-mono text-[10px] tracking-[0.28em] text-(--vn-steel-mist) uppercase">
-            Contact Us
-          </p>
+          {contactOverline ? (
+            <p
+              className="mb-5 font-mono text-[10px] tracking-[0.28em] text-(--vn-steel-mist) uppercase"
+              {...fieldAttr("noise.contact.overline")}
+            >
+              {contactOverline}
+            </p>
+          ) : null}
           <h1
             className="font-serif leading-none tracking-tight italic"
             style={{
@@ -82,12 +88,12 @@ export function NoiseContactPage({
           </p>
 
           {/* ── Info-block cards (only rendered when data is present) ── */}
-          {(address ?? email ?? phone) && (
+          {(!!address || !!email || !!phone) && (
             <div className="mb-0 grid grid-cols-1 gap-6 border-0 text-left sm:grid-cols-2">
               {address && (
                 <NoiseContactInfoBlock title="Studio" lines={[address]} />
               )}
-              {(email ?? phone) && (
+              {(!!email || !!phone) && (
                 <NoiseContactInfoBlock
                   title="Reach Us"
                   lines={[...(email ? [email] : []), ...(phone ? [phone] : [])]}
@@ -109,6 +115,8 @@ export function NoiseContactPage({
             <FadeIn
               className="border-foreground relative order-2 hidden overflow-hidden border md:order-1 md:block"
               style={{ aspectRatio: "4/5" }}
+              {...sectionGroupAttr("contact", "info")}
+              {...fieldAttr("noise.contact-image")}
             >
               <Image
                 src={contactImage}
@@ -119,13 +127,19 @@ export function NoiseContactPage({
               />
             </FadeIn>
             <FadeIn className="order-1 flex flex-col justify-center md:order-2">
-              <NoiseContactForm />
+              <NoiseContactForm
+                successHeading={successHeading}
+                successBody={successBody}
+              />
             </FadeIn>
           </div>
         ) : (
           <div className="border-foreground/15 mx-auto max-w-[880px] px-7 pt-16 pb-20">
             <FadeIn>
-              <NoiseContactForm />
+              <NoiseContactForm
+                successHeading={successHeading}
+                successBody={successBody}
+              />
             </FadeIn>
           </div>
         )}

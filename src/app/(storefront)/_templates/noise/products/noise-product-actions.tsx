@@ -5,16 +5,34 @@ import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
+import { nonBlank } from "../shared/noise-non-blank";
 import { NoiseVariantSelector } from "./noise-variant-selector";
+
+export type NoiseProductActionsCopy = {
+  /** `noise.product.*` field values, resolved by `NoiseProductPage`. */
+  comingSoonHeading: string;
+  /** Blank hides the line. */
+  comingSoonBody: string;
+  soldOutText: string;
+  /** Blank falls back to `NotifyMeForm`'s own line. */
+  soldOutMessage: string;
+};
+
+type NoiseProductActionsProps = {
+  product: DefaultProductPageTemplateProps["product"];
+  copy: NoiseProductActionsCopy;
+};
 
 export function NoiseProductActions({
   product,
-}: DefaultProductPageTemplateProps) {
+  copy,
+}: NoiseProductActionsProps) {
   const {
     inStock,
     variantOptions,
@@ -101,12 +119,20 @@ export function NoiseProductActions({
             background: "var(--vn-bone)",
           }}
         >
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase">
-            Coming Soon
+          <p
+            className="font-mono text-[10px] tracking-[0.2em] uppercase"
+            {...fieldAttr("noise.product.coming-soon-heading")}
+          >
+            {copy.comingSoonHeading}
           </p>
-          <p className="text-muted-foreground mt-1 font-sans text-sm">
-            This piece isn&apos;t available yet. Check back soon.
-          </p>
+          {copy.comingSoonBody ? (
+            <p
+              className="text-muted-foreground mt-1 font-sans text-sm"
+              {...fieldAttr("noise.product.coming-soon-body")}
+            >
+              {copy.comingSoonBody}
+            </p>
+          ) : null}
         </div>
       ) : hasVariants ? (
         <NoiseVariantSelector
@@ -126,11 +152,13 @@ export function NoiseProductActions({
               border: "1.5px solid var(--vn-ink)",
             }}
           >
-            Sold Out
+            <span {...fieldAttr("noise.product.sold-out-text")}>
+              {copy.soldOutText}
+            </span>
           </button>
           <NotifyMeForm
             productId={product.id}
-            message="Get notified when it's back in stock."
+            message={nonBlank(copy.soldOutMessage)}
             messageClassName="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--vn-steel)]"
             inputClassName="rounded-none border-[var(--vn-ink)] font-sans"
             buttonClassName="rounded-none font-mono text-[11px] tracking-[0.24em] uppercase"

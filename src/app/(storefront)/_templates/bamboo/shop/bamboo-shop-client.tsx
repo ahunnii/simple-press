@@ -54,7 +54,12 @@ export function BambooShopClient({ products }: Props) {
   }, []);
 
   return (
-    <div className="mt-10">
+    // No top margin here: the caller (`shop/bamboo-shop-page.tsx`) now
+    // renders this directly inside its own `py-12 md:py-16` cream section
+    // (added with the top-shelf split, 2026-09-25), which already supplies
+    // the ~48px/64px gap below the shelf's bottom edge. A `mt-*` here would
+    // stack on top of that padding instead of replacing it.
+    <div>
       {/* Controls */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">

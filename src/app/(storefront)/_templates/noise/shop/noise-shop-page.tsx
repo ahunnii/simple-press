@@ -14,11 +14,13 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
     | undefined;
 
   const f = resolveFields(customFields, [
+    "noise.shop-listing-overline",
     "noise.shop-listing-heading",
     "noise.shop-listing-intro",
   ]);
 
-  const shopHeading = f["noise.shop-listing-heading"] ?? "The Collection";
+  const shopOverline = f["noise.shop-listing-overline"] ?? "";
+  const shopHeading = f["noise.shop-listing-heading"] ?? "";
   const shopIntro = f["noise.shop-listing-intro"] ?? "";
   const products = (business.products ?? []) as unknown as Product[];
 
@@ -59,12 +61,15 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
         {...sectionGroupAttr("shop", "listing")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1440px" }}>
-          <p
-            className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            Shop
-          </p>
+          {shopOverline ? (
+            <p
+              className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
+              style={{ color: "var(--vn-steel-mist)" }}
+              {...fieldAttr("noise.shop-listing-overline")}
+            >
+              {shopOverline}
+            </p>
+          ) : null}
           <h1
             className="font-serif leading-none tracking-tight italic"
             style={{

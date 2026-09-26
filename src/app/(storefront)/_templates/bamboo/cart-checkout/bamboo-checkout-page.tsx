@@ -5,6 +5,7 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { Button } from "~/components/ui/button";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
+import { BambooPageShelf } from "../shared/bamboo-page-shelf";
 import { BambooCheckoutUnavailable } from "./bamboo-checkout-unavailable";
 import { CheckoutForm } from "./bamboo-checkout-form";
 
@@ -31,25 +32,26 @@ export async function BambooCheckoutPage({
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
+      <BambooPageShelf>
         <FadeIn direction="up">
-          <div className="mb-8">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="text-muted-foreground mb-4 gap-1"
-            >
-              <Link href="/cart">
-                <ArrowLeft className="size-4" aria-hidden="true" />
-                Back to Cart
-              </Link>
-            </Button>
-            <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
-              Checkout
-            </h1>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="text-muted-foreground mb-4 gap-1"
+          >
+            <Link href="/cart">
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Back to Cart
+            </Link>
+          </Button>
+          <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+            Checkout
+          </h1>
         </FadeIn>
+      </BambooPageShelf>
+
+      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
         <FadeIn direction="up" delay={0.1}>
           <CheckoutForm
             business={business}

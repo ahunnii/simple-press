@@ -4,11 +4,14 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { FadeIn } from "~/components/page-animations";
 
 type NoiseGuaranteeSectionProps = {
-  overline?: string;
-  heading?: string;
-  headingAccent?: string;
+  /** Small label above the heading; blank hides it. */
+  overline: string;
+  heading: string;
+  headingAccent: string;
   body?: string;
   image?: string;
+  /** Initials painted on the striped panel when there's no image. */
+  monogram: string;
   /** Short label shown as a corner stamp on the image. Leave undefined to hide. */
   stamp?: string;
   /** Spread on root <section> for preview overlay hotspot. */
@@ -22,6 +25,7 @@ export function NoiseGuaranteeSection({
   body,
   image,
   stamp,
+  monogram,
   sectionAttrs,
 }: NoiseGuaranteeSectionProps) {
   return (
@@ -29,12 +33,15 @@ export function NoiseGuaranteeSection({
       <FadeIn className="mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-24">
         {/* Text side */}
         <div>
-          <p
-            className="mb-6 font-mono text-[9.5px] tracking-[.28em] uppercase"
-            style={{ color: "var(--vn-steel)" }}
-          >
-            {overline ?? "Our Guarantee"}
-          </p>
+          {overline ? (
+            <p
+              className="mb-6 font-mono text-[9.5px] tracking-[.28em] uppercase"
+              style={{ color: "var(--vn-steel)" }}
+              {...fieldAttr("noise.homepage-guarantee-overline")}
+            >
+              {overline}
+            </p>
+          ) : null}
           <h2
             className="font-serif leading-tight tracking-tight italic"
             style={{
@@ -44,40 +51,42 @@ export function NoiseGuaranteeSection({
             }}
           >
             <span {...fieldAttr("noise.homepage-guarantee-heading")}>
-              {heading ?? "Thoughtfully made."}
+              {heading}
             </span>
             <br />
             <span
               style={{ color: "var(--vn-steel)" }}
               {...fieldAttr("noise.homepage-guarantee-headingAccent")}
             >
-              {headingAccent ?? "Responsibly backed."}
+              {headingAccent}
             </span>
           </h2>
 
-          <p
-            className="mt-7 max-w-[46ch] font-sans leading-relaxed"
-            style={{
-              fontSize: "15px",
-              color: "var(--vn-ink-soft)",
-              lineHeight: 1.85,
-            }}
-            {...fieldAttr("noise.homepage-guarantee-quote")}
-          >
-            {body ??
-              "If a piece doesn't fit, doesn't last, or doesn't feel right — we'll make it right. Free returns within 60 days, and a lifetime repair program for every garment we make."}
-          </p>
+          {body && (
+            <p
+              className="mt-7 max-w-[46ch] font-sans leading-relaxed"
+              style={{
+                fontSize: "15px",
+                color: "var(--vn-ink-soft)",
+                lineHeight: 1.85,
+              }}
+              {...fieldAttr("noise.homepage-guarantee-quote")}
+            >
+              {body}
+            </p>
+          )}
         </div>
 
         {/* Image side */}
         <div
           className="border-foreground relative overflow-hidden border"
           style={{ aspectRatio: "5/4", background: "var(--vn-steel)" }}
+          {...fieldAttr("noise.homepage-guarantee-image")}
         >
           {image ? (
             <Image
               src={image}
-              alt="Guarantee"
+              alt=""
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -98,7 +107,7 @@ export function NoiseGuaranteeSection({
                   opacity: 0.12,
                 }}
               >
-                VN
+                {monogram}
               </p>
             </div>
           )}

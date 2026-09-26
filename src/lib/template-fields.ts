@@ -413,6 +413,12 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "vii.homepage.testimonial-author",
   "vii.homepage.instagram-feed-url",
   "vii.homepage.instagram-embed",
+  // noise, retired 2026-09-25 — the wordmark's small location label now comes
+  // from Settings → General (address city) via
+  // `_templates/noise/shared/noise-location-tag.ts`, and the footer tagline
+  // now comes from Content → Branding (`SiteContent.footerText`).
+  "noise.global.location-tag",
+  "noise.global.footer-tagline",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

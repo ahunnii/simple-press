@@ -5,8 +5,9 @@ import Link from "next/link";
 
 import type { SortOption } from "~/hooks/use-shop-filters";
 import type { Product } from "~/types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
-import { useShopFilters } from "~/hooks/use-shop-filters";
+import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import {
   FadeIn,
   StaggerContainer,
@@ -92,7 +93,10 @@ export function NoiseCollectionClient({
             className="mb-6 block font-mono text-[10px] tracking-[0.18em] uppercase transition-opacity hover:opacity-60"
             style={{ color: "var(--vn-steel-mist)" }}
           >
-            ← {backLabel}
+            ←{" "}
+            <span {...fieldAttr("noise.collections.detail-back-label")}>
+              {backLabel}
+            </span>
           </Link>
 
           <FilterGroup title="Availability">
@@ -177,10 +181,11 @@ export function NoiseCollectionClient({
                   fontFamily: "inherit",
                 }}
               >
-                <option value="featured">Featured</option>
-                <option value="price-ascending">Price · Low to High</option>
-                <option value="price-descending">Price · High to Low</option>
-                <option value="title-ascending">Name A–Z</option>
+                {Object.entries(SORT_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </label>
           </div>
