@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Quote } from "lucide-react";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
@@ -30,24 +31,41 @@ export async function HappyBambooTestimonialsPage({
 
   const f = resolveFields(business?.siteContent?.customFields, [
     "happy-bamboo.homepage-testimonials-heading",
+    "happy-bamboo.testimonials-page-small-label",
+    "happy-bamboo.testimonials-page-intro",
   ]);
   const heading =
     f["happy-bamboo.homepage-testimonials-heading"] ?? "What Consumers Say";
+  const smallLabel = f["happy-bamboo.testimonials-page-small-label"] ?? "";
+  const intro = f["happy-bamboo.testimonials-page-intro"] ?? "";
 
   return (
     <PageTransition>
-      <section className="bg-secondary py-16 md:py-24">
+      <section
+        className="bg-secondary py-16 md:py-24"
+        {...sectionGroupAttr("testimonials", "page")}
+      >
         <div className="container mx-auto px-4 text-center">
           <FadeIn>
-            <span className="text-primary text-sm font-semibold tracking-wider uppercase">
-              Testimonials
-            </span>
+            {!!smallLabel && (
+              <span
+                className="text-primary text-sm font-semibold tracking-wider uppercase"
+                {...fieldAttr("happy-bamboo.testimonials-page-small-label")}
+              >
+                {smallLabel}
+              </span>
+            )}
             <h1 className="mt-2 font-serif text-4xl font-bold md:text-5xl">
               {heading}
             </h1>
-            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed">
-              Kind words from people who shop with us
-            </p>
+            {!!intro && (
+              <p
+                className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed"
+                {...fieldAttr("happy-bamboo.testimonials-page-intro")}
+              >
+                {intro}
+              </p>
+            )}
           </FadeIn>
         </div>
       </section>

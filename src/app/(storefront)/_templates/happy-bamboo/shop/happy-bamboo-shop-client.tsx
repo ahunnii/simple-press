@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Leaf, Search, X } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getEffectivePrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
@@ -114,10 +114,17 @@ export function HappyBambooShopClient({
         <FadeIn className="mx-auto max-w-3xl text-center">
           <Badge className="mb-4">Eco-Friendly Products</Badge>
           <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-            {shopHeading}
+            <span {...fieldAttr("happy-bamboo.shop-listing-heading")}>
+              {shopHeading}
+            </span>
           </h1>
           {shopIntro && (
-            <p className="text-muted-foreground text-lg">{shopIntro}</p>
+            <p
+              className="text-muted-foreground text-lg"
+              {...fieldAttr("happy-bamboo.shop-listing-intro")}
+            >
+              {shopIntro}
+            </p>
           )}
         </FadeIn>
 

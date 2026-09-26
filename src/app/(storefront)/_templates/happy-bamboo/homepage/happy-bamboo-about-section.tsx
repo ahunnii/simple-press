@@ -11,6 +11,7 @@ import { FadeIn } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {
+  aboutSmallLabel?: string | null;
   aboutVideoUrl?: string | null;
   aboutVideoPosterUrl?: string | null;
   aboutImageUrl?: string | null;
@@ -25,13 +26,14 @@ type Props = {
 const DEFAULT_ABOUT_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4";
 
 export function HappyBambooAboutSection({
+  aboutSmallLabel,
   aboutDescription,
   aboutVideoUrl,
   aboutVideoPosterUrl,
   aboutImageUrl,
-  aboutHeading = "Our Vision for a Sustainable Future",
-  aboutButtonText = "Read More About Us",
-  aboutButtonLink = "/about",
+  aboutHeading,
+  aboutButtonText,
+  aboutButtonLink,
   sectionAttrs,
 }: Props) {
   return (
@@ -42,6 +44,9 @@ export function HappyBambooAboutSection({
             direction="left"
             className="relative flex flex-col gap-4 md:gap-5"
           >
+            {/* `||` (not `??`) is intentional below: a cleared image field
+                resolves to `""` (see `resolveTemplateFields`), never
+                `null`/`undefined`, so `??` would never trigger the fallback. */}
             <div className="relative aspect-video overflow-hidden rounded-2xl">
               {!!aboutVideoUrl ? (
                 <video
@@ -50,13 +55,15 @@ export function HappyBambooAboutSection({
                   muted
                   playsInline
                   controls
-                  poster={aboutVideoPosterUrl ?? "/placeholder.svg"}
+                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                  poster={aboutVideoPosterUrl || "/placeholder.svg"}
                 >
                   Your browser does not support the video tag.
                 </video>
               ) : (
                 <Image
-                  src={aboutVideoPosterUrl!}
+                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                  src={aboutVideoPosterUrl || "/placeholder.svg"}
                   alt="About video poster"
                   fill
                   className="object-cover"
@@ -66,7 +73,8 @@ export function HappyBambooAboutSection({
 
             <div className="border-border bg-muted/30 relative aspect-4/3 w-full overflow-hidden rounded-2xl border shadow-sm ring-1 ring-black/5">
               <Image
-                src={aboutImageUrl!}
+                // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                src={aboutImageUrl || "/placeholder.svg"}
                 alt={
                   aboutHeading
                     ? `${aboutHeading} — additional image`
@@ -88,9 +96,14 @@ export function HappyBambooAboutSection({
           </FadeIn>
 
           <FadeIn direction="right" className="space-y-6">
-            <span className="text-primary text-sm font-semibold tracking-wider uppercase">
-              About Us
-            </span>
+            {!!aboutSmallLabel && (
+              <span
+                className="text-primary text-sm font-semibold tracking-wider uppercase"
+                {...fieldAttr("happy-bamboo.homepage-about-small-label")}
+              >
+                {aboutSmallLabel}
+              </span>
+            )}
             <h2
               className="font-serif text-4xl leading-tight font-bold md:text-5xl"
               {...fieldAttr("happy-bamboo.homepage-about-heading")}
@@ -114,11 +127,12 @@ export function HappyBambooAboutSection({
               </div>
             )}
             <Button variant="outline" className="group" asChild>
-              <Link
-                href={aboutButtonLink ?? "/about"}
-                {...fieldAttr("happy-bamboo.homepage-about-button-text")}
-              >
-                {aboutButtonText}
+              <Link href={aboutButtonLink ?? "/about"}>
+                <span
+                  {...fieldAttr("happy-bamboo.homepage-about-button-text")}
+                >
+                  {aboutButtonText}
+                </span>
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>

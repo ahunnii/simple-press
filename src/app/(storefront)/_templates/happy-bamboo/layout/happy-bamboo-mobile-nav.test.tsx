@@ -240,11 +240,23 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
     });
     fireEvent.click(getToggle());
 
-    expect(screen.getByLabelText("Instagram")).toBeInTheDocument();
-    expect(screen.getByLabelText("YouTube")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Facebook")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Twitter")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("TikTok")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Instagram \(opens in new tab\)/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /YouTube \(opens in new tab\)/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Facebook \(opens in new tab\)/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", {
+        name: /X \/ Twitter \(opens in new tab\)/,
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /TikTok \(opens in new tab\)/ }),
+    ).not.toBeInTheDocument();
   });
 
   it("inerts #main-content and locks page scroll while open, and restores both on close", async () => {

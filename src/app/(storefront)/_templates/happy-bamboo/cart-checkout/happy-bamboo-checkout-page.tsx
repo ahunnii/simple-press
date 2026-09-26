@@ -10,28 +10,21 @@ import { Button } from "~/components/ui/button";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { HappyBambooCheckoutForm } from "./happy-bamboo-checkout-form";
+import { HappyBambooCheckoutUnavailable } from "./happy-bamboo-checkout-unavailable";
 
 export async function HappyBambooCheckoutPage({
   business,
   merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   //   const { items } = useCart();
-  // Check if Stripe is connected
+  // `checkout/page.tsx` already renders `t.CheckoutUnavailable` (no props)
+  // outside development; this guard also covers development and hands the
+  // already-loaded `customFields` down so the screen doesn't re-fetch.
   if (!business.isStripeConnected) {
     return (
-      <PageTransition>
-        <div className="flex min-h-[50vh] flex-1 items-center justify-center bg-[#1A1A1A] p-4">
-          <div className="max-w-md text-center">
-            <h1 className="mb-4 text-2xl font-bold text-white">
-              Checkout Unavailable
-            </h1>
-            <p className="text-white/70">
-              This store hasn&apos;t set up payment processing yet. Please
-              contact the store owner.
-            </p>
-          </div>
-        </div>
-      </PageTransition>
+      <HappyBambooCheckoutUnavailable
+        customFields={business.siteContent?.customFields}
+      />
     );
   }
 

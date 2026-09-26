@@ -6,6 +6,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -19,7 +20,17 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 const IS_IN_PRODUCTION = process.env.NODE_ENV === "production";
 
-export function HappyBambooContactForm() {
+type HappyBambooContactFormProps = {
+  successHeading: string;
+  successBody: string;
+  successAgainLabel: string;
+};
+
+export function HappyBambooContactForm({
+  successHeading,
+  successBody,
+  successAgainLabel,
+}: HappyBambooContactFormProps) {
   const {
     form,
     messageLength,
@@ -51,7 +62,11 @@ export function HappyBambooContactForm() {
 
   if (isSuccess) {
     return (
-      <Card className="border-primary/20 bg-primary/5" role="status">
+      <Card
+        {...sectionGroupAttr("contact", "form")}
+        className="border-primary/20 bg-primary/5"
+        role="status"
+      >
         <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
           <div className="bg-primary/10 flex size-16 items-center justify-center rounded-full">
             <CheckCircle2 className="text-primary size-8" aria-hidden="true" />
@@ -59,16 +74,21 @@ export function HappyBambooContactForm() {
           <h2
             ref={successHeadingRef}
             tabIndex={-1}
-            className="text-foreground font-heading text-xl font-semibold"
+            {...fieldAttr("happy-bamboo.contact.form-success-heading")}
+            className="text-foreground font-heading text-xl font-semibold outline-none"
           >
-            Message Sent
+            {successHeading}
           </h2>
-          <p className="text-muted-foreground">
-            Thank you for reaching out. We will get back to you within 1-2
-            business days.
+          <p
+            {...fieldAttr("happy-bamboo.contact.form-success-body")}
+            className="text-muted-foreground"
+          >
+            {successBody}
           </p>
           <Button variant="outline" onClick={resetSuccess} className="mt-2">
-            Send Another Message
+            <span {...fieldAttr("happy-bamboo.contact.form-success-again-label")}>
+              {successAgainLabel}
+            </span>
           </Button>
         </CardContent>
       </Card>
@@ -80,6 +100,7 @@ export function HappyBambooContactForm() {
       <form
         ref={formRef}
         onSubmit={form.handleSubmit(onSubmit)}
+        {...sectionGroupAttr("contact", "form")}
         className="flex w-full flex-col gap-5"
       >
         {error && (

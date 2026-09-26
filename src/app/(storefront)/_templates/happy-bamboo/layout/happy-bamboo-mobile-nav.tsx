@@ -5,18 +5,16 @@ import type { Ref, RefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TwitterLogoIcon } from "@radix-ui/react-icons";
 import { ArrowRight } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { isActiveNavLink } from "~/lib/nav-utils";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { cn } from "~/lib/utils";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
+import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
 
 /** Fallback nav when the owner hasn't configured `navigationItems` — shared
  *  with the header's desktop nav so the two lists can't drift apart. */
@@ -28,7 +26,6 @@ export const NAV_LINKS = [
 ] as const;
 
 const MENU_ID = "hb-mobile-menu";
-const DEFAULT_TAGLINE = "Tree-free products · Crafted with care";
 /** Matches Tailwind's `md` breakpoint — the menu has no business being open
  *  once the desktop nav is showing. */
 const DESKTOP_QUERY = "(min-width: 768px)";
@@ -41,14 +38,6 @@ const ROW_MAX_STEPS = 8;
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
-
-type SocialLinks = {
-  instagram?: string;
-  facebook?: string;
-  twitter?: string;
-  tiktok?: string;
-  youtube?: string;
-};
 
 // ─── Toggle ────────────────────────────────────────────────────────────────
 
@@ -265,50 +254,15 @@ function MobileMenuPanel({
     (business?.siteContent?.navigationItems as
       | { label: string; href: string }[]
       | undefined) ?? NAV_LINKS;
-  const socialLinks = business?.siteContent?.socialLinks as
-    | SocialLinks
-    | undefined;
-  // Blank owner text falls back too, not just a missing field.
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
+  // A blank owner tagline renders nothing — no hardcoded copy stand-in.
   const footerText = business?.siteContent?.footerText;
-  const tagline = footerText?.trim() ? footerText : DEFAULT_TAGLINE;
+  const tagline = footerText?.trim() ? footerText.trim() : "";
 
   const showAccount = isEnabled("customerAccounts") && !isPending;
   const isAdmin =
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
-
-  const socials = [
-    {
-      key: "facebook",
-      label: "Facebook",
-      href: socialLinks?.facebook,
-      Icon: FacebookIcon,
-    },
-    {
-      key: "instagram",
-      label: "Instagram",
-      href: socialLinks?.instagram,
-      Icon: InstagramIcon,
-    },
-    {
-      key: "twitter",
-      label: "Twitter",
-      href: socialLinks?.twitter,
-      Icon: TwitterLogoIcon,
-    },
-    {
-      key: "tiktok",
-      label: "TikTok",
-      href: socialLinks?.tiktok,
-      Icon: TikTokIcon,
-    },
-    {
-      key: "youtube",
-      label: "YouTube",
-      href: socialLinks?.youtube,
-      Icon: YouTubeIcon,
-    },
-  ].filter((social) => !!social.href);
 
   // Clip-path unfold from the bar's edge; rows inherit the open/closed
   // labels and fade up on a capped stagger. Reduced motion → every
@@ -485,30 +439,26 @@ function MobileMenuPanel({
           variants={rowVariants}
           className="mt-auto pt-12"
         >
-          {socials.length > 0 && (
-            <div className="mb-5 flex flex-wrap gap-3">
-              {socials.map(({ key, label, href, Icon }) => (
-                <a
-                  key={key}
-                  href={href}
-                  aria-label={label}
-                  className={cn(
-                    "inline-flex size-11 items-center justify-center rounded-full border border-[var(--hb-brand)]/60 text-[var(--hb-brand)] transition-colors hover:border-[var(--hb-brand)] hover:bg-[var(--hb-brand)]/8",
-                    focusRing,
-                  )}
-                >
-                  <Icon className="size-5" aria-hidden="true" />
-                </a>
-              ))}
-            </div>
-          )}
+          <HappyBambooSocialIcons
+            socialLinks={socialLinks}
+            label="Follow us on social media"
+            className="mb-5 flex-wrap gap-3"
+            linkClassName={cn(
+              "size-11 rounded-full border border-[var(--hb-brand)]/60 text-[var(--hb-brand)] hover:border-[var(--hb-brand)] hover:bg-[var(--hb-brand)]/8",
+              focusRing,
+            )}
+            iconClassName="size-5"
+            onLinkClick={onClose}
+          />
           <span
             aria-hidden="true"
             className="mb-3 block h-px w-10 bg-[var(--hb-gold)]"
           />
-          <p className="text-sm leading-relaxed text-[var(--hb-brand-muted)]">
-            {tagline}
-          </p>
+          {tagline && (
+            <p className="text-sm leading-relaxed text-[var(--hb-brand-muted)]">
+              {tagline}
+            </p>
+          )}
         </motion.div>
       </div>
     </motion.div>

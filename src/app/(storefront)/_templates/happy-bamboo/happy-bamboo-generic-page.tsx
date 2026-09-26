@@ -31,7 +31,7 @@ export function HappyBambooGenericPage({ page }: Props) {
         <FadeIn direction="up">
           <TiptapRenderer
             content={page.content as TiptapJSON}
-            className="prose prose-lg prose-invert prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-primary prose-pre:bg-background prose-pre:border prose-pre:border-border max-w-none"
+            className="prose prose-lg prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-primary prose-pre:bg-background prose-pre:border prose-pre:border-border max-w-none"
           />
           <PlatformPolicyNotice slug={page.slug} />
         </FadeIn>

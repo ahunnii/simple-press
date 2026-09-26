@@ -419,6 +419,11 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   // now comes from Content → Branding (`SiteContent.footerText`).
   "noise.global.location-tag",
   "noise.global.footer-tagline",
+  // happy-bamboo, retired 2026-09-26 — orphan saved keys that were never
+  // declared as fields; hidden from the admin's custom pairs and preserved
+  // on save.
+  "happy-bamboo.about.mission-rich-content",
+  "happy-bamboo.homepage.about-body",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

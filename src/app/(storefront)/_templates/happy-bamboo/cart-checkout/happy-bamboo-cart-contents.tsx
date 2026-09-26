@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -27,9 +28,11 @@ type Props = {
       primaryColor: string | null;
     } | null;
   };
+  /** Line under "Your cart is empty". Blank hides it. */
+  cartEmptyText: string;
 };
 
-export function HappyBambooCartContents({ business }: Props) {
+export function HappyBambooCartContents({ business, cartEmptyText }: Props) {
   const { items } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
 
@@ -44,10 +47,14 @@ export function HappyBambooCartContents({ business }: Props) {
             <h1 className="text-foreground font-heading mt-6 text-2xl font-bold">
               Your cart is empty
             </h1>
-            <p className="text-muted-foreground mx-auto mt-2 max-w-md">
-              Looks like you have not added anything to your cart yet. Explore
-              our collection of premium products.
-            </p>
+            {!!cartEmptyText && (
+              <p
+                className="text-muted-foreground mx-auto mt-2 max-w-md"
+                {...fieldAttr("happy-bamboo.global.cart-empty-text")}
+              >
+                {cartEmptyText}
+              </p>
+            )}
             <Button className="mt-8" size="lg" asChild>
               <Link href="/shop">Continue Shopping</Link>
             </Button>
@@ -71,7 +78,9 @@ export function HappyBambooCartContents({ business }: Props) {
             staggerDelay={0.08}
           >
             {items.map((item) => (
-              <StaggerItem key={item.productId}>
+              <StaggerItem
+                key={`${item.productId}-${item.variantId ?? "base"}`}
+              >
                 <HappyBambooCartItem item={item} />
               </StaggerItem>
             ))}

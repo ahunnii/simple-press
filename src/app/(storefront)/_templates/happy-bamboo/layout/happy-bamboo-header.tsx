@@ -19,6 +19,7 @@ import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
+import { resolveFields } from "..";
 import { HappyBambooCartDrawer } from "../cart-checkout/happy-bamboo-cart-drawer";
 import {
   HappyBambooMenuToggle,
@@ -66,6 +67,13 @@ export function HappyBambooHeader({
       label: string;
       href: string;
     }[]) ?? NAV_LINKS;
+
+  const f = resolveFields(business.siteContent?.customFields, [
+    "happy-bamboo.global.cart-label",
+    "happy-bamboo.global.cart-empty-text",
+  ]);
+  const cartLabel = f["happy-bamboo.global.cart-label"] ?? "";
+  const cartEmptyText = f["happy-bamboo.global.cart-empty-text"] ?? "";
 
   // Desktop only — below md, "Log in" lives in the mobile panel so the bar
   // stays logo · wishlist · cart · menu.
@@ -239,6 +247,8 @@ export function HappyBambooHeader({
       </header>
       <HappyBambooCartDrawer
         shippingConfig={shippingConfigFromBusiness(business)}
+        cartLabel={cartLabel}
+        cartEmptyText={cartEmptyText}
       />
       <span
         role="status"

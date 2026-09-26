@@ -8,23 +8,23 @@ import { Button } from "~/components/ui/button";
 import { FadeIn, ScaleIn } from "~/components/page-animations";
 
 type Props = {
-  heading?: string;
-  body?: string;
-  primaryButtonText?: string;
-  primaryButtonLink?: string;
-  secondaryButtonText?: string;
-  secondaryButtonLink?: string;
+  heading: string;
+  body: string;
+  primaryButtonText: string;
+  primaryButtonLink: string;
+  secondaryButtonText: string;
+  secondaryButtonLink: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 };
 
 export function HappyBambooCtaSection({
-  heading = "Ready to Make the Switch?",
-  body = "Join a growing community of customers who love what we make. Experience premium quality while making a positive impact.",
-  primaryButtonText = "Shop Now",
-  primaryButtonLink = "/shop",
-  secondaryButtonText = "Learn More",
-  secondaryButtonLink = "/about",
+  heading,
+  body,
+  primaryButtonText,
+  primaryButtonLink,
+  secondaryButtonText,
+  secondaryButtonLink,
   sectionAttrs,
 }: Props) {
   return (
@@ -67,7 +67,9 @@ export function HappyBambooCtaSection({
               asChild
             >
               <Link href={primaryButtonLink}>
-                {primaryButtonText}
+                <span {...fieldAttr("happy-bamboo.homepage-cta-primary-button-text")}>
+                  {primaryButtonText}
+                </span>
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
@@ -78,7 +80,15 @@ export function HappyBambooCtaSection({
                 className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent text-lg"
                 asChild
               >
-                <Link href={secondaryButtonLink}>{secondaryButtonText}</Link>
+                <Link href={secondaryButtonLink}>
+                  <span
+                    {...fieldAttr(
+                      "happy-bamboo.homepage-cta-secondary-button-text",
+                    )}
+                  >
+                    {secondaryButtonText}
+                  </span>
+                </Link>
               </Button>
             )}
           </div>

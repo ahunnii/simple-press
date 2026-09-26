@@ -1,15 +1,7 @@
-import type { Metadata } from "next";
-
 import type { DefaultProductsPageTemplateProps } from "../../types";
 
 import { resolveFields } from "../index";
 import { HappyBambooShopClient } from "./happy-bamboo-shop-client";
-
-export const metadata: Metadata = {
-  title: "Shop",
-  description:
-    "Browse our collection of premium bamboo toilet paper and household paper products. Septic-safe, hypoallergenic, and sustainably crafted.",
-};
 
 export function HappyBambooShopPage({
   business,

@@ -174,6 +174,7 @@ import { HappyBambooBlogPage } from "./happy-bamboo/blog/happy-bamboo-blog-page"
 import { HappyBambooBlogPostPage } from "./happy-bamboo/blog/happy-bamboo-blog-post-page";
 import { HappyBambooCartPage } from "./happy-bamboo/cart-checkout/happy-bamboo-cart-page";
 import { HappyBambooCheckoutPage } from "./happy-bamboo/cart-checkout/happy-bamboo-checkout-page";
+import { HappyBambooCheckoutUnavailable } from "./happy-bamboo/cart-checkout/happy-bamboo-checkout-unavailable";
 import { HappyBambooOrderSuccessPage } from "./happy-bamboo/cart-checkout/happy-bamboo-order-success-page";
 import { HappyBambooCollectionPage } from "./happy-bamboo/collections/happy-bamboo-collection-page";
 import { HappyBambooCollectionsPage } from "./happy-bamboo/collections/happy-bamboo-collections-page";
@@ -647,6 +648,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: HappyBambooBlogPostPage,
     CartPage: HappyBambooCartPage,
     CheckoutPage: HappyBambooCheckoutPage,
+    CheckoutUnavailable: HappyBambooCheckoutUnavailable,
     OrderSuccessPage: HappyBambooOrderSuccessPage,
     CollectionPage: HappyBambooCollectionPage,
     CollectionsPage: HappyBambooCollectionsPage,

@@ -16,7 +16,7 @@ import {
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -145,10 +145,15 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
                 Stories & Insights
               </Badge>
               <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-                {pageTitle}
+                <span {...fieldAttr("happy-bamboo.blog-listing-title")}>
+                  {pageTitle}
+                </span>
               </h1>
               {pageIntro && (
-                <p className="text-muted-foreground mx-auto max-w-xl text-lg leading-relaxed">
+                <p
+                  className="text-muted-foreground mx-auto max-w-xl text-lg leading-relaxed"
+                  {...fieldAttr("happy-bamboo.blog-listing-intro")}
+                >
                   {pageIntro}
                 </p>
               )}

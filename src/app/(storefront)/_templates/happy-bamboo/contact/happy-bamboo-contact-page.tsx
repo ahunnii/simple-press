@@ -1,11 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Mail, MapPin, MessageSquare, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, MessageSquare, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { telHref } from "~/lib/tel-href";
 import { resolveFaqPickerItems } from "~/lib/template-fields";
 import {
   Accordion,
@@ -24,11 +26,15 @@ export function HappyBambooContactPage({
   faqItems,
 }: DefaultContactPageTemplateProps) {
   const f = resolveFields(business?.siteContent?.customFields, [
+    "happy-bamboo.contact.small-label",
     "happy-bamboo.contact.header",
     "happy-bamboo.contact.subheader",
     "happy-bamboo.contact-image",
     "happy-bamboo.contact-faq-title",
     "happy-bamboo.contact-faq-subtitle",
+    "happy-bamboo.contact.form-success-heading",
+    "happy-bamboo.contact.form-success-body",
+    "happy-bamboo.contact.form-success-again-label",
   ]);
 
   const customFields = business?.siteContent?.customFields as
@@ -42,8 +48,17 @@ export function HappyBambooContactPage({
   const supportEmail = business?.supportEmail;
   const phone = business?.phoneNumber;
   const locationValue = business?.businessAddress;
+  const hoursRows = formatBusinessHours(
+    parseBusinessHours(business?.businessHours),
+  );
 
-  const contactInfo = [
+  const contactInfo: {
+    icon: typeof Mail;
+    label: string;
+    value?: string;
+    href?: string;
+    lines?: { label: string; value: string }[];
+  }[] = [
     ...(supportEmail
       ? [
           {
@@ -70,9 +85,12 @@ export function HappyBambooContactPage({
             icon: Phone,
             label: "Phone",
             value: phone,
-            href: `tel:${phone.replace(/\D/g, "")}`,
+            href: telHref(phone),
           },
         ]
+      : []),
+    ...(hoursRows.length > 0
+      ? [{ icon: Clock, label: "Hours", lines: hoursRows }]
       : []),
   ];
 
@@ -86,10 +104,15 @@ export function HappyBambooContactPage({
           <div className="mx-auto flex w-full flex-col items-center justify-center gap-12 md:flex-row">
             {/* Text content */}
             <FadeIn className="flex flex-1 flex-col justify-center text-left">
-              <Badge className="mb-4 w-fit">
-                <MessageSquare className="mr-1 h-3 w-3" />
-                Get in Touch
-              </Badge>
+              {!!f["happy-bamboo.contact.small-label"] && (
+                <Badge
+                  className="mb-4 w-fit"
+                  {...fieldAttr("happy-bamboo.contact.small-label")}
+                >
+                  <MessageSquare className="mr-1 h-3 w-3" />
+                  {f["happy-bamboo.contact.small-label"]}
+                </Badge>
+              )}
               <h1
                 className="mb-4 font-serif text-4xl font-bold md:text-5xl"
                 {...fieldAttr("happy-bamboo.contact.header")}
@@ -110,7 +133,8 @@ export function HappyBambooContactPage({
             >
               <div className="aspect-video w-full max-w-md overflow-hidden rounded-xl border border-white/20 bg-white/20 shadow-md">
                 <img
-                  src={f["happy-bamboo.contact-image"]}
+                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- cleared field resolves to "", not null/undefined
+                  src={f["happy-bamboo.contact-image"] || "/placeholder.svg"}
                   alt="Bamboo contact illustration"
                   className="h-full w-full object-cover object-center"
                   loading="lazy"
@@ -125,7 +149,13 @@ export function HappyBambooContactPage({
         <FadeIn direction="up">
           <div className="mx-auto flex w-full flex-col gap-12 lg:flex-row">
             {/* Form */}
-            <HappyBambooContactForm />
+            <HappyBambooContactForm
+              successHeading={f["happy-bamboo.contact.form-success-heading"] ?? ""}
+              successBody={f["happy-bamboo.contact.form-success-body"] ?? ""}
+              successAgainLabel={
+                f["happy-bamboo.contact.form-success-again-label"] ?? ""
+              }
+            />
 
             {/* Contact Info Sidebar */}
             <div className="w-full shrink-0 lg:w-80">
@@ -135,11 +165,27 @@ export function HappyBambooContactPage({
                     <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full">
                       <info.icon className="text-primary size-5" />
                     </div>
-                    <div>
-                      <h3 className="text-foreground text-sm font-semibold">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-foreground text-sm font-semibold">
                         {info.label}
-                      </h3>
-                      {info.href ? (
+                      </h2>
+                      {info.lines ? (
+                        <dl className="mt-1 space-y-0.5">
+                          {info.lines.map((line, i) => (
+                            <div
+                              key={line.label + String(i)}
+                              className="flex items-baseline justify-between gap-3 text-sm"
+                            >
+                              <dt className="text-muted-foreground">
+                                {line.label}
+                              </dt>
+                              <dd className="text-muted-foreground">
+                                {line.value}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      ) : info.href ? (
                         <a
                           href={info.href}
                           className="text-muted-foreground hover:text-primary text-sm transition-colors"

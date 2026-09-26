@@ -14,12 +14,21 @@ import type {
 } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
+import {
+  happyBambooCheckoutUnavailableData,
+  happyBambooCheckoutUnavailableFieldGroups,
+} from "./cart-checkout/unavailable-fields";
+import {
+  happyBambooProductData,
+  happyBambooProductFieldGroups,
+} from "./products";
+
 const homepageHeroData: TemplateField[] = [
   {
     key: "happy-bamboo.homepage.hero-image",
-    label: "Homepage Hero Image",
+    label: "Background photo",
     description:
-      "This image is used as the main focal point of the hero section.",
+      "Full-width photo behind the hero text. Leave blank to use a plain brand background.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -27,8 +36,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage.hero-welcome",
-    label: "Homepage Hero Welcome",
-    description: "Welcome text for the hero section",
+    label: "Headline, first line",
+    description: "First line of the two-line hero headline.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -37,8 +46,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage.hero-title",
-    label: "Homepage Hero Title",
-    description: "Title for the hero section",
+    label: "Headline, second line",
+    description:
+      "Second line of the hero headline, shown in the accent colour.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -47,8 +57,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage.hero-tagline",
-    label: "Homepage Hero Tagline",
-    description: "Tagline for the hero section, above the title.",
+    label: "Tagline",
+    description: "Line with a leaf icon, shown below the headline.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -56,42 +66,56 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage.hero-description",
-    label: "Homepage Hero Description",
-    description: "Description for the hero section",
+    label: "Intro text",
+    description: "Paragraph below the tagline, introducing your products.",
     type: "textarea",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue:
       "Luxuriously soft, tree-free happy-bamboo paper products crafted in Detroit. Because what you bring into your home should be as thoughtful as the life you build in it.",
+    placeholder: "Luxuriously soft, tree-free paper products crafted...",
   },
   {
     key: "happy-bamboo.homepage.hero-primary-button-text",
-    label: "Hero Primary Button Text",
-    description: "Primary CTA button text (e.g. Shop Now)",
+    label: "Button text",
+    description: "Label for the main hero button, e.g. Shop Now.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "Shop Now",
+    placeholder: "Shop Now",
   },
   {
     key: "happy-bamboo.homepage.hero-primary-button-link",
-    label: "Hero Primary Button Link",
-    description: "Primary CTA button URL",
+    label: "Button link",
+    description: "Where the main hero button goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "/shop",
+    placeholder: "/shop",
   },
 ];
 
 const homepageAboutTeaserData: TemplateField[] = [
   {
+    key: "happy-bamboo.homepage-about-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "About Us",
+    placeholder: "About Us",
+  },
+  {
     key: "happy-bamboo.homepage-about-heading",
-    label: "About Section Heading",
-    description: "Heading for the about block",
+    label: "Heading",
+    description: "Heading for the story block on the homepage.",
     type: "text",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -101,8 +125,8 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-about-body",
-    label: "About Teaser Body",
-    description: "Body text for the about teaser",
+    label: "Body text",
+    description: "Paragraph telling your story, below the heading.",
     type: "richtext",
     page: "homepage",
     gridColumn: "col-span-full",
@@ -110,8 +134,9 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-about-video",
-    label: "About Section Video",
-    description: "Video shown in the homepage about section",
+    label: "Video",
+    description:
+      "Optional video shown at the top of this block. Leave blank to show the poster image instead.",
     type: "video",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -119,8 +144,9 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-about-video-poster",
-    label: "About Section Video Poster",
-    description: "Poster image for the about section video",
+    label: "Poster image",
+    description:
+      "Image shown before play, or in place of the video when none is set.",
     type: "image",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -128,8 +154,8 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-about-image",
-    label: "About Section Image",
-    description: "Image for the about section, appears below the video",
+    label: "Second image",
+    description: "Second photo, shown below the video or poster image.",
     type: "image",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -137,8 +163,8 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-about-button-text",
-    label: "About Button Text",
-    description: "Learn More button text",
+    label: "Button text",
+    description: "Label for the link to your full About page.",
     type: "text",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -147,8 +173,8 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-about-button-link",
-    label: "About Button Link",
-    description: "Link for the about button",
+    label: "Button link",
+    description: "Where the button goes, e.g. /about.",
     type: "url",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -159,28 +185,40 @@ const homepageAboutTeaserData: TemplateField[] = [
 
 const homepageFeaturedData: TemplateField[] = [
   {
+    key: "happy-bamboo.homepage-featured-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.featured",
+    defaultValue: "Happy Bamboo",
+    placeholder: "Happy Bamboo",
+  },
+  {
     key: "happy-bamboo.homepage-featured-title",
-    label: "Featured Section Title",
-    description: "Title for the featured products section",
+    label: "Heading",
+    description: "Heading above the featured products grid.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
     defaultValue: "Our Curated Collection",
+    placeholder: "Our Curated Collection",
   },
   {
     key: "happy-bamboo.homepage-featured-description",
-    label: "Featured Section Description",
-    description: "Description below the featured section title",
+    label: "Intro text",
+    description: "Short paragraph below the heading, above the product grid.",
     type: "textarea",
     page: "homepage",
     group: "homepage.featured",
     defaultValue:
       "Every product is 100% happy-bamboo, tree-free, and crafted to the highest standard. No compromises.",
+    placeholder: "Every product is 100% bamboo, tree-free...",
   },
   {
     key: "happy-bamboo.homepage-featured-button-text",
-    label: "View All Button Text",
-    description: "Text for the View All Products button",
+    label: "Button text",
+    description: "Label for the link to the full shop, below the product grid.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -188,8 +226,8 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-featured-button-link",
-    label: "View All Button Link",
-    description: "Link for the View All Products button",
+    label: "Button link",
+    description: "Where the button goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.featured",
@@ -199,9 +237,20 @@ const homepageFeaturedData: TemplateField[] = [
 
 const homepageBenefitsData: TemplateField[] = [
   {
+    key: "happy-bamboo.homepage-benefits-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.benefits",
+    gridColumn: "col-span-full",
+    defaultValue: "Happy Bamboo",
+    placeholder: "Happy Bamboo",
+  },
+  {
     key: "happy-bamboo.homepage-benefits-heading",
-    label: "Benefits Section Heading",
-    description: "Main heading for the Why Choose Bamboo Products section",
+    label: "Heading",
+    description: "Heading above the benefit cards.",
     type: "text",
     page: "homepage",
     group: "homepage.benefits",
@@ -211,8 +260,8 @@ const homepageBenefitsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-benefits-intro",
-    label: "Benefits Section Intro",
-    description: "Intro paragraph below the heading",
+    label: "Intro text",
+    description: "Paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
     group: "homepage.benefits",
@@ -223,8 +272,8 @@ const homepageBenefitsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-benefits-closing",
-    label: "Benefits Section Closing",
-    description: "Closing paragraph below the benefits cards",
+    label: "Closing text",
+    description: "Paragraph below the benefit cards. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
     group: "homepage.benefits",
@@ -235,31 +284,35 @@ const homepageBenefitsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-benefits-list",
-    label: "Benefits Cards",
+    label: "Benefit cards",
     description:
-      "Cards for the Why Choose Bamboo Products section (icon, title, and description per item).",
+      "Cards shown below the intro text (icon, title, and description per card). Leave empty to show the default cards.",
     type: "list",
     page: "homepage",
     group: "homepage.benefits",
     gridColumn: "col-span-full",
+    itemLabel: "benefit",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "Supporting text.",
+        optional: true,
       },
     ],
     minItems: 0,
@@ -270,9 +323,20 @@ const homepageBenefitsData: TemplateField[] = [
 /// ABOUT PAGE
 const aboutHeroData: TemplateField[] = [
   {
+    key: "happy-bamboo.about-hero-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "About Us",
+    placeholder: "About Us",
+  },
+  {
     key: "happy-bamboo.about-hero-heading",
-    label: "About Hero Heading",
-    description: "Main heading for the about page",
+    label: "Heading",
+    description: "Main heading at the top of the about page.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -281,32 +345,53 @@ const aboutHeroData: TemplateField[] = [
     gridColumn: "col-span-full",
   },
   {
+    key: "happy-bamboo.about-hero-mission-heading",
+    label: "Mission heading",
+    description: "Subheading above the mission statement.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Mission",
+    placeholder: "Our Mission",
+  },
+  {
     key: "happy-bamboo.about-hero-mission",
-    label: "About Hero Mission",
-    description: "Mission statement for the about page",
+    label: "Mission statement",
+    description: "Paragraph under the \"Our Mission\" subheading.",
     type: "textarea",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
-    placeholder: "To offer eco-friendly, chemical and hypoallergenic free...",
     defaultValue: "To offer eco-friendly, chemical and hypoallergenic free...",
   },
   {
+    key: "happy-bamboo.about-hero-vision-heading",
+    label: "Vision heading",
+    description: "Subheading above the vision statement.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Vision",
+    placeholder: "Our Vision",
+  },
+  {
     key: "happy-bamboo.about-hero-vision",
-    label: "About Hero Vision",
-    description: "Vision statement for the about page",
+    label: "Vision statement",
+    description: "Paragraph under the \"Our Vision\" subheading.",
     type: "textarea",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
-    placeholder: "A world where everyday personal care choices protect...",
     defaultValue: "A world where everyday personal care choices protect...",
   },
 
   {
     key: "happy-bamboo.about-hero-bamboo",
-    label: "About Hero Bamboo",
-    description: "Bamboo statement for the about page",
+    label: "Closing statement",
+    description:
+      "Last paragraph in the hero text column, below the mission and vision statements.",
     type: "textarea",
     page: "about",
     group: "about.hero",
@@ -316,8 +401,8 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-hero-image",
-    label: "About Hero Image",
-    description: "Image for the about page",
+    label: "Photo",
+    description: "Portrait photo shown beside the hero text.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -329,8 +414,9 @@ const aboutHeroData: TemplateField[] = [
 const aboutMissionData: TemplateField[] = [
   {
     key: "happy-bamboo.about-mission-banner",
-    label: "Mission Banner",
-    description: "Mission banner for the about page",
+    label: "Banner text",
+    description:
+      "Rich text shown in the highlighted banner below the hero. Leave blank to show default copy.",
     type: "richtext",
     page: "about",
     group: "about.mission",
@@ -341,9 +427,19 @@ const aboutMissionData: TemplateField[] = [
 
 const aboutServicesData: TemplateField[] = [
   {
+    key: "happy-bamboo.about-services-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.services",
+    defaultValue: "What We Offer",
+    placeholder: "What We Offer",
+  },
+  {
     key: "happy-bamboo.about-services-heading",
-    label: "Services Heading",
-    description: "Services heading for the about page",
+    label: "Heading",
+    description: "Heading above the service cards.",
     type: "text",
     page: "about",
     group: "about.services",
@@ -353,41 +449,47 @@ const aboutServicesData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-services-banner",
-    label: "Services Banner",
-    description: "Mission banner for the about page",
+    label: "Intro text",
+    description: "Paragraph below the heading, above the service cards.",
     type: "textarea",
     page: "about",
     group: "about.services",
     gridColumn: "col-span-full",
-    placeholder: "Join us in our mission to make everyday moments...",
+    placeholder: "We provide premium bamboo personal care products...",
     defaultValue:
       "We provide premium bamboo personal care products designed for comfort, sustainability, and your well-being.",
   },
   {
     key: "happy-bamboo.about-services-list",
-    label: "Services List",
-    description: "Services list for the about page",
+    label: "Service cards",
+    description:
+      "Cards below the intro text (icon, title, and description per card). Leave empty to show the default cards.",
     type: "list",
     page: "about",
     group: "about.services",
+    gridColumn: "col-span-full",
+    itemLabel: "service",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "Supporting text.",
+        optional: true,
       },
     ],
     minItems: 0,
@@ -397,9 +499,19 @@ const aboutServicesData: TemplateField[] = [
 
 const aboutBambooData: TemplateField[] = [
   {
+    key: "happy-bamboo.about-bamboo-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.bamboo",
+    defaultValue: "The Smart Choice",
+    placeholder: "The Smart Choice",
+  },
+  {
     key: "happy-bamboo.about-bamboo-heading",
-    label: "Bamboo Heading",
-    description: "Bamboo heading for the about page",
+    label: "Heading",
+    description: "Heading for the why-bamboo section.",
     type: "text",
     page: "about",
     group: "about.bamboo",
@@ -409,8 +521,8 @@ const aboutBambooData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-bamboo-tagline",
-    label: "Bamboo Tagline",
-    description: "Bamboo tagline for the about page",
+    label: "Subheading",
+    description: "Line below the heading.",
     type: "text",
     page: "about",
     group: "about.bamboo",
@@ -420,8 +532,8 @@ const aboutBambooData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-bamboo-description",
-    label: "Bamboo Description",
-    description: "Description line for Bamboo section",
+    label: "Intro text",
+    description: "Paragraph below the subheading, above the bamboo facts.",
     type: "textarea",
     page: "about",
     group: "about.bamboo",
@@ -432,30 +544,35 @@ const aboutBambooData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-bamboo-list",
-    label: "Bamboo Facts List",
-    description: "Bamboo list for the about page",
+    label: "Bamboo facts",
+    description:
+      "Fact cards below the intro text (icon, title, and description per card). Leave empty to show the default cards.",
     type: "list",
     page: "about",
     group: "about.bamboo",
     gridColumn: "col-span-full",
+    itemLabel: "fact",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
-        description: "Icon shown on the card",
+        description: "Icon shown on the card.",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "Supporting text.",
+        optional: true,
       },
     ],
     minItems: 0,
@@ -463,8 +580,8 @@ const aboutBambooData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-bamboo-image-1",
-    label: "Bamboo Image 1",
-    description: "Bamboo image 1 for the about page",
+    label: "Main photo",
+    description: "Larger photo above the two smaller photos.",
     type: "image",
     page: "about",
     group: "about.bamboo",
@@ -473,8 +590,8 @@ const aboutBambooData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-bamboo-image-2",
-    label: "Bamboo Image 2",
-    description: "Bamboo image 2 for the about page",
+    label: "Second photo",
+    description: "Smaller photo, top of the pair below the main photo.",
     type: "image",
     page: "about",
     group: "about.bamboo",
@@ -483,8 +600,8 @@ const aboutBambooData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-bamboo-image-3",
-    label: "Bamboo Image 3",
-    description: "Bamboo image 3 for the about page",
+    label: "Third photo",
+    description: "Smaller photo, bottom of the pair below the main photo.",
     type: "image",
     page: "about",
     group: "about.bamboo",
@@ -496,8 +613,9 @@ const aboutBambooData: TemplateField[] = [
 const aboutCTAData: TemplateField[] = [
   {
     key: "happy-bamboo.about-cta-image",
-    label: "CTA Image",
-    description: "CTA image for the about page",
+    label: "Photo",
+    description:
+      "Full-width photo banner between the Why Bamboo and Connect With Us sections.",
     type: "image",
     page: "about",
     group: "about.cta",
@@ -508,20 +626,31 @@ const aboutCTAData: TemplateField[] = [
 
 const aboutConnectWithUsData: TemplateField[] = [
   {
+    key: "happy-bamboo.about-connect-with-us-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-full",
+    defaultValue: "Stay Connected",
+    placeholder: "Stay Connected",
+  },
+  {
     key: "happy-bamboo.about-connect-with-us-heading",
-    label: "Connect With Us Heading",
-    description: "Connect with us heading for the about page",
+    label: "Heading",
+    description: "Heading above the review and social-follow cards.",
     type: "text",
     page: "about",
     group: "about.connect-with-us",
     gridColumn: "col-span-full",
     defaultValue: "Join the Happy Bamboo Community",
-    placeholder: "Share Your Feedback",
+    placeholder: "Join the Happy Bamboo Community",
   },
   {
     key: "happy-bamboo.about-connect-with-us-text",
-    label: "Connect With Us Text",
-    description: "Connect with us text for the about page",
+    label: "Intro text",
+    description: "Paragraph below the heading.",
     type: "textarea",
     page: "about",
     group: "about.connect-with-us",
@@ -532,8 +661,9 @@ const aboutConnectWithUsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-connect-with-us-qr-code",
-    label: "Connect With Us QR Code",
-    description: "Connect with us QR code for the about page",
+    label: "QR code image",
+    description:
+      "QR code shown beside the review button. Leave blank to hide it.",
     type: "image",
     page: "about",
     group: "about.connect-with-us",
@@ -542,20 +672,30 @@ const aboutConnectWithUsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-connect-with-us-google-review-link",
-    label: "Connect With Us Google Review Link",
-    description: "Connect with us Google review link for the about page",
+    label: "Google review link",
+    description: "Link to your Google review page. Leave blank to hide the review button.",
     type: "url",
     page: "about",
     group: "about.connect-with-us",
     gridColumn: "col-span-1",
-    defaultValue:
-      "https://search.google.com/local/writereview?placeid=ChIJ008r2PrRJIgRaaMPENARjUc",
-    placeholder: "https://search.google.com/local/writereview?placeid=",
+    defaultValue: "",
+    placeholder: "https://g.page/r/.../review",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-review-button-text",
+    label: "Review button text",
+    description: "Label for the button that links to your Google review page.",
+    type: "text",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-1",
+    defaultValue: "Write a Review",
+    placeholder: "Write a Review",
   },
   {
     key: "happy-bamboo.about-connect-with-us-google-review-header",
-    label: "Connect With Us Google Review Header",
-    description: "Connect with us Google review text for the about page",
+    label: "Review card heading",
+    description: "Heading on the review card, above the Write a Review button.",
     type: "text",
     page: "about",
     group: "about.connect-with-us",
@@ -565,8 +705,9 @@ const aboutConnectWithUsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-connect-with-us-google-review-text",
-    label: "Connect With Us Google Review Text",
-    description: "Connect with us Google review text for the about page",
+    label: "Review card text",
+    description:
+      "Supporting text on the review card, above the Write a Review button.",
     type: "textarea",
     page: "about",
     group: "about.connect-with-us",
@@ -577,8 +718,8 @@ const aboutConnectWithUsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-connect-with-us-social-follow-header",
-    label: "Connect With Us Social Follow Header",
-    description: "Connect with us Social follow header for the about page",
+    label: "Social card heading",
+    description: "Heading on the social-follow card.",
     type: "text",
     page: "about",
     group: "about.connect-with-us",
@@ -588,25 +729,35 @@ const aboutConnectWithUsData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.about-connect-with-us-social-follow-text",
-    label: "Connect With Us Social Follow Text",
-    description: "Connect with us Social follow text for the about page",
+    label: "Social card text",
+    description: "Supporting text on the social-follow card.",
     type: "textarea",
     page: "about",
     group: "about.connect-with-us",
     gridColumn: "col-span-1",
     defaultValue:
       "Stay connected for exclusive updates, eco-tips, behind-the-scenes content, and special offers.",
-    placeholder:
-      "Stay connected for exclusive updates, eco-tips, behind-the-scenes content, and special offers.",
+    placeholder: "Stay connected for exclusive updates, eco-tips...",
   },
 ];
 
 /// CONTACT PAGE
 const contactPageData: TemplateField[] = [
   {
+    key: "happy-bamboo.contact.small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "contact",
+    group: "contact.info",
+    gridColumn: "col-span-full",
+    defaultValue: "Get in Touch",
+    placeholder: "Get in Touch",
+  },
+  {
     key: "happy-bamboo.contact.header",
-    label: "Contact Page Header",
-    description: "Main heading for the contact page",
+    label: "Heading",
+    description: "Main heading at the top of the contact page.",
     type: "text",
     page: "contact",
     group: "contact.info",
@@ -616,8 +767,8 @@ const contactPageData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.contact.subheader",
-    label: "Contact Page Subheader",
-    description: "Subheader or intro below the heading",
+    label: "Intro text",
+    description: "Line below the heading.",
     type: "textarea",
     page: "contact",
     group: "contact.info",
@@ -629,8 +780,8 @@ const contactPageData: TemplateField[] = [
 
   {
     key: "happy-bamboo.contact-image",
-    label: "Contact Image",
-    description: "Contact image for the contact page",
+    label: "Photo",
+    description: "Photo beside the heading and intro text.",
     type: "image",
     page: "contact",
     group: "contact.info",
@@ -639,11 +790,50 @@ const contactPageData: TemplateField[] = [
   },
 ];
 
+const contactFormData: TemplateField[] = [
+  {
+    key: "happy-bamboo.contact.form-success-heading",
+    label: "Success heading",
+    description:
+      "Heading shown after someone sends the contact form, in place of the form.",
+    type: "text",
+    page: "contact",
+    group: "contact.form",
+    defaultValue: "Message sent",
+    placeholder: "Message sent",
+  },
+  {
+    key: "happy-bamboo.contact.form-success-body",
+    label: "Success message",
+    description:
+      "Line shown under the success heading after someone sends the contact form.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.form",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Thanks for reaching out. We'll get back to you soon.",
+    placeholder: "Thanks for reaching out. We'll be in touch shortly.",
+  },
+  {
+    key: "happy-bamboo.contact.form-success-again-label",
+    label: "Success button text",
+    description:
+      "Label for the button that lets a customer send another message after their first one succeeds.",
+    type: "text",
+    page: "contact",
+    group: "contact.form",
+    defaultValue: "Send another message",
+    placeholder: "Send another message",
+  },
+];
+
 const homepageTestimonialsData: TemplateField[] = [
   {
     key: "happy-bamboo.homepage-testimonials-heading",
-    label: "Testimonials Section Heading",
-    description: "Heading shown above the testimonials cards",
+    label: "Heading",
+    description:
+      "Heading above the testimonial cards, pulled from your reviews.",
     type: "text",
     page: "homepage",
     group: "homepage.testimonials",
@@ -653,11 +843,36 @@ const homepageTestimonialsData: TemplateField[] = [
   },
 ];
 
+const testimonialsPageData: TemplateField[] = [
+  {
+    key: "happy-bamboo.testimonials-page-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-1",
+    defaultValue: "Testimonials",
+    placeholder: "Testimonials",
+  },
+  {
+    key: "happy-bamboo.testimonials-page-intro",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank to hide.",
+    type: "textarea",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-full",
+    defaultValue: "Kind words from people who shop with us",
+    placeholder: "Kind words from people who shop with us",
+  },
+];
+
 const homepageCtaData: TemplateField[] = [
   {
     key: "happy-bamboo.homepage-cta-heading",
-    label: "CTA Heading",
-    description: "Main heading for the bottom call-to-action section",
+    label: "Heading",
+    description: "Heading for the closing banner at the bottom of the homepage.",
     type: "text",
     page: "homepage",
     group: "homepage.cta",
@@ -667,8 +882,8 @@ const homepageCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-cta-body",
-    label: "CTA Body Text",
-    description: "Paragraph below the CTA heading",
+    label: "Body text",
+    description: "Paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
     group: "homepage.cta",
@@ -679,8 +894,8 @@ const homepageCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-cta-primary-button-text",
-    label: "Primary Button Text",
-    description: "Text for the primary CTA button",
+    label: "Primary button text",
+    description: "Label for the main button, e.g. Shop Now.",
     type: "text",
     page: "homepage",
     group: "homepage.cta",
@@ -690,8 +905,8 @@ const homepageCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-cta-primary-button-link",
-    label: "Primary Button Link",
-    description: "URL for the primary CTA button",
+    label: "Primary button link",
+    description: "Where the main button goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.cta",
@@ -701,8 +916,8 @@ const homepageCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-cta-secondary-button-text",
-    label: "Secondary Button Text",
-    description: "Text for the secondary CTA button",
+    label: "Secondary button text",
+    description: "Label for the second button. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.cta",
@@ -712,8 +927,8 @@ const homepageCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.homepage-cta-secondary-button-link",
-    label: "Secondary Button Link",
-    description: "URL for the secondary CTA button",
+    label: "Secondary button link",
+    description: "Where the second button goes, e.g. /about.",
     type: "url",
     page: "homepage",
     group: "homepage.cta",
@@ -726,8 +941,8 @@ const homepageCtaData: TemplateField[] = [
 const blogListingData: TemplateField[] = [
   {
     key: "happy-bamboo.blog-listing-title",
-    label: "Blog Page Title",
-    description: "Main heading shown at the top of the blog listing page",
+    label: "Heading",
+    description: "Heading at the top of the blog page.",
     type: "text",
     page: "blog",
     group: "blog.listing",
@@ -737,8 +952,8 @@ const blogListingData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.blog-listing-intro",
-    label: "Blog Page Intro",
-    description: "Introductory paragraph below the blog page title",
+    label: "Intro text",
+    description: "Paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "blog",
     group: "blog.listing",
@@ -749,8 +964,8 @@ const blogListingData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.blog-listing-image",
-    label: "Blog Listing Image",
-    description: "Image shown at the top of the blog listing page",
+    label: "Photo",
+    description: "Photo beside the heading and intro text.",
     type: "image",
     page: "blog",
     group: "blog.listing",
@@ -762,8 +977,8 @@ const blogListingData: TemplateField[] = [
 const collectionsListingData: TemplateField[] = [
   {
     key: "happy-bamboo.collections-listing-heading",
-    label: "Collections Page Heading",
-    description: "Main heading shown at the top of the collections page",
+    label: "Heading",
+    description: "Heading at the top of the collections page.",
     type: "text",
     page: "collections",
     group: "collections.listing",
@@ -773,8 +988,8 @@ const collectionsListingData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.collections-listing-intro",
-    label: "Collections Page Intro",
-    description: "Intro paragraph below the collections page heading",
+    label: "Intro text",
+    description: "Paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "collections",
     group: "collections.listing",
@@ -789,9 +1004,8 @@ const collectionsListingData: TemplateField[] = [
 const collectionsCtaData: TemplateField[] = [
   {
     key: "happy-bamboo.collections-cta-heading",
-    label: "Collections CTA Heading",
-    description:
-      "Heading for the bottom call-to-action on the collections page",
+    label: "Heading",
+    description: "Heading for the closing banner on the collections page.",
     type: "text",
     page: "collections",
     group: "collections.cta",
@@ -801,9 +1015,8 @@ const collectionsCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.collections-cta-body",
-    label: "Collections CTA Body",
-    description:
-      "Paragraph for the bottom call-to-action on the collections page",
+    label: "Body text",
+    description: "Paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "collections",
     group: "collections.cta",
@@ -815,8 +1028,8 @@ const collectionsCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.collections-cta-button-text",
-    label: "Collections CTA Button Text",
-    description: "Text for the collections CTA button",
+    label: "Button text",
+    description: "Label for the button, e.g. View All Products.",
     type: "text",
     page: "collections",
     group: "collections.cta",
@@ -826,8 +1039,8 @@ const collectionsCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.collections-cta-button-link",
-    label: "Collections CTA Button Link",
-    description: "URL for the collections CTA button",
+    label: "Button link",
+    description: "Where the button goes, e.g. /shop.",
     type: "url",
     page: "collections",
     group: "collections.cta",
@@ -851,8 +1064,8 @@ const shopListingData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.shop-listing-heading",
-    label: "Shop Page Heading",
-    description: "Main heading shown at the top of the shop page",
+    label: "Heading",
+    description: "Heading at the top of the shop page.",
     type: "text",
     page: "shop",
     group: "shop.listing",
@@ -862,8 +1075,8 @@ const shopListingData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.shop-listing-intro",
-    label: "Shop Page Intro",
-    description: "Introductory paragraph below the shop page heading",
+    label: "Intro text",
+    description: "Paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "shop",
     group: "shop.listing",
@@ -878,8 +1091,8 @@ const shopListingData: TemplateField[] = [
 const contactFaqData: TemplateField[] = [
   {
     key: "happy-bamboo.contact-faq-title",
-    label: "FAQ Section Title",
-    description: "Heading shown above the frequently asked questions",
+    label: "Heading",
+    description: "Heading above the frequently asked questions.",
     type: "text",
     page: "contact",
     group: "contact.faq",
@@ -889,8 +1102,8 @@ const contactFaqData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.contact-faq-subtitle",
-    label: "FAQ Section Subtitle",
-    description: "Subtitle or intro line below the FAQ heading",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "contact",
     group: "contact.faq",
@@ -913,11 +1126,36 @@ const contactFaqData: TemplateField[] = [
   },
 ];
 
+const globalCartData: TemplateField[] = [
+  {
+    key: "happy-bamboo.global.cart-label",
+    label: "Cart panel label",
+    description:
+      "Title at the top of the cart panel that slides out from the side.",
+    type: "text",
+    page: "global",
+    group: "global.cart",
+    defaultValue: "Your cart",
+    placeholder: "Your cart",
+  },
+  {
+    key: "happy-bamboo.global.cart-empty-text",
+    label: "Empty cart message",
+    description:
+      "Line shown under \"Your cart is empty\" in the cart panel and on the full cart page. Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.cart",
+    defaultValue: "Add something you love to get started.",
+    placeholder: "Add something you love to get started.",
+  },
+];
+
 const globalAuthenticationData: TemplateField[] = [
   {
     key: "happy-bamboo.global.authentication-image",
-    label: "Authentication Image",
-    description: "Image shown in the authentication section",
+    label: "Background image",
+    description: "Image shown on the sign-in and sign-up screens.",
     type: "image",
     page: "global",
     group: "global.authentication",
@@ -927,25 +1165,31 @@ const globalAuthenticationData: TemplateField[] = [
 
   {
     key: "happy-bamboo.global.logo-size-width",
-    label: "Logo Size Width",
-    description: "Size of the logo in the authentication section",
+    label: "Logo width (px)",
+    description: "Width of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
     placeholder: "80",
+    min: 24,
+    max: 400,
+    unit: "px",
   },
   {
     key: "happy-bamboo.global.logo-size-height",
-    label: "Logo Size Height",
-    description: "Size of the logo in the authentication section",
+    label: "Logo height (px)",
+    description: "Height of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
     placeholder: "80",
+    min: 24,
+    max: 400,
+    unit: "px",
   },
 ];
 
@@ -953,8 +1197,9 @@ const globalAuthenticationData: TemplateField[] = [
 const blogPostCtaData: TemplateField[] = [
   {
     key: "happy-bamboo.blog.post-cta-heading",
-    label: "Blog post — CTA heading",
-    description: "Call-to-action box at the end of each blog post",
+    label: "Heading",
+    description:
+      "Heading in the closing banner at the end of every blog post. The banner is hidden when this and the body text are both blank.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -964,21 +1209,22 @@ const blogPostCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.blog.post-cta-body",
-    label: "Blog post — CTA body",
-    description: "Supporting text for the post footer CTA",
+    label: "Body text",
+    description:
+      "Supporting text in the closing banner. The banner is hidden when this and the heading are both blank.",
     type: "textarea",
     page: "blog",
     group: "blog.post",
     gridColumn: "col-span-full",
     defaultValue:
       "Explore tree-free, thoughtfully made essentials — crafted for everyday comfort.",
-    placeholder:
-      "Explore tree-free, thoughtfully made essentials — crafted for everyday comfort.",
+    placeholder: "Explore tree-free, thoughtfully made essentials...",
   },
   {
     key: "happy-bamboo.blog.post-cta-button-text",
-    label: "Blog post — CTA button text",
-    description: "Label for the primary button in the post footer CTA",
+    label: "Button text",
+    description:
+      "Label for the banner's button. Leave this or the link blank to hide the button.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -988,8 +1234,8 @@ const blogPostCtaData: TemplateField[] = [
   },
   {
     key: "happy-bamboo.blog.post-cta-button-link",
-    label: "Blog post — CTA button link",
-    description: "Destination URL for the post footer CTA button",
+    label: "Button link",
+    description: "Where the button goes, e.g. /shop.",
     type: "url",
     page: "blog",
     group: "blog.post",
@@ -1002,72 +1248,76 @@ const blogPostCtaData: TemplateField[] = [
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
-    title: "Hero Section",
-    description: "Main banner area at the top of homepage",
+    title: "Hero",
+    description: "Photo, headline, and button in the main banner at the top of the homepage.",
     icon: "🎯",
     columns: 2,
   },
   {
     id: "homepage.featured",
-    title: "Featured Products",
-    description: "Featured products section title and description",
+    title: "Featured products",
+    description: "Grid of products from your shop, with a heading and link below.",
     icon: "📦",
     columns: 2,
   },
   {
     id: "homepage.benefits",
-    title: "Benefits Section",
-    description: "Section heading, intro text, closing text, and benefit cards",
+    title: "Benefits",
+    description: "Heading, intro text, closing text, and benefit cards.",
     icon: "✨",
     columns: 2,
   },
   {
     id: "homepage.aboutTeaser",
-    title: "About Teaser",
-    description: "About teaser block on homepage",
+    title: "Our story",
+    description:
+      "Video or photo block introducing your business, with a link to the full About page.",
     icon: "📄",
     columns: 2,
   },
   {
     id: "about.hero",
-    title: "About Hero",
-    description: "About page hero heading and intro",
+    title: "Hero",
+    description:
+      "Heading, mission and vision statements, closing statement, and photo at the top of the about page.",
     icon: "📖",
     columns: 2,
   },
   {
     id: "about.mission",
-    title: "Our Mission",
-    description: "Mission section heading and paragraphs",
+    title: "Mission banner",
+    description: "Highlighted banner with a short mission statement below the hero.",
     icon: "🎯",
     columns: 2,
   },
 
   {
     id: "about.bamboo",
-    title: "Why Bamboo",
-    description: "Bamboo section and bamboo facts",
+    title: "Why bamboo",
+    description: "Heading, fact cards, and photo grid explaining why you use bamboo.",
     icon: "🎋",
     columns: 3,
   },
   {
     id: "about.services",
     title: "Services",
-    description: "Services section heading and paragraphs",
-    icon: "�",
+    description: "Heading, intro text, and service cards below the mission banner.",
+    icon: "🛠️",
     columns: 2,
   },
   {
     id: "about.cta",
-    title: "About CTA",
-    description: "About CTA section",
-    icon: "💬",
+    title: "Image banner",
+    description:
+      "Full-width photo banner between the Why Bamboo and Connect With Us sections.",
+    icon: "🖼️",
     columns: 2,
   },
   {
     id: "about.connect-with-us",
-    title: "Connect With Us",
-    description: "Connect with us section on the about page",
+    title: "Connect with us",
+    description:
+      "Review prompt and social-follow cards below the Why Bamboo section.",
     icon: "💬",
     columns: 2,
   },
@@ -1075,72 +1325,97 @@ const fieldGroups: TemplateFieldGroup[] = [
     id: "homepage.testimonials",
     title: "Testimonials",
     description:
-      "Section heading for the testimonials block (content is pulled from your reviews)",
+      "Heading for the testimonials block. Testimonials themselves are managed under Admin → Testimonials.",
     icon: "⭐",
     columns: 1,
   },
   {
     id: "homepage.cta",
-    title: "Call to Action",
-    description: "Bottom call-to-action banner on the homepage",
+    title: "Closing banner",
+    description: "Heading, text, and up to two buttons at the bottom of the homepage.",
     icon: "🚀",
     columns: 2,
   },
   {
     id: "blog.listing",
-    title: "Blog Page",
-    description: "Title and intro text for the blog listing page",
+    title: "Blog page",
+    description: "Heading, intro text, and photo at the top of the blog page.",
     icon: "✍️",
     columns: 1,
   },
   {
     id: "blog.post",
-    title: "Blog Post Call to Action",
-    description: "Call-to-action shown at the end of every blog article",
+    title: "End of post",
+    description: "Closing banner shown at the end of every blog post.",
     icon: "✨",
     columns: 2,
   },
   {
     id: "collections.listing",
-    title: "Collections Page",
-    description: "Heading and intro text for the collections listing page",
+    title: "Collections page",
+    description: "Heading and intro text at the top of the collections page.",
     icon: "🗂️",
     columns: 1,
   },
   {
     id: "collections.cta",
-    title: "Collections Call to Action",
-    description: "Bottom call-to-action block on the collections page",
+    title: "Closing banner",
+    description: "Bottom banner with a heading, text, and button on the collections page.",
     icon: "🛒",
     columns: 2,
   },
   {
     id: "shop.listing",
-    title: "Shop Page",
-    description: "Heading and intro text for the shop page",
+    title: "Shop page",
+    description:
+      "Sale-badge format, plus heading and intro text at the top of the shop page.",
     icon: "🏪",
     columns: 1,
   },
   {
     id: "contact.info",
-    title: "Contact Info",
-    description: "Contact page header, subheader, image, and contact details",
+    title: "Contact details",
+    description:
+      "Heading, intro text, and photo at the top of the contact page. Your email, phone, address, and hours come from Settings.",
     icon: "📧",
     columns: 2,
   },
   {
-    id: "contact.faq",
-    title: "FAQ Section",
+    id: "contact.form",
+    title: "Contact form",
     description:
-      "Heading and subtitle for the frequently asked questions section",
+      "Message shown after someone sends the contact form. Your email address comes from Settings.",
+    icon: "✉️",
+    columns: 2,
+  },
+  {
+    id: "contact.faq",
+    title: "FAQ",
+    description:
+      "Heading, intro text, and picked questions at the bottom of the contact page.",
     icon: "❓",
     columns: 1,
   },
   {
+    id: "testimonials.page",
+    title: "Testimonials page",
+    description: "Small label and intro text at the top of the testimonials page.",
+    icon: "🗣️",
+    columns: 2,
+  },
+  {
+    id: "global.cart",
+    title: "Cart",
+    description:
+      "Wording inside the cart panel that slides out from the side.",
+    icon: "🛍️",
+    columns: 2,
+  },
+  {
     id: "global.authentication",
-    title: "Authentication",
-    description: "Authentication settings for your business",
-    icon: "�",
+    title: "Sign-in screens",
+    description: "Background image and logo size on the sign-in and sign-up screens.",
+    icon: "🔐",
     columns: 2,
   },
 ];
@@ -1152,6 +1427,7 @@ export const happyBambooData = {
     ...homepageBenefitsData,
     ...homepageAboutTeaserData,
     ...homepageTestimonialsData,
+    ...testimonialsPageData,
     ...homepageCtaData,
     ...aboutHeroData,
     ...aboutMissionData,
@@ -1160,18 +1436,26 @@ export const happyBambooData = {
     ...aboutCTAData,
     ...aboutConnectWithUsData,
     ...contactPageData,
+    ...contactFormData,
     ...contactFaqData,
     ...blogListingData,
     ...blogPostCtaData,
     ...collectionsListingData,
     ...collectionsCtaData,
     ...shopListingData,
+    ...happyBambooProductData,
+    ...happyBambooCheckoutUnavailableData,
+    ...globalCartData,
     ...globalAuthenticationData,
   ],
 };
 
 export const happyBambooFieldGroups = {
-  "happy-bamboo": fieldGroups,
+  "happy-bamboo": [
+    ...fieldGroups,
+    ...happyBambooProductFieldGroups,
+    ...happyBambooCheckoutUnavailableFieldGroups,
+  ],
 };
 
 ///RESOLVERS

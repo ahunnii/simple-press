@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { TwitterLogoIcon } from "@radix-ui/react-icons";
 import { Leaf } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveSocialLinks } from "~/lib/social-links";
+import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
+import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -37,15 +36,7 @@ export async function HappyBambooFooter({
     type: "policy",
   });
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
   return (
     <footer className="border-border bg-foreground border-t">
@@ -65,54 +56,13 @@ export async function HappyBambooFooter({
               </p>
             )}
 
-            <div className="flex gap-4">
-              {socialLinks?.facebook && (
-                <a
-                  href={socialLinks.facebook}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="Facebook"
-                >
-                  <FacebookIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-
-              {socialLinks?.instagram && (
-                <a
-                  href={socialLinks.instagram}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="Instagram"
-                >
-                  <InstagramIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-              {socialLinks?.twitter && (
-                <a
-                  href={socialLinks.twitter}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="Twitter"
-                >
-                  <TwitterLogoIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-              {socialLinks?.tiktok && (
-                <a
-                  href={socialLinks.tiktok}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="TikTok"
-                >
-                  <TikTokIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-              {socialLinks?.youtube && (
-                <a
-                  href={socialLinks.youtube}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="YouTube"
-                >
-                  <YouTubeIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-            </div>
+            <HappyBambooSocialIcons
+              socialLinks={socialLinks}
+              label="Follow us on social media"
+              className="gap-4"
+              linkClassName="text-muted hover:text-[var(--hb-primary-on-dark)]"
+              iconClassName="h-5 w-5"
+            />
           </div>
 
           {/* Shop */}
@@ -142,7 +92,7 @@ export async function HappyBambooFooter({
 
               {!!phone && (
                 <a
-                  href={`tel:${phone.replace(/\D/g, "")}`}
+                  href={telHref(phone)}
                   className="transition-colors hover:text-[var(--hb-primary-on-dark)]"
                 >
                   {phone}

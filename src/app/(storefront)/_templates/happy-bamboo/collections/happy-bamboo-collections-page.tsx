@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Leaf, Package, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -50,10 +50,15 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
               Shop by Collection
             </Badge>
             <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-              {listingHeading}
+              <span {...fieldAttr("happy-bamboo.collections-listing-heading")}>
+                {listingHeading}
+              </span>
             </h1>
             {listingIntro && (
-              <p className="text-muted-foreground text-lg leading-relaxed">
+              <p
+                className="text-muted-foreground text-lg leading-relaxed"
+                {...fieldAttr("happy-bamboo.collections-listing-intro")}
+              >
                 {listingIntro}
               </p>
             )}
@@ -150,17 +155,26 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
             <FadeIn>
               <div className="mx-auto max-w-2xl text-center">
                 <h2 className="mb-4 text-2xl font-bold md:text-3xl">
-                  {ctaHeading}
+                  <span {...fieldAttr("happy-bamboo.collections-cta-heading")}>
+                    {ctaHeading}
+                  </span>
                 </h2>
                 {ctaBody && (
-                  <p className="text-muted-foreground mb-8 leading-relaxed">
+                  <p
+                    className="text-muted-foreground mb-8 leading-relaxed"
+                    {...fieldAttr("happy-bamboo.collections-cta-body")}
+                  >
                     {ctaBody}
                   </p>
                 )}
                 <div className="flex flex-wrap justify-center gap-4">
                   <Button asChild size="lg">
                     <Link href={ctaButtonLink}>
-                      {ctaButtonText}
+                      <span
+                        {...fieldAttr("happy-bamboo.collections-cta-button-text")}
+                      >
+                        {ctaButtonText}
+                      </span>
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
