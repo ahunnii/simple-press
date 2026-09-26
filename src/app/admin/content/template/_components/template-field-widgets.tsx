@@ -30,7 +30,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
+import {
+  GripVertical,
+  Info,
+  MoreHorizontal,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type {
@@ -53,6 +60,7 @@ import {
 } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -951,6 +959,26 @@ function parseFaqRowIds(raw: unknown): string[] {
   return raw.map((v) => (typeof v === "string" ? v : ""));
 }
 
+type LegacyFaqRow = { question: string; answer: string };
+
+/**
+ * The typed `{question, answer}` rows a field saved before it became a
+ * picker, or `null` for a picker value. Any object in the array counts, the
+ * same rule `parseFaqPickerIds` uses to reject a value as picker ids.
+ */
+function parseLegacyFaqRows(raw: unknown): LegacyFaqRow[] | null {
+  if (!Array.isArray(raw)) return null;
+  const rows = raw.filter(
+    (row): row is Record<string, unknown> =>
+      row !== null && typeof row === "object" && !Array.isArray(row),
+  );
+  if (rows.length === 0) return null;
+  return rows.map((row) => ({
+    question: typeof row.question === "string" ? row.question : "",
+    answer: typeof row.answer === "string" ? row.answer : "",
+  }));
+}
+
 function SortableFaqRow({
   sortId,
   index,
@@ -1080,7 +1108,10 @@ export function FaqFieldEditor({
   const { data: items } = api.faq.adminList.useQuery();
   const maxItems = field.maxItems ?? 10;
   const minItems = field.minItems ?? 0;
-  const ids = parseFaqRowIds(value);
+  // A legacy value renders as a read-only notice with no rows, so no select,
+  // move or delete can overwrite it — only "Replace with picked questions".
+  const legacyRows = parseLegacyFaqRows(value);
+  const ids = legacyRows ? [] : parseFaqRowIds(value);
   const published = (items ?? []).filter((item) => item.published);
   const byId = new Map((items ?? []).map((item) => [item.id, item]));
 
@@ -1103,10 +1134,36 @@ export function FaqFieldEditor({
   }
   const sortIds = ids.map((id, i) => id || keysRef.current[i]!);
 
+  // Latest raw value, for the replace-legacy Undo (which restores a value
+  // `ids` can't represent).
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
   const commit = (nextIds: string[], nextKeys: string[]) => {
     idsRef.current = nextIds;
     keysRef.current = nextKeys;
+    valueRef.current = nextIds;
     onChange(nextIds);
+  };
+
+  const replaceLegacy = () => {
+    const legacyValue = value;
+    const firstId = published[0]?.id;
+    commit(firstId ? [firstId] : [], firstId ? [crypto.randomUUID()] : []);
+
+    toast("Typed questions replaced", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          // Already back (double click, or restored some other way).
+          if (parseLegacyFaqRows(valueRef.current)) return;
+          idsRef.current = [];
+          keysRef.current = [];
+          valueRef.current = legacyValue;
+          onChange(legacyValue);
+        },
+      },
+    });
   };
 
   const addRow = () => {
@@ -1179,11 +1236,62 @@ export function FaqFieldEditor({
 
   const canDelete = ids.length > minItems;
 
+  if (legacyRows) {
+    const count = legacyRows.length;
+    const questions = count === 1 ? "question" : "questions";
+    return (
+      <Alert role="note">
+        <Info aria-hidden="true" />
+        <AlertTitle>
+          {count} {questions} typed in before this field used Content → FAQ
+        </AlertTitle>
+        <AlertDescription className="space-y-3">
+          <p>
+            {field.rendersLegacyRows
+              ? `Your page still shows ${count === 1 ? "it" : "them"} until you pick questions instead.`
+              : `Your page no longer shows ${count === 1 ? "it" : "them"}. It shows the first ${maxItems} published questions from Content → FAQ instead.`}{" "}
+            To keep {count === 1 ? "it" : "them"}, add{" "}
+            {count === 1 ? "it" : "them"} under{" "}
+            <a
+              href="/admin/content/faq"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Content → FAQ
+            </a>{" "}
+            first.
+          </p>
+          <ol className="border-border divide-border divide-y rounded-md border">
+            {legacyRows.map((row, i) => (
+              <li key={i} className="px-3 py-2">
+                <p className="text-foreground font-medium">
+                  {row.question.trim() || "Untitled question"}
+                </p>
+                {row.answer.trim() && (
+                  <p className="line-clamp-2">{row.answer}</p>
+                )}
+              </li>
+            ))}
+          </ol>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={replaceLegacy}
+          >
+            Replace with picked questions
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {ids.length === 0 && (
         <p className="text-muted-foreground text-sm">
-          Showing the first {maxItems} published questions.{" "}
+          {field.emptyHint ??
+            `Showing the first ${maxItems} published questions.`}{" "}
           <a
             href="/admin/content/faq"
             target="_blank"

@@ -24,8 +24,8 @@ import { SECTION_LINKS } from "~/lib/section-links";
 const videosHeaderData: TemplateField[] = [
   {
     key: "pink.videos.header-heading",
-    label: "Header Heading",
-    description: "The H1 for the videos page.",
+    label: "Heading",
+    description: "Main heading at the top of the videos page.",
     type: "text",
     page: "videos",
     group: "videos.header",
@@ -34,7 +34,7 @@ const videosHeaderData: TemplateField[] = [
   },
   {
     key: "pink.videos.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "videos",
@@ -50,7 +50,7 @@ const videosHeaderData: TemplateField[] = [
 const videosListData: TemplateField[] = [
   {
     key: "pink.videos.list-show-channel",
-    label: "Credit The Channel",
+    label: "Credit the channel",
     description:
       "Show which YouTube channel posted each video. Worth leaving on when some of these were filmed by the people who hosted you; turn it off if everything here is from your own channel.",
     type: "boolean",
@@ -61,7 +61,7 @@ const videosListData: TemplateField[] = [
   },
   {
     key: "pink.videos.list-empty-heading",
-    label: "Empty Heading",
+    label: "Empty list heading",
     description: "Shown when nothing has been published yet.",
     type: "text",
     page: "videos",
@@ -71,9 +71,9 @@ const videosListData: TemplateField[] = [
   },
   {
     key: "pink.videos.list-empty-body",
-    label: "Empty Body",
+    label: "Empty list body",
     description:
-      "One or two lines under the empty-state heading. Give people somewhere else to go while the page is bare.",
+      "One or two lines under the empty-list heading. Give people somewhere else to go while the page is bare.",
     type: "textarea",
     page: "videos",
     group: "videos.list",
@@ -83,8 +83,8 @@ const videosListData: TemplateField[] = [
   },
   {
     key: "pink.videos.list-empty-cta-label",
-    label: "Empty CTA Label",
-    description: "Leave blank to hide the empty-state button.",
+    label: "Empty list button text",
+    description: "Leave blank to hide the button.",
     type: "text",
     page: "videos",
     group: "videos.list",
@@ -93,8 +93,8 @@ const videosListData: TemplateField[] = [
   },
   {
     key: "pink.videos.list-empty-cta-link",
-    label: "Empty CTA Link",
-    description: "Where the empty-state button goes.",
+    label: "Empty list button link",
+    description: "Where the empty-list button goes.",
     type: "url",
     page: "videos",
     group: "videos.list",
@@ -108,8 +108,8 @@ const videosListData: TemplateField[] = [
 const videosCtaData: TemplateField[] = [
   {
     key: "pink.videos.cta-heading",
-    label: "CTA Heading",
-    description: "Closing call-to-action heading.",
+    label: "Heading",
+    description: "Heading in the closing panel at the bottom of the page.",
     type: "text",
     page: "videos",
     group: "videos.cta",
@@ -118,7 +118,7 @@ const videosCtaData: TemplateField[] = [
   },
   {
     key: "pink.videos.cta-body",
-    label: "CTA Body",
+    label: "Body text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "videos",
@@ -129,7 +129,7 @@ const videosCtaData: TemplateField[] = [
   },
   {
     key: "pink.videos.cta-primary-label",
-    label: "CTA Button Label",
+    label: "Button text",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "videos",
@@ -139,7 +139,7 @@ const videosCtaData: TemplateField[] = [
   },
   {
     key: "pink.videos.cta-primary-link",
-    label: "CTA Button Link",
+    label: "Button link",
     description: "Where the button goes.",
     type: "url",
     page: "videos",
@@ -160,22 +160,22 @@ export const pinkVideosData: TemplateField[] = [
 export const pinkVideosFieldGroups: TemplateFieldGroup[] = [
   {
     id: "videos.header",
-    title: "Videos Header",
-    description: "Breadcrumb, heading and intro for the videos page",
+    title: "Header",
+    description: "Heading and intro text for the videos page.",
     icon: "📺",
     columns: 2,
   },
   {
     id: "videos.list",
-    title: "Videos List",
-    description: "The channel credit and the empty-state copy",
+    title: "Videos list",
+    description: "The channel credit toggle and the empty-list copy.",
     icon: "🎬",
     columns: 2,
   },
   {
     id: "videos.cta",
-    title: "Closing Call to Action",
-    description: "Heading, body and one button",
+    title: "Closing banner",
+    description: "Heading, body and one button.",
     icon: "📣",
     columns: 2,
   },
@@ -185,8 +185,8 @@ export const pinkVideosSections: TemplateSection[] = [
   {
     id: "videos.header",
     page: "videos",
-    title: "Videos Header",
-    description: "Breadcrumb, heading and intro",
+    title: "Header",
+    description: "Heading and intro text for the videos page.",
     groupIds: ["videos.header"],
     order: 0,
     hideable: false,
@@ -194,8 +194,8 @@ export const pinkVideosSections: TemplateSection[] = [
   {
     id: "videos.list",
     page: "videos",
-    title: "Videos List",
-    description: "The grid of videos synced from your YouTube sources",
+    title: "Videos list",
+    description: "The grid of videos synced from your YouTube sources.",
     groupIds: ["videos.list"],
     order: 1,
     hideable: false,
@@ -204,8 +204,8 @@ export const pinkVideosSections: TemplateSection[] = [
   {
     id: "videos.cta",
     page: "videos",
-    title: "Closing Call to Action",
-    description: "Closing CTA panel under the grid",
+    title: "Closing banner",
+    description: "Closing panel under the grid.",
     groupIds: ["videos.cta"],
     order: 2,
     hideable: true,

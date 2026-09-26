@@ -3,7 +3,11 @@ import Link from "next/link";
 
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 
 import { PinkFactRows } from "../shared/pink-fact-rows";
 import { PinkImageFallback } from "../shared/pink-image-fallback";
@@ -125,7 +129,12 @@ export function PinkEventsSection({
               empty list, so an owner who clears every row loses the rail
               rather than getting empty strips. */}
           {facts.length > 0 && (
-            <PinkFactRows rows={facts} surface="dark" className="h-fit" />
+            <PinkFactRows
+              rows={facts}
+              surface="dark"
+              className="h-fit"
+              itemAttr={(i) => listItemAttr("pink.homepage.events-facts", i)}
+            />
           )}
         </div>
 
@@ -145,6 +154,7 @@ export function PinkEventsSection({
                       key={row?._id ?? i}
                       className={`pink-em-${i} relative overflow-hidden border-2 border-transparent transition-colors duration-300 hover:border-[var(--pink-blush)]`}
                       style={{ background: "var(--pink-ink-tint)" }}
+                      {...listItemAttr("pink.homepage.events-mosaic", i)}
                     >
                       {/* A partial photo set now gets a designed placeholder
                           tile (`PinkImageFallback`) instead of staying bare —

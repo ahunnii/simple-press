@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Field / group / section module for the `pink` template's Contact page.
@@ -17,7 +18,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 const contactHeaderData: TemplateField[] = [
   {
     key: "pink.contact.header-heading",
-    label: "Header Heading",
+    label: "Heading",
     type: "text",
     page: "contact",
     group: "contact.header",
@@ -27,7 +28,7 @@ const contactHeaderData: TemplateField[] = [
   },
   {
     key: "pink.contact.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     type: "textarea",
     page: "contact",
     group: "contact.header",
@@ -38,24 +39,28 @@ const contactHeaderData: TemplateField[] = [
   },
   {
     key: "pink.contact.header-facts",
-    label: "Header Facts",
+    label: "Facts",
     description:
-      "Label/value rows on the right of the header. Leave empty to use the defaults.",
+      "Label and value rows beside the heading. Leave empty to show a single Location row built from the city and state in Settings → General; with no city set there, no rows show. Any rows you add here replace it.",
     type: "list",
     page: "contact",
     group: "contact.header",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "fact",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "label",
         label: "Label",
+        description: "The small label on the left of the row.",
         type: "text",
         placeholder: "Response time",
       },
       {
         key: "value",
         label: "Value",
+        description: "The text on the right of the row.",
         type: "text",
         placeholder: "1–2 business days",
       },
@@ -69,7 +74,7 @@ const contactHeaderData: TemplateField[] = [
 const contactTopicsData: TemplateField[] = [
   {
     key: "pink.contact.topics-heading",
-    label: "Topics Heading",
+    label: "Heading",
     type: "text",
     page: "contact",
     group: "contact.topics",
@@ -87,30 +92,41 @@ const contactTopicsData: TemplateField[] = [
     group: "contact.topics",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "topic",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "name",
         label: "Name",
+        description: "Text on the topic button.",
         type: "text",
         placeholder: "Custom orders",
       },
       {
         key: "blurb",
         label: "Blurb",
+        description: "Short line shown under the topic name.",
         type: "textarea",
+        optional: true,
         placeholder:
           "A doll, a piece of jewelry, or something else made just for you.",
       },
       {
         key: "messageLabel",
-        label: "Message Field Label",
+        label: "Message field label",
+        description:
+          "Replaces the message field's label below when this topic is selected.",
         type: "text",
+        optional: true,
         placeholder: "Tell me what you have in mind",
       },
       {
         key: "messagePlaceholder",
-        label: "Message Field Placeholder",
+        label: "Message field placeholder",
+        description:
+          "Replaces the message field's placeholder below when this topic is selected.",
         type: "text",
+        optional: true,
         placeholder: "Sizes, colors, timeline — whatever you've got.",
       },
     ],
@@ -123,7 +139,7 @@ const contactTopicsData: TemplateField[] = [
 const contactFormData: TemplateField[] = [
   {
     key: "pink.contact.form-heading",
-    label: "Form Heading",
+    label: "Heading",
     type: "text",
     page: "contact",
     group: "contact.form",
@@ -133,17 +149,17 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "pink.contact.form-reference-label",
-    label: "Reference Field Label",
+    label: "Reference field label",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    description: "Optional catch-all field — order number, referral, etc.",
+    description: "Label on the optional catch-all field — order number, referral, etc.",
     defaultValue: "Reference (optional)",
   },
   {
     key: "pink.contact.form-reference-placeholder",
-    label: "Reference Field Placeholder",
+    label: "Reference field placeholder",
     type: "text",
     page: "contact",
     group: "contact.form",
@@ -153,7 +169,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "pink.contact.form-marketing-label",
-    label: "Marketing Opt-in Label",
+    label: "Marketing checkbox text",
     type: "text",
     page: "contact",
     group: "contact.form",
@@ -163,28 +179,28 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "pink.contact.form-message-label",
-    label: "Default Message Field Label",
+    label: "Default message label",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    description: "Used when no topic is selected above.",
+    description: "Message field label used when no topic is selected above.",
     defaultValue: "Your message",
   },
   {
     key: "pink.contact.form-message-placeholder",
-    label: "Default Message Field Placeholder",
+    label: "Default message placeholder",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    description: "Used when no topic is selected above.",
+    description: "Message field placeholder used when no topic is selected above.",
     defaultValue:
       "Tell me what you're thinking about — a piece, a date, a question.",
   },
   {
     key: "pink.contact.form-submit-label",
-    label: "Submit Button Text",
+    label: "Submit button text",
     type: "text",
     page: "contact",
     group: "contact.form",
@@ -194,13 +210,49 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "pink.contact.form-email-note",
-    label: "Email Fallback Prefix",
+    label: "Email note prefix",
     description: "Static text before your support email, e.g. 'or just email'.",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
     defaultValue: "or just email",
+  },
+  {
+    key: "pink.contact.form-success-heading",
+    label: "Success heading",
+    description:
+      "Heading shown in place of the form after someone sends a message.",
+    type: "text",
+    page: "contact",
+    group: "contact.form",
+    gridColumn: "col-span-1",
+    defaultValue: "Got it — thank you.",
+    placeholder: "Message sent",
+  },
+  {
+    key: "pink.contact.form-success-again-label",
+    label: "Send another button text",
+    description:
+      "Button under the success message that brings the form back. Leave blank to hide the button.",
+    type: "text",
+    page: "contact",
+    group: "contact.form",
+    gridColumn: "col-span-1",
+    defaultValue: "Send another",
+    placeholder: "New message",
+  },
+  {
+    key: "pink.contact.form-success-body",
+    label: "Success message",
+    description:
+      "Line under the success heading after someone sends a message. Leave blank to hide.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.form",
+    gridColumn: "col-span-full",
+    defaultValue: "We read every note and reply as soon as we can.",
+    placeholder: "Thanks for writing. We'll reply soon.",
   },
 ];
 
@@ -209,7 +261,7 @@ const contactFormData: TemplateField[] = [
 const contactStudioData: TemplateField[] = [
   {
     key: "pink.contact.studio-image",
-    label: "Studio Photo",
+    label: "Photo",
     type: "image",
     page: "contact",
     group: "contact.studio",
@@ -219,17 +271,17 @@ const contactStudioData: TemplateField[] = [
   },
   {
     key: "pink.contact.studio-label",
-    label: "Studio Card Label",
+    label: "Card label",
     type: "text",
     page: "contact",
     group: "contact.studio",
     gridColumn: "col-span-1",
-    description: "Small uppercase label at the top of the studio card.",
+    description: "Small label at the top of the studio card.",
     defaultValue: "The studio",
   },
   {
     key: "pink.contact.studio-access-note",
-    label: "Access Note",
+    label: "Access note",
     description: "A line about how/when to visit. Leave blank to hide.",
     type: "textarea",
     page: "contact",
@@ -245,7 +297,7 @@ const contactStudioData: TemplateField[] = [
 const contactShortcutsData: TemplateField[] = [
   {
     key: "pink.contact.shortcuts-heading",
-    label: "Shortcuts Heading",
+    label: "Heading",
     type: "text",
     page: "contact",
     group: "contact.shortcuts",
@@ -263,16 +315,20 @@ const contactShortcutsData: TemplateField[] = [
     group: "contact.shortcuts",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "link",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "label",
         label: "Label",
+        description: "Text on the quick link.",
         type: "text",
         placeholder: "Track an order",
       },
       {
         key: "href",
         label: "Link",
+        description: "Where the quick link goes.",
         type: "url",
         placeholder: "/account/orders",
       },
@@ -294,28 +350,29 @@ export const pinkContactData: TemplateField[] = [
 export const pinkContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.header",
-    title: "Contact — Header",
-    description: "Eyebrow, heading, intro, and fact rows.",
+    title: "Header",
+    description: "Heading, intro text, and fact rows.",
     icon: "✉️",
     columns: 2,
   },
   {
     id: "contact.topics",
-    title: "Contact — Topics",
+    title: "Topics",
     description: "Topic buttons that rewrite the message field below.",
     icon: "🗂️",
     columns: 2,
   },
   {
     id: "contact.form",
-    title: "Contact — Form",
-    description: "Labels, placeholders and button text for the contact form.",
+    title: "Form",
+    description:
+      "Labels, placeholders and button text for the contact form, plus the thank-you message shown after it is sent.",
     icon: "📝",
     columns: 2,
   },
   {
     id: "contact.studio",
-    title: "Contact — Studio",
+    title: "Studio",
     description:
       "Photo, label, and access note for the studio aside. Address, hours, phone, and email in the card below them pull from Settings → General and Settings → Hours.",
     icon: "🏠",
@@ -323,7 +380,7 @@ export const pinkContactFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "contact.shortcuts",
-    title: "Contact — Shortcuts",
+    title: "Shortcuts",
     description: "Quick links shown before the form.",
     icon: "🔗",
     columns: 1,
@@ -335,7 +392,7 @@ export const pinkContactSections: TemplateSection[] = [
     id: "contact.header",
     page: "contact",
     title: "Header",
-    description: "Page header with eyebrow, heading, intro, and facts.",
+    description: "Page header with heading, intro text, and facts.",
     groupIds: ["contact.header"],
     order: 0,
     hideable: false,
@@ -357,6 +414,7 @@ export const pinkContactSections: TemplateSection[] = [
     groupIds: ["contact.form"],
     order: 2,
     hideable: false,
+    links: [SECTION_LINKS.businessContact],
   },
   {
     id: "contact.studio",
@@ -368,8 +426,9 @@ export const pinkContactSections: TemplateSection[] = [
     order: 3,
     hideable: true,
     links: [
-      { label: "Business info", href: "/admin/settings/general" },
-      { label: "Hours", href: "/admin/settings/hours" },
+      SECTION_LINKS.businessLocation,
+      SECTION_LINKS.businessContact,
+      SECTION_LINKS.businessHours,
     ],
   },
   {

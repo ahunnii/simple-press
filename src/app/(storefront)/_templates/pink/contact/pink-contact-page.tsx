@@ -5,7 +5,11 @@ import type { DefaultContactPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkContactTopic } from "./pink-contact-form";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { telHref } from "~/lib/tel-href";
@@ -34,6 +38,9 @@ const FIELD_KEYS = [
   "pink.contact.form-message-placeholder",
   "pink.contact.form-submit-label",
   "pink.contact.form-email-note",
+  "pink.contact.form-success-heading",
+  "pink.contact.form-success-body",
+  "pink.contact.form-success-again-label",
   "pink.contact.studio-image",
   "pink.contact.studio-label",
   "pink.contact.studio-access-note",
@@ -43,10 +50,29 @@ const FIELD_KEYS = [
 type FactRow = { label?: string; value?: string; _id?: string };
 type ShortcutItem = { label?: string; href?: string; _id?: string };
 
-const DEFAULT_HEADER_FACTS: PinkFactRow[] = [
-  { label: "Response time", value: "1–2 business days" },
-  { label: "Location", value: "Detroit, Michigan" },
-];
+/** Trims `value` and maps blank to `undefined`, for plain `??` chains. */
+function nonBlank(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed?.length ? trimmed : undefined;
+}
+
+/**
+ * The header facts shown when the owner hasn't saved any
+ * `pink.contact.header-facts` rows: a single Location row built from
+ * Settings → General (city, plus state when set — e.g. "Detroit, MI"). No
+ * city means no default rows at all, and the header drops its right slot.
+ * (Until 2026-09-26 this was a hardcoded "Response time: 1–2 business days"
+ * + "Location: Detroit, Michigan" pair.)
+ */
+function defaultHeaderFacts(business: {
+  addressCity?: string | null;
+  addressState?: string | null;
+}): PinkFactRow[] {
+  const city = nonBlank(business.addressCity);
+  if (!city) return [];
+  const state = nonBlank(business.addressState);
+  return [{ label: "Location", value: state ? `${city}, ${state}` : city }];
+}
 
 const DEFAULT_SHORTCUTS: ShortcutItem[] = [
   { label: "Ask about a make & take", href: "/services" },
@@ -61,14 +87,17 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
   const headerFactsRaw = parseTemplateListRows(
     rawCustomFields?.["pink.contact.header-facts"],
   ) as FactRow[];
-  const headerFacts =
-    headerFactsRaw.length > 0
-      ? headerFactsRaw.map((r) => ({
-          label: r.label ?? "",
-          value: r.value ?? "",
-          _id: r._id,
-        }))
-      : DEFAULT_HEADER_FACTS;
+  // Only saved rows are a real `header-facts` list item — the Settings
+  // location fallback isn't part of the saved list, so it never gets a
+  // `data-sp-item` (there's nothing in the list editor for it to focus).
+  const headerFactsFromSaved = headerFactsRaw.length > 0;
+  const headerFacts = headerFactsFromSaved
+    ? headerFactsRaw.map((r) => ({
+        label: r.label ?? "",
+        value: r.value ?? "",
+        _id: r._id,
+      }))
+    : defaultHeaderFacts(business);
 
   const topics = parseTemplateListRows(
     rawCustomFields?.["pink.contact.topics-items"],
@@ -117,7 +146,19 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
         headingFieldKey="pink.contact.header-heading"
         intro={f["pink.contact.header-intro"] ?? ""}
         introFieldKey="pink.contact.header-intro"
-        rightSlot={<PinkFactRows rows={headerFacts} surface="paper" />}
+        rightSlot={
+          headerFacts.length > 0 ? (
+            <PinkFactRows
+              rows={headerFacts}
+              surface="paper"
+              itemAttr={
+                headerFactsFromSaved
+                  ? (i) => listItemAttr("pink.contact.header-facts", i)
+                  : undefined
+              }
+            />
+          ) : undefined
+        }
         sectionAttrs={sectionGroupAttr("contact", "header")}
       />
 
@@ -140,6 +181,9 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
             }
             submitLabel={f["pink.contact.form-submit-label"] ?? ""}
             emailNotePrefix={f["pink.contact.form-email-note"] ?? ""}
+            successHeading={f["pink.contact.form-success-heading"] ?? ""}
+            successBody={f["pink.contact.form-success-body"] ?? ""}
+            successAgainLabel={f["pink.contact.form-success-again-label"] ?? ""}
             supportEmail={business.supportEmail}
           />
         </div>
@@ -287,6 +331,7 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                             ? { borderTop: "1px solid var(--pink-line-button)" }
                             : undefined
                         }
+                        {...listItemAttr("pink.contact.shortcuts-items", i)}
                       >
                         <Link
                           href={item.href ?? "/contact"}

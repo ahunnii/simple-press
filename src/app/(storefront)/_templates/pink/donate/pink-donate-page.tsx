@@ -3,6 +3,7 @@ import { resolveDonationHandles } from "~/lib/donation-handles";
 import { DEFAULT_DONATION_PRESETS_CENTS } from "~/lib/donations/constants";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
 import { PinkEmptyState } from "../shared/pink-empty-state";
@@ -45,7 +46,9 @@ export function PinkDonatePage({
   // Both flags come from the connected Stripe account — see `DefaultDonatePage`
   // for the full rationale (mirrors `/checkout` and `/subscribe`'s gate).
   const showCard = business.isStripeConnected && business.stripeChargesEnabled;
-  const showOtherWays = handles.length > 0;
+  const showOtherWays =
+    handles.length > 0 &&
+    isSectionVisible(customFields, "pink", "donate.other-ways");
   const showThankYou = status === "success";
 
   // `f[...]` is always a string, never undefined — see `resolveFields` /

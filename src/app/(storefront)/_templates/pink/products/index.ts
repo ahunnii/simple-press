@@ -9,49 +9,158 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * page entry that previews a sample product (one set of fields applied to
  * every product page). Field KEYS keep the legacy `pink.global.product-`
  * prefix — owner-saved values are keyed by these strings, so renaming them
- * would orphan saved content. The gallery and per-product details (name,
- * price, description, specs) are fully DB-driven and have no fields/section
- * of their own.
+ * would orphan saved content; fields added later use `pink.product.*`. The
+ * gallery and per-product details (name, price, description, specs) are fully
+ * DB-driven. `product.details` holds the copy around the buy panel (notes,
+ * question link, coming-soon / sold-out / stock text).
  */
 export const pinkProductData: TemplateField[] = [
+  // ── product.details (new keys use pink.product.*) ────────────────
+  {
+    key: "pink.product.shipping-note",
+    label: "Shipping note",
+    description:
+      "Short shipping note shown under the buy button on every product. Leave blank to hide. When your Shipping Policy page is published, a link to it appears next to the note.",
+    type: "textarea",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    placeholder: "e.g. Ships within 5 business days.",
+  },
+  {
+    key: "pink.product.returns-note",
+    label: "Returns note",
+    description:
+      "Short returns note shown under the buy button on every product. Leave blank to hide. When your Returns & Refunds Policy page is published, a link to it appears next to the note.",
+    type: "textarea",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    placeholder: "e.g. Returns accepted within 14 days.",
+  },
+  {
+    key: "pink.global.product-question",
+    label: "Question line",
+    description:
+      "One short line under the buy button, followed by a link to your contact page. Leave blank to hide the line and the link.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "Have a question about this piece before you buy?",
+    placeholder: "e.g. Not sure about sizing?",
+  },
+  {
+    key: "pink.product.question-link-label",
+    label: "Question link text",
+    description:
+      "Text of the contact-page link after the question line. Leave blank to show the question line without a link.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-1",
+    defaultValue: "Ask us a question",
+    placeholder: "e.g. Get in touch",
+  },
+  {
+    key: "pink.product.stock-untracked-label",
+    label: "Stock line for untracked items",
+    description:
+      "Shown under the buy button on products that don't track inventory, e.g. Made to order. Leave blank to hide.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. Made to order",
+  },
+  {
+    key: "pink.product.coming-soon-label",
+    label: "Coming soon heading",
+    description:
+      "Shown in place of the buy button, and as a tag on the photo, on products marked as coming soon.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-1",
+    defaultValue: "Coming soon",
+    placeholder: "e.g. Available soon",
+  },
+  {
+    key: "pink.product.coming-soon-message",
+    label: "Coming soon message",
+    description:
+      "Line under the coming soon heading on products marked as coming soon. Leave blank to hide.",
+    type: "textarea",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "This piece isn't available yet — check back soon.",
+    placeholder: "e.g. Back next month.",
+  },
+  {
+    key: "pink.product.sold-out-label",
+    label: "Sold out button text",
+    description:
+      "Text on the disabled buy button when a product or option is out of stock.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-1",
+    defaultValue: "Sold out",
+    placeholder: "e.g. Out of stock",
+  },
+  {
+    key: "pink.product.sold-out-message",
+    label: "Sold out message",
+    description:
+      "Line above the back-in-stock email sign-up on sold-out products. Leave blank to use a built-in line.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "Get notified when it's back in stock.",
+    placeholder: "e.g. Want one? Leave your email.",
+  },
+
   // ── product.panels (keys keep legacy pink.global.product- prefix) ───────────────────────────────────────────────
   {
     key: "pink.global.product-panels",
-    label: "Product Page Accordion",
+    label: "Information rows",
     description:
-      "Rows shown in the accordion under every product's buy box — care instructions, shipping, custom orders, etc. Leave empty to use the built-in example rows.",
+      "Expandable rows under every product, such as care instructions or custom orders. Leave empty to show the built-in rows.",
     type: "list",
     page: "product",
     group: "product.panels",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "row",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "title",
         label: "Title",
         type: "text",
-        placeholder: "Care & keeping",
+        description: "The row's heading, shown while it's collapsed.",
+        placeholder: "e.g. Care & keeping",
       },
-      { key: "body", label: "Body", type: "textarea", placeholder: "…" },
+      {
+        key: "body",
+        label: "Text",
+        type: "textarea",
+        description: "Shown when the row is opened.",
+        placeholder: "A sentence or two",
+      },
     ],
-  },
-  {
-    key: "pink.global.product-question",
-    label: "Ask a Question Line",
-    description:
-      'One short line shown under the buy box, e.g. "Have a question about this piece?" — followed by an "Ask us a question" link to /contact. Leave blank to hide (review 2026-07-29, F7).',
-    type: "text",
-    page: "product",
-    group: "product.panels",
-    gridColumn: "col-span-full",
-    defaultValue: "Have a question about this piece before you buy?",
   },
 
   // ── product.story ────────────────────────────────────────────────
   {
     key: "pink.global.product-story-image",
-    label: "Product Story Image",
-    description: "1:1 image on the left of the dark band under the accordion.",
+    label: "Image",
+    description: "1:1 image beside the heading in the section under the accordion.",
     type: "image",
     page: "product",
     group: "product.story",
@@ -61,18 +170,18 @@ export const pinkProductData: TemplateField[] = [
   },
   {
     key: "pink.global.product-story-heading",
-    label: "Product Story Heading",
+    label: "Heading",
     type: "text",
     page: "product",
     group: "product.story",
     gridColumn: "col-span-1",
-    description: "Heading in the dark band under every product's accordion.",
+    description: "Heading in the section under every product's accordion.",
     defaultValue: "Every piece starts on the same table.",
   },
   {
     key: "pink.global.product-story-body",
-    label: "Product Story Body",
-    description: "One or two sentences under the story heading.",
+    label: "Body text",
+    description: "One or two sentences under the heading above.",
     type: "textarea",
     page: "product",
     group: "product.story",
@@ -84,7 +193,7 @@ export const pinkProductData: TemplateField[] = [
   // ── product.related ──────────────────────────────────────────────
   {
     key: "pink.global.product-related-heading",
-    label: "Related Products Heading",
+    label: "Heading",
     description: "Heading over the related-products grid.",
     type: "text",
     page: "product",
@@ -94,8 +203,8 @@ export const pinkProductData: TemplateField[] = [
   },
   {
     key: "pink.global.product-related-link-label",
-    label: "Related Products Link Text",
-    description: "Right-aligned link beside the heading.",
+    label: "Link text",
+    description: "Link beside the heading, to the full shop.",
     type: "text",
     page: "product",
     group: "product.related",
@@ -106,24 +215,32 @@ export const pinkProductData: TemplateField[] = [
 
 export const pinkProductFieldGroups: TemplateFieldGroup[] = [
   {
-    id: "product.panels",
-    title: "Product Page — Accordion",
+    id: "product.details",
+    title: "Product details",
     description:
-      "Care, shipping and custom order rows shown under every product's buy box",
+      "Text around the buy button on every product: shipping and returns notes, the question link, and coming-soon, sold-out and stock lines",
+    icon: "🛍️",
+    columns: 2,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.panels",
+    title: "Accordion",
+    description:
+      "Expandable rows under every product's buy button, such as care and custom orders.",
     icon: "📦",
     columns: 1,
   } satisfies TemplateFieldGroup,
   {
     id: "product.story",
-    title: "Product Page — Studio Story",
-    description: "The dark band below the accordion: image, copy and stats",
+    title: "Studio story",
+    description: "The section below the accordion: image and copy.",
     icon: "🧶",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "product.related",
-    title: "Product Page — Related Products",
-    description: 'Heading and link over the "you may also like" grid',
+    title: "Related products",
+    description: "Heading and link over the related-products grid.",
     icon: "🔗",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -131,31 +248,42 @@ export const pinkProductFieldGroups: TemplateFieldGroup[] = [
 
 export const pinkProductSections: TemplateSection[] = [
   {
+    id: "product.details",
+    page: "product",
+    title: "Product details",
+    description:
+      "Text around the buy button on every product: shipping and returns notes, the question link, and coming-soon, sold-out and stock lines",
+    groupIds: ["product.details"],
+    order: 0,
+    hideable: false,
+    links: [SECTION_LINKS.products],
+  },
+  {
     id: "product.panels",
     page: "product",
-    title: "Product Page — Accordion",
+    title: "Accordion",
     description:
-      "Care, shipping and custom order rows shown under every product's buy box",
+      "Expandable rows under every product's buy button, such as care and custom orders",
     groupIds: ["product.panels"],
-    order: 0,
+    order: 1,
     hideable: true,
   },
   {
     id: "product.story",
     page: "product",
-    title: "Product Page — Studio Story",
-    description: "The dark band below the accordion: image, copy and stats",
+    title: "Studio story",
+    description: "The section below the accordion: image and copy",
     groupIds: ["product.story"],
-    order: 1,
+    order: 2,
     hideable: true,
   },
   {
     id: "product.related",
     page: "product",
-    title: "Product Page — Related Products",
-    description: 'Heading and link over the "you may also like" grid',
+    title: "Related products",
+    description: "Heading and link over the related-products grid",
     groupIds: ["product.related"],
-    order: 2,
+    order: 3,
     hideable: true,
     links: [SECTION_LINKS.products],
   },

@@ -21,7 +21,7 @@ export const pinkTableFields: TemplateField[] = [
     key: "pink-table.duration-label",
     label: "Duration",
     description:
-      "Shown in the hero eyebrow alongside the group size. Ships blank on purpose — fill it in only once you know how long a session actually runs.",
+      "Shown near the top of the hero alongside the group size. Ships blank on purpose — fill it in only once you know how long a session actually runs.",
     type: "text",
     page: "homepage",
     group: "pink-table.hero",
@@ -31,8 +31,8 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.group-size-label",
-    label: "Group Size",
-    description: "Shown in the hero eyebrow alongside the duration.",
+    label: "Group size",
+    description: "Shown near the top of the hero alongside the duration.",
     type: "text",
     page: "homepage",
     group: "pink-table.hero",
@@ -42,7 +42,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.hero-intro",
-    label: "Hero Intro",
+    label: "Intro text",
     description: "One or two sentences under the service name in the hero.",
     type: "textarea",
     page: "homepage",
@@ -53,21 +53,30 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.fact-rows",
-    label: "Hero Fact Rows",
+    label: "Fact rows",
     description:
-      "Up to four label/value rows shown on the blurred panel at the bottom of the hero.",
+      "Up to four label/value rows shown at the bottom of the hero. Falls back to built-in rows when left empty.",
     type: "list",
     page: "homepage",
     group: "pink-table.hero",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "row",
+    defaultsWhenEmpty: true,
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Where" },
+      {
+        key: "label",
+        label: "Label",
+        type: "text",
+        placeholder: "Where",
+        description: "Row label, e.g. Where.",
+      },
       {
         key: "value",
         label: "Value",
         type: "text",
         placeholder: "Your space",
+        description: "Row value, e.g. Your space.",
       },
     ],
     defaultValue: JSON.stringify([
@@ -84,7 +93,7 @@ export const pinkTableFields: TemplateField[] = [
   // ── pink-table.body ─────────────────────────────────────────────────────
   {
     key: "pink-table.body-heading",
-    label: "Body Heading",
+    label: "Heading",
     description: "Section heading above the description paragraphs.",
     type: "text",
     page: "homepage",
@@ -94,7 +103,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.body-paragraph-1",
-    label: "Body Paragraph 1",
+    label: "Paragraph 1",
     type: "textarea",
     page: "homepage",
     group: "pink-table.body",
@@ -102,11 +111,11 @@ export const pinkTableFields: TemplateField[] = [
     defaultValue:
       "We bring the table to you. Fabric, stuffing, needles and thread all show up ready to go — nobody needs to have sewn a stitch before.",
     description:
-      "Default body copy. Use the richtext override below for formatted text (bold, links, lists) instead.",
+      "Default paragraph text. Use the formatted override below instead if you need bold, links or lists.",
   },
   {
     key: "pink-table.body-paragraph-2",
-    label: "Body Paragraph 2",
+    label: "Paragraph 2",
     type: "textarea",
     page: "homepage",
     group: "pink-table.body",
@@ -117,7 +126,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.body-paragraph-3",
-    label: "Body Paragraph 3",
+    label: "Paragraph 3",
     type: "textarea",
     page: "homepage",
     group: "pink-table.body",
@@ -127,7 +136,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.body-richtext",
-    label: "Body Richtext Override",
+    label: "Formatted override",
     description:
       "Optional. When set, replaces the three paragraph fields above with formatted rich text.",
     type: "richtext",
@@ -140,7 +149,7 @@ export const pinkTableFields: TemplateField[] = [
   // ── pink-table.picker ────────────────────────────────────────────────────
   {
     key: "pink-table.picker-heading",
-    label: "Project Picker Heading",
+    label: "Heading",
     type: "text",
     page: "homepage",
     group: "pink-table.picker",
@@ -150,7 +159,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.picker-intro",
-    label: "Project Picker Intro",
+    label: "Intro text",
     description: "Leave blank to omit.",
     type: "text",
     page: "homepage",
@@ -162,7 +171,7 @@ export const pinkTableFields: TemplateField[] = [
   // ── pink-table.timeline (hideable — blank list) ─────────────────────────
   {
     key: "pink-table.timeline-heading",
-    label: "Timeline Heading",
+    label: "Heading",
     type: "text",
     page: "homepage",
     group: "pink-table.timeline",
@@ -173,7 +182,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.timeline",
-    label: "Timeline Rows",
+    label: "Rows",
     description:
       "Up to six time/title/body rows. Leave empty to hide the whole timeline section.",
     type: "list",
@@ -181,10 +190,27 @@ export const pinkTableFields: TemplateField[] = [
     group: "pink-table.timeline",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "row",
     itemSchema: [
-      { key: "time", label: "Time", type: "text", placeholder: "0:00" },
-      { key: "title", label: "Title", type: "text" },
-      { key: "body", label: "Body", type: "textarea" },
+      {
+        key: "time",
+        label: "Time",
+        type: "text",
+        placeholder: "0:00",
+        description: "Timestamp shown for this row, e.g. 0:00.",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Short title for this row.",
+      },
+      {
+        key: "body",
+        label: "Body",
+        type: "textarea",
+        description: "One or two sentences describing this part of the session.",
+      },
     ],
     defaultValue: "",
   },
@@ -192,7 +218,7 @@ export const pinkTableFields: TemplateField[] = [
   // ── pink-table.brings-provides (hideable — blank lists) ─────────────────
   {
     key: "pink-table.brings-label",
-    label: "Brings Column Label",
+    label: "Brings label",
     type: "text",
     page: "homepage",
     group: "pink-table.brings-provides",
@@ -202,19 +228,27 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.brings",
-    label: "Brings Rows",
-    description: "Up to six em-dash rows.",
+    label: "Rows — what to bring",
+    description: "Up to six short items.",
     type: "list",
     page: "homepage",
     group: "pink-table.brings-provides",
     gridColumn: "col-span-1",
     maxItems: 6,
-    itemSchema: [{ key: "text", label: "Item", type: "text" }],
+    itemLabel: "item",
+    itemSchema: [
+      {
+        key: "text",
+        label: "Item",
+        type: "text",
+        description: "One short line, e.g. an item to bring.",
+      },
+    ],
     defaultValue: "",
   },
   {
     key: "pink-table.provides-label",
-    label: "Provides Column Label",
+    label: "Provides label",
     type: "text",
     page: "homepage",
     group: "pink-table.brings-provides",
@@ -224,30 +258,50 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.provides",
-    label: "Provides Rows",
-    description: "Up to six em-dash rows.",
+    label: "Rows — what's provided",
+    description: "Up to six short items.",
     type: "list",
     page: "homepage",
     group: "pink-table.brings-provides",
     gridColumn: "col-span-1",
     maxItems: 6,
-    itemSchema: [{ key: "text", label: "Item", type: "text" }],
+    itemLabel: "item",
+    itemSchema: [
+      {
+        key: "text",
+        label: "Item",
+        type: "text",
+        description: "One short line, e.g. something provided.",
+      },
+    ],
     defaultValue: "",
   },
 
   // ── pink-table.gallery (hideable — blank list) ──────────────────────────
   {
     key: "pink-table.gallery",
-    label: "Gallery Images",
+    label: "Images",
     description: "Up to two images, shown side by side. Leave empty to hide.",
     type: "list",
     page: "homepage",
     group: "pink-table.gallery",
     gridColumn: "col-span-full",
     maxItems: 2,
+    itemLabel: "image",
     itemSchema: [
-      { key: "image", label: "Image", type: "image" },
-      { key: "alt", label: "Alt Text", type: "text" },
+      {
+        key: "image",
+        label: "Image",
+        type: "image",
+        description: "Photo shown in the gallery.",
+      },
+      {
+        key: "alt",
+        label: "Alt text",
+        type: "text",
+        description: "Description of the image, for screen readers.",
+        optional: true,
+      },
     ],
     defaultValue: "",
   },
@@ -255,8 +309,8 @@ export const pinkTableFields: TemplateField[] = [
   // ── pink-table.quote (hideable — blank text) ────────────────────────────
   {
     key: "pink-table.quote-text",
-    label: "Pull-Quote",
-    description: "Leave blank to hide the pull-quote section.",
+    label: "Quote text",
+    description: "Leave blank to hide the quote section.",
     type: "textarea",
     page: "homepage",
     group: "pink-table.quote",
@@ -265,7 +319,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.quote-attribution",
-    label: "Pull-Quote Attribution",
+    label: "Attribution",
     description: "Who said it, e.g. a teacher or organizer's name and role.",
     type: "text",
     page: "homepage",
@@ -274,10 +328,10 @@ export const pinkTableFields: TemplateField[] = [
     defaultValue: "",
   },
 
-  // ── pink-table.faq (hideable — blank list) ──────────────────────────────
+  // ── pink-table.faq (hidden when nothing is picked) ─────────────────────
   {
     key: "pink-table.faq-heading",
-    label: "FAQ Heading",
+    label: "Heading",
     type: "text",
     page: "homepage",
     group: "pink-table.faq",
@@ -286,57 +340,62 @@ export const pinkTableFields: TemplateField[] = [
     description:
       "Leave the FAQ list below empty to hide this section entirely.",
   },
+  // A Content → FAQ picker since 2026-09-26 (was a typed question/answer
+  // `list`). Same key: a service saved before the switch still holds
+  // `{question, answer}` rows here, and the page keeps rendering them until
+  // the owner picks questions — see `resolvePinkTableFaq` in
+  // `pink-table-service-page.tsx`.
   {
     key: "pink-table.faq",
-    label: "FAQ Rows",
-    description: "Up to eight question/answer rows.",
-    type: "list",
+    label: "Questions",
+    description:
+      "Pick up to eight questions from Content → FAQ to show on this page. Leave empty to hide this section. Questions typed here before keep showing until you pick some.",
+    type: "faq",
     page: "homepage",
     group: "pink-table.faq",
     gridColumn: "col-span-full",
+    minItems: 0,
     maxItems: 8,
-    itemSchema: [
-      { key: "question", label: "Question", type: "text" },
-      { key: "answer", label: "Answer", type: "textarea" },
-    ],
+    emptyHint: "Nothing picked, so this section is hidden.",
+    rendersLegacyRows: true,
     defaultValue: "",
   },
 
   // ── pink-table.sidebar ───────────────────────────────────────────────────
   {
     key: "pink-table.price-eyebrow",
-    label: "Cost Panel Label",
+    label: "Label",
     type: "text",
     page: "homepage",
     group: "pink-table.sidebar",
     gridColumn: "col-span-1",
     defaultValue: "Cost",
-    description: "Small uppercase label at the top of the sidebar panel.",
+    description: "Small label at the top of the cost panel.",
   },
   {
     key: "pink-table.price-fallback",
-    label: "Cost Panel Line",
+    label: "Cost line",
     type: "text",
     page: "homepage",
     group: "pink-table.sidebar",
     gridColumn: "col-span-1",
     defaultValue: "Quoted per group",
     description:
-      "The big line in the sidebar panel. Shown whenever the selected project has no price label set on it in Services — leave project prices blank to keep the panel a contact-for-cost panel.",
+      "The big line in the cost panel. Shown whenever the selected project has no price label set on it in Services — leave project prices blank to keep the panel a contact-for-cost panel.",
   },
   {
     key: "pink-table.price-qualifier",
-    label: "Cost Qualifier",
+    label: "Qualifier",
     type: "text",
     page: "homepage",
     group: "pink-table.sidebar",
     gridColumn: "col-span-1",
     defaultValue: "Materials included. Ask and we'll confirm for your group.",
-    description: "Muted line under the big line.",
+    description: "Supporting line under the cost line.",
   },
   {
     key: "pink-table.price-cta-label",
-    label: "Cost Panel Button Text",
+    label: "Button text",
     type: "text",
     page: "homepage",
     group: "pink-table.sidebar",
@@ -346,7 +405,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.quicklink-1-label",
-    label: "Quick Link 1 Label",
+    label: "Quick link 1 text",
     description: "Always links back to /services.",
     type: "text",
     page: "homepage",
@@ -356,9 +415,8 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.quicklink-2-label",
-    label: "Quick Link 2 Label",
-    description:
-      "Second sidebar quick link — an owner-set secondary destination.",
+    label: "Quick link 2 text",
+    description: "Second quick link, pointing wherever you set below.",
     type: "text",
     page: "homepage",
     group: "pink-table.sidebar",
@@ -367,7 +425,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.quicklink-2-href",
-    label: "Quick Link 2 URL",
+    label: "Quick link 2 link",
     description: "Where the second quick link goes.",
     type: "url",
     page: "homepage",
@@ -379,8 +437,8 @@ export const pinkTableFields: TemplateField[] = [
   // ── pink-table.request-form ──────────────────────────────────────────────
   {
     key: "pink-table.request-heading",
-    label: "Request Form Heading",
-    description: "Heading above the sidebar request form.",
+    label: "Heading",
+    description: "Heading above the request form.",
     type: "text",
     page: "homepage",
     group: "pink-table.request-form",
@@ -389,7 +447,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.request-intro",
-    label: "Request Form Intro",
+    label: "Intro text",
     description: "Leave blank to omit.",
     type: "text",
     page: "homepage",
@@ -400,7 +458,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.request-submit-label",
-    label: "Request Form Submit Button Text",
+    label: "Submit button text",
     description: "Label on the request form's submit button.",
     type: "text",
     page: "homepage",
@@ -410,7 +468,7 @@ export const pinkTableFields: TemplateField[] = [
   },
   {
     key: "pink-table.request-fallback-label",
-    label: "Request Fallback Link Text",
+    label: "Fallback link text",
     description:
       "Shown instead of the full form when the contact form feature is turned off.",
     type: "text",
@@ -425,71 +483,72 @@ const pinkTableFieldGroups: TemplateFieldGroup[] = [
   {
     id: "pink-table.hero",
     title: "Hero",
-    description: "Duration, group size, intro and the hero fact rows",
+    description: "Duration, group size, intro text and the hero fact rows.",
     icon: "🖼️",
     columns: 2,
   },
   {
     id: "pink-table.body",
-    title: "What It Actually Is",
+    title: "What it actually is",
     description:
-      "Heading and body copy — plain paragraphs or a richtext override",
+      "Heading and body copy — plain paragraphs, or a formatted override.",
     icon: "📝",
     columns: 1,
   },
   {
     id: "pink-table.picker",
-    title: "Project Picker",
-    description: "Heading and intro above the ServiceItem selector",
+    title: "Project picker",
+    description: "Heading and intro text above the project selector.",
     icon: "🧷",
     columns: 2,
   },
   {
     id: "pink-table.timeline",
     title: "Timeline",
-    description: "Optional run-of-show rows — leave empty to hide",
+    description:
+      "Optional time/title/description rows — leave empty to hide this section.",
     icon: "⏱️",
     columns: 1,
   },
   {
     id: "pink-table.brings-provides",
-    title: "Brings / Provides",
-    description: "Two optional em-dash lists — leave both empty to hide",
+    title: "Brings and provides",
+    description: "Two optional lists — leave both empty to hide this section.",
     icon: "🧺",
     columns: 2,
   },
   {
     id: "pink-table.gallery",
     title: "Gallery",
-    description: "Optional 2-up image pair",
+    description: "Optional pair of images, shown side by side.",
     icon: "📷",
     columns: 1,
   },
   {
     id: "pink-table.quote",
-    title: "Pull-Quote",
-    description: "Optional quote and attribution",
+    title: "Pull quote",
+    description: "Optional quote and attribution.",
     icon: "💬",
     columns: 1,
   },
   {
     id: "pink-table.faq",
     title: "FAQ",
-    description: "Optional question/answer accordion",
+    description: "Optional accordion of questions picked from Content → FAQ.",
     icon: "❓",
     columns: 1,
   },
   {
     id: "pink-table.sidebar",
-    title: "Sidebar Cost Panel",
-    description: "Labels for the sticky contact-for-cost panel and quick links",
+    title: "Cost panel",
+    description: "Labels for the cost panel and its quick links.",
     icon: "🏷️",
     columns: 2,
   },
   {
     id: "pink-table.request-form",
-    title: "Request Form",
-    description: "Heading, intro, and the fallback link text",
+    title: "Request form",
+    description: "Heading, intro text, and the fallback link text.",
     icon: "✉️",
     columns: 2,
   },

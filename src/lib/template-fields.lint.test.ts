@@ -24,6 +24,7 @@ const STRICT_TEMPLATES: readonly string[] = [
   "happy-bamboo",
   "pollen",
   "olive",
+  "pink",
 ];
 
 /**
@@ -54,6 +55,8 @@ const PALETTE_COLOR_WORDS: readonly string[] = [
   "navy",
   "steel",
   "bone",
+  "rose",
+  "pink",
 ];
 
 /** Escapes regex-special characters in a literal word/phrase. */

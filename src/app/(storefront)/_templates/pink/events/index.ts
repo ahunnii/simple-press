@@ -20,8 +20,8 @@ import { SECTION_LINKS } from "~/lib/section-links";
 const eventsHeaderData: TemplateField[] = [
   {
     key: "pink.events.header-heading",
-    label: "Header Heading",
-    description: "The H1 for the events page.",
+    label: "Heading",
+    description: "Main heading at the top of the events page.",
     type: "text",
     page: "events",
     group: "events.header",
@@ -30,7 +30,7 @@ const eventsHeaderData: TemplateField[] = [
   },
   {
     key: "pink.events.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "events",
@@ -46,7 +46,7 @@ const eventsHeaderData: TemplateField[] = [
 const eventsListData: TemplateField[] = [
   {
     key: "pink.events.list-flier-hint",
-    label: "Flier Hint",
+    label: "Flier hint",
     description:
       "Small line above the cards, shown only when at least one event has a flier (photo or video) uploaded. Leave blank to hide it.",
     type: "text",
@@ -57,7 +57,7 @@ const eventsListData: TemplateField[] = [
   },
   {
     key: "pink.events.list-link-fallback-label",
-    label: "Default Link Label",
+    label: "Default link text",
     description:
       "Button text on an event's outbound link when that event doesn't set a label of its own.",
     type: "text",
@@ -68,7 +68,7 @@ const eventsListData: TemplateField[] = [
   },
   {
     key: "pink.events.list-empty-heading",
-    label: "Empty Heading",
+    label: "Empty list heading",
     description: "Shown when nothing is scheduled yet.",
     type: "text",
     page: "events",
@@ -78,9 +78,9 @@ const eventsListData: TemplateField[] = [
   },
   {
     key: "pink.events.list-empty-body",
-    label: "Empty Body",
+    label: "Empty list body",
     description:
-      "One or two lines under the empty-state heading. Give people somewhere else to go while the calendar is bare.",
+      "One or two lines under the empty-list heading. Give people somewhere else to go while the calendar is bare.",
     type: "textarea",
     page: "events",
     group: "events.list",
@@ -90,8 +90,8 @@ const eventsListData: TemplateField[] = [
   },
   {
     key: "pink.events.list-empty-cta-label",
-    label: "Empty CTA Label",
-    description: "Leave blank to hide the empty-state button.",
+    label: "Empty list button text",
+    description: "Leave blank to hide the button.",
     type: "text",
     page: "events",
     group: "events.list",
@@ -100,8 +100,8 @@ const eventsListData: TemplateField[] = [
   },
   {
     key: "pink.events.list-empty-cta-link",
-    label: "Empty CTA Link",
-    description: "Where the empty-state button goes.",
+    label: "Empty list button link",
+    description: "Where the empty-list button goes.",
     type: "url",
     page: "events",
     group: "events.list",
@@ -121,7 +121,7 @@ const eventsListData: TemplateField[] = [
 const eventsDetailData: TemplateField[] = [
   {
     key: "pink.events.detail-when-label",
-    label: "“When” Label",
+    label: "“When” label",
     description: "Row label beside the full date on an event's page.",
     type: "text",
     page: "events",
@@ -131,7 +131,7 @@ const eventsDetailData: TemplateField[] = [
   },
   {
     key: "pink.events.detail-where-label",
-    label: "“Where” Label",
+    label: "“Where” label",
     description:
       "Row label beside the location. The row hides when an event has no location.",
     type: "text",
@@ -142,7 +142,7 @@ const eventsDetailData: TemplateField[] = [
   },
   {
     key: "pink.events.detail-cost-label",
-    label: "“Cost” Label",
+    label: "“Cost” label",
     description:
       "Row label beside the price line. The row hides when an event has no price set.",
     type: "text",
@@ -153,8 +153,8 @@ const eventsDetailData: TemplateField[] = [
   },
   {
     key: "pink.events.detail-past-badge",
-    label: "Past Event Badge",
-    description: "Small ink badge on the calendar leaf once an event is over.",
+    label: "Past-event badge text",
+    description: "Small badge on the calendar leaf once an event is over.",
     type: "text",
     page: "events",
     group: "events.detail",
@@ -163,9 +163,9 @@ const eventsDetailData: TemplateField[] = [
   },
   {
     key: "pink.events.detail-scan-label",
-    label: "QR Caption",
+    label: "QR caption",
     description:
-      "Caps line beside the QR code on events where you turned on “Show a scannable QR code”.",
+      "Small label beside the QR code, shown on events where you turned on “Show a scannable QR code”.",
     type: "text",
     page: "events",
     group: "events.detail",
@@ -174,7 +174,7 @@ const eventsDetailData: TemplateField[] = [
   },
   {
     key: "pink.events.detail-back-label",
-    label: "Back Link",
+    label: "Back link text",
     description: "Link back to the events page, shown after the details.",
     type: "text",
     page: "events",
@@ -189,8 +189,8 @@ const eventsDetailData: TemplateField[] = [
 const eventsCtaData: TemplateField[] = [
   {
     key: "pink.events.cta-heading",
-    label: "CTA Heading",
-    description: "Closing call-to-action heading.",
+    label: "Heading",
+    description: "Heading in the closing panel at the bottom of the page.",
     type: "text",
     page: "events",
     group: "events.cta",
@@ -199,7 +199,7 @@ const eventsCtaData: TemplateField[] = [
   },
   {
     key: "pink.events.cta-body",
-    label: "CTA Body",
+    label: "Body text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "events",
@@ -210,7 +210,7 @@ const eventsCtaData: TemplateField[] = [
   },
   {
     key: "pink.events.cta-primary-label",
-    label: "CTA Button Label",
+    label: "Button text",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "events",
@@ -220,7 +220,7 @@ const eventsCtaData: TemplateField[] = [
   },
   {
     key: "pink.events.cta-primary-link",
-    label: "CTA Button Link",
+    label: "Button link",
     description: "Where the button goes.",
     type: "url",
     page: "events",
@@ -230,9 +230,9 @@ const eventsCtaData: TemplateField[] = [
   },
   {
     key: "pink.events.cta-image-1",
-    label: "CTA Image 1",
+    label: "Image 1",
     description:
-      "Left image in the closing CTA's 2-up pair. Leave both blank and the panel runs full width as copy only.",
+      "Left image in the closing panel's image pair. Leave both images blank to run the panel as text only.",
     type: "image",
     page: "events",
     group: "events.cta",
@@ -244,9 +244,9 @@ const eventsCtaData: TemplateField[] = [
   },
   {
     key: "pink.events.cta-image-2",
-    label: "CTA Image 2",
+    label: "Image 2",
     description:
-      "Right image in the closing CTA's 2-up pair. Leave both blank and the panel runs full width as copy only.",
+      "Right image in the closing panel's image pair. Leave both images blank to run the panel as text only.",
     type: "image",
     page: "events",
     group: "events.cta",
@@ -267,30 +267,30 @@ export const pinkEventsData: TemplateField[] = [
 export const pinkEventsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "events.header",
-    title: "Events Header",
-    description: "Breadcrumb, heading and intro for the events page",
+    title: "Header",
+    description: "Heading and intro text for the events page.",
     icon: "🗓️",
     columns: 2,
   },
   {
     id: "events.list",
-    title: "Events List",
-    description: "Flier hint, the default link label, and the empty-state copy",
+    title: "Events list",
+    description: "Flier hint, the default link text, and the empty-list copy.",
     icon: "🎫",
     columns: 2,
   },
   {
     id: "events.detail",
-    title: "Event Page",
+    title: "Event page",
     description:
-      "Labels on each event's own page — the calendar leaf rows, the past badge, the QR caption and the back link",
+      "Labels on each event's own page — the calendar leaf rows, the past badge, the QR caption and the back link.",
     icon: "📅",
     columns: 2,
   },
   {
     id: "events.cta",
-    title: "Closing Call to Action",
-    description: "Heading, body, one button and an optional 2-up image pair",
+    title: "Closing banner",
+    description: "Heading, body, one button and an optional image pair.",
     icon: "📣",
     columns: 2,
   },
@@ -300,8 +300,8 @@ export const pinkEventsSections: TemplateSection[] = [
   {
     id: "events.header",
     page: "events",
-    title: "Events Header",
-    description: "Breadcrumb, heading and intro",
+    title: "Header",
+    description: "Heading and intro text for the events page.",
     groupIds: ["events.header"],
     order: 0,
     hideable: false,
@@ -309,8 +309,8 @@ export const pinkEventsSections: TemplateSection[] = [
   {
     id: "events.list",
     page: "events",
-    title: "Events List",
-    description: "The grid of dated events you've published in Events",
+    title: "Events list",
+    description: "The grid of dated events you've published in Events.",
     groupIds: ["events.list"],
     order: 1,
     hideable: false,
@@ -319,9 +319,9 @@ export const pinkEventsSections: TemplateSection[] = [
   {
     id: "events.detail",
     page: "events",
-    title: "Event Page",
+    title: "Event page",
     description:
-      "Row labels, past badge, QR caption and back link on each event's own page",
+      "Row labels, past badge, QR caption and back link on each event's own page.",
     groupIds: ["events.detail"],
     order: 2,
     hideable: false,
@@ -330,9 +330,9 @@ export const pinkEventsSections: TemplateSection[] = [
   {
     id: "events.cta",
     page: "events",
-    title: "Closing Call to Action",
+    title: "Closing banner",
     description:
-      "Closing CTA panel with an optional 2-up image pair — also closes each event's own page",
+      "Closing panel with an optional image pair — also closes each event's own page.",
     groupIds: ["events.cta"],
     order: 3,
     hideable: true,

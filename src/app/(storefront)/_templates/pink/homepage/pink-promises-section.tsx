@@ -1,5 +1,5 @@
 import type { TemplateListRow } from "~/lib/template-fields";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
 import { PinkReveal } from "../shared/pink-reveal";
@@ -36,6 +36,7 @@ export function PinkPromisesSection({ items }: Props) {
               key={item._id ?? i}
               index={i}
               className="flex flex-col gap-4 p-8 md:p-9"
+              attrs={listItemAttr("pink.homepage.promises-items", i)}
             >
               <PinkRule width={38} />
               <h3

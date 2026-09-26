@@ -4,7 +4,11 @@ import Link from "next/link";
 import type { PinkServiceCard } from "./pink-services-grid";
 import type { TemplateListRow } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
@@ -279,6 +283,7 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
                 key={step._id ?? i}
                 index={i}
                 className="flex flex-col gap-3 px-5 py-6"
+                attrs={listItemAttr("pink.services.steps-list", i)}
               >
                 <span
                   className="pink-display"

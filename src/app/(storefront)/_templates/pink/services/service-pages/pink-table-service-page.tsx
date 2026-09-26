@@ -3,8 +3,11 @@ import type { TemplateListRow } from "~/lib/template-fields";
 import {
   getRichTextFieldValue,
   isContentEmpty,
+  parseFaqPickerIds,
   parseTemplateListRows,
+  resolveFaqPickerItems,
 } from "~/lib/template-fields";
+import { api } from "~/trpc/server";
 
 import { PinkFactRows } from "../../shared/pink-fact-rows";
 import { PinkPhotoHeader } from "../../shared/pink-photo-header";
@@ -25,13 +28,60 @@ const DEFAULT_FACT_ROWS: TemplateListRow[] = [
   { label: "Notice", value: "Book at least 2 weeks out" },
 ];
 
+/** Matches `maxItems` on the `pink-table.faq` picker field. */
+const FAQ_MAX_ITEMS = 8;
+
+type PinkTableFaqRow = { question: string; answer: string; _id?: string };
+
+/**
+ * The service page's FAQ rows, in priority order:
+ *
+ *   1. questions picked in the `pink-table.faq` Content → FAQ picker,
+ *      resolved against the published FAQ corpus (only fetched when something
+ *      is picked, so a service without FAQs costs no query);
+ *   2. otherwise, `{question, answer}` rows saved before the field became a
+ *      picker (2026-09-26), parsed exactly as before so they keep rendering;
+ *   3. otherwise, nothing — the section hides. Unlike the contact-page
+ *      pickers there is deliberately no "first N published" fallback here.
+ *
+ * Picked ids that no longer resolve (unpublished or deleted) hide the
+ * section rather than falling through to step 2.
+ */
+async function resolvePinkTableFaq(raw: unknown): Promise<PinkTableFaqRow[]> {
+  const pickedIds = parseFaqPickerIds(raw);
+  if (pickedIds) {
+    const published = await api.faq.list().catch(() => []);
+    return resolveFaqPickerItems(pickedIds, published, FAQ_MAX_ITEMS).map(
+      (item) => ({
+        question: item.question,
+        answer: item.answer,
+        _id: item.id,
+      }),
+    );
+  }
+
+  // Legacy rows are objects; a picker value (string ids, possibly all blank)
+  // never is, so blank picker slots can't surface as empty accordion rows.
+  const legacyRows = Array.isArray(raw)
+    ? raw.filter(
+        (row): row is Record<string, unknown> =>
+          row !== null && typeof row === "object" && !Array.isArray(row),
+      )
+    : [];
+  return parseTemplateListRows(legacyRows).map((row) => ({
+    question: typeof row.question === "string" ? row.question : "",
+    answer: typeof row.answer === "string" ? row.answer : "",
+    _id: row._id,
+  }));
+}
+
 /**
  * `pink-table` — the PinkArt service detail template (design.md → "Service
  * detail — pink-table"). Not part of the visual editor: fields live on
  * `Service.customFields`, edited at `/admin/services/[id]`, so there are no
  * `sectionGroupAttr`/`fieldAttr`/`isSectionVisible` calls in this file.
  */
-export function PinkTableServicePage({
+export async function PinkTableServicePage({
   service,
   items,
   embedsEnabled,
@@ -115,11 +165,7 @@ export function PinkTableServicePage({
     }),
   );
 
-  const faq = parseTemplateListRows(raw?.["pink-table.faq"]).map((row) => ({
-    question: typeof row.question === "string" ? row.question : "",
-    answer: typeof row.answer === "string" ? row.answer : "",
-    _id: row._id,
-  }));
+  const faq = await resolvePinkTableFaq(raw?.["pink-table.faq"]);
 
   return (
     <div className="flex flex-col">

@@ -227,7 +227,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                 {f["pink.checkout.summary-heading"] ?? ""}
               </span>
               <span className="pink-label-dark">
-                {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+                {itemCount} {itemCount === 1 ? "item" : "items"}
               </span>
             </div>
 
@@ -559,7 +559,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                 autoComplete="tel"
                 value={form.phone}
                 onChange={(val) => form.setPhone(val)}
-                placeholder="+1 313 555 0100"
+                placeholder="+1 555 555 0100"
                 required
                 aria-required="true"
                 aria-invalid={invalid.phone ? true : undefined}
@@ -614,9 +614,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                           : "var(--pink-ink)",
                     }}
                   >
-                    {method === "ship"
-                      ? "Ship to address"
-                      : "Pick up in Detroit"}
+                    {method === "ship" ? "Ship to address" : "Pick up"}
                   </button>
                 ))}
               </div>
@@ -640,7 +638,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                   >
                     {form.shippingConfig.pickupLocation ??
                       business.businessAddress ??
-                      "Pickup details will be confirmed by the studio."}
+                      "We'll confirm pickup details by email."}
                   </p>
                   {form.shippingConfig.pickupInstructions && (
                     <p

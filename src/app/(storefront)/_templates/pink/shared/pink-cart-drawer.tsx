@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   Sheet,
@@ -13,7 +14,18 @@ import {
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
 
+import { resolveFields } from "../index";
 import { PINK_SCOPE_CLASS } from "../layout/pink-scope";
+
+/** Shared with the cart page (`cart.main`) — one set of cart copy. */
+const CART_FIELD_KEYS = [
+  "pink.cart.heading",
+  "pink.cart.empty-heading",
+  "pink.cart.empty-body",
+  "pink.cart.empty-cta",
+  "pink.cart.checkout-label",
+  "pink.cart.summary-note",
+];
 
 type PinkCartDrawerProps = {
   /**
@@ -22,13 +34,12 @@ type PinkCartDrawerProps = {
    * so the caller has to hand them over or presets skip the drawer.
    */
   themeVars?: React.CSSProperties;
-  /** Owner-editable copy — resolved by the caller. */
-  title?: string;
-  emptyHeading?: string;
-  emptyBody?: string;
-  browseLabel?: string;
-  checkoutLabel?: string;
-  noteText?: string;
+  /**
+   * `business.siteContent.customFields` — the drawer resolves the cart page's
+   * `pink.cart.*` copy from it so the drawer and the cart page always say the
+   * same thing. Omitted → the fields' defaults.
+   */
+  customFields?: unknown;
 };
 
 /**
@@ -41,15 +52,17 @@ type PinkCartDrawerProps = {
  */
 export function PinkCartDrawer({
   themeVars,
-  title = "Your basket",
-  emptyHeading = "Your basket is empty.",
-  emptyBody = "Anything you add will appear here.",
-  browseLabel = "Browse the shop →",
-  checkoutLabel = "Checkout",
-  noteText = "Shipping and taxes are calculated at checkout.",
+  customFields,
 }: PinkCartDrawerProps) {
   const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
     useCart();
+  const f = resolveFields(customFields, CART_FIELD_KEYS);
+  const title = f["pink.cart.heading"] ?? "";
+  const emptyHeading = f["pink.cart.empty-heading"] ?? "";
+  const emptyBody = f["pink.cart.empty-body"] ?? "";
+  const browseLabel = f["pink.cart.empty-cta"] ?? "";
+  const checkoutLabel = f["pink.cart.checkout-label"] ?? "";
+  const noteText = f["pink.cart.summary-note"] ?? "";
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -83,12 +96,13 @@ export function PinkCartDrawer({
                   fontWeight: 600,
                   color: "var(--pink-paper)",
                 }}
+                {...fieldAttr("pink.cart.heading")}
               >
                 {title}
               </span>
               {itemCount > 0 && (
                 <span className="pink-label-dark">
-                  {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+                  {itemCount} {itemCount === 1 ? "item" : "items"}
                 </span>
               )}
             </div>
@@ -109,24 +123,31 @@ export function PinkCartDrawer({
                   fontWeight: 600,
                   color: "var(--pink-paper)",
                 }}
+                {...fieldAttr("pink.cart.empty-heading")}
               >
                 {emptyHeading}
               </p>
-              <p
-                className="text-[13px]"
-                style={{ color: "var(--pink-ink-muted)" }}
-              >
-                {emptyBody}
-              </p>
+              {emptyBody && (
+                <p
+                  className="text-[13px]"
+                  style={{ color: "var(--pink-ink-muted)" }}
+                  {...fieldAttr("pink.cart.empty-body")}
+                >
+                  {emptyBody}
+                </p>
+              )}
             </div>
-            <Link
-              href="/shop"
-              onClick={() => setIsOpen(false)}
-              className="mt-2 text-[13px] font-medium transition-opacity hover:opacity-80"
-              style={{ color: "var(--pink-blush)" }}
-            >
-              {browseLabel}
-            </Link>
+            {browseLabel && (
+              <Link
+                href="/shop"
+                onClick={() => setIsOpen(false)}
+                className="mt-2 text-[13px] font-medium transition-opacity hover:opacity-80"
+                style={{ color: "var(--pink-blush)" }}
+                {...fieldAttr("pink.cart.empty-cta")}
+              >
+                {browseLabel}
+              </Link>
+            )}
           </div>
         ) : (
           <>
@@ -261,7 +282,9 @@ export function PinkCartDrawer({
                 onClick={() => setIsOpen(false)}
                 className="pink-btn pink-btn-solid w-full justify-between"
               >
-                <span>{checkoutLabel}</span>
+                <span {...fieldAttr("pink.cart.checkout-label")}>
+                  {checkoutLabel}
+                </span>
                 <span>{formatPrice(subtotal)} →</span>
               </Link>
 
@@ -269,6 +292,7 @@ export function PinkCartDrawer({
                 <p
                   className="text-center text-[12px]"
                   style={{ color: "var(--pink-ink-subtle)" }}
+                  {...fieldAttr("pink.cart.summary-note")}
                 >
                   {noteText}
                 </p>

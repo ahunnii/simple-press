@@ -18,16 +18,29 @@ type OrderDetails = {
   amount_total: number | null;
   currency: string;
   payment_status: string;
+  /** Checkout metadata — `null` on older sessions or stores without pickup. */
+  delivery_method?: "ship" | "pickup" | null;
 };
 
 type Props = {
   heading: string;
   headingAccent: string;
   body: string;
+  /** Replaces `body` on pickup orders. */
+  pickupBody: string;
   itemsHeading: string;
   summaryHeading: string;
   nextStepsLabel: string;
   nextSteps: string;
+  /** Replaces `nextSteps` on pickup orders. */
+  nextStepsPickup: string;
+  /** Owner note (`pink.checkout.success-note`); blank hides it. */
+  successNote: string;
+  /** Shown when the ordered items can't be listed; blank hides it. */
+  receiptNote: string;
+  /** Settings pickup location (else business address), pre-trimmed. */
+  pickupLocation: string;
+  pickupInstructions: string;
   continueCta: string;
   loadingText: string;
   noOrderHeading: string;
@@ -64,16 +77,24 @@ function titleCasePaymentStatus(status: string): string {
  * and clears the cart — but takes a snapshot of the shopper's own cart items
  * FIRST (still in `useCart()` state at this point, since the browser just
  * returned from Stripe) so "What you ordered" can show real line items even
- * though the session endpoint itself returns only email/total/status.
+ * though the session endpoint itself returns no line items. Its
+ * `delivery_method` switches the body and next steps to their pickup
+ * variants and shows the pickup location.
  */
 export function PinkOrderConfirmation({
   heading,
   headingAccent,
   body,
+  pickupBody,
   itemsHeading,
   summaryHeading,
   nextStepsLabel,
   nextSteps,
+  nextStepsPickup,
+  successNote,
+  receiptNote,
+  pickupLocation,
+  pickupInstructions,
   continueCta,
   loadingText,
   noOrderHeading,
@@ -181,7 +202,10 @@ export function PinkOrderConfirmation({
   }
 
   // ── Success ────────────────────────────────────────────────────────────
-  const nextStepsLines = nextSteps
+  const isPickup = orderDetails?.delivery_method === "pickup";
+  const leadText = isPickup ? pickupBody : body;
+  const leadFieldKey = isPickup ? "pink.order.pickup-body" : "pink.order.body";
+  const nextStepsLines = (isPickup ? nextStepsPickup : nextSteps)
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
@@ -234,13 +258,13 @@ export function PinkOrderConfirmation({
               {headingAccent}
             </span>
           </h1>
-          {body && (
+          {leadText && (
             <p
               className="max-w-[46ch] text-[17px] leading-[1.7]"
               style={{ color: "var(--pink-ink-body)" }}
-              {...fieldAttr("pink.order.body")}
+              {...fieldAttr(leadFieldKey)}
             >
-              {body}
+              {leadText}
             </p>
           )}
         </div>
@@ -290,17 +314,18 @@ export function PinkOrderConfirmation({
                   </span>
                 </div>
               ))
-            ) : (
+            ) : receiptNote ? (
               <p
                 className="py-4 text-[14px]"
                 style={{
                   borderTop: "1px solid var(--pink-ink)",
                   color: "var(--pink-subtle)",
                 }}
+                {...fieldAttr("pink.order.receipt-note")}
               >
-                Your receipt is on its way by email.
+                {receiptNote}
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Ink summary panel */}
@@ -353,6 +378,34 @@ export function PinkOrderConfirmation({
                     ))}
                   </ul>
                 </div>
+              )}
+              {isPickup && pickupLocation && (
+                <div className="flex flex-col gap-1.5 p-7 pt-0 md:p-8 md:pt-0">
+                  <p className="pink-label-dark">Pickup location</p>
+                  <p
+                    className="text-[14px] leading-[1.6] whitespace-pre-line"
+                    style={{ color: "var(--pink-paper)" }}
+                  >
+                    {pickupLocation}
+                  </p>
+                  {pickupInstructions && (
+                    <p
+                      className="text-[13px] leading-[1.6] whitespace-pre-line"
+                      style={{ color: "var(--pink-ink-body)" }}
+                    >
+                      {pickupInstructions}
+                    </p>
+                  )}
+                </div>
+              )}
+              {successNote.trim() && (
+                <p
+                  className="p-7 pt-0 text-[14px] leading-[1.6] whitespace-pre-line md:p-8 md:pt-0"
+                  style={{ color: "var(--pink-ink-body)" }}
+                  {...fieldAttr("pink.checkout.success-note")}
+                >
+                  {successNote}
+                </p>
               )}
               <div className="p-7 pt-0 md:p-8 md:pt-0">
                 <Link

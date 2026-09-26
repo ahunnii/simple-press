@@ -98,7 +98,7 @@ export function PinkCartContents({
               {heading}
             </span>
             <span className="pink-label-dark">
-              {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+              {itemCount} {itemCount === 1 ? "item" : "items"}
             </span>
           </div>
 

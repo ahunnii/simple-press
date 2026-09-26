@@ -269,6 +269,8 @@ import { PinkAddressBookPage } from "./pink/account/pink-address-book-page";
 import { PinkOrderDetailPage } from "./pink/account/pink-order-detail-page";
 import { PinkOrdersPage } from "./pink/account/pink-orders-page";
 import { PinkPreferencesPage } from "./pink/account/pink-preferences-page";
+import { PinkRewardsPage } from "./pink/account/pink-rewards-page";
+import { PinkSubscriptionsPage } from "./pink/account/pink-subscriptions-page";
 import { PinkBlogPage } from "./pink/blog/pink-blog-page";
 import { PinkBlogPostPage } from "./pink/blog/pink-blog-post-page";
 import { PinkCartPage } from "./pink/cart-checkout/pink-cart-page";
@@ -282,6 +284,7 @@ import { PinkDonatePage } from "./pink/donate/pink-donate-page";
 import { PinkEventPage } from "./pink/events/pink-event-page";
 import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
 import { PinkGenericPage } from "./pink/generic/pink-generic-page";
+import { PinkInvoicesPage } from "./pink/account/pink-invoices-page";
 import { PinkLayout } from "./pink/layout/pink-layout";
 import { PinkProductPage } from "./pink/products/pink-product-page";
 import { PinkServicesIndexPage } from "./pink/services/pink-services-index-page";
@@ -741,6 +744,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: PinkOrderDetailPage,
     OrdersPage: PinkOrdersPage,
     PreferencesPage: PinkPreferencesPage,
+    SubscriptionsPage: PinkSubscriptionsPage,
+    InvoicesPage: PinkInvoicesPage,
+    RewardsPage: PinkRewardsPage,
   },
 
   // Handy Relocations — service archetype (1:1 recreation of

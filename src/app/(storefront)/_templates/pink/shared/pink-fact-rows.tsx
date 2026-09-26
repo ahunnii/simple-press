@@ -12,6 +12,11 @@ type PinkFactRowsProps = {
    */
   surface?: "dark" | "paper";
   className?: string;
+  /**
+   * Extra attributes for each row's root — e.g. `listItemAttr(fieldKey, i)`
+   * so a click on a row in the editor preview opens that list row.
+   */
+  itemAttr?: (index: number) => Record<string, string | undefined>;
 };
 
 /**
@@ -23,6 +28,7 @@ export function PinkFactRows({
   rows,
   surface = "dark",
   className,
+  itemAttr,
 }: PinkFactRowsProps) {
   if (rows.length === 0) return null;
   const dark = surface === "dark";
@@ -35,6 +41,7 @@ export function PinkFactRows({
           style={{
             background: dark ? "var(--pink-ink-panel)" : "var(--pink-panel)",
           }}
+          {...itemAttr?.(i)}
         >
           <dt className={dark ? "pink-label-dark" : "pink-label"}>
             {row.label}

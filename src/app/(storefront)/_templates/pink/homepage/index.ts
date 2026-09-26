@@ -21,9 +21,9 @@ import { SECTION_LINKS } from "~/lib/section-links";
 const homepageHeroData: TemplateField[] = [
   {
     key: "pink.homepage.hero-kicker",
-    label: "Hero Kicker",
+    label: "Small label",
     description:
-      "Small uppercase line above the headline, in the brighter of the two dark-surface text colors.",
+      "Short line above the headline, shown in the brighter of the hero's two text colors.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -32,9 +32,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-kicker-trailing",
-    label: "Hero Kicker — Trailing Clause",
+    label: "Small label — second part",
     description:
-      "Muted continuation of the kicker line, e.g. 'in a Detroit studio.' Leave blank to show just the kicker.",
+      "Continues the small label above, e.g. 'in a Detroit studio.' Leave blank to show only the first part.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -43,7 +43,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-heading-line-1",
-    label: "Headline — Line 1",
+    label: "Headline — line 1",
     description: "First line of the hero headline.",
     type: "text",
     page: "homepage",
@@ -53,7 +53,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-heading-line-2",
-    label: "Headline — Line 2 (accent)",
+    label: "Headline — line 2 (accent)",
     description: "Second line of the hero headline, shown in the accent color.",
     type: "text",
     page: "homepage",
@@ -63,7 +63,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-body",
-    label: "Hero Body",
+    label: "Body text",
     description: "One or two sentences under the headline.",
     type: "textarea",
     page: "homepage",
@@ -74,8 +74,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-cta-primary-label",
-    label: "Primary CTA Label",
-    description: "The solid rose button.",
+    label: "Button text",
+    description: "Text on the hero's main button.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -84,18 +84,19 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-cta-primary-link",
-    label: "Primary CTA Link",
+    label: "Button link",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "/shop",
-    description: "Where the solid button goes.",
+    description: "Where the main button goes.",
   },
   {
     key: "pink.homepage.hero-cta-secondary-label",
-    label: "Secondary CTA Label",
-    description: "The ghost (outlined) button. Leave blank to hide it.",
+    label: "Button text — second button",
+    description:
+      "Text on the hero's second, outlined button. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -104,19 +105,19 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-cta-secondary-link",
-    label: "Secondary CTA Link",
+    label: "Button link — second button",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "#make-and-takes",
-    description: "Where the ghost button goes.",
+    description: "Where the second button goes.",
   },
   {
     key: "pink.homepage.hero-image",
-    label: "Family Home Photo",
+    label: "Family home photo",
     description:
-      "The family home where it all began — washed into the hero background behind the wordmark, not shown as a standalone tile.",
+      "The family home where it all began, washed into the hero background behind the wordmark. Not shown as a standalone image.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -125,7 +126,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-1",
-    label: "Maker — Left",
+    label: "Maker — left",
     description:
       "A person holding what they made at a make & take, standing at the hero's left. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band.",
     type: "image",
@@ -136,7 +137,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-1-alt",
-    label: "Maker — Left (photo description)",
+    label: "Maker — left (photo description)",
     description:
       "Read aloud by screen readers; describe the person and what they're holding.",
     type: "text",
@@ -148,7 +149,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-2",
-    label: "Maker — Center",
+    label: "Maker — center",
     description:
       "A person holding what they made at a make & take, standing at the hero's center. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band.",
     type: "image",
@@ -159,7 +160,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-2-alt",
-    label: "Maker — Center (photo description)",
+    label: "Maker — center (photo description)",
     description:
       "Read aloud by screen readers; describe the person and what they're holding.",
     type: "text",
@@ -171,7 +172,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-3",
-    label: "Maker — Right",
+    label: "Maker — right",
     description:
       "A person holding what they made at a make & take, standing at the hero's right. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band.",
     type: "image",
@@ -182,7 +183,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-3-alt",
-    label: "Maker — Right (photo description)",
+    label: "Maker — right (photo description)",
     description:
       "Read aloud by screen readers; describe the person and what they're holding.",
     type: "text",
@@ -194,7 +195,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-4",
-    label: "Maker — Far Left",
+    label: "Maker — far left",
     description:
       "A person holding what they made at a make & take, standing at the hero's far left, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Shown on desktop only — five figures cannot fit a phone or tablet stage, which keep the middle three.",
     type: "image",
@@ -205,7 +206,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-4-alt",
-    label: "Maker — Far Left (photo description)",
+    label: "Maker — far left (photo description)",
     description:
       "Read aloud by screen readers; describe the person and what they're holding.",
     type: "text",
@@ -217,7 +218,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-5",
-    label: "Maker — Far Right",
+    label: "Maker — far right",
     description:
       "A person holding what they made at a make & take, standing at the hero's far right, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Shown on desktop only — five figures cannot fit a phone or tablet stage, which keep the middle three.",
     type: "image",
@@ -228,7 +229,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-maker-5-alt",
-    label: "Maker — Far Right (photo description)",
+    label: "Maker — far right (photo description)",
     description:
       "Read aloud by screen readers; describe the person and what they're holding.",
     type: "text",
@@ -240,7 +241,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-doll-1",
-    label: "Corner Doll — Top Left",
+    label: "Corner doll — top left",
     description:
       "Small tilted doll cutout pinned in the hero's top-left corner like taped-up artwork — smaller and cropped by the edge on phones. A photo with its background removed (transparent PNG/WebP) works best.",
     type: "image",
@@ -251,7 +252,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-doll-2",
-    label: "Corner Doll — Top Right",
+    label: "Corner doll — top right",
     description:
       "Small tilted doll cutout pinned in the hero's top-right corner like taped-up artwork — smaller and cropped by the edge on phones. A photo with its background removed (transparent PNG/WebP) works best.",
     type: "image",
@@ -267,26 +268,30 @@ const homepageHeroData: TemplateField[] = [
 const homepagePromisesData: TemplateField[] = [
   {
     key: "pink.homepage.promises-items",
-    label: "Promise Cards",
+    label: "Promise cards",
     description:
-      "Three short promises shown in a hairline grid — the plain-spoken facts a new visitor should know. Up to 6.",
+      "Short promises shown in a grid of up to 6 cards — the plain facts a new visitor should know. Leave empty to use the defaults.",
     type: "list",
     page: "homepage",
     group: "homepage.promises",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "promise",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "title",
         label: "Title",
         type: "text",
-        placeholder: "One of a kind",
+        description: "Short heading for the promise.",
+        placeholder: "e.g. One of a kind",
       },
       {
         key: "body",
         label: "Body",
         type: "textarea",
-        placeholder: "Every piece is made on its own, never in runs.",
+        description: "One sentence explaining the promise.",
+        placeholder: "e.g. Every piece is made on its own, never in runs.",
       },
     ],
     defaultValue: "",
@@ -298,19 +303,19 @@ const homepagePromisesData: TemplateField[] = [
 const homepageCollectionData: TemplateField[] = [
   {
     key: "pink.homepage.collection-heading",
-    label: "Collection Heading",
+    label: "Heading",
     type: "text",
     page: "homepage",
     group: "homepage.collection",
     gridColumn: "col-span-1",
     defaultValue: "New from the table",
-    description: "Section heading above the product grid.",
+    description: "Heading above the product grid.",
   },
   {
     key: "pink.homepage.collection-note",
-    label: "Collection Note",
+    label: "Note",
     description:
-      "Short right-aligned line beside the heading. Leave blank to hide.",
+      "Short line beside the heading, aligned to the opposite side. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.collection",
@@ -319,23 +324,24 @@ const homepageCollectionData: TemplateField[] = [
   },
   {
     key: "pink.homepage.collection-cta-label",
-    label: "“See All” CTA Label",
+    label: "Button text",
     type: "text",
     page: "homepage",
     group: "homepage.collection",
     gridColumn: "col-span-1",
     defaultValue: "See all pieces",
-    description: "Centered ghost button below the product grid.",
+    description:
+      "Centered button below the product grid. Leave blank to hide it.",
   },
   {
     key: "pink.homepage.collection-cta-link",
-    label: "“See All” CTA Link",
+    label: "Button link",
     type: "url",
     page: "homepage",
     group: "homepage.collection",
     gridColumn: "col-span-1",
     defaultValue: "/shop",
-    description: "Where the “see all” button goes.",
+    description: "Where the button goes.",
   },
 ];
 
@@ -344,8 +350,8 @@ const homepageCollectionData: TemplateField[] = [
 const homepageUpcomingData: TemplateField[] = [
   {
     key: "pink.homepage.upcoming-eyebrow",
-    label: "Eyebrow",
-    description: "Small uppercase line above the heading.",
+    label: "Small label",
+    description: "Short line above the heading.",
     type: "text",
     page: "homepage",
     group: "homepage.upcoming",
@@ -364,7 +370,7 @@ const homepageUpcomingData: TemplateField[] = [
   },
   {
     key: "pink.homepage.upcoming-note",
-    label: "Lead-In",
+    label: "Intro text",
     description:
       "One short line under the heading. Hidden automatically while nothing is scheduled.",
     type: "textarea",
@@ -375,7 +381,7 @@ const homepageUpcomingData: TemplateField[] = [
   },
   {
     key: "pink.homepage.upcoming-limit",
-    label: "How Many To Show",
+    label: "How many to show",
     description:
       "How many upcoming dates to put on the homepage. Three fills the row; anything over six is capped.",
     type: "number",
@@ -383,11 +389,13 @@ const homepageUpcomingData: TemplateField[] = [
     group: "homepage.upcoming",
     gridColumn: "col-span-1",
     defaultValue: "3",
-    placeholder: "3",
+    min: 1,
+    max: 6,
+    step: 1,
   },
   {
     key: "pink.homepage.upcoming-cta-label",
-    label: "“See All” Label",
+    label: "Link text",
     description:
       "Link beside the heading, through to the full events page. Leave blank to hide it.",
     type: "text",
@@ -398,7 +406,7 @@ const homepageUpcomingData: TemplateField[] = [
   },
   {
     key: "pink.homepage.upcoming-cta-link",
-    label: "“See All” Link",
+    label: "Link target",
     description: "Where that link goes.",
     type: "url",
     page: "homepage",
@@ -408,9 +416,9 @@ const homepageUpcomingData: TemplateField[] = [
   },
   {
     key: "pink.homepage.upcoming-empty-heading",
-    label: "Empty Heading",
+    label: "Heading — nothing scheduled",
     description:
-      "Shown in place of the cards when nothing is scheduled. Clear this and the body to drop the whole band until you add a date.",
+      "Shown in place of the cards when nothing is scheduled. Clear this and the body below to drop the whole section until you add a date.",
     type: "text",
     page: "homepage",
     group: "homepage.upcoming",
@@ -419,8 +427,8 @@ const homepageUpcomingData: TemplateField[] = [
   },
   {
     key: "pink.homepage.upcoming-empty-body",
-    label: "Empty Body",
-    description: "One line under the empty-state heading.",
+    label: "Body text — nothing scheduled",
+    description: "One line under the heading above.",
     type: "textarea",
     page: "homepage",
     group: "homepage.upcoming",
@@ -434,17 +442,17 @@ const homepageUpcomingData: TemplateField[] = [
 const homepageEventsData: TemplateField[] = [
   {
     key: "pink.homepage.events-heading",
-    label: "Events Heading",
+    label: "Heading",
     type: "text",
     page: "homepage",
     group: "homepage.events",
     gridColumn: "col-span-1",
     defaultValue: "Come sit at the table",
-    description: "Heading for the make & takes band.",
+    description: "Heading for the make & takes section.",
   },
   {
     key: "pink.homepage.events-note",
-    label: "Events Lead-In",
+    label: "Intro text",
     description: "One short line under the heading.",
     type: "textarea",
     page: "homepage",
@@ -454,9 +462,9 @@ const homepageEventsData: TemplateField[] = [
   },
   {
     key: "pink.homepage.events-body",
-    label: "What a Make & Take Is",
+    label: "Body text",
     description:
-      "A short paragraph explaining what actually happens at one. This is the only place on the homepage that says what you are offering, so keep it plain.",
+      "A short paragraph explaining what actually happens at a make & take. This is the only place on the homepage that says what you are offering, so keep it plain.",
     type: "textarea",
     page: "homepage",
     group: "homepage.events",
@@ -466,52 +474,68 @@ const homepageEventsData: TemplateField[] = [
   },
   {
     key: "pink.homepage.events-mosaic",
-    label: "Make & Take Photos and Fliers",
+    label: "Photos and fliers",
     description:
-      "Five photos — the first shows large; the other four fill the grid around it. The layout is arranged for you.",
+      "Up to 5 photos in a fixed layout — the first shows large, the other four fill the grid around it.",
     type: "list",
     page: "homepage",
     group: "homepage.events",
     gridColumn: "col-span-full",
     maxItems: 5,
+    itemLabel: "photo",
     itemSchema: [
-      { key: "image", label: "Image", type: "image" },
+      {
+        key: "image",
+        label: "Image",
+        type: "image",
+        description: "One photo or flier for the grid.",
+      },
       {
         key: "alt",
-        label: "Alt Text",
+        label: "Alt text",
         type: "text",
-        // Fliers carry words, so this is not decoration — if it says the date
-        // and the room, the alt text has to say them too.
+        description:
+          "Read aloud by screen readers. Fliers carry words, so if it says the date and the room, say that here too.",
         placeholder: "Describe the photo, or read out what the flier says",
+        optional: true,
       },
     ],
     defaultValue: "",
   },
   {
     key: "pink.homepage.events-facts",
-    label: "How They're Hosted",
+    label: "How they're hosted",
     description:
-      "Label/value rows describing how a make & take typically runs — where, group size, what's included. Up to 4.",
+      "Up to 4 label/value rows describing how a make & take typically runs — where, group size, what's included. Leave empty to use the defaults.",
     type: "list",
     page: "homepage",
     group: "homepage.events",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "fact",
+    defaultsWhenEmpty: true,
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Where" },
+      {
+        key: "label",
+        label: "Label",
+        type: "text",
+        description: "Short name for the fact, e.g. 'Where'.",
+        placeholder: "e.g. Where",
+      },
       {
         key: "value",
         label: "Value",
         type: "text",
+        description: "The fact itself.",
         placeholder:
-          "Your space — school, church, library, workplace or back yard",
+          "e.g. Your space — school, church, library, workplace or back yard",
       },
     ],
     defaultValue: "",
   },
   {
     key: "pink.homepage.events-cta-note",
-    label: "Enquiry Note",
+    label: "Note — button",
     description:
       "The line beside the button. Say that cost is quoted per group once you know what someone needs.",
     type: "textarea",
@@ -523,7 +547,7 @@ const homepageEventsData: TemplateField[] = [
   },
   {
     key: "pink.homepage.events-cta-label",
-    label: "Enquiry Button Text",
+    label: "Button text",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "homepage",
@@ -533,7 +557,7 @@ const homepageEventsData: TemplateField[] = [
   },
   {
     key: "pink.homepage.events-cta-link",
-    label: "Enquiry Button Link",
+    label: "Button link",
     description: "Where the button goes.",
     type: "url",
     page: "homepage",
@@ -558,7 +582,7 @@ const homepageVideosData: TemplateField[] = [
   },
   {
     key: "pink.homepage.videos-note",
-    label: "Lead-In",
+    label: "Intro text",
     description:
       "One short line under the heading. Hidden automatically while there are no videos to describe.",
     type: "textarea",
@@ -570,7 +594,7 @@ const homepageVideosData: TemplateField[] = [
   },
   {
     key: "pink.homepage.videos-limit",
-    label: "How Many To Show",
+    label: "How many to show",
     description:
       "How many videos to put on the homepage. Three fills the row; anything over six is capped.",
     type: "number",
@@ -578,11 +602,13 @@ const homepageVideosData: TemplateField[] = [
     group: "homepage.videos",
     gridColumn: "col-span-1",
     defaultValue: "3",
-    placeholder: "3",
+    min: 1,
+    max: 6,
+    step: 1,
   },
   {
     key: "pink.homepage.videos-cta-label",
-    label: "“See All” Label",
+    label: "Link text",
     description:
       "Link beside the heading, through to the full videos page. Leave blank to hide it.",
     type: "text",
@@ -593,7 +619,7 @@ const homepageVideosData: TemplateField[] = [
   },
   {
     key: "pink.homepage.videos-cta-link",
-    label: "“See All” Link",
+    label: "Link target",
     description: "Where that link goes.",
     type: "url",
     page: "homepage",
@@ -603,9 +629,9 @@ const homepageVideosData: TemplateField[] = [
   },
   {
     key: "pink.homepage.videos-empty-heading",
-    label: "Empty Heading",
+    label: "Heading — nothing posted",
     description:
-      "Shown in place of the videos when nothing has been published yet. Clear this and the body to drop the whole band until you add one.",
+      "Shown in place of the videos when nothing has been published yet. Clear this and the body below to drop the whole section until you add one.",
     type: "text",
     page: "homepage",
     group: "homepage.videos",
@@ -614,8 +640,8 @@ const homepageVideosData: TemplateField[] = [
   },
   {
     key: "pink.homepage.videos-empty-body",
-    label: "Empty Body",
-    description: "One line under the empty-state heading.",
+    label: "Body text — nothing posted",
+    description: "One line under the heading above.",
     type: "textarea",
     page: "homepage",
     group: "homepage.videos",
@@ -629,9 +655,8 @@ const homepageVideosData: TemplateField[] = [
 const homepageStoryData: TemplateField[] = [
   {
     key: "pink.homepage.story-image",
-    label: "Story Image",
-    description:
-      "Portrait image beside the pull-quote — a studio or working photo.",
+    label: "Image",
+    description: "Portrait image beside the pull-quote — a studio or working photo.",
     type: "image",
     page: "homepage",
     group: "homepage.story",
@@ -640,17 +665,17 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "pink.homepage.story-image-alt",
-    label: "Story Image Alt Text",
+    label: "Image alt text",
     type: "text",
     page: "homepage",
     group: "homepage.story",
     gridColumn: "col-span-full",
     defaultValue: "Evelyn Pinkard working at her studio table in Detroit.",
-    description: "Describes the story image for screen readers.",
+    description: "Read aloud by screen readers to describe the image above.",
   },
   {
     key: "pink.homepage.story-quote-before",
-    label: "Pull-Quote — Before",
+    label: "Pull-quote — before",
     description: "Text before the accent word.",
     type: "text",
     page: "homepage",
@@ -660,7 +685,7 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "pink.homepage.story-quote-accent",
-    label: "Pull-Quote — Accent Word",
+    label: "Pull-quote — accent word",
     description: "One word shown in the accent color.",
     type: "text",
     page: "homepage",
@@ -670,7 +695,7 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "pink.homepage.story-quote-after",
-    label: "Pull-Quote — After",
+    label: "Pull-quote — after",
     description: "Text after the accent word.",
     type: "text",
     page: "homepage",
@@ -680,7 +705,7 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "pink.homepage.story-body",
-    label: "Story Body",
+    label: "Body text",
     type: "textarea",
     page: "homepage",
     group: "homepage.story",
@@ -708,37 +733,37 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair on desktop only), and two small doll cutouts pinned in the top corners. The wordmark itself isn't set here — it follows your business name (Settings → General) split on the accent word in the global Branding group, same as the header and footer.",
+      "Full-width hero — small label, two-line headline, body, and buttons over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair on desktop only), and two small doll cutouts pinned in the top corners. The wordmark itself isn't set here — it follows your business name (Settings → General) split on the accent word in the global Branding group, same as the header and footer.",
     icon: "🏰",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "homepage.promises",
     title: "Promises",
-    description: "Three short, plain-spoken promises shown in a hairline grid",
+    description: "Three short, plain-spoken promises shown in a grid.",
     icon: "🪡",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "homepage.collection",
-    title: "Featured Collection",
-    description: "Heading and CTAs framing your featured products",
+    title: "Featured collection",
+    description: "Heading and buttons framing your featured products.",
     icon: "🧵",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "homepage.events",
-    title: "Make & Takes",
+    title: "Make & takes",
     description:
-      "The workshop band — your photos and fliers as a five-photo mosaic, what a make & take is, how they're hosted, and one enquiry CTA",
+      "The workshop section — your photos and fliers, what a make & take is, how they're hosted, and one enquiry button.",
     icon: "🪡",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "homepage.upcoming",
-    title: "Upcoming Events",
+    title: "Upcoming events",
     description:
-      "The next few real dates from your Events list — heading, how many to show, and the empty-state copy",
+      "The next few real dates from your Events list — heading, how many to show, and the empty-state copy.",
     icon: "🗓️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -746,14 +771,14 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.videos",
     title: "Videos",
     description:
-      "The first few videos from your Videos list — heading, how many to show, and the empty-state copy",
+      "The first few videos from your Videos list — heading, how many to show, and the empty-state copy.",
     icon: "📺",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "homepage.story",
-    title: "The Artist",
-    description: "Portrait, pull-quote, body copy and a small stat row",
+    title: "The artist",
+    description: "Portrait, pull-quote and body copy.",
     icon: "✍️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -774,7 +799,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     id: "homepage.promises",
     page: "homepage",
     title: "Promises",
-    description: "Hairline grid of three short promises",
+    description: "Grid of three short promises",
     groupIds: ["homepage.promises"],
     order: 1,
     hideable: true,
@@ -782,7 +807,7 @@ export const pinkHomepageSections: TemplateSection[] = [
   {
     id: "homepage.collection",
     page: "homepage",
-    title: "Featured Collection",
+    title: "Featured collection",
     description: "Featured products from the shop",
     groupIds: ["homepage.collection"],
     order: 2,
@@ -796,8 +821,8 @@ export const pinkHomepageSections: TemplateSection[] = [
   {
     id: "homepage.events",
     page: "homepage",
-    title: "Make & Takes",
-    description: "Photo/flier mosaic, how they're hosted, and the enquiry CTA",
+    title: "Make & takes",
+    description: "Photo/flier layout, how they're hosted, and the enquiry button",
     groupIds: ["homepage.events"],
     order: 3,
     hideable: true,
@@ -805,7 +830,7 @@ export const pinkHomepageSections: TemplateSection[] = [
   {
     id: "homepage.upcoming",
     page: "homepage",
-    title: "Upcoming Events",
+    title: "Upcoming events",
     description: "The next few dated events from your Events list",
     groupIds: ["homepage.upcoming"],
     order: 4,
@@ -828,8 +853,8 @@ export const pinkHomepageSections: TemplateSection[] = [
   {
     id: "homepage.story",
     page: "homepage",
-    title: "The Artist",
-    description: "Portrait, pull-quote and stat row",
+    title: "The artist",
+    description: "Portrait, pull-quote and body copy",
     groupIds: ["homepage.story"],
     order: 6,
     hideable: true,

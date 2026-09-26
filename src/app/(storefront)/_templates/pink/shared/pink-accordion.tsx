@@ -2,6 +2,8 @@
 
 import { useId, useState } from "react";
 
+import { listItemAttr } from "~/lib/preview/section-attrs";
+
 export type PinkAccordionItem = {
   id?: string;
   title: string;
@@ -13,6 +15,13 @@ type PinkAccordionProps = {
   /** Index of the item open on mount. Omit to start fully closed. */
   defaultOpenIndex?: number;
   className?: string;
+  /**
+   * List field key the rows come from — each row root gets
+   * `listItemAttr(itemFieldKey, i)` so a click on a row in the editor preview
+   * opens that list row. A string (not a callback) because server components
+   * render this client component, and functions can't cross that boundary.
+   */
+  itemFieldKey?: string;
 };
 
 /**
@@ -25,6 +34,7 @@ export function PinkAccordion({
   items,
   defaultOpenIndex,
   className,
+  itemFieldKey,
 }: PinkAccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(
     defaultOpenIndex ?? null,
@@ -42,6 +52,7 @@ export function PinkAccordion({
           <div
             key={panelId}
             style={{ borderBottom: "1px solid var(--pink-line)" }}
+            {...(itemFieldKey ? listItemAttr(itemFieldKey, i) : {})}
           >
             <h3 className="m-0">
               <button

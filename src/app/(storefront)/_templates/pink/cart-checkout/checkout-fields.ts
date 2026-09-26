@@ -5,7 +5,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
  *
  * Two groups, both `page: "checkout"`:
  *  - `checkout.main` — the paper form column. Not hideable (it's the form).
- *  - `checkout.summary` — the sticky ink basket aside. Hideable per design.md,
+ *  - `checkout.summary` — the sticky order summary aside. Hideable per design.md,
  *    though the checkout form always keeps a totals readout inline so the
  *    submit button is never orphaned from the price when an owner hides it.
  *
@@ -16,7 +16,7 @@ export const pinkCheckoutData: TemplateField[] = [
   // ── checkout.main ──────────────────────────────────────────────────────
   {
     key: "pink.checkout.heading",
-    label: "Checkout Heading",
+    label: "Heading",
     description: "The main heading at the top of the checkout page.",
     type: "text",
     page: "checkout",
@@ -26,8 +26,9 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.intro",
-    label: "Checkout Reassurance Line",
-    description: "One line under the heading explaining what happens next.",
+    label: "Reassurance text",
+    description:
+      "One line under the heading explaining what happens next. Leave blank to hide.",
     type: "textarea",
     page: "checkout",
     group: "checkout.main",
@@ -37,7 +38,7 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.contact-heading",
-    label: "Contact Section Heading",
+    label: "Contact heading",
     description: "Heading over the name / email / phone fields.",
     type: "text",
     page: "checkout",
@@ -47,7 +48,7 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.shipping-heading",
-    label: "Shipping Section Heading",
+    label: "Shipping heading",
     description: "Heading over the delivery method and address fields.",
     type: "text",
     page: "checkout",
@@ -57,7 +58,7 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.submit-label",
-    label: "Submit Button Label",
+    label: "Submit button text",
     description: "Text on the primary checkout submit button.",
     type: "text",
     page: "checkout",
@@ -67,7 +68,7 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.back-link-label",
-    label: "Back Link Label",
+    label: "Back link text",
     description: "The quiet link beside the submit button, back to the basket.",
     type: "text",
     page: "checkout",
@@ -77,9 +78,9 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.note",
-    label: "Payment Note",
+    label: "Payment note",
     description:
-      "Small line explaining that no card is taken on this step — sits beside the submit button.",
+      "Small line explaining that no card is taken on this step, beside the submit button. Leave blank to hide.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -88,7 +89,7 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.empty-heading",
-    label: "Empty Basket Heading",
+    label: "Empty basket heading",
     description: "Heading shown if checkout is reached with an empty basket.",
     type: "text",
     page: "checkout",
@@ -98,8 +99,9 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.empty-body",
-    label: "Empty Basket Body",
-    description: "Short line under the empty-basket heading.",
+    label: "Empty basket message",
+    description:
+      "Short line under the empty-basket heading. Leave blank to hide.",
     type: "textarea",
     page: "checkout",
     group: "checkout.main",
@@ -108,8 +110,9 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.empty-cta",
-    label: "Empty Basket CTA Label",
-    description: "Button label on the empty-basket state.",
+    label: "Empty basket button text",
+    description:
+      "Text on the button back to the shop on the empty-basket state. Leave blank to hide it.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -120,8 +123,8 @@ export const pinkCheckoutData: TemplateField[] = [
   // ── checkout.summary ───────────────────────────────────────────────────
   {
     key: "pink.checkout.summary-heading",
-    label: "Basket Summary Heading",
-    description: "Heading at the top of the sticky ink basket panel.",
+    label: "Heading",
+    description: "Heading at the top of the sticky order summary panel.",
     type: "text",
     page: "checkout",
     group: "checkout.summary",
@@ -130,8 +133,8 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.summary-discount-label",
-    label: "Discount Field Label",
-    description: "Label above the discount-code input in the basket panel.",
+    label: "Discount code label",
+    description: "Label above the discount-code input in the summary panel.",
     type: "text",
     page: "checkout",
     group: "checkout.summary",
@@ -140,8 +143,8 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.summary-apply-label",
-    label: "Discount Apply Button Label",
-    description: "Label on the ghost button that applies a discount code.",
+    label: "Apply button text",
+    description: "Text on the button that applies a discount code.",
     type: "text",
     page: "checkout",
     group: "checkout.summary",
@@ -150,8 +153,9 @@ export const pinkCheckoutData: TemplateField[] = [
   },
   {
     key: "pink.checkout.summary-note",
-    label: "Basket Summary Closing Note",
-    description: "Small reassurance line at the bottom of the basket panel.",
+    label: "Closing note",
+    description:
+      "Small reassurance line at the bottom of the summary panel. Leave blank to hide.",
     type: "textarea",
     page: "checkout",
     group: "checkout.summary",
@@ -163,7 +167,7 @@ export const pinkCheckoutData: TemplateField[] = [
 export const pinkCheckoutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "checkout.main",
-    title: "Checkout Form",
+    title: "Checkout form",
     description:
       "Heading, section headings, submit button, and messaging for the checkout form",
     icon: "📝",
@@ -171,9 +175,9 @@ export const pinkCheckoutFieldGroups: TemplateFieldGroup[] = [
   } satisfies TemplateFieldGroup,
   {
     id: "checkout.summary",
-    title: "Checkout Basket Panel",
+    title: "Order summary",
     description:
-      "Heading and copy for the sticky ink basket summary beside the checkout form",
+      "Heading and copy for the sticky order summary beside the checkout form",
     icon: "🧾",
     columns: 2,
   } satisfies TemplateFieldGroup,

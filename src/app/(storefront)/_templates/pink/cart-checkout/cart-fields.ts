@@ -12,8 +12,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 export const pinkCartData: TemplateField[] = [
   {
     key: "pink.cart.heading",
-    label: "Cart Heading",
-    description: "The main heading at the top of the cart page.",
+    label: "Heading",
+    description:
+      "The main heading at the top of the cart page and the slide-out cart.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -22,7 +23,7 @@ export const pinkCartData: TemplateField[] = [
   },
   {
     key: "pink.cart.intro",
-    label: "Cart Intro",
+    label: "Intro text",
     description: "One reassuring line under the heading.",
     type: "textarea",
     page: "cart",
@@ -33,9 +34,9 @@ export const pinkCartData: TemplateField[] = [
   },
   {
     key: "pink.cart.summary-note",
-    label: "Basket Summary Note",
+    label: "Summary note",
     description:
-      "Small line under the totals in the ink basket panel — explains that discounts and shipping are handled at the next step.",
+      "Small line under the totals on the cart page and in the slide-out cart. Leave blank to hide.",
     type: "textarea",
     page: "cart",
     group: "cart.main",
@@ -44,8 +45,9 @@ export const pinkCartData: TemplateField[] = [
   },
   {
     key: "pink.cart.checkout-label",
-    label: "Checkout Button Label",
-    description: "Label on the button that continues from cart to checkout.",
+    label: "Checkout button text",
+    description:
+      "Text on the button that continues to checkout, on the cart page and in the slide-out cart.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -54,9 +56,9 @@ export const pinkCartData: TemplateField[] = [
   },
   {
     key: "pink.cart.continue-shopping-label",
-    label: "Continue Shopping Label",
+    label: "Continue shopping link",
     description:
-      "Quiet link label back to the shop, under the checkout button.",
+      "Quiet link back to the shop, under the checkout button.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -65,8 +67,9 @@ export const pinkCartData: TemplateField[] = [
   },
   {
     key: "pink.cart.empty-heading",
-    label: "Empty Basket Heading",
-    description: "Heading shown when the basket has no items.",
+    label: "Empty cart heading",
+    description:
+      "Heading shown on the cart page and in the slide-out cart when the cart has no items.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -75,8 +78,9 @@ export const pinkCartData: TemplateField[] = [
   },
   {
     key: "pink.cart.empty-body",
-    label: "Empty Basket Body",
-    description: "Short line under the empty-basket heading.",
+    label: "Empty cart message",
+    description:
+      "Short line under the empty cart heading, on the cart page and in the slide-out cart. Leave blank to hide.",
     type: "textarea",
     page: "cart",
     group: "cart.main",
@@ -86,8 +90,9 @@ export const pinkCartData: TemplateField[] = [
   },
   {
     key: "pink.cart.empty-cta",
-    label: "Empty Basket CTA Label",
-    description: "Button label on the empty-basket state.",
+    label: "Empty cart button text",
+    description:
+      "Text on the link to the shop when the cart is empty, on the cart page and in the slide-out cart. Leave blank to hide it.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -99,7 +104,7 @@ export const pinkCartData: TemplateField[] = [
 export const pinkCartFieldGroups: TemplateFieldGroup[] = [
   {
     id: "cart.main",
-    title: "Cart Page",
+    title: "Cart page",
     description:
       "Heading, intro, basket summary copy, and empty-state messaging for the cart page",
     icon: "🧺",

@@ -15,8 +15,8 @@ import type { TemplateSection } from "~/lib/template-sections";
 const servicesHeaderData: TemplateField[] = [
   {
     key: "pink.services.header-heading",
-    label: "Header Heading",
-    description: "The H1 for the services index page.",
+    label: "Heading",
+    description: "Main heading at the top of the services page.",
     type: "text",
     page: "services",
     group: "services.header",
@@ -25,7 +25,7 @@ const servicesHeaderData: TemplateField[] = [
   },
   {
     key: "pink.services.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "services",
@@ -41,9 +41,9 @@ const servicesHeaderData: TemplateField[] = [
 const servicesFeaturedData: TemplateField[] = [
   {
     key: "pink.services.featured-badge",
-    label: "Featured Badge Label",
+    label: "Badge text",
     description:
-      "Corner badge on the featured service card (the one marked as your signature offering). Keep it neutral — it is not a popularity claim.",
+      "Corner badge on the featured service card — the one marked as your signature offering. Keep it neutral; it isn't a popularity claim.",
     type: "text",
     page: "services",
     group: "services.featured",
@@ -52,8 +52,9 @@ const servicesFeaturedData: TemplateField[] = [
   },
   {
     key: "pink.services.featured-cta-label",
-    label: "Featured CTA Label",
-    description: "Link text on the featured card.",
+    label: "Button text",
+    description:
+      "Text shown as the link on the featured service card, pointing to its detail page.",
     type: "text",
     page: "services",
     group: "services.featured",
@@ -67,7 +68,7 @@ const servicesFeaturedData: TemplateField[] = [
 const servicesGridData: TemplateField[] = [
   {
     key: "pink.services.grid-heading-suffix",
-    label: "Grid Heading",
+    label: "Heading suffix",
     description:
       "Shown after the live count, e.g. '6 ways to work together'. Enter just the part after the number.",
     type: "text",
@@ -78,7 +79,7 @@ const servicesGridData: TemplateField[] = [
   },
   {
     key: "pink.services.audience-one-label",
-    label: "One-to-One Badge Label",
+    label: "One-to-one badge text",
     description: "Badge shown on cards for one-to-one / private offerings.",
     type: "text",
     page: "services",
@@ -88,7 +89,7 @@ const servicesGridData: TemplateField[] = [
   },
   {
     key: "pink.services.audience-group-label",
-    label: "Group Badge Label",
+    label: "Group badge text",
     description: "Badge shown on cards for group offerings.",
     type: "text",
     page: "services",
@@ -98,7 +99,7 @@ const servicesGridData: TemplateField[] = [
   },
   {
     key: "pink.services.grid-empty-heading",
-    label: "Empty State Heading",
+    label: "Empty list heading",
     description: "Shown when no services are published yet.",
     type: "text",
     page: "services",
@@ -108,8 +109,8 @@ const servicesGridData: TemplateField[] = [
   },
   {
     key: "pink.services.grid-empty-body",
-    label: "Empty State Body",
-    description: "One or two lines under the empty-state heading.",
+    label: "Empty list body",
+    description: "One or two lines under the empty-list heading.",
     type: "textarea",
     page: "services",
     group: "services.grid",
@@ -119,7 +120,7 @@ const servicesGridData: TemplateField[] = [
   },
   {
     key: "pink.services.grid-empty-cta-label",
-    label: "Empty State Button Text",
+    label: "Empty list button text",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "services",
@@ -129,8 +130,8 @@ const servicesGridData: TemplateField[] = [
   },
   {
     key: "pink.services.grid-empty-cta-link",
-    label: "Empty State Button Link",
-    description: "Where the empty-state button goes.",
+    label: "Empty list button link",
+    description: "Where the empty-list button goes.",
     type: "url",
     page: "services",
     group: "services.grid",
@@ -144,8 +145,8 @@ const servicesGridData: TemplateField[] = [
 const servicesStepsData: TemplateField[] = [
   {
     key: "pink.services.steps-heading",
-    label: "Steps Heading",
-    description: "Heading for the 'how it works' band.",
+    label: "Heading",
+    description: "Heading for the how-it-works band.",
     type: "text",
     page: "services",
     group: "services.steps",
@@ -154,8 +155,8 @@ const servicesStepsData: TemplateField[] = [
   },
   {
     key: "pink.services.steps-note",
-    label: "Steps Note",
-    description: "Short muted line beside the heading.",
+    label: "Note",
+    description: "Short line beside the heading.",
     type: "text",
     page: "services",
     group: "services.steps",
@@ -165,21 +166,36 @@ const servicesStepsData: TemplateField[] = [
   {
     key: "pink.services.steps-list",
     label: "Steps",
-    description: "Up to four ordinal + title + body cells.",
+    description:
+      "Up to four steps in the how-it-works band, each with a step number, title and short description. Falls back to built-in steps when left empty.",
     type: "list",
     page: "services",
     group: "services.steps",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "step",
+    defaultsWhenEmpty: true,
     itemSchema: [
-      { key: "ordinal", label: "Ordinal", type: "text", placeholder: "01" },
+      {
+        key: "ordinal",
+        label: "Step number",
+        type: "text",
+        placeholder: "01",
+        description: "Two-digit step number, e.g. 01.",
+      },
       {
         key: "title",
         label: "Title",
         type: "text",
         placeholder: "You reach out",
+        description: "Short title for this step.",
       },
-      { key: "body", label: "Body", type: "textarea" },
+      {
+        key: "body",
+        label: "Body",
+        type: "textarea",
+        description: "One or two sentences describing this step.",
+      },
     ],
     defaultValue: JSON.stringify([
       {
@@ -211,8 +227,8 @@ const servicesStepsData: TemplateField[] = [
 const servicesCtaData: TemplateField[] = [
   {
     key: "pink.services.cta-heading",
-    label: "CTA Heading",
-    description: "Closing call-to-action heading.",
+    label: "Heading",
+    description: "Heading in the closing panel at the bottom of the page.",
     type: "text",
     page: "services",
     group: "services.cta",
@@ -221,7 +237,7 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "pink.services.cta-body",
-    label: "CTA Body",
+    label: "Body text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "services",
@@ -232,27 +248,27 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "pink.services.cta-primary-label",
-    label: "Primary Button Text",
+    label: "Primary button text",
     type: "text",
     page: "services",
     group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "Ask about a date",
-    description: "Primary CTA button label.",
+    description: "Text on the closing panel's primary button.",
   },
   {
     key: "pink.services.cta-primary-link",
-    label: "Primary Button Link",
+    label: "Primary button link",
     type: "url",
     page: "services",
     group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "/contact",
-    description: "Primary CTA button destination.",
+    description: "Where the primary button goes.",
   },
   {
     key: "pink.services.cta-secondary-label",
-    label: "Secondary Button Text",
+    label: "Secondary button text",
     description: "Leave blank to hide the second button.",
     type: "text",
     page: "services",
@@ -262,18 +278,19 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "pink.services.cta-secondary-link",
-    label: "Secondary Button Link",
+    label: "Secondary button link",
     type: "url",
     page: "services",
     group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "/shop",
-    description: "Secondary CTA button destination.",
+    description: "Where the secondary button goes.",
   },
   {
     key: "pink.services.cta-image-1",
-    label: "CTA Image 1",
-    description: "Left image in the closing CTA's 2-up pair.",
+    label: "Image 1",
+    description:
+      "Left image in the closing panel's image pair. Leave both images blank to run the panel as text only.",
     type: "image",
     page: "services",
     group: "services.cta",
@@ -282,8 +299,9 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "pink.services.cta-image-2",
-    label: "CTA Image 2",
-    description: "Right image in the closing CTA's 2-up pair.",
+    label: "Image 2",
+    description:
+      "Right image in the closing panel's image pair. Leave both images blank to run the panel as text only.",
     type: "image",
     page: "services",
     group: "services.cta",
@@ -305,38 +323,39 @@ export const pinkServicesData: TemplateField[] = [
 export const pinkServicesFieldGroups: TemplateFieldGroup[] = [
   {
     id: "services.header",
-    title: "Services Header",
-    description: "Eyebrow, heading, intro and stat tiles",
+    title: "Header",
+    description: "Heading and intro text at the top of the services page.",
     icon: "🧵",
     columns: 2,
   },
   {
     id: "services.featured",
-    title: "Featured Service",
+    title: "Featured service",
     description:
-      "Badge and link text for the card sourced from your signature ServiceItem",
+      "Badge and button text for the card built from the service you've marked as your signature offering.",
     icon: "⭐",
     columns: 2,
   },
   {
     id: "services.grid",
-    title: "Services Grid",
+    title: "Services grid",
     description:
-      "Heading suffix, audience badge labels, and the empty-state copy",
+      "Heading suffix, badge text, and the empty-list copy for the grid of published services.",
     icon: "🗂️",
     columns: 2,
   },
   {
     id: "services.steps",
-    title: "How It Works",
-    description: "Heading, note, and up to four numbered steps",
+    title: "How it works",
+    description: "Heading, note, and up to four steps in the how-it-works band.",
     icon: "🪡",
     columns: 1,
   },
   {
     id: "services.cta",
-    title: "Closing Call to Action",
-    description: "Eyebrow, heading, body, two buttons and a 2-up image pair",
+    title: "Closing banner",
+    description:
+      "Heading, body, two buttons, and an optional image pair for the closing panel at the bottom of the page.",
     icon: "📣",
     columns: 2,
   },
@@ -346,8 +365,8 @@ export const pinkServicesSections: TemplateSection[] = [
   {
     id: "services.header",
     page: "services",
-    title: "Services Header",
-    description: "Eyebrow, heading, intro and stat tiles",
+    title: "Header",
+    description: "Heading and intro text at the top of the services page.",
     groupIds: ["services.header"],
     order: 0,
     hideable: false,
@@ -355,8 +374,8 @@ export const pinkServicesSections: TemplateSection[] = [
   {
     id: "services.featured",
     page: "services",
-    title: "Featured Service",
-    description: "Card for your signature ServiceItem",
+    title: "Featured service",
+    description: "Card for your signature service.",
     groupIds: ["services.featured"],
     order: 1,
     hideable: true,
@@ -364,8 +383,8 @@ export const pinkServicesSections: TemplateSection[] = [
   {
     id: "services.grid",
     page: "services",
-    title: "Services Grid",
-    description: "The filterable grid of every published service",
+    title: "Services grid",
+    description: "The filterable grid of every published service.",
     groupIds: ["services.grid"],
     order: 2,
     hideable: false,
@@ -373,8 +392,8 @@ export const pinkServicesSections: TemplateSection[] = [
   {
     id: "services.steps",
     page: "services",
-    title: "How It Works",
-    description: "Four-step process band",
+    title: "How it works",
+    description: "Up to four steps explaining how it works.",
     groupIds: ["services.steps"],
     order: 3,
     hideable: true,
@@ -382,8 +401,8 @@ export const pinkServicesSections: TemplateSection[] = [
   {
     id: "services.cta",
     page: "services",
-    title: "Closing Call to Action",
-    description: "Closing CTA panel with a 2-up image pair",
+    title: "Closing banner",
+    description: "Closing panel with an optional image pair.",
     groupIds: ["services.cta"],
     order: 4,
     hideable: true,

@@ -99,13 +99,13 @@ const DEFAULT_PROMISES: TemplateListRow[] = [
   },
   {
     _id: "promise-2",
-    title: "Priced plainly",
-    body: "Materials and time, no markup games. What you see is what you pay.",
+    title: "Made by hand",
+    body: "Each piece is shaped and finished by hand.",
   },
   {
     _id: "promise-3",
-    title: "Natural materials",
-    body: "100% wool filling, cotton fabrics, polymer clay faces.",
+    title: "Made to keep",
+    body: "Chosen materials and careful finishing, built to last.",
   },
 ];
 

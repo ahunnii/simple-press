@@ -182,6 +182,20 @@ export type TemplateField =
       type: "faq";
       minItems?: number;
       maxItems?: number;
+      /**
+       * Editor hint shown while nothing is picked. Defaults to "Showing the
+       * first N published questions." — what `resolveFaqPickerItems` does.
+       * Set it when the template does something else with an empty picker
+       * (e.g. hides the section).
+       */
+      emptyHint?: string;
+      /**
+       * True when the template still renders a legacy `{question, answer}`
+       * list saved under this key (the field used to be a typed `list`).
+       * Only changes the editor's legacy notice copy — the fallback itself
+       * lives in the template's render code.
+       */
+      rendersLegacyRows?: boolean;
     });
 
 export type RichTextFieldValue = JSONContent & {
@@ -456,6 +470,15 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "olive.global.social-tiktok",
   "olive.global.social-facebook",
   "olive.global.social-pinterest",
+  // pink, retired 2026-09-26 — the footer tagline now comes from Content →
+  // Branding (`SiteContent.footerText`; a saved `footer-blurb` is still read
+  // as a silent fallback in `_templates/pink/layout/pink-footer.tsx`). Social
+  // links (Content → Branding) and the locality tag were dropped from pink's
+  // fields in Jul/Aug 2026 without being listed here; any saved values stay
+  // hidden from the admin's custom pairs and preserved on save.
+  "pink.global.footer-blurb",
+  "pink.global.social-links",
+  "pink.global.locality-tag",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

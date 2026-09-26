@@ -294,3 +294,93 @@ describe("FaqFieldEditor — empty (unselected) rows", () => {
     expect(screen.getAllByRole("combobox")).toHaveLength(3);
   });
 });
+
+describe("FaqFieldEditor — empty-state hint", () => {
+  it("uses the field's emptyHint in place of the default", () => {
+    render(
+      <Harness
+        field={makeField({
+          emptyHint: "Nothing picked, so this section is hidden.",
+        })}
+        initial={[]}
+      />,
+    );
+    expect(
+      screen.getByText(/Nothing picked, so this section is hidden\./),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Showing the first/),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("FaqFieldEditor — legacy typed rows", () => {
+  const LEGACY = [
+    { question: "Typed one?", answer: "Answer one.", _id: "row-0" },
+    { question: "Typed two?", answer: "Answer two.", _id: "row-1" },
+  ];
+
+  it("shows the typed questions read-only, with no picker rows or Add button", () => {
+    const onEmit = vi.fn();
+    render(
+      <Harness
+        field={makeField({ rendersLegacyRows: true })}
+        initial={LEGACY}
+        onEmit={onEmit}
+      />,
+    );
+
+    expect(screen.getByText("Typed one?")).toBeInTheDocument();
+    expect(screen.getByText("Answer two.")).toBeInTheDocument();
+    expect(screen.getByText(/still shows them/)).toBeInTheDocument();
+    expect(screen.queryAllByRole("combobox")).toHaveLength(0);
+    expect(
+      screen.queryByRole("button", { name: /Add question/ }),
+    ).not.toBeInTheDocument();
+    expect(onEmit).not.toHaveBeenCalled();
+  });
+
+  it("says the page no longer shows them when the template ignores legacy rows", () => {
+    render(<Harness field={makeField({ maxItems: 6 })} initial={LEGACY} />);
+    expect(
+      screen.getByText(/no longer shows them.*first 6 published questions/),
+    ).toBeInTheDocument();
+  });
+
+  it("replaces only on the explicit action, and Undo restores the exact legacy value", async () => {
+    const user = userEvent.setup();
+    const onEmit = vi.fn();
+    render(
+      <Harness
+        field={makeField({ rendersLegacyRows: true })}
+        initial={LEGACY}
+        onEmit={onEmit}
+      />,
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Replace with picked questions" }),
+    );
+
+    expect(onEmit).toHaveBeenCalledTimes(1);
+    // Seeds one row with the first published question, like "Add question".
+    expect(onEmit.mock.calls[0]![0]).toEqual(["q1"]);
+    expect(screen.getAllByRole("combobox")).toHaveLength(1);
+    expect(screen.queryByText("Typed one?")).not.toBeInTheDocument();
+
+    const [message, options] = toastMock.mock.calls[0]! as [
+      string,
+      { action: { label: string; onClick: () => void } },
+    ];
+    expect(message).toBe("Typed questions replaced");
+    act(() => options.action.onClick());
+
+    expect(onEmit).toHaveBeenCalledTimes(2);
+    expect(onEmit.mock.calls[1]![0]).toBe(LEGACY);
+    expect(screen.getByText("Typed one?")).toBeInTheDocument();
+
+    // Second Undo is a no-op.
+    act(() => options.action.onClick());
+    expect(onEmit).toHaveBeenCalledTimes(2);
+  });
+});

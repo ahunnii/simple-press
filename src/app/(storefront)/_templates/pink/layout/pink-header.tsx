@@ -79,7 +79,7 @@ export function PinkHeader({
     setMobileOpen(false);
   }, [pathname]);
 
-  const businessName = business?.name ?? "PinkArt";
+  const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
   const logoAlt = resolveLogoAlt(
     business?.siteContent?.logoAltText,
@@ -111,12 +111,12 @@ export function PinkHeader({
       ? [{ href: "/collections", label: "Collections" }]
       : []),
     ...(isEnabled("services")
-      ? [{ href: "/services", label: "Make & Takes" }]
+      ? [{ href: "/services", label: "Services" }]
       : []),
     ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
     ...(isEnabled("events") ? [{ href: "/events", label: "Events" }] : []),
     ...(isEnabled("videos") ? [{ href: "/videos", label: "Videos" }] : []),
-    { href: "/about", label: "The artist" },
+    { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -445,7 +445,10 @@ export function PinkHeader({
         }}
       />
 
-      <PinkCartDrawer themeVars={themeVars ?? undefined} />
+      <PinkCartDrawer
+        themeVars={themeVars ?? undefined}
+        customFields={customFields}
+      />
     </>
   );
 }

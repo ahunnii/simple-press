@@ -9,8 +9,8 @@ import type { TemplateSection } from "~/lib/template-sections";
  * and the light footer tone (handled automatically by `PinkFooter`'s
  * route-based `isLightFooterRoute` check — no action needed here).
  *
- * Tone (2026-07-31, client direction): the hero and the values band are on
- * the pale pink wash; the commissions band stays dark on purpose as the
+ * Tone (2026-07-31, client direction): the hero and the values section are on
+ * the pale wash; the custom-orders section stays dark on purpose as the
  * page's closing note, echoing the footer beneath it.
  */
 
@@ -19,9 +19,9 @@ import type { TemplateSection } from "~/lib/template-sections";
 const aboutHeroData: TemplateField[] = [
   {
     key: "pink.about.hero-image",
-    label: "Hero Portrait",
+    label: "Portrait",
     description:
-      "Tall photo (4:5) beside the heading — a portrait of the maker works best. Leave blank to show the heading on a plain pink band.",
+      "Tall photo (4:5) beside the heading — a portrait of the maker works best. Leave blank to show the heading on a plain band.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -35,8 +35,8 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "pink.about.hero-heading",
-    label: "Hero Heading",
-    description: "The page's H1.",
+    label: "Heading",
+    description: "The page's main heading.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -45,7 +45,7 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "pink.about.hero-intro",
-    label: "Hero Intro",
+    label: "Intro text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "about",
@@ -61,7 +61,7 @@ const aboutHeroData: TemplateField[] = [
 const aboutStoryData: TemplateField[] = [
   {
     key: "pink.about.story-heading",
-    label: "Story Heading",
+    label: "Heading",
     description: "Heading over the studio story.",
     type: "text",
     page: "about",
@@ -71,7 +71,7 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "pink.about.story-body",
-    label: "Story Body (rich text)",
+    label: "Story (rich text)",
     description:
       "The studio story — the only place it is written. Formatted text: headings, links and lists all render.",
     type: "richtext",
@@ -82,7 +82,7 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "pink.about.story-image-main",
-    label: "Story Image — Large",
+    label: "Image — large",
     description: "The large image in the trio beside the story text (3:2).",
     type: "image",
     page: "about",
@@ -92,7 +92,7 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "pink.about.story-image-2",
-    label: "Story Image — Small 1",
+    label: "Image — small 1",
     description: "First small square image (1:1).",
     type: "image",
     page: "about",
@@ -102,7 +102,7 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "pink.about.story-image-3",
-    label: "Story Image — Small 2",
+    label: "Image — small 2",
     description: "Second small square image (1:1).",
     type: "image",
     page: "about",
@@ -117,18 +117,18 @@ const aboutStoryData: TemplateField[] = [
 const aboutValuesData: TemplateField[] = [
   {
     key: "pink.about.values-heading",
-    label: "Values Heading",
+    label: "Heading",
     type: "text",
     page: "about",
     group: "about.values",
     gridColumn: "col-span-1",
-    description: "Heading over the values band.",
+    description: "Heading over the values section.",
     defaultValue: "What doesn't change",
   },
   {
     key: "pink.about.values-note",
-    label: "Values Note",
-    description: "Muted supporting line beside the heading.",
+    label: "Note",
+    description: "Supporting line beside the heading.",
     type: "textarea",
     page: "about",
     group: "about.values",
@@ -144,18 +144,22 @@ const aboutValuesData: TemplateField[] = [
     group: "about.values",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "value",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "title",
         label: "Title",
         type: "text",
-        placeholder: "One of a kind",
+        description: "Short name for the value.",
+        placeholder: "e.g. One of a kind",
       },
       {
         key: "body",
         label: "Body",
         type: "textarea",
-        placeholder: "One sentence on what this means in practice.",
+        description: "One sentence on what this means in practice.",
+        placeholder: "e.g. Every piece is made on its own.",
       },
     ],
     defaultValue: "",
@@ -167,7 +171,7 @@ const aboutValuesData: TemplateField[] = [
 const aboutTimelineData: TemplateField[] = [
   {
     key: "pink.about.timeline-heading",
-    label: "Timeline Heading",
+    label: "Heading",
     type: "text",
     page: "about",
     group: "about.timeline",
@@ -177,7 +181,7 @@ const aboutTimelineData: TemplateField[] = [
   },
   {
     key: "pink.about.timeline-note",
-    label: "Timeline Note",
+    label: "Note",
     description: "Supporting line under the heading.",
     type: "textarea",
     page: "about",
@@ -187,26 +191,35 @@ const aboutTimelineData: TemplateField[] = [
   },
   {
     key: "pink.about.timeline-items",
-    label: "Timeline Rows",
+    label: "Timeline rows",
     description:
-      "Year / title / body rows. Ships empty — the whole section stays hidden until you add at least one row.",
+      "Up to 8 year/title/body rows. Ships empty — the whole section stays hidden until you add at least one row.",
     type: "list",
     page: "about",
     group: "about.timeline",
     gridColumn: "col-span-full",
     maxItems: 8,
+    itemLabel: "milestone",
     itemSchema: [
-      { key: "year", label: "Year", type: "text", placeholder: "2004" },
+      {
+        key: "year",
+        label: "Year",
+        type: "text",
+        description: "The year this milestone happened.",
+        placeholder: "e.g. 2004",
+      },
       {
         key: "title",
         label: "Title",
         type: "text",
-        placeholder: "First stitches",
+        description: "Short name for the milestone.",
+        placeholder: "e.g. First stitches",
       },
       {
         key: "body",
         label: "Body",
         type: "textarea",
+        description: "A sentence or two on what happened.",
         placeholder: "What happened.",
       },
     ],
@@ -219,27 +232,37 @@ const aboutTimelineData: TemplateField[] = [
 const aboutGalleryData: TemplateField[] = [
   {
     key: "pink.about.gallery-items",
-    label: "Gallery Images",
+    label: "Gallery images",
     description:
-      "Full-width photo mosaic. Column/row span accept 1 or 2 — leave empty to use the defaults.",
+      "Up to 8 photos in a full-width layout. The section stays hidden until at least one photo is set.",
     type: "list",
     page: "about",
     group: "about.gallery",
     gridColumn: "col-span-full",
     maxItems: 8,
+    itemLabel: "photo",
     itemSchema: [
-      { key: "image", label: "Image", type: "image" },
+      {
+        key: "image",
+        label: "Image",
+        type: "image",
+        description: "One photo for the layout.",
+      },
       {
         key: "colSpan",
-        label: "Column span (1 or 2)",
+        label: "Column span",
         type: "text",
+        description: "How many columns this photo fills — 1 or 2. Leave blank for 1.",
         placeholder: "1",
+        optional: true,
       },
       {
         key: "rowSpan",
-        label: "Row span (1 or 2)",
+        label: "Row span",
         type: "text",
+        description: "How many rows this photo fills — 1 or 2. Leave blank for 1.",
         placeholder: "1",
+        optional: true,
       },
     ],
     defaultValue: "",
@@ -254,17 +277,17 @@ const aboutGalleryData: TemplateField[] = [
 const aboutCommissionsData: TemplateField[] = [
   {
     key: "pink.about.commissions-heading",
-    label: "Custom Orders Heading",
+    label: "Heading",
     type: "text",
     page: "about",
     group: "about.commissions",
     gridColumn: "col-span-full",
-    description: "Heading for the custom orders band.",
+    description: "Heading for the custom orders section.",
     defaultValue: "Order something made for you",
   },
   {
     key: "pink.about.commissions-body",
-    label: "Custom Orders Body",
+    label: "Body text",
     type: "textarea",
     page: "about",
     group: "about.commissions",
@@ -275,7 +298,7 @@ const aboutCommissionsData: TemplateField[] = [
   },
   {
     key: "pink.about.commissions-cta-label",
-    label: "Primary Button Text",
+    label: "Button text",
     type: "text",
     page: "about",
     group: "about.commissions",
@@ -285,17 +308,17 @@ const aboutCommissionsData: TemplateField[] = [
   },
   {
     key: "pink.about.commissions-cta-link",
-    label: "Primary Button Link",
+    label: "Button link",
     type: "url",
     page: "about",
     group: "about.commissions",
     gridColumn: "col-span-1",
-    description: "Where the primary button goes.",
+    description: "Where the button goes.",
     defaultValue: "/contact",
   },
   {
     key: "pink.about.commissions-secondary-label",
-    label: "Secondary Button Text",
+    label: "Button text — second button",
     type: "text",
     page: "about",
     group: "about.commissions",
@@ -305,31 +328,39 @@ const aboutCommissionsData: TemplateField[] = [
   },
   {
     key: "pink.about.commissions-secondary-link",
-    label: "Secondary Button Link",
+    label: "Button link — second button",
     type: "url",
     page: "about",
     group: "about.commissions",
     gridColumn: "col-span-1",
-    description: "Where the secondary button goes.",
+    description: "Where the second button goes.",
     defaultValue: "/shop",
   },
   {
     key: "pink.about.commissions-facts",
-    label: "Custom Order Facts",
+    label: "Custom order facts",
     description:
-      "Label/value rows on the right — anything a customer should know before asking. Ships empty; the rows only appear once you add them.",
+      "Up to 4 label/value rows — anything a customer should know before asking. Ships empty; the rows only appear once you add them.",
     type: "list",
     page: "about",
     group: "about.commissions",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "fact",
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Turnaround" },
+      {
+        key: "label",
+        label: "Label",
+        type: "text",
+        description: "Short name for the fact, e.g. 'Turnaround'.",
+        placeholder: "e.g. Turnaround",
+      },
       {
         key: "value",
         label: "Value",
         type: "text",
-        placeholder: "Ask for a quote",
+        description: "The fact itself.",
+        placeholder: "e.g. Ask for a quote",
       },
     ],
     defaultValue: "",
@@ -350,14 +381,14 @@ export const pinkAboutData: TemplateField[] = [
 export const pinkAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "About — Hero",
-    description: "Portrait photo, heading and intro on the pink band.",
+    title: "Hero",
+    description: "Portrait photo, heading and intro on the pale band.",
     icon: "🎨",
     columns: 2,
   },
   {
     id: "about.story",
-    title: "About — Studio Story",
+    title: "Studio story",
     description:
       "The main story and an image trio. The signature under it comes from Owner / Artist.",
     icon: "🧵",
@@ -365,29 +396,29 @@ export const pinkAboutFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "about.values",
-    title: "About — Values",
-    description: "Up to 4 short principles on the pink band.",
+    title: "Values",
+    description: "Up to 4 short principles on the pale band.",
     icon: "✦",
     columns: 2,
   },
   {
     id: "about.timeline",
-    title: "About — Timeline",
+    title: "Timeline",
     description: "A short year-by-year history.",
     icon: "🕰️",
     columns: 2,
   },
   {
     id: "about.gallery",
-    title: "About — Gallery",
-    description: "Full-width photo mosaic.",
+    title: "Gallery",
+    description: "Full-width photo layout.",
     icon: "🖼️",
     columns: 1,
   },
   {
     id: "about.commissions",
-    title: "About — Custom Orders",
-    description: "Closing band explaining custom order work.",
+    title: "Custom orders",
+    description: "Closing section explaining custom order work.",
     icon: "✉️",
     columns: 2,
   },
@@ -406,17 +437,17 @@ export const pinkAboutSections: TemplateSection[] = [
   {
     id: "about.story",
     page: "about",
-    title: "Studio Story",
+    title: "Studio story",
     description: "Main story and image trio.",
     groupIds: ["about.story"],
     order: 1,
-    hideable: false,
+    hideable: true,
   },
   {
     id: "about.values",
     page: "about",
     title: "Values",
-    description: "Pink band of short principles.",
+    description: "Band of short principles.",
     groupIds: ["about.values"],
     order: 2,
     hideable: true,
@@ -434,7 +465,7 @@ export const pinkAboutSections: TemplateSection[] = [
     id: "about.gallery",
     page: "about",
     title: "Gallery",
-    description: "Full-width photo mosaic.",
+    description: "Full-width photo layout.",
     groupIds: ["about.gallery"],
     order: 4,
     hideable: true,
@@ -442,8 +473,8 @@ export const pinkAboutSections: TemplateSection[] = [
   {
     id: "about.commissions",
     page: "about",
-    title: "Custom Orders",
-    description: "Closing band about custom order work.",
+    title: "Custom orders",
+    description: "Closing section about custom order work.",
     groupIds: ["about.commissions"],
     order: 5,
     hideable: true,

@@ -9,6 +9,12 @@ type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
 };
 
+/** Trimmed value, or `undefined` when blank — so `??` skips a cleared column. */
+function nonBlank(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed?.length ? trimmed : undefined;
+}
+
 function PinkOrderLoadingFallback({ loadingText }: { loadingText: string }) {
   return (
     <div
@@ -32,10 +38,10 @@ function PinkOrderLoadingFallback({ loadingText }: { loadingText: string }) {
  * checkout's paper item-list + ink summary-panel inversion so the whole
  * cart → checkout → success flow reads as one thing. Group
  * `checkout.success`, not hideable — see `order-fields.ts` for why the ink
- * panel shows order total / email / payment status rather than shipping
- * address / delivery method (that data isn't available from
- * `/api/stripe/session`, only from server-side order records this route
- * doesn't have access to).
+ * panel shows order total / email / payment status rather than a shipping
+ * address. Pickup orders (`delivery_method` from `/api/stripe/session`) get
+ * the pickup copy plus the Settings pickup location (falling back to the
+ * business address) and instructions.
  */
 export function PinkOrderSuccessPage({ business }: Props) {
   const customFields = business?.siteContent?.customFields as
@@ -46,10 +52,14 @@ export function PinkOrderSuccessPage({ business }: Props) {
     "pink.order.heading",
     "pink.order.heading-accent",
     "pink.order.body",
+    "pink.order.pickup-body",
     "pink.order.items-heading",
     "pink.order.summary-heading",
     "pink.checkout.next-steps-label",
     "pink.order.next-steps",
+    "pink.order.next-steps-pickup",
+    "pink.checkout.success-note",
+    "pink.order.receipt-note",
     "pink.order.continue-cta",
     "pink.order.loading-text",
     "pink.order.no-order-heading",
@@ -63,6 +73,12 @@ export function PinkOrderSuccessPage({ business }: Props) {
     "pink.order.cta-secondary-link",
   ]);
 
+  const pickupLocation =
+    nonBlank(business?.pickupLocation) ??
+    nonBlank(business?.businessAddress) ??
+    "";
+  const pickupInstructions = nonBlank(business?.pickupInstructions) ?? "";
+
   const loadingText = f["pink.order.loading-text"] ?? "Confirming your order…";
 
   return (
@@ -71,10 +87,16 @@ export function PinkOrderSuccessPage({ business }: Props) {
         heading={f["pink.order.heading"] ?? ""}
         headingAccent={f["pink.order.heading-accent"] ?? ""}
         body={f["pink.order.body"] ?? ""}
+        pickupBody={f["pink.order.pickup-body"] ?? ""}
         itemsHeading={f["pink.order.items-heading"] ?? ""}
         summaryHeading={f["pink.order.summary-heading"] ?? ""}
         nextStepsLabel={f["pink.checkout.next-steps-label"] ?? ""}
         nextSteps={f["pink.order.next-steps"] ?? ""}
+        nextStepsPickup={f["pink.order.next-steps-pickup"] ?? ""}
+        successNote={f["pink.checkout.success-note"] ?? ""}
+        receiptNote={f["pink.order.receipt-note"] ?? ""}
+        pickupLocation={pickupLocation}
+        pickupInstructions={pickupInstructions}
         continueCta={f["pink.order.continue-cta"] ?? ""}
         loadingText={loadingText}
         noOrderHeading={f["pink.order.no-order-heading"] ?? ""}

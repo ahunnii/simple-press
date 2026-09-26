@@ -4,7 +4,11 @@ import Link from "next/link";
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getRichTextFieldValue,
@@ -64,14 +68,6 @@ const DEFAULT_VALUES: ValueItem[] = [
     body: "Made one at a time, never in runs. No two pieces are exactly alike.",
   },
   {
-    title: "Priced plainly",
-    body: "The price on the tag is the price. No markups dressed up as scarcity.",
-  },
-  {
-    title: "Natural materials",
-    body: "100% wool filling, cotton fabrics, polymer clay faces.",
-  },
-  {
     title: "Made by hand",
     body: "Every piece passes through Evelyn's hands start to finish.",
   },
@@ -115,6 +111,16 @@ function clampSpan(raw: string | undefined, max = 2): number {
   const n = Number.parseInt(raw ?? "1", 10);
   if (!Number.isFinite(n) || n < 1) return 1;
   return Math.min(n, max);
+}
+
+// The values list ships with a default of 2 rows (see DEFAULT_VALUES) but the
+// owner can save up to 4 (`pink.about.values-items`, maxItems: 4). A fixed
+// `lg:grid-cols-4` leaves an obviously half-empty row once there are fewer
+// than 4 — so the column count is keyed on the actual item count instead.
+function valuesGridClass(count: number): string {
+  if (count <= 2) return "grid-cols-1 sm:grid-cols-2";
+  if (count === 3) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+  return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
 }
 
 export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
@@ -187,111 +193,117 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
       />
 
       {/* ── about.story ────────────────────────────────────────────────── */}
-      <section
-        className="px-5 py-16 md:px-10 md:py-24"
-        {...sectionGroupAttr("about", "story")}
-      >
-        <div className="mx-auto grid max-w-[1400px] gap-12 md:grid-cols-[1fr_0.85fr] md:items-start">
-          <PinkReveal className="flex max-w-[60ch] flex-col gap-5">
-            <h2
-              className="pink-display max-w-[24ch]"
-              style={{
-                fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
-                fontWeight: 600,
-                letterSpacing: "-0.025em",
-                lineHeight: 1.1,
-              }}
-              {...fieldAttr("pink.about.story-heading")}
-            >
-              {f["pink.about.story-heading"] ?? ""}
-            </h2>
+      {isSectionVisible(customFields, "pink", "about.story") && (
+        <section
+          className="px-5 py-16 md:px-10 md:py-24"
+          {...sectionGroupAttr("about", "story")}
+        >
+          <div className="mx-auto grid max-w-[1400px] gap-12 md:grid-cols-[1fr_0.85fr] md:items-start">
+            <PinkReveal className="flex max-w-[60ch] flex-col gap-5">
+              <h2
+                className="pink-display max-w-[24ch]"
+                style={{
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.025em",
+                  lineHeight: 1.1,
+                }}
+                {...fieldAttr("pink.about.story-heading")}
+              >
+                {f["pink.about.story-heading"] ?? ""}
+              </h2>
 
-            {/* Rich text is the only story authoring path; the shipped copy
-                below is a constant so a fresh store still reads day-one. */}
-            {hasStoryRichText ? (
-              <TiptapRenderer
-                content={storyRichContent as TiptapJSON}
-                className="pink-prose max-w-none"
-              />
-            ) : (
-              <div className="flex flex-col gap-4">
-                {DEFAULT_STORY_PARAGRAPHS.map((paragraph) => (
-                  <p
-                    key={paragraph}
-                    className="text-[17px] leading-[1.8]"
-                    style={{ color: "var(--pink-body)" }}
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+              {/* Rich text is the only story authoring path; the shipped copy
+                  below is a constant so a fresh store still reads day-one. */}
+              {hasStoryRichText ? (
+                <TiptapRenderer
+                  content={storyRichContent as TiptapJSON}
+                  className="pink-prose max-w-none"
+                />
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {DEFAULT_STORY_PARAGRAPHS.map((paragraph) => (
+                    <p
+                      key={paragraph}
+                      className="text-[17px] leading-[1.8]"
+                      style={{ color: "var(--pink-body)" }}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </PinkReveal>
+
+            {/* Each tile keeps its slot whether or not a photo is set — the
+                trio is the column's whole layout — so an unset one shows the
+                designed stand-in rather than a bare panel or a stock
+                placeholder. */}
+            <PinkReveal index={1} className="grid grid-cols-2 gap-3">
+              <div
+                className="relative col-span-2 overflow-hidden"
+                style={{
+                  aspectRatio: "3 / 2",
+                  background: "var(--pink-panel)",
+                }}
+              >
+                {hasCustomImage(f["pink.about.story-image-main"]) ? (
+                  <Image
+                    src={f["pink.about.story-image-main"] ?? ""}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 45vw"
+                  />
+                ) : (
+                  <PinkImageFallback
+                    surface="paper"
+                    className="absolute inset-0"
+                  />
+                )}
               </div>
-            )}
-          </PinkReveal>
-
-          {/* Each tile keeps its slot whether or not a photo is set — the trio
-              is the column's whole layout — so an unset one shows the designed
-              stand-in rather than a bare panel or a stock placeholder. */}
-          <PinkReveal index={1} className="grid grid-cols-2 gap-3">
-            <div
-              className="relative col-span-2 overflow-hidden"
-              style={{ aspectRatio: "3 / 2", background: "var(--pink-panel)" }}
-            >
-              {hasCustomImage(f["pink.about.story-image-main"]) ? (
-                <Image
-                  src={f["pink.about.story-image-main"] ?? ""}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 45vw"
-                />
-              ) : (
-                <PinkImageFallback
-                  surface="paper"
-                  className="absolute inset-0"
-                />
-              )}
-            </div>
-            <div
-              className="relative overflow-hidden"
-              style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
-            >
-              {hasCustomImage(f["pink.about.story-image-2"]) ? (
-                <Image
-                  src={f["pink.about.story-image-2"] ?? ""}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 50vw, 22vw"
-                />
-              ) : (
-                <PinkImageFallback
-                  surface="paper"
-                  className="absolute inset-0"
-                />
-              )}
-            </div>
-            <div
-              className="relative overflow-hidden"
-              style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
-            >
-              {hasCustomImage(f["pink.about.story-image-3"]) ? (
-                <Image
-                  src={f["pink.about.story-image-3"] ?? ""}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 50vw, 22vw"
-                />
-              ) : (
-                <PinkImageFallback
-                  surface="paper"
-                  className="absolute inset-0"
-                />
-              )}
-            </div>
-          </PinkReveal>
-        </div>
-      </section>
+              <div
+                className="relative overflow-hidden"
+                style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
+              >
+                {hasCustomImage(f["pink.about.story-image-2"]) ? (
+                  <Image
+                    src={f["pink.about.story-image-2"] ?? ""}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 22vw"
+                  />
+                ) : (
+                  <PinkImageFallback
+                    surface="paper"
+                    className="absolute inset-0"
+                  />
+                )}
+              </div>
+              <div
+                className="relative overflow-hidden"
+                style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
+              >
+                {hasCustomImage(f["pink.about.story-image-3"]) ? (
+                  <Image
+                    src={f["pink.about.story-image-3"] ?? ""}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 22vw"
+                  />
+                ) : (
+                  <PinkImageFallback
+                    surface="paper"
+                    className="absolute inset-0"
+                  />
+                )}
+              </div>
+            </PinkReveal>
+          </div>
+        </section>
+      )}
 
       {/* ── about.values ───────────────────────────────────────────────── */}
       {isSectionVisible(customFields, "pink", "about.values") && (
@@ -339,12 +351,15 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 plain grid is visually identical — and the cells drop their
                 padding here so column one lines up with the heading above
                 instead of floating 24px inside the band. */}
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+              className={`grid gap-x-8 gap-y-10 ${valuesGridClass(values.length)}`}
+            >
               {values.map((v, i) => (
                 <PinkReveal
                   key={v._id ?? i}
                   index={i}
                   className="flex min-w-0 flex-col gap-3"
+                  attrs={listItemAttr("pink.about.values-items", i)}
                 >
                   <PinkRule width={34} />
                   <h3
@@ -406,6 +421,7 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
                     as="div"
                     className="grid grid-cols-[78px_minmax(0,1fr)] gap-4 py-5"
                     style={{ borderTop: "1px solid var(--pink-line)" }}
+                    attrs={listItemAttr("pink.about.timeline-items", i)}
                   >
                     <span
                       className="pink-display text-[15px] font-semibold"
@@ -452,6 +468,7 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
                     gridColumn: `span ${clampSpan(item.colSpan)} / span ${clampSpan(item.colSpan)}`,
                     gridRow: `span ${clampSpan(item.rowSpan)} / span ${clampSpan(item.rowSpan)}`,
                   }}
+                  {...listItemAttr("pink.about.gallery-items", i)}
                 >
                   {/* Unset tiles inside an otherwise-filled gallery stay bare on
                     `--pink-panel` rather than showing a placeholder slab. */}
@@ -525,7 +542,12 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
             </PinkReveal>
 
             <PinkReveal index={1}>
-              <PinkFactRows rows={commissionFacts} />
+              <PinkFactRows
+                rows={commissionFacts}
+                itemAttr={(i) =>
+                  listItemAttr("pink.about.commissions-facts", i)
+                }
+              />
             </PinkReveal>
           </div>
         </PinkDarkBand>

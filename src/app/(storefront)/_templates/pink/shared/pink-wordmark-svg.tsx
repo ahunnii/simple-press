@@ -34,7 +34,7 @@
  * `PINK_WORDMARK_DEFAULTS` — traced letterforms of the word "PINK" are worth
  * nothing to a shop that has renamed itself, and silently ignoring the
  * rename would be worse than a font swap. In the FOOTER it is an explicit owner switch
- * (`pink.global.footer-brand-mark`, default on). The first cut inferred it
+ * (`pink.global.footer-brand-mark`, default off). The first cut inferred it
  * from `business.name` instead, which meant a store whose Business row is
  * named anything but "PinkArt" — the `demo` store, for one — silently got the
  * text build with no way to ask for the mark (2026-08-05). An owner-facing

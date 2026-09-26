@@ -28,21 +28,26 @@ const FIELD_KEYS = [
   "pink.global.product-related-heading",
   "pink.global.product-related-link-label",
   "pink.global.product-question",
+  "pink.product.question-link-label",
+  "pink.product.shipping-note",
+  "pink.product.returns-note",
+  "pink.product.coming-soon-label",
+  "pink.product.coming-soon-message",
+  "pink.product.sold-out-label",
+  "pink.product.sold-out-message",
+  "pink.product.stock-untracked-label",
 ];
+
+const PANELS_KEY = "pink.global.product-panels";
 
 const DEFAULT_PANELS: TemplateListRow[] = [
   {
     _id: "default-panel-1",
     title: "Care & keeping",
-    body: "Wool filling, cotton fabric, polymer clay. Keep out of direct sun and away from damp, and spot clean only — a dry cloth handles most dust.",
+    body: "Keep out of direct sun and away from damp. Ask us if you have questions about caring for a piece.",
   },
   {
     _id: "default-panel-2",
-    title: "Shipping & returns",
-    body: "Ships in 3–5 days, boxed by hand. Each piece is one of a kind, so returns are accepted only if something arrives damaged.",
-  },
-  {
-    _id: "default-panel-3",
     title: "Custom orders",
     body: "Want something close to this but not quite? Reach out and we'll talk it through.",
   },
@@ -68,19 +73,30 @@ function parseProductSpecs(raw: unknown): { label: string; value: string }[] {
 /**
  * Product page — design.md → "Per-page section concepts → Product".
  *
- * Gallery + Details are fully DB-driven (no fields, no section — see the
- * "Page key note"). `product.panels` / `.story` / `.related` are the only
- * fielded sections, on `page: "product"` — the editor previews them on a
- * sample product; field keys keep the legacy `pink.global.product-` prefix.
+ * Gallery + product info (name, description, specs) are fully DB-driven.
+ * `product.details` wraps the buy panel (price/actions, shipping and returns
+ * notes, question line); `product.panels` / `.story` / `.related` follow. All
+ * sit on `page: "product"` — the editor previews them on a sample product;
+ * older field keys keep the legacy `pink.global.product-` prefix.
  */
 export async function PinkProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, string>
     | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+  const shippingNote = f["pink.product.shipping-note"] ?? "";
+  const returnsNote = f["pink.product.returns-note"] ?? "";
+  const showShipping = shippingNote.trim().length > 0;
+  const showReturns = returnsNote.trim().length > 0;
+  const questionLine = f["pink.global.product-question"] ?? "";
+  const questionLinkLabel = f["pink.product.question-link-label"] ?? "";
+  const comingSoonLabel = f["pink.product.coming-soon-label"] ?? "";
 
   const [collectionLink, related] = await Promise.all([
     db.collectionProduct.findFirst({
@@ -104,9 +120,7 @@ export async function PinkProductPage({
 
   const specs = parseProductSpecs(product.additionalFields);
 
-  const panelsRows = parseTemplateListRows(
-    customFields?.["pink.global.product-panels"],
-  );
+  const panelsRows = parseTemplateListRows(customFields?.[PANELS_KEY]);
   const panels = panelsRows.length > 0 ? panelsRows : DEFAULT_PANELS;
 
   const panelsVisible = isSectionVisible(
@@ -178,8 +192,8 @@ export async function PinkProductPage({
             images={product.images}
             productName={product.name}
             badge={
-              additional?.comingSoon
-                ? { label: "Coming soon", tone: "ink" }
+              additional?.comingSoon && comingSoonLabel
+                ? { label: comingSoonLabel, tone: "ink" }
                 : undefined
             }
           />
@@ -238,25 +252,108 @@ export async function PinkProductPage({
               </dl>
             )}
 
-            <PinkProductActions product={product} />
+            {/* Buy panel — everything the "Product details" editor section
+                controls sits inside this wrapper so its hotspot covers it. */}
+            <div
+              className="flex flex-col gap-5"
+              {...sectionGroupAttr("product", "details")}
+            >
+              <PinkProductActions
+                product={product}
+                comingSoonLabel={comingSoonLabel}
+                comingSoonMessage={f["pink.product.coming-soon-message"] ?? ""}
+                soldOutLabel={f["pink.product.sold-out-label"] ?? ""}
+                soldOutMessage={f["pink.product.sold-out-message"] ?? ""}
+                stockUntrackedLabel={
+                  f["pink.product.stock-untracked-label"] ?? ""
+                }
+              />
 
-            {f["pink.global.product-question"] && (
-              <p
-                className="text-[13px]"
-                style={{ color: "var(--pink-subtle)" }}
-              >
-                <span {...fieldAttr("pink.global.product-question")}>
-                  {f["pink.global.product-question"]}
-                </span>{" "}
-                <Link
-                  href="/contact"
-                  className="underline"
-                  style={{ color: "var(--pink-rose)" }}
+              {(showShipping || showReturns) && (
+                <dl
+                  className="flex flex-col gap-3 text-[14px] leading-[1.6]"
+                  style={{
+                    borderTop: "1px solid var(--pink-line)",
+                    paddingTop: "16px",
+                  }}
                 >
-                  Ask us a question
-                </Link>
-              </p>
-            )}
+                  {showShipping && (
+                    <div className="flex flex-col gap-1">
+                      <dt className="pink-label">Shipping</dt>
+                      <dd style={{ color: "var(--pink-body)" }}>
+                        <span
+                          className="whitespace-pre-line"
+                          {...fieldAttr("pink.product.shipping-note")}
+                        >
+                          {shippingNote}
+                        </span>
+                        {hasShippingPolicy && (
+                          <>
+                            {" "}
+                            <Link
+                              href="/shipping-policy"
+                              className="underline"
+                              style={{ color: "var(--pink-rose)" }}
+                            >
+                              Shipping policy
+                            </Link>
+                          </>
+                        )}
+                      </dd>
+                    </div>
+                  )}
+                  {showReturns && (
+                    <div className="flex flex-col gap-1">
+                      <dt className="pink-label">Returns</dt>
+                      <dd style={{ color: "var(--pink-body)" }}>
+                        <span
+                          className="whitespace-pre-line"
+                          {...fieldAttr("pink.product.returns-note")}
+                        >
+                          {returnsNote}
+                        </span>
+                        {hasRefundPolicy && (
+                          <>
+                            {" "}
+                            <Link
+                              href="/refund-policy"
+                              className="underline"
+                              style={{ color: "var(--pink-rose)" }}
+                            >
+                              Returns policy
+                            </Link>
+                          </>
+                        )}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              )}
+
+              {questionLine && (
+                <p
+                  className="text-[13px]"
+                  style={{ color: "var(--pink-subtle)" }}
+                >
+                  <span {...fieldAttr("pink.global.product-question")}>
+                    {questionLine}
+                  </span>
+                  {questionLinkLabel && (
+                    <>
+                      {" "}
+                      <Link
+                        href="/contact"
+                        className="underline"
+                        style={{ color: "var(--pink-rose)" }}
+                        {...fieldAttr("pink.product.question-link-label")}
+                      >
+                        {questionLinkLabel}
+                      </Link>
+                    </>
+                  )}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -283,6 +380,7 @@ export async function PinkProductPage({
                 content: typeof row.body === "string" ? row.body : "",
               }))}
               defaultOpenIndex={0}
+              itemFieldKey={PANELS_KEY}
             />
           </div>
         </section>

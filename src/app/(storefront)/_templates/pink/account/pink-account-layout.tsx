@@ -5,15 +5,33 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkPageHeader } from "../shared/pink-page-header";
 
-const NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders" },
-  { href: "/account/settings", label: "Settings" },
-  { href: "/account/security", label: "Security" },
-  { href: "/account/address-book", label: "Address Book" },
-  { href: "/account/preferences", label: "Preferences" },
+/**
+ * `flag` optionally gates a nav item behind a storefront feature flag
+ * (Subscriptions → `"subscriptions"`, Invoices → `"invoices"`, Rewards →
+ * `"loyalty"`); omitted means always-on. Same items, order and flags as
+ * `DefaultAccountLayout`/`NoiseAccountLayout`.
+ */
+const BASE_NAV_ITEMS = [
+  { href: "/account/orders", label: "Orders", flag: undefined },
+  {
+    href: "/account/subscriptions",
+    label: "Subscriptions",
+    flag: "subscriptions",
+  },
+  { href: "/account/invoices", label: "Invoices", flag: "invoices" },
+  { href: "/account/settings", label: "Settings", flag: undefined },
+  { href: "/account/security", label: "Security", flag: undefined },
+  {
+    href: "/account/address-book",
+    label: "Address Book",
+    flag: undefined,
+  },
+  { href: "/account/preferences", label: "Preferences", flag: undefined },
+  { href: "/account/rewards", label: "Rewards", flag: "loyalty" },
 ] as const;
 
 type PinkAccountLayoutProps = {
@@ -49,6 +67,11 @@ export function PinkAccountLayout({
   // the raw `authClient.useSession()` could resolve before hydration and
   // mismatch against the server's markup.
   const { data: session } = useHydratedSession();
+  const flags = useStorefrontFlags();
+
+  const NAV_ITEMS = BASE_NAV_ITEMS.filter(
+    (item) => !item.flag || flags.isEnabled(item.flag),
+  );
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);

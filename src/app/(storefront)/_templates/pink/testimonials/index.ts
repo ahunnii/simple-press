@@ -19,17 +19,17 @@ import { SECTION_LINKS } from "~/lib/section-links";
 const testimonialsHeaderData: TemplateField[] = [
   {
     key: "pink.testimonials.header-heading",
-    label: "Header Heading",
+    label: "Heading",
     type: "text",
     page: "testimonials",
     group: "testimonials.header",
     gridColumn: "col-span-full",
-    description: "The page's H1.",
+    description: "Main heading at the top of the testimonials page.",
     defaultValue: "What people say",
   },
   {
     key: "pink.testimonials.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.header",
@@ -45,13 +45,13 @@ const testimonialsHeaderData: TemplateField[] = [
 const testimonialsFeaturedData: TemplateField[] = [
   {
     key: "pink.testimonials.featured-link-label",
-    label: "Featured Card Link Text",
+    label: "Link text",
     type: "text",
     page: "testimonials",
     group: "testimonials.featured",
     gridColumn: "col-span-1",
     description:
-      "Link under the featured pull-quote — sources the first testimonial.",
+      "Text for the link under the featured quote card, built from your most recent testimonial. Leave blank to hide the link.",
     defaultValue: "Read more notes →",
   },
 ];
@@ -61,7 +61,7 @@ const testimonialsFeaturedData: TemplateField[] = [
 const testimonialsGridData: TemplateField[] = [
   {
     key: "pink.testimonials.grid-heading-suffix",
-    label: "Grid Heading Suffix",
+    label: "Heading suffix",
     description: "Appended after the live count, e.g. '12 notes back'.",
     type: "text",
     page: "testimonials",
@@ -71,8 +71,8 @@ const testimonialsGridData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.grid-filter-all-label",
-    label: "Filter — All",
-    description: "Label for the 'show everything' filter chip.",
+    label: "All filter text",
+    description: "Label for the filter chip that shows every note.",
     type: "text",
     page: "testimonials",
     group: "testimonials.grid",
@@ -81,7 +81,7 @@ const testimonialsGridData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.grid-filter-keeper-label",
-    label: "Filter — Customer Notes",
+    label: "Customer filter text",
     description: "Label for the filter chip showing customer-submitted notes.",
     type: "text",
     page: "testimonials",
@@ -91,7 +91,7 @@ const testimonialsGridData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.grid-filter-studio-label",
-    label: "Filter — Owner Notes",
+    label: "Studio filter text",
     description:
       "Label for the filter chip showing owner-added notes. Only shown when at least one exists.",
     type: "text",
@@ -102,7 +102,7 @@ const testimonialsGridData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.grid-empty-heading",
-    label: "Empty State Heading",
+    label: "Empty list heading",
     description: "Shown when there are no testimonials yet.",
     type: "text",
     page: "testimonials",
@@ -112,8 +112,8 @@ const testimonialsGridData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.grid-empty-body",
-    label: "Empty State Body",
-    description: "Supporting line under the empty-state heading.",
+    label: "Empty list body",
+    description: "Supporting line under the empty-list heading.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.grid",
@@ -127,7 +127,7 @@ const testimonialsGridData: TemplateField[] = [
 const testimonialsPressData: TemplateField[] = [
   {
     key: "pink.testimonials.press-heading",
-    label: "Press Heading",
+    label: "Heading",
     description: "Heading over the press band.",
     type: "text",
     page: "testimonials",
@@ -137,8 +137,8 @@ const testimonialsPressData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.press-note",
-    label: "Press Note",
-    description: "Muted supporting line beside the heading.",
+    label: "Note",
+    description: "Supporting line beside the heading.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.press",
@@ -147,7 +147,7 @@ const testimonialsPressData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.press-items",
-    label: "Press Mentions",
+    label: "Press mentions",
     description:
       "Up to 4 press mentions. Ships empty — the whole band stays hidden until you add a real one.",
     type: "list",
@@ -155,21 +155,38 @@ const testimonialsPressData: TemplateField[] = [
     group: "testimonials.press",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "press mention",
     itemSchema: [
       {
         key: "outlet",
         label: "Outlet",
         type: "text",
         placeholder: "Local Makers Weekly",
+        description: "Name of the publication or site that mentioned you.",
       },
-      { key: "date", label: "Date", type: "text", placeholder: "March 2024" },
+      {
+        key: "date",
+        label: "Date",
+        type: "text",
+        placeholder: "March 2024",
+        description: "When it ran.",
+        optional: true,
+      },
       {
         key: "quote",
         label: "Quote",
         type: "textarea",
-        placeholder: "A short pull-quote from the piece.",
+        placeholder: "A short excerpt from the piece.",
+        description: "Short excerpt from the piece.",
       },
-      { key: "href", label: "Link", type: "url", placeholder: "https://…" },
+      {
+        key: "href",
+        label: "Link",
+        type: "url",
+        placeholder: "https://…",
+        description: "Where the mention links, if it's online.",
+        optional: true,
+      },
     ],
     defaultValue: "",
   },
@@ -180,7 +197,7 @@ const testimonialsPressData: TemplateField[] = [
 const testimonialsCtaData: TemplateField[] = [
   {
     key: "pink.testimonials.cta-heading",
-    label: "CTA Heading",
+    label: "Heading",
     description: "Heading for the closing panel.",
     type: "text",
     page: "testimonials",
@@ -190,7 +207,7 @@ const testimonialsCtaData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.cta-body",
-    label: "CTA Body",
+    label: "Body text",
     description: "Supporting line under the heading.",
     type: "textarea",
     page: "testimonials",
@@ -201,7 +218,7 @@ const testimonialsCtaData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.cta-button-label",
-    label: "CTA Button Text",
+    label: "Button text",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "testimonials",
@@ -211,7 +228,7 @@ const testimonialsCtaData: TemplateField[] = [
   },
   {
     key: "pink.testimonials.cta-button-link",
-    label: "CTA Button Link",
+    label: "Button link",
     description:
       "Where the closing button goes — defaults to the shared testimonial submission page.",
     type: "url",
@@ -235,35 +252,37 @@ export const pinkTestimonialsData: TemplateField[] = [
 export const pinkTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.header",
-    title: "Testimonials — Header",
-    description: "Eyebrow, heading, intro, and stat tiles.",
+    title: "Header",
+    description: "Heading and intro text at the top of the testimonials page.",
     icon: "💬",
     columns: 2,
   },
   {
     id: "testimonials.featured",
-    title: "Testimonials — Featured",
-    description: "Link text for the featured pull-quote card.",
+    title: "Featured note",
+    description: "Link text for the featured quote card.",
     icon: "🌟",
     columns: 1,
   },
   {
     id: "testimonials.grid",
-    title: "Testimonials — Grid",
-    description: "Heading, filter labels, and the empty state.",
+    title: "Notes grid",
+    description:
+      "Heading suffix, filter text, and the empty-list copy for the notes grid.",
     icon: "🧾",
     columns: 2,
   },
   {
     id: "testimonials.press",
-    title: "Testimonials — Press",
-    description: "Press mentions on a dark band.",
+    title: "Press",
+    description:
+      "Heading, note, and up to four press mentions, shown once at least one is added.",
     icon: "📰",
     columns: 2,
   },
   {
     id: "testimonials.cta",
-    title: "Testimonials — Closing CTA",
+    title: "Closing banner",
     description: "Closing panel inviting a note.",
     icon: "✍️",
     columns: 2,
@@ -275,7 +294,7 @@ export const pinkTestimonialsSections: TemplateSection[] = [
     id: "testimonials.header",
     page: "testimonials",
     title: "Header",
-    description: "Page header with eyebrow, heading, intro, and stat tiles.",
+    description: "Heading and intro text at the top of the testimonials page.",
     groupIds: ["testimonials.header"],
     order: 0,
     hideable: false,
@@ -283,8 +302,8 @@ export const pinkTestimonialsSections: TemplateSection[] = [
   {
     id: "testimonials.featured",
     page: "testimonials",
-    title: "Featured Note",
-    description: "Large pull-quote card for the first testimonial.",
+    title: "Featured note",
+    description: "Large quote card for the first testimonial.",
     groupIds: ["testimonials.featured"],
     order: 1,
     hideable: true,
@@ -293,7 +312,7 @@ export const pinkTestimonialsSections: TemplateSection[] = [
   {
     id: "testimonials.grid",
     page: "testimonials",
-    title: "Notes Grid",
+    title: "Notes grid",
     description: "Filterable masonry grid of every testimonial.",
     groupIds: ["testimonials.grid"],
     order: 2,
@@ -304,7 +323,7 @@ export const pinkTestimonialsSections: TemplateSection[] = [
     id: "testimonials.press",
     page: "testimonials",
     title: "Press",
-    description: "Dark band of press mentions.",
+    description: "Band of press mentions.",
     groupIds: ["testimonials.press"],
     order: 3,
     hideable: true,
@@ -312,7 +331,7 @@ export const pinkTestimonialsSections: TemplateSection[] = [
   {
     id: "testimonials.cta",
     page: "testimonials",
-    title: "Closing CTA",
+    title: "Closing banner",
     description: "Closing panel inviting a note.",
     groupIds: ["testimonials.cta"],
     order: 4,
