@@ -256,6 +256,27 @@ describe("isRetiredTemplateKey", () => {
     expect(isRetiredTemplateKey("dream.global.service-area")).toBe(false);
   });
 
+  it("recognises umsc's retired Settings-owned keys (2026-09-26)", () => {
+    for (const key of [
+      "umsc.global.announcement-text",
+      "umsc.global.announcement-link-label",
+      "umsc.global.announcement-link-url",
+      "umsc.global.footer-tagline",
+      "umsc.global.customer-service-phone",
+      "umsc.global.instagram-url",
+      "umsc.global.facebook-url",
+      "umsc.global.tiktok-url",
+      "umsc.contact.hours",
+      "umsc.homepage.reviews-override-quote",
+      "umsc.homepage.reviews-override-name",
+    ]) {
+      expect(RETIRED_TEMPLATE_KEYS.has(key)).toBe(true);
+    }
+    // Template-owned chrome copy stays a field.
+    expect(isRetiredTemplateKey("umsc.global.google-review-url")).toBe(false);
+    expect(isRetiredTemplateKey("umsc.global.header-tagline")).toBe(false);
+  });
+
   it("is never still declared by a template", () => {
     const declared = Object.values(TEMPLATE_FIELDS)
       .flat()

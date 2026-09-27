@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 // design.md "Per-page section concepts › Testimonials": hero (not hideable)
 // → featured pull-quote + masonry (not hideable, DB-driven — real
@@ -12,8 +13,8 @@ import type { TemplateSection } from "~/lib/template-sections";
 const testimonialsHeroData: TemplateField[] = [
   {
     key: "umsc.testimonials.hero-heading",
-    label: "Hero Heading",
-    description: "The page title shown on the black page-hero band.",
+    label: "Heading",
+    description: "The page's main heading, at the top of the page.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -22,7 +23,7 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "umsc.testimonials.hero-lede",
-    label: "Hero Lede",
+    label: "Subheading",
     description: "One sentence beneath the heading.",
     type: "textarea",
     page: "testimonials",
@@ -32,7 +33,7 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "umsc.testimonials.empty-message",
-    label: "Empty State Message",
+    label: "Empty state message",
     description: "Shown when there are no customer reviews yet.",
     type: "textarea",
     page: "testimonials",
@@ -47,7 +48,7 @@ const testimonialsHeroData: TemplateField[] = [
 const testimonialsFeaturedData: TemplateField[] = [
   {
     key: "umsc.testimonials.review-source-label",
-    label: "Review Source Label",
+    label: "Review source label",
     description:
       "Caption shown under each customer's name on the featured quote and every review card (e.g. 'Verified customer').",
     type: "text",
@@ -63,8 +64,8 @@ const testimonialsFeaturedData: TemplateField[] = [
 const testimonialsCtaData: TemplateField[] = [
   {
     key: "umsc.testimonials.cta-heading",
-    label: "CTA Heading",
-    description: "Heading on the closing cream band.",
+    label: "Closing heading",
+    description: "Heading on the closing band.",
     type: "text",
     page: "testimonials",
     group: "testimonials.cta",
@@ -73,7 +74,7 @@ const testimonialsCtaData: TemplateField[] = [
   },
   {
     key: "umsc.testimonials.cta-body",
-    label: "CTA Body Text",
+    label: "Closing text",
     description:
       "Short invitation encouraging customers to share their experience.",
     type: "textarea",
@@ -85,7 +86,7 @@ const testimonialsCtaData: TemplateField[] = [
   },
   {
     key: "umsc.testimonials.cta-button-label",
-    label: "Button Text",
+    label: "Button text",
     description: "Text for the 'submit a testimonial' button.",
     type: "text",
     page: "testimonials",
@@ -106,14 +107,14 @@ export const umscTestimonialsData: TemplateField[] = [
 export const umscTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.hero",
-    title: "Testimonials Hero",
-    description: "Page-hero heading, lede, and the empty-state message",
+    title: "Hero",
+    description: "Page heading, subheading, and the empty-state message",
     icon: "💬",
     columns: 2,
   },
   {
     id: "testimonials.featured",
-    title: "Featured Review",
+    title: "Featured review",
     description:
       "Caption shown on the featured pull-quote and every review card",
     icon: "⭐",
@@ -121,7 +122,7 @@ export const umscTestimonialsFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "testimonials.cta",
-    title: "Testimonials CTA",
+    title: "Closing banner",
     description: "Closing band encouraging customers to submit a review",
     icon: "✍️",
     columns: 2,
@@ -133,7 +134,7 @@ export const umscTestimonialsSections: TemplateSection[] = [
     id: "testimonials.hero",
     page: "testimonials",
     title: "Hero",
-    description: "Page hero with heading and lede",
+    description: "Page heading and subheading",
     groupIds: ["testimonials.hero"],
     order: 0,
     hideable: false,
@@ -141,16 +142,17 @@ export const umscTestimonialsSections: TemplateSection[] = [
   {
     id: "testimonials.featured",
     page: "testimonials",
-    title: "Featured Review",
+    title: "Featured review",
     description: "The first review as a pull-quote, then a masonry of the rest",
     groupIds: ["testimonials.featured"],
     order: 1,
     hideable: false,
+    links: [SECTION_LINKS.testimonials],
   },
   {
     id: "testimonials.cta",
     page: "testimonials",
-    title: "Closing CTA",
+    title: "Closing banner",
     description: "Closing band with the Google-review link and a submit button",
     groupIds: ["testimonials.cta"],
     order: 2,

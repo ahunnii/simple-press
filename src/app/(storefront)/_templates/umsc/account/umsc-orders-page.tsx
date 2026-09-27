@@ -2,14 +2,27 @@ import Link from "next/link";
 
 import type { OrdersPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 
+import { resolveUmscAccountFields } from ".";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscImageFallback } from "../shared/umsc-image-fallback";
 import { UmscAccountLayout } from "./umsc-account-layout";
 import { UmscOrderStatusBadge } from "./umsc-order-status-badge";
 
-export function UmscOrdersPage({ orders }: OrdersPageTemplateProps) {
+const FIELD_KEYS = [
+  "umsc.global.account-orders-empty-heading",
+  "umsc.global.account-orders-empty-body",
+  "umsc.global.account-orders-empty-button",
+];
+
+export function UmscOrdersPage({ business, orders }: OrdersPageTemplateProps) {
+  const f = resolveUmscAccountFields(
+    business.siteContent?.customFields,
+    FIELD_KEYS,
+  );
+
   return (
     <UmscAccountLayout
       heading="Orders"
@@ -24,21 +37,32 @@ export function UmscOrdersPage({ orders }: OrdersPageTemplateProps) {
           <div className="mb-6 size-16">
             <UmscImageFallback aspect="1 / 1" />
           </div>
-          <h2 className="umsc-serif text-[22px] font-normal text-[var(--umsc-ink)]">
-            No orders yet
-          </h2>
-          <p className="umsc-sans mt-3 max-w-[36ch] text-[15px] leading-[1.6] text-[var(--umsc-muted)]">
-            When you place an order, it will appear here.
-          </p>
-          <UmscButton
-            as="link"
-            href="/shop"
-            variant="gold"
-            showArrow={false}
-            className="mt-7"
+          <h2
+            {...fieldAttr("umsc.global.account-orders-empty-heading")}
+            className="umsc-serif text-[22px] font-normal text-[var(--umsc-ink)]"
           >
-            Shop now
-          </UmscButton>
+            {f["umsc.global.account-orders-empty-heading"] ?? ""}
+          </h2>
+          {f["umsc.global.account-orders-empty-body"] ? (
+            <p
+              {...fieldAttr("umsc.global.account-orders-empty-body")}
+              className="umsc-sans mt-3 max-w-[36ch] text-[15px] leading-[1.6] text-[var(--umsc-muted)]"
+            >
+              {f["umsc.global.account-orders-empty-body"]}
+            </p>
+          ) : null}
+          {f["umsc.global.account-orders-empty-button"] ? (
+            <UmscButton
+              as="link"
+              href="/shop"
+              variant="gold"
+              showArrow={false}
+              fieldKey="umsc.global.account-orders-empty-button"
+              className="mt-7"
+            >
+              {f["umsc.global.account-orders-empty-button"]}
+            </UmscButton>
+          ) : null}
         </div>
       ) : (
         <div className="flex flex-col gap-4">

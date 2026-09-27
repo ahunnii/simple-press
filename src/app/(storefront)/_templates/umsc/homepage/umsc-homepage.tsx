@@ -4,11 +4,15 @@ import type { Product } from "~/types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import {
+  getRawCustomFieldString,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { nonBlank } from "../shared/umsc-non-blank";
 import { UmscCategoriesSection } from "./umsc-categories-section";
 import { UmscCustomSection } from "./umsc-custom-section";
 import { UmscFaqSection } from "./umsc-faq-section";
@@ -72,9 +76,10 @@ export async function UmscHomepage(_props?: DefaultHomepageTemplateProps) {
     // Reviews
     "umsc.homepage.reviews-heading",
     "umsc.homepage.reviews-lede",
-    "umsc.homepage.reviews-override-quote",
-    "umsc.homepage.reviews-override-name",
     "umsc.homepage.reviews-empty-text",
+    "umsc.homepage.reviews-owner-source",
+    "umsc.homepage.reviews-verified-source",
+    "umsc.homepage.reviews-anonymous-name",
     // Custom band
     "umsc.homepage.custom-heading",
     "umsc.homepage.custom-lede",
@@ -126,15 +131,33 @@ export async function UmscHomepage(_props?: DefaultHomepageTemplateProps) {
   const testimonials = isEnabled("testimonials")
     ? await api.testimonial.list({ publicOnly: true }).catch(() => [])
     : [];
-  const overrideQuote = f["umsc.homepage.reviews-override-quote"] ?? "";
-  const overrideName = f["umsc.homepage.reviews-override-name"] ?? "";
-  const hasOverride = overrideQuote.trim().length > 0;
+  // The override quote/name fields were retired 2026-09-26 (testimonials are
+  // owned by Admin → Testimonials); a quote saved before then is still read
+  // here as a silent legacy fallback.
+  const overrideQuote =
+    nonBlank(
+      getRawCustomFieldString(
+        customFields,
+        "umsc.homepage.reviews-override-quote",
+      ),
+    ) ?? "";
+  const overrideName =
+    nonBlank(
+      getRawCustomFieldString(
+        customFields,
+        "umsc.homepage.reviews-override-name",
+      ),
+    ) ?? "";
+  const hasOverride = overrideQuote.length > 0;
+  const anonymousReviewerName = f["umsc.homepage.reviews-anonymous-name"] ?? "";
+  const ownerReviewSource = f["umsc.homepage.reviews-owner-source"] ?? "";
+  const verifiedReviewSource = f["umsc.homepage.reviews-verified-source"] ?? "";
   const reviewCards: UmscReviewCardData[] = [
     ...(hasOverride
       ? [
           {
             quote: overrideQuote,
-            name: overrideName || "A customer",
+            name: overrideName || anonymousReviewerName,
             source: "Featured review",
           },
         ]
@@ -142,7 +165,7 @@ export async function UmscHomepage(_props?: DefaultHomepageTemplateProps) {
     ...testimonials.slice(0, hasOverride ? 2 : 3).map((t) => ({
       quote: t.text,
       name: t.customerName,
-      source: t.source === "owner" ? "From Monique" : "Verified order",
+      source: t.source === "owner" ? ownerReviewSource : verifiedReviewSource,
     })),
   ];
 

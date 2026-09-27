@@ -496,6 +496,25 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   // Settings → General (address city) via
   // `_templates/sledge/shared/sledge-location-tag.ts`.
   "sledge.global.location-tag",
+  // umsc, retired 2026-09-26 — phone and hours come from Settings
+  // (Business), the footer tagline and Instagram/Facebook/TikTok links from
+  // Content → Branding (`SiteContent.footerText` / `socialLinks`), the
+  // announcement bar from Content → Announcements (platform banner), and the
+  // homepage featured review from Admin → Testimonials. Saved values are read
+  // as a silent fallback in `_templates/umsc/shared/umsc-contact-details.ts`,
+  // `_templates/umsc/layout/umsc-layout.tsx` and
+  // `_templates/umsc/homepage/umsc-homepage.tsx`.
+  "umsc.global.announcement-text",
+  "umsc.global.announcement-link-label",
+  "umsc.global.announcement-link-url",
+  "umsc.global.footer-tagline",
+  "umsc.global.customer-service-phone",
+  "umsc.global.instagram-url",
+  "umsc.global.facebook-url",
+  "umsc.global.tiktok-url",
+  "umsc.contact.hours",
+  "umsc.homepage.reviews-override-quote",
+  "umsc.homepage.reviews-override-name",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

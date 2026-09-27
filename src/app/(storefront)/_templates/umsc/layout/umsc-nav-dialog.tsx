@@ -9,6 +9,7 @@ import type { UmscNavLink } from "./umsc-header";
 import type { Session } from "~/server/better-auth/config";
 
 import { UmscButton } from "../shared/umsc-button";
+import { umscTelHref } from "../shared/umsc-contact-details";
 import { UmscNavDialogAccount } from "./umsc-nav-dialog-account";
 
 type Props = {
@@ -250,7 +251,7 @@ export function UmscNavDialog({
         )}
         {phone && (
           <a
-            href={`tel:${phone.replace(/\s/g, "")}`}
+            href={umscTelHref(phone)}
             className="umsc-sans mb-4 flex items-center gap-2 text-[14px] text-[var(--umsc-cream-on-black)] no-underline"
           >
             <Phone className="size-4" aria-hidden="true" />

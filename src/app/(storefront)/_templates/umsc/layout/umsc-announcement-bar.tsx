@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { fieldAttr } from "~/lib/preview/section-attrs";
 import { BannerDismissButton } from "~/components/site-banner/dismissible-banner";
 
 /**
@@ -22,10 +21,15 @@ type Props = {
 };
 
 /**
- * UmscAnnouncementBar — 34px black bar, dismissible, hidden when the text
- * field is blank (checked by the caller before rendering this component so
- * a fully-hidden bar never mounts). The dismissed state is keyed on the text
- * itself so editing the copy un-dismisses it for returning visitors.
+ * UmscAnnouncementBar — 34px black bar, dismissible.
+ * Legacy path only: `UmscLayout` renders this from an announcement an owner
+ * saved under the retired `umsc.global.announcement-*` fields, and only when
+ * no platform banner (`resolveBanner`, rendered by `UmscPlatformBanner`) is
+ * configured. The caller checks the text is non-blank before rendering, so a
+ * fully-hidden bar never mounts; `linkLabel` / `linkUrl` arrive as `""` when
+ * the saved link is incomplete or unsafe, which hides the link. The dismissed
+ * state is keyed on the text itself so editing the copy un-dismisses it for
+ * returning visitors.
  */
 export function UmscAnnouncementBar({ text, linkLabel, linkUrl }: Props) {
   const isExternal = /^https?:\/\//i.test(linkUrl);
@@ -53,12 +57,7 @@ export function UmscAnnouncementBar({ text, linkLabel, linkUrl }: Props) {
   return (
     <div role="region" aria-label="Announcement">
       <div className="umsc-announcement-bar umsc-sans grid grid-cols-[1fr_auto_auto] items-center gap-3 bg-[var(--umsc-black)] px-4 py-2 text-[12px] text-[var(--umsc-cream-on-black)]">
-        <p
-          {...fieldAttr("umsc.global.announcement-text")}
-          className="m-0 truncate text-center sm:text-left"
-        >
-          {text}
-        </p>
+        <p className="m-0 truncate text-center sm:text-left">{text}</p>
 
         {linkLabel ? (
           isExternal ? (
@@ -66,7 +65,6 @@ export function UmscAnnouncementBar({ text, linkLabel, linkUrl }: Props) {
               href={linkUrl}
               target="_blank"
               rel="noreferrer"
-              {...fieldAttr("umsc.global.announcement-link-label")}
               className="shrink-0 font-semibold tracking-[0.06em] text-[var(--umsc-gold-soft)] underline underline-offset-[3px]"
             >
               {linkLabel}
@@ -75,7 +73,6 @@ export function UmscAnnouncementBar({ text, linkLabel, linkUrl }: Props) {
           ) : (
             <Link
               href={linkUrl}
-              {...fieldAttr("umsc.global.announcement-link-label")}
               className="shrink-0 font-semibold tracking-[0.06em] text-[var(--umsc-gold-soft)] underline underline-offset-[3px]"
             >
               {linkLabel}

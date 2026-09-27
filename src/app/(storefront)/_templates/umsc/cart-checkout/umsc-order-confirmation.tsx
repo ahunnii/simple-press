@@ -20,8 +20,10 @@ type OrderDetails = {
 type Props = {
   businessName: string;
   thankYouHeading: string;
+  nextStepsHeading: string;
   nextSteps: string;
   continueCta: string;
+  homeLinkLabel: string;
   loadingText: string;
   noOrderHeading: string;
   noOrderBody: string;
@@ -41,8 +43,10 @@ function formatOrderTotal(amountCents: number, currency: string): string {
 export function UmscOrderConfirmation({
   businessName,
   thankYouHeading,
+  nextStepsHeading,
   nextSteps,
   continueCta,
+  homeLinkLabel,
   loadingText,
   noOrderHeading,
   noOrderBody,
@@ -150,7 +154,7 @@ export function UmscOrderConfirmation({
 
       <section
         aria-labelledby="umsc-order-heading"
-        {...sectionGroupAttr("order", "main")}
+        {...sectionGroupAttr("checkout", "success")}
         className="px-6 py-24 sm:px-8 sm:py-28"
       >
         <div className="mx-auto max-w-[640px] text-center">
@@ -199,9 +203,14 @@ export function UmscOrderConfirmation({
 
           {nextStepsLines.length > 0 && (
             <div className="mb-10 inline-block text-left">
-              <p className="umsc-sans mb-3.5 text-[11px] font-semibold tracking-[0.16em] text-[var(--umsc-gold-soft)] uppercase">
-                What happens next
-              </p>
+              {nextStepsHeading ? (
+                <p
+                  {...fieldAttr("umsc.order.next-steps-heading")}
+                  className="umsc-sans mb-3.5 text-[11px] font-semibold tracking-[0.16em] text-[var(--umsc-gold-soft)] uppercase"
+                >
+                  {nextStepsHeading}
+                </p>
+              ) : null}
               <ul role="list" className="m-0 flex flex-col gap-2.5 p-0">
                 {nextStepsLines.map((line, i) => (
                   <li
@@ -231,14 +240,17 @@ export function UmscOrderConfirmation({
             >
               {continueCta || "Continue Shopping"}
             </UmscButton>
-            <UmscButton
-              as="link"
-              href="/"
-              variant="link"
-              className="!text-[var(--umsc-gold-soft)]"
-            >
-              Back to home
-            </UmscButton>
+            {homeLinkLabel ? (
+              <UmscButton
+                as="link"
+                href="/"
+                variant="link"
+                fieldKey="umsc.order.home-link-label"
+                className="!text-[var(--umsc-gold-soft)]"
+              >
+                {homeLinkLabel}
+              </UmscButton>
+            ) : null}
           </div>
         </div>
       </section>

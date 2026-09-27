@@ -4,11 +4,13 @@ import { Marcellus, Work_Sans } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { safeHref } from "~/lib/safe-href";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
 
-import { resolveFields } from "../index";
+import { nonBlank } from "../shared/umsc-non-blank";
 import { UmscAnnouncementBar } from "./umsc-announcement-bar";
 import { UmscFooter } from "./umsc-footer";
 import { UmscHeader } from "./umsc-header";
@@ -35,12 +37,13 @@ const fontSans = Work_Sans({
  * banners render as normal in-flow elements above the header rather than
  * inside a fixed header stack.
  *
- * Two independent banners can stack here: the platform's owner-toggled admin
- * banner (`resolveBanner`, same mechanism as `vii-layout.tsx`) renders first
- * when active, and umsc's own field-driven `UmscAnnouncementBar` renders
- * below it. Each hides independently — the platform banner is off unless an
- * admin configures one; the template banner is off when its text field is
- * blank.
+ * Announcement bar: the platform banner (Content → Announcements,
+ * `resolveBanner` → `UmscPlatformBanner`) is the only live source. When no
+ * banner is configured, an announcement the owner saved under the retired
+ * `umsc.global.announcement-*` fields (2026-09-26) still renders as a silent
+ * fallback via `UmscAnnouncementBar`, with its link only when both the saved
+ * label and a safe saved URL exist. A fresh store shows no bar until the
+ * owner turns on a banner.
  */
 export async function UmscLayout({
   children,
@@ -57,15 +60,24 @@ export async function UmscLayout({
     business.siteContent?.customFields,
   );
 
-  const customFields = business.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
-  const f = resolveFields(customFields, [
-    "umsc.global.announcement-text",
-    "umsc.global.announcement-link-label",
-    "umsc.global.announcement-link-url",
-  ]);
-  const announcementText = f["umsc.global.announcement-text"] ?? "";
+  const customFields = business.siteContent?.customFields;
+  const legacyText = nonBlank(
+    getRawCustomFieldString(customFields, "umsc.global.announcement-text"),
+  );
+  const legacyLinkLabel = nonBlank(
+    getRawCustomFieldString(
+      customFields,
+      "umsc.global.announcement-link-label",
+    ),
+  );
+  const legacyLinkUrl =
+    safeHref(
+      getRawCustomFieldString(
+        customFields,
+        "umsc.global.announcement-link-url",
+      ),
+    ) ?? undefined;
+  const hasLegacyLink = Boolean(legacyLinkLabel && legacyLinkUrl);
 
   return (
     <div
@@ -79,15 +91,15 @@ export async function UmscLayout({
         Skip to main content
       </a>
 
-      {banner && <UmscPlatformBanner banner={banner} />}
-
-      {announcementText && (
+      {banner ? (
+        <UmscPlatformBanner banner={banner} />
+      ) : legacyText ? (
         <UmscAnnouncementBar
-          text={announcementText}
-          linkLabel={f["umsc.global.announcement-link-label"] ?? ""}
-          linkUrl={f["umsc.global.announcement-link-url"] ?? "/shop"}
+          text={legacyText}
+          linkLabel={hasLegacyLink ? (legacyLinkLabel ?? "") : ""}
+          linkUrl={hasLegacyLink ? (legacyLinkUrl ?? "") : ""}
         />
-      )}
+      ) : null}
 
       <UmscHeader business={business} initialSession={session ?? null} />
 

@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 // design.md "Per-page section concepts › Contact": hero (not hideable) →
 // form + sticky aside (not hideable — gated on the contactForm flag inside
@@ -14,8 +15,8 @@ import type { TemplateSection } from "~/lib/template-sections";
 const contactHeroData: TemplateField[] = [
   {
     key: "umsc.contact.hero-heading",
-    label: "Hero Heading",
-    description: "The page title shown on the black page-hero band.",
+    label: "Heading",
+    description: "The page's main heading, at the top of the page.",
     type: "text",
     page: "contact",
     group: "contact.hero",
@@ -24,8 +25,8 @@ const contactHeroData: TemplateField[] = [
   },
   {
     key: "umsc.contact.hero-lede",
-    label: "Hero Lede",
-    description: "One sentence beneath the heading.",
+    label: "Subheading",
+    description: "One or two sentences beneath the heading.",
     type: "textarea",
     page: "contact",
     group: "contact.hero",
@@ -40,7 +41,7 @@ const contactHeroData: TemplateField[] = [
 const contactFormData: TemplateField[] = [
   {
     key: "umsc.contact.form-heading",
-    label: "Form Heading",
+    label: "Form heading",
     description: "Heading above the contact form.",
     type: "text",
     page: "contact",
@@ -50,7 +51,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.toggle-general-label",
-    label: "'General Question' Toggle Label",
+    label: "General question toggle label",
     description:
       "Text for the first toggle pill (the default, general-inquiry mode).",
     type: "text",
@@ -61,7 +62,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.toggle-custom-label",
-    label: "'Custom Order' Toggle Label",
+    label: "Custom order toggle label",
     description:
       "Text for the second toggle pill. Selected automatically when a visitor arrives at /contact?type=custom.",
     type: "text",
@@ -72,7 +73,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.form-submit-label",
-    label: "Submit Button Text",
+    label: "Submit button text",
     description: "Text for the form's submit button.",
     type: "text",
     page: "contact",
@@ -82,7 +83,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.form-success-heading",
-    label: "Success Heading",
+    label: "Success heading",
     description: "Heading shown on the success panel after a message is sent.",
     type: "text",
     page: "contact",
@@ -92,7 +93,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.form-success-body",
-    label: "Success Body Text",
+    label: "Success message",
     description: "Copy shown on the success panel after a message is sent.",
     type: "textarea",
     page: "contact",
@@ -103,7 +104,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.expect-heading",
-    label: "'What to Expect' Heading",
+    label: "What to expect heading",
     description: "Heading for the sticky aside beside the form.",
     type: "text",
     page: "contact",
@@ -113,7 +114,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.expect-line-1",
-    label: "'What to Expect' Line 1",
+    label: "What to expect line 1",
     description: "First short line in the aside. Leave blank to hide it.",
     type: "text",
     page: "contact",
@@ -123,7 +124,7 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.expect-line-2",
-    label: "'What to Expect' Line 2",
+    label: "What to expect line 2",
     description: "Second short line in the aside. Leave blank to hide it.",
     type: "text",
     page: "contact",
@@ -133,24 +134,13 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "umsc.contact.expect-line-3",
-    label: "'What to Expect' Line 3",
+    label: "What to expect line 3",
     description: "Third short line in the aside. Leave blank to hide it.",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
     defaultValue: "Local pickup and shipping are both available.",
-  },
-  {
-    key: "umsc.contact.hours",
-    label: "Hours",
-    description:
-      "Shown in the sticky aside beside the form. Leave blank to hide it.",
-    type: "textarea",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-full",
-    defaultValue: "Mon–Sat: by appointment · Sun: closed",
   },
 ];
 
@@ -159,7 +149,7 @@ const contactFormData: TemplateField[] = [
 const contactVisitData: TemplateField[] = [
   {
     key: "umsc.contact.visit-heading",
-    label: "Visit Heading",
+    label: "Visit heading",
     description: "Heading for the 'Visit Our Stores' band.",
     type: "text",
     page: "contact",
@@ -169,7 +159,7 @@ const contactVisitData: TemplateField[] = [
   },
   {
     key: "umsc.contact.visit-body",
-    label: "Visit Body Text",
+    label: "Visit message",
     description:
       "Markets, pop-ups, or store-visit details. Leave blank to hide this section.",
     type: "textarea",
@@ -181,7 +171,7 @@ const contactVisitData: TemplateField[] = [
   },
   {
     key: "umsc.contact.visit-link-label",
-    label: "Visit Link Text",
+    label: "Visit link text",
     description: "Text for the link beneath the visit copy.",
     type: "text",
     page: "contact",
@@ -191,7 +181,7 @@ const contactVisitData: TemplateField[] = [
   },
   {
     key: "umsc.contact.visit-link-url",
-    label: "Visit Link URL",
+    label: "Visit link",
     description:
       "Where the link points — a socials page or events listing. Leave blank to hide the link.",
     type: "url",
@@ -213,22 +203,22 @@ export const umscContactData: TemplateField[] = [
 export const umscContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.hero",
-    title: "Contact Hero",
-    description: "Page-hero heading and lede",
+    title: "Hero",
+    description: "Page heading and subheading",
     icon: "✉️",
     columns: 2,
   },
   {
     id: "contact.form",
-    title: "Contact Form",
+    title: "Form",
     description:
-      "Form heading, toggle-pill labels, submit/success copy, and the 'What to expect' aside (lines, hours)",
+      "Form heading, toggle labels, submit and success copy, and the What to expect aside",
     icon: "📝",
     columns: 2,
   },
   {
     id: "contact.visit",
-    title: "Visit Our Stores",
+    title: "Visit our stores",
     description: "Heading, body, and link for markets/pop-ups",
     icon: "📍",
     columns: 2,
@@ -240,7 +230,7 @@ export const umscContactSections: TemplateSection[] = [
     id: "contact.hero",
     page: "contact",
     title: "Hero",
-    description: "Page hero with heading and lede",
+    description: "Page heading and subheading",
     groupIds: ["contact.hero"],
     order: 0,
     hideable: false,
@@ -249,15 +239,20 @@ export const umscContactSections: TemplateSection[] = [
     id: "contact.form",
     page: "contact",
     title: "Form",
-    description: "The contact/custom-order form and its 'What to expect' aside",
+    description: "The contact/custom-order form and its What to expect aside",
     groupIds: ["contact.form"],
     order: 1,
     hideable: false,
+    links: [
+      SECTION_LINKS.businessContact,
+      SECTION_LINKS.businessHours,
+      SECTION_LINKS.branding,
+    ],
   },
   {
     id: "contact.visit",
     page: "contact",
-    title: "Visit Our Stores",
+    title: "Visit our stores",
     description: "Markets/pop-ups band",
     groupIds: ["contact.visit"],
     order: 2,

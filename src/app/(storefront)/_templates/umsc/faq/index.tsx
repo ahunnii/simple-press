@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 // FaqPage has no playbook entry (see .claude/skills/sp-new-template/references/page-playbooks.md
 // "How to use this file") — built from `_templates/default/faq/default-faq-page.tsx`'s data
@@ -25,7 +26,7 @@ const faqHeroData: TemplateField[] = [
   },
   {
     key: "umsc.faq.hero-lede",
-    label: "Lede",
+    label: "Subheading",
     description:
       "One sentence under the heading, above the phone and contact links.",
     type: "textarea",
@@ -110,8 +111,8 @@ const faqAccordionData: TemplateField[] = [
 const faqCtaData: TemplateField[] = [
   {
     key: "umsc.faq.cta-heading",
-    label: "CTA Heading",
-    description: "Heading for the closing cream band.",
+    label: "Closing heading",
+    description: "Heading for the closing band at the bottom of the page.",
     type: "text",
     page: "faq",
     group: "faq.cta",
@@ -120,8 +121,8 @@ const faqCtaData: TemplateField[] = [
   },
   {
     key: "umsc.faq.cta-body",
-    label: "CTA Body",
-    description: "One line under the CTA heading.",
+    label: "Closing text",
+    description: "One line under the closing heading.",
     type: "textarea",
     page: "faq",
     group: "faq.cta",
@@ -131,8 +132,8 @@ const faqCtaData: TemplateField[] = [
   },
   {
     key: "umsc.faq.cta-button-label",
-    label: "CTA Button Text",
-    description: "Text for the gold button.",
+    label: "Button text",
+    description: "Text for the button in the closing band.",
     type: "text",
     page: "faq",
     group: "faq.cta",
@@ -141,8 +142,8 @@ const faqCtaData: TemplateField[] = [
   },
   {
     key: "umsc.faq.cta-button-url",
-    label: "CTA Button URL",
-    description: "URL the gold button points to.",
+    label: "Button link",
+    description: "Where the closing-band button points to.",
     type: "url",
     page: "faq",
     group: "faq.cta",
@@ -164,7 +165,7 @@ export const umscFaqFieldGroups: TemplateFieldGroup[] = [
     id: "faq.hero",
     title: "Hero",
     description:
-      "Heading, lede, and the contact link shown beside the phone number",
+      "Heading, subheading, and the contact link shown beside the phone number",
     icon: "❓",
     columns: 2,
   },
@@ -178,8 +179,8 @@ export const umscFaqFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "faq.cta",
-    title: "Closing CTA",
-    description: '"Still have a question?" cream band linking to Contact',
+    title: "Closing banner",
+    description: '"Still have a question?" band linking to Contact',
     icon: "💬",
     columns: 2,
   },
@@ -190,10 +191,11 @@ export const umscFaqSections: TemplateSection[] = [
     id: "faq.hero",
     page: "faq",
     title: "Hero",
-    description: "Heading, lede, phone, and a contact link",
+    description: "Heading, subheading, phone, and a contact link",
     groupIds: ["faq.hero"],
     order: 0,
     hideable: false,
+    links: [SECTION_LINKS.businessContact],
   },
   {
     id: "faq.accordion",
@@ -204,12 +206,13 @@ export const umscFaqSections: TemplateSection[] = [
     groupIds: ["faq.accordion"],
     order: 1,
     hideable: false,
+    links: [SECTION_LINKS.faq],
   },
   {
     id: "faq.cta",
     page: "faq",
-    title: "Closing CTA",
-    description: '"Still have a question?" cream band linking to Contact',
+    title: "Closing banner",
+    description: '"Still have a question?" band linking to Contact',
     groupIds: ["faq.cta"],
     order: 2,
     hideable: true,

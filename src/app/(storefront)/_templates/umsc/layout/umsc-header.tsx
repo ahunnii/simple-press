@@ -19,6 +19,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 import { resolveFields } from "../index";
+import { resolveUmscContactDetails } from "../shared/umsc-contact-details";
 import { UmscNavDialog } from "./umsc-nav-dialog";
 
 export type UmscNavChild = { label: string; href: string; external?: boolean };
@@ -105,17 +106,13 @@ export function UmscHeader({
     | undefined;
   const g = resolveFields(customFields, [
     "umsc.global.header-tagline",
-    "umsc.global.customer-service-phone",
     "umsc.global.nav-cta-label",
     "umsc.global.nav-cta-url",
   ]);
   const tagline = g["umsc.global.header-tagline"] ?? "Home essentials";
-  // Business-record-first, field-as-override — same rule `umsc-footer.tsx`
-  // applies to this same field: `||`, not `??`, since a cleared field ("")
-  // must fall through to the business record.
-  const phone =
-    (g["umsc.global.customer-service-phone"] ?? "").trim() ||
-    (business?.phoneNumber ?? "");
+  // Settings → General phone; the retired `umsc.global.customer-service-phone`
+  // field is only a silent legacy fallback (see `resolveUmscContactDetails`).
+  const { phone } = resolveUmscContactDetails(business);
 
   // Mobile-menu pill. `resolveFields` already trims and falls back to the
   // declared default, so an owner-cleared label arrives as "" and hides the
@@ -372,7 +369,7 @@ export function UmscHeader({
         links={links}
         businessName={businessName}
         brand={brand}
-        phone={phone || undefined}
+        phone={phone}
         triggerRef={hamburgerRef}
         initialSession={initialSession}
         accountsEnabled={accountsEnabled}

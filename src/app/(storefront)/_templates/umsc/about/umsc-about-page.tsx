@@ -132,6 +132,7 @@ export async function UmscAboutPage({
           heading={f["umsc.about.cta-heading"] ?? ""}
           buttonLabel={f["umsc.about.cta-button-label"] ?? ""}
           buttonUrl={f["umsc.about.cta-button-url"] ?? ""}
+          businessName={business.name ?? ""}
         />
       )}
     </PageTransition>

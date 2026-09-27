@@ -1,4 +1,5 @@
 import type { TemplateListRow } from "~/lib/template-fields";
+import { listItemAttr } from "~/lib/preview/section-attrs";
 
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
@@ -114,6 +115,7 @@ export function UmscCategoriesSection({
               key={row._id ?? i}
               className="umsc-reveal-item"
               style={{ "--i": Math.min(i, 6) } as React.CSSProperties}
+              {...listItemAttr("umsc.homepage.categories-doors", i)}
             >
               <UmscCollectionDoor
                 href={link}

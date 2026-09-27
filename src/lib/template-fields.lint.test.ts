@@ -28,6 +28,7 @@ const STRICT_TEMPLATES: readonly string[] = [
   "pink",
   "dream",
   "sledge",
+  "umsc",
 ];
 
 /**

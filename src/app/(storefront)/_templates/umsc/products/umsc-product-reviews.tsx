@@ -15,6 +15,7 @@ import { UmscSection } from "../shared/umsc-section";
 type Props = {
   productId: string;
   productName: string;
+  heading: string;
   googleReviewUrl: string;
 };
 
@@ -51,6 +52,7 @@ const UMSC_SHADCN_VARS: CSSProperties = {
 export function UmscProductReviews({
   productId,
   productName,
+  heading,
   googleReviewUrl,
 }: Props) {
   const { isEnabled } = useStorefrontFlags();
@@ -65,8 +67,12 @@ export function UmscProductReviews({
       aria-label="Reviews"
       className="border-t border-[var(--umsc-line)]"
     >
-      <UmscHeading as="h2" className="mb-8">
-        Customer reviews
+      <UmscHeading
+        as="h2"
+        className="mb-8"
+        fieldKey="umsc.product.reviews-heading"
+      >
+        {heading}
       </UmscHeading>
 
       <div style={UMSC_SHADCN_VARS}>

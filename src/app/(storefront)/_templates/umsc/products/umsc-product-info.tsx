@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Heart } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
@@ -21,12 +21,21 @@ import { UmscVariantSelector } from "./umsc-variant-selector";
 
 type Product = NonNullable<RouterOutputs["product"]["get"]>;
 
+const TRUST_BADGES_KEY = "umsc.global.product-trust-badges";
+
 type Props = {
   product: Product;
   collectionName?: string;
   shippingDescription: string;
+  hasShippingPolicy: boolean;
+  returnsNote: string;
+  hasRefundPolicy: boolean;
   questionDescription: string;
-  globalTrustBadges: { icon?: unknown; label: string }[];
+  questionLinkLabel: string;
+  comingSoonHeading: string;
+  comingSoonBody: string;
+  /** Rows from the store-wide trust-badges list, in saved order. */
+  globalTrustBadges: { label: string; index: number }[];
 };
 
 /**
@@ -41,7 +50,13 @@ export function UmscProductInfo({
   product,
   collectionName,
   shippingDescription,
+  hasShippingPolicy,
+  returnsNote,
+  hasRefundPolicy,
   questionDescription,
+  questionLinkLabel,
+  comingSoonHeading,
+  comingSoonBody,
   globalTrustBadges,
 }: Props) {
   const {
@@ -63,8 +78,17 @@ export function UmscProductInfo({
     justAdded,
   } = useProduct(product);
 
-  const trustBadges =
-    displayTrustBadges.length > 0 ? displayTrustBadges : globalTrustBadges;
+  // Product's own features (Products → product → features) win; otherwise
+  // the store-wide badges from the editor. `storeIndex` is only set for the
+  // latter, so only those rows get a `listItemAttr` (the editor's
+  // click-to-row targeting) — a product's own badges get none.
+  const trustBadges: { label: string; storeIndex?: number }[] =
+    displayTrustBadges.length > 0
+      ? displayTrustBadges.map((badge) => ({ label: badge.label }))
+      : globalTrustBadges.map((badge) => ({
+          label: badge.label,
+          storeIndex: badge.index,
+        }));
   const hasVariants = Object.keys(variantOptions).length > 0;
   const comingSoon = !!additionalFields?.comingSoon;
 
@@ -137,12 +161,20 @@ export function UmscProductInfo({
           {/* Purchase actions */}
           {comingSoon ? (
             <div className="border border-[var(--umsc-line)] bg-[var(--umsc-cream)] px-5 py-4">
-              <p className="umsc-serif text-[17px] text-[var(--umsc-ink)]">
-                Coming Soon
+              <p
+                {...fieldAttr("umsc.product.coming-soon-heading")}
+                className="umsc-serif text-[17px] text-[var(--umsc-ink)]"
+              >
+                {comingSoonHeading}
               </p>
-              <p className="umsc-sans mt-1 text-[14px] text-[var(--umsc-muted)]">
-                This product isn&apos;t available yet — check back soon.
-              </p>
+              {comingSoonBody ? (
+                <p
+                  {...fieldAttr("umsc.product.coming-soon-body")}
+                  className="umsc-sans mt-1 text-[14px] text-[var(--umsc-muted)]"
+                >
+                  {comingSoonBody}
+                </p>
+              ) : null}
             </div>
           ) : hasVariants ? (
             <UmscVariantSelector
@@ -266,12 +298,17 @@ export function UmscProductInfo({
             ctaClassName="umsc-btn umsc-btn-gold h-12"
           />
 
-          {/* Trust badges */}
+          {/* Trust badges — `storeIndex` is only present on store-list rows
+              (see the comment above `trustBadges`), so only those get a
+              `listItemAttr`; a product's own badges get none. */}
           {trustBadges.length > 0 && (
             <div className="umsc-sans flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-[var(--umsc-muted)]">
-              {trustBadges.map((badge) => (
+              {trustBadges.map((badge, i) => (
                 <span
-                  key={badge.label}
+                  key={`${badge.label}-${i}`}
+                  {...(badge.storeIndex !== undefined
+                    ? listItemAttr(TRUST_BADGES_KEY, badge.storeIndex)
+                    : {})}
                   className="inline-flex items-center gap-1.5"
                 >
                   <Check
@@ -284,12 +321,10 @@ export function UmscProductInfo({
             </div>
           )}
 
-          {/* Shipping & pickup / Returns / Ask a question — global.product
-              copy (chrome-owned field group; no page="products" fields of
-              our own, so the hotspot targets "global.product" directly per
-              the build brief). `UmscAccordion` doesn't forward arbitrary
-              props, so the hotspot attribute lives on this wrapping div. */}
-          <div {...sectionGroupAttr("global", "product")}>
+          {/* Shipping & pickup / Returns / Ask a question — `product.details`
+              copy. `UmscAccordion` doesn't forward arbitrary props, so the
+              hotspot attribute lives on this wrapping div. */}
+          <div {...sectionGroupAttr("product", "details")}>
             <h2 className="sr-only">Product details</h2>
             <UmscAccordion className="mt-2">
               {shippingDescription && (
@@ -297,21 +332,31 @@ export function UmscProductInfo({
                   <p {...fieldAttr("umsc.global.product-shipping-description")}>
                     {shippingDescription}
                   </p>
+                  {hasShippingPolicy ? (
+                    <Link
+                      href="/shipping-policy"
+                      className="mt-3 inline-block text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
+                    >
+                      View our shipping policy
+                    </Link>
+                  ) : null}
                 </UmscAccordionItem>
               )}
-              <UmscAccordionItem title="Returns">
-                <p>
-                  Returns are accepted within 30 days of delivery, unused and in
-                  original packaging.{" "}
-                  <Link
-                    href="/refund-policy"
-                    className="text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
-                  >
-                    View our return policy
-                  </Link>
-                  .
-                </p>
-              </UmscAccordionItem>
+              {returnsNote && (
+                <UmscAccordionItem title="Returns">
+                  <p {...fieldAttr("umsc.product.returns-note")}>
+                    {returnsNote}
+                  </p>
+                  {hasRefundPolicy ? (
+                    <Link
+                      href="/refund-policy"
+                      className="mt-3 inline-block text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
+                    >
+                      View our return policy
+                    </Link>
+                  ) : null}
+                </UmscAccordionItem>
+              )}
               {questionDescription && (
                 <UmscAccordionItem title="Ask a question">
                   <p>
@@ -320,12 +365,15 @@ export function UmscProductInfo({
                     >
                       {questionDescription}
                     </span>{" "}
-                    <Link
-                      href="/contact"
-                      className="text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
-                    >
-                      Reach out here.
-                    </Link>
+                    {questionLinkLabel ? (
+                      <Link
+                        href="/contact"
+                        {...fieldAttr("umsc.product.question-link-label")}
+                        className="text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
+                      >
+                        {questionLinkLabel}
+                      </Link>
+                    ) : null}
                   </p>
                 </UmscAccordionItem>
               )}

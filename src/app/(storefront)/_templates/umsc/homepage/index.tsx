@@ -1,14 +1,15 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 // ─── Hero (homepage.hero) ──────────────────────────────────────────────────
 
 const homepageHeroData: TemplateField[] = [
   {
     key: "umsc.homepage.hero-video",
-    label: "Hero Video",
+    label: "Video",
     description:
-      "Optional full-viewport video for the hero. When set, autoplays muted/looped instead of the image. Use .mp4.",
+      "Optional full-viewport video for the hero. Autoplays muted and looped, and takes priority over the photo below when set. Leave blank to use the photo instead.",
     type: "video",
     page: "homepage",
     group: "homepage.hero",
@@ -16,9 +17,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-image",
-    label: "Hero Image",
+    label: "Photo",
     description:
-      "Full-viewport hero photo, used as the video poster and as the background when no video is set. Leave blank to show a black ground with a soft gold glow instead of a generic placeholder.",
+      "Full-viewport hero photo, used as the video poster and as the background when no video is set. Leave blank to show a dark backdrop with a soft glow instead of a plain placeholder.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -27,7 +28,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-image-alt",
-    label: "Hero Image Alt Text",
+    label: "Photo alt text",
     description:
       "Accessible description of the hero photo, for screen readers.",
     type: "text",
@@ -38,8 +39,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-headline",
-    label: "Hero Headline",
-    description: "The uppercase Marcellus headline overlaid on the hero media.",
+    label: "Headline",
+    description: "Headline shown over the hero photo or video.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -48,8 +49,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-lede",
-    label: "Hero Lede",
-    description: "One sentence beneath the headline.",
+    label: "Intro text",
+    description: "One sentence below the headline.",
     type: "textarea",
     page: "homepage",
     group: "homepage.hero",
@@ -59,8 +60,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-primary-label",
-    label: "Primary Button Text",
-    description: "Text for the gold hero button.",
+    label: "Primary button text",
+    description: "Text on the main hero button.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -69,8 +70,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-primary-url",
-    label: "Primary Button Link",
-    description: "URL the gold hero button points to.",
+    label: "Primary button link",
+    description: "Where the main hero button goes, e.g. /collections/candles.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
@@ -79,8 +80,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-secondary-label",
-    label: "Secondary Button Text",
-    description: "Text for the ghost hero button.",
+    label: "Secondary button text",
+    description: "Text for the outlined hero button.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -89,8 +90,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.hero-secondary-url",
-    label: "Secondary Button Link",
-    description: "URL the ghost hero button points to.",
+    label: "Secondary button link",
+    description: "Where the outlined hero button goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
@@ -104,7 +105,7 @@ const homepageHeroData: TemplateField[] = [
 const homepageFeaturedData: TemplateField[] = [
   {
     key: "umsc.homepage.featured-heading",
-    label: "Featured Shelf Heading",
+    label: "Heading",
     description:
       "Accessible heading for the featured-products shelf. Not shown visually — the shelf reads as the hero's bottom edge — but announced to screen readers.",
     type: "text",
@@ -115,7 +116,7 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.featured-collection",
-    label: "Featured Shelf Collection",
+    label: "Collection",
     description:
       "Pick a collection to feature on the shelf. Leave empty to show your latest four published products.",
     type: "collection",
@@ -125,7 +126,7 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.featured-empty-text",
-    label: "Featured Shelf Empty Text",
+    label: "Empty state text",
     description:
       "Shown beneath four placeholder tiles when you have no products yet.",
     type: "text",
@@ -141,7 +142,7 @@ const homepageFeaturedData: TemplateField[] = [
 const homepageCategoriesData: TemplateField[] = [
   {
     key: "umsc.homepage.categories-heading",
-    label: "Shop By Type Heading",
+    label: "Heading",
     description: "Heading above the four category doors.",
     type: "text",
     page: "homepage",
@@ -151,8 +152,8 @@ const homepageCategoriesData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.categories-lede",
-    label: "Shop By Type Lede",
-    description: "One sentence beneath the shop-by-type heading.",
+    label: "Intro text",
+    description: "One sentence beneath the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.categories",
@@ -162,45 +163,52 @@ const homepageCategoriesData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.categories-doors",
-    label: "Category Doors",
+    label: "Category doors",
     description:
-      "The four product-type doors, each with an image, title, one-line blurb, and link. Up to 4.",
+      "The four product-type doors, each with a photo, title, one-line description, and link. Leave empty to use the built-in Candles / Soaps / Body Care / Home Care doors.",
     type: "list",
     page: "homepage",
     group: "homepage.categories",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "door",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "image",
-        label: "Image",
+        label: "Photo",
         type: "image",
+        description: "Photo shown on the door.",
         placeholder: "Upload a photo",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
+        description: "Door name, e.g. Candles.",
         placeholder: "e.g. Candles",
       },
       {
         key: "blurb",
-        label: "Blurb",
+        label: "Description",
         type: "text",
+        description: "One short line under the title.",
         placeholder: "e.g. Soy candles and wax melts.",
       },
       {
         key: "link",
         label: "Link",
         type: "text",
+        description: "Where the door goes, e.g. /collections/candles.",
         placeholder: "e.g. /collections/candles",
       },
     ],
   },
   {
     key: "umsc.homepage.categories-all-label",
-    label: '"All Products" Link Text',
-    description: "Text for the link beside the shop-by-type heading.",
+    label: "Link text",
+    description: "Text for the link beside the heading, e.g. All products.",
     type: "text",
     page: "homepage",
     group: "homepage.categories",
@@ -209,8 +217,8 @@ const homepageCategoriesData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.categories-all-url",
-    label: '"All Products" Link URL',
-    description: "URL the link points to.",
+    label: "Link",
+    description: "Where the link goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.categories",
@@ -224,9 +232,8 @@ const homepageCategoriesData: TemplateField[] = [
 const homepageStoryData: TemplateField[] = [
   {
     key: "umsc.homepage.story-image",
-    label: "Story Photo",
-    description:
-      "Photo of Monique or her market table, shown beside the story copy.",
+    label: "Photo",
+    description: "A photo of you or your team, shown beside the story copy.",
     type: "image",
     page: "homepage",
     group: "homepage.story",
@@ -235,7 +242,7 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.story-image-alt",
-    label: "Story Photo Alt Text",
+    label: "Photo alt text",
     description:
       "Accessible description of the story photo, for screen readers.",
     type: "text",
@@ -246,8 +253,8 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.story-heading",
-    label: "Story Heading",
-    description: "Heading for the story band.",
+    label: "Heading",
+    description: "Heading for the story section.",
     type: "text",
     page: "homepage",
     group: "homepage.story",
@@ -256,7 +263,7 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.story-lede",
-    label: "Story Lede",
+    label: "Intro text",
     description: "First, bolder line of the story copy.",
     type: "textarea",
     page: "homepage",
@@ -267,7 +274,7 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.story-paragraph",
-    label: "Story Paragraph",
+    label: "Body text",
     description: "Second paragraph of the story copy.",
     type: "textarea",
     page: "homepage",
@@ -278,8 +285,8 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.story-cta-label",
-    label: "Story Button Text",
-    description: "Text for the gold button beneath the story copy.",
+    label: "Button text",
+    description: "Text for the button beneath the story copy.",
     type: "text",
     page: "homepage",
     group: "homepage.story",
@@ -288,8 +295,8 @@ const homepageStoryData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.story-cta-url",
-    label: "Story Button Link",
-    description: "URL the story button points to.",
+    label: "Button link",
+    description: "Where the button goes, e.g. /about.",
     type: "url",
     page: "homepage",
     group: "homepage.story",
@@ -303,7 +310,7 @@ const homepageStoryData: TemplateField[] = [
 const homepageRailData: TemplateField[] = [
   {
     key: "umsc.homepage.rail-heading",
-    label: "Product Rail Heading",
+    label: "Heading",
     description: "Heading above the second product rail.",
     type: "text",
     page: "homepage",
@@ -313,8 +320,8 @@ const homepageRailData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.rail-cta-label",
-    label: '"View All" Link Text',
-    description: "Text for the link beside the product rail heading.",
+    label: "Link text",
+    description: "Text for the link beside the heading, e.g. View all.",
     type: "text",
     page: "homepage",
     group: "homepage.rail",
@@ -323,8 +330,8 @@ const homepageRailData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.rail-cta-url",
-    label: '"View All" Link URL',
-    description: "URL the link points to.",
+    label: "Link",
+    description: "Where the link goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.rail",
@@ -333,7 +340,7 @@ const homepageRailData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.rail-collection",
-    label: "Product Rail Collection",
+    label: "Collection",
     description:
       "Pick a collection for this second rail. Leave empty to show more of your latest products.",
     type: "collection",
@@ -343,7 +350,7 @@ const homepageRailData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.rail-empty-text",
-    label: "Product Rail Empty Text",
+    label: "Empty state text",
     description:
       "Shown beneath four placeholder tiles when there are no more products to show.",
     type: "text",
@@ -359,7 +366,7 @@ const homepageRailData: TemplateField[] = [
 const homepageReviewsData: TemplateField[] = [
   {
     key: "umsc.homepage.reviews-heading",
-    label: "Reviews Heading",
+    label: "Heading",
     description: "Heading above the customer reviews.",
     type: "text",
     page: "homepage",
@@ -369,8 +376,8 @@ const homepageReviewsData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.reviews-lede",
-    label: "Reviews Lede",
-    description: "One sentence beneath the reviews heading.",
+    label: "Intro text",
+    description: "One sentence beneath the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.reviews",
@@ -379,29 +386,8 @@ const homepageReviewsData: TemplateField[] = [
       "Real reviews from real orders, pulled from the store. Yours can be next.",
   },
   {
-    key: "umsc.homepage.reviews-override-quote",
-    label: "Featured Review Quote",
-    description:
-      "Optional quote to feature first, ahead of your latest approved reviews. Leave blank to show real reviews automatically.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.reviews",
-    gridColumn: "col-span-full",
-    defaultValue: "",
-  },
-  {
-    key: "umsc.homepage.reviews-override-name",
-    label: "Featured Review Customer Name",
-    description: "Customer name shown with the featured quote above.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.reviews",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
     key: "umsc.homepage.reviews-empty-text",
-    label: "Reviews Empty Text",
+    label: "Empty state text",
     description:
       "Shown beside the Google review link when there are no reviews yet.",
     type: "text",
@@ -410,6 +396,38 @@ const homepageReviewsData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "Reviews are on their way.",
   },
+  {
+    key: "umsc.homepage.reviews-owner-source",
+    label: "Owner label",
+    description:
+      "Small label on a review card whose testimonial was submitted by you, the business owner.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.reviews",
+    gridColumn: "col-span-1",
+    defaultValue: "From Monique",
+  },
+  {
+    key: "umsc.homepage.reviews-verified-source",
+    label: "Customer label",
+    description:
+      "Small label on a review card whose testimonial came from a customer order.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.reviews",
+    gridColumn: "col-span-1",
+    defaultValue: "Verified order",
+  },
+  {
+    key: "umsc.homepage.reviews-anonymous-name",
+    label: "Anonymous name",
+    description: "Shown as the reviewer's name when a testimonial has none.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.reviews",
+    gridColumn: "col-span-1",
+    defaultValue: "A customer",
+  },
 ];
 
 // ─── Custom band (homepage.custom) ─────────────────────────────────────────
@@ -417,8 +435,8 @@ const homepageReviewsData: TemplateField[] = [
 const homepageCustomData: TemplateField[] = [
   {
     key: "umsc.homepage.custom-heading",
-    label: "Custom Band Heading",
-    description: "Heading for the custom-order band.",
+    label: "Heading",
+    description: "Heading for the custom-order section.",
     type: "text",
     page: "homepage",
     group: "homepage.custom",
@@ -427,8 +445,8 @@ const homepageCustomData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.custom-lede",
-    label: "Custom Band Lede",
-    description: "One or two sentences beneath the custom band heading.",
+    label: "Intro text",
+    description: "One or two sentences beneath the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.custom",
@@ -438,8 +456,8 @@ const homepageCustomData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.custom-cta-label",
-    label: "Primary Button Text",
-    description: "Text for the gold custom-order button.",
+    label: "Primary button text",
+    description: "Text for the primary custom-order button.",
     type: "text",
     page: "homepage",
     group: "homepage.custom",
@@ -448,8 +466,8 @@ const homepageCustomData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.custom-cta-url",
-    label: "Primary Button Link",
-    description: "URL the gold button points to.",
+    label: "Primary button link",
+    description: "Where the primary button goes, e.g. /contact?type=custom.",
     type: "url",
     page: "homepage",
     group: "homepage.custom",
@@ -458,8 +476,8 @@ const homepageCustomData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.custom-secondary-label",
-    label: "Secondary Button Text",
-    description: "Text for the ghost custom-band button.",
+    label: "Secondary button text",
+    description: "Text for the outlined button.",
     type: "text",
     page: "homepage",
     group: "homepage.custom",
@@ -468,8 +486,8 @@ const homepageCustomData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.custom-secondary-url",
-    label: "Secondary Button Link",
-    description: "URL the ghost button points to.",
+    label: "Secondary button link",
+    description: "Where the outlined button goes, e.g. /contact.",
     type: "url",
     page: "homepage",
     group: "homepage.custom",
@@ -478,19 +496,23 @@ const homepageCustomData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.custom-list",
-    label: "What To Include",
+    label: "What to include",
     description:
-      "Short lines telling shoppers what to mention in a custom request. Up to 3.",
+      "Short lines telling shoppers what to mention in a custom request. Leave empty to use the built-in list.",
     type: "list",
     page: "homepage",
     group: "homepage.custom",
     gridColumn: "col-span-full",
     maxItems: 3,
+    itemLabel: "line",
+    summaryKey: "text",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "text",
         label: "Line",
         type: "text",
+        description: "One short line, e.g. what kind of product or occasion.",
         placeholder: "e.g. Bundles, favors, and corporate gifts",
       },
     ],
@@ -502,7 +524,7 @@ const homepageCustomData: TemplateField[] = [
 const homepageFaqData: TemplateField[] = [
   {
     key: "umsc.homepage.faq-heading",
-    label: "Questions Heading",
+    label: "Heading",
     description: "Heading for the homepage FAQ teaser.",
     type: "text",
     page: "homepage",
@@ -512,8 +534,8 @@ const homepageFaqData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.faq-lede",
-    label: "Questions Lede",
-    description: "One sentence beneath the questions heading.",
+    label: "Intro text",
+    description: "One sentence beneath the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.faq",
@@ -522,7 +544,7 @@ const homepageFaqData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.faq-all-label",
-    label: '"All Questions" Link Text',
+    label: "Link text",
     description: "Text for the link to the full FAQ page.",
     type: "text",
     page: "homepage",
@@ -532,8 +554,8 @@ const homepageFaqData: TemplateField[] = [
   },
   {
     key: "umsc.homepage.faq-all-url",
-    label: '"All Questions" Link URL',
-    description: "URL the link points to.",
+    label: "Link",
+    description: "Where the link goes, e.g. /faq.",
     type: "url",
     page: "homepage",
     group: "homepage.faq",
@@ -560,49 +582,49 @@ export const umscHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "Full-viewport hero — video or photo, headline, lede, and the two entry buttons",
+      "Full-viewport hero — video or photo, headline, intro text, and the two entry buttons",
     icon: "🕯️",
     columns: 2,
   },
   {
     id: "homepage.featured",
-    title: "Featured Shelf",
+    title: "Featured shelf",
     description: "The tight product shelf directly beneath the hero",
     icon: "🛍️",
     columns: 2,
   },
   {
     id: "homepage.categories",
-    title: "Shop By Type",
-    description: "Heading, lede, and the four category doors",
+    title: "Shop by type",
+    description: "Heading, intro text, and the four category doors",
     icon: "🚪",
     columns: 2,
   },
   {
     id: "homepage.story",
     title: "Story",
-    description: "Photo + story copy on the cream band",
+    description: "Photo and story copy on the light band",
     icon: "📖",
     columns: 2,
   },
   {
     id: "homepage.rail",
-    title: "New This Season",
+    title: "New this season",
     description: "Second product rail with its own collection",
     icon: "🆕",
     columns: 2,
   },
   {
     id: "homepage.reviews",
-    title: "Our Customers. Our Community.",
+    title: "Our customers. Our community.",
     description: "Latest approved reviews and the Google review link",
     icon: "⭐",
     columns: 2,
   },
   {
     id: "homepage.custom",
-    title: "Custom Band",
-    description: "Black custom-order band with the what-to-include list",
+    title: "Custom band",
+    description: "Dark custom-order band with the what-to-include list",
     icon: "🎁",
     columns: 2,
   },
@@ -621,7 +643,7 @@ export const umscHomepageSections: TemplateSection[] = [
     page: "homepage",
     title: "Hero",
     description:
-      "Full-viewport hero with video/image, headline, lede, and CTAs",
+      "Full-viewport hero with video/image, headline, intro text, and buttons",
     groupIds: ["homepage.hero"],
     order: 0,
     hideable: false,
@@ -629,26 +651,28 @@ export const umscHomepageSections: TemplateSection[] = [
   {
     id: "homepage.featured",
     page: "homepage",
-    title: "Featured Shelf",
+    title: "Featured shelf",
     description: "Four products directly beneath the hero",
     groupIds: ["homepage.featured"],
     order: 1,
     hideable: true,
+    links: [SECTION_LINKS.products],
   },
   {
     id: "homepage.categories",
     page: "homepage",
-    title: "Shop By Type",
+    title: "Shop by type",
     description: "Four category doors — Candles, Soaps, Body Care, Home Care",
     groupIds: ["homepage.categories"],
     order: 2,
     hideable: true,
+    links: [SECTION_LINKS.collections],
   },
   {
     id: "homepage.story",
     page: "homepage",
     title: "Story",
-    description: "Cream band with Monique's story and a link to About",
+    description: "Light band with your story and a link to About",
     groupIds: ["homepage.story"],
     order: 3,
     hideable: true,
@@ -656,26 +680,28 @@ export const umscHomepageSections: TemplateSection[] = [
   {
     id: "homepage.rail",
     page: "homepage",
-    title: "New This Season",
+    title: "New this season",
     description: "Second product rail",
     groupIds: ["homepage.rail"],
     order: 4,
     hideable: true,
+    links: [SECTION_LINKS.products],
   },
   {
     id: "homepage.reviews",
     page: "homepage",
-    title: "Our Customers. Our Community.",
+    title: "Our customers. Our community.",
     description: "Latest approved reviews and the Google review link",
     groupIds: ["homepage.reviews"],
     order: 5,
     hideable: true,
+    links: [SECTION_LINKS.testimonials],
   },
   {
     id: "homepage.custom",
     page: "homepage",
-    title: "Custom Band",
-    description: "Black band inviting custom orders",
+    title: "Custom band",
+    description: "Dark band inviting custom orders",
     groupIds: ["homepage.custom"],
     order: 6,
     hideable: true,
@@ -688,5 +714,6 @@ export const umscHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.faq"],
     order: 7,
     hideable: true,
+    links: [SECTION_LINKS.faq],
   },
 ];

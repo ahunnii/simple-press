@@ -2,13 +2,21 @@ import Link from "next/link";
 
 import type { SubscriptionsPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { SUBSCRIPTION_STATUS_LABELS } from "~/lib/validators/subscription";
 
+import { resolveUmscAccountFields } from ".";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscImageFallback } from "../shared/umsc-image-fallback";
 import { UmscAccountLayout } from "./umsc-account-layout";
 import { UmscOrderStatusBadge } from "./umsc-order-status-badge";
+
+const FIELD_KEYS = [
+  "umsc.global.account-subscriptions-empty-heading",
+  "umsc.global.account-subscriptions-empty-body",
+  "umsc.global.account-subscriptions-empty-button",
+];
 
 /** Next-delivery line for a subscription card — mirrors default/dream's own logic. */
 function nextDateLabel(
@@ -35,8 +43,14 @@ function nextDateLabel(
 }
 
 export function UmscSubscriptionsPage({
+  business,
   subscriptions,
 }: SubscriptionsPageTemplateProps) {
+  const f = resolveUmscAccountFields(
+    business.siteContent?.customFields,
+    FIELD_KEYS,
+  );
+
   return (
     <UmscAccountLayout
       heading="Subscriptions"
@@ -51,22 +65,32 @@ export function UmscSubscriptionsPage({
           <div className="mb-6 size-16">
             <UmscImageFallback aspect="1 / 1" />
           </div>
-          <h2 className="umsc-serif text-[22px] font-normal text-[var(--umsc-ink)]">
-            You don&apos;t have any subscriptions yet
-          </h2>
-          <p className="umsc-sans mt-3 max-w-[36ch] text-[15px] leading-[1.6] text-[var(--umsc-muted)]">
-            Subscribe to a product for recurring delivery and it will appear
-            here.
-          </p>
-          <UmscButton
-            as="link"
-            href="/shop"
-            variant="gold"
-            showArrow={false}
-            className="mt-7"
+          <h2
+            {...fieldAttr("umsc.global.account-subscriptions-empty-heading")}
+            className="umsc-serif text-[22px] font-normal text-[var(--umsc-ink)]"
           >
-            Browse products
-          </UmscButton>
+            {f["umsc.global.account-subscriptions-empty-heading"] ?? ""}
+          </h2>
+          {f["umsc.global.account-subscriptions-empty-body"] ? (
+            <p
+              {...fieldAttr("umsc.global.account-subscriptions-empty-body")}
+              className="umsc-sans mt-3 max-w-[36ch] text-[15px] leading-[1.6] text-[var(--umsc-muted)]"
+            >
+              {f["umsc.global.account-subscriptions-empty-body"]}
+            </p>
+          ) : null}
+          {f["umsc.global.account-subscriptions-empty-button"] ? (
+            <UmscButton
+              as="link"
+              href="/shop"
+              variant="gold"
+              showArrow={false}
+              fieldKey="umsc.global.account-subscriptions-empty-button"
+              className="mt-7"
+            >
+              {f["umsc.global.account-subscriptions-empty-button"]}
+            </UmscButton>
+          ) : null}
           <Link
             href="/subscriptions/manage"
             className="umsc-sans mt-5 text-[13px] text-[var(--umsc-muted)] underline underline-offset-[3px] hover:text-[var(--umsc-ink)]"

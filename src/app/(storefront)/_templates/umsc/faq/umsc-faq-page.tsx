@@ -7,6 +7,10 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { resolveFields } from "..";
 import { UmscAccordion, UmscAccordionItem } from "../shared/umsc-accordion";
 import { UmscButton } from "../shared/umsc-button";
+import {
+  resolveUmscContactDetails,
+  umscTelHref,
+} from "../shared/umsc-contact-details";
 import { UmscHeading } from "../shared/umsc-heading";
 import { UmscLede } from "../shared/umsc-lede";
 import { UmscReveal, UmscRevealGroup } from "../shared/umsc-reveal";
@@ -38,14 +42,11 @@ export function UmscFaqPage({ business, items }: DefaultFaqPageTemplateProps) {
     "umsc.faq.cta-body",
     "umsc.faq.cta-button-label",
     "umsc.faq.cta-button-url",
-    "umsc.global.customer-service-phone",
   ]);
 
-  // Business-record-first, field-as-override — same source and precedence
-  // rule as `layout/umsc-footer.tsx`'s phone line.
-  const phone =
-    (f["umsc.global.customer-service-phone"] ?? "").trim() ||
-    (business?.phoneNumber ?? "");
+  // Settings → General phone; the retired `umsc.global.customer-service-phone`
+  // field is only a silent legacy fallback (see `resolveUmscContactDetails`).
+  const { phone } = resolveUmscContactDetails(business);
 
   const hasItems = items.length > 0;
 
@@ -80,7 +81,7 @@ export function UmscFaqPage({ business, items }: DefaultFaqPageTemplateProps) {
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
             {phone && (
               <a
-                href={`tel:${phone.replace(/\s/g, "")}`}
+                href={umscTelHref(phone)}
                 className="umsc-sans flex items-center gap-2 text-[14px] text-[var(--umsc-cream-on-black)] no-underline hover:opacity-80"
               >
                 <Phone

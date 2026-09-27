@@ -5,7 +5,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
@@ -95,14 +95,15 @@ export function UmscCartContents({
         )}
 
         <div className="mt-10 grid w-full max-w-[880px] grid-cols-2 gap-5 text-left sm:grid-cols-4">
-          {doors.map((door) => (
-            <UmscCollectionDoor
-              key={door.title}
-              href={door.link}
-              title={door.title}
-              image={door.image}
-              aspect="3 / 2"
-            />
+          {doors.map((door, i) => (
+            <div key={door.title} {...listItemAttr("umsc.cart.empty-doors", i)}>
+              <UmscCollectionDoor
+                href={door.link}
+                title={door.title}
+                image={door.image}
+                aspect="3 / 2"
+              />
+            </div>
           ))}
         </div>
       </div>

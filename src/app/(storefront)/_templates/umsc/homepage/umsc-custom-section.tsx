@@ -1,6 +1,7 @@
 "use client";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+import { listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useUmscReveal } from "../hooks/use-umsc-reveal";
@@ -116,6 +117,7 @@ export function UmscCustomSection({
                 <li
                   key={row._id ?? i}
                   className="umsc-sans text-[15px] leading-[1.5] text-[var(--umsc-cream-on-black)]"
+                  {...listItemAttr("umsc.homepage.custom-list", i)}
                 >
                   {text}
                 </li>

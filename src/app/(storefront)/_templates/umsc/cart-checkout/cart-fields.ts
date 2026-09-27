@@ -9,7 +9,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 export const umscCartData: TemplateField[] = [
   {
     key: "umsc.cart.heading",
-    label: "Cart Page Heading",
+    label: "Heading",
     description: "The heading shown at the top of the cart page.",
     type: "text",
     page: "cart",
@@ -19,7 +19,7 @@ export const umscCartData: TemplateField[] = [
   },
   {
     key: "umsc.cart.empty-heading",
-    label: "Empty Bag Heading",
+    label: "Empty bag heading",
     description: "Heading shown when the bag has no items.",
     type: "text",
     page: "cart",
@@ -29,7 +29,7 @@ export const umscCartData: TemplateField[] = [
   },
   {
     key: "umsc.cart.empty-body",
-    label: "Empty Bag Body",
+    label: "Empty bag message",
     description: "Short line shown under the empty-bag heading.",
     type: "textarea",
     page: "cart",
@@ -39,7 +39,7 @@ export const umscCartData: TemplateField[] = [
   },
   {
     key: "umsc.cart.continue-shopping",
-    label: "Continue Shopping Label",
+    label: "Continue shopping link",
     description:
       "Quiet link label under the checkout button in the summary card.",
     type: "text",
@@ -50,8 +50,8 @@ export const umscCartData: TemplateField[] = [
   },
   {
     key: "umsc.cart.checkout-cta",
-    label: "Checkout Button Label",
-    description: "Label on the gold pill button that continues to checkout.",
+    label: "Checkout button text",
+    description: "Label on the button that continues to checkout.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -60,7 +60,7 @@ export const umscCartData: TemplateField[] = [
   },
   {
     key: "umsc.cart.empty-doors",
-    label: "Empty Bag Doors",
+    label: "Empty bag doors",
     description:
       "The product-type doors shown on the empty-bag state, each with an image, title, and link. Leave all rows blank to use the four default doors (Candles, Soaps, Body Care, Home Care).",
     type: "list",
@@ -68,23 +68,29 @@ export const umscCartData: TemplateField[] = [
     group: "cart.main",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "door",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "image",
         label: "Image",
         type: "image",
+        description: "Image shown on the door.",
         placeholder: "Upload a door image",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
+        description: "Short label on the door, e.g. a product category.",
         placeholder: "e.g. Candles",
       },
       {
         key: "link",
         label: "Link",
         type: "text",
+        description: "Where the door links to.",
         placeholder: "e.g. /collections/candles",
       },
     ],
@@ -96,7 +102,7 @@ export const umscCartData: TemplateField[] = [
 export const umscCartFieldGroups: TemplateFieldGroup[] = [
   {
     id: "cart.main",
-    title: "Cart Page",
+    title: "Cart page",
     description: "Heading, empty-state messaging, doors, and button labels.",
     icon: "🛍️",
     columns: 2,

@@ -26,8 +26,9 @@ function UmscOrderLoadingFallback({ loadingText }: { loadingText: string }) {
 /**
  * UmscOrderSuccessPage — no shared `types.ts` interface (locally typed, same
  * as every other template's OrderSuccessPage). Server component resolves the
- * `order.main` fields, then hands off to the client `UmscOrderConfirmation`
- * (needs `useSearchParams`/`useCart`), wrapped in `<Suspense>`.
+ * `checkout.success` fields, then hands off to the client
+ * `UmscOrderConfirmation` (needs `useSearchParams`/`useCart`), wrapped in
+ * `<Suspense>`.
  */
 export function UmscOrderSuccessPage({ business }: Props) {
   const customFields = business?.siteContent?.customFields as
@@ -36,8 +37,10 @@ export function UmscOrderSuccessPage({ business }: Props) {
 
   const f = resolveFields(customFields, [
     "umsc.order.thank-you-heading",
+    "umsc.order.next-steps-heading",
     "umsc.order.next-steps",
     "umsc.order.continue-cta",
+    "umsc.order.home-link-label",
     "umsc.order.loading-text",
     "umsc.order.no-order-heading",
     "umsc.order.no-order-body",
@@ -50,8 +53,10 @@ export function UmscOrderSuccessPage({ business }: Props) {
       <UmscOrderConfirmation
         businessName={business.name}
         thankYouHeading={f["umsc.order.thank-you-heading"] ?? ""}
+        nextStepsHeading={f["umsc.order.next-steps-heading"] ?? ""}
         nextSteps={f["umsc.order.next-steps"] ?? ""}
         continueCta={f["umsc.order.continue-cta"] ?? ""}
+        homeLinkLabel={f["umsc.order.home-link-label"] ?? ""}
         loadingText={loadingText}
         noOrderHeading={f["umsc.order.no-order-heading"] ?? ""}
         noOrderBody={f["umsc.order.no-order-body"] ?? ""}

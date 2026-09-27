@@ -12,10 +12,15 @@ import {
   umscOrderData,
   umscOrderFieldGroups,
 } from "./cart-checkout/order-fields";
+import {
+  umscCheckoutUnavailableData,
+  umscCheckoutUnavailableFieldGroups,
+} from "./cart-checkout/unavailable-fields";
 import { umscCollectionsData, umscCollectionsFieldGroups } from "./collections";
 import { umscContactData, umscContactFieldGroups } from "./contact";
 import { umscFaqData, umscFaqFieldGroups } from "./faq";
 import { umscHomepageData, umscHomepageFieldGroups } from "./homepage";
+import { umscProductData, umscProductFieldGroups } from "./products";
 import { umscShopData, umscShopFieldGroups } from "./shop";
 import {
   umscTestimonialsData,
@@ -26,40 +31,8 @@ import {
 
 const globalBrandingData: TemplateField[] = [
   {
-    key: "umsc.global.announcement-text",
-    label: "Announcement Bar Text",
-    description:
-      "Text shown in the black announcement bar above the header. Leave blank to hide the bar entirely.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Handcrafted home + body essentials",
-  },
-  {
-    key: "umsc.global.announcement-link-label",
-    label: "Announcement Bar Link Text",
-    description:
-      "Bold gold link text shown at the end of the announcement bar. Leave blank to hide the link.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Shop small batch favorites",
-  },
-  {
-    key: "umsc.global.announcement-link-url",
-    label: "Announcement Bar Link URL",
-    description: "URL the announcement bar link points to.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "/shop",
-  },
-  {
     key: "umsc.global.header-tagline",
-    label: "Header Tagline",
+    label: "Header tagline",
     description:
       "Small uppercase line shown beneath the wordmark in the header.",
     type: "text",
@@ -70,9 +43,9 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "umsc.global.nav-cta-label",
-    label: "Mobile Menu Button Text",
+    label: "Mobile menu button label",
     description:
-      "Gold button pinned at the bottom of the mobile navigation menu. Leave blank to hide the button.",
+      "Button pinned at the bottom of the mobile navigation menu. Leave blank to hide the button.",
     type: "text",
     page: "global",
     group: "global.branding",
@@ -81,8 +54,8 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "umsc.global.nav-cta-url",
-    label: "Mobile Menu Button URL",
-    description: "URL the mobile menu button points to.",
+    label: "Mobile menu button link",
+    description: "Where the mobile menu button points to.",
     type: "url",
     page: "global",
     group: "global.branding",
@@ -90,21 +63,10 @@ const globalBrandingData: TemplateField[] = [
     defaultValue: "/contact?type=custom",
   },
   {
-    key: "umsc.global.footer-tagline",
-    label: "Footer Tagline",
-    description:
-      "Short brand statement shown in the footer beneath the wordmark.",
-    type: "textarea",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Small-batch soy candles, soaps, and body care, poured and packed by hand in Detroit.",
-  },
-  {
     key: "umsc.global.visit-stores-label",
-    label: "Visit Our Stores Label",
-    description: "Text for the 'Visit Our Stores' link in the footer.",
+    label: "Store visits link text",
+    description:
+      "Label for the footer link to where customers can find you in person — markets, pop-ups, etc.",
     type: "text",
     page: "global",
     group: "global.branding",
@@ -113,9 +75,9 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "umsc.global.visit-stores-url",
-    label: "Visit Our Stores Link",
+    label: "Store visits link",
     description:
-      "URL the 'Visit Our Stores' link points to (markets, pop-ups, or a locations page). Leave blank to hide the link.",
+      "Where the store-visits link points to — markets, pop-ups, or a locations page. Leave blank to hide the link.",
     type: "url",
     page: "global",
     group: "global.branding",
@@ -123,19 +85,8 @@ const globalBrandingData: TemplateField[] = [
     defaultValue: "",
   },
   {
-    key: "umsc.global.customer-service-phone",
-    label: "Customer Service Phone",
-    description:
-      "Phone number shown in the footer as 'Customer service: …'. Leave blank to use the value from your business settings.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
     key: "umsc.global.google-review-url",
-    label: "Google Review Link",
+    label: "Google review link",
     description:
       "Link to your Google review page. Shown as 'Click to leave us a Google Review' in the footer and the reviews section. Leave blank to hide.",
     type: "url",
@@ -145,85 +96,46 @@ const globalBrandingData: TemplateField[] = [
     defaultValue: "",
   },
   {
-    key: "umsc.global.instagram-url",
-    label: "Instagram URL",
+    key: "umsc.global.footer-shop-heading",
+    label: "Footer shop heading",
     description:
-      "Link to your Instagram profile. Leave blank to use the value from your business settings.",
-    type: "url",
+      "Heading above the shop links in the footer's first column. Leave blank to hide it.",
+    type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "",
+    defaultValue: "Get to know UM Scented Candles",
   },
   {
-    key: "umsc.global.facebook-url",
-    label: "Facebook URL",
+    key: "umsc.global.footer-shop-links",
+    label: "Footer shop links",
     description:
-      "Link to your Facebook page. Leave blank to use the value from your business settings.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "umsc.global.tiktok-url",
-    label: "TikTok URL",
-    description:
-      "Link to your TikTok profile. Leave blank to use the value from your business settings.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-];
-
-// ─── Global: Product Page ─────────────────────────────────────────────────
-
-const globalProductData: TemplateField[] = [
-  {
-    key: "umsc.global.product-shipping-description",
-    label: "Product Shipping & Pickup Text",
-    description:
-      "Shown in the 'Shipping & pickup' accordion on every product page. Leave blank to hide that accordion.",
-    type: "textarea",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "We ship within 1–2 business days. Local pickup is available — we'll email you when it's ready.",
-  },
-  {
-    key: "umsc.global.product-question-description",
-    label: "Product 'Ask a Question' Text",
-    description:
-      "Shown in the 'Ask a question' accordion on every product page. Leave blank to hide that accordion.",
-    type: "textarea",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Have a question about scent, size, or ingredients? Monique is happy to help.",
-  },
-  {
-    key: "umsc.global.product-trust-badges",
-    label: "Product Trust Badges",
-    description:
-      "Short reassurance lines shown beneath the add-to-cart button on every product page.",
+      "Links in the footer's Shop column. Leave empty to use the default candle, soap, and care-line links.",
     type: "list",
     page: "global",
-    group: "global.product",
+    group: "global.branding",
     gridColumn: "col-span-full",
-    maxItems: 4,
+    maxItems: 8,
+    itemLabel: "link",
+    summaryKey: "label",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "label",
-        label: "Badge Text",
+        label: "Label",
+        description: "Text on the link.",
         type: "text",
-        placeholder: "e.g. Hand-poured in Detroit",
+        placeholder: "e.g. Candles",
+      },
+      {
+        key: "url",
+        label: "URL",
+        description: "Where the link goes.",
+        type: "url",
+        placeholder: "/collections/candles",
       },
     ],
+    defaultValue: "",
   },
 ];
 
@@ -232,7 +144,7 @@ const globalProductData: TemplateField[] = [
 const globalAuthenticationData: TemplateField[] = [
   {
     key: "umsc.global.authentication-image",
-    label: "Authentication Image",
+    label: "Authentication image",
     description: "Image shown on the sign-in and sign-up screens.",
     type: "image",
     page: "global",
@@ -255,10 +167,11 @@ export const umscData: Record<string, TemplateField[]> = {
     ...umscFaqData,
     ...umscCartData,
     ...umscCheckoutData,
+    ...umscCheckoutUnavailableData,
     ...umscOrderData,
     ...umscAccountData,
+    ...umscProductData,
     ...globalBrandingData,
-    ...globalProductData,
     ...globalAuthenticationData,
   ],
 };
@@ -274,27 +187,21 @@ export const umscFieldGroups: Record<string, TemplateFieldGroup[]> = {
     ...umscFaqFieldGroups,
     ...umscCartFieldGroups,
     ...umscCheckoutFieldGroups,
+    ...umscCheckoutUnavailableFieldGroups,
     ...umscOrderFieldGroups,
     ...umscAccountFieldGroups,
+    ...umscProductFieldGroups,
     {
       id: "global.branding",
-      title: "Global Branding",
+      title: "Header and footer",
       description:
-        "Announcement bar, header tagline, footer tagline, store visits, customer service, and social links used throughout the template",
+        "Header tagline, mobile menu button, store visits link, Google review link, and the footer's shop links — shown on every page. Phone comes from Settings; the footer tagline and social links from Content → Branding; the announcement bar from Content → Announcements.",
       icon: "🏷️",
       columns: 2,
     } satisfies TemplateFieldGroup,
     {
-      id: "global.product",
-      title: "Global Product Page",
-      description:
-        "Shipping/pickup text, 'ask a question' text, and trust badges shown on every product page",
-      icon: "📦",
-      columns: 1,
-    } satisfies TemplateFieldGroup,
-    {
       id: "global.authentication",
-      title: "Authentication",
+      title: "Sign-in screens",
       description: "Image shown on the sign-in and sign-up screens",
       icon: "🔐",
       columns: 1,

@@ -14,8 +14,8 @@ import { SECTION_LINKS } from "~/lib/section-links";
 const aboutHeroData: TemplateField[] = [
   {
     key: "umsc.about.hero-heading",
-    label: "Hero Heading",
-    description: "The page title shown on the black page-hero band.",
+    label: "Heading",
+    description: "The page title shown on the dark page-hero band.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -24,7 +24,7 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "umsc.about.hero-lede",
-    label: "Hero Lede",
+    label: "Intro text",
     description: "One sentence beneath the heading.",
     type: "textarea",
     page: "about",
@@ -35,9 +35,9 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "umsc.about.hero-image",
-    label: "Hero Image",
+    label: "Photo",
     description:
-      "Photo shown on the right of the page hero (desktop only) — her three-jar photo works well here. Leave blank to show the UM mark instead of a photo.",
+      "Photo shown on the right of the page hero (desktop only). A photo of your products or team works well here. Leave blank to show your logo mark instead of a photo.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -46,7 +46,7 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "umsc.about.hero-image-alt",
-    label: "Hero Image Alt Text",
+    label: "Photo alt text",
     description:
       "Accessible description of the hero photo, for screen readers.",
     type: "text",
@@ -57,13 +57,13 @@ const aboutHeroData: TemplateField[] = [
   },
 ];
 
-// ─── The maker (about.maker) ───────────────────────────────────────────────
+// ─── Your story (about.maker) ──────────────────────────────────────────────
 
 const aboutMakerData: TemplateField[] = [
   {
     key: "umsc.about.maker-heading",
-    label: "Maker Heading",
-    description: "Heading above her story.",
+    label: "Heading",
+    description: "Heading above your story.",
     type: "text",
     page: "about",
     group: "about.maker",
@@ -72,8 +72,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-body-1",
-    label: "Story Paragraph 1",
-    description: "First paragraph of her About story.",
+    label: "Paragraph 1",
+    description: "First paragraph of your story.",
     type: "textarea",
     page: "about",
     group: "about.maker",
@@ -83,8 +83,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-body-2",
-    label: "Story Paragraph 2",
-    description: "Second paragraph of her About story.",
+    label: "Paragraph 2",
+    description: "Second paragraph of your story.",
     type: "textarea",
     page: "about",
     group: "about.maker",
@@ -94,8 +94,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-body-3",
-    label: "Story Paragraph 3",
-    description: "Third paragraph of her About story.",
+    label: "Paragraph 3",
+    description: "Third paragraph of your story.",
     type: "textarea",
     page: "about",
     group: "about.maker",
@@ -105,8 +105,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-image",
-    label: "Maker Photo",
-    description: "Portrait or market-table photo shown beside her story.",
+    label: "Photo",
+    description: "Portrait or market-table photo shown beside your story.",
     type: "image",
     page: "about",
     group: "about.maker",
@@ -115,7 +115,7 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-image-alt",
-    label: "Maker Photo Alt Text",
+    label: "Photo alt text",
     description: "Accessible description of the photo, for screen readers.",
     type: "text",
     page: "about",
@@ -125,8 +125,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-primary-label",
-    label: "Primary Button Text",
-    description: "Text for the gold button beneath her story.",
+    label: "Primary button text",
+    description: "Text for the primary button beneath your story.",
     type: "text",
     page: "about",
     group: "about.maker",
@@ -135,8 +135,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-primary-url",
-    label: "Primary Button Link",
-    description: "URL the gold button points to.",
+    label: "Primary button link",
+    description: "Where the primary button goes, e.g. /shop.",
     type: "url",
     page: "about",
     group: "about.maker",
@@ -145,8 +145,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-secondary-label",
-    label: "Secondary Button Text",
-    description: "Text for the ghost button beneath her story.",
+    label: "Secondary button text",
+    description: "Text for the outlined button beneath your story.",
     type: "text",
     page: "about",
     group: "about.maker",
@@ -155,8 +155,8 @@ const aboutMakerData: TemplateField[] = [
   },
   {
     key: "umsc.about.maker-secondary-url",
-    label: "Secondary Button Link",
-    description: "URL the ghost button points to.",
+    label: "Secondary button link",
+    description: "Where the outlined button goes, e.g. /contact?type=custom.",
     type: "url",
     page: "about",
     group: "about.maker",
@@ -170,9 +170,9 @@ const aboutMakerData: TemplateField[] = [
 const aboutMissionData: TemplateField[] = [
   {
     key: "umsc.about.mission-quote",
-    label: "Mission Statement",
+    label: "Mission statement",
     description:
-      "Her mission sentence, shown as a large pull-quote on a cream band.",
+      "Your mission sentence, shown as a large pull-quote on a light band.",
     type: "textarea",
     page: "about",
     group: "about.mission",
@@ -187,7 +187,7 @@ const aboutMissionData: TemplateField[] = [
 const aboutValuesData: TemplateField[] = [
   {
     key: "umsc.about.values-heading",
-    label: "Values Heading",
+    label: "Heading",
     description: "Heading above the three value columns.",
     type: "text",
     page: "about",
@@ -199,23 +199,28 @@ const aboutValuesData: TemplateField[] = [
     key: "umsc.about.values",
     label: "Values",
     description:
-      "Three hairline-separated columns describing what the business stands for. Up to 4. Leave empty to use the built-in defaults.",
+      "Three columns describing what the business stands for. Leave empty to use the built-in defaults.",
     type: "list",
     page: "about",
     group: "about.values",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "value",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "title",
-        label: "Value Name",
+        label: "Name",
         type: "text",
+        description: "Name of this value, e.g. Wellness & Relief.",
         placeholder: "e.g. Wellness & Relief",
       },
       {
         key: "body",
-        label: "Value Description",
+        label: "Description",
         type: "textarea",
+        description: "One sentence describing this value.",
         placeholder: "Describe this value",
       },
     ],
@@ -227,7 +232,7 @@ const aboutValuesData: TemplateField[] = [
 const aboutCommunityData: TemplateField[] = [
   {
     key: "umsc.about.community-heading",
-    label: "Community Heading",
+    label: "Heading",
     description: "Heading above the community photo grid.",
     type: "text",
     page: "about",
@@ -237,7 +242,7 @@ const aboutCommunityData: TemplateField[] = [
   },
   {
     key: "umsc.about.community-gallery",
-    label: "Community Gallery",
+    label: "Gallery",
     description:
       "Pick a gallery of market and customer photos. Galleries are created under Admin → Galleries; its layout, aspect ratio, captions, and lightbox settings are honored here. Leave unset to hide this section on your site.",
     type: "gallery",
@@ -247,13 +252,13 @@ const aboutCommunityData: TemplateField[] = [
   },
 ];
 
-// ─── CTA (about.cta, hideable) ──────────────────────────────────────────────
+// ─── Closing band (about.cta, hideable) ─────────────────────────────────────
 
 const aboutCtaData: TemplateField[] = [
   {
     key: "umsc.about.cta-heading",
-    label: "CTA Heading",
-    description: "Heading on the closing black band.",
+    label: "Heading",
+    description: "Heading on the closing dark band.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -262,8 +267,8 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "umsc.about.cta-button-label",
-    label: "Button Text",
-    description: "Text for the gold button.",
+    label: "Button text",
+    description: "Text for the button.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -272,8 +277,8 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "umsc.about.cta-button-url",
-    label: "Button Link",
-    description: "URL the gold button points to.",
+    label: "Button link",
+    description: "Where the button goes, e.g. /shop.",
     type: "url",
     page: "about",
     group: "about.cta",
@@ -296,44 +301,45 @@ export const umscAboutData: TemplateField[] = [
 export const umscAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "About Hero",
-    description: "Page-hero heading, lede, and optional right-side photo",
+    title: "Hero",
+    description: "Page-hero heading, intro text, and optional right-side photo",
     icon: "🕯️",
     columns: 2,
   },
   {
     id: "about.maker",
-    title: "The Maker",
+    title: "Your story",
     description:
-      "Her story — heading, three paragraphs, photo, and two buttons",
+      "Your story — heading, three paragraphs, photo, and two buttons",
     icon: "🤍",
     columns: 2,
   },
   {
     id: "about.mission",
     title: "Mission",
-    description: "Her mission statement, shown as a pull-quote",
+    description: "Your mission statement, shown as a pull-quote",
     icon: "✨",
     columns: 1,
   },
   {
     id: "about.values",
     title: "Values",
-    description: "Heading and the three hairline value columns",
+    description: "Heading and the three value columns",
     icon: "🌿",
     columns: 1,
   },
   {
     id: "about.community",
-    title: "Our Customers. Our Community.",
-    description: "Heading and the market/customer photo gallery (pick one from Admin → Galleries)",
+    title: "Our customers. Our community.",
+    description:
+      "Heading and the market/customer photo gallery (pick one from Admin → Galleries)",
     icon: "📷",
     columns: 1,
   },
   {
     id: "about.cta",
-    title: "Closing CTA",
-    description: "Closing black band heading and shop button",
+    title: "Closing band",
+    description: "Closing dark band heading and shop button",
     icon: "🛍️",
     columns: 2,
   },
@@ -344,7 +350,7 @@ export const umscAboutSections: TemplateSection[] = [
     id: "about.hero",
     page: "about",
     title: "Hero",
-    description: "Page hero with heading, lede, and optional photo",
+    description: "Page hero with heading, intro text, and optional photo",
     groupIds: ["about.hero"],
     order: 0,
     hideable: false,
@@ -352,8 +358,8 @@ export const umscAboutSections: TemplateSection[] = [
   {
     id: "about.maker",
     page: "about",
-    title: "The Maker",
-    description: "Her story split with a photo",
+    title: "Your story",
+    description: "Your story split with a photo",
     groupIds: ["about.maker"],
     order: 1,
     hideable: false,
@@ -362,7 +368,7 @@ export const umscAboutSections: TemplateSection[] = [
     id: "about.mission",
     page: "about",
     title: "Mission",
-    description: "Mission statement pull-quote on cream",
+    description: "Mission statement pull-quote on a light band",
     groupIds: ["about.mission"],
     order: 2,
     hideable: false,
@@ -371,7 +377,7 @@ export const umscAboutSections: TemplateSection[] = [
     id: "about.values",
     page: "about",
     title: "Values",
-    description: "Three hairline-separated value columns",
+    description: "Three value columns",
     groupIds: ["about.values"],
     order: 3,
     hideable: true,
@@ -379,8 +385,8 @@ export const umscAboutSections: TemplateSection[] = [
   {
     id: "about.community",
     page: "about",
-    title: "Our Customers. Our Community.",
-    description: "Market/customer photo gallery on a cream band",
+    title: "Our customers. Our community.",
+    description: "Market/customer photo gallery on a light band",
     groupIds: ["about.community"],
     order: 4,
     hideable: true,
@@ -389,8 +395,8 @@ export const umscAboutSections: TemplateSection[] = [
   {
     id: "about.cta",
     page: "about",
-    title: "Closing CTA",
-    description: "Closing black band with a shop button",
+    title: "Closing band",
+    description: "Closing band with a shop button",
     groupIds: ["about.cta"],
     order: 5,
     hideable: true,

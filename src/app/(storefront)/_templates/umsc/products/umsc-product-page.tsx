@@ -23,9 +23,18 @@ import { UmscSection } from "../shared/umsc-section";
 import { UmscProductInfo } from "./umsc-product-info";
 import { UmscProductReviews } from "./umsc-product-reviews";
 
-const GLOBAL_FIELD_KEYS = [
+const TRUST_BADGES_KEY = "umsc.global.product-trust-badges";
+
+const FIELD_KEYS = [
   "umsc.global.product-shipping-description",
+  "umsc.product.returns-note",
   "umsc.global.product-question-description",
+  "umsc.product.question-link-label",
+  "umsc.product.coming-soon-heading",
+  "umsc.product.coming-soon-body",
+  "umsc.product.reviews-heading",
+  "umsc.product.related-heading",
+  "umsc.product.related-link-label",
   "umsc.global.google-review-url",
 ];
 
@@ -62,16 +71,17 @@ const PRODUCT_PROSE_STYLE = `
 
 /**
  * UmscProductPage — design.md "Product". Server half resolves the breadcrumb
- * collection, the global product-page copy, and the related-products grid;
- * gallery/price/variant/cart state is handed off to `UmscProductInfo`
- * ("use client", per `useProduct`'s requirement).
+ * collection, the product-page copy (`product.details`), and the
+ * related-products grid; gallery/price/variant/cart state is handed off to
+ * `UmscProductInfo` ("use client", per `useProduct`'s requirement).
  */
 export async function UmscProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const customFields = business.siteContent?.customFields;
-  const f = resolveFields(customFields, GLOBAL_FIELD_KEYS);
+  const f = resolveFields(customFields, FIELD_KEYS);
 
   const [collectionLink, related] = await Promise.all([
     db.collectionProduct.findFirst({
@@ -89,13 +99,15 @@ export async function UmscProductPage({
   ]);
   const firstCollection = collectionLink?.collection ?? null;
 
-  const globalTrustBadges = parseTemplateTrustBadgesListRows(
-    getListFieldValue(customFields, "umsc.global.product-trust-badges"),
-    [
-      { label: "Hand-poured in Detroit" },
-      { label: "Ships in 1-2 business days" },
-    ],
-  );
+  // No built-in fallback rows — an unsaved (or emptied) list renders no
+  // store badges at all, matching bamboo's product page.
+  const trustBadgeRows =
+    parseTemplateTrustBadgesListRows(
+      getListFieldValue(customFields, TRUST_BADGES_KEY),
+    ) ?? [];
+  const globalTrustBadges = trustBadgeRows
+    .map((row, index) => ({ label: row.label.trim(), index }))
+    .filter((row) => row.label.length > 0);
 
   const additionalInformation = (
     product.additionalFields as { additionalInformation?: TiptapJSON } | null
@@ -137,10 +149,16 @@ export async function UmscProductPage({
         shippingDescription={
           f["umsc.global.product-shipping-description"] ?? ""
         }
+        hasShippingPolicy={productPolicies?.hasShippingPolicy ?? false}
+        returnsNote={f["umsc.product.returns-note"] ?? ""}
+        hasRefundPolicy={productPolicies?.hasRefundPolicy ?? false}
         questionDescription={
           f["umsc.global.product-question-description"] ?? ""
         }
-        globalTrustBadges={globalTrustBadges ?? []}
+        questionLinkLabel={f["umsc.product.question-link-label"] ?? ""}
+        comingSoonHeading={f["umsc.product.coming-soon-heading"] ?? ""}
+        comingSoonBody={f["umsc.product.coming-soon-body"] ?? ""}
+        globalTrustBadges={globalTrustBadges}
       />
 
       {/* products.details */}
@@ -163,6 +181,7 @@ export async function UmscProductPage({
       <UmscProductReviews
         productId={product.id}
         productName={product.name}
+        heading={f["umsc.product.reviews-heading"] ?? ""}
         googleReviewUrl={f["umsc.global.google-review-url"] ?? ""}
       />
 
@@ -174,11 +193,19 @@ export async function UmscProductPage({
           className="border-t border-[var(--umsc-line)]"
         >
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <UmscHeading as="h2" id="umsc-related-heading">
-              You may also like
+            <UmscHeading
+              as="h2"
+              id="umsc-related-heading"
+              fieldKey="umsc.product.related-heading"
+            >
+              {f["umsc.product.related-heading"] ?? ""}
             </UmscHeading>
-            <UmscButton href="/shop" variant="link">
-              All products
+            <UmscButton
+              href="/shop"
+              variant="link"
+              fieldKey="umsc.product.related-link-label"
+            >
+              {f["umsc.product.related-link-label"] ?? ""}
             </UmscButton>
           </div>
           <UmscRevealGroup>
