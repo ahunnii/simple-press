@@ -31,6 +31,9 @@ const STRICT_TEMPLATES: readonly string[] = [
   "sledge",
   "umsc",
   "dark-trend",
+  "elegant",
+  "modern",
+  "default",
 ];
 
 /**
@@ -56,6 +59,7 @@ const LIST_DEFAULTS_SWEPT_TEMPLATES: readonly string[] = [
   "sledge",
   "dream",
   "umsc",
+  "default",
 ];
 
 /**

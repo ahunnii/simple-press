@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { TwitterLogoIcon } from "@radix-ui/react-icons";
-import { Facebook, Instagram } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -27,14 +25,7 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
     type: "policy",
   });
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
   return (
     <footer className="border-border bg-secondary border-t">
@@ -52,57 +43,26 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
                 {business.siteContent.footerText}
               </p>
             )}
-            {(socialLinks?.instagram ??
-              socialLinks?.facebook ??
-              socialLinks?.twitter ??
-              socialLinks?.youtube) && (
-              <div className="mt-4 flex gap-3">
+            {socialLinks.length > 0 && (
+              <ul
+                className="mt-4 flex gap-3"
+                aria-label="Follow us on social media"
+              >
                 {/* M-7: "(opens in new tab)" appended to aria-label; M-2: aria-hidden on decorative icons */}
-                {socialLinks?.instagram && (
-                  <a
-                    href={socialLinks.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram (opens in new tab)"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Instagram className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                )}
-                {socialLinks?.facebook && (
-                  <a
-                    href={socialLinks.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Facebook (opens in new tab)"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Facebook className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                )}
-                {socialLinks?.twitter && (
-                  <a
-                    href={socialLinks.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Twitter (opens in new tab)"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <TwitterLogoIcon className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                )}
-                {socialLinks?.youtube && (
-                  <a
-                    href={socialLinks.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="YouTube (opens in new tab)"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <YouTubeIcon className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                )}
-              </div>
+                {socialLinks.map(({ key, ariaLabel, Icon, url }) => (
+                  <li key={key}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${ariaLabel} (opens in new tab)`}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import type { ServiceTemplateProps } from "../../../_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateIframeValue } from "~/lib/template-fields";
 import {
   parseServiceAddOns,
@@ -35,6 +34,12 @@ type ServiceItem = ServiceTemplateProps["items"][number];
  * 2. Optional intro section (heading + richtext + optional media)
  * 3. Items grid (3-col, default service cards)
  * 4. Closing CTA band (button + optional booking embed)
+ *
+ * Fields live on `Service.customFields`, edited at `/admin/services/[id]` —
+ * NOT the visual editor (there is no `sections.ts` entry for a service
+ * detail page), so this file has no `sectionGroupAttr`/`fieldAttr`/
+ * `isSectionVisible` calls. Mirrors vii's, pink's and wealth's
+ * per-service-template pages.
  */
 export async function DefaultServicePage({
   service,
@@ -84,10 +89,7 @@ export async function DefaultServicePage({
   return (
     <PageTransition>
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("service", "hero")}
-        className="relative h-[60vh] min-h-[320px] w-full overflow-hidden"
-      >
+      <section className="relative h-[60vh] min-h-[320px] w-full overflow-hidden">
         {heroVideo ? (
           <ServiceHeroVideo src={heroVideo} />
         ) : (
@@ -117,10 +119,7 @@ export async function DefaultServicePage({
 
       {/* ── Intro section ─────────────────────────────────────────────────── */}
       {hasIntroSection && (
-        <section
-          {...sectionGroupAttr("service", "intro")}
-          className="border-b border-[#e8e8e8] px-6 py-24 lg:px-8"
-        >
+        <section className="border-b border-[#e8e8e8] px-6 py-24 lg:px-8">
           <div className="mx-auto max-w-[1440px]">
             <div
               className={`grid gap-12 ${hasIntroMedia ? "lg:grid-cols-2 lg:items-start" : ""}`}
@@ -163,10 +162,7 @@ export async function DefaultServicePage({
 
       {/* ── Items grid ────────────────────────────────────────────────────── */}
       {items.length > 0 && (
-        <section
-          {...sectionGroupAttr("service", "items")}
-          className="px-6 py-24 lg:px-8"
-        >
+        <section className="px-6 py-24 lg:px-8">
           <div className="mx-auto max-w-[1440px]">
             <h2 className="mb-12 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
               Our Services
@@ -186,10 +182,7 @@ export async function DefaultServicePage({
 
       {/* ── Closing CTA band ──────────────────────────────────────────────── */}
       {hasClosingCta && (
-        <section
-          {...sectionGroupAttr("service", "cta")}
-          className="bg-[#efece8] px-6 py-24 text-center lg:px-8"
-        >
+        <section className="bg-[#efece8] px-6 py-24 text-center lg:px-8">
           <div className="mx-auto max-w-[640px]">
             {ctaLink && ctaText && (
               <div className="mb-8">

@@ -7,10 +7,15 @@ import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 
 import { resolveFields } from "..";
+import {
+  BLOG_LISTING_EYEBROW_DEFAULT,
+  BLOG_LISTING_MORE_LABEL_DEFAULT,
+  BLOG_LISTING_SEARCH_EMPTY_DEFAULT,
+} from "./index";
 
 type Props = DefaultBlogPageTemplateProps & {
   customFields?: Record<string, string>;
@@ -52,6 +57,9 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
   const f = resolveFields(customFields, [
     "default.blog.listing-title",
     "default.blog.listing-intro",
+    "default.blog.listing-eyebrow",
+    "default.blog.listing-search-empty",
+    "default.blog.listing-more-label",
   ]);
 
   const listingTitle =
@@ -59,6 +67,15 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
   const listingIntro =
     (f["default.blog.listing-intro"] ?? "").trim() ||
     "Stories behind the work.";
+  const listingEyebrow =
+    (f["default.blog.listing-eyebrow"] ?? "").trim() ||
+    BLOG_LISTING_EYEBROW_DEFAULT;
+  const searchEmpty =
+    (f["default.blog.listing-search-empty"] ?? "").trim() ||
+    BLOG_LISTING_SEARCH_EMPTY_DEFAULT;
+  const moreLabel =
+    (f["default.blog.listing-more-label"] ?? "").trim() ||
+    BLOG_LISTING_MORE_LABEL_DEFAULT;
 
   const [query, setQuery] = useState("");
 
@@ -86,14 +103,25 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
         className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8"
       >
         <div className="mx-auto max-w-[1440px]">
-          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-            Journal
+          <span
+            {...fieldAttr("default.blog.listing-eyebrow")}
+            className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+          >
+            {listingEyebrow}
           </span>
-          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
+          <h1
+            {...fieldAttr("default.blog.listing-title")}
+            className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]"
+          >
             {listingTitle}
           </h1>
           {listingIntro && (
-            <p className="mt-4 text-[17px] text-[#6b6b6b]">{listingIntro}</p>
+            <p
+              {...fieldAttr("default.blog.listing-intro")}
+              className="mt-4 text-[17px] text-[#6b6b6b]"
+            >
+              {listingIntro}
+            </p>
           )}
         </div>
       </section>
@@ -138,8 +166,11 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
               {query.trim() ? (
                 /* Search results */
                 filtered.length === 0 ? (
-                  <p className="py-16 text-center text-[#6b6b6b]">
-                    No posts match your search.
+                  <p
+                    {...fieldAttr("default.blog.listing-search-empty")}
+                    className="py-16 text-center text-[#6b6b6b]"
+                  >
+                    {searchEmpty}
                   </p>
                 ) : (
                   <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
@@ -190,8 +221,11 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
                     <>
                       {featured && (
                         <div className="mb-10 flex items-center gap-2">
-                          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                            More posts
+                          <span
+                            {...fieldAttr("default.blog.listing-more-label")}
+                            className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                          >
+                            {moreLabel}
                           </span>
                           <div className="h-px flex-1 bg-[#e8e8e8]" />
                         </div>

@@ -19,6 +19,8 @@ type Props = {
   heroDescription?: string;
   heroButtonText?: string;
   heroButtonLink?: string;
+  heroSecondaryButtonText?: string;
+  heroSecondaryButtonLink?: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 };
@@ -35,6 +37,8 @@ export function ElegantHero({
   heroDescription,
   heroButtonText,
   heroButtonLink,
+  heroSecondaryButtonText,
+  heroSecondaryButtonLink,
   sectionAttrs,
 }: Props) {
   const [shown, setShown] = useState(false);
@@ -69,6 +73,8 @@ export function ElegantHero({
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim() && heroImage !== "/placeholder.svg";
+  const hasTagline = !!tagline?.trim();
+  const hasSecondaryButton = !!heroSecondaryButtonText?.trim();
 
   const revealStyle = (delay: number): React.CSSProperties =>
     reducedMotion
@@ -114,34 +120,36 @@ export function ElegantHero({
         {/* ── Text column ── */}
         <div style={{ padding: "0 24px 48px 24px" }}>
           {/* Eyebrow */}
-          <div style={revealStyle(0)}>
-            <span
-              style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 14,
-                marginBottom: 28,
-              }}
-            >
+          {hasTagline && (
+            <div style={revealStyle(0)}>
               <span
                 style={{
-                  display: "inline-block",
-                  width: 28,
-                  height: 1,
-                  background: "currentColor",
-                  flexShrink: 0,
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 14,
+                  marginBottom: 28,
                 }}
-              />
-              <span {...fieldAttr("elegant.homepage.hero-tagline")}>
-                {tagline ?? "A thoughtful studio"}
+              >
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 28,
+                    height: 1,
+                    background: "currentColor",
+                    flexShrink: 0,
+                  }}
+                />
+                <span {...fieldAttr("elegant.homepage.hero-tagline")}>
+                  {tagline}
+                </span>
               </span>
-            </span>
-          </div>
+            </div>
+          )}
 
           {/* Display heading with mask-reveal lines */}
           <h1
@@ -159,7 +167,7 @@ export function ElegantHero({
                 style={maskStyle(0.08)}
                 {...fieldAttr("elegant.homepage.hero-title-line-1")}
               >
-                {heroTitleLine1 ?? "Made with care."}
+                {heroTitleLine1}
               </span>
             </span>
             <span style={{ display: "block", overflow: "hidden" }}>
@@ -167,7 +175,7 @@ export function ElegantHero({
                 style={{ ...maskStyle(0.2), fontStyle: "italic" }}
                 {...fieldAttr("elegant.homepage.hero-title-line-2")}
               >
-                {heroTitleLine2 ?? "Especially for you."}
+                {heroTitleLine2}
               </em>
             </span>
           </h1>
@@ -185,7 +193,7 @@ export function ElegantHero({
             }}
             {...fieldAttr("elegant.homepage.hero-description")}
           >
-            {heroDescription ?? "Explore our collection."}
+            {heroDescription}
           </p>
 
           {/* CTAs */}
@@ -220,36 +228,42 @@ export function ElegantHero({
               className="el-btn-primary"
             >
               <span {...fieldAttr("elegant.homepage.hero-button-text")}>
-                {heroButtonText ?? "Shop Now"}
+                {heroButtonText}
               </span>
               <ArrowRight
                 aria-hidden={true}
                 style={{ width: 14, height: 14 }}
               />
             </Link>
-            <Link
-              href="/about"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "14px 26px",
-                borderRadius: 999,
-                fontSize: 13,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                background: "transparent",
-                color: "var(--el-ink, #1c1a17)",
-                border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                textDecoration: "none",
-                transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
-                fontFamily: "var(--font-sans, sans-serif)",
-              }}
-              className="el-btn-ghost"
-            >
-              Our story
-            </Link>
+            {hasSecondaryButton && (
+              <Link
+                href={heroSecondaryButtonLink ?? "/about"}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "14px 26px",
+                  borderRadius: 999,
+                  fontSize: 13,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  background: "transparent",
+                  color: "var(--el-ink, #1c1a17)",
+                  border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                  textDecoration: "none",
+                  transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+                className="el-btn-ghost"
+              >
+                <span
+                  {...fieldAttr("elegant.homepage.hero-secondary-button-text")}
+                >
+                  {heroSecondaryButtonText}
+                </span>
+              </Link>
+            )}
           </div>
         </div>
 

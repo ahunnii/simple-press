@@ -3,6 +3,7 @@ import { resolveDonationHandles } from "~/lib/donation-handles";
 import { DEFAULT_DONATION_PRESETS_CENTS } from "~/lib/donations/constants";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -29,7 +30,14 @@ export function DefaultDonatePage({
   // form: `isStripeConnected` alone isn't enough — an account that's
   // connected but hasn't finished onboarding can't accept charges yet.
   const showCard = business.isStripeConnected && business.stripeChargesEnabled;
+  // `showOtherWays` alone drives the "no lanes configured" empty state below
+  // — a section the owner has merely hidden still counts as "configured",
+  // so `isSectionVisible` only gates the block's actual render, not the
+  // empty-state fallback.
   const showOtherWays = handles.length > 0;
+  const otherWaysVisible =
+    showOtherWays &&
+    isSectionVisible(customFields, "default", "donate.other-ways");
   const showThankYou = status === "success";
 
   // `f[...]` is always a string, never undefined (see `resolveTemplateFields`),
@@ -73,6 +81,7 @@ export function DefaultDonatePage({
             <div
               role="status"
               className="rounded-(--radius) border border-[#e8e8e8] bg-[#efece8] p-6 text-center"
+              {...sectionGroupAttr("donate", "thank-you")}
             >
               <p
                 className="font-serif text-[22px] font-medium tracking-[-0.01em]"
@@ -93,8 +102,12 @@ export function DefaultDonatePage({
           )}
 
           {/* ── Card / Stripe Checkout form ─────────────────────────────── */}
+          {/* No sectionGroupAttr here — "donate.form" isn't a declared field
+              group or section (this form's amount/label come from Donation
+              settings, not template fields), so the attribute was a stray
+              hotspot that pointed at nothing. Removed 2026-09-27. */}
           {showCard && (
-            <div {...sectionGroupAttr("donate", "form")}>
+            <div>
               <DefaultDonateForm
                 label={label}
                 presetAmountsCents={
@@ -106,7 +119,7 @@ export function DefaultDonatePage({
           )}
 
           {/* ── Other ways to give: Venmo / Cash App ────────────────────── */}
-          {showOtherWays && (
+          {otherWaysVisible && (
             <div {...sectionGroupAttr("donate", "other-ways")}>
               <h2
                 className="mb-5 text-center font-serif text-[22px] font-medium tracking-[-0.01em]"

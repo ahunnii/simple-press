@@ -3,30 +3,21 @@ import Link from "next/link";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 
 import { DefaultCheckoutForm } from "./default-checkout-form";
+import { DefaultCheckoutUnavailable } from "./default-checkout-unavailable";
 
 export async function DefaultCheckoutPage({
   business,
   merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
+  // Unreachable through `checkout/page.tsx`, which applies this exact guard
+  // first and renders `t.CheckoutUnavailable` itself. Kept as a safety net
+  // for any future direct caller, delegating to the same component so the
+  // owner's `default.checkout.unavailable-*` copy is the single source.
   if (!business.isStripeConnected && process.env.NODE_ENV !== "development") {
     return (
-      <div className="flex flex-1 items-center justify-center px-6 py-24">
-        <div className="max-w-md text-center">
-          <h1 className="font-serif text-2xl font-medium">
-            Checkout unavailable
-          </h1>
-          <p className="mt-3 text-sm text-[#6b6b6b]">
-            This store hasn&apos;t set up payment processing yet. Please contact
-            the store owner.
-          </p>
-          <Link
-            href="/shop"
-            className="mt-8 inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
-          >
-            Back to shop
-          </Link>
-        </div>
-      </div>
+      <DefaultCheckoutUnavailable
+        customFields={business.siteContent?.customFields}
+      />
     );
   }
 

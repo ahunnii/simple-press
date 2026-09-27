@@ -34,6 +34,8 @@ export async function DefaultAboutPage({
     "default.about.pillar-2-desc",
     "default.about.pillar-3-title",
     "default.about.pillar-3-desc",
+    "default.about.pillars-eyebrow",
+    "default.about.pillars-heading",
     "default.about.cta-eyebrow",
     "default.about.cta-heading",
     "default.about.cta-button-text",
@@ -157,10 +159,12 @@ export async function DefaultAboutPage({
               </h2>
 
               {hasRichText ? (
-                <TiptapRenderer
-                  content={storyRichContent as TiptapJSON}
-                  className="prose prose-sm prose-p:text-[15px] prose-p:leading-[1.75] prose-p:text-[#6b6b6b] max-w-none"
-                />
+                <div {...fieldAttr("default.about.story-body")}>
+                  <TiptapRenderer
+                    content={storyRichContent as TiptapJSON}
+                    className="prose prose-sm prose-p:text-[15px] prose-p:leading-[1.75] prose-p:text-[#6b6b6b] max-w-none"
+                  />
+                </div>
               ) : (
                 <div className="flex flex-col gap-4">
                   {f["default.about.paragraph-1"] && (
@@ -204,12 +208,14 @@ export async function DefaultAboutPage({
       </section>
 
       {/* ── Pull quote ───────────────────────────────────────────────────── */}
+      {/* No sectionGroupAttr here — the "Three pillars" section below shares
+          the same "about.pillars" group and always renders when the group is
+          visible, while this quote is conditional on its own field, so it's
+          the more reliable hotspot for the editor (a group is annotated
+          once; see field-conventions.md). */}
       {f["default.about.pull-quote"] &&
         isSectionVisible(customFields, "default", "about.pillars") && (
-          <section
-            {...sectionGroupAttr("about", "pillars")}
-            className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8"
-          >
+          <section className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8">
             <div className="mx-auto max-w-[1440px]">
               <p className="max-w-[800px] font-serif text-[clamp(22px,2.8vw,36px)] leading-[1.28] tracking-[-0.015em] text-balance">
                 &ldquo;{f["default.about.pull-quote"]}&rdquo;
@@ -226,11 +232,17 @@ export async function DefaultAboutPage({
         >
           <div className="mx-auto max-w-[1440px]">
             <div className="mb-12 flex flex-col gap-2">
-              <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                What I care about
+              <span
+                className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                {...fieldAttr("default.about.pillars-eyebrow")}
+              >
+                {f["default.about.pillars-eyebrow"] ?? "What I care about"}
               </span>
-              <h2 className="font-serif text-3xl font-medium tracking-tight">
-                Three things, in order.
+              <h2
+                className="font-serif text-3xl font-medium tracking-tight"
+                {...fieldAttr("default.about.pillars-heading")}
+              >
+                {f["default.about.pillars-heading"] ?? "Three things, in order."}
               </h2>
             </div>
             <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">

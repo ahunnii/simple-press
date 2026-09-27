@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const homepageHeroData: TemplateField[] = [
   {
     key: "modern.homepage.hero-image",
-    label: "Hero Image",
-    description: "Image for the hero section",
+    label: "Hero photo",
+    description: "Background photo behind the hero heading.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -13,43 +13,41 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "modern.homepage.hero-title",
-    label: "Hero Title",
-    description: "Title for the hero section",
+    label: "Heading",
+    description: "Main heading in the hero.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue: "Designed with modern in mind",
-    placeholder: "Designed with modern in mind",
+    placeholder: "e.g. Designed with modern in mind",
   },
   {
     key: "modern.homepage.hero-subtitle",
-    label: "Hero Subtitle",
-    description: "Subtitle for the hero section",
+    label: "Intro text",
+    description: "Short paragraph below the hero heading.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Thoughtfully crafted goods that blend beauty with everyday function.",
-    placeholder:
-      "Thoughtfully crafted goods that blend beauty with everyday function.",
+    defaultValue: "Well-chosen pieces that bring beauty to everyday life.",
+    placeholder: "A sentence or two about what makes your products special.",
   },
   {
     key: "modern.homepage.hero-cta-button-text",
-    label: "Hero CTA Button Text",
-    description: "Button text for the hero section",
+    label: "Button text",
+    description: "Label on the main hero button.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "Shop All",
-    placeholder: "Shop All",
+    placeholder: "e.g. Shop All",
   },
   {
     key: "modern.homepage.hero-cta-button-link",
-    label: "Hero CTA Button Link",
-    description: "Button link for the hero section",
+    label: "Button link",
+    description: "Where the hero button goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
@@ -62,9 +60,9 @@ const homepageHeroData: TemplateField[] = [
 const homepageValuesData: TemplateField[] = [
   {
     key: "modern.homepage.values-list",
-    label: "Values Cards",
+    label: "Values",
     description:
-      "Cards for the Values section (title, and description per item).",
+      "Up to four short value statements shown under the hero. When left empty, three built-in statements are shown instead.",
     type: "list",
     page: "homepage",
     group: "homepage.values",
@@ -74,25 +72,27 @@ const homepageValuesData: TemplateField[] = [
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Short value statement, e.g. Built to Last.",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "One short sentence supporting the title.",
       },
     ],
     minItems: 0,
     maxItems: 4,
+    itemLabel: "Value",
+    defaultsWhenEmpty: true,
   },
 ];
 
 const homepageProductsData: TemplateField[] = [
   {
     key: "modern.homepage.products-tagline",
-    label: "Products Tagline",
-    description: "Tagline for the products section",
+    label: "Small label",
+    description: "Short label above the featured products heading.",
     type: "text",
     page: "homepage",
     group: "homepage.products",
@@ -103,8 +103,8 @@ const homepageProductsData: TemplateField[] = [
 
   {
     key: "modern.homepage.products-title",
-    label: "Products Title",
-    description: "Title for the products section",
+    label: "Heading",
+    description: "Heading for the featured products section.",
     type: "text",
     page: "homepage",
     group: "homepage.products",
@@ -114,8 +114,8 @@ const homepageProductsData: TemplateField[] = [
   },
   {
     key: "modern.homepage.products-link-text",
-    label: "Products Link Text",
-    description: "Link text for the products section",
+    label: "Link text",
+    description: "Label for the link to the full shop, below the heading.",
     type: "text",
     page: "homepage",
     group: "homepage.products",
@@ -125,21 +125,21 @@ const homepageProductsData: TemplateField[] = [
   },
   {
     key: "modern.homepage.products-link-url",
-    label: "Products Link URL",
-    description: "Link URL for the products section",
+    label: "Link URL",
+    description: "Where the link goes, e.g. /shop.",
     type: "url",
     page: "homepage",
     group: "homepage.products",
     gridColumn: "col-span-1",
-    placeholder: "e.g. /shop",
+    placeholder: "/shop",
     defaultValue: "/shop",
   },
 ];
 const homepageAboutData: TemplateField[] = [
   {
     key: "modern.homepage.about-tagline",
-    label: "About Tagline",
-    description: "Subtitle for the about section",
+    label: "Small label",
+    description: "Short label above the about-teaser heading.",
     type: "text",
     page: "homepage",
     group: "homepage.about",
@@ -149,8 +149,8 @@ const homepageAboutData: TemplateField[] = [
   },
   {
     key: "modern.homepage.about-header",
-    label: "About Header",
-    description: "Title for the about section",
+    label: "Heading",
+    description: "Heading for the about-teaser section.",
     type: "text",
     page: "homepage",
     group: "homepage.about",
@@ -161,20 +161,20 @@ const homepageAboutData: TemplateField[] = [
 
   {
     key: "modern.homepage.about-text",
-    label: "About Text",
-    description: "Text for the about section",
+    label: "Body text",
+    description: "Paragraph introducing your story, below the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.about",
     gridColumn: "col-span-full",
-    placeholder: "e.g. We work directly with artisans from around the world...",
+    placeholder: "A sentence or two introducing your business and its story.",
     defaultValue:
-      "We work directly with artisans from around the world to bring you pieces that tell a story. Every item in our collection is chosen for its quality, beauty, and the hands that made it.",
+      "We started with a simple goal: to offer pieces worth keeping. Every item in our collection is chosen for its quality, its beauty, and how well it fits into everyday life.",
   },
   {
     key: "modern.homepage.about-image",
-    label: "About Image",
-    description: "Image for the about section",
+    label: "Photo",
+    description: "Photo beside the about-teaser text.",
     type: "image",
     page: "homepage",
     group: "homepage.about",
@@ -183,8 +183,8 @@ const homepageAboutData: TemplateField[] = [
   },
   {
     key: "modern.homepage.about-cta-button-text",
-    label: "About CTA Button Text",
-    description: "Button text for the about cta section",
+    label: "Button text",
+    description: "Label on the button linking to the About page.",
     type: "text",
     page: "homepage",
     group: "homepage.about",
@@ -194,14 +194,14 @@ const homepageAboutData: TemplateField[] = [
   },
   {
     key: "modern.homepage.about-cta-button-link",
-    label: "About CTA Button Link",
-    description: "Button link for the about cta section",
+    label: "Button link",
+    description: "Where the button goes, e.g. /about.",
     type: "url",
     page: "homepage",
     gridColumn: "col-span-1",
     group: "homepage.about",
     defaultValue: "/about",
-    placeholder: "e.g. /about",
+    placeholder: "/about",
   },
 ];
 
@@ -215,39 +215,32 @@ export const modernHomepageData = [
 export const modernHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
-    title: "Hero Section",
-    description: "Main banner area at the top of homepage",
+    title: "Hero",
+    description: "Photo and heading at the top of the homepage.",
     icon: "🎯",
     columns: 2,
   },
 
   {
     id: "homepage.values",
-    title: "Values Section",
-    description: "What sets your business apart?",
+    title: "Values",
+    description: "Short value statements shown under the hero.",
     icon: "💡",
     columns: 2,
   },
   {
     id: "homepage.products",
-    title: "Featured Products Section",
-    description: "Featured products section after the hero section",
+    title: "Featured products",
+    description:
+      "Grid of featured products below the hero, pulled from your catalog.",
     icon: "🛍️",
     columns: 1,
   },
 
   {
-    id: "homepage.services",
-    title: "Services Section",
-    description: "Services section after the hero section",
-    icon: "💬",
-    columns: 1,
-  },
-
-  {
     id: "homepage.about",
-    title: "About Section",
-    description: "About section on the homepage",
+    title: "About teaser",
+    description: "Photo and short story linking to the About page.",
     icon: "📖",
     columns: 2,
   },
@@ -255,14 +248,14 @@ export const modernHomepageFieldGroups: TemplateFieldGroup[] = [
 
 export const DEFAULT_MODERN_VALUES_LIST = [
   {
-    title: "Crafted With Care",
+    title: "Care in Every Detail",
     description:
-      "Every piece is made by skilled artisans using time-honored techniques.",
+      "Every piece is chosen with attention to detail, from how it looks to how it feels in use.",
   },
   {
-    title: "Sustainably Made",
+    title: "Thoughtfully Chosen",
     description:
-      "We source responsibly and prioritize natural, sustainable materials.",
+      "We take our time choosing what we carry, so you can shop with confidence.",
   },
   {
     title: "Built to Last",

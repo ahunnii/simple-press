@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
@@ -12,9 +13,17 @@ import { ModernVariantSelector } from "./modern-variant-selector";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
+  /** Resolved `modern.product.coming-soon-heading`. */
+  comingSoonHeading: string;
+  /** Resolved `modern.product.coming-soon-body`; blank hides the line. */
+  comingSoonBody: string;
 };
 
-export function ModernProductActions({ product }: Props) {
+export function ModernProductActions({
+  product,
+  comingSoonHeading,
+  comingSoonBody,
+}: Props) {
   const {
     inStock,
     variantOptions,
@@ -43,12 +52,20 @@ export function ModernProductActions({ product }: Props) {
     <div className="mt-8">
       {additionalFields?.comingSoon ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
-          <p className="font-semibold text-amber-700 dark:text-amber-300">
-            Coming Soon
+          <p
+            {...fieldAttr("modern.product.coming-soon-heading")}
+            className="font-semibold text-amber-700 dark:text-amber-300"
+          >
+            {comingSoonHeading}
           </p>
-          <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
-            This product isn&apos;t available yet. Check back later!
-          </p>
+          {comingSoonBody.trim() ? (
+            <p
+              {...fieldAttr("modern.product.coming-soon-body")}
+              className="mt-1 text-sm text-amber-600 dark:text-amber-400"
+            >
+              {comingSoonBody}
+            </p>
+          ) : null}
         </div>
       ) : hasVariants ? (
         <ModernVariantSelector

@@ -4,15 +4,32 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
+import {
+  DEFAULT_PRODUCT_COMING_SOON_BODY,
+  DEFAULT_PRODUCT_COMING_SOON_HEADING,
+} from ".";
 import { DefaultVariantSelector } from "./default-variant-selector";
+
+type Props = DefaultProductPageTemplateProps & {
+  /**
+   * Resolved `default.product.coming-soon-*` copy from the page. Optional so
+   * a caller that doesn't pass them still gets the built-in text; a passed
+   * "" means the owner blanked it (the body then hides).
+   */
+  comingSoonHeading?: string;
+  comingSoonBody?: string;
+};
 
 export function DefaultProductActions({
   product,
-}: DefaultProductPageTemplateProps) {
+  comingSoonHeading = DEFAULT_PRODUCT_COMING_SOON_HEADING,
+  comingSoonBody = DEFAULT_PRODUCT_COMING_SOON_BODY,
+}: Props) {
   const {
     inStock,
     variantOptions,
@@ -40,10 +57,20 @@ export function DefaultProductActions({
     <>
       {additionalFields?.comingSoon ? (
         <div className="rounded-[var(--radius)] border border-amber-200 bg-amber-50 px-5 py-4">
-          <p className="font-medium text-amber-700">Coming Soon</p>
-          <p className="mt-1 text-sm text-amber-700">
-            This product isn&apos;t available yet. Check back later!
+          <p
+            {...fieldAttr("default.product.coming-soon-heading")}
+            className="font-medium text-amber-700"
+          >
+            {comingSoonHeading}
           </p>
+          {comingSoonBody && (
+            <p
+              {...fieldAttr("default.product.coming-soon-body")}
+              className="mt-1 text-sm text-amber-700"
+            >
+              {comingSoonBody}
+            </p>
+          )}
         </div>
       ) : hasVariants ? (
         <DefaultVariantSelector

@@ -7,9 +7,16 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+
+import { resolveFields } from "..";
+
+type Props = DefaultBlogPostPageTemplateProps & {
+  customFields?: Record<string, string>;
+};
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -38,7 +45,8 @@ function useScrollReveal() {
 export function ElegantBlogPostPage({
   page,
   relatedPosts,
-}: DefaultBlogPostPageTemplateProps) {
+  customFields,
+}: Props) {
   const [shown, setShown] = useState(false);
   const keepReading = useScrollReveal();
   const reducedMotion = useReducedMotion();
@@ -47,6 +55,19 @@ export function ElegantBlogPostPage({
     const t = setTimeout(() => setShown(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  const f = resolveFields(customFields, [
+    "elegant.blog.post-back-text",
+    "elegant.blog.post-keep-reading-label",
+    "elegant.blog.post-keep-reading-heading",
+    "elegant.blog.post-keep-reading-accent",
+    "elegant.blog.post-all-posts-text",
+  ]);
+  const backText = f["elegant.blog.post-back-text"] ?? "";
+  const keepReadingLabel = f["elegant.blog.post-keep-reading-label"] ?? "";
+  const keepReadingHeading = f["elegant.blog.post-keep-reading-heading"] ?? "";
+  const keepReadingAccent = f["elegant.blog.post-keep-reading-accent"] ?? "";
+  const allPostsText = f["elegant.blog.post-all-posts-text"] ?? "";
 
   const others = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
 
@@ -93,7 +114,9 @@ export function ElegantBlogPostPage({
               className="el-blog-back"
             >
               <ArrowLeft aria-hidden={true} style={{ width: 13, height: 13 }} />
-              Back to journal
+              <span {...fieldAttr("elegant.blog.post-back-text")}>
+                {backText}
+              </span>
             </Link>
           </div>
 
@@ -250,8 +273,9 @@ export function ElegantBlogPostPage({
                 transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
               }}
               className="el-btn-ghost"
+              {...fieldAttr("elegant.blog.post-back-text")}
             >
-              Back to journal
+              {backText}
             </Link>
           </div>
         </div>
@@ -281,19 +305,22 @@ export function ElegantBlogPostPage({
                 marginBottom: 40,
               }}
             >
-              <span
-                style={{
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  fontSize: 11,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--el-ink-soft, #6b6659)",
-                  display: "block",
-                  marginBottom: 14,
-                }}
-              >
-                Keep reading
-              </span>
+              {keepReadingLabel && (
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    fontSize: 11,
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "var(--el-ink-soft, #6b6659)",
+                    display: "block",
+                    marginBottom: 14,
+                  }}
+                  {...fieldAttr("elegant.blog.post-keep-reading-label")}
+                >
+                  {keepReadingLabel}
+                </span>
+              )}
               <h2
                 style={{
                   fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
@@ -304,7 +331,16 @@ export function ElegantBlogPostPage({
                   color: "var(--el-ink, #1c1a17)",
                 }}
               >
-                More from the <em style={{ fontStyle: "italic" }}>journal</em>.
+                <span {...fieldAttr("elegant.blog.post-keep-reading-heading")}>
+                  {keepReadingHeading}
+                </span>{" "}
+                <em
+                  style={{ fontStyle: "italic" }}
+                  {...fieldAttr("elegant.blog.post-keep-reading-accent")}
+                >
+                  {keepReadingAccent}
+                </em>
+                .
               </h2>
             </div>
 
@@ -398,7 +434,9 @@ export function ElegantBlogPostPage({
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
               >
-                All posts
+                <span {...fieldAttr("elegant.blog.post-all-posts-text")}>
+                  {allPostsText}
+                </span>
                 <ArrowRight
                   aria-hidden={true}
                   style={{ width: 14, height: 14 }}

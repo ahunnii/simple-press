@@ -1,14 +1,33 @@
 import type { DefaultFaqPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
+import { resolveFields } from "..";
+import { FAQ_PAGE_EMPTY_DEFAULT, FAQ_PAGE_HEADING_DEFAULT } from "./index";
 
 export function DefaultFaqPage({
   business,
   items,
 }: DefaultFaqPageTemplateProps) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "default.faq.page-heading",
+    "default.faq.page-empty",
+  ]);
+  const pageHeading =
+    (f["default.faq.page-heading"] ?? "").trim() || FAQ_PAGE_HEADING_DEFAULT;
+  const pageEmpty =
+    (f["default.faq.page-empty"] ?? "").trim() || FAQ_PAGE_EMPTY_DEFAULT;
+
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+    <main
+      {...sectionGroupAttr("faq", "page")}
+      className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8"
+    >
       <header className="mb-12">
-        <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
-          Frequently Asked Questions
+        <h1
+          {...fieldAttr("default.faq.page-heading")}
+          className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl"
+        >
+          {pageHeading}
         </h1>
         {items.length > 0 && (
           <p className="text-muted-foreground mt-3 text-base">
@@ -18,8 +37,11 @@ export function DefaultFaqPage({
       </header>
 
       {items.length === 0 ? (
-        <p className="text-muted-foreground">
-          No FAQ items available yet. Check back soon.
+        <p
+          {...fieldAttr("default.faq.page-empty")}
+          className="text-muted-foreground"
+        >
+          {pageEmpty}
         </p>
       ) : (
         <dl className="divide-border space-y-0 divide-y rounded-lg border">

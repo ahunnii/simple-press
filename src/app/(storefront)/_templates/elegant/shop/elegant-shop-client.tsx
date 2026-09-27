@@ -6,9 +6,11 @@ import { ArrowUpDown, Search } from "lucide-react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { SortOption } from "~/hooks/use-shop-filters";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useShopFilters } from "~/hooks/use-shop-filters";
 
+import { resolveFields } from "..";
 import { ElegantProductCard } from "../shared/elegant-product-card";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -41,6 +43,24 @@ export function ElegantShopClient({
   const searchParams = useSearchParams();
 
   const allProducts = business.products ?? [];
+
+  const customFields = business.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+  const f = resolveFields(customFields, [
+    "elegant.shop.small-label",
+    "elegant.shop.heading",
+    "elegant.shop.heading-accent",
+    "elegant.shop.empty-heading",
+    "elegant.shop.empty-body",
+    "elegant.shop.no-results-heading",
+  ]);
+  const smallLabel = f["elegant.shop.small-label"] ?? "";
+  const heading = f["elegant.shop.heading"] ?? "";
+  const headingAccent = f["elegant.shop.heading-accent"] ?? "";
+  const emptyHeading = f["elegant.shop.empty-heading"] ?? "";
+  const emptyBody = f["elegant.shop.empty-body"] ?? "";
+  const noResultsHeading = f["elegant.shop.no-results-heading"] ?? "";
 
   const {
     search,
@@ -95,26 +115,32 @@ export function ElegantShopClient({
     <div>
       {/* ── Page hero ── */}
       <section
+        {...sectionGroupAttr("shop", "header")}
         style={{
           padding: "48px 40px 0",
           background: "var(--el-cream, #f5f1ea)",
         }}
       >
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-          <div style={revealStyle(0)}>
-            <span
-              style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-              }}
-            >
-              The shop · {allProducts.length}{" "}
-              {allProducts.length === 1 ? "item" : "items"}
-            </span>
-          </div>
+          {smallLabel && (
+            <div style={revealStyle(0)}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+              >
+                <span {...fieldAttr("elegant.shop.small-label")}>
+                  {smallLabel}
+                </span>{" "}
+                · {allProducts.length}{" "}
+                {allProducts.length === 1 ? "item" : "items"}
+              </span>
+            </div>
+          )}
 
           <h1
             style={{
@@ -139,8 +165,9 @@ export function ElegantShopClient({
                         transition: `transform 1.1s ${easeOut} 0.08s`,
                       }
                 }
+                {...fieldAttr("elegant.shop.heading")}
               >
-                Everything,
+                {heading}
               </span>
             </span>
             <span style={{ display: "block", overflow: "hidden" }}>
@@ -155,8 +182,9 @@ export function ElegantShopClient({
                         transition: `transform 1.1s ${easeOut} 0.2s`,
                       }
                 }
+                {...fieldAttr("elegant.shop.heading-accent")}
               >
-                quietly considered.
+                {headingAccent}
               </em>
             </span>
           </h1>
@@ -337,10 +365,13 @@ export function ElegantShopClient({
                   color: "var(--el-ink, #1c1a17)",
                   marginBottom: 10,
                 }}
+                {...fieldAttr(
+                  allProducts.length === 0
+                    ? "elegant.shop.empty-heading"
+                    : "elegant.shop.no-results-heading",
+                )}
               >
-                {allProducts.length === 0
-                  ? "Nothing here yet."
-                  : "Nothing matches."}
+                {allProducts.length === 0 ? emptyHeading : noResultsHeading}
               </p>
               <p
                 style={{
@@ -349,7 +380,9 @@ export function ElegantShopClient({
                 }}
               >
                 {allProducts.length === 0 ? (
-                  "Products will appear here once added."
+                  <span {...fieldAttr("elegant.shop.empty-body")}>
+                    {emptyBody}
+                  </span>
                 ) : (
                   <>
                     Try a different search, or{" "}

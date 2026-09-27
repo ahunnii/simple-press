@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
@@ -19,8 +20,30 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
+import { resolveFields } from "..";
 import { ElegantProductCard } from "../shared/elegant-product-card";
 import { ElegantProductActions } from "./elegant-product-actions";
+
+/**
+ * Splits a heading into a plain-text lead and an italicized last word, e.g.
+ * "You may also like" -> "You may also " + <em>like</em>. Mirrors the
+ * previous hardcoded "Complete the *ritual*." treatment while letting the
+ * owner author the whole heading as one field.
+ */
+function renderHeadingWithLastWordItalic(heading: string) {
+  const trimmed = heading.trim();
+  if (!trimmed) return null;
+  const lastSpace = trimmed.lastIndexOf(" ");
+  if (lastSpace === -1) {
+    return <em style={{ fontStyle: "italic" }}>{trimmed}</em>;
+  }
+  return (
+    <>
+      {trimmed.slice(0, lastSpace + 1)}
+      <em style={{ fontStyle: "italic" }}>{trimmed.slice(lastSpace + 1)}</em>
+    </>
+  );
+}
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -35,9 +58,32 @@ type TabKey = (typeof TABS)[number]["key"];
 export function ElegantProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const { formatPrice, displayPrice, displayCompareAtPrice, isOnSale } =
     useProduct(product);
+
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
+    "elegant.product.shipping-summary",
+    "elegant.product.returns-summary",
+    "elegant.product.related-label",
+    "elegant.product.related-heading",
+    "elegant.product.related-button",
+    "elegant.product.reviews-label",
+    "elegant.product.reviews-heading",
+    "elegant.product.coming-soon-heading",
+    "elegant.product.coming-soon-body",
+  ]);
+  const shippingSummary = (f["elegant.product.shipping-summary"] ?? "").trim();
+  const returnsSummary = (f["elegant.product.returns-summary"] ?? "").trim();
+  const relatedLabel = f["elegant.product.related-label"] ?? "";
+  const relatedHeading = f["elegant.product.related-heading"] ?? "";
+  const relatedButton = f["elegant.product.related-button"] ?? "";
+  const reviewsLabel = f["elegant.product.reviews-label"] ?? "";
+  const reviewsHeading = f["elegant.product.reviews-heading"] ?? "";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
 
   const [shown, setShown] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -351,64 +397,136 @@ export function ElegantProductPage({
                 </div>
               </div>
 
-              {/* Actions */}
-              <div style={revealStyle(0.3)}>
-                <ElegantProductActions product={product} business={business} />
-              </div>
-
-              {/* Trust line */}
-              <div style={revealStyle(0.38)}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 24,
-                    paddingTop: 20,
-                    borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                    marginBottom: 32,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                      fontSize: 13,
-                      color: "var(--el-ink-soft, #6b6659)",
-                      fontFamily: "var(--font-sans, sans-serif)",
-                    }}
-                  >
-                    <Check
-                      aria-hidden={true}
-                      style={{
-                        width: 13,
-                        height: 13,
-                        color: "var(--el-sage, #4a5240)",
-                      }}
-                    />
-                    Free shipping over $80
-                  </span>
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                      fontSize: 13,
-                      color: "var(--el-ink-soft, #6b6659)",
-                      fontFamily: "var(--font-sans, sans-serif)",
-                    }}
-                  >
-                    <Check
-                      aria-hidden={true}
-                      style={{
-                        width: 13,
-                        height: 13,
-                        color: "var(--el-sage, #4a5240)",
-                      }}
-                    />
-                    Easy returns
-                  </span>
+              {/* Buy panel — everything the "Product page" editor section
+                  controls sits inside this wrapper so its hotspot covers it. */}
+              <div {...sectionGroupAttr("product", "details")}>
+                {/* Actions */}
+                <div style={revealStyle(0.3)}>
+                  <ElegantProductActions
+                    product={product}
+                    business={business}
+                    comingSoonHeading={
+                      f["elegant.product.coming-soon-heading"] ?? ""
+                    }
+                    comingSoonBody={f["elegant.product.coming-soon-body"] ?? ""}
+                  />
                 </div>
+
+                {/* Shipping / returns — each line only when its note is set */}
+                {shippingSummary || returnsSummary ? (
+                  <div style={revealStyle(0.38)}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 14,
+                        paddingTop: 20,
+                        borderTop:
+                          "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                        marginBottom: 32,
+                      }}
+                    >
+                      {shippingSummary ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 8,
+                          }}
+                        >
+                          <Check
+                            aria-hidden={true}
+                            style={{
+                              width: 13,
+                              height: 13,
+                              marginTop: 2,
+                              flexShrink: 0,
+                              color: "var(--el-sage, #4a5240)",
+                            }}
+                          />
+                          <p
+                            style={{
+                              fontSize: 13,
+                              color: "var(--el-ink-soft, #6b6659)",
+                              fontFamily: "var(--font-sans, sans-serif)",
+                              whiteSpace: "pre-line",
+                              margin: 0,
+                            }}
+                          >
+                            <span
+                              {...fieldAttr("elegant.product.shipping-summary")}
+                            >
+                              {shippingSummary}
+                            </span>
+                            {hasShippingPolicy ? (
+                              <>
+                                {" "}
+                                <Link
+                                  href="/shipping-policy"
+                                  style={{
+                                    color: "var(--el-ink, #1c1a17)",
+                                    textDecoration: "underline",
+                                  }}
+                                >
+                                  Shipping policy
+                                </Link>
+                              </>
+                            ) : null}
+                          </p>
+                        </div>
+                      ) : null}
+                      {returnsSummary ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 8,
+                          }}
+                        >
+                          <Check
+                            aria-hidden={true}
+                            style={{
+                              width: 13,
+                              height: 13,
+                              marginTop: 2,
+                              flexShrink: 0,
+                              color: "var(--el-sage, #4a5240)",
+                            }}
+                          />
+                          <p
+                            style={{
+                              fontSize: 13,
+                              color: "var(--el-ink-soft, #6b6659)",
+                              fontFamily: "var(--font-sans, sans-serif)",
+                              whiteSpace: "pre-line",
+                              margin: 0,
+                            }}
+                          >
+                            <span
+                              {...fieldAttr("elegant.product.returns-summary")}
+                            >
+                              {returnsSummary}
+                            </span>
+                            {hasRefundPolicy ? (
+                              <>
+                                {" "}
+                                <Link
+                                  href="/refund-policy"
+                                  style={{
+                                    color: "var(--el-ink, #1c1a17)",
+                                    textDecoration: "underline",
+                                  }}
+                                >
+                                  Returns policy
+                                </Link>
+                              </>
+                            ) : null}
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               {/* Product features */}
@@ -563,6 +681,7 @@ export function ElegantProductPage({
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
             <div style={{ marginBottom: 48 }}>
               <span
+                {...fieldAttr("elegant.product.reviews-label")}
                 style={{
                   fontFamily: "var(--font-mono, ui-monospace)",
                   fontSize: 11,
@@ -573,9 +692,10 @@ export function ElegantProductPage({
                   marginBottom: 14,
                 }}
               >
-                Reviews
+                {reviewsLabel}
               </span>
               <h2
+                {...fieldAttr("elegant.product.reviews-heading")}
                 style={{
                   fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                   fontWeight: 400,
@@ -585,7 +705,7 @@ export function ElegantProductPage({
                   color: "var(--el-ink, #1c1a17)",
                 }}
               >
-                What customers are saying
+                {reviewsHeading}
               </h2>
             </div>
             <ProductReviews
@@ -615,6 +735,7 @@ export function ElegantProductPage({
             {/* Section header */}
             <div style={{ marginBottom: 48 }}>
               <span
+                {...fieldAttr("elegant.product.related-label")}
                 style={{
                   fontFamily: "var(--font-mono, ui-monospace)",
                   fontSize: 11,
@@ -625,9 +746,10 @@ export function ElegantProductPage({
                   marginBottom: 14,
                 }}
               >
-                Pairs well with
+                {relatedLabel}
               </span>
               <h2
+                {...fieldAttr("elegant.product.related-heading")}
                 style={{
                   fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                   fontWeight: 400,
@@ -637,7 +759,7 @@ export function ElegantProductPage({
                   color: "var(--el-ink, #1c1a17)",
                 }}
               >
-                Complete the <em style={{ fontStyle: "italic" }}>ritual</em>.
+                {renderHeadingWithLastWordItalic(relatedHeading)}
               </h2>
             </div>
 
@@ -674,7 +796,9 @@ export function ElegantProductPage({
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
               >
-                View all products
+                <span {...fieldAttr("elegant.product.related-button")}>
+                  {relatedButton}
+                </span>
                 <ArrowRight
                   aria-hidden={true}
                   style={{ width: 14, height: 14 }}

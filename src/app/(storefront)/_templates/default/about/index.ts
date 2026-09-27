@@ -3,8 +3,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const aboutHeroData: TemplateField[] = [
   {
     key: "default.about.eyebrow",
-    label: "Page Eyebrow",
-    description: "Small label above the page heading",
+    label: "Small label",
+    description:
+      "Short text above the page heading on the About page. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -13,8 +14,8 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "default.about.heading",
-    label: "Page Heading",
-    description: "Main heading for the About page",
+    label: "Heading",
+    description: "Main heading at the top of the About page.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -24,19 +25,19 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "default.about.hero-tagline",
-    label: "Hero Tagline",
-    description: "Short line below the heading",
+    label: "Intro text",
+    description: "Short line below the heading. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
     defaultValue: "A little shop, run by me, from a home studio.",
-    placeholder: "A little shop, run by me, from a home studio.",
+    placeholder: "One short sentence",
   },
   {
     key: "default.about.hero-image",
-    label: "Hero Image",
-    description: "Wide studio or workspace photo shown below the heading",
+    label: "Photo",
+    description: "Wide studio or workspace photo shown below the heading.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -48,8 +49,8 @@ const aboutHeroData: TemplateField[] = [
 const aboutBioData: TemplateField[] = [
   {
     key: "default.about.portrait-image",
-    label: "Portrait Image",
-    description: "Photo of yourself or your workspace",
+    label: "Portrait",
+    description: "Photo of yourself or your workspace, beside the bio text.",
     type: "image",
     page: "about",
     group: "about.bio",
@@ -58,8 +59,8 @@ const aboutBioData: TemplateField[] = [
   },
   {
     key: "default.about.bio-eyebrow",
-    label: "Bio Eyebrow",
-    description: "Small label above the bio heading",
+    label: "Small label",
+    description: "Short text above the bio heading. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.bio",
@@ -68,8 +69,8 @@ const aboutBioData: TemplateField[] = [
   },
   {
     key: "default.about.bio-heading",
-    label: "Bio Heading",
-    description: "Heading for the maker bio section",
+    label: "Heading",
+    description: "Heading above the bio text.",
     type: "text",
     page: "about",
     group: "about.bio",
@@ -79,8 +80,9 @@ const aboutBioData: TemplateField[] = [
   },
   {
     key: "default.about.story-body",
-    label: "Story (rich text)",
-    description: "Main body copy — supports formatting. Used when set.",
+    label: "Story",
+    description:
+      "Main bio copy, with formatting. Used instead of the plain paragraphs below when set.",
     type: "richtext",
     page: "about",
     group: "about.bio",
@@ -88,8 +90,8 @@ const aboutBioData: TemplateField[] = [
   },
   {
     key: "default.about.paragraph-1",
-    label: "Bio Paragraph 1",
-    description: "First paragraph (used when rich text is empty)",
+    label: "First paragraph",
+    description: "First paragraph of the bio, used when Story above is empty.",
     type: "textarea",
     page: "about",
     group: "about.bio",
@@ -100,8 +102,8 @@ const aboutBioData: TemplateField[] = [
   },
   {
     key: "default.about.paragraph-2",
-    label: "Bio Paragraph 2",
-    description: "Second paragraph",
+    label: "Second paragraph",
+    description: "Second paragraph of the bio.",
     type: "textarea",
     page: "about",
     group: "about.bio",
@@ -112,8 +114,8 @@ const aboutBioData: TemplateField[] = [
   },
   {
     key: "default.about.paragraph-3",
-    label: "Bio Paragraph 3",
-    description: "Third paragraph (optional)",
+    label: "Third paragraph",
+    description: "Optional third paragraph of the bio. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.bio",
@@ -124,7 +126,7 @@ const aboutBioData: TemplateField[] = [
   {
     key: "default.about.signature",
     label: "Signature",
-    description: "Signed name shown below the bio",
+    description: "Signed name shown below the bio. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.bio",
@@ -135,9 +137,32 @@ const aboutBioData: TemplateField[] = [
 
 const aboutPillarsData: TemplateField[] = [
   {
+    key: "default.about.pillars-eyebrow",
+    label: "Small label",
+    description:
+      "Short text above the values heading, shown above the three value cards.",
+    type: "text",
+    page: "about",
+    group: "about.pillars",
+    defaultValue: "What I care about",
+    placeholder: "What I care about",
+  },
+  {
+    key: "default.about.pillars-heading",
+    label: "Heading",
+    description: "Heading above the three value cards.",
+    type: "text",
+    page: "about",
+    group: "about.pillars",
+    gridColumn: "col-span-full",
+    defaultValue: "Three things, in order.",
+    placeholder: "Three things, in order.",
+  },
+  {
     key: "default.about.pull-quote",
-    label: "Pull Quote",
-    description: "A short, meaningful sentence displayed in large type",
+    label: "Pull quote",
+    description:
+      "A short, meaningful sentence shown in large type above the value cards. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.pillars",
@@ -148,8 +173,8 @@ const aboutPillarsData: TemplateField[] = [
   },
   {
     key: "default.about.pillar-1-title",
-    label: "Pillar 1 — Title",
-    description: "First value / pillar heading",
+    label: "First value heading",
+    description: "Heading for the first value card.",
     type: "text",
     page: "about",
     group: "about.pillars",
@@ -159,8 +184,8 @@ const aboutPillarsData: TemplateField[] = [
   },
   {
     key: "default.about.pillar-1-desc",
-    label: "Pillar 1 — Description",
-    description: "Short supporting sentence for the first pillar",
+    label: "First value description",
+    description: "Short supporting line for the first value card.",
     type: "text",
     page: "about",
     group: "about.pillars",
@@ -170,8 +195,8 @@ const aboutPillarsData: TemplateField[] = [
   },
   {
     key: "default.about.pillar-2-title",
-    label: "Pillar 2 — Title",
-    description: "Second value / pillar heading",
+    label: "Second value heading",
+    description: "Heading for the second value card.",
     type: "text",
     page: "about",
     group: "about.pillars",
@@ -181,8 +206,8 @@ const aboutPillarsData: TemplateField[] = [
   },
   {
     key: "default.about.pillar-2-desc",
-    label: "Pillar 2 — Description",
-    description: "Short supporting sentence for the second pillar",
+    label: "Second value description",
+    description: "Short supporting line for the second value card.",
     type: "text",
     page: "about",
     group: "about.pillars",
@@ -192,8 +217,8 @@ const aboutPillarsData: TemplateField[] = [
   },
   {
     key: "default.about.pillar-3-title",
-    label: "Pillar 3 — Title",
-    description: "Third value / pillar heading",
+    label: "Third value heading",
+    description: "Heading for the third value card.",
     type: "text",
     page: "about",
     group: "about.pillars",
@@ -203,8 +228,8 @@ const aboutPillarsData: TemplateField[] = [
   },
   {
     key: "default.about.pillar-3-desc",
-    label: "Pillar 3 — Description",
-    description: "Short supporting sentence for the third pillar",
+    label: "Third value description",
+    description: "Short supporting line for the third value card.",
     type: "text",
     page: "about",
     group: "about.pillars",
@@ -217,8 +242,9 @@ const aboutPillarsData: TemplateField[] = [
 const aboutCtaData: TemplateField[] = [
   {
     key: "default.about.cta-eyebrow",
-    label: "CTA Eyebrow",
-    description: "Small label above the CTA heading",
+    label: "Small label",
+    description:
+      "Short text above the heading in the bottom call-to-action strip. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -227,8 +253,8 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "default.about.cta-heading",
-    label: "CTA Heading",
-    description: "Heading for the bottom call-to-action strip",
+    label: "Heading",
+    description: "Heading for the bottom call-to-action strip.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -238,8 +264,8 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "default.about.cta-button-text",
-    label: "CTA Button Text",
-    description: "Label for the CTA button",
+    label: "Button text",
+    description: "Label on the bottom call-to-action button.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -248,8 +274,8 @@ const aboutCtaData: TemplateField[] = [
   },
   {
     key: "default.about.cta-button-link",
-    label: "CTA Button Link",
-    description: "Where the CTA button points",
+    label: "Button link",
+    description: "Where the bottom button goes, e.g. /contact.",
     type: "url",
     page: "about",
     group: "about.cta",
@@ -268,29 +294,29 @@ export const defaultAboutData: TemplateField[] = [
 export const defaultAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "About — Hero",
-    description: "Page heading, tagline, and wide hero image",
+    title: "Hero",
+    description: "Page heading, intro text, and wide photo.",
     icon: "📖",
     columns: 2,
   },
   {
     id: "about.bio",
-    title: "About — Bio",
-    description: "Maker portrait, bio text, and signature",
+    title: "Bio",
+    description: "Portrait, bio text, and signature.",
     icon: "🙋",
     columns: 1,
   },
   {
     id: "about.pillars",
-    title: "About — Values",
-    description: "Pull quote and three value pillars",
+    title: "Values",
+    description: "Pull quote and three value cards.",
     icon: "✦",
     columns: 2,
   },
   {
     id: "about.cta",
-    title: "About — CTA",
-    description: "Bottom call-to-action strip",
+    title: "Closing banner",
+    description: "Bottom banner inviting visitors to get in touch.",
     icon: "💌",
     columns: 2,
   },

@@ -27,6 +27,15 @@ type DefaultProductRailProps = {
    * Pattern: {...sectionGroupAttr("homepage", "rails")}
    */
   sectionAttrs?: Record<string, string>;
+  /**
+   * Optional `fieldAttr(...)` passthrough for the eyebrow/title/CTA text,
+   * spread on the element(s) whose entire text content is that field's
+   * resolved value. Omitted by the caller when the text isn't field-backed
+   * (e.g. a collection's own name/description).
+   */
+  eyebrowAttrs?: Record<string, string>;
+  titleAttrs?: Record<string, string>;
+  ctaTextAttrs?: Record<string, string>;
 };
 
 export function DefaultProductRail({
@@ -38,6 +47,9 @@ export function DefaultProductRail({
   products,
   limit = 4,
   sectionAttrs,
+  eyebrowAttrs,
+  titleAttrs,
+  ctaTextAttrs,
 }: DefaultProductRailProps) {
   const shown = products.slice(0, limit);
   if (shown.length === 0) return null;
@@ -48,11 +60,17 @@ export function DefaultProductRail({
         <FadeIn className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-2">
             {eyebrow && (
-              <p className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+              <p
+                className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                {...eyebrowAttrs}
+              >
                 {eyebrow}
               </p>
             )}
-            <h2 className="text-foreground font-serif text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2
+              className="text-foreground font-serif text-3xl font-semibold tracking-tight md:text-4xl"
+              {...titleAttrs}
+            >
               {title}
             </h2>
             {description && (
@@ -65,7 +83,8 @@ export function DefaultProductRail({
             href={ctaHref}
             className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
           >
-            {ctaText} <span aria-hidden="true">→</span>
+            <span {...ctaTextAttrs}>{ctaText}</span>{" "}
+            <span aria-hidden="true">→</span>
           </Link>
         </FadeIn>
 

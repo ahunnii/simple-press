@@ -15,7 +15,35 @@ import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-export function DefaultContactForm() {
+import {
+  DEFAULT_CONTACT_FORM_SUBMIT_LABEL,
+  DEFAULT_CONTACT_FORM_SUCCESS_BODY,
+  DEFAULT_CONTACT_FORM_SUCCESS_BUTTON,
+  DEFAULT_CONTACT_FORM_SUCCESS_HEADING,
+} from ".";
+
+type DefaultContactFormProps = {
+  /**
+   * Resolved field strings, passed down from the server-rendered page (never
+   * functions — this is a client component). Each falls back to the
+   * template's built-in constant so the form renders identically before the
+   * "contact.form" field group is wired into the root field map.
+   */
+  successHeading?: string;
+  successBody?: string;
+  successButtonText?: string;
+  submitLabel?: string;
+  /** `fieldAttr("default.contact.form-submit-label")` passthrough. */
+  submitLabelAttrs?: Record<string, string>;
+};
+
+export function DefaultContactForm({
+  successHeading = DEFAULT_CONTACT_FORM_SUCCESS_HEADING,
+  successBody = DEFAULT_CONTACT_FORM_SUCCESS_BODY,
+  successButtonText = DEFAULT_CONTACT_FORM_SUCCESS_BUTTON,
+  submitLabel = DEFAULT_CONTACT_FORM_SUBMIT_LABEL,
+  submitLabelAttrs,
+}: DefaultContactFormProps) {
   const {
     form,
     messageLength,
@@ -52,12 +80,12 @@ export function DefaultContactForm() {
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
           <AlertDescription className="text-green-800">
-            <strong>Message sent successfully!</strong>
+            <strong>{successHeading}</strong>
             <br />
-            We&apos;ve received your message and will get back to you soon.
+            {successBody}
           </AlertDescription>
           <Button variant="outline" onClick={resetSuccess} className="mt-4">
-            Send Another Message
+            {successButtonText}
           </Button>
         </Alert>
       </div>
@@ -144,7 +172,7 @@ export function DefaultContactForm() {
           ) : (
             <>
               <Send className="mr-2 h-5 w-5" aria-hidden="true" />
-              Send Message
+              <span {...submitLabelAttrs}>{submitLabel}</span>
             </>
           )}
         </Button>

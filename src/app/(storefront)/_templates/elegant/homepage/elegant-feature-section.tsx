@@ -6,7 +6,11 @@ import Link from "next/link";
 import { ArrowRight, Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -22,6 +26,8 @@ type Props = {
   aboutVideo?: string;
   aboutImage?: string;
   aboutTagline?: string;
+  aboutButtonText?: string;
+  aboutButtonLink?: string;
   /** Spread on root <section> for preview overlay hotspot (homepage.about). */
   sectionAttrs?: Record<string, string>;
   /** Whether the owner has hidden the nested feature-card grid (homepage.features). Defaults to visible. */
@@ -59,6 +65,8 @@ export function ElegantFeatureSection({
   aboutTagline,
   aboutVideo,
   aboutImage,
+  aboutButtonText,
+  aboutButtonLink,
   sectionAttrs,
   featuresVisible = true,
 }: Props) {
@@ -89,6 +97,7 @@ export function ElegantFeatureSection({
 
   const hasVideo = !!aboutVideo?.trim();
   const hasImage = !!aboutImage?.trim() && aboutImage !== "/placeholder.svg";
+  const hasButton = !!aboutButtonText?.trim();
 
   const featureCards = parseTemplateIconListRows(
     getListFieldValue(
@@ -217,7 +226,7 @@ export function ElegantFeatureSection({
                 }}
                 {...fieldAttr("elegant.homepage.about.tagline")}
               >
-                {aboutTagline ?? "About Us"}
+                {aboutTagline}
               </span>
             </div>
 
@@ -234,7 +243,7 @@ export function ElegantFeatureSection({
                 }}
                 {...fieldAttr("elegant.homepage.about.title")}
               >
-                {aboutTitle ?? "About Us"}
+                {aboutTitle}
               </h2>
             </div>
 
@@ -266,9 +275,10 @@ export function ElegantFeatureSection({
                   marginBottom: 32,
                 }}
               >
-                {featureCards.map((feature) => (
+                {featureCards.map((feature, i) => (
                   <div
-                    key={feature.title}
+                    key={i}
+                    {...listItemAttr("elegant.homepage.about-features-list", i)}
                     style={{
                       background: "var(--el-cream, #f5f1ea)",
                       borderRadius: 8,
@@ -322,35 +332,39 @@ export function ElegantFeatureSection({
               </div>
             )}
 
-            <div style={revealStyle(0.42)}>
-              <Link
-                href="/about"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "14px 26px",
-                  borderRadius: 999,
-                  fontSize: 13,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  background: "transparent",
-                  color: "var(--el-ink, #1c1a17)",
-                  border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                  textDecoration: "none",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
-                }}
-                className="el-btn-ghost"
-              >
-                Read our story
-                <ArrowRight
-                  aria-hidden={true}
-                  style={{ width: 14, height: 14 }}
-                />
-              </Link>
-            </div>
+            {hasButton && (
+              <div style={revealStyle(0.42)}>
+                <Link
+                  href={aboutButtonLink ?? "/about"}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "14px 26px",
+                    borderRadius: 999,
+                    fontSize: 13,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    fontWeight: 500,
+                    background: "transparent",
+                    color: "var(--el-ink, #1c1a17)",
+                    border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                    textDecoration: "none",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
+                  }}
+                  className="el-btn-ghost"
+                >
+                  <span {...fieldAttr("elegant.homepage.about.button-text")}>
+                    {aboutButtonText}
+                  </span>
+                  <ArrowRight
+                    aria-hidden={true}
+                    style={{ width: 14, height: 14 }}
+                  />
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -543,6 +543,38 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "dark-trend.about.feature-4-header",
   "dark-trend.about.feature-4-description",
   "dark-trend.second-section-image",
+  // elegant, retired 2026-09-27 — contact email/phone/address come from
+  // Settings (Business); saved overrides are read as a silent fallback in
+  // `_templates/elegant/contact/elegant-contact-page.tsx`. The tagline, the
+  // homepage feature-1..4 cards, and the contact info heading were declared
+  // but never rendered; `hero-use-video` was an orphan saved value.
+  "elegant.contact.email",
+  "elegant.contact.phone",
+  "elegant.contact.address",
+  "elegant.contact.info-title",
+  "elegant.tagline",
+  "elegant.homepage.feature-1-title",
+  "elegant.homepage.feature-1-description",
+  "elegant.homepage.feature-2-title",
+  "elegant.homepage.feature-2-description",
+  "elegant.homepage.feature-3-title",
+  "elegant.homepage.feature-3-description",
+  "elegant.homepage.feature-4-title",
+  "elegant.homepage.feature-4-description",
+  "elegant.homepage.hero-use-video",
+  // modern, retired 2026-09-27 — orphan saved keys with no declaration and
+  // no runtime reader; the announcement bar now comes from the platform
+  // banner and FAQ visibility from the contact.questions hide toggle.
+  // Hidden from the admin's custom pairs and preserved on save.
+  "modern.banner.text",
+  "modern.contact.faq-enabled",
+  // default, retired 2026-09-27 — the homepage testimonial now comes from
+  // Admin → Testimonials; a quote/author saved before then is still read as
+  // a silent fallback in `_templates/default/homepage/default-homepage.tsx`.
+  // `image-overlay-color` was declared but never read by the auth shell.
+  "default.homepage.testimonial-quote",
+  "default.homepage.testimonial-author",
+  "default.global.image-overlay-color",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

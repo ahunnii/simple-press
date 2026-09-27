@@ -1,7 +1,10 @@
 import { Cormorant_Garamond, JetBrains_Mono, Manrope } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveBanner } from "~/lib/site-banner/resolve";
 
+import { ElegantAnnouncementBar } from "./elegant-announcement-bar";
 import { ElegantFooter } from "./elegant-footer";
 import { ElegantHeader } from "./elegant-header";
 
@@ -24,10 +27,15 @@ const fontMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
-export function ElegantLayout({
+export async function ElegantLayout({
   business,
   children,
 }: DefaultLayoutTemplateProps) {
+  // Platform-wide site banner — owner-configured in the admin, gated by the
+  // `banners` feature flag. Same source every other template reads.
+  const { isEnabled } = await getBusinessFlags();
+  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+
   return (
     <div
       className={`${fontSerif.variable} ${fontSans.variable} ${fontMono.variable} elegant min-h-screen`}
@@ -48,6 +56,7 @@ export function ElegantLayout({
       >
         Skip to main content
       </a>
+      {banner ? <ElegantAnnouncementBar banner={banner} /> : null}
       <ElegantHeader business={business} />
       {/* Wrapper adds nav clearance without creating a new scroll context */}
       <main id="main-content" style={{ paddingTop: 100 }}>

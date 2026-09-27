@@ -3,8 +3,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const testimonialsData: TemplateField[] = [
   {
     key: "modern.testimonials.tagline",
-    label: "Tagline",
-    description: "Tagline for the testimonials section",
+    label: "Small label",
+    description:
+      "Short label above the heading at the top of the Testimonials page. Leave blank to hide.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -14,8 +15,8 @@ const testimonialsData: TemplateField[] = [
   },
   {
     key: "modern.testimonials.header",
-    label: "Header",
-    description: "Header for the testimonials section",
+    label: "Heading",
+    description: "Main heading at the top of the Testimonials page.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -25,22 +26,23 @@ const testimonialsData: TemplateField[] = [
   },
   {
     key: "modern.testimonials.description",
-    label: "Description",
-    description: "Description for the testimonials section",
+    label: "Intro text",
+    description: "Short paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.page",
     gridColumn: "col-span-full",
     defaultValue: "What our customers have to say",
-    placeholder: "e.g. What our customers have to say",
+    placeholder: "A short line introducing the testimonials below.",
   },
 ];
 
 const testimonialsCallToActionData: TemplateField[] = [
   {
     key: "modern.testimonials.call-to-action.header",
-    label: "Header",
-    description: "Header for the call to action section",
+    label: "Heading",
+    description:
+      "Heading on the band inviting customers to leave a testimonial.",
     type: "text",
     page: "testimonials",
     group: "testimonials.call-to-action",
@@ -50,25 +52,36 @@ const testimonialsCallToActionData: TemplateField[] = [
   },
   {
     key: "modern.testimonials.call-to-action.text",
-    label: "Text",
-    description: "Text for the call to action section",
+    label: "Intro text",
+    description: "Short text on the band, below the heading.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.call-to-action",
     gridColumn: "col-span-full",
     defaultValue: "Loved shopping with us? We'd love to hear from you.",
-    placeholder: "e.g. Loved shopping with us? We'd love to hear from you.",
+    placeholder: "A line inviting happy customers to share feedback.",
   },
   {
     key: "modern.testimonials.call-to-action.button-text",
-    label: "Button Text",
-    description: "Text for the call to action button",
+    label: "Button text",
+    description: "Label on the button linking to the testimonial form.",
     type: "text",
     page: "testimonials",
     group: "testimonials.call-to-action",
     gridColumn: "col-span-full",
     defaultValue: "Write a testimonial",
     placeholder: "e.g. Write a testimonial",
+  },
+  {
+    key: "modern.testimonials.call-to-action.button-link",
+    label: "Button link",
+    description: "Where the button goes, e.g. /testimonials/submit.",
+    type: "url",
+    page: "testimonials",
+    group: "testimonials.call-to-action",
+    gridColumn: "col-span-full",
+    defaultValue: "/testimonials/submit",
+    placeholder: "/testimonials/submit",
   },
 ];
 
@@ -80,15 +93,15 @@ export const modernTestimonialsData = [
 export const modernTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.page",
-    title: "Testimonials Page",
-    description: "Heading and subheading for the testimonials page",
-    icon: "💬",
+    title: "Intro",
+    description: "Small label, heading, and intro above the testimonial cards.",
+    icon: "⭐",
     columns: 2,
   },
   {
     id: "testimonials.call-to-action",
-    title: "Call to Action",
-    description: "Call to action for the testimonials page",
+    title: "Share your experience",
+    description: "Band inviting customers to leave a testimonial.",
     icon: "💬",
     columns: 2,
   },

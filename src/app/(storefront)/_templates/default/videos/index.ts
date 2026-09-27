@@ -3,8 +3,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const videosHeroData: TemplateField[] = [
   {
     key: "default.videos.hero-eyebrow",
-    label: "Hero Eyebrow",
-    description: "Small label above the page heading",
+    label: "Small label",
+    description:
+      "Short text above the page heading on the Videos page. Leave blank to hide.",
     type: "text",
     page: "videos",
     group: "videos.hero",
@@ -13,8 +14,8 @@ const videosHeroData: TemplateField[] = [
   },
   {
     key: "default.videos.hero-heading",
-    label: "Hero Heading",
-    description: "Main heading for the Videos page",
+    label: "Heading",
+    description: "Main heading at the top of the Videos page.",
     type: "text",
     page: "videos",
     group: "videos.hero",
@@ -24,8 +25,8 @@ const videosHeroData: TemplateField[] = [
   },
   {
     key: "default.videos.hero-tagline",
-    label: "Hero Tagline",
-    description: "Short line below the heading",
+    label: "Intro text",
+    description: "Short line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "videos",
     group: "videos.hero",
@@ -38,8 +39,8 @@ const videosHeroData: TemplateField[] = [
 const videosListData: TemplateField[] = [
   {
     key: "default.videos.list-empty-heading",
-    label: "Empty Heading",
-    description: "Heading shown when there are no published videos",
+    label: "Empty state heading",
+    description: "Heading shown on the Videos page when there are no published videos.",
     type: "text",
     page: "videos",
     group: "videos.list",
@@ -48,14 +49,15 @@ const videosListData: TemplateField[] = [
   },
   {
     key: "default.videos.list-empty-body",
-    label: "Empty Body",
-    description: "Supporting copy shown below the empty-state heading",
+    label: "Empty state message",
+    description:
+      "Line below the empty-state heading when there are no published videos. Leave blank to hide.",
     type: "textarea",
     page: "videos",
     group: "videos.list",
     gridColumn: "col-span-full",
     defaultValue: "Check back soon — new videos are posted here.",
-    placeholder: "Check back soon — new videos are posted here.",
+    placeholder: "One short sentence",
   },
 ];
 
@@ -67,15 +69,15 @@ export const defaultVideosData: TemplateField[] = [
 export const defaultVideosFieldGroups: TemplateFieldGroup[] = [
   {
     id: "videos.hero",
-    title: "Videos — Hero",
-    description: "Page heading and tagline",
+    title: "Hero",
+    description: "Page heading and intro text.",
     icon: "📺",
     columns: 2,
   },
   {
     id: "videos.list",
-    title: "Videos — List",
-    description: "Empty-state copy",
+    title: "List",
+    description: "Empty-state copy.",
     icon: "🎬",
     columns: 2,
   },

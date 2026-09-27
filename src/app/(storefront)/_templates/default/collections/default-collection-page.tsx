@@ -3,10 +3,17 @@ import Link from "next/link";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { resolveFields } from "..";
 import { DefaultProductCard } from "../shared/default-product-card";
+import {
+  COLLECTIONS_DETAIL_EMPTY_DEFAULT,
+  COLLECTIONS_DETAIL_MORE_HEADING_DEFAULT,
+} from "./index";
 
 export function DefaultCollectionPage({
+  business,
   collection,
   additionalCollections,
 }: DefaultCollectionPageTemplateProps) {
@@ -17,6 +24,17 @@ export function DefaultCollectionPage({
   const others = (additionalCollections ?? [])
     .filter((c) => c.slug !== collection.slug)
     .slice(0, 3);
+
+  const f = resolveFields(business.siteContent?.customFields, [
+    "default.collections.detail-empty",
+    "default.collections.detail-more-heading",
+  ]);
+  const detailEmpty =
+    (f["default.collections.detail-empty"] ?? "").trim() ||
+    COLLECTIONS_DETAIL_EMPTY_DEFAULT;
+  const detailMoreHeading =
+    (f["default.collections.detail-more-heading"] ?? "").trim() ||
+    COLLECTIONS_DETAIL_MORE_HEADING_DEFAULT;
 
   return (
     <div>
@@ -72,12 +90,18 @@ export function DefaultCollectionPage({
       </section>
 
       {/* Products */}
-      <section className="px-6 py-16 lg:px-8">
+      <section
+        {...sectionGroupAttr("collections", "detail")}
+        className="px-6 py-16 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           {products.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="text-[#6b6b6b]">
-                No products in this collection yet.
+              <p
+                {...fieldAttr("default.collections.detail-empty")}
+                className="text-[#6b6b6b]"
+              >
+                {detailEmpty}
               </p>
               <Link
                 href="/shop"
@@ -106,11 +130,17 @@ export function DefaultCollectionPage({
 
       {/* More collections */}
       {others.length > 0 && (
-        <section className="border-t border-[#e8e8e8] bg-[#f6f6f6] px-6 py-16 lg:px-8">
+        <section
+          {...sectionGroupAttr("collections", "detail")}
+          className="border-t border-[#e8e8e8] bg-[#f6f6f6] px-6 py-16 lg:px-8"
+        >
           <div className="mx-auto max-w-[1440px]">
             <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <h2 className="font-serif text-2xl font-medium tracking-tight">
-                More collections
+              <h2
+                {...fieldAttr("default.collections.detail-more-heading")}
+                className="font-serif text-2xl font-medium tracking-tight"
+              >
+                {detailMoreHeading}
               </h2>
               <Link
                 href="/collections"

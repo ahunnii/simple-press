@@ -4,13 +4,34 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import { defaultAboutData, defaultAboutFieldGroups } from "./about";
 import { defaultBlogData, defaultBlogFieldGroups } from "./blog";
 import {
+  defaultCartData,
+  defaultCartFieldGroups,
+} from "./cart-checkout/cart-fields";
+import {
+  defaultOrderData,
+  defaultOrderFieldGroups,
+} from "./cart-checkout/order-fields";
+import {
+  defaultCheckoutUnavailableData,
+  defaultCheckoutUnavailableFieldGroups,
+} from "./cart-checkout/unavailable-fields";
+import {
   defaultCollectionsData,
   defaultCollectionsFieldGroups,
 } from "./collections";
 import { defaultContactData, defaultContactFieldGroups } from "./contact";
 import { defaultDonateData, defaultDonateFieldGroups } from "./donate";
 import { defaultEventsData, defaultEventsFieldGroups } from "./events";
+import { defaultFaqData, defaultFaqFieldGroups } from "./faq";
 import { defaultHomepageData, defaultHomepageFieldGroups } from "./homepage";
+import {
+  defaultFooterData,
+  defaultFooterFieldGroups,
+} from "./layout/footer-fields";
+import {
+  defaultProductData,
+  defaultProductFieldGroups,
+} from "./products";
 import { defaultServicesData, defaultServicesFieldGroups } from "./services";
 import { defaultShopData, defaultShopFieldGroups } from "./shop";
 import {
@@ -24,8 +45,9 @@ export { defaultTemplateSections } from "./sections";
 const globalAuthenticationData: TemplateField[] = [
   {
     key: "default.global.authentication-image",
-    label: "Authentication Image",
-    description: "Image shown in the authentication section",
+    label: "Sign-in background image",
+    description:
+      "Image shown behind the sign-in and sign-up panel on wide screens. Leave blank to hide that side panel.",
     type: "image",
     page: "global",
     group: "global.authentication",
@@ -35,101 +57,33 @@ const globalAuthenticationData: TemplateField[] = [
 
   {
     key: "default.global.logo-size-width",
-    label: "Logo Size Width",
-    description: "Size of the logo in the authentication section",
+    label: "Logo width (px)",
+    description: "Width of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
     placeholder: "80",
+    min: 20,
+    max: 400,
+    step: 1,
+    unit: "px",
   },
   {
     key: "default.global.logo-size-height",
-    label: "Logo Size Height",
-    description: "Size of the logo in the authentication section",
+    label: "Logo height (px)",
+    description: "Height of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
     placeholder: "80",
-  },
-
-  {
-    key: "default.global.image-overlay-color",
-    label: "Image Overlay Color",
-    description: "Color of the image overlay in the authentication section",
-    type: "color",
-    page: "global",
-    group: "global.authentication",
-    gridColumn: "col-span-1",
-    defaultValue: "#000000",
-    placeholder: "#000000",
-  },
-];
-
-/**
- * Product-page defaults, applied to every product. These fields moved from
- * page `"global"` to page `"product"` so the visual editor can preview them on
- * a real product page — their KEYS intentionally keep the legacy
- * `default.global.product-*` prefix, because `customFields` values are keyed
- * purely by field key and renaming would orphan every owner-saved value.
- */
-const productDetailsData: TemplateField[] = [
-  {
-    key: "default.global.product-shipping-description",
-    label: "Product Shipping Description",
-    description: "Description of the product shipping",
-    type: "textarea",
-    page: "product",
-    group: "product.details",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Ships within 1-2 business days. US orders over $75 ship free. International rates calculated at checkout. 30-day returns, no questions asked.",
-  },
-
-  {
-    key: "default.global.product-question-description",
-    label: "Product Question Description",
-    description: "Description of the product question",
-    type: "textarea",
-    page: "product",
-    group: "product.details",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "We answer most questions within a day. Contact us and we'll get back to you.",
-  },
-  {
-    key: "default.global.product-trust-badges",
-    label: "Badges",
-    description:
-      "Up to four short lines shown under the buy button on every product, before any badges set on the product itself. Leave empty to show the built-in two.",
-    type: "list",
-    page: "product",
-    group: "product.details",
-    gridColumn: "col-span-full",
-    // The text sub-field is keyed `title` (other templates use `label`);
-    // renaming it would orphan saved rows, and
-    // `parseTemplateTrustBadgesListRows` accepts either.
-    itemSchema: [
-      {
-        key: "icon",
-        label: "Icon",
-        type: "icon",
-        description: "Small icon shown before the text.",
-      },
-      {
-        key: "title",
-        label: "Text",
-        type: "text",
-        description: "A few words, e.g. Free returns within 30 days.",
-      },
-    ],
-    minItems: 0,
-    maxItems: 4,
-    itemLabel: "badge",
-    defaultsWhenEmpty: true,
+    min: 20,
+    max: 400,
+    step: 1,
+    unit: "px",
   },
 ];
 
@@ -145,18 +99,18 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...defaultShopFieldGroups,
   ...defaultTestimonialsFieldGroups,
   ...defaultVideosFieldGroups,
+  ...defaultProductFieldGroups,
+  ...defaultCheckoutUnavailableFieldGroups,
+  ...defaultOrderFieldGroups,
+  ...defaultCartFieldGroups,
+  ...defaultFaqFieldGroups,
+  ...defaultFooterFieldGroups,
   {
     id: "global.authentication",
     title: "Authentication",
-    description: "Authentication settings for your business",
+    description:
+      "Background image and logo size on the sign-in and sign-up screens.",
     icon: "🔑",
-    columns: 2,
-  },
-  {
-    id: "product.details",
-    title: "Product",
-    description: "Product settings for your business",
-    icon: "🏪",
     columns: 2,
   },
 ];
@@ -174,8 +128,13 @@ export const defaultTemplateData = {
     ...defaultShopData,
     ...defaultTestimonialsData,
     ...defaultVideosData,
+    ...defaultProductData,
+    ...defaultCheckoutUnavailableData,
+    ...defaultOrderData,
+    ...defaultCartData,
+    ...defaultFaqData,
+    ...defaultFooterData,
     ...globalAuthenticationData,
-    ...productDetailsData,
   ],
 };
 

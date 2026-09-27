@@ -5,12 +5,32 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-export function ElegantCartDrawer() {
+type Props = {
+  /** `elegant.global.cart-title` — shown before the item count. */
+  cartTitle: string;
+  /** `elegant.global.cart-drawer-empty-heading`. */
+  emptyHeading: string;
+  /** `elegant.global.cart-empty-body` — blank hides the line. */
+  emptyBody: string;
+  /** `elegant.global.cart-browse-button`. */
+  browseButtonText: string;
+  /** `elegant.global.cart-drawer-note` — blank hides the line. */
+  checkoutNote: string;
+};
+
+export function ElegantCartDrawer({
+  cartTitle,
+  emptyHeading,
+  emptyBody,
+  browseButtonText,
+  checkoutNote,
+}: Props) {
   const {
     items,
     removeItem,
@@ -156,7 +176,7 @@ export function ElegantCartDrawer() {
               color: "var(--el-ink, #1c1a17)",
             }}
           >
-            Your bag{" "}
+            <span {...fieldAttr("elegant.global.cart-title")}>{cartTitle}</span>{" "}
             <span
               style={{
                 fontFamily: "var(--font-mono, ui-monospace)",
@@ -226,24 +246,28 @@ export function ElegantCartDrawer() {
                 Empty bag
               </span>
               <p
+                {...fieldAttr("elegant.global.cart-drawer-empty-heading")}
                 style={{
                   fontFamily: "var(--font-serif, serif)",
                   fontSize: 26,
                   color: "var(--el-ink, #1c1a17)",
                 }}
               >
-                Nothing here yet.
+                {emptyHeading}
               </p>
-              <p
-                style={{
-                  fontSize: 15,
-                  color: "var(--el-ink-soft, #6b6659)",
-                  maxWidth: 240,
-                  fontFamily: "var(--font-sans, sans-serif)",
-                }}
-              >
-                Find something to take home.
-              </p>
+              {emptyBody ? (
+                <p
+                  {...fieldAttr("elegant.global.cart-empty-body")}
+                  style={{
+                    fontSize: 15,
+                    color: "var(--el-ink-soft, #6b6659)",
+                    maxWidth: 240,
+                    fontFamily: "var(--font-sans, sans-serif)",
+                  }}
+                >
+                  {emptyBody}
+                </p>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
@@ -264,7 +288,9 @@ export function ElegantCartDrawer() {
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
               >
-                Browse shop
+                <span {...fieldAttr("elegant.global.cart-browse-button")}>
+                  {browseButtonText}
+                </span>
                 <ArrowRight
                   aria-hidden={true}
                   style={{ width: 13, height: 13 }}
@@ -503,16 +529,19 @@ export function ElegantCartDrawer() {
                 {formatPrice(subtotal)}
               </span>
             </div>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--el-ink-soft, #6b6659)",
-                marginBottom: 14,
-                fontFamily: "var(--font-sans, sans-serif)",
-              }}
-            >
-              Shipping and taxes calculated at checkout.
-            </p>
+            {checkoutNote ? (
+              <p
+                {...fieldAttr("elegant.global.cart-drawer-note")}
+                style={{
+                  fontSize: 12,
+                  color: "var(--el-ink-soft, #6b6659)",
+                  marginBottom: 14,
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+              >
+                {checkoutNote}
+              </p>
+            ) : null}
             <Link
               href="/checkout"
               onClick={() => setIsOpen(false)}

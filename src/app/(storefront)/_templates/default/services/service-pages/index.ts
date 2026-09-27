@@ -14,8 +14,9 @@ export const defaultServiceFields: TemplateField[] = [
   // ── Hero ──────────────────────────────────────────────────────────────────
   {
     key: "default-service.hero-image",
-    label: "Hero Image",
-    description: "Full-width image displayed at the top of the service page",
+    label: "Image",
+    description:
+      "Wide image across the top of this service page. A video, if set, plays here instead.",
     type: "image",
     page: "homepage",
     group: "default-service.hero",
@@ -24,9 +25,9 @@ export const defaultServiceFields: TemplateField[] = [
   },
   {
     key: "default-service.hero-video",
-    label: "Hero Video",
+    label: "Video",
     description:
-      "Optional background video (MP4). Takes precedence over the hero image.",
+      "Optional MP4 that plays across the top of the page instead of the image. Leave blank to show the image.",
     type: "video",
     page: "homepage",
     group: "default-service.hero",
@@ -36,19 +37,21 @@ export const defaultServiceFields: TemplateField[] = [
   // ── Intro ─────────────────────────────────────────────────────────────────
   {
     key: "default-service.intro-heading",
-    label: "Intro Heading",
-    description: "Primary heading below the hero image",
+    label: "Heading",
+    description:
+      "Heading of the intro section below the top image. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "default-service.intro",
     gridColumn: "col-span-full",
     defaultValue: "About This Service",
-    placeholder: "e.g. About This Service",
+    placeholder: "e.g. How it works",
   },
   {
     key: "default-service.intro-body",
-    label: "Intro Body",
-    description: "Rich text introduction for this service group",
+    label: "Text",
+    description:
+      "Formatted introduction under the heading. Leave blank to hide.",
     type: "richtext",
     page: "homepage",
     group: "default-service.intro",
@@ -58,8 +61,8 @@ export const defaultServiceFields: TemplateField[] = [
   },
   {
     key: "default-service.intro-image",
-    label: "Intro Image",
-    description: "Optional image displayed beside the intro text",
+    label: "Image",
+    description: "Optional photo beside the intro text. Leave blank to hide.",
     type: "image",
     page: "homepage",
     group: "default-service.intro",
@@ -67,9 +70,9 @@ export const defaultServiceFields: TemplateField[] = [
   },
   {
     key: "default-service.intro-video",
-    label: "Intro Video",
+    label: "Video",
     description:
-      "Optional video displayed beside the intro text (MP4). Takes precedence over intro image.",
+      "Optional MP4 beside the intro text. Plays instead of the image when set. Leave blank to hide.",
     type: "video",
     page: "homepage",
     group: "default-service.intro",
@@ -79,20 +82,21 @@ export const defaultServiceFields: TemplateField[] = [
   // ── CTA ───────────────────────────────────────────────────────────────────
   {
     key: "default-service.cta-text",
-    label: "CTA Button Text",
-    description: "Label on the call-to-action button",
+    label: "Button text",
+    description:
+      "Text on the booking button, shown under the intro and at the bottom of the page once a button link is set.",
     type: "text",
     page: "homepage",
     group: "default-service.cta",
     gridColumn: "col-span-1",
     defaultValue: "Book Now",
-    placeholder: "Book Now",
+    placeholder: "e.g. Book a session",
   },
   {
     key: "default-service.cta-link",
-    label: "CTA Button Link",
+    label: "Button link",
     description:
-      "URL the CTA button points to (leave blank to hide the button)",
+      "Where the booking button goes, such as your booking page. Leave blank to hide the button.",
     type: "url",
     page: "homepage",
     group: "default-service.cta",
@@ -102,9 +106,9 @@ export const defaultServiceFields: TemplateField[] = [
   },
   {
     key: "default-service.cta-embed",
-    label: "CTA Booking Embed",
+    label: "Booking widget",
     description:
-      "Optional embedded booking widget shown in the closing CTA section (e.g. Calendly, Acuity)",
+      "Optional embedded booking tool, such as Calendly or Acuity, shown at the bottom of the page. Leave blank to hide.",
     type: "iframe",
     page: "homepage",
     group: "default-service.cta",
@@ -112,9 +116,9 @@ export const defaultServiceFields: TemplateField[] = [
   },
   {
     key: "default-service.cta-embed-reveal",
-    label: "Reveal booking behind a button",
+    label: "Show booking widget behind a button",
     description:
-      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+      "When on, the booking widget stays hidden until the visitor clicks a button, then opens.",
     type: "boolean",
     page: "homepage",
     group: "default-service.cta",
@@ -126,25 +130,24 @@ export const defaultServiceFields: TemplateField[] = [
 export const defaultServiceFieldGroups: TemplateFieldGroup[] = [
   {
     id: "default-service.hero",
-    title: "Hero Image & Video",
+    title: "Top image",
     description:
-      "Large banner at the top of the service page. Video takes precedence when set.",
+      "Wide banner at the top of the service page. A video plays instead of the image when set.",
     icon: "🖼️",
     columns: 1,
   },
   {
     id: "default-service.intro",
-    title: "Introduction",
-    description:
-      "Heading, rich-text body, and optional media for the intro section",
+    title: "Intro",
+    description: "Heading, text, and an optional photo or video beside them.",
     icon: "📝",
     columns: 1,
   },
   {
     id: "default-service.cta",
-    title: "Call to Action",
+    title: "Booking",
     description:
-      "Optional button and/or booking embed shown at the bottom of the page",
+      "Optional booking button and booking widget at the bottom of the page.",
     icon: "👆",
     columns: 2,
   },

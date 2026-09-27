@@ -24,7 +24,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
     {
       id: "homepage.collections",
       page: "homepage",
-      title: "Collections Grid",
+      title: "Collections grid",
       description: "3-up collection showcase below the hero",
       groupIds: ["homepage.collections"],
       order: 1,
@@ -100,8 +100,8 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
     {
       id: "about.cta",
       page: "about",
-      title: "CTA",
-      description: "Bottom call-to-action strip",
+      title: "Closing banner",
+      description: "Bottom banner inviting visitors to get in touch",
       groupIds: ["about.cta"],
       order: 3,
       hideable: true,
@@ -117,11 +117,35 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       hideable: false,
     },
     {
+      id: "contact.form",
+      page: "contact",
+      title: "Form",
+      description: "Success-message copy and submit button on the contact form",
+      groupIds: ["contact.form"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "contact.info",
+      page: "contact",
+      title: "Info cards",
+      description:
+        "Labels and body copy for the email, phone, address, and hours cards in the contact sidebar",
+      groupIds: ["contact.info"],
+      order: 2,
+      hideable: false,
+      links: [
+        SECTION_LINKS.businessContact,
+        SECTION_LINKS.businessLocation,
+        SECTION_LINKS.businessHours,
+      ],
+    },
+    {
       id: "contact.faq",
       page: "contact",
       title: "FAQ",
       groupIds: ["contact.faq"],
-      order: 1,
+      order: 3,
       hideable: true,
       links: [SECTION_LINKS.faq],
     },
@@ -176,8 +200,8 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
     {
       id: "services.cta",
       page: "services",
-      title: "CTA",
-      description: "Bottom call-to-action strip",
+      title: "Closing banner",
+      description: "Bottom banner inviting visitors to get in touch",
       groupIds: ["services.cta"],
       order: 2,
       hideable: true,
@@ -205,8 +229,8 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
     {
       id: "events.cta",
       page: "events",
-      title: "CTA",
-      description: "Bottom call-to-action strip",
+      title: "Closing banner",
+      description: "Bottom banner inviting visitors to get in touch",
       groupIds: ["events.cta"],
       order: 2,
       hideable: true,
@@ -236,11 +260,135 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
     {
       id: "blog.header",
       page: "blog",
-      title: "Header",
+      title: "Blog listing",
+      description: "Heading and intro on the blog index",
       groupIds: ["blog.header"],
       order: 0,
       hideable: false,
       links: [SECTION_LINKS.blog],
+    },
+    {
+      id: "blog.post",
+      page: "blog",
+      renderContext: "blog-post",
+      title: "Blog post",
+      description: "Related-posts label and heading at the bottom of a post",
+      groupIds: ["blog.post"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.blog],
+    },
+
+    // ── Shop ──────────────────────────────────────────────────────────────
+    {
+      id: "shop.listing",
+      page: "shop",
+      title: "Shop listing",
+      description: "Label, heading, and empty state on the shop page",
+      groupIds: ["shop.listing"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.products],
+    },
+
+    // ── Collections ───────────────────────────────────────────────────────
+    {
+      id: "collections.listing",
+      page: "collections",
+      title: "Collections listing",
+      description: "Label, heading, and empty state on the collections index page",
+      groupIds: ["collections.listing"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.collections],
+    },
+    {
+      id: "collections.detail",
+      page: "collections",
+      title: "Collection page",
+      description:
+        "Empty state and related-collections heading on an individual collection page",
+      groupIds: ["collections.detail"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.collections],
+    },
+
+    // ── Testimonials ──────────────────────────────────────────────────────
+    {
+      id: "testimonials.listing",
+      page: "testimonials",
+      title: "Testimonials",
+      description: "Label, heading, intro, and empty state on the testimonials page",
+      groupIds: ["testimonials.listing"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.testimonials],
+    },
+    {
+      id: "testimonials.share",
+      page: "testimonials",
+      title: "Share your experience",
+      description: "Banner inviting customers to submit a review",
+      groupIds: ["testimonials.share"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.testimonials],
+    },
+
+    // ── FAQ ───────────────────────────────────────────────────────────────
+    {
+      id: "faq.page",
+      page: "faq",
+      title: "FAQ page",
+      description: "Heading and empty state on the FAQ page",
+      groupIds: ["faq.page"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.faq],
+    },
+
+    // ── Cart ──────────────────────────────────────────────────────────────
+    {
+      id: "cart.empty",
+      page: "cart",
+      title: "Empty cart",
+      description: "Heading, message, and button shown when the cart is empty",
+      groupIds: ["cart.empty"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "cart.summary",
+      page: "cart",
+      title: "Order summary",
+      description:
+        "Heading and checkout button on the cart page's order summary panel",
+      groupIds: ["cart.summary"],
+      order: 1,
+      hideable: false,
+    },
+
+    // ── Checkout ──────────────────────────────────────────────────────────
+    {
+      id: "checkout.unavailable",
+      page: "checkout",
+      title: "Checkout unavailable",
+      description:
+        "Shown on the checkout page when online payments aren't set up yet",
+      groupIds: ["checkout.unavailable"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "checkout.confirmation",
+      page: "checkout",
+      title: "Order confirmation",
+      description:
+        "Heading, thank-you line, next-steps list, and button on the order confirmation page",
+      groupIds: ["checkout.confirmation"],
+      order: 1,
+      hideable: false,
     },
 
     // ── Product ───────────────────────────────────────────────────────────
@@ -250,7 +398,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
     {
       id: "product.details",
       page: "product",
-      title: "Product page details",
+      title: "Product page",
       description:
         "Shipping/question copy and trust badges applied to all products",
       groupIds: ["product.details"],
@@ -268,6 +416,16 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["global.authentication"],
       order: 0,
       hideable: false,
+    },
+    {
+      id: "global.footer",
+      page: "global",
+      title: "Footer",
+      description: "Column headings shown in the site footer",
+      groupIds: ["global.footer"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.branding],
     },
   ],
 };

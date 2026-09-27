@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+
+import { resolveFields } from "..";
 
 type Testimonial = RouterOutputs["testimonial"]["listRandom"][number];
 
@@ -93,9 +96,11 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
 
 export function ElegantTestimonials({
   testimonials,
+  customFields,
   sectionAttrs,
 }: {
   testimonials: Testimonial[];
+  customFields?: unknown;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 }) {
@@ -103,6 +108,13 @@ export function ElegantTestimonials({
   const [isPaused, setIsPaused] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+
+  const f = resolveFields(customFields, [
+    "elegant.homepage.testimonials-label",
+    "elegant.homepage.testimonials-heading",
+  ]);
+  const label = f["elegant.homepage.testimonials-label"] ?? "";
+  const heading = f["elegant.homepage.testimonials-heading"] ?? "";
 
   const column1 = testimonials.filter((_, i) => i % 3 === 0);
   const column2 = testimonials.filter((_, i) => i % 3 === 1);
@@ -167,8 +179,9 @@ export function ElegantTestimonials({
                     transition: "opacity 0.9s 0.1s, transform 0.9s 0.1s",
                   }),
             }}
+            {...fieldAttr("elegant.homepage.testimonials-label")}
           >
-            Kind Words
+            {label}
           </span>
           <h2
             style={{
@@ -188,8 +201,9 @@ export function ElegantTestimonials({
                     transition: "opacity 0.9s 0.2s, transform 0.9s 0.2s",
                   }),
             }}
+            {...fieldAttr("elegant.homepage.testimonials-heading")}
           >
-            Loved by our community
+            {heading}
           </h2>
           {/* The marquee auto-scrolls whenever the section renders (even with a
               single testimonial, since the track is duplicated for a seamless

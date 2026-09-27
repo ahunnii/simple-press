@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { Facebook, Instagram, Twitter } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
+import { resolveFields } from "..";
 
 const BRAND_LINKS = [
   { href: "/testimonials", label: "Reviews" },
@@ -21,14 +23,16 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
     | { label: string; href: string }[]
     | undefined;
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
+
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "elegant.global.footer-shop-heading",
+    "elegant.global.footer-info-heading",
+    "elegant.global.footer-signoff",
+  ]);
+  const shopHeading = f["elegant.global.footer-shop-heading"] ?? "";
+  const infoHeading = f["elegant.global.footer-info-heading"] ?? "";
+  const signoff = f["elegant.global.footer-signoff"] ?? "";
 
   const DEFAULT_NAV_LINKS = [
     { href: "/shop", label: "All Products" },
@@ -47,6 +51,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
 
   return (
     <footer
+      {...sectionGroupAttr("global", "footer")}
       style={{
         background: "var(--el-ink, #1c1a17)",
         color: "var(--el-paper, #fbf8f2)",
@@ -95,99 +100,41 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                 {business.siteContent.footerText}
               </p>
             )}
-            {/* Social icons */}
-            <div style={{ display: "flex", gap: 12 }}>
-              {socialLinks?.instagram && (
-                <a
-                  href={socialLinks.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram (opens in new tab)"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 999,
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    color: "rgba(255,255,255,0.7)",
-                    transition: "border-color 0.3s, color 0.3s",
-                  }}
-                >
-                  <Instagram
-                    aria-hidden={true}
-                    style={{ width: 15, height: 15 }}
-                  />
-                </a>
-              )}
-              {socialLinks?.facebook && (
-                <a
-                  href={socialLinks.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook (opens in new tab)"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 999,
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    color: "rgba(255,255,255,0.7)",
-                  }}
-                >
-                  <Facebook
-                    aria-hidden={true}
-                    style={{ width: 15, height: 15 }}
-                  />
-                </a>
-              )}
-              {socialLinks?.twitter && (
-                <a
-                  href={socialLinks.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="X / Twitter (opens in new tab)"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 999,
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    color: "rgba(255,255,255,0.7)",
-                  }}
-                >
-                  <Twitter
-                    aria-hidden={true}
-                    style={{ width: 15, height: 15 }}
-                  />
-                </a>
-              )}
-              {socialLinks?.youtube && (
-                <a
-                  href={socialLinks.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="YouTube (opens in new tab)"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 999,
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    color: "rgba(255,255,255,0.7)",
-                  }}
-                >
-                  <YouTubeIcon className="h-[15px] w-[15px]" />
-                </a>
-              )}
-            </div>
+            {/* Social icons — Content → Branding */}
+            {socialLinks.length > 0 && (
+              <ul
+                aria-label="Follow us on social media"
+                style={{ display: "flex", flexWrap: "wrap", gap: 12 }}
+              >
+                {socialLinks.map(({ key, ariaLabel, Icon, url }) => (
+                  <li key={key}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        width: 36,
+                        height: 36,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 999,
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        color: "rgba(255,255,255,0.7)",
+                        transition: "border-color 0.3s, color 0.3s",
+                      }}
+                    >
+                      <span aria-hidden="true" className="inline-flex">
+                        <Icon className="h-[15px] w-[15px]" />
+                      </span>
+                      <span className="sr-only">
+                        {ariaLabel} (opens in new tab)
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Nav columns — 3-col sub-grid so the <nav> landmark is preserved */}
@@ -201,7 +148,11 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
             }}
           >
             {/* Shop column */}
-            <FooterColumn title="Shop" links={navLinks} />
+            <FooterColumn
+              title={shopHeading}
+              titleFieldKey="elegant.global.footer-shop-heading"
+              links={navLinks}
+            />
 
             {/* Brand links column */}
             <FooterColumn
@@ -211,7 +162,9 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
 
             {/* Policies / Contact column */}
             <div>
-              <FooterColHeading>Info</FooterColHeading>
+              <FooterColHeading fieldKey="elegant.global.footer-info-heading">
+                {infoHeading}
+              </FooterColHeading>
               <ul role="list" style={{ listStyle: "none" }}>
                 {policies.map((policy) => (
                   <li key={policy.id} style={{ marginBottom: 10 }}>
@@ -282,16 +235,31 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
           <span>
             © {new Date().getFullYear()} {business?.name}
           </span>
-          <span>Made with care</span>
+          {signoff ? (
+            <span {...fieldAttr("elegant.global.footer-signoff")}>
+              {signoff}
+            </span>
+          ) : null}
         </div>
       </div>
     </footer>
   );
 }
 
-function FooterColHeading({ children }: { children: React.ReactNode }) {
+function FooterColHeading({
+  children,
+  fieldKey,
+}: {
+  children: React.ReactNode;
+  /** Template field the heading renders, for the visual editor. */
+  fieldKey?: string;
+}) {
+  // A blank heading hides the paragraph but keeps its spacing so the
+  // column's links stay aligned with the neighbouring columns.
+  if (!children) return <div aria-hidden="true" style={{ height: 32 }} />;
   return (
     <p
+      {...(fieldKey ? fieldAttr(fieldKey) : {})}
       style={{
         fontFamily: "var(--font-mono, ui-monospace)",
         fontSize: 11,
@@ -309,14 +277,16 @@ function FooterColHeading({ children }: { children: React.ReactNode }) {
 
 function FooterColumn({
   title,
+  titleFieldKey,
   links,
 }: {
   title: string;
+  titleFieldKey?: string;
   links: { href: string; label: string }[];
 }) {
   return (
     <div>
-      <FooterColHeading>{title}</FooterColHeading>
+      <FooterColHeading fieldKey={titleFieldKey}>{title}</FooterColHeading>
       <ul role="list" style={{ listStyle: "none" }}>
         {links.map((link) => (
           <li key={link.href + link.label} style={{ marginBottom: 10 }}>

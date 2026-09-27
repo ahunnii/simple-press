@@ -153,6 +153,7 @@ import { ElegantBlogPage } from "./elegant/blog/elegant-blog-page";
 import { ElegantBlogPostPage } from "./elegant/blog/elegant-blog-post-page";
 import { ElegantCartPage } from "./elegant/cart-checkout/elegant-cart-page";
 import { ElegantCheckoutPage } from "./elegant/cart-checkout/elegant-checkout-page";
+import { ElegantCheckoutUnavailable } from "./elegant/cart-checkout/elegant-checkout-unavailable";
 import { ElegantOrderSuccessPage } from "./elegant/cart-checkout/elegant-order-success-page";
 import { ElegantCollectionPage } from "./elegant/collections/elegant-collection-page";
 import { ElegantCollectionsPage } from "./elegant/collections/elegant-collections-page";
@@ -202,6 +203,7 @@ import { ModernBlogPage } from "./modern/blog/modern-blog-page";
 import { ModernBlogPostPage } from "./modern/blog/modern-blog-post-page";
 import ModernCartPage from "./modern/cart-checkout/modern-cart-page";
 import { ModernCheckoutPage } from "./modern/cart-checkout/modern-checkout-page";
+import { ModernCheckoutUnavailable } from "./modern/cart-checkout/modern-checkout-unavailable";
 import { ModernOrderSuccessPage } from "./modern/cart-checkout/modern-order-success-page";
 import { ModernCollectionPage } from "./modern/collections/modern-collection-page";
 import { ModernCollectionsPage } from "./modern/collections/modern-collections-page";
@@ -643,6 +645,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: ElegantBlogPostPage,
     CartPage: ElegantCartPage,
     CheckoutPage: ElegantCheckoutPage,
+    CheckoutUnavailable: ElegantCheckoutUnavailable,
     OrderSuccessPage: ElegantOrderSuccessPage,
     CollectionPage: ElegantCollectionPage,
     CollectionsPage: ElegantCollectionsPage,
@@ -692,6 +695,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: ModernBlogPostPage,
     CartPage: ModernCartPage,
     CheckoutPage: ModernCheckoutPage,
+    CheckoutUnavailable: ModernCheckoutUnavailable,
     OrderSuccessPage: ModernOrderSuccessPage,
     CollectionPage: ModernCollectionPage,
     CollectionsPage: ModernCollectionsPage,

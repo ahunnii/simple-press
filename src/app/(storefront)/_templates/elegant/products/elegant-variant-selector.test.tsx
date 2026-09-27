@@ -22,7 +22,11 @@ vi.mock("~/trpc/react", () => ({
   api: {
     backInStock: {
       subscribe: {
-        useMutation: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+        useMutation: () => ({
+          mutate: vi.fn(),
+          isPending: false,
+          isError: false,
+        }),
       },
     },
   },
