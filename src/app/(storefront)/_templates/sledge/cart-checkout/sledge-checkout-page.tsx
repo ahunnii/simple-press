@@ -1,6 +1,11 @@
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 
+import {
+  SLEDGE_CHECKOUT_REASSURANCE_DEFAULTS,
+  SLEDGE_CART_REASSURANCE_KEY,
+} from "./cart-fields";
 import { SledgeCheckoutContents } from "./sledge-checkout-contents";
+import { resolveSledgeTextList } from "./text-list";
 
 export async function SledgeCheckoutPage({
   business,
@@ -10,6 +15,11 @@ export async function SledgeCheckoutPage({
     <SledgeCheckoutContents
       business={business}
       merchantPolicies={merchantPolicies}
+      reassuranceLines={resolveSledgeTextList(
+        business.siteContent?.customFields,
+        SLEDGE_CART_REASSURANCE_KEY,
+        SLEDGE_CHECKOUT_REASSURANCE_DEFAULTS,
+      )}
     />
   );
 }

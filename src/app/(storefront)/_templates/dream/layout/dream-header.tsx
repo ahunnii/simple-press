@@ -4,16 +4,17 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { DreamNavItem } from "../lib/nav";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { UserButton } from "~/components/auth/user/user-button";
+import { useCart } from "~/providers/cart-context";
 
 import { isDreamNavActive, resolveDreamNav } from "../lib/nav";
 import { resolveDreamFields } from "../lib/resolve-fields";
@@ -26,7 +27,13 @@ import { DreamNavOverlay } from "./dream-nav-overlay";
  * logged out, `UserButton` when signed in) followed by the Estimate Quote CTA
  * pill. Nav entries with children open a hover/click dropdown.
  *
- * Below 960px only the logo and the hamburger show; the hamburger opens
+ * The cart link sits at the far right at every width. Dream has no cart
+ * drawer, so it goes straight to `/cart`. It only shows once the store has a
+ * published product or the shopper already has something in the cart, so a
+ * services-only store never gets an empty cart icon.
+ *
+ * Below 960px only the logo, the cart link, and the hamburger show; the
+ * hamburger opens
  * `DreamNavOverlay`. The breakpoint and the mobile/desktop flex switch live in
  * the scoped `.dream-header-*` CSS in globals.css, not Tailwind responsive
  * classes, so the 960px number lives in exactly one place.
@@ -47,6 +54,8 @@ export function DreamHeader({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
   const accountsEnabled = isEnabled("customerAccounts");
+  const { itemCount } = useCart();
+  const showCart = (business?.products?.length ?? 0) > 0 || itemCount > 0;
   const ordersEnabled = isEnabled("orders");
 
   const customFields = business?.siteContent?.customFields as
@@ -56,8 +65,9 @@ export function DreamHeader({
     "dream.global.header-cta-label",
     "dream.global.header-cta-url",
   ]);
-  const ctaLabel = f["dream.global.header-cta-label"] ?? "Estimate Quote";
-  const ctaUrl = f["dream.global.header-cta-url"] ?? "/contact";
+  // A blank label or an unsafe/blank link (resolved to "") hides the pill.
+  const ctaLabel = f["dream.global.header-cta-label"] ?? "";
+  const ctaUrl = f["dream.global.header-cta-url"] ?? "";
 
   const businessName = business?.name ?? "";
   const logoUrl =
@@ -71,7 +81,10 @@ export function DreamHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  const navItems = resolveDreamNav(business?.siteContent?.navigationItems);
+  const navItems = resolveDreamNav(
+    business?.siteContent?.navigationItems,
+    customFields,
+  );
 
   const renderNavItem = (item: DreamNavItem, i: number) => {
     if (item.children?.length) {
@@ -226,26 +239,56 @@ export function DreamHeader({
               </Link>
             ) : null}
 
-            <Link
-              href={ctaUrl}
-              className="dream-btn dream-btn--secondary dream-header-cta"
-            >
-              {ctaLabel}
-            </Link>
+            {ctaLabel && ctaUrl ? (
+              <Link
+                href={ctaUrl}
+                className="dream-btn dream-btn--secondary dream-header-cta"
+                {...fieldAttr("dream.global.header-cta-label")}
+              >
+                {ctaLabel}
+              </Link>
+            ) : null}
           </div>
 
-          {/* Mobile-only: a direct child of the inner bar so it survives the
-              right cell being display:none below 960px. */}
-          <button
-            ref={hamburgerRef}
-            type="button"
-            aria-label="Open menu"
-            aria-expanded={open}
-            onClick={() => setOpen(true)}
-            className="dream-header-hamburger"
-          >
-            <Menu className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-          </button>
+          {/* A direct child of the inner bar so it survives the right cell
+              being display:none below 960px. The cart shows at every width;
+              the hamburger is mobile-only. */}
+          <div className="dream-header-actions">
+            {showCart ? (
+              <Link
+                href="/cart"
+                aria-label={
+                  itemCount > 0
+                    ? `Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "Cart"
+                }
+                aria-current={pathname === "/cart" ? "page" : undefined}
+                className="dream-header-cart"
+              >
+                <ShoppingBag
+                  className="h-5 w-5"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+                {itemCount > 0 ? (
+                  <span className="dream-header-cart-count" aria-hidden="true">
+                    {itemCount > 99 ? "99+" : itemCount}
+                  </span>
+                ) : null}
+              </Link>
+            ) : null}
+
+            <button
+              ref={hamburgerRef}
+              type="button"
+              aria-label="Open menu"
+              aria-expanded={open}
+              onClick={() => setOpen(true)}
+              className="dream-header-hamburger"
+            >
+              <Menu className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </header>
 

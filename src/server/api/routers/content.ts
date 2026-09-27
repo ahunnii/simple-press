@@ -8,6 +8,7 @@ import { checkBusiness } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
+import type { TemplateFieldRefIds } from "~/lib/template-field-refs";
 import {
   cmsPageDraftSchema,
   pageSchema,
@@ -1017,5 +1018,87 @@ export const contentRouter = createTRPCRouter({
       });
 
       return { ok: true };
+    }),
+
+  /**
+   * Ownership check backing the template-fields JSON import's reference
+   * warnings. `~/lib/template-field-refs.ts` collects candidate gallery /
+   * collection / faq / form / quoteCalculator ids out of the JSON client-side
+   * (it's client-safe and has no DB access); this confirms which of those
+   * ids actually belong to *this* business so the import UI can warn about
+   * the rest as dangling references that won't resolve after import.
+   *
+   * A MUTATION rather than a query: it's read-only, but an id list up to 500
+   * entries per collection could overflow a GET request's URL length, so it
+   * travels as a POST body instead.
+   */
+  checkTemplateFieldRefs: ownerAdminProcedure
+    .input(
+      z.object({
+        gallery: z.array(z.string()).max(500),
+        collection: z.array(z.string()).max(500),
+        faq: z.array(z.string()).max(500),
+        form: z.array(z.string()).max(500),
+        quoteCalculator: z.array(z.string()).max(500),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      async function missingIds(
+        ids: string[],
+        findMany: (id: {
+          in: string[];
+        }) => Promise<{ id: string }[]>,
+      ): Promise<string[]> {
+        if (ids.length === 0) return [];
+        const found = await findMany({ in: ids });
+        const foundIds = new Set(found.map((row) => row.id));
+        return ids.filter((id) => !foundIds.has(id));
+      }
+
+      const [gallery, collection, faq, form, quoteCalculator] =
+        await Promise.all([
+          missingIds(input.gallery, (id) =>
+            ctx.db.gallery.findMany({
+              where: { id, businessId },
+              select: { id: true },
+            }),
+          ),
+          missingIds(input.collection, (id) =>
+            ctx.db.collection.findMany({
+              where: { id, businessId },
+              select: { id: true },
+            }),
+          ),
+          missingIds(input.faq, (id) =>
+            ctx.db.faqItem.findMany({
+              where: { id, businessId },
+              select: { id: true },
+            }),
+          ),
+          missingIds(input.form, (id) =>
+            ctx.db.form.findMany({
+              where: { id, businessId },
+              select: { id: true },
+            }),
+          ),
+          missingIds(input.quoteCalculator, (id) =>
+            ctx.db.quoteCalculator.findMany({
+              where: { id, businessId },
+              select: { id: true },
+            }),
+          ),
+        ]);
+
+      return {
+        missing: {
+          gallery,
+          collection,
+          faq,
+          form,
+          quoteCalculator,
+        } satisfies TemplateFieldRefIds,
+      };
     }),
 });

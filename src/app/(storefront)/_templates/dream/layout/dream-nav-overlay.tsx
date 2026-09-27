@@ -7,6 +7,7 @@ import { ChevronDown, X } from "lucide-react";
 
 import type { DreamNavItem } from "../lib/nav";
 import type { Session } from "~/server/better-auth/config";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { isDreamNavActive } from "../lib/nav";
 import { DreamSocialLinks } from "../shared/dream-social-links";
@@ -21,6 +22,7 @@ type DreamNavOverlayProps = {
   businessName: string;
   logoUrl: string;
   logoAlt: string;
+  /** Blank label or link hides the CTA pill. */
   ctaLabel: string;
   ctaUrl: string;
   /** Raw `business.siteContent.socialLinks` JSON — parsed by `DreamSocialLinks`. */
@@ -338,13 +340,16 @@ export function DreamNavOverlay({
           ordersEnabled={ordersEnabled}
           onClose={onClose}
         />
-        <Link
-          href={ctaUrl}
-          onClick={onClose}
-          className="dream-btn dream-nav-overlay-cta"
-        >
-          {ctaLabel}
-        </Link>
+        {ctaLabel && ctaUrl ? (
+          <Link
+            href={ctaUrl}
+            onClick={onClose}
+            className="dream-btn dream-nav-overlay-cta"
+            {...fieldAttr("dream.global.header-cta-label")}
+          >
+            {ctaLabel}
+          </Link>
+        ) : null}
       </div>
     </div>
   );

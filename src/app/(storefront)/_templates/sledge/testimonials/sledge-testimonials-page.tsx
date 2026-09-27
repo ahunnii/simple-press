@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { api } from "~/trpc/server";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
@@ -44,21 +45,27 @@ export async function SledgeTestimonialsPage({
     "sledge.global.shop-cta-link",
   ]);
 
-  const heading = f["sledge.testimonials.page-heading"];
+  const heading = f["sledge.testimonials.page-heading"] ?? "";
   const pageIntro = f["sledge.testimonials.page-intro"];
-  const trendingHeading = f["sledge.testimonials.trending-heading"];
-  const emptyStateText = f["sledge.testimonials.empty-state-text"];
-  const shopCtaText = f["sledge.global.shop-cta-text"];
-  const shopCtaHref = f["sledge.global.shop-cta-link"];
+  const trendingHeading = f["sledge.testimonials.trending-heading"] ?? "";
+  const emptyStateText = f["sledge.testimonials.empty-state-text"] ?? "";
+  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "";
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- url field: "" means unsafe/cleared, must still fall back
+  const shopCtaHref = f["sledge.global.shop-cta-link"] || "/shop";
 
   const products = homepage?.products ?? [];
+  const trendingVisible = isSectionVisible(
+    customFields,
+    "sledge",
+    "testimonials.trending",
+  );
 
   return (
     <PageTransition>
       <SledgePageHeader
-        title={heading ?? "Testimonials"}
+        title={heading}
         titleFieldKey="sledge.testimonials.page-heading"
-        intro={pageIntro ?? undefined}
+        intro={pageIntro}
         introFieldKey="sledge.testimonials.page-intro"
         sectionAttrs={sectionGroupAttr("testimonials", "page")}
       />
@@ -70,7 +77,7 @@ export async function SledgeTestimonialsPage({
           <SledgeEmptyState
             bare
             className="py-16"
-            message={emptyStateText ?? "No testimonials yet."}
+            message={emptyStateText}
             messageFieldKey="sledge.testimonials.empty-state-text"
             action={
               <Link
@@ -96,14 +103,16 @@ export async function SledgeTestimonialsPage({
         )}
       </SledgePageSection>
 
-      <SledgeProductRail
-        heading={trendingHeading ?? ""}
-        headingFieldKey="sledge.testimonials.trending-heading"
-        ctaText={shopCtaText ?? ""}
-        ctaHref={shopCtaHref ?? ""}
-        products={products}
-        sectionAttrs={sectionGroupAttr("testimonials", "page")}
-      />
+      {trendingVisible ? (
+        <SledgeProductRail
+          heading={trendingHeading}
+          headingFieldKey="sledge.testimonials.trending-heading"
+          ctaText={shopCtaText}
+          ctaHref={shopCtaHref}
+          products={products}
+          sectionAttrs={sectionGroupAttr("testimonials", "trending")}
+        />
+      ) : null}
     </PageTransition>
   );
 }

@@ -4,13 +4,12 @@ import Image from "next/image";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr } from "~/lib/preview/section-attrs";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
+
+import { SledgeSocialLinks } from "../shared/sledge-social-links";
 
 type SledgeSubscribeProps = {
   image?: string;
-  heading?: string;
+  heading: string;
   body?: string;
   business?: RouterOutputs["business"]["getHomepage"];
   /** Spread on root <section> for preview overlay hotspot. */
@@ -20,20 +19,11 @@ type SledgeSubscribeProps = {
 export function SledgeSubscribe({
   image,
   heading,
+  body,
   business,
   sectionAttrs,
 }: SledgeSubscribeProps) {
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-      }
-    | undefined;
-
-  const hasSocial =
-    socialLinks?.instagram ?? socialLinks?.facebook ?? socialLinks?.tiktok;
+  const socialLinks = business?.siteContent?.socialLinks;
 
   return (
     <section className="sl-section-green" {...sectionAttrs}>
@@ -51,46 +41,28 @@ export function SledgeSubscribe({
           </div>
         )}
 
-        {/* Right: social links */}
+        {/* Right: heading, body, social links */}
         <div>
           <h2
             className="sl-heading-lg font-heading"
             {...fieldAttr("sledge.homepage-guarantee-heading")}
           >
-            {heading ?? "Subscribe for the latest drops"}
+            {heading}
           </h2>
 
-          {hasSocial && (
-            <div className="flex flex-wrap items-start gap-3 md:justify-start">
-              {socialLinks?.instagram && (
-                <a
-                  href={socialLinks.instagram}
-                  aria-label="Instagram"
-                  className="sl-social-btn transition-opacity hover:opacity-70"
-                >
-                  <InstagramIcon className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.facebook && (
-                <a
-                  href={socialLinks.facebook}
-                  aria-label="Facebook"
-                  className="sl-social-btn transition-opacity hover:opacity-70"
-                >
-                  <FacebookIcon className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.tiktok && (
-                <a
-                  href={socialLinks.tiktok}
-                  aria-label="TikTok"
-                  className="sl-social-btn transition-opacity hover:opacity-70"
-                >
-                  <TikTokIcon className="h-5 w-5" />
-                </a>
-              )}
-            </div>
-          )}
+          {body?.trim() ? (
+            <p
+              className="sl-quote-body mt-4 mb-6 font-sans"
+              {...fieldAttr("sledge.homepage-guarantee-quote")}
+            >
+              {body}
+            </p>
+          ) : null}
+
+          <SledgeSocialLinks
+            socialLinks={socialLinks}
+            className="md:justify-start"
+          />
         </div>
       </div>
     </section>

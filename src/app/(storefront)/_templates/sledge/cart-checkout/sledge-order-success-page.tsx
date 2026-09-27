@@ -3,7 +3,12 @@ import { Suspense } from "react";
 import type { RouterOutputs } from "~/trpc/react";
 import { PageTransition } from "~/components/page-animations";
 
+import {
+  SLEDGE_CONFIRMATION_NOTES_DEFAULTS,
+  SLEDGE_CONFIRMATION_NOTES_KEY,
+} from "./cart-fields";
 import { SledgeOrderConfirmation } from "./sledge-order-confirmation";
+import { resolveSledgeTextList } from "./text-list";
 
 export function SledgeOrderSuccessPage({
   business,
@@ -21,7 +26,14 @@ export function SledgeOrderSuccessPage({
           </div>
         }
       >
-        <SledgeOrderConfirmation business={business} />
+        <SledgeOrderConfirmation
+          business={business}
+          notes={resolveSledgeTextList(
+            business.siteContent?.customFields,
+            SLEDGE_CONFIRMATION_NOTES_KEY,
+            SLEDGE_CONFIRMATION_NOTES_DEFAULTS,
+          )}
+        />
       </Suspense>
     </PageTransition>
   );

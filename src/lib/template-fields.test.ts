@@ -240,6 +240,22 @@ describe("isRetiredTemplateKey", () => {
     expect(isRetiredTemplateKey("noise.global.footer-tagline")).toBe(true);
   });
 
+  it("recognises dream's retired chrome keys (2026-09-26)", () => {
+    for (const key of [
+      "dream.global.announcement-text",
+      "dream.global.announcement-link-label",
+      "dream.global.announcement-url",
+      "dream.global.footer-tagline",
+      "dream.global.contact-email",
+      "dream.global.contact-phone",
+      "dream.global.contact-hours",
+    ]) {
+      expect(RETIRED_TEMPLATE_KEYS.has(key)).toBe(true);
+    }
+    // Service area stays a template field.
+    expect(isRetiredTemplateKey("dream.global.service-area")).toBe(false);
+  });
+
   it("is never still declared by a template", () => {
     const declared = Object.values(TEMPLATE_FIELDS)
       .flat()

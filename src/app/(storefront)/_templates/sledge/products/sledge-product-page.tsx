@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,7 +10,11 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
 import {
   getListFieldValue,
@@ -70,9 +75,19 @@ function ProductAccordion({
   );
 }
 
+const TRUST_BADGES_KEY = "sledge.global.product-trust-badges";
+
+type StoreBadge = {
+  Icon: LucideIcon | undefined;
+  label: string;
+  /** Position in the saved list, for the editor's click-to-row targeting. */
+  index: number;
+};
+
 export function SledgeProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -149,11 +164,15 @@ export function SledgeProductPage({
 
   const additional = parseCardAdditionalFields(product.additionalFields);
 
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
     "sledge.global.product-shipping-description",
     "sledge.global.product-question-description",
     "sledge.global.product-care-instructions",
     "sledge.global.product-shipping-details",
+    "sledge.product.related-heading",
+    "sledge.product.coming-soon-heading",
+    "sledge.product.coming-soon-body",
     "sledge.global.shop-cta-text",
     "sledge.global.shop-cta-link",
   ]);
@@ -161,13 +180,32 @@ export function SledgeProductPage({
   const shopCtaText = f["sledge.global.shop-cta-text"] ?? "Browse Shop";
   const shopCtaHref = f["sledge.global.shop-cta-link"] ?? "/shop";
 
-  const globalProductTrustBadges = parseTemplateTrustBadgesListRows(
-    getListFieldValue(
-      business?.siteContent?.customFields,
-      "sledge.global.product-trust-badges",
-    ),
-    [],
-  );
+  const shippingNote = (
+    f["sledge.global.product-shipping-description"] ?? ""
+  ).trim();
+  const shippingDetails = (
+    f["sledge.global.product-shipping-details"] ?? ""
+  ).trim();
+  const careInstructions = (
+    f["sledge.global.product-care-instructions"] ?? ""
+  ).trim();
+  const questionText = (
+    f["sledge.global.product-question-description"] ?? ""
+  ).trim();
+  const relatedHeading = f["sledge.product.related-heading"] ?? "";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Store-wide badges from the editor. Parsed row by row so each badge keeps
+  // its position in the SAVED list (a skipped malformed row must not shift
+  // the editor's click-to-row index). No built-in fallback rows.
+  const storeBadges: StoreBadge[] = (
+    getListFieldValue(customFields, TRUST_BADGES_KEY) ?? []
+  ).flatMap((row, index) => {
+    const parsed = parseTemplateTrustBadgesListRows([row])?.[0];
+    const label = parsed?.label.trim() ?? "";
+    return parsed && label ? [{ Icon: parsed.icon, label, index }] : [];
+  });
 
   type CollectionRef = {
     collection: { id: string; name: string; slug: string } | null;
@@ -180,14 +218,13 @@ export function SledgeProductPage({
   const images = product.images.length > 0 ? product.images : [];
   const activeImage = images[activeImg];
 
-  const hasAdditionalTab =
-    !isAdditionalEmpty ||
-    !!f["sledge.global.product-shipping-description"] ||
-    !!f["sledge.global.product-question-description"];
+  const hasAdditionalTab = !isAdditionalEmpty || !!questionText;
 
-  const hasSidebarAccordions =
-    !!f["sledge.global.product-care-instructions"] ||
-    !!f["sledge.global.product-shipping-details"];
+  // One Shipping & returns row: the owner's details plus links to whichever
+  // policy pages are actually published (never a link to a missing page).
+  const hasShippingRow =
+    !!shippingDetails || hasShippingPolicy || hasRefundPolicy;
+  const hasSidebarAccordions = !!careInstructions || hasShippingRow;
 
   return (
     <PageTransition>
@@ -295,7 +332,10 @@ export function SledgeProductPage({
           </div>
 
           {/* Details */}
-          <FadeIn className="flex flex-col gap-5">
+          <FadeIn
+            {...sectionGroupAttr("product", "details")}
+            className="flex flex-col gap-5"
+          >
             {firstCollection ? (
               <Link
                 href={`/collections/${firstCollection.slug}`}
@@ -355,47 +395,87 @@ export function SledgeProductPage({
               </div>
             ) : null}
 
-            {(globalProductTrustBadges?.length ?? 0) > 0 ? (
+            {storeBadges.length > 0 ? (
               <div className="flex flex-col gap-1.5">
-                {globalProductTrustBadges?.map((badge) => (
+                {storeBadges.map((badge) => (
                   <p
-                    key={badge.label}
-                    className="font-sans text-xs font-semibold tracking-[0.08em] text-[var(--sl-ink)] uppercase"
+                    key={badge.index}
+                    {...listItemAttr(TRUST_BADGES_KEY, badge.index)}
+                    className="flex items-center gap-1.5 font-sans text-xs font-semibold tracking-[0.08em] text-[var(--sl-ink)] uppercase"
                   >
+                    {badge.Icon ? (
+                      <badge.Icon
+                        aria-hidden="true"
+                        className="size-3.5 shrink-0 text-[var(--sl-coral)]"
+                      />
+                    ) : null}
                     {badge.label}
                   </p>
                 ))}
               </div>
             ) : null}
 
-            {f["sledge.global.product-shipping-description"] ? (
+            {shippingNote ? (
               <p
                 className="sl-eyebrow font-sans text-xs tracking-[0.1em] uppercase"
                 {...fieldAttr("sledge.global.product-shipping-description")}
               >
-                {f["sledge.global.product-shipping-description"]}
+                {shippingNote}
               </p>
             ) : null}
 
-            <SledgeProductActions product={product} business={business} />
+            <SledgeProductActions
+              product={product}
+              business={business}
+              comingSoonHeading={f["sledge.product.coming-soon-heading"] ?? ""}
+              comingSoonBody={f["sledge.product.coming-soon-body"] ?? ""}
+            />
 
             {hasSidebarAccordions ? (
               <div className="mt-2">
-                {f["sledge.global.product-care-instructions"] ? (
+                {careInstructions ? (
                   <ProductAccordion
-                    title="Care Instructions"
+                    title="Care instructions"
                     defaultOpen
                     contentFieldKey="sledge.global.product-care-instructions"
                   >
-                    {f["sledge.global.product-care-instructions"]}
+                    {careInstructions}
                   </ProductAccordion>
                 ) : null}
-                {f["sledge.global.product-shipping-details"] ? (
-                  <ProductAccordion
-                    title="Shipping & Returns"
-                    contentFieldKey="sledge.global.product-shipping-details"
-                  >
-                    {f["sledge.global.product-shipping-details"]}
+                {hasShippingRow ? (
+                  <ProductAccordion title="Shipping & returns">
+                    {shippingDetails ? (
+                      <p
+                        {...fieldAttr("sledge.global.product-shipping-details")}
+                      >
+                        {shippingDetails}
+                      </p>
+                    ) : null}
+                    {hasShippingPolicy || hasRefundPolicy ? (
+                      <p
+                        className={cn(
+                          "flex flex-wrap gap-x-5 gap-y-1",
+                          shippingDetails && "mt-3",
+                        )}
+                      >
+                        {hasShippingPolicy ? (
+                          <Link
+                            href="/shipping-policy"
+                            className="text-[var(--sl-coral-aa)] underline underline-offset-4 transition-opacity hover:opacity-70"
+                          >
+                            Shipping policy
+                          </Link>
+                        ) : null}
+                        {hasRefundPolicy ? (
+                          <Link
+                            href="/refund-policy"
+                            className="text-[var(--sl-coral-aa)] underline underline-offset-4 transition-opacity hover:opacity-70"
+                          >
+                            Returns policy
+                          </Link>
+                        ) : null}
+                      </p>
+                    ) : null}
                   </ProductAccordion>
                 ) : null}
               </div>
@@ -506,19 +586,16 @@ export function SledgeProductPage({
                       </ProductAccordion>
                     ) : null}
 
-                    {f["sledge.global.product-shipping-description"] ? (
-                      <ProductAccordion
-                        title="Shipping & Returns"
-                        contentFieldKey="sledge.global.product-shipping-description"
-                      >
-                        <p>{f["sledge.global.product-shipping-description"]}</p>
-                      </ProductAccordion>
-                    ) : null}
-
-                    {f["sledge.global.product-question-description"] ? (
-                      <ProductAccordion title="Ask a Question">
+                    {questionText ? (
+                      <ProductAccordion title="Ask a question">
                         <p>
-                          {f["sledge.global.product-question-description"]}{" "}
+                          <span
+                            {...fieldAttr(
+                              "sledge.global.product-question-description",
+                            )}
+                          >
+                            {questionText}
+                          </span>{" "}
                           <Link
                             href="/contact"
                             className="text-[var(--sl-coral-aa)] underline underline-offset-4 transition-opacity hover:opacity-70"
@@ -537,7 +614,8 @@ export function SledgeProductPage({
       </SledgePageSection>
 
       <SledgeProductRail
-        heading="Related Products"
+        heading={relatedHeading}
+        headingFieldKey="sledge.product.related-heading"
         ctaText={shopCtaText}
         ctaHref={shopCtaHref}
         products={(relatedProducts ?? []) as Product[]}

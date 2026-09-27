@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { api } from "~/trpc/server";
 import { FadeIn } from "~/components/page-animations";
 
@@ -25,6 +26,7 @@ export async function SledgeAboutPage({
     "sledge.about.section-2-body",
     "sledge.about.section-3-label",
     "sledge.about.section-3-body",
+    "sledge.about.trending-heading",
     "sledge.global.shop-cta-text",
     "sledge.global.shop-cta-link",
   ]);
@@ -33,27 +35,33 @@ export async function SledgeAboutPage({
   const products = homepage?.products ?? [];
 
   const heroImage = f["sledge.about-hero-image"] ?? "";
-  const heading = f["sledge.about-hero-heading"] ?? "About The Artist";
-  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "Browse Shop";
-  const shopCtaHref = f["sledge.global.shop-cta-link"] ?? "/shop";
+  const heading = f["sledge.about-hero-heading"] ?? "";
+  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "";
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const shopCtaHref = f["sledge.global.shop-cta-link"] || "/shop";
+  const trendingVisible = isSectionVisible(
+    customFields,
+    "sledge",
+    "about.trending",
+  );
 
   const sections = [
     {
-      label: f["sledge.about.section-1-label"] ?? "My Story.",
+      label: f["sledge.about.section-1-label"],
       labelKey: "sledge.about.section-1-label",
-      body: f["sledge.about.section-1-body"] ?? "",
+      body: f["sledge.about.section-1-body"],
       bodyKey: "sledge.about.section-1-body",
     },
     {
-      label: f["sledge.about.section-2-label"] ?? "What I Do.",
+      label: f["sledge.about.section-2-label"],
       labelKey: "sledge.about.section-2-label",
-      body: f["sledge.about.section-2-body"] ?? "",
+      body: f["sledge.about.section-2-body"],
       bodyKey: "sledge.about.section-2-body",
     },
     {
-      label: f["sledge.about.section-3-label"] ?? "My Services.",
+      label: f["sledge.about.section-3-label"],
       labelKey: "sledge.about.section-3-label",
-      body: f["sledge.about.section-3-body"] ?? "",
+      body: f["sledge.about.section-3-body"],
       bodyKey: "sledge.about.section-3-body",
     },
   ];
@@ -159,14 +167,16 @@ export async function SledgeAboutPage({
         </FadeIn>
       </section>
 
-      {/* No dedicated field group backs this rail (heading is fixed,
-          products are pulled live) — no sectionGroupAttr. */}
-      <SledgeProductRail
-        heading="Trending Now"
-        ctaText={shopCtaText}
-        ctaHref={shopCtaHref}
-        products={products}
-      />
+      {trendingVisible ? (
+        <SledgeProductRail
+          heading={f["sledge.about.trending-heading"] ?? ""}
+          headingFieldKey="sledge.about.trending-heading"
+          ctaText={shopCtaText}
+          ctaHref={shopCtaHref}
+          products={products}
+          sectionAttrs={sectionGroupAttr("about", "trending")}
+        />
+      ) : null}
     </>
   );
 }

@@ -59,10 +59,10 @@ export function SledgeBlogPostPage({
     "sledge.blog.post-shop-cta-heading",
   ]);
 
-  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "Browse Shop";
-  const shopCtaLink = f["sledge.global.shop-cta-link"] ?? "/shop";
-  const shopCtaHeading =
-    f["sledge.blog.post-shop-cta-heading"] ?? "Trending Now";
+  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "";
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const shopCtaLink = f["sledge.global.shop-cta-link"] || "/shop";
+  const shopCtaHeading = f["sledge.blog.post-shop-cta-heading"] ?? "";
 
   const filtered = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
 

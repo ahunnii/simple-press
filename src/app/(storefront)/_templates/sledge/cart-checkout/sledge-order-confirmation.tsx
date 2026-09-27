@@ -5,23 +5,26 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 
+import type { SledgeTextRow } from "./text-list";
+import { listItemAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
+import {
+  SLEDGE_CONFIRMATION_NOTES_KEY,
+  sledgeConfirmationGlyph,
+} from "./cart-fields";
+
+/** Platform facts — always shown first; owner notes follow. */
 const NEXT_STEPS = [
   {
     icon: "✉",
     text: "You'll receive an email confirmation at the address provided.",
   },
-  { icon: "✱", text: "Each piece is handcrafted with care before it ships." },
   {
     icon: "↗",
     text: "We'll notify you with a tracking number when your order ships.",
-  },
-  {
-    icon: "✓",
-    text: "All sales are final — thank you for supporting the studio.",
   },
 ] as const;
 
@@ -31,9 +34,11 @@ type Props = {
     name: string;
     siteContent: { primaryColor: string | null } | null;
   };
+  /** Resolved `sledge.checkout.confirmation-notes` rows (plain data). */
+  notes: SledgeTextRow[];
 };
 
-export function SledgeOrderConfirmation({ business }: Props) {
+export function SledgeOrderConfirmation({ business, notes }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [orderDetails, setOrderDetails] = useState<{
@@ -187,6 +192,24 @@ export function SledgeOrderConfirmation({ business }: Props) {
                   </span>
                   <p className="font-sans text-sm leading-relaxed text-[var(--sl-ink-soft)]">
                     {step.text}
+                  </p>
+                </div>
+              ))}
+              {notes.map((note, position) => (
+                <div
+                  key={note.index}
+                  {...listItemAttr(SLEDGE_CONFIRMATION_NOTES_KEY, note.index)}
+                  className="flex items-start gap-3"
+                >
+                  {/* N-1: decorative glyph */}
+                  <span
+                    aria-hidden="true"
+                    className="flex size-6 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
+                  >
+                    {sledgeConfirmationGlyph(position)}
+                  </span>
+                  <p className="font-sans text-sm leading-relaxed text-[var(--sl-ink-soft)]">
+                    {note.text}
                   </p>
                 </div>
               ))}

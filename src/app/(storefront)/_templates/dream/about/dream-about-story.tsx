@@ -13,19 +13,22 @@ import { DreamSection } from "../shared/dream-section";
 type Props = {
   portrait: string;
   portraitAlt: string;
+  portraitEmptyMessage: string;
   quoteLead: string;
   quoteAccent: string;
   storyBody: RichTextFieldValue | null;
+  /**
+   * The `dream.about.story-body` field's `defaultValue` (static HTML), used
+   * only while `storyBody` is empty. `getRichTextFieldValue` never reads a
+   * field's `defaultValue` — richtext fields bypass `resolveFields` — so the
+   * fallback has to be rendered directly rather than through the Tiptap
+   * renderer. Rich text is still the only *authoring* path; the shipped copy
+   * lives in `about/index.ts` so it stays in one place.
+   */
+  storyBodyDefaultHtml: string;
   ctaLabel: string;
   ctaUrl: string;
 };
-
-// Rich text is the only story authoring path; the shipped copy below is a
-// constant so a fresh store still reads day-one (mirrors the pink pattern).
-const DEFAULT_STORY_PARAGRAPHS: string[] = [
-  "Selest is an event designer, not a planner. Give her the shape of your day and she'll build a world around it — drape by drape, chair by chair, until the space matches what you imagined.",
-  "The best part of the job, she says, is watching guests walk in and see their theme for the first time. That's the smile she's designing for.",
-];
 
 // Overrides `DREAM_PROSE_CLASSNAME` to match this section's existing look:
 // the parent column already caps the measure at 60ch, the section uses the
@@ -49,9 +52,11 @@ const DREAM_STORY_PROSE = cn(
 export function DreamAboutStory({
   portrait,
   portraitAlt,
+  portraitEmptyMessage,
   quoteLead,
   quoteAccent,
   storyBody,
+  storyBodyDefaultHtml,
   ctaLabel,
   ctaUrl,
 }: Props) {
@@ -60,7 +65,7 @@ export function DreamAboutStory({
   return (
     <DreamSection
       sectionAttrs={sectionGroupAttr("about", "story")}
-      aria-label="Selest's story"
+      aria-label="Story"
     >
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <DreamPhoto
@@ -68,7 +73,7 @@ export function DreamAboutStory({
           alt={portraitAlt}
           aspect="4 / 5"
           className="mx-auto w-full max-w-[420px]"
-          fallbackMessage="Selest's portrait is on its way"
+          fallbackMessage={portraitEmptyMessage}
         />
         <div className="max-w-[60ch]">
           <DreamHeading
@@ -82,19 +87,13 @@ export function DreamAboutStory({
           {hasStoryRichText ? (
             <TiptapRenderer content={storyBody} className={DREAM_STORY_PROSE} />
           ) : (
-            <>
-              {DEFAULT_STORY_PARAGRAPHS.map((paragraph, index) => (
-                <p
-                  key={paragraph}
-                  className={cn(
-                    "text-[var(--dream-soft)]",
-                    index === 0 ? "mt-6" : "mt-4",
-                  )}
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </>
+            // Static fallback for the field's own `defaultValue` (see the
+            // `storyBodyDefaultHtml` prop doc above) — not the Tiptap
+            // renderer, since this HTML never went through the editor.
+            <div
+              className={DREAM_STORY_PROSE}
+              dangerouslySetInnerHTML={{ __html: storyBodyDefaultHtml }}
+            />
           )}
           <div className="mt-8">
             <DreamButton href={ctaUrl} variant="primary">

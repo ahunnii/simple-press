@@ -1,6 +1,10 @@
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { sledgeCartSections } from "./cart-checkout/cart-fields";
+import { sledgeCheckoutUnavailableSections } from "./cart-checkout/unavailable-fields";
+import { sledgeProductSections } from "./products";
+
 /**
  * Curated section registry for the `sledge` storefront template.
  *
@@ -15,7 +19,7 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
     {
       id: "homepage.hero",
       page: "homepage",
-      title: "Hero Mosaic",
+      title: "Hero",
       description: "Animated photo mosaic, tagline, and button at the top.",
       groupIds: ["homepage.hero"],
       order: 0,
@@ -24,11 +28,11 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
     {
       id: "homepage.getToKnow",
       page: "homepage",
-      title: "Get to Know Judy",
-      description: "Intro section with image, heading, and body text.",
+      title: "Introduction",
+      description: "Intro section with image, heading, body text, and buttons.",
       groupIds: ["homepage.getToKnow"],
       order: 1,
-      hideable: false,
+      hideable: true,
     },
     {
       id: "homepage.testimonials",
@@ -48,14 +52,15 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.subscribe"],
       order: 3,
       hideable: true,
+      links: [SECTION_LINKS.branding],
     },
 
     // ── About ─────────────────────────────────────────────────────────────
     {
       id: "about.hero",
       page: "about",
-      title: "About Hero",
-      description: "Editorial image shown in the split hero banner.",
+      title: "Hero",
+      description: "Full-width photo at the top of the about page.",
       groupIds: ["about.hero"],
       order: 0,
       hideable: false,
@@ -63,31 +68,79 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
     {
       id: "about.main",
       page: "about",
-      title: "About Content",
-      description: "Page heading and three labeled content rows.",
+      title: "Introduction",
+      description: "Heading and three labeled rows introducing your story.",
       groupIds: ["about.main"],
       order: 1,
       hideable: false,
+    },
+    {
+      id: "about.trending",
+      page: "about",
+      title: "Trending products",
+      description: "Product rail shown below the about page content.",
+      groupIds: ["about.trending"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.products],
     },
 
     // ── Contact ───────────────────────────────────────────────────────────
     {
       id: "contact.info",
       page: "contact",
-      title: "Contact Page",
-      description:
-        "Hero image, contact info headings, form title, and trending section heading.",
+      title: "Contact details",
+      description: "Photo, contact info headings, and form heading.",
       groupIds: ["contact.info"],
       order: 0,
       hideable: false,
+      links: [
+        SECTION_LINKS.businessContact,
+        SECTION_LINKS.businessLocation,
+        SECTION_LINKS.businessHours,
+      ],
+    },
+    {
+      id: "contact.faq",
+      page: "contact",
+      title: "FAQ",
+      description:
+        "Common questions answered at the bottom of the contact page.",
+      groupIds: ["contact.faq"],
+      order: 1,
+      hideable: true,
+      links: [SECTION_LINKS.faq],
+    },
+    {
+      id: "contact.trending",
+      page: "contact",
+      title: "Trending products",
+      description: "Product rail shown below the contact form.",
+      groupIds: ["contact.trending"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.products],
+    },
+
+    // ── Collections ───────────────────────────────────────────────────────
+    {
+      id: "collections.listing",
+      page: "collections",
+      title: "Collections page",
+      description:
+        "Heading and intro at the top of the collections index page.",
+      groupIds: ["collections.listing"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.collections],
     },
 
     // ── Shop ──────────────────────────────────────────────────────────────
     {
       id: "shop.listing",
       page: "shop",
-      title: "Shop Page",
-      description: "Heading and intro for the shop listing page.",
+      title: "Shop page",
+      description: "Heading and intro for the shop page.",
       groupIds: ["shop.listing"],
       order: 0,
       hideable: false,
@@ -98,8 +151,8 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
     {
       id: "blog.listing",
       page: "blog",
-      title: "Blog Page",
-      description: "Heading and intro for the blog listing page.",
+      title: "Blog page",
+      description: "Heading and intro for the blog page.",
       groupIds: ["blog.listing"],
       order: 0,
       hideable: false,
@@ -109,8 +162,8 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
       id: "blog.post",
       page: "blog",
       renderContext: "blog-post",
-      title: "Blog Post — Shop CTA",
-      description: "Call-to-action band at the bottom of every blog post.",
+      title: "Shop banner",
+      description: "Banner shown at the bottom of each blog post.",
       groupIds: ["blog.post"],
       order: 1,
       hideable: true,
@@ -120,34 +173,35 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
     {
       id: "testimonials.page",
       page: "testimonials",
-      title: "Testimonials Page",
-      description: "Heading, intro, trending section, and empty state.",
+      title: "Testimonials page",
+      description: "Heading, intro text, and empty state.",
       groupIds: ["testimonials.page"],
       order: 0,
       hideable: false,
       links: [SECTION_LINKS.testimonials],
+    },
+    {
+      id: "testimonials.trending",
+      page: "testimonials",
+      title: "Trending products",
+      description: "Product rail shown below the testimonials.",
+      groupIds: ["testimonials.trending"],
+      order: 1,
+      hideable: true,
+      links: [SECTION_LINKS.products],
     },
 
     // ── Global ────────────────────────────────────────────────────────────
     {
       id: "global.branding",
       page: "global",
-      title: "Global Branding",
+      title: "Site branding",
       description:
-        "Location tag and footer notice shown in the site footer, plus the shop CTA text/link reused across pages.",
+        "Footer notice heading/text shown in the site footer, plus the shop button text/link reused across pages. The footer's location tag comes from Settings.",
       groupIds: ["global.branding"],
       order: 0,
       hideable: false,
-    },
-    {
-      id: "global.product",
-      page: "global",
-      title: "Product Page",
-      description:
-        "Trust badges, shipping/question copy, and care instructions applied to every product page.",
-      groupIds: ["global.product"],
-      order: 1,
-      hideable: false,
+      links: [SECTION_LINKS.businessLocation],
     },
     {
       id: "global.authentication",
@@ -158,5 +212,10 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
       order: 2,
       hideable: false,
     },
+
+    // ── Product / cart / checkout (sections live beside their fields) ─────
+    ...sledgeProductSections,
+    ...sledgeCartSections,
+    ...sledgeCheckoutUnavailableSections,
   ],
 };

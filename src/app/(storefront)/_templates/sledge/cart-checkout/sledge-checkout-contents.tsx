@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import type { SledgeTextRow } from "./text-list";
 import { cn } from "~/lib/utils";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
@@ -19,9 +20,15 @@ type Props = {
   merchantPolicies: Parameters<
     typeof SledgeCheckoutForm
   >[0]["merchantPolicies"];
+  /** Resolved `sledge.cart.reassurance-lines` rows (plain data). */
+  reassuranceLines: SledgeTextRow[];
 };
 
-export function SledgeCheckoutContents({ business, merchantPolicies }: Props) {
+export function SledgeCheckoutContents({
+  business,
+  merchantPolicies,
+  reassuranceLines,
+}: Props) {
   const { items } = useCart();
   const itemLabel = `${items.length} ${items.length === 1 ? "item" : "items"}`;
 
@@ -68,6 +75,7 @@ export function SledgeCheckoutContents({ business, merchantPolicies }: Props) {
           <SledgeCheckoutForm
             business={business}
             merchantPolicies={merchantPolicies}
+            reassuranceLines={reassuranceLines}
           />
         </FadeIn>
       </section>

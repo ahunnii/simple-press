@@ -12,6 +12,16 @@ import { DreamRevealGroup } from "../shared/dream-reveal";
 import { DreamAccountEmptyState } from "./dream-account-empty-state";
 import { DreamAccountLayout } from "./dream-account-layout";
 import { DreamOrderStatusBadge } from "./dream-order-status-badge";
+import { resolveDreamAccountFields } from "./fields";
+
+// Reuses the Orders page's empty-state button field (`orders-empty-button`)
+// — both pages currently ship the identical "Request an estimate" → /contact
+// button, so this stays a single field instead of two kept in sync by hand.
+const FIELD_KEYS = [
+  "dream.global.subscriptions-empty-heading",
+  "dream.global.subscriptions-empty-body",
+  "dream.global.orders-empty-button",
+];
 
 /** Next-delivery line for a subscription card — mirrors default/wealth's own logic. */
 function nextDateLabel(
@@ -39,8 +49,12 @@ function nextDateLabel(
 }
 
 export function DreamSubscriptionsPage({
+  business,
   subscriptions,
 }: SubscriptionsPageTemplateProps) {
+  const customFields = business.siteContent?.customFields;
+  const f = resolveDreamAccountFields(customFields, FIELD_KEYS);
+
   return (
     <DreamAccountLayout
       heading="Subscriptions"
@@ -52,9 +66,9 @@ export function DreamSubscriptionsPage({
     >
       {subscriptions.length === 0 ? (
         <DreamAccountEmptyState
-          heading="No subscriptions yet"
-          body="Set up a recurring order with Selest and it will appear here."
-          ctaLabel="Request an estimate"
+          heading={f["dream.global.subscriptions-empty-heading"] ?? ""}
+          body={f["dream.global.subscriptions-empty-body"] ?? ""}
+          ctaLabel={f["dream.global.orders-empty-button"] ?? ""}
           ctaHref="/contact"
         />
       ) : (

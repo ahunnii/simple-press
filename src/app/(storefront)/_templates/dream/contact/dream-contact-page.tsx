@@ -4,6 +4,7 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
+import { resolveDreamContactDetails } from "../shared/dream-contact-details";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamContactInfo } from "./dream-contact-info";
 import { DreamQuoteForm } from "./dream-quote-form";
@@ -25,10 +26,11 @@ const FIELD_KEYS = [
   "dream.contact.form-next-step-2-body",
   "dream.contact.form-next-step-3-heading",
   "dream.contact.form-next-step-3-body",
+  "dream.contact.form-draping-label",
+  "dream.contact.form-throne-label",
+  "dream.contact.form-full-decor-label",
+  "dream.contact.form-full-decor-error",
   "dream.contact.info-heading",
-  "dream.global.contact-email",
-  "dream.global.contact-phone",
-  "dream.global.contact-hours",
   "dream.global.service-area",
 ];
 
@@ -45,6 +47,7 @@ export function DreamContactPage({
     | Record<string, unknown>
     | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
+  const contact = resolveDreamContactDetails(business);
 
   const businessName = business.name ?? "";
   const logoUrl =
@@ -98,14 +101,21 @@ export function DreamContactPage({
         successBody={f["dream.contact.form-success-body"] ?? ""}
         nextHeading={f["dream.contact.form-next-heading"] ?? ""}
         nextSteps={nextSteps}
+        labels={{
+          draping: f["dream.contact.form-draping-label"] ?? "",
+          throneChair: f["dream.contact.form-throne-label"] ?? "",
+          fullDecor: f["dream.contact.form-full-decor-label"] ?? "",
+          fullDecorError: f["dream.contact.form-full-decor-error"] ?? "",
+        }}
       />
 
       {isSectionVisible(customFields, "dream", "contact.info") && (
         <DreamContactInfo
           heading={f["dream.contact.info-heading"] ?? ""}
-          email={f["dream.global.contact-email"] ?? ""}
-          phone={f["dream.global.contact-phone"] ?? ""}
-          hours={f["dream.global.contact-hours"] ?? ""}
+          email={contact.email}
+          phone={contact.phone}
+          hoursRows={contact.hoursRows}
+          legacyHours={contact.legacyHours}
           serviceArea={f["dream.global.service-area"] ?? ""}
         />
       )}

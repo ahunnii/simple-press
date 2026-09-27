@@ -13,7 +13,7 @@ type Testimonial = RouterOutputs["testimonial"]["listRandom"][number];
 
 type SledgeTestimonialsProps = {
   testimonials: Testimonial[];
-  heading?: string;
+  heading: string;
   image?: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
@@ -59,7 +59,7 @@ export function SledgeTestimonials({
             className="sl-heading-xl font-heading"
             {...fieldAttr("sledge.homepage-testimonials-heading")}
           >
-            {heading ?? "Testimonials"}
+            {heading}
           </h2>
 
           {/* Quote carousel */}

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  AlertTriangle,
   ArrowLeft,
   ChevronDown,
   Download,
@@ -20,10 +21,16 @@ import {
 import { toast } from "sonner";
 
 import type { PreviewPaneHandle } from "~/components/preview/preview-pane";
+import type { TemplateFieldRefIds } from "~/lib/template-field-refs";
 import type { TemplateField } from "~/lib/template-fields";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
+import { publicUrlToKey } from "~/lib/s3/url";
 import { SP_META_KEY } from "~/lib/sp-meta";
+import {
+  collectTemplateFieldRefs,
+  mergeRefIds,
+} from "~/lib/template-field-refs";
 import {
   getGroupMetadata,
   groupFieldsByGroup,
@@ -33,6 +40,12 @@ import {
 } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -76,6 +89,30 @@ type Props = {
   mediaEnabled?: boolean;
 };
 
+/** An imported field whose value points at something this site doesn't own. */
+type ImportIssue = {
+  key: string;
+  label: string;
+  page: string;
+  /** Field group id (`field.group ?? "ungrouped"`) — absent for custom pairs. */
+  group?: string;
+  reasons: string[];
+};
+
+const FOREIGN_MEDIA_REASON = "Image/video from another site";
+
+// One reason per referenced-record type, in display order.
+const MISSING_REF_REASONS: Record<keyof TemplateFieldRefIds, string> = {
+  gallery: "Gallery not on this site",
+  collection: "Collection not on this site",
+  faq: "FAQ item(s) not on this site",
+  form: "Embedded form not on this site",
+  quoteCalculator: "Embedded quote calculator not on this site",
+};
+const REF_TYPES = Object.keys(MISSING_REF_REASONS) as Array<
+  keyof TemplateFieldRefIds
+>;
+
 export function TemplateFieldsEditor({
   business,
   siteContent,
@@ -106,6 +143,26 @@ export function TemplateFieldsEditor({
   const groupedByPage = groupFieldsByPage(business.templateId);
   const allPages = Object.keys(groupedByPage);
 
+  // Custom pairs are keyed `<templateId>.<page>.<rest>` — the tab is segment
+  // [1]; anything that doesn't name a real tab lands on the first one so it's
+  // never orphaned. Only THIS template's keys become pairs (other templates'
+  // saved keys still round-trip untouched via `customFields` on save).
+  const templatePrefix = `${business.templateId}.`;
+  const customPairPage = (key: string) => {
+    const page = key.split(".")[1];
+    return page && allPages.includes(page) ? page : (allPages[0] ?? "global");
+  };
+
+  // Import warnings — imported fields referencing another site's media or records.
+  const [importIssues, setImportIssues] = useState<ImportIssue[]>([]);
+  // Bumped whenever issues are cleared so an in-flight import check can't
+  // resurrect them after Reset / Save / dismiss (or a newer import).
+  const importSeqRef = useRef(0);
+  const clearImportIssues = () => {
+    importSeqRef.current++;
+    setImportIssues([]);
+  };
+
   // Initialize custom fields
   const initialFields = (siteContent.customFields ?? {}) as Record<
     string,
@@ -126,6 +183,7 @@ export function TemplateFieldsEditor({
       Object.entries(initialFields)
         .filter(
           ([key, value]) =>
+            key.startsWith(templatePrefix) &&
             key !== SP_META_KEY &&
             !isRetiredTemplateKey(key) &&
             !allTemplateKeys.has(key) &&
@@ -148,10 +206,13 @@ export function TemplateFieldsEditor({
   const savedFieldsRef = useRef<Record<string, unknown>>({});
   const importInputRef = useRef<HTMLInputElement>(null);
 
-  // Custom key-value pairs (organized by page)
-  const [customPairs, setCustomPairs] = useState<
-    Array<{ key: string; value: string; page: string }>
-  >(() => {
+  // Custom key-value pairs (organized by page), rebuilt from the saved
+  // fields on mount and on Reset.
+  const buildCustomPairs = (): Array<{
+    key: string;
+    value: string;
+    page: string;
+  }> => {
     const allTemplateKeys = new Set(
       Object.values(groupedByPage)
         .flat()
@@ -160,25 +221,30 @@ export function TemplateFieldsEditor({
     // Exclude the reserved editor-metadata key and retired template keys —
     // neither is owner-editable content (retired keys have no schema left to
     // render an input for; their saved value round-trips untouched via
-    // `customFields`/`allFields` below).
+    // `customFields`/`allFields` below). Other templates' keys are excluded
+    // too — same round-trip, never shown on this template's tabs.
     return Object.entries(initialFields)
       .filter(
         ([key]) =>
+          key.startsWith(templatePrefix) &&
           key !== SP_META_KEY &&
           !isRetiredTemplateKey(key) &&
           !allTemplateKeys.has(key),
       )
-      .map(([key, value]) => {
-        const page = key.split(".")[0] ?? "global";
-        return { key, value: typeof value === "string" ? value : "", page };
-      });
-  });
+      .map(([key, value]) => ({
+        key,
+        value: typeof value === "string" ? value : "",
+        page: customPairPage(key),
+      }));
+  };
+  const [customPairs, setCustomPairs] = useState(buildCustomPairs);
 
   const updateSiteContent = api.content.updateSiteContent.useMutation({
     onSuccess: () => {
       toast.dismiss();
       toast.success("Template fields updated");
       setModifiedFields(new Set());
+      clearImportIssues();
       requestAnimationFrame(() => {
         setModifiedFields(new Set());
         setInitialState((prev) => ({
@@ -204,6 +270,11 @@ export function TemplateFieldsEditor({
 
   // Draft save mutation — orthogonal to publish; does NOT touch modifiedFields/initialState.
   const savePreviewDraft = api.content.savePreviewDraft.useMutation();
+
+  // Import check — which referenced gallery/collection/FAQ/form/calculator ids
+  // this business doesn't own. A mutation so it runs on demand, never cached.
+  const checkTemplateFieldRefs =
+    api.content.checkTemplateFieldRefs.useMutation();
 
   // Clear draft mutation — explicit action only. Drafts are DURABLE now (the
   // visual editor at /editor resumes them), so this editor must never clear
@@ -294,8 +365,9 @@ export function TemplateFieldsEditor({
 
   const handleReset = () => {
     setCustomFields({ ...initialFields });
-    setCustomPairs(customPairs.filter((p) => p.key && p.value));
+    setCustomPairs(buildCustomPairs());
     setModifiedFields(new Set());
+    clearImportIssues();
   };
 
   // handleFieldChange only updates local state — no per-keystroke autosave.
@@ -335,55 +407,184 @@ export function TemplateFieldsEditor({
     URL.revokeObjectURL(url);
   };
 
+  /**
+   * Flag imported fields whose values point at another site: storage URLs
+   * outside this business's key prefix (checked here) and gallery/collection/
+   * FAQ/form/calculator ids it doesn't own (checked server-side). Issues merge
+   * over the previous import's — a re-imported key replaces its old entry.
+   */
+  const checkImportedRefs = async (imported: Record<string, unknown>) => {
+    const seq = ++importSeqRef.current;
+    const refs = collectTemplateFieldRefs(business.templateId, imported);
+    const reasonsByKey = new Map<string, Set<string>>();
+    const addReason = (key: string, reason: string) => {
+      const set = reasonsByKey.get(key) ?? new Set<string>();
+      set.add(reason);
+      reasonsByKey.set(key, set);
+    };
+
+    const ownPrefix = `${business.id}/`;
+    for (const [key, ref] of Object.entries(refs)) {
+      const foreign = ref.storageUrls.some((url) => {
+        const storageKey = publicUrlToKey(url);
+        return storageKey !== null && !storageKey.startsWith(ownPrefix);
+      });
+      if (foreign) addReason(key, FOREIGN_MEDIA_REASON);
+    }
+
+    const ids = mergeRefIds(refs);
+    if (REF_TYPES.some((type) => ids[type].length > 0)) {
+      try {
+        const { missing } = await checkTemplateFieldRefs.mutateAsync(ids);
+        for (const type of REF_TYPES) {
+          const missingIds = new Set(missing[type]);
+          if (missingIds.size === 0) continue;
+          for (const [key, ref] of Object.entries(refs)) {
+            if (ref.ids[type].some((id) => missingIds.has(id))) {
+              addReason(key, MISSING_REF_REASONS[type]);
+            }
+          }
+        }
+      } catch {
+        // The import itself stands — only the verification failed.
+        toast.warning(
+          "Imported, but couldn't verify linked galleries/collections/FAQs/forms",
+        );
+      }
+    }
+
+    // Reset / Save / dismiss / a newer import happened while we awaited.
+    if (seq !== importSeqRef.current) return;
+
+    const fieldDefs = new Map(
+      Object.values(groupedByPage)
+        .flat()
+        .map((f) => [f.key, f] as const),
+    );
+    // Canonical reason order regardless of the order they were found in.
+    const reasonOrder = [
+      FOREIGN_MEDIA_REASON,
+      ...REF_TYPES.map((t) => MISSING_REF_REASONS[t]),
+    ];
+    const issues: ImportIssue[] = [...reasonsByKey].map(([key, reasons]) => {
+      const field = fieldDefs.get(key);
+      return {
+        key,
+        label: field?.label ?? key,
+        page: field ? (field.page ?? "global") : customPairPage(key),
+        // Matches FieldGroup's card id `fieldgroup-<page>-<groupId>`.
+        group: field ? (field.group ?? "ungrouped") : undefined,
+        reasons: reasonOrder.filter((r) => reasons.has(r)),
+      };
+    });
+
+    setImportIssues((prev) => [
+      ...prev.filter((issue) => !(issue.key in imported)),
+      ...issues,
+    ]);
+  };
+
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
+      // Always clear so re-picking the same file fires onChange again.
+      input.value = "";
+
+      let parsed: Record<string, unknown>;
       try {
-        const parsed = JSON.parse(ev.target?.result as string) as Record<
-          string,
-          unknown
-        >;
-        const prefix = `${business.templateId}.`;
-        const allTemplateKeys = new Set(
-          Object.values(groupedByPage)
-            .flat()
-            .map((f) => f.key),
-        );
-        const newCustomFields = { ...customFields };
-        const newModified = new Set(modifiedFields);
-        const newCustomPairs = [...customPairs];
-        let count = 0;
-
-        for (const [key, value] of Object.entries(parsed)) {
-          if (key === "_templateId") continue;
-          // Retired keys have no schema left to render an input for — same
-          // treatment as SP_META_KEY, never surfaced as an editable pair.
-          if (isRetiredTemplateKey(key)) continue;
-          // Only import keys that belong to this template
-          if (!key.startsWith(prefix)) continue;
-          if (allTemplateKeys.has(key)) {
-            newCustomFields[key] = value;
-            newModified.add(key);
-            count++;
-          } else if (typeof value === "string") {
-            const page = key.split(".")[1] ?? "global";
-            const existing = newCustomPairs.findIndex((p) => p.key === key);
-            if (existing >= 0) newCustomPairs[existing] = { key, value, page };
-            else newCustomPairs.push({ key, value, page });
-            count++;
-          }
+        const json: unknown = JSON.parse(ev.target?.result as string);
+        if (!json || typeof json !== "object" || Array.isArray(json)) {
+          throw new Error("not an object");
         }
-
-        setCustomFields(newCustomFields);
-        setModifiedFields(newModified);
-        setCustomPairs(newCustomPairs);
-        toast.success(`Imported ${count} field${count !== 1 ? "s" : ""}`);
+        parsed = json as Record<string, unknown>;
       } catch {
         toast.error("Invalid JSON file");
+        return;
       }
-      e.target.value = "";
+
+      const prefix = templatePrefix;
+      const current = business.templateId;
+      const contentKeys = Object.keys(parsed).filter(
+        (key) => key !== "_templateId" && key !== SP_META_KEY,
+      );
+
+      // Refuse files exported from a different template — their keys would
+      // all be skipped anyway, and a silent "Imported 0 fields" reads as a bug.
+      const fileTemplateId =
+        typeof parsed._templateId === "string" ? parsed._templateId : null;
+      if (fileTemplateId !== null && fileTemplateId !== current) {
+        toast.error(
+          `This file is for the "${fileTemplateId}" template; this site uses "${current}". Nothing imported.`,
+        );
+        return;
+      }
+      if (
+        fileTemplateId === null &&
+        contentKeys.length > 0 &&
+        !contentKeys.some((key) => key.startsWith(prefix))
+      ) {
+        const firstKey = contentKeys[0] ?? "";
+        const guess = firstKey.includes(".") ? firstKey.split(".")[0] : null;
+        toast.error(
+          guess
+            ? `This file is for the "${guess}" template; this site uses "${current}". Nothing imported.`
+            : `This file has no "${current}" template fields. Nothing imported.`,
+        );
+        return;
+      }
+
+      const allTemplateKeys = new Set(
+        Object.values(groupedByPage)
+          .flat()
+          .map((f) => f.key),
+      );
+      const newCustomFields = { ...customFields };
+      const newModified = new Set(modifiedFields);
+      const newCustomPairs = [...customPairs];
+      // Only what was actually merged — the ref check runs over this.
+      const imported: Record<string, unknown> = {};
+      let count = 0;
+      let skippedForeign = 0;
+
+      for (const key of contentKeys) {
+        const value = parsed[key];
+        // Only import keys that belong to this template
+        if (!key.startsWith(prefix)) {
+          skippedForeign++;
+          continue;
+        }
+        // Retired keys have no schema left to render an input for — same
+        // treatment as SP_META_KEY, never surfaced as an editable pair.
+        if (isRetiredTemplateKey(key)) continue;
+        if (allTemplateKeys.has(key)) {
+          newCustomFields[key] = value;
+          newModified.add(key);
+          imported[key] = value;
+          count++;
+        } else if (typeof value === "string") {
+          const page = customPairPage(key);
+          const existing = newCustomPairs.findIndex((p) => p.key === key);
+          if (existing >= 0) newCustomPairs[existing] = { key, value, page };
+          else newCustomPairs.push({ key, value, page });
+          imported[key] = value;
+          count++;
+        }
+      }
+
+      setCustomFields(newCustomFields);
+      setModifiedFields(newModified);
+      setCustomPairs(newCustomPairs);
+      toast.success(
+        `Imported ${count} field${count !== 1 ? "s" : ""}` +
+          (skippedForeign > 0
+            ? ` (${skippedForeign} skipped: other template)`
+            : ""),
+      );
+
+      void checkImportedRefs(imported);
     };
     reader.readAsText(file);
   };
@@ -431,6 +632,7 @@ export function TemplateFieldsEditor({
       Object.entries(initialFields)
         .filter(
           ([key, value]) =>
+            key.startsWith(templatePrefix) &&
             key !== SP_META_KEY &&
             !isRetiredTemplateKey(key) &&
             !allTemplateKeys.has(key) &&
@@ -720,6 +922,67 @@ export function TemplateFieldsEditor({
               </CardHeader>
 
               <CardContent>
+                {/* Import warnings — fields pointing at another site's media/records */}
+                {importIssues.length > 0 && (
+                  <Alert variant="warning" className="mb-6">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>
+                      {importIssues.length} imported field
+                      {importIssues.length === 1 ? " needs" : "s need"}{" "}
+                      attention
+                    </AlertTitle>
+                    <AlertDescription>
+                      <p>Re-pick or re-upload these on this site, then Save.</p>
+                      <ul className="-mx-2 mt-2 space-y-0.5">
+                        {importIssues.map((issue) => {
+                          const pageTitle =
+                            PAGE_METADATA[
+                              issue.page as keyof typeof PAGE_METADATA
+                            ]?.title ?? issue.page;
+                          return (
+                            <li key={issue.key}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (issue.group) {
+                                    handleEditGroup(issue.page, issue.group);
+                                  } else {
+                                    setView("form");
+                                    setActiveTab(issue.page);
+                                  }
+                                }}
+                                className="focus-visible:ring-ring w-full rounded-md px-2 py-1.5 text-left transition-colors hover:bg-amber-500/10 focus-visible:ring-2 focus-visible:outline-none"
+                              >
+                                <span className="text-foreground font-medium">
+                                  {issue.label}
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {" "}
+                                  · {pageTitle}
+                                </span>
+                                <span className="block text-xs">
+                                  {issue.reasons.join(" · ")}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </AlertDescription>
+                    <AlertAction>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={clearImportIssues}
+                        aria-label="Dismiss import warnings"
+                      >
+                        <X />
+                      </Button>
+                    </AlertAction>
+                  </Alert>
+                )}
+
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                   <div className="mb-6 sm:hidden">
                     <DropdownMenu>

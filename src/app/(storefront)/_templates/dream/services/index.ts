@@ -15,14 +15,59 @@ import type { TemplateSection } from "~/lib/template-sections";
  * (mirrors `wealth/services/index.ts` / `pink/services/index.ts`).
  */
 
+/**
+ * Built-in package-idea rows — the single source for both the
+ * `dream.services.packages` field's `defaultValue` and the services index
+ * page's render fallback when the saved list is empty
+ * (`dream-services-index-page.tsx`). Row shape matches the field's
+ * `itemSchema` (`includes` is one item per line).
+ */
+export const DREAM_DEFAULT_PACKAGE_ROWS: {
+  name: string;
+  tagline: string;
+  includes: string;
+  note: string;
+}[] = [
+  {
+    name: "Essence",
+    tagline: "A simple, elegant start.",
+    includes: "1 panel\n3 colors\n2 layers\n2 tie backs",
+    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+  },
+  {
+    name: "Deluxe",
+    tagline: "Full and finished with a theme.",
+    includes: "1 panel\na theme\n3–5 colors\nvalance",
+    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+  },
+  {
+    name: "Premium",
+    tagline: "Deluxe, plus a throne chair moment.",
+    includes: "Deluxe package\n2 panels\nthrone chair",
+    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+  },
+  {
+    name: "Lavish",
+    tagline: "Dressed for a full guest list.",
+    includes: "up to 50 guests\nchair covers\ntable cloths",
+    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+  },
+  {
+    name: "Yasss!",
+    tagline: "Big, bright, and ready to celebrate.",
+    includes: "backdrop\nballoon garland\nthrone chair\ngift tables",
+    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+  },
+];
+
 // ─── services.hero ──────────────────────────────────────────────────────────
 // Not hideable — this is the page's sole <h1> and its lead-in copy.
 
 const servicesHeroData: TemplateField[] = [
   {
     key: "dream.services.hero-heading",
-    label: "Hero Heading",
-    description: "The page's H1, shown before the script accent word.",
+    label: "Heading",
+    description: "The page's H1, shown before the highlighted word.",
     type: "text",
     page: "services",
     group: "services.hero",
@@ -31,9 +76,9 @@ const servicesHeroData: TemplateField[] = [
   },
   {
     key: "dream.services.hero-accent",
-    label: "Hero Accent Word",
+    label: "Highlighted word",
     description:
-      "One script word rendered in rose after the heading (design.md: never more than one accent per heading).",
+      "One script-styled word after the heading. Never more than one word.",
     type: "text",
     page: "services",
     group: "services.hero",
@@ -42,7 +87,7 @@ const servicesHeroData: TemplateField[] = [
   },
   {
     key: "dream.services.hero-lede",
-    label: "Hero Lede",
+    label: "Intro",
     description: "Short line under the hero heading.",
     type: "textarea",
     page: "services",
@@ -58,7 +103,7 @@ const servicesHeroData: TemplateField[] = [
 const servicesLanesData: TemplateField[] = [
   {
     key: "dream.services.lanes-see-details-label",
-    label: '"See Details" Link Label',
+    label: "See details link label",
     description: "Label for the link at the end of each service row.",
     type: "text",
     page: "services",
@@ -68,7 +113,7 @@ const servicesLanesData: TemplateField[] = [
   },
   {
     key: "dream.services.lanes-empty-heading",
-    label: "Empty State Heading",
+    label: "Empty state heading",
     description:
       "Shown in place of the service list when nothing is published yet.",
     type: "text",
@@ -79,7 +124,7 @@ const servicesLanesData: TemplateField[] = [
   },
   {
     key: "dream.services.lanes-empty-body",
-    label: "Empty State Body",
+    label: "Empty state message",
     description: "Short line under the empty-state heading.",
     type: "textarea",
     page: "services",
@@ -90,7 +135,7 @@ const servicesLanesData: TemplateField[] = [
   },
   {
     key: "dream.services.lanes-empty-cta-label",
-    label: "Empty State Button Label",
+    label: "Empty state button label",
     description: "Label for the empty-state button.",
     type: "text",
     page: "services",
@@ -100,7 +145,7 @@ const servicesLanesData: TemplateField[] = [
   },
   {
     key: "dream.services.lanes-empty-cta-url",
-    label: "Empty State Button Link",
+    label: "Empty state button link",
     description: "Where the empty-state button links to.",
     type: "url",
     page: "services",
@@ -115,7 +160,7 @@ const servicesLanesData: TemplateField[] = [
 const servicesPackagesData: TemplateField[] = [
   {
     key: "dream.services.packages-heading",
-    label: "Packages Heading",
+    label: "Heading",
     description: "Heading above the package ideas grid.",
     type: "text",
     page: "services",
@@ -125,7 +170,7 @@ const servicesPackagesData: TemplateField[] = [
   },
   {
     key: "dream.services.packages-lede",
-    label: "Packages Lede",
+    label: "Intro",
     description: "Short line under the packages heading.",
     type: "textarea",
     page: "services",
@@ -136,7 +181,7 @@ const servicesPackagesData: TemplateField[] = [
   },
   {
     key: "dream.services.packages",
-    label: "Package Ideas",
+    label: "Package ideas",
     description:
       "Up to 6 package cards. Includes are entered one per line. No prices — inquiries only.",
     type: "list",
@@ -144,60 +189,43 @@ const servicesPackagesData: TemplateField[] = [
     group: "services.packages",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "package",
+    summaryKey: "name",
     itemSchema: [
-      { key: "name", label: "Name", type: "text", placeholder: "e.g. Essence" },
+      {
+        key: "name",
+        label: "Name",
+        type: "text",
+        description: "Name of the package.",
+        placeholder: "e.g. Essence",
+      },
       {
         key: "tagline",
         label: "Tagline",
         type: "text",
+        description: "Short line shown under the package name.",
+        optional: true,
         placeholder: "e.g. A simple, elegant start.",
       },
       {
         key: "includes",
         label: "Includes (one per line)",
         type: "textarea",
+        description: "What's included in the package, one item per line.",
         placeholder: "1 panel\n3 colors\n2 layers\n2 tie backs",
       },
       {
         key: "note",
         label: "Note",
         type: "text",
+        description: "Short note shown under the package, e.g. an inquiry disclaimer.",
+        optional: true,
         placeholder:
           "Inquiry-only; delivery, setup, and teardown quoted separately.",
       },
     ],
-    defaultValue: JSON.stringify([
-      {
-        name: "Essence",
-        tagline: "A simple, elegant start.",
-        includes: "1 panel\n3 colors\n2 layers\n2 tie backs",
-        note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-      },
-      {
-        name: "Deluxe",
-        tagline: "Full and finished with a theme.",
-        includes: "1 panel\na theme\n3–5 colors\nvalance",
-        note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-      },
-      {
-        name: "Premium",
-        tagline: "Deluxe, plus a throne chair moment.",
-        includes: "Deluxe package\n2 panels\nthrone chair",
-        note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-      },
-      {
-        name: "Lavish",
-        tagline: "Dressed for a full guest list.",
-        includes: "up to 50 guests\nchair covers\ntable cloths",
-        note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-      },
-      {
-        name: "Yasss!",
-        tagline: "Big, bright, and ready to celebrate.",
-        includes: "backdrop\nballoon garland\nthrone chair\ngift tables",
-        note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-      },
-    ]),
+    defaultsWhenEmpty: true,
+    defaultValue: JSON.stringify(DREAM_DEFAULT_PACKAGE_ROWS),
   },
 ];
 
@@ -206,8 +234,8 @@ const servicesPackagesData: TemplateField[] = [
 const servicesCtaData: TemplateField[] = [
   {
     key: "dream.services.cta-heading",
-    label: "Closing CTA Heading",
-    description: "Heading shown before the script accent word.",
+    label: "Heading",
+    description: "Heading shown before the highlighted word.",
     type: "text",
     page: "services",
     group: "services.cta",
@@ -216,8 +244,8 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "dream.services.cta-accent",
-    label: "Closing CTA Accent Word",
-    description: "Script word rendered in rose after the heading.",
+    label: "Highlighted word",
+    description: "Script-styled word after the heading.",
     type: "text",
     page: "services",
     group: "services.cta",
@@ -226,8 +254,8 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "dream.services.cta-lede",
-    label: "Closing CTA Lede",
-    description: "Short line under the closing CTA heading.",
+    label: "Intro",
+    description: "Short line under this section's heading.",
     type: "textarea",
     page: "services",
     group: "services.cta",
@@ -237,8 +265,8 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "dream.services.cta-label",
-    label: "Closing CTA Button Label",
-    description: "Label for the closing CTA button.",
+    label: "Button label",
+    description: "Label for this section's button.",
     type: "text",
     page: "services",
     group: "services.cta",
@@ -247,8 +275,8 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "dream.services.cta-url",
-    label: "Closing CTA Button URL",
-    description: "Where the closing CTA button links to.",
+    label: "Button link",
+    description: "Where this section's button links to.",
     type: "url",
     page: "services",
     group: "services.cta",
@@ -269,14 +297,14 @@ export const dreamServicesData: TemplateField[] = [
 export const dreamServicesFieldGroups: TemplateFieldGroup[] = [
   {
     id: "services.hero",
-    title: "Hero",
-    description: "Page heading, script accent, and lede.",
+    title: "Page header",
+    description: "Page heading, highlighted word, and intro.",
     icon: "☁️",
     columns: 2,
   },
   {
     id: "services.lanes",
-    title: "Service Lanes",
+    title: "Services",
     description:
       "Alternating rows, one per published service. Designed empty-state copy shown when none are published.",
     icon: "🎀",
@@ -284,17 +312,17 @@ export const dreamServicesFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "services.packages",
-    title: "Package Ideas",
+    title: "Package ideas",
     description:
-      "Heading, lede, and up to 6 package cards — no prices, inquiry-only.",
+      "Heading, intro, and up to 6 package cards — no prices, inquiry-only.",
     icon: "🎁",
     columns: 2,
   },
   {
     id: "services.cta",
-    title: "Closing Call to Action",
+    title: "Closing banner",
     description:
-      "Quiet closing heading, lede, and button beneath the packages.",
+      "Quiet closing heading, intro, and button beneath the packages.",
     icon: "💌",
     columns: 2,
   },
@@ -304,8 +332,8 @@ export const dreamServicesSections: TemplateSection[] = [
   {
     id: "services.hero",
     page: "services",
-    title: "Hero",
-    description: "Page heading, lede, and logo over the sky.",
+    title: "Page header",
+    description: "Page heading, intro, and logo over the hero background.",
     groupIds: ["services.hero"],
     order: 0,
     hideable: false,
@@ -313,7 +341,7 @@ export const dreamServicesSections: TemplateSection[] = [
   {
     id: "services.lanes",
     page: "services",
-    title: "Service Lanes",
+    title: "Services",
     description:
       "The alternating row for every published service, or its empty state.",
     groupIds: ["services.lanes"],
@@ -323,7 +351,7 @@ export const dreamServicesSections: TemplateSection[] = [
   {
     id: "services.packages",
     page: "services",
-    title: "Package Ideas",
+    title: "Package ideas",
     description: "Grid of package cards beneath the service lanes.",
     groupIds: ["services.packages"],
     order: 2,
@@ -332,8 +360,8 @@ export const dreamServicesSections: TemplateSection[] = [
   {
     id: "services.cta",
     page: "services",
-    title: "Closing Call to Action",
-    description: "Estimate Quote band beneath the packages.",
+    title: "Closing banner",
+    description: "Quote request band beneath the packages.",
     groupIds: ["services.cta"],
     order: 3,
     hideable: true,

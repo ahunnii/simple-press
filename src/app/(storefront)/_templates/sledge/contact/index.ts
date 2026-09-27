@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const contactPageData: TemplateField[] = [
   {
     key: "sledge.contact-image",
-    label: "Contact Hero Image",
-    description: "Full-width banner image at the top of the contact page",
+    label: "Photo",
+    description: "Full-width banner photo at the top of the contact page.",
     type: "image",
     page: "contact",
     group: "contact.info",
@@ -13,8 +13,8 @@ const contactPageData: TemplateField[] = [
   },
   {
     key: "sledge.contact.location-heading",
-    label: "Location Heading",
-    description: "Heading above the shop address",
+    label: "Location heading",
+    description: "Heading above your address, set in Settings → General.",
     type: "text",
     page: "contact",
     group: "contact.info",
@@ -23,8 +23,8 @@ const contactPageData: TemplateField[] = [
   },
   {
     key: "sledge.contact.location-note",
-    label: "Location Note",
-    description: "Secondary text below the shop address",
+    label: "Location note",
+    description: "Secondary line below your address. Leave blank to hide.",
     type: "textarea",
     page: "contact",
     group: "contact.info",
@@ -34,8 +34,8 @@ const contactPageData: TemplateField[] = [
   },
   {
     key: "sledge.contact.email-heading",
-    label: "Email Heading",
-    description: "Heading above the support email",
+    label: "Email heading",
+    description: "Heading above your support email, set in Settings → General.",
     type: "text",
     page: "contact",
     group: "contact.info",
@@ -44,8 +44,8 @@ const contactPageData: TemplateField[] = [
   },
   {
     key: "sledge.contact.phone-heading",
-    label: "Phone Heading",
-    description: "Heading above the phone number",
+    label: "Phone heading",
+    description: "Heading above your phone number, set in Settings → General.",
     type: "text",
     page: "contact",
     group: "contact.info",
@@ -53,36 +53,101 @@ const contactPageData: TemplateField[] = [
     defaultValue: "Phone Number",
   },
   {
+    key: "sledge.contact.hours-heading",
+    label: "Hours heading",
+    description: "Heading above your business hours, set in Settings → Hours.",
+    type: "text",
+    page: "contact",
+    group: "contact.info",
+    gridColumn: "col-span-1",
+    defaultValue: "Hours",
+  },
+  {
     key: "sledge.contact.form-title",
-    label: "Form Title",
-    description: "Heading shown on the contact form card",
+    label: "Form heading",
+    description: "Heading shown on the contact form card.",
     type: "text",
     page: "contact",
     group: "contact.info",
     gridColumn: "col-span-1",
     defaultValue: "Send Us A Message",
   },
+];
+
+const contactTrendingData: TemplateField[] = [
   {
     key: "sledge.contact.trending-heading",
-    label: "Trending Section Heading",
-    description: "Heading for the product rail below the contact form",
+    label: "Heading",
+    description: "Heading for the product rail below the contact form.",
     type: "text",
     page: "contact",
-    group: "contact.info",
+    group: "contact.trending",
     gridColumn: "col-span-1",
     defaultValue: "Trending Now",
   },
 ];
 
-export const sledgeContactData = [...contactPageData];
+const contactFaqData: TemplateField[] = [
+  {
+    key: "sledge.contact.faq-heading",
+    label: "Heading",
+    description: "Heading above the questions.",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "Frequently asked questions",
+  },
+  {
+    key: "sledge.contact.faq-intro",
+    label: "Intro text",
+    description: "Optional line below the heading. Leave blank to hide.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "sledge.contact.faq",
+    label: "Questions",
+    description:
+      "Pick questions from Content → FAQ. Leave empty to show the first 10 published questions.",
+    type: "faq",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    minItems: 0,
+    maxItems: 10,
+  },
+];
+
+export const sledgeContactData = [
+  ...contactPageData,
+  ...contactTrendingData,
+  ...contactFaqData,
+];
 
 export const sledgeContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.info",
-    title: "Contact Page",
-    description:
-      "Hero image, contact info headings, form title, and trending section",
+    title: "Contact details",
+    description: "Photo, contact info headings, and form heading.",
     icon: "📧",
     columns: 2,
+  },
+  {
+    id: "contact.trending",
+    title: "Trending products",
+    description: "Product rail shown below the contact form.",
+    icon: "🛍️",
+    columns: 1,
+  },
+  {
+    id: "contact.faq",
+    title: "FAQ",
+    description: "Common questions answered at the bottom of the contact page.",
+    icon: "❓",
+    columns: 1,
   },
 ];

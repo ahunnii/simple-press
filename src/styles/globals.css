@@ -11811,6 +11811,47 @@
   cursor: pointer;
 }
 
+.dream .dream-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dream .dream-header-cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: var(--dream-soft);
+  text-decoration: none;
+  transition: color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-header-cart:hover,
+.dream .dream-header-cart[aria-current="page"] {
+  color: var(--dream-ink);
+}
+
+.dream .dream-header-cart-count {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-family: var(--font-dream-body);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--dream-paper);
+  background: var(--dream-rose);
+  border-radius: 999px;
+}
+
 @media (min-width: 960px) {
   /* Single row: logo + nav left, account slot + CTA pushed right by the
      right cell's `margin-left:auto`. */

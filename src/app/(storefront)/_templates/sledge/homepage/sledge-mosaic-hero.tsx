@@ -15,9 +15,9 @@ type ImageEntry = { url: string; altText: string | null };
 type SledgeMosaicHeroProps = {
   images: ImageEntry[];
   logoUrl?: string;
-  tagline?: string;
-  ctaText?: string;
-  ctaHref?: string;
+  tagline: string;
+  ctaText: string;
+  ctaHref: string;
   businessName?: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
@@ -50,10 +50,6 @@ export function SledgeMosaicHero({
   }, []);
 
   const tiles = images.slice(0, MAX_TILES);
-  const resolvedTagline =
-    tagline ?? "BE DIFFERENT. BE UNIQUELY YOU. BE OUTRAGEOUS.";
-  const resolvedCtaText = ctaText ?? "What's New";
-  const resolvedCtaHref = ctaHref ?? "/shop";
 
   const tileStyle = (i: number): React.CSSProperties =>
     reducedMotion
@@ -123,23 +119,27 @@ export function SledgeMosaicHero({
         </div>
 
         {/* Tagline */}
-        <p
-          className="sl-hero-tagline font-sans italic"
-          {...fieldAttr("sledge.homepage.hero-tagline")}
-        >
-          {resolvedTagline}
-        </p>
+        {tagline.trim() ? (
+          <p
+            className="sl-hero-tagline font-sans italic"
+            {...fieldAttr("sledge.homepage.hero-tagline")}
+          >
+            {tagline}
+          </p>
+        ) : null}
 
         {/* CTA — larger than the default sl-btn to match the original hero */}
-        <div className="sl-hero-cta-wrap">
-          <Link
-            href={resolvedCtaHref}
-            className="sl-btn sl-btn-hero"
-            {...fieldAttr("sledge.homepage.hero-primary-button-text")}
-          >
-            {resolvedCtaText}
-          </Link>
-        </div>
+        {ctaText.trim() ? (
+          <div className="sl-hero-cta-wrap">
+            <Link
+              href={ctaHref || "/shop"}
+              className="sl-btn sl-btn-hero"
+              {...fieldAttr("sledge.homepage.hero-primary-button-text")}
+            >
+              {ctaText}
+            </Link>
+          </div>
+        ) : null}
       </div>
     </section>
   );

@@ -1,12 +1,14 @@
 import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   PageTransition,
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
 
+import { resolveFields } from "../index";
 import { SledgeCollectionCard } from "../shared/sledge-collection-card";
 import {
   SledgeEmptyState,
@@ -16,14 +18,27 @@ import {
 
 export function SledgeCollectionsPage({
   collections,
+  business,
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
+
+  const customFields = business.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+  const f = resolveFields(customFields, [
+    "sledge.collections.heading",
+    "sledge.collections.intro",
+  ]);
 
   return (
     <PageTransition>
       <SledgePageHeader
-        title="All Collections"
-        intro="Browse curated groupings of one-of-a-kind pieces from the studio."
+        title={f["sledge.collections.heading"] ?? ""}
+        titleFieldKey="sledge.collections.heading"
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        intro={f["sledge.collections.intro"] || undefined}
+        introFieldKey="sledge.collections.intro"
+        sectionAttrs={sectionGroupAttr("collections", "listing")}
         actions={
           <Link
             href="/shop"

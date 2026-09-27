@@ -300,6 +300,7 @@ export async function DreamHomepage({
             accent={f["dream.homepage.quote-accent"] ?? ""}
             lede={f["dream.homepage.quote-lede"] ?? ""}
             chips={quoteChips}
+            chipsFieldKey="dream.homepage.quote-chips"
             ctaLabel={f["dream.homepage.quote-cta-label"] ?? ""}
             ctaUrl={f["dream.homepage.quote-cta-url"] ?? "/contact"}
             headingFieldKey="dream.homepage.quote-heading"

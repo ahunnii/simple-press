@@ -19,8 +19,8 @@ export function SledgeShopPage({ business }: DefaultProductsPageTemplateProps) {
     "sledge.shop-listing-intro",
   ]);
 
-  const shopHeading = f["sledge.shop-listing-heading"] ?? "The Collection";
-  const shopIntro = f["sledge.shop-listing-intro"] ?? "";
+  const shopHeading = f["sledge.shop-listing-heading"] ?? "";
+  const shopIntro = f["sledge.shop-listing-intro"];
   const products = (business.products ?? []) as unknown as Product[];
 
   /* Derive unique collections from products for the browse strip */
@@ -53,6 +53,7 @@ export function SledgeShopPage({ business }: DefaultProductsPageTemplateProps) {
       <SledgePageHeader
         title={shopHeading}
         titleFieldKey="sledge.shop-listing-heading"
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         intro={shopIntro || undefined}
         introFieldKey="sledge.shop-listing-intro"
         sectionAttrs={sectionGroupAttr("shop", "listing")}

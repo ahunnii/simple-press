@@ -1,8 +1,12 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 import { dreamAboutSections } from "./about";
+import { dreamAccountSections } from "./account";
+import { dreamCheckoutUnavailableSections } from "./cart-checkout/unavailable-fields";
 import { dreamContactSections } from "./contact";
 import { dreamHomepageSections } from "./homepage";
+import { dreamProductSections } from "./products";
 import { dreamServicesSections } from "./services";
 import { dreamTestimonialsSections } from "./testimonials";
 
@@ -19,10 +23,16 @@ export const dreamSections: Record<string, TemplateSection[]> = {
     {
       id: "global.branding",
       page: "global",
-      title: "Topbar, Navigation & Footer",
+      title: "Header and footer",
       description:
-        "Announcement bar, header CTA, gallery link, and the footer's brand/contact copy — shown on every page",
+        "Header button, footer sign-off, and service area — shown on every page. Email, phone, and hours come from Settings; the footer tagline and social links from Content → Branding; the announcement bar from Content → Announcements",
       groupIds: ["global.branding"],
+      links: [
+        SECTION_LINKS.branding,
+        SECTION_LINKS.businessContact,
+        SECTION_LINKS.businessHours,
+        SECTION_LINKS.announcements,
+      ],
       order: 0,
       hideable: false,
     },
@@ -36,11 +46,14 @@ export const dreamSections: Record<string, TemplateSection[]> = {
       order: 1,
       hideable: false,
     },
+    ...dreamAccountSections,
 
     ...dreamHomepageSections,
     ...dreamAboutSections,
     ...dreamServicesSections,
     ...dreamContactSections,
     ...dreamTestimonialsSections,
+    ...dreamProductSections,
+    ...dreamCheckoutUnavailableSections,
   ],
 };

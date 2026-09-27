@@ -1,18 +1,23 @@
 import Image from "next/image";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
+import { resolveFaqPickerItems } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import { FadeIn } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
+import { SledgeAccordionItem } from "../shared/sledge-accordion";
 import { SledgeProductRail } from "../shared/sledge-product-rail";
 import { SledgeContactForm } from "./sledge-contact-form";
 import { SledgeContactInfoRow } from "./sledge-contact-info-row";
 
 export async function SledgeContactPage({
   business,
+  faqItems,
 }: DefaultContactPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, unknown>
@@ -24,25 +29,43 @@ export async function SledgeContactPage({
     "sledge.contact.location-note",
     "sledge.contact.email-heading",
     "sledge.contact.phone-heading",
+    "sledge.contact.hours-heading",
     "sledge.contact.form-title",
     "sledge.contact.trending-heading",
+    "sledge.contact.faq-heading",
+    "sledge.contact.faq-intro",
     "sledge.global.shop-cta-text",
     "sledge.global.shop-cta-link",
   ]);
 
-  const heroImage = f["sledge.contact-image"]?.trim() ?? "/placeholder.svg";
-  const locationHeading =
-    f["sledge.contact.location-heading"] ?? "Shop Location";
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- cleared field resolves to "", not null/undefined
+  const heroImage = f["sledge.contact-image"] || "/placeholder.svg";
+  const locationHeading = f["sledge.contact.location-heading"] ?? "";
   const locationNote = f["sledge.contact.location-note"] ?? "";
-  const emailHeading = f["sledge.contact.email-heading"] ?? "Email Address";
-  const phoneHeading = f["sledge.contact.phone-heading"] ?? "Phone Number";
-  const formTitle = f["sledge.contact.form-title"] ?? "Send Us A Message";
-  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "Browse Shop";
-  const shopCtaHref = f["sledge.global.shop-cta-link"] ?? "/shop";
+  const emailHeading = f["sledge.contact.email-heading"] ?? "";
+  const phoneHeading = f["sledge.contact.phone-heading"] ?? "";
+  const hoursHeading = f["sledge.contact.hours-heading"] ?? "";
+  const formTitle = f["sledge.contact.form-title"] ?? "";
+  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "";
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- url field: "" means unsafe/cleared, must still fall back
+  const shopCtaHref = f["sledge.global.shop-cta-link"] || "/shop";
 
   const email = business.supportEmail;
   const phone = business.phoneNumber;
   const address = business.businessAddress;
+  const hoursRows = formatBusinessHours(parseBusinessHours(business.businessHours));
+
+  const faq = resolveFaqPickerItems(
+    customFields?.["sledge.contact.faq"],
+    faqItems,
+    10,
+  );
+  const trendingVisible = isSectionVisible(
+    customFields,
+    "sledge",
+    "contact.trending",
+  );
+  const faqVisible = isSectionVisible(customFields, "sledge", "contact.faq");
 
   const homepage = await api.business.getHomepage();
   const products = homepage?.products ?? [];
@@ -100,7 +123,15 @@ export async function SledgeContactPage({
                   title={phoneHeading}
                   titleFieldKey="sledge.contact.phone-heading"
                   lines={[phone]}
-                  links={[`tel:${phone.replace(/\D/g, "")}`]}
+                  links={[`tel:${phone.replace(/[^\d+]/g, "")}`]}
+                />
+              )}
+              {hoursRows.length > 0 && (
+                <SledgeContactInfoRow
+                  icon={Clock}
+                  title={hoursHeading}
+                  titleFieldKey="sledge.contact.hours-heading"
+                  lines={hoursRows.map((row) => `${row.label}: ${row.value}`)}
                 />
               )}
             </div>
@@ -113,14 +144,51 @@ export async function SledgeContactPage({
         </FadeIn>
       </section>
 
-      <SledgeProductRail
-        heading={f["sledge.contact.trending-heading"] ?? "Trending Now"}
-        headingFieldKey="sledge.contact.trending-heading"
-        ctaText={shopCtaText}
-        ctaHref={shopCtaHref}
-        products={products}
-        sectionAttrs={sectionGroupAttr("contact", "info")}
-      />
+      {faq.length > 0 && faqVisible ? (
+        <section
+          {...sectionGroupAttr("contact", "faq")}
+          className="bg-white px-7 py-16 md:py-20"
+        >
+          <div className="mx-auto max-w-3xl">
+            <FadeIn>
+              <h2
+                className="sl-heading-xl font-heading mb-4"
+                {...fieldAttr("sledge.contact.faq-heading")}
+              >
+                {f["sledge.contact.faq-heading"]}
+              </h2>
+              {f["sledge.contact.faq-intro"]?.trim() ? (
+                <p
+                  className="sl-eyebrow mb-8 font-sans text-sm leading-relaxed"
+                  {...fieldAttr("sledge.contact.faq-intro")}
+                >
+                  {f["sledge.contact.faq-intro"]}
+                </p>
+              ) : null}
+            </FadeIn>
+            <FadeIn>
+              <div className="mt-4">
+                {faq.map((row) => (
+                  <SledgeAccordionItem key={row.id} title={row.question}>
+                    {row.answer}
+                  </SledgeAccordionItem>
+                ))}
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+      ) : null}
+
+      {trendingVisible ? (
+        <SledgeProductRail
+          heading={f["sledge.contact.trending-heading"] ?? ""}
+          headingFieldKey="sledge.contact.trending-heading"
+          ctaText={shopCtaText}
+          ctaHref={shopCtaHref}
+          products={products}
+          sectionAttrs={sectionGroupAttr("contact", "trending")}
+        />
+      ) : null}
     </>
   );
 }

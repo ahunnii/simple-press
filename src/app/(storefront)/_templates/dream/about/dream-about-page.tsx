@@ -9,6 +9,7 @@ import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
 import { DreamAboutConsultation } from "./dream-about-consultation";
 import { DreamAboutStory } from "./dream-about-story";
+import { DREAM_ABOUT_STORY_BODY_DEFAULT_HTML } from "./index";
 
 const FIELD_KEYS = [
   "dream.about.hero-heading",
@@ -16,6 +17,7 @@ const FIELD_KEYS = [
   "dream.about.hero-lede",
   "dream.about.story-portrait",
   "dream.about.story-portrait-alt",
+  "dream.about.story-portrait-empty",
   "dream.about.story-quote-lead",
   "dream.about.story-quote-accent",
   "dream.about.story-cta-label",
@@ -96,9 +98,11 @@ export function DreamAboutPage({ business }: DefaultAboutPageTemplateProps) {
       <DreamAboutStory
         portrait={f["dream.about.story-portrait"] ?? "/placeholder.svg"}
         portraitAlt={f["dream.about.story-portrait-alt"] ?? ""}
+        portraitEmptyMessage={f["dream.about.story-portrait-empty"] ?? ""}
         quoteLead={f["dream.about.story-quote-lead"] ?? ""}
         quoteAccent={f["dream.about.story-quote-accent"] ?? ""}
         storyBody={storyBody}
+        storyBodyDefaultHtml={DREAM_ABOUT_STORY_BODY_DEFAULT_HTML}
         ctaLabel={f["dream.about.story-cta-label"] ?? ""}
         ctaUrl={f["dream.about.story-cta-url"] ?? "/contact"}
       />

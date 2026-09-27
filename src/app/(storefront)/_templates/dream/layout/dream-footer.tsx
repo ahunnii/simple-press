@@ -7,16 +7,16 @@ import { api } from "~/trpc/server";
 
 import { resolveDreamNav } from "../lib/nav";
 import { resolveDreamFields } from "../lib/resolve-fields";
+import {
+  dreamTelHref,
+  resolveDreamContactDetails,
+} from "../shared/dream-contact-details";
 import { DreamSocialLinks } from "../shared/dream-social-links";
 
 const FIELD_KEYS = [
   "dream.global.footer-signoff",
   "dream.global.footer-signoff-accent",
-  "dream.global.footer-tagline",
   "dream.global.service-area",
-  "dream.global.contact-email",
-  "dream.global.contact-phone",
-  "dream.global.contact-hours",
   "dream.global.header-cta-label",
   "dream.global.header-cta-url",
 ];
@@ -25,8 +25,9 @@ const FIELD_KEYS = [
  * Paper footer, hairline top rule, three columns (design.md "Chrome ›
  * Footer"): brand (mini logo + script sign-off + service area), links
  * (mirrors Admin → Content → Navigation top-level items via
- * `resolveDreamNav`, plus the header CTA), contact (email, phone, hours,
- * then the Branding social icon row — each hidden when blank/unset). Policy
+ * `resolveDreamNav`, plus the header CTA), contact (Settings email, phone,
+ * hours, then the Branding social icon row — each hidden when blank/unset;
+ * see `resolveDreamContactDetails` for the legacy-field fallback). Policy
  * links row falls back to `/platform/policies/*` when no merchant Page
  * exists, mirroring `wealth-footer.tsx`.
  */
@@ -39,14 +40,21 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
   const f = resolveDreamFields(customFields, FIELD_KEYS);
   const signoff = f["dream.global.footer-signoff"] ?? "";
   const signoffAccent = f["dream.global.footer-signoff-accent"] ?? "";
-  const tagline = f["dream.global.footer-tagline"] ?? "";
   const serviceArea = f["dream.global.service-area"] ?? "";
-  const email = f["dream.global.contact-email"] ?? "";
-  const phone = f["dream.global.contact-phone"] ?? "";
-  const hours = f["dream.global.contact-hours"] ?? "";
-  const ctaLabel = f["dream.global.header-cta-label"] ?? "Estimate Quote";
-  const ctaUrl = f["dream.global.header-cta-url"] ?? "/contact";
-  const navItems = resolveDreamNav(business?.siteContent?.navigationItems);
+  const ctaLabel = f["dream.global.header-cta-label"] ?? "";
+  const ctaUrl = f["dream.global.header-cta-url"] ?? "";
+  const navItems = resolveDreamNav(
+    business?.siteContent?.navigationItems,
+    customFields,
+  );
+
+  const {
+    email,
+    phone,
+    hoursRows,
+    legacyHours,
+    footerTagline: tagline,
+  } = resolveDreamContactDetails(business);
 
   const logoUrl =
     business?.siteContent?.logoUrl ?? "/templates/dream/images/logo.webp";
@@ -91,14 +99,7 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
               ) : null}
             </p>
           ) : null}
-          {tagline ? (
-            <p
-              className="dream-footer-tagline"
-              {...fieldAttr("dream.global.footer-tagline")}
-            >
-              {tagline}
-            </p>
-          ) : null}
+          {tagline ? <p className="dream-footer-tagline">{tagline}</p> : null}
           {serviceArea ? (
             <p
               className="dream-footer-service-area"
@@ -128,9 +129,15 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
               ) : null}
             </Link>
           ))}
-          <Link href={ctaUrl} className="dream-footer-link">
-            {ctaLabel}
-          </Link>
+          {ctaLabel && ctaUrl ? (
+            <Link
+              href={ctaUrl}
+              className="dream-footer-link"
+              {...fieldAttr("dream.global.header-cta-label")}
+            >
+              {ctaLabel}
+            </Link>
+          ) : null}
         </nav>
 
         {/* Contact column — every line hidden when blank */}
@@ -144,15 +151,26 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
           ) : null}
           {phone ? (
             <p>
-              <a
-                href={`tel:${phone.replace(/[^\d+]/g, "")}`}
-                className="dream-link"
-              >
+              <a href={dreamTelHref(phone)} className="dream-link">
                 {phone}
               </a>
             </p>
           ) : null}
-          {hours ? <p>{hours}</p> : null}
+          {hoursRows.length > 0 ? (
+            <dl className="m-0 flex flex-col gap-1">
+              {hoursRows.map((row, i) => (
+                <div
+                  key={`${row.label}-${i}`}
+                  className="flex flex-wrap gap-x-2"
+                >
+                  <dt>{row.label}</dt>
+                  <dd className="m-0">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : legacyHours ? (
+            <p>{legacyHours}</p>
+          ) : null}
           <DreamSocialLinks
             socialLinks={business?.siteContent?.socialLinks}
             className="dream-footer-social"

@@ -1,44 +1,39 @@
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { dreamTelHref } from "../shared/dream-contact-details";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamSection } from "../shared/dream-section";
 
 type Props = {
   heading: string;
-  email: string;
-  phone: string;
-  hours: string;
+  email?: string;
+  phone?: string;
+  /** Settings → Business Hours rows; wins over `legacyHours`. */
+  hoursRows: { label: string; value: string }[];
+  /** Legacy saved single-line hours, used only when `hoursRows` is empty. */
+  legacyHours?: string;
   serviceArea: string;
 };
 
 /**
  * Email / phone / hours / service-area lines, each hidden when blank
- * (design.md "Estimate Quote › Contact info"). The four values are
- * `dream.global.*` fields already defined in the template root — this
- * section only owns its own heading. Hideable (contact.info).
+ * (design.md "Estimate Quote › Contact info"). Email, phone and hours come
+ * from Settings (with the retired `dream.global.contact-*` fields as a silent
+ * legacy fallback — see `resolveDreamContactDetails`); service area is the
+ * `dream.global.service-area` field. This section only owns its heading.
+ * Hideable (contact.info), and hides itself when every line is blank.
  */
 export function DreamContactInfo({
   heading,
   email,
   phone,
-  hours,
+  hoursRows,
+  legacyHours,
   serviceArea,
 }: Props) {
-  // Service area alone doesn't earn a band (finish-review "Rest/empty
-  // states"): hide the whole section unless there's at least one of
-  // email/phone/hours to show alongside it.
-  const hasCoreContact =
-    email.trim().length > 0 ||
-    phone.trim().length > 0 ||
-    hours.trim().length > 0;
-  if (!hasCoreContact) return null;
-
-  const lines = [
-    { value: email, key: "dream.global.contact-email" },
-    { value: phone, key: "dream.global.contact-phone" },
-    { value: hours, key: "dream.global.contact-hours" },
-    { value: serviceArea, key: "dream.global.service-area" },
-  ].filter((line) => line.value.trim().length > 0);
+  const area = serviceArea.trim();
+  const hasHours = hoursRows.length > 0 || Boolean(legacyHours);
+  if (!email && !phone && !hasHours && !area) return null;
 
   return (
     <DreamSection
@@ -50,15 +45,42 @@ export function DreamContactInfo({
         <DreamHeading as="h2" fieldKey="dream.contact.info-heading">
           {heading}
         </DreamHeading>
-        {lines.length > 0 ? (
-          <ul className="mt-6 flex flex-col gap-2 text-[var(--dream-soft)]">
-            {lines.map((line) => (
-              <li key={line.key} {...fieldAttr(line.key)}>
-                {line.value}
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        <ul className="mt-6 flex flex-col gap-2 text-[var(--dream-soft)]">
+          {email ? (
+            <li>
+              <a href={`mailto:${email}`} className="dream-link">
+                {email}
+              </a>
+            </li>
+          ) : null}
+          {phone ? (
+            <li>
+              <a href={dreamTelHref(phone)} className="dream-link">
+                {phone}
+              </a>
+            </li>
+          ) : null}
+          {hoursRows.length > 0 ? (
+            <li>
+              <dl className="m-0 flex flex-col gap-1">
+                {hoursRows.map((row, i) => (
+                  <div
+                    key={`${row.label}-${i}`}
+                    className="flex flex-wrap justify-center gap-x-2"
+                  >
+                    <dt>{row.label}</dt>
+                    <dd className="m-0">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </li>
+          ) : legacyHours ? (
+            <li>{legacyHours}</li>
+          ) : null}
+          {area ? (
+            <li {...fieldAttr("dream.global.service-area")}>{area}</li>
+          ) : null}
+        </ul>
       </div>
     </DreamSection>
   );

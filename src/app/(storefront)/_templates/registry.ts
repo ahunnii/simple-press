@@ -335,13 +335,17 @@ import { SledgeAboutPage } from "./sledge/about/sledge-about-page";
 import { SledgeAccountSecurityPage } from "./sledge/account/sledge-account-security-page";
 import { SledgeAccountSettingsPage } from "./sledge/account/sledge-account-settings-page";
 import { SledgeAddressBookPage } from "./sledge/account/sledge-address-book-page";
+import { SledgeInvoicesPage } from "./sledge/account/sledge-invoices-page";
 import { SledgeOrderDetailPage } from "./sledge/account/sledge-order-detail-page";
 import { SledgeOrdersPage } from "./sledge/account/sledge-orders-page";
 import { SledgePreferencesPage } from "./sledge/account/sledge-preferences-page";
+import { SledgeRewardsPage } from "./sledge/account/sledge-rewards-page";
+import { SledgeSubscriptionsPage } from "./sledge/account/sledge-subscriptions-page";
 import { SledgeBlogPage } from "./sledge/blog/sledge-blog-page";
 import { SledgeBlogPostPage } from "./sledge/blog/sledge-blog-post-page";
 import { SledgeCartPage } from "./sledge/cart-checkout/sledge-cart-page";
 import { SledgeCheckoutPage } from "./sledge/cart-checkout/sledge-checkout-page";
+import { SledgeCheckoutUnavailable } from "./sledge/cart-checkout/sledge-checkout-unavailable";
 import { SledgeOrderSuccessPage } from "./sledge/cart-checkout/sledge-order-success-page";
 import { SledgeCollectionPage } from "./sledge/collections/sledge-collection-page";
 import { SledgeCollectionsPage } from "./sledge/collections/sledge-collections-page";
@@ -415,6 +419,8 @@ import { DreamMaintenancePage } from "./dream/maintenance/dream-maintenance-page
 import { DreamServicesIndexPage } from "./dream/services/dream-services-index-page";
 import { DreamTestimonialsPage } from "./dream/testimonials/dream-testimonials-page";
 import { DreamLayout } from "./dream/layout/dream-layout";
+import { DreamCheckoutUnavailable } from "./dream/cart-checkout/dream-checkout-unavailable";
+import { DreamProductPage } from "./dream/products/dream-product-page";
 // Unique Monique
 import { UmscAboutPage } from "./umsc/about/umsc-about-page";
 import { UmscAccountSecurityPage } from "./umsc/account/umsc-account-security-page";
@@ -790,8 +796,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     InvoicesPage: WealthInvoicesPage,
   },
   // Dream Your Theme — service archetype (event decor / rentals / draping):
-  // no commerce slots (Default fallback); blog/faq/events/videos/donate also
-  // fall back to Default by scope.
+  // ProductPage + CheckoutUnavailable are styled (2026-09-26); the other
+  // commerce slots (shop, cart, checkout form, confirmation) fall back to
+  // Default, as do blog/faq/events/videos/donate by scope.
   dream: {
     Layout: DreamLayout,
     AboutPage: DreamAboutPage,
@@ -808,6 +815,8 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: DreamPreferencesPage,
     SubscriptionsPage: DreamSubscriptionsPage,
     InvoicesPage: DreamInvoicesPage,
+    ProductPage: DreamProductPage,
+    CheckoutUnavailable: DreamCheckoutUnavailable,
   },
   // Unique Monique — retail archetype (candles / soaps / body care / home care).
   // Blog, events, videos, donate and services fall back to Default by scope.
@@ -924,6 +933,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: SledgeBlogPostPage,
     CartPage: SledgeCartPage,
     CheckoutPage: SledgeCheckoutPage,
+    CheckoutUnavailable: SledgeCheckoutUnavailable,
     OrderSuccessPage: SledgeOrderSuccessPage,
     CollectionPage: SledgeCollectionPage,
     CollectionsPage: SledgeCollectionsPage,
@@ -938,6 +948,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: SledgeOrderDetailPage,
     OrdersPage: SledgeOrdersPage,
     PreferencesPage: SledgePreferencesPage,
+    SubscriptionsPage: SledgeSubscriptionsPage,
+    InvoicesPage: SledgeInvoicesPage,
+    RewardsPage: SledgeRewardsPage,
   },
   vii: {
     Layout: ViiLayout,

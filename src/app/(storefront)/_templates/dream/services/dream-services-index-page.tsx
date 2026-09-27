@@ -4,6 +4,7 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
+import { DREAM_DEFAULT_PACKAGE_ROWS } from ".";
 import { resolveFields } from "..";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
@@ -54,9 +55,12 @@ export function DreamServicesIndexPage({ business, services }: Props) {
     business.name ?? "",
   );
 
+  // `parseTemplateListRows` ignores the field's `defaultValue` (it reads
+  // `customFields` directly), so an empty saved list falls back to the same
+  // built-in rows the field declares (`defaultsWhenEmpty`).
   const packageRows = parseTemplateListRows(raw?.["dream.services.packages"]);
   const packages = (
-    packageRows.length > 0 ? packageRows : DEFAULT_PACKAGE_ROWS
+    packageRows.length > 0 ? packageRows : DREAM_DEFAULT_PACKAGE_ROWS
   ).map(toPackageRow);
 
   return (
@@ -110,6 +114,7 @@ export function DreamServicesIndexPage({ business, services }: Props) {
             heading={f["dream.services.packages-heading"] ?? ""}
             lede={f["dream.services.packages-lede"] ?? ""}
             packages={packages}
+            packagesFieldKey="dream.services.packages"
             headingFieldKey="dream.services.packages-heading"
             ledeFieldKey="dream.services.packages-lede"
           />
@@ -133,41 +138,3 @@ export function DreamServicesIndexPage({ business, services }: Props) {
     </>
   );
 }
-
-// `parseTemplateListRows` ignores a list field's `defaultValue` (it reads
-// `customFields` directly), so a fresh business needs a real hardcoded
-// fallback here or the packages grid renders empty — mirrors
-// `wealth-essay-service-page.tsx`'s `DEFAULT_PRIORITIES` pattern. Must stay
-// in sync with `dream.services.packages`'s `defaultValue` in `./index.ts`.
-const DEFAULT_PACKAGE_ROWS: Parameters<typeof toPackageRow>[0][] = [
-  {
-    name: "Essence",
-    tagline: "A simple, elegant start.",
-    includes: "1 panel\n3 colors\n2 layers\n2 tie backs",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-  },
-  {
-    name: "Deluxe",
-    tagline: "Full and finished with a theme.",
-    includes: "1 panel\na theme\n3–5 colors\nvalance",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-  },
-  {
-    name: "Premium",
-    tagline: "Deluxe, plus a throne chair moment.",
-    includes: "Deluxe package\n2 panels\nthrone chair",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-  },
-  {
-    name: "Lavish",
-    tagline: "Dressed for a full guest list.",
-    includes: "up to 50 guests\nchair covers\ntable cloths",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-  },
-  {
-    name: "Yasss!",
-    tagline: "Big, bright, and ready to celebrate.",
-    includes: "backdrop\nballoon garland\nthrone chair\ngift tables",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
-  },
-];

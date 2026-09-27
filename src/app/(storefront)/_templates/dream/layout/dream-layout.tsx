@@ -4,12 +4,14 @@ import { Italiana, Mulish, Parisienne } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { safeHref } from "~/lib/safe-href";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
 
-import { resolveDreamFields } from "../lib/resolve-fields";
 import { DreamAmbientController } from "../shared/dream-ambient-controller";
+import { nonBlank } from "../shared/dream-non-blank";
 import { DreamFooter } from "./dream-footer";
 import { DreamHeader } from "./dream-header";
 import { DreamPlatformBanner } from "./dream-platform-banner";
@@ -44,16 +46,14 @@ const fontMulish = Mulish({
 });
 
 /**
- * `dream`'s topbar honors the platform site-banner feature (`resolveBanner`,
- * same as `wealth`/`vii`) FIRST, falling back to the `dream.global.
- * announcement-*` fields (see `../lib/resolve-fields.ts`) when no platform
- * banner is configured. design.md pins a real default announcement ("Dream
- * Your Theme · Event Decor · Rentals · Draping") for the field-driven path,
- * which the site-banner feature has no concept of (a platform banner is
- * unset — and hidden — until an admin configures one), so the two coexist
- * rather than one replacing the other. `DreamTopbar` renders nothing once
- * its resolved text is blank, so an owner can still hide the fallback by
- * clearing the field to `""` if a future default ever ships empty.
+ * `dream`'s topbar is the platform announcement bar (Content → Announcements,
+ * `resolveBanner`, same as `wealth`/`vii`). The old
+ * `dream.global.announcement-*` fields were retired 2026-09-26: when no
+ * platform banner is configured, `DreamTopbar` renders only from a legacy
+ * announcement text an owner saved before the move (a silent, read-only
+ * fallback — never written or cleared from here), with its link only when
+ * both the saved label and a safe saved URL exist. A fresh store shows no
+ * topbar until the owner turns on a banner.
  */
 export async function DreamLayout({
   children,
@@ -67,14 +67,20 @@ export async function DreamLayout({
 
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
 
-  const f = resolveDreamFields(customFields, [
-    "dream.global.announcement-text",
-    "dream.global.announcement-link-label",
-    "dream.global.announcement-url",
-  ]);
-  const announcementText = f["dream.global.announcement-text"] ?? "";
-  const announcementLinkLabel = f["dream.global.announcement-link-label"] ?? "";
-  const announcementUrl = f["dream.global.announcement-url"] ?? "";
+  const legacyText = nonBlank(
+    getRawCustomFieldString(customFields, "dream.global.announcement-text"),
+  );
+  const legacyLinkLabel = nonBlank(
+    getRawCustomFieldString(
+      customFields,
+      "dream.global.announcement-link-label",
+    ),
+  );
+  const legacyLinkUrl =
+    safeHref(
+      getRawCustomFieldString(customFields, "dream.global.announcement-url"),
+    ) ?? undefined;
+  const hasLegacyLink = Boolean(legacyLinkLabel && legacyLinkUrl);
 
   // `dream` has no theme presets (fixed brand, per design.md) — resolveThemeVars
   // returns null for a templateId with no TEMPLATE_THEMES entry, so this is a
@@ -102,13 +108,13 @@ export async function DreamLayout({
 
       {banner ? (
         <DreamPlatformBanner banner={banner} />
-      ) : (
+      ) : legacyText ? (
         <DreamTopbar
-          text={announcementText}
-          linkLabel={announcementLinkLabel || undefined}
-          linkUrl={announcementUrl || undefined}
+          text={legacyText}
+          linkLabel={hasLegacyLink ? legacyLinkLabel : undefined}
+          linkUrl={hasLegacyLink ? legacyLinkUrl : undefined}
         />
-      )}
+      ) : null}
 
       <DreamHeader business={business} initialSession={session ?? null} />
 

@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const blogListingData: TemplateField[] = [
   {
     key: "sledge.blog-listing-heading",
-    label: "Blog Page Heading",
-    description: "Heading for the blog listing page",
+    label: "Heading",
+    description: "Heading at the top of the blog page.",
     type: "text",
     page: "blog",
     group: "blog.listing",
@@ -13,8 +13,8 @@ const blogListingData: TemplateField[] = [
   },
   {
     key: "sledge.blog-listing-intro",
-    label: "Blog Page Intro",
-    description: "Optional intro text below the blog heading",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "blog",
     group: "blog.listing",
@@ -25,9 +25,9 @@ const blogListingData: TemplateField[] = [
 const blogPostData: TemplateField[] = [
   {
     key: "sledge.blog.post-shop-cta-heading",
-    label: "Blog Post Shop CTA Heading",
+    label: "Heading",
     description:
-      "Serif heading in the shop call-to-action band at the bottom of each blog post.",
+      "Heading in the shop banner shown at the bottom of every blog post.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -43,15 +43,15 @@ export const sledgeBlogData = [...blogListingData, ...blogPostData];
 export const sledgeBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.listing",
-    title: "Blog Page",
-    description: "Heading and intro for the blog listing page",
+    title: "Blog page",
+    description: "Heading and intro for the blog page.",
     icon: "✍️",
     columns: 1,
   },
   {
     id: "blog.post",
-    title: "Blog Post — Shop CTA",
-    description: "Call-to-action band at the bottom of each blog post",
+    title: "Shop banner",
+    description: "Banner shown at the bottom of each blog post.",
     icon: "🛍️",
     columns: 2,
   },

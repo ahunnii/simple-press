@@ -3,8 +3,21 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { sledgeAboutData, sledgeAboutFieldGroups } from "./about";
 import { sledgeBlogData, sledgeBlogFieldGroups } from "./blog";
+import {
+  sledgeCartData,
+  sledgeCartFieldGroups,
+} from "./cart-checkout/cart-fields";
+import {
+  sledgeCheckoutUnavailableData,
+  sledgeCheckoutUnavailableFieldGroups,
+} from "./cart-checkout/unavailable-fields";
+import {
+  sledgeCollectionsData,
+  sledgeCollectionsFieldGroups,
+} from "./collections";
 import { sledgeContactData, sledgeContactFieldGroups } from "./contact";
 import { sledgeHomepageData, sledgeHomepageFieldGroups } from "./homepage";
+import { sledgeProductData, sledgeProductFieldGroups } from "./products";
 import {
   sledgeTestimonialsData,
   sledgeTestimonialsFieldGroups,
@@ -15,8 +28,8 @@ import {
 const shopListingData: TemplateField[] = [
   {
     key: "sledge.shop-listing-heading",
-    label: "Shop Page Heading",
-    description: "Heading for the shop listing page",
+    label: "Heading",
+    description: "Heading at the top of the shop page.",
     type: "text",
     page: "shop",
     group: "shop.listing",
@@ -25,8 +38,8 @@ const shopListingData: TemplateField[] = [
   },
   {
     key: "sledge.shop-listing-intro",
-    label: "Shop Page Intro",
-    description: "Optional intro text below the shop heading",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "shop",
     group: "shop.listing",
@@ -38,21 +51,21 @@ const shopListingData: TemplateField[] = [
 
 const globalBrandingData: TemplateField[] = [
   {
-    key: "sledge.global.location-tag",
-    label: "Location Tag",
+    key: "sledge.global.footer-notice-heading",
+    label: "Notice heading",
     description:
-      "Short location or brand identifier shown below your wordmark (e.g. · DETROIT ·). Leave blank to hide.",
+      "Heading above the footer notice, shown at the bottom of every page. Leave blank to hide.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "",
+    defaultValue: "Heads Up!",
   },
   {
     key: "sledge.global.footer-tagline",
-    label: "Footer Notice (“Heads Up”)",
+    label: "Footer notice",
     description:
-      "Short notice shown in the dark footer beside the “Heads Up” heading.",
+      "Short store notice shown in the footer under the notice heading above (e.g. a returns policy). Separate from the footer tagline in Content → Branding. Leave blank to hide.",
     type: "textarea",
     page: "global",
     group: "global.branding",
@@ -62,9 +75,9 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "sledge.global.shop-cta-text",
-    label: "Shop CTA Text",
+    label: "Shop button text",
     description:
-      "Text for the main 'shop' call-to-action used in the blog post band, cart empty state, and orders empty state.",
+      "Text for the shared shop button used in the blog post banner, empty cart, and empty orders list.",
     type: "text",
     page: "global",
     group: "global.branding",
@@ -73,8 +86,8 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "sledge.global.shop-cta-link",
-    label: "Shop CTA Link",
-    description: "URL for the main shop call-to-action.",
+    label: "Shop button link",
+    description: "Where the shared shop button points.",
     type: "url",
     page: "global",
     group: "global.branding",
@@ -88,79 +101,12 @@ const globalBrandingData: TemplateField[] = [
 const globalAuthenticationData: TemplateField[] = [
   {
     key: "sledge.global.authentication-image",
-    label: "Authentication Page Image",
-    description: "Image shown on sign-in/sign-up pages",
+    label: "Authentication image",
+    description: "Image shown on the sign-in and sign-up pages.",
     type: "image",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-full",
-  },
-];
-
-// ─── Global: Product Page ─────────────────────────────────────────────────────
-
-const globalProductData: TemplateField[] = [
-  {
-    key: "sledge.global.product-trust-badges",
-    label: "Product Trust Badges",
-    description:
-      "Bold trust lines shown on every product page (e.g. 'One size fits most!', '30-day returns')",
-    type: "list",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    maxItems: 6,
-    itemSchema: [
-      {
-        key: "label",
-        label: "Badge Text",
-        type: "text",
-        placeholder: "e.g. Free shipping on orders over $100!",
-      },
-    ],
-  },
-  {
-    key: "sledge.global.product-shipping-description",
-    label: "Shipping Description",
-    description:
-      "Short shipping note shown in bold on every product page below the description",
-    type: "text",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "sledge.global.product-question-description",
-    label: "Ask a Question Link Text",
-    description: "Contact prompt shown below the product description",
-    type: "text",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "sledge.global.product-care-instructions",
-    label: "Care Instructions",
-    description:
-      "Care instructions shown in a 'Details' accordion on every product page",
-    type: "textarea",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    defaultValue: "",
-  },
-  {
-    key: "sledge.global.product-shipping-details",
-    label: "Shipping Details",
-    description:
-      "Shipping policy shown in a 'Shipping & Returns' accordion on every product page",
-    type: "textarea",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    defaultValue: "",
   },
 ];
 
@@ -171,33 +117,30 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...sledgeAboutFieldGroups,
   ...sledgeBlogFieldGroups,
   ...sledgeContactFieldGroups,
+  ...sledgeCollectionsFieldGroups,
   ...sledgeTestimonialsFieldGroups,
-  {
-    id: "global.product",
-    title: "Product Page",
-    description: "Trust badges and shipping note shown on every product page",
-    icon: "🛍️",
-    columns: 2,
-  },
+  ...sledgeProductFieldGroups,
+  ...sledgeCartFieldGroups,
+  ...sledgeCheckoutUnavailableFieldGroups,
   {
     id: "global.branding",
-    title: "Global Branding",
+    title: "Site branding",
     description:
-      "Location tag, footer tagline, and shop CTA used throughout the template",
+      "Footer notice heading and text, plus the shop button text and link reused across pages.",
     icon: "🏷️",
     columns: 2,
   },
   {
     id: "shop.listing",
-    title: "Shop Page",
-    description: "Heading and intro for the shop listing page",
+    title: "Shop page",
+    description: "Heading and intro for the shop page.",
     icon: "🏪",
     columns: 1,
   },
   {
     id: "global.authentication",
     title: "Authentication",
-    description: "Image shown on sign-in and sign-up pages",
+    description: "Image shown on the sign-in and sign-up pages.",
     icon: "🔑",
     columns: 1,
   },
@@ -210,11 +153,14 @@ export const sledgeData = {
     ...sledgeHomepageData,
     ...sledgeAboutData,
     ...sledgeContactData,
+    ...sledgeCollectionsData,
     ...shopListingData,
     ...sledgeBlogData,
     ...globalBrandingData,
     ...globalAuthenticationData,
-    ...globalProductData,
+    ...sledgeProductData,
+    ...sledgeCartData,
+    ...sledgeCheckoutUnavailableData,
     ...sledgeTestimonialsData,
   ],
 };

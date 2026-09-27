@@ -479,6 +479,23 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "pink.global.footer-blurb",
   "pink.global.social-links",
   "pink.global.locality-tag",
+  // dream (2026-09-26) — email/phone/hours come from Settings (Business),
+  // the footer tagline from Content → Branding (`SiteContent.footerText`),
+  // and the announcement bar from Content → Announcements (platform banner).
+  // Saved values are read as a silent fallback in
+  // `_templates/dream/shared/dream-contact-details.ts` and
+  // `_templates/dream/layout/dream-layout.tsx`.
+  "dream.global.announcement-text",
+  "dream.global.announcement-link-label",
+  "dream.global.announcement-url",
+  "dream.global.footer-tagline",
+  "dream.global.contact-email",
+  "dream.global.contact-phone",
+  "dream.global.contact-hours",
+  // sledge, retired 2026-09-26 — the footer's location tag now comes from
+  // Settings → General (address city) via
+  // `_templates/sledge/shared/sledge-location-tag.ts`.
+  "sledge.global.location-tag",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

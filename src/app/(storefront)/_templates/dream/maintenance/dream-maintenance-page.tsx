@@ -5,9 +5,12 @@ import { resolveLogoAlt } from "~/lib/logo-alt";
 import { LaunchCountdown } from "~/components/maintenance/launch-countdown";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { resolveDreamFields } from "../lib/resolve-fields";
 import { DreamButton } from "../shared/dream-button";
 import { DreamClouds } from "../shared/dream-clouds";
+import {
+  dreamTelHref,
+  resolveDreamContactDetails,
+} from "../shared/dream-contact-details";
 import { DreamLink } from "../shared/dream-link";
 
 // Same next/font faces + `variable` names as `layout/dream-layout.tsx`,
@@ -54,7 +57,7 @@ const COPY = {
  * `maintenance/index.ts`) — every value below comes from the platform's
  * business-scope maintenance config (`StorefrontMaintenance`, the same
  * shared model `WealthMaintenancePage`/`MaintenanceScreen` read) or the
- * `dream.global.contact-*` fields the footer already declares.
+ * Settings email/phone the footer shows (`resolveDreamContactDetails`).
  *
  * No eyebrow/kicker line for `maintenance.overline`: the craft floor bans
  * eyebrow labels above headings, so unlike `WealthMaintenancePage` this
@@ -81,13 +84,9 @@ export function DreamMaintenancePage({
   const cta = maintenance.cta;
   const isComingSoon = maintenance.variant === "coming_soon";
 
-  const contact = resolveDreamFields(business.siteContent?.customFields, [
-    "dream.global.contact-email",
-    "dream.global.contact-phone",
-  ]);
-  const contactEmail = contact["dream.global.contact-email"] ?? "";
-  const contactPhone = contact["dream.global.contact-phone"] ?? "";
-  const hasContact = contactEmail !== "" || contactPhone !== "";
+  const { email: contactEmail, phone: contactPhone } =
+    resolveDreamContactDetails(business);
+  const hasContact = Boolean(contactEmail ?? contactPhone);
 
   return (
     <div
@@ -180,7 +179,7 @@ export function DreamMaintenancePage({
               <span aria-hidden="true">·</span>
             ) : null}
             {contactPhone ? (
-              <DreamLink href={`tel:${contactPhone.replace(/[^\d+]/g, "")}`}>
+              <DreamLink href={dreamTelHref(contactPhone)}>
                 {contactPhone}
               </DreamLink>
             ) : null}

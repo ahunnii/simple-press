@@ -14,8 +14,8 @@ import type { TemplateSection } from "~/lib/template-sections";
 const testimonialsHeroData: TemplateField[] = [
   {
     key: "dream.testimonials.hero-heading",
-    label: "Page Heading",
-    description: "The page's H1, before the script accent word.",
+    label: "Heading",
+    description: "The page's H1, before the highlighted word.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -24,8 +24,8 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "dream.testimonials.hero-accent",
-    label: "Page Heading Accent",
-    description: "Script word rendered in rose after the heading.",
+    label: "Highlighted word",
+    description: "Script-styled word after the heading.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -34,7 +34,7 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "dream.testimonials.hero-lede",
-    label: "Page Lede",
+    label: "Intro",
     description: "Short line under the page heading.",
     type: "textarea",
     page: "testimonials",
@@ -45,7 +45,7 @@ const testimonialsHeroData: TemplateField[] = [
   },
   {
     key: "dream.testimonials.hero-empty-message",
-    label: "Empty State Message",
+    label: "Empty state message",
     description:
       "Shown in place of the reviews when there are no approved testimonials yet.",
     type: "textarea",
@@ -62,7 +62,7 @@ const testimonialsHeroData: TemplateField[] = [
 const testimonialsFeaturedData: TemplateField[] = [
   {
     key: "dream.testimonials.featured-empty-cta-label",
-    label: "Empty State Button Label",
+    label: "Empty state button label",
     description:
       "Label for the button linking to the story-submission form, shown in the empty state.",
     type: "text",
@@ -73,13 +73,13 @@ const testimonialsFeaturedData: TemplateField[] = [
   },
 ];
 
-// ─── Closing CTA — hideable ─────────────────────────────────────────────────
+// ─── Closing banner — hideable ──────────────────────────────────────────────
 
 const testimonialsCtaData: TemplateField[] = [
   {
     key: "dream.testimonials.cta-heading",
-    label: "CTA Heading",
-    description: "Heading for the closing call-to-action band.",
+    label: "Heading",
+    description: "Heading for this closing section.",
     type: "text",
     page: "testimonials",
     group: "testimonials.cta",
@@ -88,7 +88,7 @@ const testimonialsCtaData: TemplateField[] = [
   },
   {
     key: "dream.testimonials.cta-body",
-    label: "CTA Body",
+    label: "Intro",
     description: "Short invitation encouraging clients to submit their story.",
     type: "textarea",
     page: "testimonials",
@@ -98,7 +98,7 @@ const testimonialsCtaData: TemplateField[] = [
   },
   {
     key: "dream.testimonials.cta-button-label",
-    label: "Button Label",
+    label: "Button label",
     description: "Label for the button linking to the story-submission form.",
     type: "text",
     page: "testimonials",
@@ -119,14 +119,14 @@ export const dreamTestimonialsData: TemplateField[] = [
 export const dreamTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.hero",
-    title: "Page Hero",
-    description: "Heading, script accent, lede, and the empty-state message",
+    title: "Page header",
+    description: "Heading, highlighted word, intro, and the empty-state message",
     icon: "☁️",
     columns: 2,
   },
   {
     id: "testimonials.featured",
-    title: "Featured Review + Grid",
+    title: "Reviews",
     description:
       "Empty-state button label (the reviews themselves come from approved submissions)",
     icon: "💬",
@@ -134,9 +134,8 @@ export const dreamTestimonialsFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "testimonials.cta",
-    title: "Share Your Story CTA",
-    description:
-      "Closing call-to-action inviting clients to submit their story",
+    title: "Share your story",
+    description: "Closing section inviting clients to submit their story",
     icon: "✍️",
     columns: 2,
   },
@@ -146,8 +145,8 @@ export const dreamTestimonialsSections: TemplateSection[] = [
   {
     id: "testimonials.hero",
     page: "testimonials",
-    title: "Page Hero",
-    description: "Logo, heading, lede, and empty-state message",
+    title: "Page header",
+    description: "Logo, heading, intro, and empty-state message",
     groupIds: ["testimonials.hero"],
     order: 0,
     hideable: false,
@@ -155,7 +154,7 @@ export const dreamTestimonialsSections: TemplateSection[] = [
   {
     id: "testimonials.featured",
     page: "testimonials",
-    title: "Featured Review + Grid",
+    title: "Reviews",
     description: "Approved testimonials, or the designed empty state",
     groupIds: ["testimonials.featured"],
     order: 1,
@@ -164,8 +163,8 @@ export const dreamTestimonialsSections: TemplateSection[] = [
   {
     id: "testimonials.cta",
     page: "testimonials",
-    title: "Share Your Story CTA",
-    description: "Closing call-to-action",
+    title: "Share your story",
+    description: "Closing section",
     groupIds: ["testimonials.cta"],
     order: 2,
     hideable: true,
