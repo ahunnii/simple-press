@@ -14,6 +14,10 @@ import {
   happyBambooProductData,
   happyBambooProductFieldGroups,
 } from "./products";
+import {
+  happyBambooServicesData,
+  happyBambooServicesFieldGroups,
+} from "./services";
 
 /// LIST DEFAULTS
 //
@@ -1606,6 +1610,7 @@ export const happyBambooData = {
     ...collectionsListingData,
     ...collectionsCtaData,
     ...shopListingData,
+    ...happyBambooServicesData,
     ...happyBambooProductData,
     ...happyBambooCheckoutUnavailableData,
     ...globalCartData,
@@ -1616,6 +1621,7 @@ export const happyBambooData = {
 export const happyBambooFieldGroups = {
   "happy-bamboo": [
     ...fieldGroups,
+    ...happyBambooServicesFieldGroups,
     ...happyBambooProductFieldGroups,
     ...happyBambooCheckoutUnavailableFieldGroups,
   ],

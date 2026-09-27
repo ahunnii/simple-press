@@ -1,6 +1,8 @@
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { happyBambooServicesSections } from "./services";
+
 export const happyBambooSections: Record<string, TemplateSection[]> = {
   "happy-bamboo": [
     // Homepage
@@ -177,6 +179,9 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       links: [SECTION_LINKS.products],
     },
 
+    // Services
+    ...happyBambooServicesSections,
+
     // Product (every product page; previewed on a representative product)
     {
       id: "product.details",
@@ -213,7 +218,8 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       id: "testimonials.page",
       page: "testimonials",
       title: "Testimonials page",
-      description: "Small label and intro text at the top of the testimonials page.",
+      description:
+        "Small label and intro text at the top of the testimonials page.",
       groupIds: ["testimonials.page"],
       order: 0,
       links: [SECTION_LINKS.testimonials],

@@ -1,8 +1,9 @@
+import type * as MotionReact from "motion/react";
 import { useRef, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type * as MotionReact from "motion/react";
+import type { HbNavItem } from "../lib/nav";
 
 import {
   HappyBambooMenuToggle,
@@ -65,7 +66,7 @@ type FakeSession = Parameters<typeof HappyBambooMobileMenu>[0]["session"];
 
 function makeBusiness(
   overrides: {
-    navigationItems?: { label: string; href: string }[];
+    navigationItems?: HbNavItem[];
     socialLinks?: Record<string, string>;
   } = {},
 ): FakeBusiness {
@@ -279,5 +280,132 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
     // from the panel's exit animation.
     await waitFor(() => expect(mainContent).not.toHaveAttribute("inert"));
     expect(html.style.overflow).toBe(originalOverflow);
+  });
+
+  describe("sub-navigation groups", () => {
+    const GROUPED_NAV: HbNavItem[] = [
+      { label: "Home", href: "/" },
+      {
+        label: "Services",
+        href: "/services",
+        children: [{ label: "Massages", href: "/services/massage" }],
+      },
+      {
+        label: "Misc",
+        href: "",
+        children: [
+          { label: "Testimonials", href: "/testimonials" },
+          { label: "Docs", href: "https://docs.example", external: true },
+        ],
+      },
+    ];
+
+    function openGrouped() {
+      renderHarness({
+        business: makeBusiness({ navigationItems: GROUPED_NAV }),
+      });
+      fireEvent.click(getToggle());
+    }
+
+    afterEach(() => {
+      pathname = "/";
+    });
+
+    it("renders a group as a collapsed disclosure button", () => {
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Services" });
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+      const controls = trigger.getAttribute("aria-controls")!;
+      expect(controls).toBeTruthy();
+      expect(document.getElementById(controls)).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Massages" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("expands on click and lists a non-empty parent href as the first entry", () => {
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Services" });
+      fireEvent.click(trigger);
+
+      expect(trigger).toHaveAttribute("aria-expanded", "true");
+      const sublist = document.getElementById(
+        trigger.getAttribute("aria-controls")!,
+      )!;
+      expect(sublist).toBeInTheDocument();
+      const links = sublist.querySelectorAll("a");
+      expect(Array.from(links, (a) => a.textContent)).toEqual([
+        "Services",
+        "Massages",
+      ]);
+      expect(links[0]).toHaveAttribute("href", "/services");
+
+      fireEvent.click(trigger);
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("gives an empty-href group no link of its own and honors external children", () => {
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Misc" });
+      fireEvent.click(trigger);
+      const sublist = document.getElementById(
+        trigger.getAttribute("aria-controls")!,
+      )!;
+      const links = Array.from(sublist.querySelectorAll("a"));
+      expect(links.map((a) => a.getAttribute("href"))).toEqual([
+        "/testimonials",
+        "https://docs.example",
+      ]);
+      expect(
+        screen.queryByRole("link", { name: /^Misc/ }),
+      ).not.toBeInTheDocument();
+
+      const docs = screen.getByRole("link", {
+        name: "Docs (opens in new tab)",
+      });
+      expect(docs).toHaveAttribute("target", "_blank");
+      expect(docs).toHaveAttribute("rel", "noopener noreferrer");
+    });
+
+    it("auto-expands the active group and marks only the active child", () => {
+      pathname = "/services/massage";
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Services" });
+      expect(trigger).toHaveAttribute("aria-expanded", "true");
+      expect(trigger).not.toHaveAttribute("aria-current");
+
+      expect(screen.getByRole("link", { name: "Massages" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+      // The parent entry prefix-matches too, but only the most specific
+      // entry is current.
+      expect(
+        screen.getByRole("link", { name: "Services" }),
+      ).not.toHaveAttribute("aria-current");
+      expect(document.querySelectorAll('[aria-current="page"]')).toHaveLength(
+        1,
+      );
+      // Other groups stay collapsed.
+      expect(screen.getByRole("button", { name: "Misc" })).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
+    });
+
+    it("closes the menu when a child link is clicked", async () => {
+      openGrouped();
+      fireEvent.click(screen.getByRole("button", { name: "Services" }));
+      fireEvent.click(screen.getByRole("link", { name: "Massages" }));
+
+      expect(getToggle()).toHaveAttribute("aria-expanded", "false");
+      await waitFor(() =>
+        expect(document.getElementById(MENU_ID)).not.toBeInTheDocument(),
+      );
+    });
   });
 });

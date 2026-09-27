@@ -25,11 +25,12 @@ import {
 } from "~/app/(storefront)/_templates/_service-pages/service-two";
 import { buildersServiceTemplateDefs } from "~/app/(storefront)/_templates/builders/services/service-pages/fields";
 import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/default/services/service-pages/fields";
+import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
+import { happyBambooServiceTemplateDefs } from "~/app/(storefront)/_templates/happy-bamboo/services/service-pages/fields";
 import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/services/service-pages/fields";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
 import { wealthServiceTemplateDefs } from "~/app/(storefront)/_templates/wealth/services/service-pages/fields";
-import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
 
 // ─── Core type ───────────────────────────────────────────────────────────────
 
@@ -109,6 +110,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   pink: pinkServiceTemplateDefs,
   wealth: wealthServiceTemplateDefs,
   dream: dreamServiceTemplateDefs,
+  "happy-bamboo": happyBambooServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -129,6 +131,7 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...pinkServiceTemplateDefs,
       ...wealthServiceTemplateDefs,
       ...dreamServiceTemplateDefs,
+      ...happyBambooServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

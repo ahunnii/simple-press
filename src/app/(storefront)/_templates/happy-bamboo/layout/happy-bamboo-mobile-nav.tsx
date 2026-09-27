@@ -5,7 +5,7 @@ import type { Ref, RefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
@@ -14,16 +14,14 @@ import { isActiveNavLink } from "~/lib/nav-utils";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { cn } from "~/lib/utils";
 
+import {
+  hbActiveEntryIndex,
+  hbExternalProps,
+  hbGroupEntries,
+  isHbItemActive,
+  resolveHappyBambooNav,
+} from "../lib/nav";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
-
-/** Fallback nav when the owner hasn't configured `navigationItems` — shared
- *  with the header's desktop nav so the two lists can't drift apart. */
-export const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-] as const;
 
 const MENU_ID = "hb-mobile-menu";
 /** Matches Tailwind's `md` breakpoint — the menu has no business being open
@@ -250,10 +248,17 @@ function MobileMenuPanel({
     return () => window.removeEventListener("resize", measure);
   }, [headerRef]);
 
-  const links =
-    (business?.siteContent?.navigationItems as
-      | { label: string; href: string }[]
-      | undefined) ?? NAV_LINKS;
+  // Shared resolver (lib/nav.ts) — the header's desktop nav and the footer
+  // read the same list, so the three can't drift apart.
+  const links = resolveHappyBambooNav(business?.siteContent?.navigationItems);
+  // One group open at a time. The panel mounts fresh on every open, so the
+  // initializer auto-expands the group holding the current route.
+  const [expanded, setExpanded] = useState<number | null>(() => {
+    const idx = links.findIndex(
+      (item) => !!item.children?.length && isHbItemActive(pathname, item),
+    );
+    return idx === -1 ? null : idx;
+  });
   const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
   // A blank owner tagline renders nothing — no hardcoded copy stand-in.
   const footerText = business?.siteContent?.footerText;
@@ -315,16 +320,102 @@ function MobileMenuPanel({
         <nav aria-label="Mobile navigation">
           <ul className="flex flex-col">
             {links.map((link, i) => {
+              if (link.children?.length) {
+                const active = isHbItemActive(pathname, link);
+                const isOpen = expanded === i;
+                const sublistId = `${MENU_ID}-group-${i}`;
+                const entries = hbGroupEntries(link);
+                const activeEntry = hbActiveEntryIndex(pathname, entries);
+                return (
+                  <motion.li
+                    key={i}
+                    custom={i}
+                    variants={rowVariants}
+                    className="border-b border-[var(--hb-brand)]/10"
+                  >
+                    {/* Group trigger — never navigates; a non-empty parent
+                        href is listed as the first entry below. Active
+                        styling, but no aria-current (it isn't a page). */}
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      aria-controls={sublistId}
+                      onClick={() => setExpanded(isOpen ? null : i)}
+                      className={cn(
+                        "group flex min-h-16 w-full items-center justify-between gap-4 py-4 text-left font-serif text-3xl leading-tight transition-colors",
+                        focusRing,
+                        active
+                          ? "text-[var(--hb-brand-deep)]"
+                          : "text-foreground hover:text-[var(--hb-brand-deep)]",
+                      )}
+                    >
+                      <span className="flex flex-col items-start">
+                        <span className="font-serif">{link.label}</span>
+                        {active && (
+                          <span
+                            aria-hidden="true"
+                            className="mt-2 block h-0.5 w-10 rounded-full bg-[var(--hb-brand)]"
+                          />
+                        )}
+                      </span>
+                      <ChevronDown
+                        aria-hidden="true"
+                        className={cn(
+                          "size-5 shrink-0 text-[var(--hb-brand)] transition-transform duration-300",
+                          isOpen && "rotate-180",
+                        )}
+                      />
+                    </button>
+                    {isOpen && (
+                      <ul
+                        id={sublistId}
+                        className="mb-4 ml-1 flex flex-col border-l-2 border-[var(--hb-brand)]/15 pl-4"
+                      >
+                        {entries.map((child, j) => {
+                          const childActive = j === activeEntry;
+                          return (
+                            <li key={j}>
+                              <Link
+                                href={child.href}
+                                {...hbExternalProps(child.external)}
+                                onClick={onClose}
+                                aria-current={childActive ? "page" : undefined}
+                                className={cn(
+                                  "flex min-h-12 items-center py-2 text-lg transition-colors",
+                                  focusRing,
+                                  childActive
+                                    ? "font-medium text-[var(--hb-brand-deep)]"
+                                    : "text-foreground/80 hover:text-[var(--hb-brand-deep)]",
+                                )}
+                              >
+                                {child.label}
+                                {child.external && (
+                                  <span className="sr-only">
+                                    {" "}
+                                    (opens in new tab)
+                                  </span>
+                                )}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </motion.li>
+                );
+              }
+
               const active = isActiveNavLink(pathname, link.href);
               return (
                 <motion.li
-                  key={`${link.href}-${link.label}`}
+                  key={i}
                   custom={i}
                   variants={rowVariants}
                   className="border-b border-[var(--hb-brand)]/10"
                 >
                   <Link
                     href={link.href}
+                    {...hbExternalProps(link.external)}
                     onClick={onClose}
                     aria-current={active ? "page" : undefined}
                     className={cn(
@@ -340,6 +431,9 @@ function MobileMenuPanel({
                           globals.css forces `.happy-bamboo *` to font-sans,
                           which beats the family inherited from the <a>. */}
                       <span className="font-serif">{link.label}</span>
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
                       {active && (
                         <span
                           aria-hidden="true"

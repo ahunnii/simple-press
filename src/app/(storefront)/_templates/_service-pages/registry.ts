@@ -20,11 +20,12 @@ import {
 
 import { BUILDERS_SERVICE_COMPONENTS } from "../builders/services/service-pages/components";
 import { DEFAULT_SERVICE_COMPONENTS } from "../default/services/service-pages/components";
+import { DREAM_SERVICE_COMPONENTS } from "../dream/services/service-pages/components";
+import { HAPPY_BAMBOO_SERVICE_COMPONENTS } from "../happy-bamboo/services/service-pages/components";
 import { PINK_SERVICE_COMPONENTS } from "../pink/services/service-pages/components";
 import { POLLEN_SERVICE_COMPONENTS } from "../pollen/services/service-pages/components";
 import { VII_SERVICE_COMPONENTS } from "../vii/services/service-pages/components";
 import { WEALTH_SERVICE_COMPONENTS } from "../wealth/services/service-pages/components";
-import { DREAM_SERVICE_COMPONENTS } from "../dream/services/service-pages/components";
 import { ServiceTemplateOne } from "./service-one/service-one-page";
 import { ServiceTemplateThree } from "./service-three/service-three-page";
 import { ServiceTemplateTwo } from "./service-two/service-two-page";
@@ -63,6 +64,7 @@ export const SERVICE_TEMPLATE_COMPONENTS: Record<
   ...PINK_SERVICE_COMPONENTS,
   ...WEALTH_SERVICE_COMPONENTS,
   ...DREAM_SERVICE_COMPONENTS,
+  ...HAPPY_BAMBOO_SERVICE_COMPONENTS,
 };
 
 /**

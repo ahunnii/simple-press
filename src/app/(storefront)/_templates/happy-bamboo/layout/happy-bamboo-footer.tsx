@@ -7,14 +7,8 @@ import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
 
+import { hbExternalProps, resolveHappyBambooNav } from "../lib/nav";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
-
-const quickLinks = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-];
 
 export async function HappyBambooFooter({
   business,
@@ -25,12 +19,15 @@ export async function HappyBambooFooter({
   const name = business?.name ?? "Business Name";
   const footerTagline = business?.siteContent?.footerText;
 
-  const navigationItems = business?.siteContent?.navigationItems as
-    | {
-        label: string;
-        href: string;
-      }[]
-    | undefined;
+  // Same list as the header/mobile panel, flattened: each top-level link,
+  // then its children right after it. A group with an empty href (a pure
+  // dropdown label) contributes only its children.
+  const quickLinks = resolveHappyBambooNav(
+    business?.siteContent?.navigationItems,
+  ).flatMap((item) => [
+    ...(item.href ? [item] : []),
+    ...(item.children ?? []).filter((child) => child.href),
+  ]);
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -69,13 +66,17 @@ export async function HappyBambooFooter({
           <div>
             <h4 className="text-muted mb-4 font-semibold">Quick Links</h4>
             <ul className="flex flex-col space-y-2">
-              {(navigationItems ?? quickLinks).map((link) => (
-                <li key={link.label}>
+              {quickLinks.map((link, i) => (
+                <li key={i}>
                   <Link
                     href={link.href}
+                    {...hbExternalProps(link.external)}
                     className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   >
                     {link.label}
+                    {link.external && (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    )}
                   </Link>
                 </li>
               ))}

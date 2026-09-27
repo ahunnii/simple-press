@@ -4,7 +4,10 @@ import Link from "next/link";
 import type { ServiceTemplateProps } from "../../../_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
-import { parseTemplateIframeValue } from "~/lib/template-fields";
+import {
+  isContentEmpty,
+  parseTemplateIframeValue,
+} from "~/lib/template-fields";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -83,8 +86,11 @@ export async function DefaultServicePage({
   const ctaEmbedReveal = f["default-service.cta-embed-reveal"] === "true";
   const hasClosingCta = Boolean(ctaText && ctaLink) || ctaEmbed !== null;
   const hasIntroMedia = Boolean(introVideo) || Boolean(introImage);
-  const hasIntroSection =
-    Boolean(introHeading) || Boolean(introBodyJson) || hasIntroMedia;
+  const hasIntroBody = introBodyJson !== null && !isContentEmpty(introBodyJson);
+  // The heading has a default value, so on its own it would render an empty
+  // "About This Service" band for every service without intro copy — require
+  // real body content or media.
+  const hasIntroSection = hasIntroBody || hasIntroMedia;
 
   return (
     <PageTransition>
@@ -130,7 +136,7 @@ export async function DefaultServicePage({
                     {introHeading}
                   </h2>
                 )}
-                {introBodyJson && (
+                {hasIntroBody && introBodyJson && (
                   <TiptapRenderer
                     content={introBodyJson}
                     className="prose prose-sm prose-p:text-[15px] prose-p:leading-[1.75] prose-p:text-[#6b6b6b] max-w-none"
