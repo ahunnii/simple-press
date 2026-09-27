@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
@@ -12,6 +13,37 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * (`Business.businessHours`), never from a literal field default — see the
  * `contact.studio` section's `links` below.
  */
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+// Text copied verbatim from the pre-migration `DEFAULT_TOPICS` /
+// `DEFAULT_SHORTCUTS` constants in `pink-contact-form.tsx` /
+// `pink-contact-page.tsx`.
+
+const PINK_CONTACT_TOPICS_DEFAULT_ROWS = [
+  {
+    name: "Custom orders",
+    blurb: "A doll, a piece of jewelry, or something else made just for you.",
+    messageLabel: "Tell me what you have in mind",
+    messagePlaceholder: "Sizes, colors, timeline — whatever you've got.",
+  },
+  {
+    name: "Make & takes",
+    blurb: "Bringing a workshop to your group.",
+    messageLabel: "Tell me about your group",
+    messagePlaceholder: "Group size, dates that work, and where.",
+  },
+  {
+    name: "Something else",
+    blurb: "Questions, press, or anything else.",
+    messageLabel: "What's on your mind",
+    messagePlaceholder: "Ask away.",
+  },
+] satisfies Record<string, string>[];
+
+const PINK_CONTACT_SHORTCUTS_DEFAULT_ROWS = [
+  { label: "Ask about a make & take", href: "/services" },
+  { label: "Browse what's ready now", href: "/shop" },
+] satisfies Record<string, string>[];
 
 // ── contact.header ───────────────────────────────────────────────────────────
 
@@ -48,7 +80,6 @@ const contactHeaderData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 4,
     itemLabel: "fact",
-    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "label",
@@ -94,6 +125,7 @@ const contactTopicsData: TemplateField[] = [
     maxItems: 6,
     itemLabel: "topic",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_CONTACT_TOPICS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "name",
@@ -154,7 +186,8 @@ const contactFormData: TemplateField[] = [
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    description: "Label on the optional catch-all field — order number, referral, etc.",
+    description:
+      "Label on the optional catch-all field — order number, referral, etc.",
     defaultValue: "Reference (optional)",
   },
   {
@@ -194,7 +227,8 @@ const contactFormData: TemplateField[] = [
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    description: "Message field placeholder used when no topic is selected above.",
+    description:
+      "Message field placeholder used when no topic is selected above.",
     defaultValue:
       "Tell me what you're thinking about — a piece, a date, a question.",
   },
@@ -317,6 +351,7 @@ const contactShortcutsData: TemplateField[] = [
     maxItems: 6,
     itemLabel: "link",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_CONTACT_SHORTCUTS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "label",
@@ -441,3 +476,15 @@ export const pinkContactSections: TemplateSection[] = [
     hideable: true,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const DEFAULT_PINK_CONTACT_TOPICS = listRowsFromDefaults(
+  PINK_CONTACT_TOPICS_DEFAULT_ROWS,
+  "default-topic",
+);
+
+export const DEFAULT_PINK_CONTACT_SHORTCUTS = listRowsFromDefaults(
+  PINK_CONTACT_SHORTCUTS_DEFAULT_ROWS,
+  "default-shortcut",
+);

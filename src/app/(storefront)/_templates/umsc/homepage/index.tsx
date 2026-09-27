@@ -1,6 +1,42 @@
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
+
+/** The four product-type doors (homepage "Shop by type" grid). */
+const UMSC_CATEGORY_DOORS_DEFAULT_ROWS = [
+  {
+    image: "/placeholder.svg",
+    title: "Candles",
+    blurb: "Soy candles and wax melts.",
+    link: "/collections/candles",
+  },
+  {
+    image: "/placeholder.svg",
+    title: "Soaps",
+    blurb: "Handmade bars for gifts and daily use.",
+    link: "/collections/soaps",
+  },
+  {
+    image: "/placeholder.svg",
+    title: "Body Care",
+    blurb: "Butters, oils, and roll-ons.",
+    link: "/collections/body-care",
+  },
+  {
+    image: "/placeholder.svg",
+    title: "Home Care",
+    blurb: "Laundry pods, bleach tablets, and mists.",
+    link: "/collections/home-care",
+  },
+] satisfies Record<string, string>[];
+
+/** "What to include" lines in the custom-order band. */
+const UMSC_CUSTOM_LINES_DEFAULT_ROWS = [
+  { text: "Candles, wax melts, soaps, or body care" },
+  { text: "Bundles, favors, and corporate gifts" },
+  { text: "Your scent notes, your colors, your label" },
+] satisfies Record<string, string>[];
 
 // ─── Hero (homepage.hero) ──────────────────────────────────────────────────
 
@@ -165,7 +201,7 @@ const homepageCategoriesData: TemplateField[] = [
     key: "umsc.homepage.categories-doors",
     label: "Category doors",
     description:
-      "The four product-type doors, each with a photo, title, one-line description, and link. Leave empty to use the built-in Candles / Soaps / Body Care / Home Care doors.",
+      "The four product-type doors, each with a photo, title, one-line description, and link.",
     type: "list",
     page: "homepage",
     group: "homepage.categories",
@@ -174,6 +210,7 @@ const homepageCategoriesData: TemplateField[] = [
     itemLabel: "door",
     summaryKey: "title",
     defaultsWhenEmpty: true,
+    defaultRows: UMSC_CATEGORY_DOORS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "image",
@@ -498,7 +535,7 @@ const homepageCustomData: TemplateField[] = [
     key: "umsc.homepage.custom-list",
     label: "What to include",
     description:
-      "Short lines telling shoppers what to mention in a custom request. Leave empty to use the built-in list.",
+      "Short lines telling shoppers what to mention in a custom request.",
     type: "list",
     page: "homepage",
     group: "homepage.custom",
@@ -507,6 +544,7 @@ const homepageCustomData: TemplateField[] = [
     itemLabel: "line",
     summaryKey: "text",
     defaultsWhenEmpty: true,
+    defaultRows: UMSC_CUSTOM_LINES_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "text",
@@ -717,3 +755,15 @@ export const umscHomepageSections: TemplateSection[] = [
     links: [SECTION_LINKS.faq],
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const UMSC_CATEGORY_DEFAULT_DOORS = listRowsFromDefaults(
+  UMSC_CATEGORY_DOORS_DEFAULT_ROWS,
+  "default-door",
+);
+
+export const UMSC_CUSTOM_DEFAULT_LINES = listRowsFromDefaults(
+  UMSC_CUSTOM_LINES_DEFAULT_ROWS,
+  "default-line",
+);

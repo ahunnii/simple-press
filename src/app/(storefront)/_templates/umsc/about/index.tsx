@@ -1,6 +1,24 @@
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
+
+// Built-in example values, used when the owner hasn't configured any — her
+// verbatim values from the current site (design.md "must-keep phrases").
+const UMSC_ABOUT_VALUES_DEFAULT_ROWS = [
+  {
+    title: "Wellness & Relief",
+    body: "Unique Monique prioritizes self-care by fostering a healthier and cleaner environment. Our products are specifically designed to soothe common respiratory issues, such as asthma and allergies, through the use of natural, pollution-free ingredients. Our triple-scented candles, wax melts, and laundry pods create soothing spaces that enhance both physical comfort and mental wellness.",
+  },
+  {
+    title: "Eco-Conscious & Everyday",
+    body: "Our commitment to sustainability ensures that our products benefit not only your health but also the environment. Unique Monique uses naturally sourced ingredients and sustainable packaging, allowing you to enjoy effective home-care solutions without environmental guilt. Our antibacterial laundry pods and bleach tablets are user-friendly and eco-friendly, offering busy families a cleaner, greener way to manage household needs without compromise.",
+  },
+  {
+    title: "Community-Driven & Family-Focused",
+    body: "As a proud Black woman-owned business, Unique Monique is deeply rooted in community support. Our product range caters to diverse needs — from calming candles for relaxation to convenient, chemical-free cleaning solutions that are gentle on your skin and safe for your airways. We promise quality you can trust for yourself and your family.",
+  },
+] satisfies Record<string, string>[];
 
 // design.md "Per-page section concepts › About": hero (not hideable) → maker
 // (not hideable) → mission (not hideable) → values (hideable, hairline
@@ -199,7 +217,7 @@ const aboutValuesData: TemplateField[] = [
     key: "umsc.about.values",
     label: "Values",
     description:
-      "Three columns describing what the business stands for. Leave empty to use the built-in defaults.",
+      "Three columns describing what the business stands for.",
     type: "list",
     page: "about",
     group: "about.values",
@@ -208,6 +226,7 @@ const aboutValuesData: TemplateField[] = [
     itemLabel: "value",
     summaryKey: "title",
     defaultsWhenEmpty: true,
+    defaultRows: UMSC_ABOUT_VALUES_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "title",
@@ -402,3 +421,10 @@ export const umscAboutSections: TemplateSection[] = [
     hideable: true,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const UMSC_ABOUT_DEFAULT_VALUES = listRowsFromDefaults(
+  UMSC_ABOUT_VALUES_DEFAULT_ROWS,
+  "default-value",
+);

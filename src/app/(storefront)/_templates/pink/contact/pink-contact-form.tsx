@@ -24,6 +24,7 @@ import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
+import { DEFAULT_PINK_CONTACT_TOPICS } from "./index";
 
 export type PinkContactTopic = {
   name?: string;
@@ -41,27 +42,6 @@ function trimmedOrFallback(raw: string | undefined, fallback: string): string {
   }
   return fallback;
 }
-
-const DEFAULT_TOPICS: PinkContactTopic[] = [
-  {
-    name: "Custom orders",
-    blurb: "A doll, a piece of jewelry, or something else made just for you.",
-    messageLabel: "Tell me what you have in mind",
-    messagePlaceholder: "Sizes, colors, timeline — whatever you've got.",
-  },
-  {
-    name: "Make & takes",
-    blurb: "Bringing a workshop to your group.",
-    messageLabel: "Tell me about your group",
-    messagePlaceholder: "Group size, dates that work, and where.",
-  },
-  {
-    name: "Something else",
-    blurb: "Questions, press, or anything else.",
-    messageLabel: "What's on your mind",
-    messagePlaceholder: "Ask away.",
-  },
-];
 
 type Props = {
   topicsVisible: boolean;
@@ -144,7 +124,8 @@ export function PinkContactForm({
     }
   }, [isSuccess]);
 
-  const items = topics.length > 0 ? topics : DEFAULT_TOPICS;
+  const items: PinkContactTopic[] =
+    topics.length > 0 ? topics : DEFAULT_PINK_CONTACT_TOPICS;
   const selectedTopic =
     selectedIndex != null ? items[selectedIndex] : undefined;
   const messageLabel = trimmedOrFallback(

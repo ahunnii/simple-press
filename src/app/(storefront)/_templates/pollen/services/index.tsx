@@ -1,6 +1,29 @@
-import { BookOpen, Flower2, HandHelping, MapIcon } from "lucide-react";
-
+import { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+
+/** Service cards beside the services page overview text. */
+const POLLEN_SERVICES_DEFAULT_ROWS = [
+  {
+    icon: "Flower2",
+    title: "Custom Orders",
+    description: "One-of-a-kind pieces made to your specifications.",
+  },
+  {
+    icon: "HandHelping",
+    title: "Personal Consultations",
+    description: "One-on-one guidance to help you find the right fit.",
+  },
+  {
+    icon: "Map",
+    title: "Local Delivery",
+    description: "Fast, friendly delivery right to your door.",
+  },
+  {
+    icon: "BookOpen",
+    title: "Workshops & Classes",
+    description: "Hands-on sessions to learn the craft yourself.",
+  },
+] satisfies Record<string, string>[];
 
 export const pollenServicesFieldGroups: TemplateFieldGroup[] = [
   {
@@ -142,6 +165,7 @@ const servicesPageData: TemplateField[] = [
     ],
     minItems: 0,
     maxItems: 8,
+    defaultRows: POLLEN_SERVICES_DEFAULT_ROWS,
   },
 ];
 
@@ -287,25 +311,6 @@ export const pollenServicesData = [
   ...servicesResourcesData,
 ];
 
-export const DEFAULT_POLLEN_SERVICES = [
-  {
-    icon: Flower2,
-    title: "Custom Orders",
-    description: "One-of-a-kind pieces made to your specifications.",
-  },
-  {
-    icon: HandHelping,
-    title: "Personal Consultations",
-    description: "One-on-one guidance to help you find the right fit.",
-  },
-  {
-    icon: MapIcon,
-    title: "Local Delivery",
-    description: "Fast, friendly delivery right to your door.",
-  },
-  {
-    icon: BookOpen,
-    title: "Workshops & Classes",
-    description: "Hands-on sessions to learn the craft yourself.",
-  },
-];
+export const DEFAULT_POLLEN_SERVICES = iconRowsFromDefaults(
+  POLLEN_SERVICES_DEFAULT_ROWS,
+);

@@ -1,4 +1,68 @@
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+
+// Built-in example facial steps, shown by the editor as real rows and copied
+// into the saved value on the first edit (copy-on-write). Text copied
+// verbatim from the pre-migration `DEFAULT_STEPS` constant in
+// `vii-about-page.tsx`.
+const VII_ABOUT_STEPS_DEFAULT_ROWS = [
+  {
+    image: "",
+    title: "Consultation",
+    body: "We begin with a one-on-one skin analysis to understand your goals, concerns, and skin type — so every step that follows is tailored to you.",
+  },
+  {
+    image: "",
+    title: "Cleanse",
+    body: "A deep double-cleanse lifts away makeup, sunscreen, and the day's buildup, leaving a fresh canvas ready to receive treatment.",
+  },
+  {
+    image: "",
+    title: "Exfoliate",
+    body: "Gentle enzymatic and physical exfoliation sloughs away dull, dead cells to reveal the brighter, smoother skin underneath.",
+  },
+  {
+    image: "",
+    title: "Steam & Extract",
+    body: "Warm steam softens the skin and opens the pores for careful, hygienic extractions that clear congestion without trauma.",
+  },
+  {
+    image: "",
+    title: "Mask & Massage",
+    body: "A targeted treatment mask paired with a relaxing facial massage drives nutrients deep while easing tension and boosting circulation.",
+  },
+  {
+    image: "",
+    title: "Hydrate & Protect",
+    body: "We seal everything in with serums, moisturizer, and SPF — locking in hydration and protecting your renewed glow.",
+  },
+] satisfies Record<string, string>[];
+
+// Built-in example team, shown by the editor as real rows and copied into the
+// saved value on the first edit (copy-on-write). Text copied verbatim from
+// the pre-migration `DEFAULT_TEAM` constant in `vii-about-page.tsx`.
+const VII_ABOUT_TEAM_DEFAULT_ROWS = [
+  {
+    image: "",
+    name: "Maya Brooks",
+    role: "Licensed Esthetician",
+    bio: "A corrective-skincare specialist with a gentle touch and a love for teaching clients the why behind every product.",
+  },
+  {
+    image: "",
+    name: "Devon Carter",
+    role: "Esthetician & Waxing Specialist",
+    bio: "Known for fast, painless service and a calm, easygoing chair-side manner that puts first-timers at ease.",
+  },
+  {
+    image: "",
+    name: "Priya Nair",
+    role: "Skin Therapist",
+    bio: "Brings a holistic, results-driven approach and a deep knowledge of ingredients to every custom facial.",
+  },
+] satisfies Record<string, string>[];
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
@@ -132,7 +196,7 @@ const aboutStepsData: TemplateField[] = [
     key: "vii.about.steps",
     label: "Steps",
     description:
-      "Each step is shown as an alternating photo-and-text row. Up to 6 steps. Shows built-in example steps when this list is empty.",
+      "Each step is shown as an alternating photo-and-text row. Up to 6 steps. Starts with example steps — edit or replace them with your own.",
     type: "list",
     page: "about",
     group: "about.steps",
@@ -140,6 +204,7 @@ const aboutStepsData: TemplateField[] = [
     itemLabel: "step",
     defaultsWhenEmpty: true,
     maxItems: 6,
+    defaultRows: VII_ABOUT_STEPS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "image",
@@ -311,7 +376,7 @@ const aboutTeamData: TemplateField[] = [
     key: "vii.about.team",
     label: "Team members",
     description:
-      "Your staff, shown as a grid of cards. Shows built-in example team members when this list is empty.",
+      "Your staff, shown as a grid of cards. Starts with example team members — edit or replace them with your own.",
     type: "list",
     page: "about",
     group: "about.team",
@@ -319,6 +384,7 @@ const aboutTeamData: TemplateField[] = [
     itemLabel: "team member",
     defaultsWhenEmpty: true,
     maxItems: 8,
+    defaultRows: VII_ABOUT_TEAM_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "image",
@@ -514,3 +580,15 @@ export const viiAboutFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────────
+
+export const DEFAULT_VII_ABOUT_STEPS = listRowsFromDefaults(
+  VII_ABOUT_STEPS_DEFAULT_ROWS,
+  "default-step",
+);
+
+export const DEFAULT_VII_ABOUT_TEAM = listRowsFromDefaults(
+  VII_ABOUT_TEAM_DEFAULT_ROWS,
+  "default-member",
+);

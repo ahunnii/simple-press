@@ -1,5 +1,4 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import type { TemplateListRow } from "~/lib/template-fields";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
@@ -11,77 +10,13 @@ import { PageTransition } from "~/components/page-animations";
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
 import { nonBlank } from "../shared/vii-non-blank";
+import { DEFAULT_VII_ABOUT_STEPS, DEFAULT_VII_ABOUT_TEAM } from "./index";
 import { ViiAboutBand } from "./vii-about-band";
 import { ViiAboutHero } from "./vii-about-hero";
 import { ViiAboutMission } from "./vii-about-mission";
 import { ViiAboutSteps } from "./vii-about-steps";
 import { ViiAboutTeam } from "./vii-about-team";
 import { ViiAboutTeamOwner } from "./vii-about-team-owner";
-
-// Built-in example facial steps, used when the owner hasn't configured any.
-const DEFAULT_STEPS: TemplateListRow[] = [
-  {
-    _id: "default-step-1",
-    image: "",
-    title: "Consultation",
-    body: "We begin with a one-on-one skin analysis to understand your goals, concerns, and skin type — so every step that follows is tailored to you.",
-  },
-  {
-    _id: "default-step-2",
-    image: "",
-    title: "Cleanse",
-    body: "A deep double-cleanse lifts away makeup, sunscreen, and the day's buildup, leaving a fresh canvas ready to receive treatment.",
-  },
-  {
-    _id: "default-step-3",
-    image: "",
-    title: "Exfoliate",
-    body: "Gentle enzymatic and physical exfoliation sloughs away dull, dead cells to reveal the brighter, smoother skin underneath.",
-  },
-  {
-    _id: "default-step-4",
-    image: "",
-    title: "Steam & Extract",
-    body: "Warm steam softens the skin and opens the pores for careful, hygienic extractions that clear congestion without trauma.",
-  },
-  {
-    _id: "default-step-5",
-    image: "",
-    title: "Mask & Massage",
-    body: "A targeted treatment mask paired with a relaxing facial massage drives nutrients deep while easing tension and boosting circulation.",
-  },
-  {
-    _id: "default-step-6",
-    image: "",
-    title: "Hydrate & Protect",
-    body: "We seal everything in with serums, moisturizer, and SPF — locking in hydration and protecting your renewed glow.",
-  },
-];
-
-// Built-in example team, used when the owner hasn't configured any members.
-const DEFAULT_TEAM: TemplateListRow[] = [
-  {
-    _id: "default-member-1",
-    image: "",
-    name: "Maya Brooks",
-    role: "Licensed Esthetician",
-    bio: "A corrective-skincare specialist with a gentle touch and a love for teaching clients the why behind every product.",
-  },
-  {
-    _id: "default-member-2",
-    image: "",
-    name: "Devon Carter",
-    role: "Esthetician & Waxing Specialist",
-    bio: "Known for fast, painless service and a calm, easygoing chair-side manner that puts first-timers at ease.",
-  },
-  {
-    _id: "default-member-3",
-    image: "",
-    name: "Priya Nair",
-    role: "Skin Therapist",
-    bio: "Brings a holistic, results-driven approach and a deep knowledge of ingredients to every custom facial.",
-  },
-];
 
 export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
@@ -130,10 +65,10 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
   ]);
 
   const parsedSteps = parseTemplateListRows(customFields?.["vii.about.steps"]);
-  const steps = parsedSteps.length > 0 ? parsedSteps : DEFAULT_STEPS;
+  const steps = parsedSteps.length > 0 ? parsedSteps : DEFAULT_VII_ABOUT_STEPS;
 
   const parsedTeam = parseTemplateListRows(customFields?.["vii.about.team"]);
-  const team = parsedTeam.length > 0 ? parsedTeam : DEFAULT_TEAM;
+  const team = parsedTeam.length > 0 ? parsedTeam : DEFAULT_VII_ABOUT_TEAM;
 
   // CTA phone/email: Settings → General wins; else the legacy per-template
   // fields (retired 2026-09-25, a read-only fallback — never written or

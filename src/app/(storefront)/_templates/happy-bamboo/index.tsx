@@ -1,17 +1,9 @@
-import {
-  Droplets,
-  Heart,
-  Leaf,
-  Recycle,
-  Shield,
-  TreeDeciduous,
-} from "lucide-react";
-
 import type {
   GenericIconRow,
   TemplateField,
   TemplateFieldGroup,
 } from "~/lib/template-fields";
+import { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import {
@@ -22,6 +14,132 @@ import {
   happyBambooProductData,
   happyBambooProductFieldGroups,
 } from "./products";
+
+/// LIST DEFAULTS
+//
+// Built-in fallback rows for `defaultsWhenEmpty: true` list fields, declared
+// in the editor's stored shape (icon by NAME, every itemSchema key spelled
+// out). See `homepageBenefitsData`, `aboutServicesData`, `aboutBambooData`
+// below for the fields, and the `DEFAULT_HAPPY_BAMBOO_*` constants near the
+// bottom of this file for the storefront-facing `GenericIconRow[]` derived
+// from these same rows via `iconRowsFromDefaults`.
+
+const HAPPY_BAMBOO_BENEFITS_DEFAULT_ROWS = [
+  {
+    icon: "TreePine",
+    title: "Sustainability",
+    description:
+      "Bamboo is one of the fastest-growing plants in the world, capable of reaching maturity in just 3-5 years. It can be harvested without killing the plant, allowing it to regenerate quickly.",
+  },
+  {
+    icon: "Recycle",
+    title: "Biodegradable",
+    description:
+      "Bamboo products are biodegradable, meaning they break down naturally and do not contribute to landfill waste, unlike many plastic products.",
+  },
+  {
+    icon: "Wind",
+    title: "Carbon Sequestration",
+    description:
+      "Bamboo absorbs more carbon dioxide and releases more oxygen than many trees, contributing positively to the environment and helping to combat climate change.",
+  },
+  {
+    icon: "Shield",
+    title: "Natural Antimicrobial",
+    description:
+      "Bamboo has natural antimicrobial properties, which can help reduce bacteria and odors, making it a hygienic choice for bathroom and personal items.",
+  },
+  {
+    icon: "Droplets",
+    title: "Eco-Friendly",
+    description:
+      "Bamboo requires less water and no pesticides or fertilizers to grow compared to traditional crops, reducing the ecological footprint associated with its cultivation.",
+  },
+  {
+    icon: "Feather",
+    title: "Lightweight",
+    description:
+      "Bamboo products are typically lightweight, making them easy to handle and transport, which is especially beneficial for personal items and home products.",
+  },
+  {
+    icon: "Leaf",
+    title: "Versatility",
+    description:
+      "Bamboo can be used to create a wide range of products, including furniture, kitchenware, flooring, and paper. This versatility allows consumers to find bamboo options for many needs.",
+  },
+  {
+    icon: "Heart",
+    title: "Support Local Economies",
+    description:
+      "Many bamboo products are sourced from local artisans and communities, supporting local economies and promoting fair trade practices.",
+  },
+] satisfies Record<string, string>[];
+
+const HAPPY_BAMBOO_SERVICES_DEFAULT_ROWS = [
+  {
+    icon: "Heart",
+    title: "Premium 3-Ply Toilet Tissue",
+    description:
+      "Crafted from the softest bamboo fibers. Each roll contains 300 sheets of luxurious softness, ensuring a gentle touch for you and your family.",
+  },
+  {
+    icon: "Recycle",
+    title: "100% Biodegradable",
+    description:
+      "Our products are made from 100% biodegradable materials, helping to reduce waste and promote a greener future.",
+  },
+  {
+    icon: "Shield",
+    title: "Chemical & Hypoallergenic Free",
+    description:
+      "Our products are free from harmful chemicals, making them safe for sensitive skin and better for your health.",
+  },
+  {
+    icon: "Leaf",
+    title: "Eco-Friendly Packaging",
+    description:
+      "Sustainable packaging that minimizes environmental impact while keeping your products fresh and protected.",
+  },
+] satisfies Record<string, string>[];
+
+const HAPPY_BAMBOO_BAMBOO_FACTS_DEFAULT_ROWS = [
+  {
+    icon: "TreeDeciduous",
+    title: "Saves Trees & Wildlife",
+    description:
+      "Bamboo grows up to 3 feet per day and regenerates without replanting, protecting forests and wildlife habitats.",
+  },
+  {
+    icon: "Droplets",
+    title: "Uses Less Water",
+    description:
+      "Bamboo requires significantly less water than traditional tree farming, conserving precious water resources.",
+  },
+  {
+    icon: "Recycle",
+    title: "Naturally Renewable",
+    description:
+      "As one of the fastest-growing plants on Earth, bamboo is a truly sustainable and renewable resource.",
+  },
+  {
+    icon: "Shield",
+    title: "Naturally Antibacterial",
+    description:
+      "Bamboo has natural antibacterial properties, making it hygienic and safe for personal care products.",
+  },
+  {
+    icon: "Leaf",
+    title: "Carbon Absorption",
+    description:
+      "Bamboo absorbs more CO2 and releases more oxygen than equivalent stands of trees, fighting climate change.",
+  },
+  {
+    icon: "Heart",
+    title: "Soft & Strong",
+    description:
+      "Bamboo fibers create a product that is both incredibly soft and durable, providing superior comfort.",
+  },
+] satisfies Record<string, string>[];
 
 const homepageHeroData: TemplateField[] = [
   {
@@ -294,6 +412,7 @@ const homepageBenefitsData: TemplateField[] = [
     itemLabel: "benefit",
     summaryKey: "title",
     defaultsWhenEmpty: true,
+    defaultRows: HAPPY_BAMBOO_BENEFITS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "icon",
@@ -471,6 +590,7 @@ const aboutServicesData: TemplateField[] = [
     itemLabel: "service",
     summaryKey: "title",
     defaultsWhenEmpty: true,
+    defaultRows: HAPPY_BAMBOO_SERVICES_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "icon",
@@ -554,6 +674,7 @@ const aboutBambooData: TemplateField[] = [
     itemLabel: "fact",
     summaryKey: "title",
     defaultsWhenEmpty: true,
+    defaultRows: HAPPY_BAMBOO_BAMBOO_FACTS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "icon",
@@ -1473,68 +1594,11 @@ export function resolveFields(
 
 /// DEFAULTS
 
-export const DEFAULT_HAPPY_BAMBOO_BAMBOO_LIST: GenericIconRow[] = [
-  {
-    icon: TreeDeciduous,
-    title: "Saves Trees & Wildlife",
-    description:
-      "Bamboo grows up to 3 feet per day and regenerates without replanting, protecting forests and wildlife habitats.",
-  },
-  {
-    icon: Droplets,
-    title: "Uses Less Water",
-    description:
-      "Bamboo requires significantly less water than traditional tree farming, conserving precious water resources.",
-  },
-  {
-    icon: Recycle,
-    title: "Naturally Renewable",
-    description:
-      "As one of the fastest-growing plants on Earth, bamboo is a truly sustainable and renewable resource.",
-  },
-  {
-    icon: Shield,
-    title: "Naturally Antibacterial",
-    description:
-      "Bamboo has natural antibacterial properties, making it hygienic and safe for personal care products.",
-  },
-  {
-    icon: Leaf,
-    title: "Carbon Absorption",
-    description:
-      "Bamboo absorbs more CO2 and releases more oxygen than equivalent stands of trees, fighting climate change.",
-  },
-  {
-    icon: Heart,
-    title: "Soft & Strong",
-    description:
-      "Bamboo fibers create a product that is both incredibly soft and durable, providing superior comfort.",
-  },
-];
+export const DEFAULT_HAPPY_BAMBOO_BAMBOO_LIST: GenericIconRow[] =
+  iconRowsFromDefaults(HAPPY_BAMBOO_BAMBOO_FACTS_DEFAULT_ROWS);
 
-export const DEFAULT_HAPPY_BAMBOO_SERVICES_LIST: GenericIconRow[] = [
-  {
-    icon: Heart,
-    title: "Premium 3-Ply Toilet Tissue",
-    description:
-      "Crafted from the softest bamboo fibers. Each roll contains 300 sheets of luxurious softness, ensuring a gentle touch for you and your family.",
-  },
-  {
-    icon: Recycle,
-    title: "100% Biodegradable",
-    description:
-      "Our products are made from 100% biodegradable materials, helping to reduce waste and promote a greener future.",
-  },
-  {
-    icon: Shield,
-    title: "Chemical & Hypoallergenic Free",
-    description:
-      "Our products are free from harmful chemicals, making them safe for sensitive skin and better for your health.",
-  },
-  {
-    icon: Leaf,
-    title: "Eco-Friendly Packaging",
-    description:
-      "Sustainable packaging that minimizes environmental impact while keeping your products fresh and protected.",
-  },
-];
+export const DEFAULT_HAPPY_BAMBOO_SERVICES_LIST: GenericIconRow[] =
+  iconRowsFromDefaults(HAPPY_BAMBOO_SERVICES_DEFAULT_ROWS);
+
+export const DEFAULT_HAPPY_BAMBOO_BENEFITS_LIST: GenericIconRow[] =
+  iconRowsFromDefaults(HAPPY_BAMBOO_BENEFITS_DEFAULT_ROWS);

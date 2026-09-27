@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { PinkServiceCard } from "./pink-services-grid";
-import type { TemplateListRow } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
 import {
   fieldAttr,
@@ -21,6 +20,7 @@ import { hasCustomImage } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
+import { DEFAULT_PINK_SERVICE_STEPS } from "./index";
 import { PinkServicesGrid } from "./pink-services-grid";
 
 type Props = {
@@ -40,34 +40,6 @@ function isOneToOneCategory(category: string | null): boolean {
     category,
   );
 }
-
-// `parseTemplateListRows` reads `customFields` directly and ignores a list
-// field's `defaultValue` (list/richtext fields bypass `resolveFields`
-// entirely — see field-conventions.md), so a fresh store needs a real
-// hardcoded fallback here or these sections render empty. Mirrors vii's
-// `DEFAULT_STEPS` pattern (`vii-about-page.tsx`).
-const DEFAULT_STEPS: TemplateListRow[] = [
-  {
-    ordinal: "01",
-    title: "You reach out",
-    body: "Tell us the room — a classroom, a sanctuary, a break room, a back yard — and how many hands.",
-  },
-  {
-    ordinal: "02",
-    title: "We pick a project",
-    body: "Something that fits the time you have and travels well.",
-  },
-  {
-    ordinal: "03",
-    title: "Materials show up",
-    body: "Everything's cut, sorted and ready before anyone sits down.",
-  },
-  {
-    ordinal: "04",
-    title: "Everyone leaves with something",
-    body: "Sewn, glued or knotted by their own hands.",
-  },
-];
 
 export async function PinkServicesIndexPage({ business, services }: Props) {
   const customFields = business.siteContent?.customFields;
@@ -105,7 +77,7 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
     rawCustomFields?.["pink.services.steps-list"],
   );
   const stepsRows = (
-    parsedStepsRows.length > 0 ? parsedStepsRows : DEFAULT_STEPS
+    parsedStepsRows.length > 0 ? parsedStepsRows : DEFAULT_PINK_SERVICE_STEPS
   ).map((row) => ({
     ordinal: typeof row.ordinal === "string" ? row.ordinal : "",
     title: typeof row.title === "string" ? row.title : "",

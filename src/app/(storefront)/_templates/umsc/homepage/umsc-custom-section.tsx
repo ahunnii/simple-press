@@ -4,11 +4,16 @@ import type { TemplateListRow } from "~/lib/template-fields";
 import { listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
+import { UMSC_CUSTOM_DEFAULT_LINES } from ".";
 import { useUmscReveal } from "../hooks/use-umsc-reveal";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscHeading } from "../shared/umsc-heading";
 import { UmscLede } from "../shared/umsc-lede";
 import { UmscSection } from "../shared/umsc-section";
+
+// Re-exported so the pre-migration import path (and the snapshot test) keep
+// working — the rows themselves now live in `./index.tsx`'s `defaultRows`.
+export { UMSC_CUSTOM_DEFAULT_LINES };
 
 type Props = {
   heading: string;
@@ -20,13 +25,6 @@ type Props = {
   lines: TemplateListRow[];
   sectionAttrs?: Record<string, string>;
 };
-
-/** Real default "what to include" lines, shown until the owner customizes the list. */
-const DEFAULT_LINES: TemplateListRow[] = [
-  { _id: "l1", text: "Candles, wax melts, soaps, or body care" },
-  { _id: "l2", text: "Bundles, favors, and corporate gifts" },
-  { _id: "l3", text: "Your scent notes, your colors, your label" },
-];
 
 /**
  * UmscCustomSection (homepage.custom) — black band with the `.umsc-hairline-
@@ -45,7 +43,7 @@ export function UmscCustomSection({
   sectionAttrs,
 }: Props) {
   const { ref, visible } = useUmscReveal(0.15);
-  const rows = lines.length > 0 ? lines : DEFAULT_LINES;
+  const rows = lines.length > 0 ? lines : UMSC_CUSTOM_DEFAULT_LINES;
 
   return (
     <UmscSection

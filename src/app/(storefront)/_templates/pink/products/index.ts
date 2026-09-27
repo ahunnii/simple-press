@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
@@ -14,6 +15,22 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * DB-driven. `product.details` holds the copy around the buy panel (notes,
  * question link, coming-soon / sold-out / stock text).
  */
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+// Text copied verbatim from the pre-migration `DEFAULT_PANELS` constant in
+// `pink-product-page.tsx`.
+
+const PINK_PRODUCT_PANELS_DEFAULT_ROWS = [
+  {
+    title: "Care & keeping",
+    body: "Keep out of direct sun and away from damp. Ask us if you have questions about caring for a piece.",
+  },
+  {
+    title: "Custom orders",
+    body: "Want something close to this but not quite? Reach out and we'll talk it through.",
+  },
+] satisfies Record<string, string>[];
+
 export const pinkProductData: TemplateField[] = [
   // ── product.details (new keys use pink.product.*) ────────────────
   {
@@ -138,6 +155,7 @@ export const pinkProductData: TemplateField[] = [
     maxItems: 6,
     itemLabel: "row",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_PRODUCT_PANELS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "title",
@@ -160,7 +178,8 @@ export const pinkProductData: TemplateField[] = [
   {
     key: "pink.global.product-story-image",
     label: "Image",
-    description: "1:1 image beside the heading in the section under the accordion.",
+    description:
+      "1:1 image beside the heading in the section under the accordion.",
     type: "image",
     page: "product",
     group: "product.story",
@@ -288,3 +307,10 @@ export const pinkProductSections: TemplateSection[] = [
     links: [SECTION_LINKS.products],
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const DEFAULT_PINK_PRODUCT_PANELS = listRowsFromDefaults(
+  PINK_PRODUCT_PANELS_DEFAULT_ROWS,
+  "default-panel",
+);

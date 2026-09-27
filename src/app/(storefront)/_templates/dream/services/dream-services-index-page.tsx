@@ -4,7 +4,7 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
-import { DREAM_DEFAULT_PACKAGE_ROWS } from ".";
+import { DREAM_PACKAGES_DEFAULT_ROWS } from ".";
 import { resolveFields } from "..";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
@@ -55,12 +55,12 @@ export function DreamServicesIndexPage({ business, services }: Props) {
     business.name ?? "",
   );
 
-  // `parseTemplateListRows` ignores the field's `defaultValue` (it reads
-  // `customFields` directly), so an empty saved list falls back to the same
-  // built-in rows the field declares (`defaultsWhenEmpty`).
+  // `parseTemplateListRows` reads `customFields` directly and knows nothing
+  // of the field's `defaultRows`, so an empty saved list falls back here to
+  // the same built-in rows the field declares (`defaultsWhenEmpty`).
   const packageRows = parseTemplateListRows(raw?.["dream.services.packages"]);
   const packages = (
-    packageRows.length > 0 ? packageRows : DREAM_DEFAULT_PACKAGE_ROWS
+    packageRows.length > 0 ? packageRows : DREAM_PACKAGES_DEFAULT_ROWS
   ).map(toPackageRow);
 
   return (

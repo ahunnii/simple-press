@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { TemplateField } from "./template-fields";
 
+import { TEMPLATE_LUCIDE_ICON_NAMES } from "./lucide-template-icons";
 import {
   getGroupMetadata,
   TEMPLATE_FIELD_GROUPS,
@@ -28,6 +29,31 @@ const STRICT_TEMPLATES: readonly string[] = [
   "pink",
   "dream",
   "sledge",
+  "umsc",
+];
+
+/**
+ * Strict templates additionally swept for the `defaultRows` list-default
+ * convention (see `field-conventions.md`'s "List defaults" section):
+ * `defaultsWhenEmpty: true` lists declare their built-in fallback via
+ * `defaultRows` in the field itself, never via a list field's `defaultValue`
+ * (the old `JSON.stringify([...])` pattern). Bamboo was swept 2026-09-26;
+ * happy-bamboo followed the same day; vii followed 2026-09-26; pollen
+ * followed 2026-09-26; olive followed the same day; pink followed the same
+ * day; sledge followed the same day. The other `STRICT_TEMPLATES` entries still have pre-`defaultRows`
+ * list fields (e.g. `dream.services.packages`) and are not yet held to this
+ * pair of checks — add a template's id here once its list fields have been
+ * swept.
+ */
+const LIST_DEFAULTS_SWEPT_TEMPLATES: readonly string[] = [
+  "bamboo",
+  "happy-bamboo",
+  "vii",
+  "pollen",
+  "olive",
+  "pink",
+  "sledge",
+  "dream",
   "umsc",
 ];
 
@@ -133,6 +159,68 @@ describe("TEMPLATE_FIELDS — universal invariants (all templates)", () => {
         `${describeField(templateId, field)} has summaryKey ` +
           `${JSON.stringify(field.summaryKey)}, which is not a key in its itemSchema.`,
       ).toBe(true);
+    }
+  });
+
+  it("list field defaultRows requires defaultsWhenEmpty: true", () => {
+    for (const { templateId, field } of allFields()) {
+      if (field.type !== "list") continue;
+      if (!field.defaultRows) continue;
+      expect(
+        field.defaultsWhenEmpty,
+        `${describeField(templateId, field)} declares defaultRows but not ` +
+          `defaultsWhenEmpty: true.`,
+      ).toBe(true);
+    }
+  });
+
+  it("list field defaultRows: every row's keys are a subset of itemSchema keys", () => {
+    for (const { templateId, field } of allFields()) {
+      if (field.type !== "list" || !field.defaultRows) continue;
+      const subKeys = new Set(field.itemSchema.map((sub) => sub.key));
+      field.defaultRows.forEach((row, index) => {
+        for (const key of Object.keys(row)) {
+          expect(
+            subKeys.has(key),
+            `${describeField(templateId, field)} defaultRows[${index}] has key ` +
+              `${JSON.stringify(key)}, which is not in its itemSchema.`,
+          ).toBe(true);
+        }
+      });
+    }
+  });
+
+  it("list field defaultRows.length does not exceed maxItems", () => {
+    for (const { templateId, field } of allFields()) {
+      if (field.type !== "list" || !field.defaultRows) continue;
+      const max = field.maxItems ?? Infinity;
+      expect(
+        field.defaultRows.length <= max,
+        `${describeField(templateId, field)} has ${field.defaultRows.length} ` +
+          `defaultRows, which exceeds maxItems (${field.maxItems}).`,
+      ).toBe(true);
+    }
+  });
+
+  it("list field defaultRows: every icon sub-field value is a real Lucide icon name", () => {
+    const iconNames: readonly string[] = TEMPLATE_LUCIDE_ICON_NAMES;
+    for (const { templateId, field } of allFields()) {
+      if (field.type !== "list" || !field.defaultRows) continue;
+      const iconKeys = field.itemSchema
+        .filter((sub) => sub.type === "icon")
+        .map((sub) => sub.key);
+      if (iconKeys.length === 0) continue;
+      field.defaultRows.forEach((row, index) => {
+        for (const key of iconKeys) {
+          const value = row[key];
+          if (value === undefined) continue;
+          expect(
+            iconNames.includes(value),
+            `${describeField(templateId, field)} defaultRows[${index}].${key} is ` +
+              `${JSON.stringify(value)}, which is not in TEMPLATE_LUCIDE_ICON_NAMES.`,
+          ).toBe(true);
+        }
+      });
     }
   });
 });
@@ -286,6 +374,32 @@ describe.each(STRICT_TEMPLATES)(
           groupIds.has(field.group),
           `${describeField(templateId, field)} references group ${JSON.stringify(field.group)}, ` +
             `which has no TemplateFieldGroup metadata on template "${templateId}".`,
+        ).toBe(true);
+      }
+    });
+
+    it("list fields with defaultsWhenEmpty: true declare non-empty defaultRows", () => {
+      if (!LIST_DEFAULTS_SWEPT_TEMPLATES.includes(templateId)) return;
+      for (const field of fields) {
+        if (field.type !== "list" || !field.defaultsWhenEmpty) continue;
+        expect(
+          field.defaultRows && field.defaultRows.length > 0,
+          `${describeField(templateId, field)} has defaultsWhenEmpty: true but no ` +
+            `(or empty) defaultRows — declare the built-in fallback rows in the field ` +
+            `itself so the editor can show and copy-on-write them.`,
+        ).toBe(true);
+      }
+    });
+
+    it("list fields never have a non-empty defaultValue string", () => {
+      if (!LIST_DEFAULTS_SWEPT_TEMPLATES.includes(templateId)) return;
+      for (const field of fields) {
+        if (field.type !== "list") continue;
+        expect(
+          !field.defaultValue,
+          `${describeField(templateId, field)} has a non-empty defaultValue ` +
+            `${JSON.stringify(field.defaultValue)} — list fields declare their built-in ` +
+            `fallback via defaultRows, never defaultValue: JSON.stringify(...).`,
         ).toBe(true);
       }
     });

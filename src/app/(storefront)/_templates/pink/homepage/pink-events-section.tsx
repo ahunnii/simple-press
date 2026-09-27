@@ -19,7 +19,11 @@ type Props = {
   note: string;
   body: string;
   mosaic: TemplateListRow[];
-  facts: PinkFactRow[];
+  // `_originalIndex` (set by `pink-homepage.tsx` past its blank-row filter)
+  // is each row's position in the saved/default list, which is what
+  // `listItemAttr` below needs — the render index drifts once a saved
+  // middle row is blank.
+  facts: (PinkFactRow & { _originalIndex?: number })[];
   ctaLabel: string;
   ctaLink: string;
   ctaNote: string;
@@ -133,7 +137,12 @@ export function PinkEventsSection({
               rows={facts}
               surface="dark"
               className="h-fit"
-              itemAttr={(i) => listItemAttr("pink.homepage.events-facts", i)}
+              itemAttr={(i) =>
+                listItemAttr(
+                  "pink.homepage.events-facts",
+                  facts[i]?._originalIndex ?? i,
+                )
+              }
             />
           )}
         </div>

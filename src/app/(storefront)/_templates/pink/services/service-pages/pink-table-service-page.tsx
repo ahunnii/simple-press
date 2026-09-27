@@ -1,5 +1,4 @@
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-import type { TemplateListRow } from "~/lib/template-fields";
 import {
   getRichTextFieldValue,
   isContentEmpty,
@@ -11,22 +10,8 @@ import { api } from "~/trpc/server";
 
 import { PinkFactRows } from "../../shared/pink-fact-rows";
 import { PinkPhotoHeader } from "../../shared/pink-photo-header";
-import { resolvePinkTableFields } from "./fields";
+import { DEFAULT_PINK_TABLE_FACT_ROWS, resolvePinkTableFields } from "./fields";
 import { PinkTableBody } from "./pink-table-body";
-
-// `parseTemplateListRows` reads `customFields` directly and ignores a list
-// field's `defaultValue` (list fields bypass `resolveFields` entirely — see
-// field-conventions.md), so the hero fact rows — not hideable — need a real
-// hardcoded fallback or a fresh Service renders an empty panel.
-const DEFAULT_FACT_ROWS: TemplateListRow[] = [
-  {
-    label: "Where",
-    value: "Your space — school, church, library or workplace",
-  },
-  { label: "Group size", value: "10 to 12 at a table" },
-  { label: "Materials", value: "Everything included" },
-  { label: "Notice", value: "Book at least 2 weeks out" },
-];
 
 /** Matches `maxItems` on the `pink-table.faq` picker field. */
 const FAQ_MAX_ITEMS = 8;
@@ -127,7 +112,7 @@ export async function PinkTableServicePage({
 
   const parsedFactRows = parseTemplateListRows(raw?.["pink-table.fact-rows"]);
   const factRows = (
-    parsedFactRows.length > 0 ? parsedFactRows : DEFAULT_FACT_ROWS
+    parsedFactRows.length > 0 ? parsedFactRows : DEFAULT_PINK_TABLE_FACT_ROWS
   ).map((row) => ({
     label: typeof row.label === "string" ? row.label : "",
     value: typeof row.value === "string" ? row.value : "",

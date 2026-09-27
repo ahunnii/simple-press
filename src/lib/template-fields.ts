@@ -175,8 +175,18 @@ export type TemplateField =
        * When true, the storefront falls back to built-in rows if the saved
        * list is empty. Purely descriptive for the editor, which shows a hint
        * — the actual fallback behaviour lives in the template's own render code.
+       * When `defaultRows` is also set, the editor displays those rows as
+       * real, editable rows instead of just a hint.
        */
       defaultsWhenEmpty?: boolean;
+      /**
+       * Built-in rows the storefront shows while this list is unsaved or saved
+       * empty. Same shape the editor stores (icons by NAME, every sub-field key
+       * spelled out — e.g. `description: ""`, which `genericIconRowSchema`
+       * requires). The editor displays these as real rows and saves them all on
+       * the first edit (copy-on-write). Requires `defaultsWhenEmpty: true`.
+       */
+      defaultRows?: Record<string, string>[];
     })
   | (TemplateFieldCommon & {
       type: "faq";
@@ -551,10 +561,17 @@ export const genericFAQRowSchema = z
   })
   .passthrough();
 
+/**
+ * Trust-badge rows store their text under `label` — except the `default`
+ * template, whose list has always saved it under `title`. Renaming that
+ * sub-field would orphan owners' saved rows, so the parser accepts either
+ * (`label` wins) and drops rows with no text.
+ */
 export const genericTrustBadgeRowSchema = z
   .object({
     icon: z.string().optional(),
-    label: z.string(),
+    label: z.string().optional(),
+    title: z.string().optional(),
   })
   .passthrough();
 
@@ -607,6 +624,18 @@ export function parseTemplateIconListRows(
   return out.length > 0 ? out : (defaultList ?? null);
 }
 
+/**
+ * Re-exported from `~/lib/lucide-template-icons`, where it actually lives.
+ * See that module for why: a template's field-definition module (e.g.
+ * `_templates/bamboo/about/index.tsx`) needs to call this while building its
+ * `defaultRows`, but importing it from *this* module would pull in every
+ * template's root `index.ts` (via `TEMPLATE_FIELDS`/`TEMPLATE_FIELD_GROUPS`
+ * below) — including the very module doing the importing, a circular import.
+ * Field-definition modules should import `iconRowsFromDefaults` directly from
+ * `~/lib/lucide-template-icons` instead of from here.
+ */
+export { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
+
 export function parseTemplateTrustBadgesListRows(
   raw: unknown,
   defaultList?: GenericTrustBadgeRow[],
@@ -617,7 +646,9 @@ export function parseTemplateTrustBadgesListRows(
   for (const row of raw) {
     const parsed = genericTrustBadgeRowSchema.safeParse(row);
     if (!parsed.success) continue;
-    const { icon, label } = parsed.data;
+    const { icon, label: savedLabel, title } = parsed.data;
+    const label = savedLabel?.trim() ? savedLabel : (title ?? "");
+    if (!label.trim()) continue;
     const Icon = icon ? getLucideTemplateIcon(icon) : undefined;
     out.push({ icon: Icon ?? undefined, label });
   }

@@ -27,6 +27,7 @@ import {
 import { PinkPortraitHeader } from "../shared/pink-portrait-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
+import { DEFAULT_PINK_VALUES } from "./index";
 
 const FIELD_KEYS = [
   "pink.about.hero-image",
@@ -62,17 +63,6 @@ type GalleryItem = {
   _id?: string;
 };
 
-const DEFAULT_VALUES: ValueItem[] = [
-  {
-    title: "One of a kind",
-    body: "Made one at a time, never in runs. No two pieces are exactly alike.",
-  },
-  {
-    title: "Made by hand",
-    body: "Every piece passes through Evelyn's hands start to finish.",
-  },
-];
-
 // Deliberately empty (2026-07-31, client direction): the shipped defaults
 // asserted dates — 2004 / 2012 / 2018 — that nobody has verified. The section
 // self-hides on an empty list (see the `timeline.length > 0` guard below) so a
@@ -81,8 +71,8 @@ const DEFAULT_TIMELINE: TimelineItem[] = [];
 
 // Shipped story copy, rendered only while `pink.about.story-body` (richtext)
 // is empty — the richtext is the sole authoring path, so this is a constant,
-// not fields (same rule as DEFAULT_VALUES). Once the owner writes their own
-// story the richtext wins and this never renders again.
+// not a field default. Once the owner writes their own story the richtext
+// wins and this never renders again.
 const DEFAULT_STORY_PARAGRAPHS: string[] = [
   "Every doll starts with cotton fabric on the table and no fixed plan. Evelyn works the shape out by hand, one piece at a time, the same way she's worked since she started sewing.",
   "Everything that goes into a piece is natural: 100% wool filling, cotton fabrics, and faces shaped from polymer clay. Nothing is printed. If a seam shows, it's because a person made it.",
@@ -113,10 +103,11 @@ function clampSpan(raw: string | undefined, max = 2): number {
   return Math.min(n, max);
 }
 
-// The values list ships with a default of 2 rows (see DEFAULT_VALUES) but the
-// owner can save up to 4 (`pink.about.values-items`, maxItems: 4). A fixed
-// `lg:grid-cols-4` leaves an obviously half-empty row once there are fewer
-// than 4 — so the column count is keyed on the actual item count instead.
+// The values list ships with a default of 2 rows (see `DEFAULT_PINK_VALUES`
+// in `./index`) but the owner can save up to 4 (`pink.about.values-items`,
+// maxItems: 4). A fixed `lg:grid-cols-4` leaves an obviously half-empty row
+// once there are fewer than 4 — so the column count is keyed on the actual
+// item count instead.
 function valuesGridClass(count: number): string {
   if (count <= 2) return "grid-cols-1 sm:grid-cols-2";
   if (count === 3) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
@@ -138,7 +129,8 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
       "pink.about.values-items"
     ],
   ) as ValueItem[];
-  const values = valuesRaw.length > 0 ? valuesRaw : DEFAULT_VALUES;
+  const values: ValueItem[] =
+    valuesRaw.length > 0 ? valuesRaw : DEFAULT_PINK_VALUES;
 
   const timelineRaw = parseTemplateListRows(
     (customFields as Record<string, unknown> | undefined)?.[
@@ -264,7 +256,10 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
               </div>
               <div
                 className="relative overflow-hidden"
-                style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
+                style={{
+                  aspectRatio: "1 / 1",
+                  background: "var(--pink-panel)",
+                }}
               >
                 {hasCustomImage(f["pink.about.story-image-2"]) ? (
                   <Image
@@ -283,7 +278,10 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
               </div>
               <div
                 className="relative overflow-hidden"
-                style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
+                style={{
+                  aspectRatio: "1 / 1",
+                  background: "var(--pink-panel)",
+                }}
               >
                 {hasCustomImage(f["pink.about.story-image-3"]) ? (
                   <Image

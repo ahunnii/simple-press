@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 
 /**
  * Field / group / section module for the `pink` template's About page.
@@ -13,6 +14,21 @@ import type { TemplateSection } from "~/lib/template-sections";
  * the pale wash; the custom-orders section stays dark on purpose as the
  * page's closing note, echoing the footer beneath it.
  */
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+// Text copied verbatim from the pre-migration `DEFAULT_VALUES` constant in
+// `pink-about-page.tsx`.
+
+const PINK_VALUES_DEFAULT_ROWS = [
+  {
+    title: "One of a kind",
+    body: "Made one at a time, never in runs. No two pieces are exactly alike.",
+  },
+  {
+    title: "Made by hand",
+    body: "Every piece passes through Evelyn's hands start to finish.",
+  },
+] satisfies Record<string, string>[];
 
 // ── about.hero ──────────────────────────────────────────────────────────────
 
@@ -146,6 +162,7 @@ const aboutValuesData: TemplateField[] = [
     maxItems: 4,
     itemLabel: "value",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_VALUES_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "title",
@@ -252,7 +269,8 @@ const aboutGalleryData: TemplateField[] = [
         key: "colSpan",
         label: "Column span",
         type: "text",
-        description: "How many columns this photo fills — 1 or 2. Leave blank for 1.",
+        description:
+          "How many columns this photo fills — 1 or 2. Leave blank for 1.",
         placeholder: "1",
         optional: true,
       },
@@ -260,7 +278,8 @@ const aboutGalleryData: TemplateField[] = [
         key: "rowSpan",
         label: "Row span",
         type: "text",
-        description: "How many rows this photo fills — 1 or 2. Leave blank for 1.",
+        description:
+          "How many rows this photo fills — 1 or 2. Leave blank for 1.",
         placeholder: "1",
         optional: true,
       },
@@ -480,3 +499,10 @@ export const pinkAboutSections: TemplateSection[] = [
     hideable: true,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const DEFAULT_PINK_VALUES = listRowsFromDefaults(
+  PINK_VALUES_DEFAULT_ROWS,
+  "default-value",
+);

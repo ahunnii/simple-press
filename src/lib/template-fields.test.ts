@@ -1,3 +1,4 @@
+import { FlaskConical, Leaf, Sprout } from "lucide-react";
 import { describe, expect, it } from "vitest";
 
 import type { TemplateListItemField } from "./template-fields";
@@ -5,13 +6,17 @@ import type { TemplateListItemField } from "./template-fields";
 import {
   getListRowSummary,
   getRawCustomFieldString,
+  iconRowsFromDefaults,
   isRetiredTemplateKey,
   parseFaqPickerIds,
+  parseTemplateIconListRows,
   parseTemplateListRows,
+  parseTemplateTrustBadgesListRows,
   resolveFaqPickerItems,
   RETIRED_TEMPLATE_KEYS,
   TEMPLATE_FIELDS,
 } from "./template-fields";
+import { getLucideTemplateIcon } from "./lucide-template-icons";
 
 /**
  * List rows live inside `customFields` (`z.any()` on the wire), so the row
@@ -336,5 +341,111 @@ describe("resolveFaqPickerItems", () => {
     expect(resolveFaqPickerItems(["gone"], published, 6)).toEqual([]);
     expect(resolveFaqPickerItems(undefined, [], 6)).toEqual([]);
     expect(resolveFaqPickerItems(["a"], published, 0)).toEqual([]);
+  });
+});
+
+describe("iconRowsFromDefaults", () => {
+  it("maps icon names to components", () => {
+    expect(
+      iconRowsFromDefaults([
+        { icon: "FlaskConical", title: "Flask", description: "d1" },
+        { icon: "Sprout", title: "Sprout", description: "d2" },
+      ]),
+    ).toEqual([
+      { icon: FlaskConical, title: "Flask", description: "d1" },
+      { icon: Sprout, title: "Sprout", description: "d2" },
+    ]);
+  });
+
+  it("falls back to Leaf for an unknown icon name", () => {
+    expect(
+      iconRowsFromDefaults([
+        { icon: "NotARealIcon", title: "Mystery", description: "d" },
+      ]),
+    ).toEqual([{ icon: Leaf, title: "Mystery", description: "d" }]);
+  });
+
+  it("defaults missing title/description to empty strings", () => {
+    expect(iconRowsFromDefaults([{ icon: "Sprout" }])).toEqual([
+      { icon: Sprout, title: "", description: "" },
+    ]);
+  });
+
+  it("returns [] for undefined", () => {
+    expect(iconRowsFromDefaults(undefined)).toEqual([]);
+  });
+});
+
+describe("parseTemplateIconListRows", () => {
+  const defaults = [{ icon: Leaf, title: "Default", description: "d" }];
+
+  it("falls back to defaults when raw is undefined", () => {
+    expect(parseTemplateIconListRows(undefined, defaults)).toEqual(defaults);
+  });
+
+  it("falls back to defaults when raw is an empty array", () => {
+    expect(parseTemplateIconListRows([], defaults)).toEqual(defaults);
+  });
+
+  it("falls back to defaults when every row is invalid", () => {
+    expect(
+      parseTemplateIconListRows(
+        [{ icon: "Leaf", title: "No description" }],
+        defaults,
+      ),
+    ).toEqual(defaults);
+  });
+
+  it("drops a row missing description and keeps the valid ones", () => {
+    expect(
+      parseTemplateIconListRows(
+        [
+          { icon: "Leaf", title: "No description" },
+          { icon: "Sprout", title: "Valid", description: "d" },
+        ],
+        defaults,
+      ),
+    ).toEqual([{ icon: Sprout, title: "Valid", description: "d" }]);
+  });
+
+  it("returns valid rows without falling back to defaults", () => {
+    expect(
+      parseTemplateIconListRows(
+        [{ icon: "FlaskConical", title: "Valid", description: "d" }],
+        defaults,
+      ),
+    ).toEqual([{ icon: FlaskConical, title: "Valid", description: "d" }]);
+  });
+});
+
+describe("getLucideTemplateIcon", () => {
+  it("returns null for a prototype property name instead of matching it", () => {
+    expect(getLucideTemplateIcon("toString")).toBeNull();
+  });
+});
+
+describe("parseTemplateTrustBadgesListRows", () => {
+  it("reads the default template's legacy `title` key", () => {
+    expect(
+      parseTemplateTrustBadgesListRows([
+        { _id: "a", icon: "Leaf", title: "Free returns" },
+      ]),
+    ).toEqual([{ icon: Leaf, label: "Free returns" }]);
+  });
+
+  it("prefers `label` over `title`", () => {
+    expect(
+      parseTemplateTrustBadgesListRows([{ label: "Label", title: "Title" }]),
+    ).toEqual([{ icon: undefined, label: "Label" }]);
+  });
+
+  it("drops rows with no text and falls back to defaults when none remain", () => {
+    const defaults = [{ label: "Built-in" }];
+    expect(
+      parseTemplateTrustBadgesListRows(
+        [{ icon: "Leaf", label: "  " }, { icon: "Leaf" }],
+        defaults,
+      ),
+    ).toBe(defaults);
   });
 });

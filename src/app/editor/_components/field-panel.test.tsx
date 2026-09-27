@@ -25,6 +25,8 @@ const FIELDS: TemplateField[] = [
     group: "homepage.hero",
     type: "list",
     itemSchema: [{ key: "title", label: "Title", type: "text" }],
+    defaultsWhenEmpty: true,
+    defaultRows: [{ title: "One" }, { title: "Two" }, { title: "Three" }],
   },
   {
     key: "t.hero-subtitle",
@@ -126,6 +128,93 @@ describe("FieldPanel focusRequest", () => {
       "null",
     );
     expect(screen.getByLabelText("Badges")).not.toHaveFocus();
+  });
+
+  describe("list reveal vs. displayed rows", () => {
+    /** Records whether the panel measured (i.e. scrolled to) the list
+     *  wrapper itself — what it does for a row the editor can't open. */
+    function spyOnListReveal() {
+      const measured: Element[] = [];
+      const spy = vi
+        .spyOn(Element.prototype, "getBoundingClientRect")
+        .mockImplementation(function (this: Element) {
+          measured.push(this);
+          // happy-dom has no layout — every rect is 0×0 anyway.
+          return {
+            x: 0,
+            y: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: 0,
+            height: 0,
+            toJSON: () => ({}),
+          } as DOMRect;
+        });
+      const revealed = () =>
+        measured.some(
+          (el) =>
+            el instanceof HTMLElement &&
+            el.dataset.fieldKey === "t.hero-badges",
+        );
+      return { spy, revealed };
+    }
+
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
+
+    it("treats built-in default rows as openable while unsaved", async () => {
+      const { spy, revealed } = spyOnListReveal();
+      try {
+        renderPanel({ fieldKey: "t.hero-badges", itemIndex: 2, nonce: 1 });
+        await waitFor(() =>
+          expect(
+            screen.getByTestId("field-t.hero-badges").dataset.listRequest,
+          ).toBe(JSON.stringify({ itemIndex: 2, nonce: 1 })),
+        );
+        await settle();
+        expect(revealed()).toBe(false);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it("treats a saved-empty list like an unsaved one", async () => {
+      const { spy, revealed } = spyOnListReveal();
+      try {
+        renderPanel(
+          { fieldKey: "t.hero-badges", itemIndex: 1, nonce: 1 },
+          { "t.hero-badges": [] },
+        );
+        await settle();
+        expect(revealed()).toBe(false);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it("reveals the list for an index past the default rows", async () => {
+      const { spy, revealed } = spyOnListReveal();
+      try {
+        renderPanel({ fieldKey: "t.hero-badges", itemIndex: 3, nonce: 1 });
+        await waitFor(() => expect(revealed()).toBe(true));
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it("measures against saved rows once any are saved", async () => {
+      const { spy, revealed } = spyOnListReveal();
+      try {
+        renderPanel(
+          { fieldKey: "t.hero-badges", itemIndex: 2, nonce: 1 },
+          { "t.hero-badges": [{ _id: "a" }] },
+        );
+        await waitFor(() => expect(revealed()).toBe(true));
+      } finally {
+        spy.mockRestore();
+      }
+    });
   });
 
   it("does nothing for a field hidden by visibleWhen or absent", async () => {

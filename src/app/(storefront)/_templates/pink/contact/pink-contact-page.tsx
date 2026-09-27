@@ -24,6 +24,7 @@ import {
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkSocialLinks } from "../shared/pink-social-links";
+import { DEFAULT_PINK_CONTACT_SHORTCUTS } from "./index";
 import { PinkContactForm } from "./pink-contact-form";
 
 const FIELD_KEYS = [
@@ -74,11 +75,6 @@ function defaultHeaderFacts(business: {
   return [{ label: "Location", value: state ? `${city}, ${state}` : city }];
 }
 
-const DEFAULT_SHORTCUTS: ShortcutItem[] = [
-  { label: "Ask about a make & take", href: "/services" },
-  { label: "Browse what's ready now", href: "/shop" },
-];
-
 export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
   const customFields = business.siteContent?.customFields;
   const rawCustomFields = customFields as Record<string, unknown> | undefined;
@@ -106,7 +102,8 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
   const shortcutsRaw = parseTemplateListRows(
     rawCustomFields?.["pink.contact.shortcuts-items"],
   ) as ShortcutItem[];
-  const shortcuts = shortcutsRaw.length > 0 ? shortcutsRaw : DEFAULT_SHORTCUTS;
+  const shortcuts: ShortcutItem[] =
+    shortcutsRaw.length > 0 ? shortcutsRaw : DEFAULT_PINK_CONTACT_SHORTCUTS;
 
   const socialLinks = resolveSocialLinks(business.siteContent?.socialLinks);
 

@@ -17,17 +17,12 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 /**
  * Built-in package-idea rows — the single source for both the
- * `dream.services.packages` field's `defaultValue` and the services index
+ * `dream.services.packages` field's `defaultRows` and the services index
  * page's render fallback when the saved list is empty
  * (`dream-services-index-page.tsx`). Row shape matches the field's
  * `itemSchema` (`includes` is one item per line).
  */
-export const DREAM_DEFAULT_PACKAGE_ROWS: {
-  name: string;
-  tagline: string;
-  includes: string;
-  note: string;
-}[] = [
+export const DREAM_PACKAGES_DEFAULT_ROWS: Record<string, string>[] = [
   {
     name: "Essence",
     tagline: "A simple, elegant start.",
@@ -225,7 +220,7 @@ const servicesPackagesData: TemplateField[] = [
       },
     ],
     defaultsWhenEmpty: true,
-    defaultValue: JSON.stringify(DREAM_DEFAULT_PACKAGE_ROWS),
+    defaultRows: DREAM_PACKAGES_DEFAULT_ROWS,
   },
 ];
 

@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
-import type { TemplateListRow } from "~/lib/template-fields";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import {
@@ -13,7 +12,7 @@ import {
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 
-import { resolveFields } from "../index";
+import { resolveFields, UMSC_FOOTER_SHOP_LINKS_DEFAULT } from "../index";
 import {
   resolveUmscContactDetails,
   umscTelHref,
@@ -21,25 +20,9 @@ import {
 import { UmscGoogleReviewLink } from "../shared/umsc-google-review-link";
 import { UmscSocialIcons } from "../shared/umsc-social-icons";
 
-/**
- * Built-in shop-link rows, shown until the owner saves their own via
- * `umsc.global.footer-shop-links` (`defaultsWhenEmpty`) — the four
- * collections that existed on the current site.
- */
-export const UMSC_FOOTER_SHOP_LINKS_DEFAULT: TemplateListRow[] = [
-  { _id: "footer-shop-candles", label: "Candles", url: "/collections/candles" },
-  { _id: "footer-shop-soaps", label: "Soaps", url: "/collections/soaps" },
-  {
-    _id: "footer-shop-body-care",
-    label: "Body Care",
-    url: "/collections/body-care",
-  },
-  {
-    _id: "footer-shop-home-care",
-    label: "Home Care",
-    url: "/collections/home-care",
-  },
-];
+// Re-exported so the pre-migration import path (and the snapshot test) keep
+// working — the rows themselves now live in `../index.ts`'s `defaultRows`.
+export { UMSC_FOOTER_SHOP_LINKS_DEFAULT };
 
 export async function UmscFooter({ business }: DefaultFooterTemplateProps) {
   const name = business?.name ?? "";

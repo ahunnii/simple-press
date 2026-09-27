@@ -1,23 +1,63 @@
-import {
-  BanknoteArrowDown,
-  CheckCircle,
-  Droplets,
-  FlaskConical,
-  Globe,
-  Heart,
-  Leaf,
-  ShieldCheck,
-  TreePine,
-  Users,
-} from "lucide-react";
-
-import type {
-  GenericIconRow,
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 ///HOMEPAGE
+
+/** Icon badge row under the hero copy — caption-only rows by design. */
+const BAMBOO_HERO_BADGES_DEFAULT_ROWS = [
+  { icon: "Leaf", title: "Made from 100% Bamboo", description: "" },
+  { icon: "FlaskConical", title: "Chemical Free", description: "" },
+  { icon: "ShieldCheck", title: "Hypoallergenic & Safe", description: "" },
+  { icon: "Droplets", title: "Septic Safe", description: "" },
+  {
+    icon: "TreePine",
+    title: "Tree Free",
+    description: "Better for You & Our Planet",
+  },
+] satisfies Record<string, string>[];
+
+/** Deep green value band directly below the hero — caption-only rows by design. */
+const BAMBOO_VALUE_BAND_DEFAULT_ROWS = [
+  {
+    icon: "Leaf",
+    title: "Better for you. Better for our planet.",
+    description: "",
+  },
+  {
+    icon: "Users",
+    title: "Safe for your family. Good for every home.",
+    description: "",
+  },
+  {
+    icon: "Heart",
+    title: "Supporting communities. Building generational wealth.",
+    description: "",
+  },
+  {
+    icon: "Globe",
+    title: "Healthier communities — one roll at a time.",
+    description: "",
+  },
+] satisfies Record<string, string>[];
+
+const BAMBOO_SUSTAINABILITY_DEFAULT_ROWS = [
+  {
+    icon: "CheckCircle",
+    title: "Premium Quality",
+    description:
+      "Experience top-quality household paper products, crafted for comfort and reliability.",
+  },
+  {
+    icon: "BanknoteArrowDown",
+    title: "Competitive Prices",
+    description: "Affordable prices without compromising quality.",
+  },
+  {
+    icon: "Users",
+    title: "Customer-Centric Approach",
+    description: "Your satisfaction comes first in everything we do.",
+  },
+] satisfies Record<string, string>[];
 
 // Hero — split into two groups: `homepage.hero` (copy & buttons, in the
 // order they read on the page) and `homepage.heroImage` (the photo fields).
@@ -160,6 +200,7 @@ const homepageHeroData: TemplateField[] = [
     maxItems: 6,
     itemLabel: "badge",
     defaultsWhenEmpty: true,
+    defaultRows: BAMBOO_HERO_BADGES_DEFAULT_ROWS,
   },
   {
     key: "bamboo.homepage.hero-image",
@@ -262,6 +303,7 @@ const homepageValueBandData: TemplateField[] = [
     maxItems: 4,
     itemLabel: "statement",
     defaultsWhenEmpty: true,
+    defaultRows: BAMBOO_VALUE_BAND_DEFAULT_ROWS,
   },
 ];
 
@@ -442,6 +484,7 @@ const homepageSustainabilityData: TemplateField[] = [
     maxItems: 4,
     itemLabel: "highlight",
     defaultsWhenEmpty: true,
+    defaultRows: BAMBOO_SUSTAINABILITY_DEFAULT_ROWS,
   },
 ];
 
@@ -518,61 +561,19 @@ const homepageLocationData: TemplateField[] = [
   },
 ];
 
-export const DEFAULT_BAMBOO_FEATURES = [
-  {
-    icon: CheckCircle,
-    title: "Premium Quality",
-    description:
-      "Experience top-quality household paper products, crafted for comfort and reliability.",
-  },
-  {
-    icon: BanknoteArrowDown,
-    title: "Competitive Prices",
-    description: "Affordable prices without compromising quality.",
-  },
-  {
-    icon: Users,
-    title: "Customer-Centric Approach",
-    description: "Your satisfaction comes first in everything we do.",
-  },
-];
+export const DEFAULT_BAMBOO_FEATURES = iconRowsFromDefaults(
+  BAMBOO_SUSTAINABILITY_DEFAULT_ROWS,
+);
 
 /** Icon badge row under the hero copy — caption-only rows by design. */
-export const DEFAULT_BAMBOO_HERO_BADGES: GenericIconRow[] = [
-  { icon: Leaf, title: "Made from 100% Bamboo", description: "" },
-  { icon: FlaskConical, title: "Chemical Free", description: "" },
-  { icon: ShieldCheck, title: "Hypoallergenic & Safe", description: "" },
-  { icon: Droplets, title: "Septic Safe", description: "" },
-  {
-    icon: TreePine,
-    title: "Tree Free",
-    description: "Better for You & Our Planet",
-  },
-];
+export const DEFAULT_BAMBOO_HERO_BADGES = iconRowsFromDefaults(
+  BAMBOO_HERO_BADGES_DEFAULT_ROWS,
+);
 
 /** Deep green value band directly below the hero — caption-only rows by design. */
-export const DEFAULT_BAMBOO_VALUE_BAND: GenericIconRow[] = [
-  {
-    icon: Leaf,
-    title: "Better for you. Better for our planet.",
-    description: "",
-  },
-  {
-    icon: Users,
-    title: "Safe for your family. Good for every home.",
-    description: "",
-  },
-  {
-    icon: Heart,
-    title: "Supporting communities. Building generational wealth.",
-    description: "",
-  },
-  {
-    icon: Globe,
-    title: "Healthier communities — one roll at a time.",
-    description: "",
-  },
-];
+export const DEFAULT_BAMBOO_VALUE_BAND = iconRowsFromDefaults(
+  BAMBOO_VALUE_BAND_DEFAULT_ROWS,
+);
 
 // Declaration order mirrors render order: hero → valueBand → aboutTeaser →
 // featured → sustainability → testimonials → location (see

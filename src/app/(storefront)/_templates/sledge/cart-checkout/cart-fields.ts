@@ -1,4 +1,8 @@
-import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+import type {
+  TemplateField,
+  TemplateFieldGroup,
+  TemplateListItemField,
+} from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
 /**
@@ -15,30 +19,62 @@ import type { TemplateSection } from "~/lib/template-sections";
  * that module imports the template root, which imports this file.
  */
 export const SLEDGE_CART_REASSURANCE_KEY = "sledge.cart.reassurance-lines";
+export const SLEDGE_CHECKOUT_REASSURANCE_KEY =
+  "sledge.checkout.reassurance-lines";
 export const SLEDGE_CONFIRMATION_NOTES_KEY =
   "sledge.checkout.confirmation-notes";
 
-/** Built-in rows shown until the owner saves their own (`defaultsWhenEmpty`). */
-export const SLEDGE_CART_REASSURANCE_DEFAULTS = [
-  "Free shipping on qualifying orders",
-  "Each piece handcrafted with care",
-  "All sales final — order what you love",
-] as const;
+/**
+ * Built-in rows shown until the owner saves their own (`defaultsWhenEmpty`).
+ * These are also the field's `defaultRows` — the editor shows them as real,
+ * editable rows and copies them into the saved value on first edit.
+ */
+export const SLEDGE_CART_REASSURANCE_DEFAULT_ROWS = [
+  { text: "Free shipping on qualifying orders" },
+  { text: "Each piece handcrafted with care" },
+  { text: "All sales final — order what you love" },
+] satisfies Record<string, string>[];
 
 /**
- * Checkout's built-in rows: the cart's minus the free-shipping claim, which
- * shouldn't sit next to the payment button unless the owner opts in by
- * saving their own list (a saved list is shared by cart and checkout).
+ * Checkout's own built-in rows: the cart's minus the free-shipping claim,
+ * which shouldn't sit next to the payment button unless the owner opts in by
+ * saving their own checkout list.
  */
-export const SLEDGE_CHECKOUT_REASSURANCE_DEFAULTS = [
-  "Each piece handcrafted with care",
-  "All sales final — order what you love",
-] as const;
+export const SLEDGE_CHECKOUT_REASSURANCE_DEFAULT_ROWS = [
+  { text: "Each piece handcrafted with care" },
+  { text: "All sales final — order what you love" },
+] satisfies Record<string, string>[];
 
-export const SLEDGE_CONFIRMATION_NOTES_DEFAULTS = [
-  "Each piece is handcrafted with care before it ships.",
-  "All sales are final — thank you for supporting the studio.",
-] as const;
+export const SLEDGE_CONFIRMATION_NOTES_DEFAULT_ROWS = [
+  { text: "Each piece is handcrafted with care before it ships." },
+  { text: "All sales are final — thank you for supporting the studio." },
+] satisfies Record<string, string>[];
+
+/** Reads a `defaultRows`-shaped row's `text` sub-field out to a plain string. */
+function textsFromDefaultRows(rows: readonly Record<string, string>[]): string[] {
+  return rows.map((r) => r.text ?? "");
+}
+
+export const SLEDGE_CART_REASSURANCE_DEFAULTS = textsFromDefaultRows(
+  SLEDGE_CART_REASSURANCE_DEFAULT_ROWS,
+);
+export const SLEDGE_CHECKOUT_REASSURANCE_DEFAULTS = textsFromDefaultRows(
+  SLEDGE_CHECKOUT_REASSURANCE_DEFAULT_ROWS,
+);
+export const SLEDGE_CONFIRMATION_NOTES_DEFAULTS = textsFromDefaultRows(
+  SLEDGE_CONFIRMATION_NOTES_DEFAULT_ROWS,
+);
+
+/** Shared `{ text }` schema for the cart and checkout reassurance lists. */
+const REASSURANCE_ITEM_SCHEMA: TemplateListItemField[] = [
+  {
+    key: "text",
+    label: "Text",
+    type: "text",
+    description: "One short line, shown in small capitals.",
+    placeholder: "e.g. Ships within 3 business days",
+  },
+];
 
 export const sledgeCartData: TemplateField[] = [
   {
@@ -55,9 +91,9 @@ export const sledgeCartData: TemplateField[] = [
   },
   {
     key: SLEDGE_CART_REASSURANCE_KEY,
-    label: "Reassurance lines",
+    label: "Reassurance lines in the cart",
     description:
-      "Short lines with a small symbol under the checkout button on the cart page, and under the payment button at checkout. Leave empty to show the built-in lines (checkout's built-in lines leave out free shipping).",
+      "Short lines with a small symbol under the checkout button on the cart page. Leave empty to show the built-in lines.",
     type: "list",
     page: "global",
     group: "global.cart",
@@ -66,15 +102,24 @@ export const sledgeCartData: TemplateField[] = [
     summaryKey: "text",
     maxItems: 5,
     defaultsWhenEmpty: true,
-    itemSchema: [
-      {
-        key: "text",
-        label: "Text",
-        type: "text",
-        description: "One short line, shown in small capitals.",
-        placeholder: "e.g. Ships within 3 business days",
-      },
-    ],
+    defaultRows: SLEDGE_CART_REASSURANCE_DEFAULT_ROWS,
+    itemSchema: REASSURANCE_ITEM_SCHEMA,
+  },
+  {
+    key: SLEDGE_CHECKOUT_REASSURANCE_KEY,
+    label: "Reassurance lines at checkout",
+    description:
+      "Short lines with a small symbol under the payment button on the checkout page. Leave empty to show the built-in lines.",
+    type: "list",
+    page: "global",
+    group: "global.cart",
+    gridColumn: "col-span-full",
+    itemLabel: "line",
+    summaryKey: "text",
+    maxItems: 5,
+    defaultsWhenEmpty: true,
+    defaultRows: SLEDGE_CHECKOUT_REASSURANCE_DEFAULT_ROWS,
+    itemSchema: REASSURANCE_ITEM_SCHEMA,
   },
   {
     key: SLEDGE_CONFIRMATION_NOTES_KEY,
@@ -89,6 +134,7 @@ export const sledgeCartData: TemplateField[] = [
     summaryKey: "text",
     maxItems: 4,
     defaultsWhenEmpty: true,
+    defaultRows: SLEDGE_CONFIRMATION_NOTES_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "text",
@@ -106,7 +152,7 @@ export const sledgeCartFieldGroups: TemplateFieldGroup[] = [
     id: "global.cart",
     title: "Cart and checkout",
     description:
-      "Empty cart message, reassurance lines, and order confirmation notes.",
+      "Empty cart message, cart and checkout reassurance lines, and order confirmation notes.",
     icon: "🛒",
     columns: 1,
   },
@@ -118,7 +164,7 @@ export const sledgeCartSections: TemplateSection[] = [
     page: "global",
     title: "Cart and checkout",
     description:
-      "Empty cart message, reassurance lines, and order confirmation notes.",
+      "Empty cart message, cart and checkout reassurance lines, and order confirmation notes.",
     groupIds: ["global.cart"],
     order: 3,
     hideable: false,

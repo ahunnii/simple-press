@@ -193,14 +193,23 @@ export function DefaultProductPage({
 
             {/* Trust signals */}
             <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-[13px] text-[#6b6b6b]">
-              {globalProductTrustBadges?.map((badge) => (
-                <span key={badge.label}>
-                  <span aria-hidden="true">✓</span> {badge.label}
-                </span>
-              ))}
-              {displayTrustBadges.map((badge) => (
-                <span key={badge.label}>
-                  <span aria-hidden="true">✓</span> {badge.label}
+              {[
+                ...(globalProductTrustBadges ?? []).map((badge) => ({
+                  Icon: badge.icon,
+                  label: badge.label,
+                })),
+                ...displayTrustBadges,
+              ].map(({ Icon, label }, index) => (
+                <span
+                  key={`${index}-${label}`}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  {Icon ? (
+                    <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <span aria-hidden="true">✓</span>
+                  )}
+                  {label}
                 </span>
               ))}
             </div>

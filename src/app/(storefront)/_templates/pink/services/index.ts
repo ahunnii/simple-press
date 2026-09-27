@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 
 /**
  * Services index page (`/services`) fields for the `pink` template.
@@ -9,6 +10,33 @@ import type { TemplateSection } from "~/lib/template-sections";
  * separate mechanism — see `./service-pages/fields.ts` — their fields live
  * on `Service.customFields`, not here.
  */
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+// Text copied verbatim from the pre-migration `DEFAULT_STEPS` constant in
+// `pink-services-index-page.tsx`.
+
+const PINK_SERVICE_STEPS_DEFAULT_ROWS = [
+  {
+    ordinal: "01",
+    title: "You reach out",
+    body: "Tell us the room — a classroom, a sanctuary, a break room, a back yard — and how many hands.",
+  },
+  {
+    ordinal: "02",
+    title: "We pick a project",
+    body: "Something that fits the time you have and travels well.",
+  },
+  {
+    ordinal: "03",
+    title: "Materials show up",
+    body: "Everything's cut, sorted and ready before anyone sits down.",
+  },
+  {
+    ordinal: "04",
+    title: "Everyone leaves with something",
+    body: "Sewn, glued or knotted by their own hands.",
+  },
+] satisfies Record<string, string>[];
 
 // ── services.header ──────────────────────────────────────────────────────
 
@@ -175,6 +203,7 @@ const servicesStepsData: TemplateField[] = [
     maxItems: 4,
     itemLabel: "step",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_SERVICE_STEPS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "ordinal",
@@ -197,28 +226,6 @@ const servicesStepsData: TemplateField[] = [
         description: "One or two sentences describing this step.",
       },
     ],
-    defaultValue: JSON.stringify([
-      {
-        ordinal: "01",
-        title: "You reach out",
-        body: "Tell us the room — a classroom, a sanctuary, a break room, a back yard — and how many hands.",
-      },
-      {
-        ordinal: "02",
-        title: "We pick a project",
-        body: "Something that fits the time you have and travels well.",
-      },
-      {
-        ordinal: "03",
-        title: "Materials show up",
-        body: "Everything's cut, sorted and ready before anyone sits down.",
-      },
-      {
-        ordinal: "04",
-        title: "Everyone leaves with something",
-        body: "Sewn, glued or knotted by their own hands.",
-      },
-    ]),
   },
 ];
 
@@ -347,7 +354,8 @@ export const pinkServicesFieldGroups: TemplateFieldGroup[] = [
   {
     id: "services.steps",
     title: "How it works",
-    description: "Heading, note, and up to four steps in the how-it-works band.",
+    description:
+      "Heading, note, and up to four steps in the how-it-works band.",
     icon: "🪡",
     columns: 1,
   },
@@ -408,3 +416,10 @@ export const pinkServicesSections: TemplateSection[] = [
     hideable: true,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const DEFAULT_PINK_SERVICE_STEPS = listRowsFromDefaults(
+  PINK_SERVICE_STEPS_DEFAULT_ROWS,
+  "default-step",
+);

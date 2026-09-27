@@ -1,12 +1,17 @@
 import type { TemplateListRow } from "~/lib/template-fields";
 import { listItemAttr } from "~/lib/preview/section-attrs";
 
+import { UMSC_CATEGORY_DEFAULT_DOORS } from ".";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
 import { UmscHeading } from "../shared/umsc-heading";
 import { UmscLede } from "../shared/umsc-lede";
 import { UmscRevealGroup } from "../shared/umsc-reveal";
 import { UmscSection } from "../shared/umsc-section";
+
+// Re-exported so the pre-migration import path (and the snapshot test) keep
+// working — the rows themselves now live in `./index.tsx`'s `defaultRows`.
+export { UMSC_CATEGORY_DEFAULT_DOORS };
 
 type Props = {
   heading: string;
@@ -16,42 +21,6 @@ type Props = {
   allUrl: string;
   sectionAttrs?: Record<string, string>;
 };
-
-/**
- * Real default doors — shown whenever the owner hasn't customized the list
- * field yet, so a fresh store still has four working category doors instead
- * of an empty grid (design.md "Homepage → Shop by type").
- */
-const DEFAULT_DOORS: TemplateListRow[] = [
-  {
-    _id: "candles",
-    image: "/placeholder.svg",
-    title: "Candles",
-    blurb: "Soy candles and wax melts.",
-    link: "/collections/candles",
-  },
-  {
-    _id: "soaps",
-    image: "/placeholder.svg",
-    title: "Soaps",
-    blurb: "Handmade bars for gifts and daily use.",
-    link: "/collections/soaps",
-  },
-  {
-    _id: "body-care",
-    image: "/placeholder.svg",
-    title: "Body Care",
-    blurb: "Butters, oils, and roll-ons.",
-    link: "/collections/body-care",
-  },
-  {
-    _id: "home-care",
-    image: "/placeholder.svg",
-    title: "Home Care",
-    blurb: "Laundry pods, bleach tablets, and mists.",
-    link: "/collections/home-care",
-  },
-];
 
 /**
  * UmscCategoriesSection (homepage.categories) — h2 + lede, four
@@ -67,7 +36,7 @@ export function UmscCategoriesSection({
   allUrl,
   sectionAttrs,
 }: Props) {
-  const rows = doors.length > 0 ? doors : DEFAULT_DOORS;
+  const rows = doors.length > 0 ? doors : UMSC_CATEGORY_DEFAULT_DOORS;
 
   return (
     <UmscSection

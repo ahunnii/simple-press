@@ -11,6 +11,7 @@ import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { DEFAULT_PINK_EVENTS_FACTS, DEFAULT_PINK_PROMISES } from "./index";
 import { PinkCollectionSection } from "./pink-collection-section";
 import { PinkEventsSection } from "./pink-events-section";
 import { PinkHeroSection } from "./pink-hero-section";
@@ -91,24 +92,6 @@ const FIELD_KEYS = [
 // ships blank (field-conventions.md → "Default-value rules"). Only used when
 // the owner hasn't saved rows of their own yet.
 
-const DEFAULT_PROMISES: TemplateListRow[] = [
-  {
-    _id: "promise-1",
-    title: "One of a kind",
-    body: "Every piece is made on its own, never in runs. No two are exactly alike.",
-  },
-  {
-    _id: "promise-2",
-    title: "Made by hand",
-    body: "Each piece is shaped and finished by hand.",
-  },
-  {
-    _id: "promise-3",
-    title: "Made to keep",
-    body: "Chosen materials and careful finishing, built to last.",
-  },
-];
-
 // Same reasoning as the hero panels — the events mosaic renders on the dark band.
 // Exactly five rows, because the mosaic is a fixed five-slot layout now: spans
 // are placed in CSS rather than typed per row, so an owner can no longer produce
@@ -119,19 +102,6 @@ const DEFAULT_EVENTS_MOSAIC: TemplateListRow[] = [
   { _id: "mosaic-3", image: "" },
   { _id: "mosaic-4", image: "" },
   { _id: "mosaic-5", image: "" },
-];
-
-// Mirrors the `pink-table` service page's hero fact rows — a make & take is
-// hosted the same way whichever page describes it.
-const DEFAULT_EVENTS_FACTS: PinkFactRow[] = [
-  {
-    _id: "fact-1",
-    label: "Where",
-    value: "Your space — school, church, library, workplace or back yard",
-  },
-  { _id: "fact-2", label: "Group size", value: "10 to 12 at a table" },
-  { _id: "fact-3", label: "Materials", value: "Everything included" },
-  { _id: "fact-4", label: "Notice", value: "Book at least 2 weeks out" },
 ];
 
 export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
@@ -155,7 +125,7 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
     customFields?.["pink.homepage.promises-items"],
   );
   const promiseItems =
-    promiseItemsRaw.length > 0 ? promiseItemsRaw : DEFAULT_PROMISES;
+    promiseItemsRaw.length > 0 ? promiseItemsRaw : DEFAULT_PINK_PROMISES;
 
   const eventsMosaicRaw = parseTemplateListRows(
     customFields?.["pink.homepage.events-mosaic"],
@@ -166,15 +136,21 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
   const eventsFactsRaw = parseTemplateListRows(
     customFields?.["pink.homepage.events-facts"],
   );
-  const eventsFacts: PinkFactRow[] = (
-    eventsFactsRaw.length > 0
-      ? eventsFactsRaw.map((row) => ({
-          label: rowStr(row, "label"),
-          value: rowStr(row, "value"),
-          _id: row._id,
-        }))
-      : DEFAULT_EVENTS_FACTS
-  ).filter((row) => row.label !== "" || row.value !== "");
+  const eventsFactsSource: TemplateListRow[] =
+    eventsFactsRaw.length > 0 ? eventsFactsRaw : DEFAULT_PINK_EVENTS_FACTS;
+  // Carries each row's position in the saved/default list past the blank-row
+  // filter below — `PinkEventsSection` reads `_originalIndex` off each row so
+  // `listItemAttr("pink.homepage.events-facts", …)` still targets the right
+  // saved row once a middle row is blank (same approach as
+  // `collections/pink-collection-page.tsx`'s gallery `_originalIndex`).
+  const eventsFacts: (PinkFactRow & { _originalIndex: number })[] =
+    eventsFactsSource.flatMap((row, originalIndex) => {
+      const label = rowStr(row, "label");
+      const value = rowStr(row, "value");
+      return label !== "" || value !== ""
+        ? [{ label, value, _id: row._id, _originalIndex: originalIndex }]
+        : [];
+    });
 
   // Real featured products (design.md: "renders real featured products from
   // business.products"), featured-first, capped at 6 for a 3-column grid.

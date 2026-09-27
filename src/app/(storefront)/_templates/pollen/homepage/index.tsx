@@ -1,10 +1,66 @@
-import { BookOpen, Flower2, HandHelping, MapIcon } from "lucide-react";
+import {
+  imageRowsFromDefaults,
+  iconRowsFromDefaults,
+} from "~/lib/lucide-template-icons";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
-import type {
-  GenericImageRow,
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+/** Service cards below the homepage services heading. */
+const POLLEN_HOMEPAGE_SERVICES_DEFAULT_ROWS = [
+  {
+    icon: "Flower2",
+    title: "Custom Orders",
+    description: "One-of-a-kind pieces made to your specifications.",
+  },
+  {
+    icon: "HandHelping",
+    title: "Personal Consultations",
+    description: "One-on-one guidance to help you find the right fit.",
+  },
+  {
+    icon: "Map",
+    title: "Local Delivery",
+    description: "Fast, friendly delivery right to your door.",
+  },
+  {
+    icon: "BookOpen",
+    title: "Workshops & Classes",
+    description: "Hands-on sessions to learn the craft yourself.",
+  },
+] satisfies Record<string, string>[];
+
+/** Photos shown in the homepage gallery grid. */
+const POLLEN_GALLERY_DEFAULT_ROWS = [
+  {
+    label: "Location One",
+    image:
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=450&fit=crop",
+  },
+  {
+    label: "Location Two",
+    image:
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&h=450&fit=crop",
+  },
+  {
+    label: "Location Three",
+    image:
+      "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=600&h=450&fit=crop",
+  },
+  {
+    label: "Location Four",
+    image:
+      "https://images.unsplash.com/photo-1558904541-efa843a96f01?w=600&h=450&fit=crop",
+  },
+  {
+    label: "Location Five",
+    image:
+      "https://images.unsplash.com/photo-1598902108854-10e335adac99?w=600&h=450&fit=crop",
+  },
+  {
+    label: "Location Six",
+    image:
+      "https://images.unsplash.com/photo-1592150621744-aca64f48394a?w=600&h=450&fit=crop",
+  },
+] satisfies Record<string, string>[];
 
 const homepageData: TemplateField[] = [
   {
@@ -135,6 +191,7 @@ const homepageServicesData: TemplateField[] = [
     ],
     minItems: 0,
     maxItems: 8,
+    defaultRows: POLLEN_HOMEPAGE_SERVICES_DEFAULT_ROWS,
   },
 ];
 
@@ -189,6 +246,7 @@ const homepageGalleryData: TemplateField[] = [
     ],
     minItems: 0,
     maxItems: 6,
+    defaultRows: POLLEN_GALLERY_DEFAULT_ROWS,
   },
   {
     key: "pollen.homepage.gallery-button-text",
@@ -244,58 +302,10 @@ export const pollenHomepageFieldGroups: TemplateFieldGroup[] = [
   },
 ];
 
-export const DEFAULT_POLLEN_HOMEPAGE_SERVICES = [
-  {
-    icon: Flower2,
-    title: "Custom Orders",
-    description: "One-of-a-kind pieces made to your specifications.",
-  },
-  {
-    icon: HandHelping,
-    title: "Personal Consultations",
-    description: "One-on-one guidance to help you find the right fit.",
-  },
-  {
-    icon: MapIcon,
-    title: "Local Delivery",
-    description: "Fast, friendly delivery right to your door.",
-  },
-  {
-    icon: BookOpen,
-    title: "Workshops & Classes",
-    description: "Hands-on sessions to learn the craft yourself.",
-  },
-];
+export const DEFAULT_POLLEN_HOMEPAGE_SERVICES = iconRowsFromDefaults(
+  POLLEN_HOMEPAGE_SERVICES_DEFAULT_ROWS,
+);
 
-export const DEFAULT_POLLEN_GALLERY_ITEMS: GenericImageRow[] = [
-  {
-    label: "Location One",
-    image:
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Location Two",
-    image:
-      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Location Three",
-    image:
-      "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Location Four",
-    image:
-      "https://images.unsplash.com/photo-1558904541-efa843a96f01?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Location Five",
-    image:
-      "https://images.unsplash.com/photo-1598902108854-10e335adac99?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Location Six",
-    image:
-      "https://images.unsplash.com/photo-1592150621744-aca64f48394a?w=600&h=450&fit=crop",
-  },
-];
+export const DEFAULT_POLLEN_GALLERY_ITEMS = imageRowsFromDefaults(
+  POLLEN_GALLERY_DEFAULT_ROWS,
+);

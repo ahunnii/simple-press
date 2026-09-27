@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
@@ -15,6 +16,37 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * and must stay separately hideable: one says WHEN you can come, the other
  * says WHAT a make & take is.
  */
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+// Presentable out-of-the-box rows for the promises and events-facts lists —
+// a fresh store never ships blank (field-conventions.md → "List defaults").
+// Text copied verbatim from the pre-migration `DEFAULT_PROMISES` /
+// `DEFAULT_EVENTS_FACTS` constants in `pink-homepage.tsx`.
+
+const PINK_PROMISES_DEFAULT_ROWS = [
+  {
+    title: "One of a kind",
+    body: "Every piece is made on its own, never in runs. No two are exactly alike.",
+  },
+  {
+    title: "Made by hand",
+    body: "Each piece is shaped and finished by hand.",
+  },
+  {
+    title: "Made to keep",
+    body: "Chosen materials and careful finishing, built to last.",
+  },
+] satisfies Record<string, string>[];
+
+const PINK_EVENTS_FACTS_DEFAULT_ROWS = [
+  {
+    label: "Where",
+    value: "Your space — school, church, library, workplace or back yard",
+  },
+  { label: "Group size", value: "10 to 12 at a table" },
+  { label: "Materials", value: "Everything included" },
+  { label: "Notice", value: "Book at least 2 weeks out" },
+] satisfies Record<string, string>[];
 
 // ── homepage.hero ───────────────────────────────────────────────────────────
 
@@ -278,6 +310,7 @@ const homepagePromisesData: TemplateField[] = [
     maxItems: 6,
     itemLabel: "promise",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_PROMISES_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "title",
@@ -514,6 +547,7 @@ const homepageEventsData: TemplateField[] = [
     maxItems: 4,
     itemLabel: "fact",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_EVENTS_FACTS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "label",
@@ -656,7 +690,8 @@ const homepageStoryData: TemplateField[] = [
   {
     key: "pink.homepage.story-image",
     label: "Image",
-    description: "Portrait image beside the pull-quote — a studio or working photo.",
+    description:
+      "Portrait image beside the pull-quote — a studio or working photo.",
     type: "image",
     page: "homepage",
     group: "homepage.story",
@@ -822,7 +857,8 @@ export const pinkHomepageSections: TemplateSection[] = [
     id: "homepage.events",
     page: "homepage",
     title: "Make & takes",
-    description: "Photo/flier layout, how they're hosted, and the enquiry button",
+    description:
+      "Photo/flier layout, how they're hosted, and the enquiry button",
     groupIds: ["homepage.events"],
     order: 3,
     hideable: true,
@@ -860,3 +896,15 @@ export const pinkHomepageSections: TemplateSection[] = [
     hideable: true,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const DEFAULT_PINK_PROMISES = listRowsFromDefaults(
+  PINK_PROMISES_DEFAULT_ROWS,
+  "promise",
+);
+
+export const DEFAULT_PINK_EVENTS_FACTS = listRowsFromDefaults(
+  PINK_EVENTS_FACTS_DEFAULT_ROWS,
+  "fact",
+);

@@ -274,6 +274,11 @@ const ANY_FOCUS_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(", ");
 
+/** Id of the i-th built-in default row while it is displayed unsaved. */
+function defaultRowId(index: number): string {
+  return `default-${index}`;
+}
+
 function cellString(raw: unknown): string {
   return typeof raw === "string" ? raw : "";
 }
@@ -515,17 +520,39 @@ export function TemplateListFieldEditor({
    *  clicked list item). See `TemplateListFocusRequest`. */
   focusRequest?: TemplateListFocusRequest | null;
 }) {
-  const rows = useMemo(() => parseTemplateListRows(value), [value]);
+  const savedRows = useMemo(() => parseTemplateListRows(value), [value]);
+  const defaultRows = field.defaultRows;
+  /** Unsaved or saved-empty list whose storefront shows declared built-in
+   *  rows: display those rows (ids `default-<i>`) — nothing is written until
+   *  the owner edits one (copy-on-write, see `working`). */
+  const showingDefaults = savedRows.length === 0 && !!defaultRows?.length;
+  const rows = useMemo<TemplateListRow[]>(
+    () =>
+      showingDefaults && defaultRows
+        ? defaultRows.map((row, i) => ({ ...row, _id: defaultRowId(i) }))
+        : savedRows,
+    [showingDefaults, defaultRows, savedRows],
+  );
   const minItems = field.minItems ?? 0;
   const maxItems = field.maxItems ?? DEFAULT_MAX_ITEMS;
   const itemLabel = field.itemLabel ?? "item";
   const ItemLabel = capitalize(itemLabel);
 
-  // Latest rows for callbacks that outlive the render that created them
+  // Latest SAVED rows for callbacks that outlive the render that created them
   // (toast Undo, async upload completions). `commit` also writes it so two
   // commits in the same tick compose instead of the second clobbering the first.
-  const rowsRef = useRef(rows);
-  rowsRef.current = rows;
+  const rowsRef = useRef(savedRows);
+  rowsRef.current = savedRows;
+  // Latest DISPLAYED rows (saved rows, or the built-in defaults).
+  const displayRowsRef = useRef(rows);
+  displayRowsRef.current = rows;
+
+  /** Last copy-on-write: `default-<i>` → the fresh `_id` that row got. Lets a
+   *  callback bound to a default id before the re-render find its row. */
+  const materialisedIdsRef = useRef<Map<string, string>>(new Map());
+  /** Fresh `_id` → the `default-<i>` React key its row was rendered under, so
+   *  copy-on-write never remounts a row (the edited input keeps focus). */
+  const rowKeysRef = useRef<Map<string, string>>(new Map());
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dndId = useId();
@@ -559,7 +586,48 @@ export function TemplateListFieldEditor({
   };
   const positionOf = (id: UniqueIdentifier) => rowIds.indexOf(String(id)) + 1;
 
-  const commit = (next: TemplateListRow[]) => {
+  /**
+   * The rows a mutation starts from. Normally the saved rows; while the
+   * built-in defaults are displayed, ALL of them materialised into real rows
+   * with fresh `_id`s (`remap`: `default-<i>` → new id). Pure — `commit`
+   * applies the remap only if the mutation actually writes.
+   */
+  const working = (): {
+    rows: TemplateListRow[];
+    remap: Map<string, string> | null;
+  } => {
+    const current = rowsRef.current;
+    if (current.length > 0 || !defaultRows?.length) {
+      return { rows: current, remap: null };
+    }
+    const remap = new Map<string, string>();
+    const materialised = defaultRows.map((row, i) => {
+      const _id = crypto.randomUUID();
+      remap.set(defaultRowId(i), _id);
+      return { ...row, _id } as TemplateListRow;
+    });
+    return { rows: materialised, remap };
+  };
+
+  /** Maps a (possibly stale) displayed row id onto `rows` from `working`. */
+  const resolveId = (id: string, remap: Map<string, string> | null) =>
+    remap?.get(id) ?? materialisedIdsRef.current.get(id) ?? id;
+
+  const commit = (
+    next: TemplateListRow[],
+    remap: Map<string, string> | null = null,
+  ) => {
+    if (remap) {
+      materialisedIdsRef.current = remap;
+      rowKeysRef.current = new Map(
+        [...remap].map(([defaultId, id]) => [id, defaultId]),
+      );
+      // Keep the same logical rows expanded.
+      setOpenIds((prev) => {
+        if (![...prev].some((id) => remap.has(id))) return prev;
+        return new Set([...prev].map((id) => remap.get(id) ?? id));
+      });
+    }
     rowsRef.current = next;
     onChange(next);
   };
@@ -579,7 +647,11 @@ export function TemplateListFieldEditor({
   useEffect(() => {
     if (!pendingFocus) return;
     return afterPaint(() => {
-      const rowEl = findRowElement(containerRef.current, pendingFocus.id);
+      // A default row materialised since the request carries a new id.
+      const mapped = materialisedIdsRef.current.get(pendingFocus.id);
+      const rowEl =
+        findRowElement(containerRef.current, pendingFocus.id) ??
+        (mapped ? findRowElement(containerRef.current, mapped) : null);
       if (!rowEl) return;
       rowEl.scrollIntoView?.({ block: "nearest" });
       focusFirstControl(rowEl);
@@ -592,7 +664,8 @@ export function TemplateListFieldEditor({
     if (handledNonceRef.current === focusRequest.nonce) return;
     handledNonceRef.current = focusRequest.nonce;
     const { itemIndex } = focusRequest;
-    const current = rowsRef.current;
+    // Displayed rows — a built-in default row opens without any write.
+    const current = displayRowsRef.current;
     if (
       itemIndex == null ||
       !Number.isInteger(itemIndex) ||
@@ -624,57 +697,69 @@ export function TemplateListFieldEditor({
   // ─── Mutations ───────────────────────────────────────────────────────────
 
   const addRow = () => {
-    const current = rowsRef.current;
+    const { rows: current, remap } = working();
     if (current.length >= maxItems) return;
     const item: TemplateListRow = { _id: crypto.randomUUID() };
     for (const sf of field.itemSchema) {
       item[sf.key] = sf.type === "icon" ? TEMPLATE_LUCIDE_ICON_NAMES[0] : "";
     }
-    commit([...current, item]);
+    commit([...current, item], remap);
     setRowOpen(item._id!, true);
     setPendingFocus({ id: item._id! });
   };
 
   const moveRow = (id: string, delta: -1 | 1) => {
-    const current = rowsRef.current;
-    const from = current.findIndex((r) => r._id === id);
+    const { rows: current, remap } = working();
+    const rowId = resolveId(id, remap);
+    const from = current.findIndex((r) => r._id === rowId);
     const to = from + delta;
     if (from < 0 || to < 0 || to >= current.length) return;
-    commit(arrayMove(current, from, to));
+    commit(arrayMove(current, from, to), remap);
   };
 
   const updateCell = (id: string, key: string, v: string) => {
-    const current = rowsRef.current;
-    const index = current.findIndex((r) => r._id === id);
+    const { rows: current, remap } = working();
+    const rowId = resolveId(id, remap);
+    const index = current.findIndex((r) => r._id === rowId);
     if (index < 0) return;
     const next = [...current];
     next[index] = { ...current[index]!, [key]: v };
-    commit(next);
+    commit(next, remap);
   };
 
   const deleteRow = (id: string) => {
-    const current = rowsRef.current;
+    const { rows: current, remap } = working();
     if (current.length <= minItems) return;
-    const index = current.findIndex((r) => r._id === id);
+    const rowId = resolveId(id, remap);
+    const index = current.findIndex((r) => r._id === rowId);
     if (index < 0) return;
     const removed = current[index]!;
-    const wasOpen = openIds.has(id);
+    const wasOpen = openIds.has(id) || openIds.has(rowId);
 
-    commit(current.filter((r) => r._id !== id));
-    setRowOpen(id, false);
+    const next = current.filter((r) => r._id !== rowId);
+    commit(next, remap);
+    setRowOpen(rowId, false);
     focusAfterDelete(index);
 
-    toast(`${ItemLabel} deleted`, {
+    // An empty saved list falls back to the built-in rows on the storefront.
+    const message =
+      next.length === 0 && (field.defaultsWhenEmpty || defaultRows?.length)
+        ? `All ${itemLabel}s removed — your site shows the built-in ones. Use the section's visibility toggle to hide them.`
+        : `${ItemLabel} deleted`;
+
+    toast(message, {
       action: {
         label: "Undo",
         onClick: () => {
+          // Saved rows only: restoring after a delete-all brings back just
+          // this row (the defaults stop showing), not the built-ins too.
           const latest = rowsRef.current;
           // Already back (double click, or restored some other way).
-          if (latest.some((r) => r._id === id)) return;
-          const next = [...latest];
-          next.splice(Math.min(index, latest.length), 0, removed);
-          commit(next);
-          if (wasOpen) setRowOpen(id, true);
+          if (latest.some((r) => r._id === rowId)) return;
+          const restored = [...latest];
+          restored.splice(Math.min(index, latest.length), 0, removed);
+          commit(restored);
+          if (wasOpen) setRowOpen(rowId, true);
         },
       },
     });
@@ -691,11 +776,13 @@ export function TemplateListFieldEditor({
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
-    const current = rowsRef.current;
-    const from = current.findIndex((r) => r._id === active.id);
-    const to = current.findIndex((r) => r._id === over.id);
+    const { rows: current, remap } = working();
+    const activeId = resolveId(String(active.id), remap);
+    const overId = resolveId(String(over.id), remap);
+    const from = current.findIndex((r) => r._id === activeId);
+    const to = current.findIndex((r) => r._id === overId);
     if (from < 0 || to < 0) return;
-    commit(arrayMove(current, from, to));
+    commit(arrayMove(current, from, to), remap);
   };
 
   const announcements: Announcements = {
@@ -720,6 +807,12 @@ export function TemplateListFieldEditor({
 
   return (
     <div ref={containerRef} className="space-y-3">
+      {showingDefaults && (
+        <p className="text-muted-foreground text-xs">
+          Showing the built-in {itemLabel}s — edit any of them to make them
+          your own.
+        </p>
+      )}
       {rows.length === 0 ? (
         <div className="bg-muted/40 text-muted-foreground rounded-lg border border-dashed px-3 py-4 text-sm">
           <p>No {itemLabel}s yet.</p>
@@ -748,7 +841,7 @@ export function TemplateListFieldEditor({
                 const id = rowIds[index]!;
                 return (
                   <SortableListRow
-                    key={id}
+                    key={rowKeysRef.current.get(id) ?? id}
                     row={row}
                     rowId={id}
                     index={index}

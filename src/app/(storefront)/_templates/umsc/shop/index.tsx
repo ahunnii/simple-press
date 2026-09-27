@@ -1,3 +1,4 @@
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
@@ -7,6 +8,36 @@ import { SECTION_LINKS } from "~/lib/section-links";
 // when the store has no published collections), and the grid's empty-state
 // copy. The toolbar (type chips, product count, in-stock filter, sort) and
 // pagination are structural, not fielded — see `umsc-shop-client.tsx`.
+
+/** Default doors shown when the store has no published collections and the
+ * owner hasn't customized `umsc.shop.doors` — door names are a design.md
+ * verbatim keep (Candles / Soaps / Body Care / Home Care). */
+const UMSC_SHOP_DOORS_DEFAULT_ROWS = [
+  {
+    image: "",
+    title: "Candles",
+    blurb: "Hand-poured soy, small batch.",
+    link: "/collections/candles",
+  },
+  {
+    image: "",
+    title: "Soaps",
+    blurb: "Gentle bars for everyday washing.",
+    link: "/collections/soaps",
+  },
+  {
+    image: "",
+    title: "Body Care",
+    blurb: "Butters and oils for dry skin.",
+    link: "/collections/body-care",
+  },
+  {
+    image: "",
+    title: "Home Care",
+    blurb: "Sprays and melts for every room.",
+    link: "/collections/home-care",
+  },
+] satisfies Record<string, string>[];
 
 // ─── Shop: Hero ─────────────────────────────────────────────────────────────
 
@@ -54,6 +85,7 @@ const shopDoorsData: TemplateField[] = [
     itemLabel: "door",
     summaryKey: "title",
     defaultsWhenEmpty: true,
+    defaultRows: UMSC_SHOP_DOORS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "image",
@@ -84,44 +116,6 @@ const shopDoorsData: TemplateField[] = [
         placeholder: "/collections/candles",
       },
     ],
-    // No `defaultValue` on list fields (its type is `string`, not an array —
-    // matches the convention in olive/homepage's list fields). The four
-    // default doors below live as a plain constant, read by
-    // `umsc-shop-page.tsx` when `parseTemplateListRows` returns empty.
-  },
-];
-
-/** Default doors shown when the store has no published collections and the
- * owner hasn't customized `umsc.shop.doors` — door names are a design.md
- * verbatim keep (Candles / Soaps / Body Care / Home Care). */
-export const UMSC_SHOP_DEFAULT_DOORS = [
-  {
-    _id: "door-candles",
-    image: "",
-    title: "Candles",
-    blurb: "Hand-poured soy, small batch.",
-    link: "/collections/candles",
-  },
-  {
-    _id: "door-soaps",
-    image: "",
-    title: "Soaps",
-    blurb: "Gentle bars for everyday washing.",
-    link: "/collections/soaps",
-  },
-  {
-    _id: "door-body-care",
-    image: "",
-    title: "Body Care",
-    blurb: "Butters and oils for dry skin.",
-    link: "/collections/body-care",
-  },
-  {
-    _id: "door-home-care",
-    image: "",
-    title: "Home Care",
-    blurb: "Sprays and melts for every room.",
-    link: "/collections/home-care",
   },
 ];
 
@@ -229,3 +223,10 @@ export const umscShopSections: TemplateSection[] = [
     hideable: false,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const UMSC_SHOP_DEFAULT_DOORS = listRowsFromDefaults(
+  UMSC_SHOP_DOORS_DEFAULT_ROWS,
+  "default-door",
+);

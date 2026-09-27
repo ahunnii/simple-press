@@ -10,48 +10,9 @@ import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
 import { OliveImageTile, OliveRevealGroup, OliveSection } from "../shared";
+import { DEFAULT_OLIVE_ABOUT_CTA_TILES, DEFAULT_OLIVE_ABOUT_STORY } from "./index";
 import { OliveAboutHero } from "./olive-about-hero";
 import { OliveAboutStory } from "./olive-about-story";
-
-// Built-in example story, used when the owner hasn't configured any rows.
-const DEFAULT_STORY: TemplateListRow[] = [
-  {
-    _id: "default-story-1",
-    image: "",
-    heading: "Started on a card table",
-    body: "We began as a folding table at a weekend market — a rack of dresses and a handwritten sign. We sold out by noon and ordered more the next week.",
-  },
-  {
-    _id: "default-story-2",
-    image: "",
-    heading: "Every fabric, chosen by hand",
-    body: "We touch every fabric before it goes on the floor. If it wrinkles wrong or doesn't feel right against your skin, it doesn't make the cut.",
-  },
-  {
-    _id: "default-story-3",
-    image: "",
-    heading: "A shop that remembers you",
-    body: "We keep notes — your size, the dress you almost bought last spring, the color you always reach for. Walk in and we'll likely have something pulled already.",
-  },
-  {
-    _id: "default-story-4",
-    image: "",
-    heading: "Still here, still local",
-    body: "We've grown from one folding table to a real shop on a real block, and neither has changed much. Come try things on and stay as long as you like.",
-  },
-];
-
-// Built-in example tiles, used when the owner hasn't configured any rows.
-const DEFAULT_CTA_TILES: TemplateListRow[] = [
-  { _id: "default-cta-1", image: "", label: "Shop new", link: "/shop" },
-  {
-    _id: "default-cta-2",
-    image: "",
-    label: "Read the journal",
-    link: "/blog",
-  },
-  { _id: "default-cta-3", image: "", label: "Say hello", link: "/contact" },
-];
 
 function readString(row: TemplateListRow, key: string): string {
   const value = row[key];
@@ -85,14 +46,14 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
   const storyRows = parseTemplateListRows(customFields?.["olive.about.story"]);
   const hasOwnerStory = storyRows.length > 0;
-  const story = hasOwnerStory ? storyRows : DEFAULT_STORY;
+  const story = hasOwnerStory ? storyRows : DEFAULT_OLIVE_ABOUT_STORY;
 
   const founding = (f["olive.about.founding-line"] ?? "").trim();
 
   // Carry the ORIGINAL (pre-filter) row index through the label filter so a
   // click on a rendered tile still targets the row it actually came from,
   // even when an earlier row was skipped for having no label. Built-in
-  // `DEFAULT_CTA_TILES` rows get `index: null` — they have no saved row to
+  // `DEFAULT_OLIVE_ABOUT_CTA_TILES` rows get `index: null` — they have no saved row to
   // click-target.
   const ctaRows = parseTemplateListRows(customFields?.["olive.about.cta"]);
   const labelledCtaRows = ctaRows
@@ -101,7 +62,7 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const ctaTiles: { row: TemplateListRow; index: number | null }[] =
     labelledCtaRows.length > 0
       ? labelledCtaRows
-      : DEFAULT_CTA_TILES.map((row) => ({ row, index: null }));
+      : DEFAULT_OLIVE_ABOUT_CTA_TILES.map((row) => ({ row, index: null }));
 
   return (
     <>

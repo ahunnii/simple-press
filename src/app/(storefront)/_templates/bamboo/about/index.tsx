@@ -1,22 +1,70 @@
-import {
-  Building2,
-  Droplets,
-  Heart,
-  Leaf,
-  ShieldCheck,
-  Sprout,
-  TreePine,
-  Truck,
-  Users,
-} from "lucide-react";
-
-import type {
-  GenericIconRow,
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 ///ABOUT PAGE
+
+const BAMBOO_VALUES_DEFAULT_ROWS = [
+  {
+    icon: "Leaf",
+    title: "Sustainability First",
+    description:
+      "Every decision we make starts with the planet. From sourcing to packaging, we choose the path that leaves the smallest footprint.",
+  },
+  {
+    icon: "Heart",
+    title: "Premium Quality",
+    description:
+      "We refuse to compromise. Our bamboo products match or exceed the softness and strength of traditional premium brands.",
+  },
+  {
+    icon: "Users",
+    title: "Community Driven",
+    description:
+      "We believe in the power of community. We are always here to help you find the perfect product for your needs.",
+  },
+] satisfies Record<string, string>[];
+
+const BAMBOO_WHY_BAMBOO_FACTS_DEFAULT_ROWS = [
+  {
+    icon: "Sprout",
+    title: "Rapid Growth",
+    description:
+      "Bamboo grows up to 35 inches per day and reaches maturity in 3-5 years, compared to 20-50 years for hardwood trees.",
+  },
+  {
+    icon: "TreePine",
+    title: "No Replanting Needed",
+    description:
+      "Bamboo regenerates from its own root system after harvest, which means the soil stays intact and carbon continues to be sequestered.",
+  },
+  {
+    icon: "Droplets",
+    title: "Water Efficient",
+    description:
+      "Bamboo requires significantly less water than traditional tree farming and thrives without pesticides or fertilizers.",
+  },
+] satisfies Record<string, string>[];
+
+const BAMBOO_NATIONWIDE_FACTS_DEFAULT_ROWS = [
+  {
+    icon: "Truck",
+    title: "Nationwide Shipping",
+    description:
+      "We deliver our premium products to doorsteps across the country, carefully packaged and always on time.",
+  },
+  {
+    icon: "Building2",
+    title: "Homes & Businesses",
+    description:
+      "From your bathroom to bustling restaurants, hotels, schools, and local stores -- we have solutions for every setting.",
+  },
+  {
+    icon: "ShieldCheck",
+    title: "Customer-First Service",
+    description:
+      "Our dedicated Detroit-based team provides responsive, knowledgeable support for every order and inquiry.",
+  },
+] satisfies Record<string, string>[];
 const aboutHeroData: TemplateField[] = [
   {
     key: "bamboo.about.hero-tagline",
@@ -182,6 +230,7 @@ const aboutValuesData: TemplateField[] = [
     ],
     minItems: 0,
     maxItems: 4,
+    defaultRows: BAMBOO_VALUES_DEFAULT_ROWS,
   },
 ];
 
@@ -304,6 +353,7 @@ const aboutWhyBambooData: TemplateField[] = [
     ],
     minItems: 0,
     maxItems: 3,
+    defaultRows: BAMBOO_WHY_BAMBOO_FACTS_DEFAULT_ROWS,
   },
 ];
 
@@ -386,6 +436,7 @@ const aboutNationwideData: TemplateField[] = [
     ],
     minItems: 0,
     maxItems: 4,
+    defaultRows: BAMBOO_NATIONWIDE_FACTS_DEFAULT_ROWS,
   },
 ];
 
@@ -577,64 +628,14 @@ export const bambooAboutFieldGroups: TemplateFieldGroup[] = [
   },
 ];
 
-export const DEFAULT_BAMBOO_VALUES: GenericIconRow[] = [
-  {
-    icon: Leaf,
-    title: "Sustainability First",
-    description:
-      "Every decision we make starts with the planet. From sourcing to packaging, we choose the path that leaves the smallest footprint.",
-  },
-  {
-    icon: Heart,
-    title: "Premium Quality",
-    description:
-      "We refuse to compromise. Our bamboo products match or exceed the softness and strength of traditional premium brands.",
-  },
-  {
-    icon: Users,
-    title: "Community Driven",
-    description:
-      "We believe in the power of community. We are always here to help you find the perfect product for your needs.",
-  },
-];
+export const DEFAULT_BAMBOO_VALUES = iconRowsFromDefaults(
+  BAMBOO_VALUES_DEFAULT_ROWS,
+);
 
-export const DEFAULT_BAMBOO_NATIONWIDE_FACTS: GenericIconRow[] = [
-  {
-    icon: Truck,
-    title: "Nationwide Shipping",
-    description:
-      "We deliver our premium products to doorsteps across the country, carefully packaged and always on time.",
-  },
-  {
-    icon: Building2,
-    title: "Homes & Businesses",
-    description:
-      "From your bathroom to bustling restaurants, hotels, schools, and local stores -- we have solutions for every setting.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Customer-First Service",
-    description:
-      "Our dedicated Detroit-based team provides responsive, knowledgeable support for every order and inquiry.",
-  },
-];
-export const DEFAULT_BAMBOO_WHY_BAMBOO_FACTS: GenericIconRow[] = [
-  {
-    icon: Sprout,
-    title: "Rapid Growth",
-    description:
-      "Bamboo grows up to 35 inches per day and reaches maturity in 3-5 years, compared to 20-50 years for hardwood trees.",
-  },
-  {
-    icon: TreePine,
-    title: "No Replanting Needed",
-    description:
-      "Bamboo regenerates from its own root system after harvest, which means the soil stays intact and carbon continues to be sequestered.",
-  },
-  {
-    icon: Droplets,
-    title: "Water Efficient",
-    description:
-      "Bamboo requires significantly less water than traditional tree farming and thrives without pesticides or fertilizers.",
-  },
-];
+export const DEFAULT_BAMBOO_NATIONWIDE_FACTS = iconRowsFromDefaults(
+  BAMBOO_NATIONWIDE_FACTS_DEFAULT_ROWS,
+);
+
+export const DEFAULT_BAMBOO_WHY_BAMBOO_FACTS = iconRowsFromDefaults(
+  BAMBOO_WHY_BAMBOO_FACTS_DEFAULT_ROWS,
+);

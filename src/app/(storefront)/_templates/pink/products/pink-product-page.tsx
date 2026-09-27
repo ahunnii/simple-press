@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
-import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -17,6 +16,7 @@ import { PinkAccordion } from "../shared/pink-accordion";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkProductCard } from "../shared/pink-product-card";
+import { DEFAULT_PINK_PRODUCT_PANELS } from "./index";
 import { PinkProductActions } from "./pink-product-actions";
 import { PinkProductGallery } from "./pink-product-gallery";
 import { PinkProductReviewsSection } from "./pink-product-reviews";
@@ -39,19 +39,6 @@ const FIELD_KEYS = [
 ];
 
 const PANELS_KEY = "pink.global.product-panels";
-
-const DEFAULT_PANELS: TemplateListRow[] = [
-  {
-    _id: "default-panel-1",
-    title: "Care & keeping",
-    body: "Keep out of direct sun and away from damp. Ask us if you have questions about caring for a piece.",
-  },
-  {
-    _id: "default-panel-2",
-    title: "Custom orders",
-    body: "Want something close to this but not quite? Reach out and we'll talk it through.",
-  },
-];
 
 /** `Product.additionalFields.productSpecs` — label/value pairs (design.md → Product → "Details"). */
 function parseProductSpecs(raw: unknown): { label: string; value: string }[] {
@@ -121,7 +108,8 @@ export async function PinkProductPage({
   const specs = parseProductSpecs(product.additionalFields);
 
   const panelsRows = parseTemplateListRows(customFields?.[PANELS_KEY]);
-  const panels = panelsRows.length > 0 ? panelsRows : DEFAULT_PANELS;
+  const panels =
+    panelsRows.length > 0 ? panelsRows : DEFAULT_PINK_PRODUCT_PANELS;
 
   const panelsVisible = isSectionVisible(
     customFields,

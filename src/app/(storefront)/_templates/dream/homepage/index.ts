@@ -716,6 +716,23 @@ const processData: TemplateField[] = [
 
 // ─── Estimate Quote band (hideable) ─────────────────────────────────────────
 
+/**
+ * Built-in checklist-chip rows — the single source for the
+ * `dream.homepage.quote-chips` field's `defaultRows` and (via
+ * `DREAM_QUOTE_CHIPS_FALLBACK` in `./dream-homepage-quote-chips.ts`) the
+ * storefront's render fallback when the saved list is empty.
+ */
+export const DREAM_QUOTE_CHIPS_DEFAULT_ROWS: Record<string, string>[] = [
+  { label: "Date + time" },
+  { label: "Location" },
+  { label: "Theme" },
+  { label: "Colors" },
+  { label: "Draping" },
+  { label: "Rentals" },
+  { label: "Space photos" },
+  { label: "Full decor?" },
+];
+
 const quoteData: TemplateField[] = [
   {
     key: "dream.homepage.quote-heading",
@@ -771,6 +788,7 @@ const quoteData: TemplateField[] = [
         placeholder: "e.g. Date + time",
       },
     ],
+    defaultRows: DREAM_QUOTE_CHIPS_DEFAULT_ROWS,
   },
   {
     key: "dream.homepage.quote-cta-label",

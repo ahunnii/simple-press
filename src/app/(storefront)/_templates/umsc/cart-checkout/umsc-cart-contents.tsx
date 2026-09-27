@@ -10,6 +10,7 @@ import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 
+import { UMSC_CART_DEFAULT_DOORS } from "./cart-fields";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
 import {
@@ -17,12 +18,9 @@ import {
   UmscImageFallback,
 } from "../shared/umsc-image-fallback";
 
-const DEFAULT_DOORS: { title: string; link: string; image?: string }[] = [
-  { title: "Candles", link: "/collections/candles" },
-  { title: "Soaps", link: "/collections/soaps" },
-  { title: "Body Care", link: "/collections/body-care" },
-  { title: "Home Care", link: "/collections/home-care" },
-];
+// Re-exported so the pre-migration import path (and the snapshot test) keep
+// working — the rows themselves now live in `./cart-fields.ts`'s `defaultRows`.
+export { UMSC_CART_DEFAULT_DOORS };
 
 type Props = {
   emptyHeading: string;
@@ -65,14 +63,14 @@ export function UmscCartContents({
             title:
               typeof row.title === "string" && row.title
                 ? row.title
-                : (DEFAULT_DOORS[i]?.title ?? ""),
+                : (UMSC_CART_DEFAULT_DOORS[i]?.title ?? ""),
             link:
               typeof row.link === "string" && row.link
                 ? row.link
-                : (DEFAULT_DOORS[i]?.link ?? "/shop"),
+                : (UMSC_CART_DEFAULT_DOORS[i]?.link ?? "/shop"),
             image: typeof row.image === "string" ? row.image : undefined,
           }))
-        : DEFAULT_DOORS;
+        : UMSC_CART_DEFAULT_DOORS;
 
     return (
       <div className="flex flex-col items-center py-16 text-center">

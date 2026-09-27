@@ -102,27 +102,34 @@ const productDetailsData: TemplateField[] = [
   },
   {
     key: "default.global.product-trust-badges",
-    label: "Product Trust Badges",
+    label: "Badges",
     description:
-      "Default trust badges that get applied to all products, comes before the product's trust badges",
+      "Up to four short lines shown under the buy button on every product, before any badges set on the product itself. Leave empty to show the built-in two.",
     type: "list",
     page: "product",
     group: "product.details",
     gridColumn: "col-span-full",
+    // The text sub-field is keyed `title` (other templates use `label`);
+    // renaming it would orphan saved rows, and
+    // `parseTemplateTrustBadgesListRows` accepts either.
     itemSchema: [
       {
         key: "icon",
         label: "Icon",
         type: "icon",
+        description: "Small icon shown before the text.",
       },
       {
         key: "title",
-        label: "Title",
+        label: "Text",
         type: "text",
+        description: "A few words, e.g. Free returns within 30 days.",
       },
     ],
     minItems: 0,
     maxItems: 4,
+    itemLabel: "badge",
+    defaultsWhenEmpty: true,
   },
 ];
 

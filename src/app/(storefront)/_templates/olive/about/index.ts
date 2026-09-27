@@ -1,5 +1,45 @@
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+
+// Built-in example story rows, shown by the editor as real rows and copied
+// into the saved value on the first edit (copy-on-write). Text copied
+// verbatim from the pre-migration `DEFAULT_STORY` constant in
+// `olive-about-page.tsx`.
+const OLIVE_ABOUT_STORY_DEFAULT_ROWS = [
+  {
+    image: "",
+    heading: "Started on a card table",
+    body: "We began as a folding table at a weekend market — a rack of dresses and a handwritten sign. We sold out by noon and ordered more the next week.",
+  },
+  {
+    image: "",
+    heading: "Every fabric, chosen by hand",
+    body: "We touch every fabric before it goes on the floor. If it wrinkles wrong or doesn't feel right against your skin, it doesn't make the cut.",
+  },
+  {
+    image: "",
+    heading: "A shop that remembers you",
+    body: "We keep notes — your size, the dress you almost bought last spring, the color you always reach for. Walk in and we'll likely have something pulled already.",
+  },
+  {
+    image: "",
+    heading: "Still here, still local",
+    body: "We've grown from one folding table to a real shop on a real block, and neither has changed much. Come try things on and stay as long as you like.",
+  },
+] satisfies Record<string, string>[];
+
+// Built-in example CTA tiles, shown by the editor as real rows and copied
+// into the saved value on the first edit (copy-on-write). Text copied
+// verbatim from the pre-migration `DEFAULT_CTA_TILES` constant in
+// `olive-about-page.tsx`.
+const OLIVE_ABOUT_CTA_DEFAULT_ROWS = [
+  { image: "", label: "Shop new", link: "/shop" },
+  { image: "", label: "Read the journal", link: "/blog" },
+  { image: "", label: "Say hello", link: "/contact" },
+] satisfies Record<string, string>[];
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
@@ -93,6 +133,7 @@ const aboutStoryData: TemplateField[] = [
         optional: true,
       },
     ],
+    defaultRows: OLIVE_ABOUT_STORY_DEFAULT_ROWS,
   },
 ];
 
@@ -152,6 +193,7 @@ const aboutCtaData: TemplateField[] = [
         optional: true,
       },
     ],
+    defaultRows: OLIVE_ABOUT_CTA_DEFAULT_ROWS,
   },
 ];
 
@@ -250,3 +292,15 @@ export const oliveAboutSections: TemplateSection[] = [
     hideable: true,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────────
+
+export const DEFAULT_OLIVE_ABOUT_STORY = listRowsFromDefaults(
+  OLIVE_ABOUT_STORY_DEFAULT_ROWS,
+  "default-story",
+);
+
+export const DEFAULT_OLIVE_ABOUT_CTA_TILES = listRowsFromDefaults(
+  OLIVE_ABOUT_CTA_DEFAULT_ROWS,
+  "default-cta",
+);

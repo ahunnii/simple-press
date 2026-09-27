@@ -13,7 +13,22 @@
  */
 import type { ServiceTemplateDef } from "~/lib/service-templates";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
+
+// ─── Built-in list defaults ─────────────────────────────────────────────────
+// Text copied verbatim from the pre-migration `DEFAULT_FACT_ROWS` constant in
+// `pink-table-service-page.tsx`.
+
+const PINK_TABLE_FACT_ROWS_DEFAULT_ROWS = [
+  {
+    label: "Where",
+    value: "Your space — school, church, library or workplace",
+  },
+  { label: "Group size", value: "10 to 12 at a table" },
+  { label: "Materials", value: "Everything included" },
+  { label: "Notice", value: "Book at least 2 weeks out" },
+] satisfies Record<string, string>[];
 
 export const pinkTableFields: TemplateField[] = [
   // ── pink-table.hero ────────────────────────────────────────────────────
@@ -63,6 +78,7 @@ export const pinkTableFields: TemplateField[] = [
     maxItems: 4,
     itemLabel: "row",
     defaultsWhenEmpty: true,
+    defaultRows: PINK_TABLE_FACT_ROWS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "label",
@@ -79,15 +95,6 @@ export const pinkTableFields: TemplateField[] = [
         description: "Row value, e.g. Your space.",
       },
     ],
-    defaultValue: JSON.stringify([
-      {
-        label: "Where",
-        value: "Your space — school, church, library or workplace",
-      },
-      { label: "Group size", value: "10 to 12 at a table" },
-      { label: "Materials", value: "Everything included" },
-      { label: "Notice", value: "Book at least 2 weeks out" },
-    ]),
   },
 
   // ── pink-table.body ─────────────────────────────────────────────────────
@@ -209,7 +216,8 @@ export const pinkTableFields: TemplateField[] = [
         key: "body",
         label: "Body",
         type: "textarea",
-        description: "One or two sentences describing this part of the session.",
+        description:
+          "One or two sentences describing this part of the session.",
       },
     ],
     defaultValue: "",
@@ -579,3 +587,10 @@ export const pinkServiceTemplateDefs: ServiceTemplateDef[] = [
     fieldGroups: pinkTableFieldGroups,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const DEFAULT_PINK_TABLE_FACT_ROWS = listRowsFromDefaults(
+  PINK_TABLE_FACT_ROWS_DEFAULT_ROWS,
+  "default-fact",
+);

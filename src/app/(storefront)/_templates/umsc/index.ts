@@ -1,3 +1,4 @@
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
@@ -28,6 +29,14 @@ import {
 } from "./testimonials";
 
 // ─── Global: Branding ─────────────────────────────────────────────────────
+
+/** Built-in shop-link rows — the four collections that existed on the current site. */
+const UMSC_FOOTER_SHOP_LINKS_DEFAULT_ROWS = [
+  { label: "Candles", url: "/collections/candles" },
+  { label: "Soaps", url: "/collections/soaps" },
+  { label: "Body Care", url: "/collections/body-care" },
+  { label: "Home Care", url: "/collections/home-care" },
+] satisfies Record<string, string>[];
 
 const globalBrandingData: TemplateField[] = [
   {
@@ -110,7 +119,7 @@ const globalBrandingData: TemplateField[] = [
     key: "umsc.global.footer-shop-links",
     label: "Footer shop links",
     description:
-      "Links in the footer's Shop column. Leave empty to use the default candle, soap, and care-line links.",
+      "Links in the footer's Shop column.",
     type: "list",
     page: "global",
     group: "global.branding",
@@ -119,6 +128,7 @@ const globalBrandingData: TemplateField[] = [
     itemLabel: "link",
     summaryKey: "label",
     defaultsWhenEmpty: true,
+    defaultRows: UMSC_FOOTER_SHOP_LINKS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "label",
@@ -219,3 +229,10 @@ export function resolveFields(
 ): Record<string, string> {
   return resolveTemplateFields(customFields, keys, _umscFieldMap);
 }
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const UMSC_FOOTER_SHOP_LINKS_DEFAULT = listRowsFromDefaults(
+  UMSC_FOOTER_SHOP_LINKS_DEFAULT_ROWS,
+  "default-link",
+);

@@ -134,7 +134,6 @@ const homepageCategoriesData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 4,
     itemLabel: "card",
-    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "image",

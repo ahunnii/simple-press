@@ -256,13 +256,19 @@ export function FieldPanel({
             fieldKey: requestFieldKey,
             request: { itemIndex: requestItemIndex, nonce: requestNonce },
           });
-          // A row it can't open (no index, or storefront DEFAULT rows past
-          // the saved ones) still reveals the list.
+          // A row it can't open (no index, or past the displayed rows)
+          // still reveals the list. Displayed rows are the saved ones, or —
+          // while the list is unsaved / saved empty — the field's built-in
+          // `defaultRows`, which the editor shows as real rows.
           const saved = fieldValuesRef.current[requestFieldKey];
+          const displayedCount =
+            Array.isArray(saved) && saved.length > 0
+              ? saved.length
+              : (field.defaultRows?.length ?? 0);
           const inRange =
             requestItemIndex !== undefined &&
-            Array.isArray(saved) &&
-            requestItemIndex < saved.length;
+            requestItemIndex >= 0 &&
+            requestItemIndex < displayedCount;
           if (!inRange) cancelPaint = afterPaint(() => void reveal());
           return;
         }

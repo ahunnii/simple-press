@@ -30,7 +30,7 @@ import {
 
 import {
   SLEDGE_CHECKOUT_REASSURANCE_DEFAULTS,
-  SLEDGE_CART_REASSURANCE_KEY,
+  SLEDGE_CHECKOUT_REASSURANCE_KEY,
   sledgeReassuranceGlyph,
 } from "./cart-fields";
 import { SledgeOrderSummary } from "./sledge-order-summary";
@@ -39,7 +39,7 @@ type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
   merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
   /**
-   * Resolved `sledge.cart.reassurance-lines` rows (plain data), threaded
+   * Resolved `sledge.checkout.reassurance-lines` rows (plain data), threaded
    * from `SledgeCheckoutPage`. Falls back to the built-in lines.
    */
   reassuranceLines?: SledgeTextRow[];
@@ -524,11 +524,11 @@ export function SledgeCheckoutForm({
                 Encrypted with TLS · Powered by Stripe
               </p>
             </div>
-            {/* Owner reassurance lines — the same list the cart summary shows. */}
+            {/* Owner reassurance lines shown at checkout. */}
             {reassuranceLines.map((note, position) => (
               <div
                 key={note.index}
-                {...listItemAttr(SLEDGE_CART_REASSURANCE_KEY, note.index)}
+                {...listItemAttr(SLEDGE_CHECKOUT_REASSURANCE_KEY, note.index)}
                 className="flex items-start gap-2.5"
               >
                 {/* N-1: decorative glyph */}
@@ -536,8 +536,8 @@ export function SledgeCheckoutForm({
                   aria-hidden="true"
                   className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
                 >
-                  {/* +1: the cart's ✓ slot belongs to its free-shipping line,
-                      which checkout's built-in rows leave out. */}
+                  {/* +1: keeps checkout's original ✱/↺ symbols (the ✓ slot
+                      is the cart's free-shipping line). */}
                   {sledgeReassuranceGlyph(position + 1)}
                 </span>
                 <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">

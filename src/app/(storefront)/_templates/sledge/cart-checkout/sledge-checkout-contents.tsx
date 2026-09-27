@@ -20,7 +20,7 @@ type Props = {
   merchantPolicies: Parameters<
     typeof SledgeCheckoutForm
   >[0]["merchantPolicies"];
-  /** Resolved `sledge.cart.reassurance-lines` rows (plain data). */
+  /** Resolved `sledge.checkout.reassurance-lines` rows (plain data). */
   reassuranceLines: SledgeTextRow[];
 };
 

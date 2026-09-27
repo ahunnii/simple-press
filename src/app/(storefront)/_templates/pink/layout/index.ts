@@ -96,14 +96,13 @@ export const pinkGlobalData: TemplateField[] = [
     key: "pink.global.footer-col1-links",
     label: "Column 1 links",
     description:
-      "Links in the first footer column. Leave empty to use the default shop links.",
+      "Links in the first footer column. Leave empty and it shows Shop all, plus Collections and Services once those features are turned on.",
     type: "list",
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-full",
     maxItems: 8,
     itemLabel: "link",
-    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "label",
@@ -136,14 +135,13 @@ export const pinkGlobalData: TemplateField[] = [
     key: "pink.global.footer-col2-links",
     label: "Column 2 links",
     description:
-      "Links in the second footer column. Leave empty to use the default studio links.",
+      "Links in the second footer column. Leave empty and it shows About, plus Journal, Events, Videos and Testimonials once those features are turned on, then Contact.",
     type: "list",
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-full",
     maxItems: 8,
     itemLabel: "link",
-    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "label",
@@ -260,7 +258,8 @@ export const pinkGlobalData: TemplateField[] = [
   {
     key: "pink.global.page-cta-button",
     label: "Button text",
-    description: "Text on the sidebar callout button. Leave blank to hide the button.",
+    description:
+      "Text on the sidebar callout button. Leave blank to hide the button.",
     type: "text",
     page: "global",
     group: "global.page-sidebar",
