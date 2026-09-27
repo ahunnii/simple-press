@@ -300,8 +300,15 @@ describe("PollenHeader mobile overlay", () => {
     expect(within(dialog).queryByRole("link", { name: "Log in" })).toBeNull();
   });
 
-  it("shows the signed-in account links in the overlay, flag-gated, no UserButton", () => {
-    enabledFlags = new Set(["customerAccounts", "orders"]);
+  it("shows only the quick-access account links in the overlay, no UserButton", () => {
+    enabledFlags = new Set([
+      "customerAccounts",
+      "orders",
+      "checkout",
+      "subscriptions",
+      "invoices",
+      "loyalty",
+    ]);
     session = {
       user: { name: "Ada Lovelace", email: "ada@example.com" },
       session: {},
@@ -317,13 +324,9 @@ describe("PollenHeader mobile overlay", () => {
     const labels = Array.from(account.querySelectorAll("a"), (a) =>
       a.textContent?.trim(),
     );
-    expect(labels).toEqual([
-      "Orders",
-      "Address Book",
-      "Settings",
-      "Security",
-      "Preferences",
-    ]);
+    // Address book, subscriptions, invoices, rewards, security and
+    // preferences live in the account area's own nav, not the header menu.
+    expect(labels).toEqual(["Orders", "Settings"]);
     expect(
       within(dialog).getByRole("link", { name: "Sign out" }),
     ).toHaveAttribute("href", "/auth/sign-out");

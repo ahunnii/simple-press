@@ -2949,13 +2949,27 @@
 }
 
 /* ─── Pollen template — accessibility enhancements ──────────────────────────
-   Pollen uses Tailwind utilities exclusively (no CSS vars for theme tokens).
+   Pollen styles its own UI with Tailwind hex utilities; the only CSS vars it
+   sets are the shared shadcn primary/ring tokens (below).
    This section adds a scoped focus-visible indicator that reads clearly on
    BOTH the light body (white) AND the dark hero/footer surfaces
    (#2a351f / #1A1E1A):
      - #215935 deep green outline (8.25:1 on white ✓)
      - white box-shadow halo (provides contrast on dark surfaces ✓)
    Also adds a scoped prefers-reduced-motion block per repo convention.     */
+
+/* Brand the shared shadcn tokens so platform components rendered inside
+   pollen (account pages, address book, reviews, checkout) use pollen's deep
+   green instead of the stock near-black primary. #215935 + white = 8.25:1.
+   `body:has(.pollen)` also covers Radix sheets/dialogs/menus, which portal to
+   <body> outside the .pollen wrapper (e.g. the address-book "Add address"
+   sheet). */
+.pollen,
+body:has(.pollen) {
+  --primary: #215935;
+  --primary-foreground: #ffffff;
+  --ring: #5e7747;
+}
 
 .pollen *:focus-visible {
   outline: 2px solid #215935;

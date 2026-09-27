@@ -7,6 +7,13 @@ import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
+/** Account links shown in pollen's header menus (desktop + mobile overlay). */
+export const POLLEN_QUICK_ACCOUNT_KEYS = new Set([
+  "orders",
+  "settings",
+  "admin",
+]);
+
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
 
 type PollenNavOverlayAccountProps = {
@@ -54,7 +61,7 @@ export function PollenNavOverlayAccount({
   if (isPending) {
     return (
       <div
-        className="h-11 w-48 animate-pulse rounded-full bg-white/10"
+        className="h-11 w-full animate-pulse rounded-full bg-white/10"
         aria-hidden="true"
       />
     );
@@ -64,7 +71,7 @@ export function PollenNavOverlayAccount({
 
   if (!user) {
     return (
-      <div className="flex flex-wrap items-center justify-center gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {/* White on #1A1E1A = 16.87:1; border white/70 ≈ 8.8:1. */}
         <Link
           href={SIGN_IN_HREF}
@@ -87,7 +94,12 @@ export function PollenNavOverlayAccount({
 
   const includeAdmin =
     user.platformRole === "PLATFORM_ADMIN" || !!session?.session?.membershipId;
-  const links = getAccountNavLinks({ isEnabled, includeAdmin });
+  // Quick-access subset only — the full list (address book, subscriptions,
+  // invoices, rewards, security, preferences) lives in the account area's
+  // own nav, one tap away via Settings.
+  const links = getAccountNavLinks({ isEnabled, includeAdmin }).filter((link) =>
+    POLLEN_QUICK_ACCOUNT_KEYS.has(link.key),
+  );
 
   // `name` can be blank (email-only sign-ups) — fall back to the email as the
   // primary line and drop the duplicate subtitle.
@@ -95,42 +107,52 @@ export function PollenNavOverlayAccount({
   const primaryLabel = name || user.email;
   const initials = initialsFor(name, user.email);
 
+  // Compact: one identity row (with sign-out on the right) + a row of quick
+  // links, so the whole block fits the overlay's pinned footer.
   return (
-    <div className="flex w-full max-w-sm flex-col gap-4">
-      <div className="flex items-center gap-3 rounded-2xl border border-white/15 px-4 py-3">
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
         {user.image ? (
           // eslint-disable-next-line @next/next/no-img-element -- avatar URLs come from arbitrary OAuth hosts not in next.config's image domains
           <img
             src={user.image}
             alt=""
-            className="size-11 shrink-0 rounded-full object-cover ring-2 ring-[#A8D081]"
+            className="size-10 shrink-0 rounded-full object-cover ring-2 ring-[#A8D081]"
           />
         ) : (
           <span
             aria-hidden="true"
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#A8D081] text-sm font-semibold text-[#1A1E1A]"
+            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#A8D081] text-sm font-semibold text-[#1A1E1A]"
           >
             {initials}
           </span>
         )}
-        <div className="grid min-w-0 text-left leading-tight">
-          <span className="truncate text-base font-medium text-white">
+        <div className="grid min-w-0 flex-1 text-left leading-tight">
+          <span className="truncate text-sm font-medium text-white">
             {primaryLabel}
           </span>
           {name ? (
-            <span className="truncate text-sm text-white/70">{user.email}</span>
+            <span className="truncate text-xs text-white/70">{user.email}</span>
           ) : null}
         </div>
+        <Link
+          href={SIGN_OUT_HREF}
+          onClick={onClose}
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <LogOut className="size-4" aria-hidden="true" />
+          Sign out
+        </Link>
       </div>
 
       <nav aria-label="Account">
-        <ul className="flex flex-col">
+        <ul className="flex flex-wrap gap-2">
           {links.map((link) => (
             <li key={link.key}>
               <Link
                 href={link.href}
                 onClick={onClose}
-                className="flex min-h-11 items-center rounded-lg px-4 text-base text-white/90 transition-colors hover:bg-white/10 hover:text-white"
+                className="inline-flex min-h-11 items-center rounded-full bg-white/10 px-4 text-sm text-white transition-colors hover:bg-white/20"
               >
                 {link.label}
               </Link>
@@ -138,15 +160,6 @@ export function PollenNavOverlayAccount({
           ))}
         </ul>
       </nav>
-
-      <Link
-        href={SIGN_OUT_HREF}
-        onClick={onClose}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/70 px-6 text-sm font-semibold tracking-wide text-white uppercase transition-colors hover:bg-white/10"
-      >
-        <LogOut className="size-4" aria-hidden="true" />
-        Sign out
-      </Link>
     </div>
   );
 }
