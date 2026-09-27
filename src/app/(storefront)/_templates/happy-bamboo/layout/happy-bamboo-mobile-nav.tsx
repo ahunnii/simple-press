@@ -13,14 +13,15 @@ import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { isActiveNavLink } from "~/lib/nav-utils";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { cn } from "~/lib/utils";
-
 import {
-  hbActiveEntryIndex,
-  hbExternalProps,
-  hbGroupEntries,
-  isHbItemActive,
-  resolveHappyBambooNav,
-} from "../lib/nav";
+  activeEntryIndex,
+  externalLinkProps,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
+
+import { resolveHappyBambooNav } from "../lib/nav";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
 
 const MENU_ID = "hb-mobile-menu";
@@ -248,14 +249,14 @@ function MobileMenuPanel({
     return () => window.removeEventListener("resize", measure);
   }, [headerRef]);
 
-  // Shared resolver (lib/nav.ts) — the header's desktop nav and the footer
+  // Shared resolver (lib/nav.ts, over `resolveNav`) — the header's desktop nav and the footer
   // read the same list, so the three can't drift apart.
   const links = resolveHappyBambooNav(business?.siteContent?.navigationItems);
   // One group open at a time. The panel mounts fresh on every open, so the
   // initializer auto-expands the group holding the current route.
   const [expanded, setExpanded] = useState<number | null>(() => {
     const idx = links.findIndex(
-      (item) => !!item.children?.length && isHbItemActive(pathname, item),
+      (item) => !!item.children?.length && isNavItemActive(pathname, item),
     );
     return idx === -1 ? null : idx;
   });
@@ -321,11 +322,11 @@ function MobileMenuPanel({
           <ul className="flex flex-col">
             {links.map((link, i) => {
               if (link.children?.length) {
-                const active = isHbItemActive(pathname, link);
+                const active = isNavItemActive(pathname, link);
                 const isOpen = expanded === i;
                 const sublistId = `${MENU_ID}-group-${i}`;
-                const entries = hbGroupEntries(link);
-                const activeEntry = hbActiveEntryIndex(pathname, entries);
+                const entries = navGroupEntries(link);
+                const activeEntry = activeEntryIndex(pathname, entries);
                 return (
                   <motion.li
                     key={i}
@@ -377,7 +378,7 @@ function MobileMenuPanel({
                             <li key={j}>
                               <Link
                                 href={child.href}
-                                {...hbExternalProps(child.external)}
+                                {...externalLinkProps(child.external)}
                                 onClick={onClose}
                                 aria-current={childActive ? "page" : undefined}
                                 className={cn(
@@ -415,7 +416,7 @@ function MobileMenuPanel({
                 >
                   <Link
                     href={link.href}
-                    {...hbExternalProps(link.external)}
+                    {...externalLinkProps(link.external)}
                     onClick={onClose}
                     aria-current={active ? "page" : undefined}
                     className={cn(
@@ -468,13 +469,12 @@ function MobileMenuPanel({
                   Your account
                 </p>
                 <ul className="flex flex-col">
-                  {[
-                    { href: "/account", label: "My account" },
-                    { href: "/account/orders", label: "Orders" },
-                    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
-                  ].map((item) => (
+                  {getAccountNavLinks({
+                    isEnabled,
+                    includeAdmin: isAdmin,
+                  }).map((item) => (
                     <li
-                      key={item.href}
+                      key={item.key}
                       className="border-b border-[var(--hb-brand)]/10"
                     >
                       <Link

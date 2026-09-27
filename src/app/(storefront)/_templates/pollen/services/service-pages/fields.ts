@@ -2,7 +2,8 @@
  * Pollen-specific service-page template field definitions.
  *
  * Three visually distinct layouts — all unmistakably pollen (rounded cards,
- * soft shadows, Cormorant / Inter / system-sans pairing):
+ * soft shadows, and the shared pollen green/cream palette; system-sans
+ * throughout, no custom font pairing):
  *
  *  pollen-spa   — Serene editorial: hero banner + two-column intro + 3-col card grid
  *  pollen-bloom — Gallery-forward: mosaic accent images + image-heavy staggered cards
@@ -21,12 +22,13 @@ const pollenSpaFields: TemplateField[] = [
   {
     key: "pollen-spa.hero-image",
     label: "Background image",
-    description: "Full-width image shown behind the service name.",
+    description:
+      "Full-width image shown behind the service name. Leave blank to use this service's own photo, or the site-wide header background if it has none.",
     type: "image",
     page: "homepage",
     group: "pollen-spa.hero",
     gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    defaultValue: "",
   },
   {
     key: "pollen-spa.hero-video",
@@ -77,12 +79,12 @@ const pollenSpaFields: TemplateField[] = [
     key: "pollen-spa.intro-accent-image",
     label: "Accent image",
     description:
-      "Supporting image shown beside the intro text (portrait orientation works best).",
+      "Supporting image shown beside the intro text (portrait orientation works best). Leave blank to hide.",
     type: "image",
     page: "homepage",
     group: "pollen-spa.intro",
     gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    defaultValue: "",
   },
   {
     key: "pollen-spa.intro-video",
@@ -118,8 +120,31 @@ const pollenSpaFields: TemplateField[] = [
     defaultValue: "",
     placeholder: "All treatments are tailored to your needs.",
   },
+  {
+    key: "pollen-spa.book-button-text",
+    label: "Book button text",
+    description: "Label on the booking button shown on each service card.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-spa.items",
+    gridColumn: "col-span-1",
+    defaultValue: "Book",
+    placeholder: "Book",
+  },
 
   // CTA
+  {
+    key: "pollen-spa.closing-heading",
+    label: "Closing heading",
+    description:
+      "Small line shown above the service name in the closing banner.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-spa.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Ready to begin?",
+    placeholder: "Ready to begin?",
+  },
   {
     key: "pollen-spa.cta-text",
     label: "Button text",
@@ -306,8 +331,31 @@ const pollenBloomFields: TemplateField[] = [
     defaultValue: "Available Services",
     placeholder: "Available Services",
   },
+  {
+    key: "pollen-bloom.book-button-text",
+    label: "Book button text",
+    description: "Label on the booking button shown on each service card.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-bloom.items",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+    placeholder: "Book Now",
+  },
 
   // CTA
+  {
+    key: "pollen-bloom.closing-heading",
+    label: "Closing heading",
+    description:
+      "Small line shown above the service name in the closing banner.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-bloom.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Ready to begin?",
+    placeholder: "Ready to begin?",
+  },
   {
     key: "pollen-bloom.cta-text",
     label: "Button text",
@@ -478,8 +526,31 @@ const pollenListFields: TemplateField[] = [
     defaultValue: "Our Services",
     placeholder: "Our Services",
   },
+  {
+    key: "pollen-list.book-button-text",
+    label: "Book button text",
+    description: "Label on the booking button shown on each service row.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-list.items",
+    gridColumn: "col-span-1",
+    defaultValue: "Book This Service",
+    placeholder: "Book This Service",
+  },
 
   // CTA
+  {
+    key: "pollen-list.closing-heading",
+    label: "Closing heading",
+    description:
+      "Small line shown above the service name in the closing banner.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-list.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Ready to begin?",
+    placeholder: "Ready to begin?",
+  },
   {
     key: "pollen-list.cta-text",
     label: "Button text",

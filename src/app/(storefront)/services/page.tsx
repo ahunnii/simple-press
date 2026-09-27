@@ -46,7 +46,11 @@ export default async function ServicesPage() {
     return (
       <>
         <JsonLd data={itemListSchema} />
-        <t.ServicesIndexPage business={business} services={services} />
+        <t.ServicesIndexPage
+          business={business}
+          services={services}
+          faqItems={await api.faq.list()}
+        />
       </>
     );
   }

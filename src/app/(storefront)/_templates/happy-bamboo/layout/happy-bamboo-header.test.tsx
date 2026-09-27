@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import type { HbNavItem } from "../lib/nav";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 
 import { HappyBambooHeader } from "./happy-bamboo-header";
 
@@ -67,7 +67,7 @@ vi.mock("./happy-bamboo-mobile-nav", () => ({
   HappyBambooMobileMenu: () => null,
 }));
 
-const NAV: HbNavItem[] = [
+const NAV: NavItem[] = [
   { label: "Home", href: "/" },
   {
     label: "Services",

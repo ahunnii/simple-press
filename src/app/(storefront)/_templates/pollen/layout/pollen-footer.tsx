@@ -1,13 +1,29 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import type { SocialNetworkKey } from "~/lib/social-links";
+import {
+  AUTH_BASE_PATHS,
+  AUTH_VIEW_PATHS,
+  SETTINGS_VIEW_PATHS,
+} from "~/lib/auth-paths";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { resolveSocialLinks } from "~/lib/social-links";
+import {
+  externalLinkProps,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
+// Pollen has never had a mega-menu, so the footer's Main Menu default mirrors
+// the header's own NAV_LINKS (`pollen-header.tsx`) one-for-one. An owner who
+// saves Admin → Content → Navigation entries with children gets those too —
+// see the flatten below.
 const mainMenuLinks = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
@@ -15,11 +31,12 @@ const mainMenuLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
-const accountLinks = [
-  { label: "My Account", href: "/account/settings", flag: "customerAccounts" },
-  { label: "Sign In", href: "/auth/sign-in", flag: "customerAccounts" },
-  { label: "Testimonials", href: "/testimonials", flag: "testimonials" },
-];
+// Same route constants pollen-nav-overlay-account.tsx uses for the mobile
+// overlay's account block, so the footer never drifts from it.
+const SIGN_IN_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signIn}`;
+const SIGN_UP_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signUp}`;
+const ACCOUNT_HREF = `${AUTH_BASE_PATHS.settings}/${SETTINGS_VIEW_PATHS.account}`;
+const ORDERS_HREF = `${AUTH_BASE_PATHS.settings}/orders`;
 
 // Pollen's own line-art glyphs for the networks it has always drawn; any
 // other network saved in Content → Branding (TikTok, Pinterest, YouTube)
@@ -129,21 +146,37 @@ const POLLEN_SOCIAL_ICONS: Partial<
   linkedin: PollenLinkedinIcon,
 };
 
-export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
+export function PollenFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phoneNumber = business?.phoneNumber;
   const physicalAddress = business?.businessAddress;
   const footerTagline = business?.siteContent?.footerText?.trim();
   const { isEnabled } = resolveFlags(business?.featureFlags);
 
-  const navigationItems = business?.siteContent?.navigationItems as
-    | { label: string; href: string }[]
-    | undefined;
+  // Client component (no SSR session seed — pollen's own header calls
+  // `useHydratedSession()` unseeded too; `DefaultFooterTemplateProps` has no
+  // `initialSession` and no storefront footer fetches one server-side, so
+  // this keeps the account column self-contained without touching
+  // `pollen-layout.tsx` or the shared footer prop type).
+  const { data: session, isPending } = useHydratedSession();
+  const user = session?.user;
 
-  const filteredMainMenuLinks = mainMenuLinks.filter(
-    (l) => l.href !== "/services" || isEnabled("services"),
-  );
-  const filteredAccountLinks = accountLinks.filter((l) => isEnabled(l.flag));
+  // Same list as the header (`pollen-header.tsx`'s NAV_LINKS), flattened:
+  // each top-level link, then its children right after it (mirrors
+  // happy-bamboo-footer.tsx's `quickLinks`). An owner-saved nav with no
+  // children behaves exactly like the old flat list did.
+  const footerNav = resolveNav(
+    business?.siteContent?.navigationItems,
+    mainMenuLinks.filter(
+      (l) => l.href !== "/services" || isEnabled("services"),
+    ),
+  ).flatMap((item) => [
+    ...(item.href ? [item] : []),
+    ...(item.children ?? []).filter((child) => child.href),
+  ]);
+
+  const accountsEnabled = isEnabled("customerAccounts");
+  const ordersEnabled = isEnabled("orders");
 
   const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
@@ -208,36 +241,80 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
               Main Menu
             </h4>
             <ul className="space-y-3">
-              {(navigationItems ?? filteredMainMenuLinks).map((link) => (
-                <li key={link.label}>
+              {footerNav.map((link, i) => (
+                <li key={i}>
                   <Link
                     href={link.href}
+                    {...externalLinkProps(link.external)}
                     className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
                   >
                     {link.label}
+                    {link.external && (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    )}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Right: Account — omitted when every link's feature is off */}
-          {filteredAccountLinks.length > 0 && (
+          {/* Right: Account — omitted when customerAccounts is off */}
+          {accountsEnabled && (
             <div>
               <h4 className="mb-4 text-sm font-semibold text-[#374151]">
                 Account
               </h4>
               <ul className="space-y-3">
-                {filteredAccountLinks.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {isPending ? (
+                  <>
+                    <li>
+                      <span className="bg-muted block h-4 w-24 animate-pulse rounded" />
+                    </li>
+                    <li>
+                      <span className="bg-muted block h-4 w-20 animate-pulse rounded" />
+                    </li>
+                  </>
+                ) : user ? (
+                  <>
+                    <li>
+                      <Link
+                        href={ACCOUNT_HREF}
+                        className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+                      >
+                        My account
+                      </Link>
+                    </li>
+                    {ordersEnabled && (
+                      <li>
+                        <Link
+                          href={ORDERS_HREF}
+                          className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+                        >
+                          Orders
+                        </Link>
+                      </li>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <Link
+                        href={SIGN_IN_HREF}
+                        className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+                      >
+                        Sign in
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href={SIGN_UP_HREF}
+                        className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+                      >
+                        Create account
+                      </Link>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
           )}

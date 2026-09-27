@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
 import type { RouterOutputs } from "~/trpc/react";
-import { parseTemplateIframeValue } from "~/lib/template-fields";
+import { isContentEmpty, parseTemplateIframeValue } from "~/lib/template-fields";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -40,11 +41,14 @@ type Props = {
  * Pollen service-page template: pollen-spa — Serene Editorial
  *
  * Layout:
- * 1. PollenGeneralLayout title-hero (service name + description)
- * 2. Optional hero video band (full-bleed, below title hero)
- * 3. Two-column intro: richtext left, accent image/video right
- * 4. Three-column card grid of individual service items
- * 5. Optional closing CTA + booking embed section
+ * 1. PollenGeneralLayout title-hero (service name; image falls back to this
+ *    service's own photo, then the site-wide header background)
+ * 2. Back link to /services + service description as a lead paragraph
+ * 3. Optional hero video band (full-bleed)
+ * 4. Two-column intro: richtext left, accent image/video right — hidden
+ *    unless there's real body copy or media (label/heading alone don't count)
+ * 5. Three-column card grid of individual service items
+ * 6. Optional closing CTA + booking embed section
  */
 export function PollenSpaServicePage({
   business,
@@ -62,21 +66,27 @@ export function PollenSpaServicePage({
     "pollen-spa.intro-video",
     "pollen-spa.items-heading",
     "pollen-spa.items-subheading",
+    "pollen-spa.book-button-text",
+    "pollen-spa.closing-heading",
     "pollen-spa.cta-text",
     "pollen-spa.cta-link",
     "pollen-spa.cta-embed",
     "pollen-spa.cta-embed-reveal",
   ]);
 
-  const heroImage = f["pollen-spa.hero-image"] ?? "/placeholder.svg";
+  const heroImage =
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- cleared field resolves to "", not null/undefined
+    f["pollen-spa.hero-image"] || service.image || undefined;
   const heroVideoSrc = f["pollen-spa.hero-video"] ?? "";
   const introLabel = f["pollen-spa.intro-label"] ?? "";
   const introHeading = f["pollen-spa.intro-heading"] ?? "";
   const introBodyRaw = f["pollen-spa.intro-body"];
-  const accentImage = f["pollen-spa.intro-accent-image"] ?? "/placeholder.svg";
+  const accentImage = f["pollen-spa.intro-accent-image"] ?? "";
   const introVideoSrc = f["pollen-spa.intro-video"] ?? "";
   const itemsHeading = f["pollen-spa.items-heading"] ?? "";
   const itemsSubheading = f["pollen-spa.items-subheading"] ?? "";
+  const bookButtonText = f["pollen-spa.book-button-text"] ?? "Book";
+  const closingHeading = f["pollen-spa.closing-heading"] ?? "";
   const ctaText = f["pollen-spa.cta-text"] ?? "";
   const ctaLink = f["pollen-spa.cta-link"] ?? "";
   const ctaEmbedRaw = f["pollen-spa.cta-embed"] ?? "";
@@ -94,15 +104,38 @@ export function PollenSpaServicePage({
   const ctaEmbedReveal = f["pollen-spa.cta-embed-reveal"] === "true";
   const showClosingCta = (ctaLink && ctaText) || !!embed;
 
-  const publishedItems = items.filter((item) => item.published);
+  const hasIntroMedia = Boolean(introVideoSrc) || Boolean(accentImage);
+  const hasIntroBody = introBodyJson !== null && !isContentEmpty(introBodyJson);
+  // The heading/label both have default values, so on their own they would
+  // render an empty band for every service without real intro copy or media
+  // — require real body content or media before showing the section.
+  const hasIntroSection = hasIntroBody || hasIntroMedia;
 
   return (
     <PollenGeneralLayout
       business={business}
       title={service.name}
-      subtitle={service.description ?? undefined}
       imageUrl={heroImage}
+      showCTA={false}
     >
+      {/* ── Back link + lead paragraph ───────────────────────────────────── */}
+      <section className="bg-white pt-10 pb-2 md:pt-14">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <Link
+            href="/services"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            All Services
+          </Link>
+          {service.description && (
+            <p className="text-lg leading-relaxed text-[#4b5563]">
+              {service.description}
+            </p>
+          )}
+        </div>
+      </section>
+
       {/* ── Hero video band ──────────────────────────────────────────────── */}
       {heroVideoSrc && (
         <div className="relative min-h-[60vh] overflow-hidden">
@@ -111,62 +144,63 @@ export function PollenSpaServicePage({
       )}
 
       {/* ── Two-column intro ─────────────────────────────────────────────── */}
-      <section className="bg-[#d4e8d4] py-20 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            {/* Text column */}
-            <FadeIn direction="right">
-              <div>
-                {introLabel && (
-                  <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">
-                    {introLabel}
-                  </p>
-                )}
-                {introHeading && (
-                  <h2 className="mb-6 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
-                    {introHeading}
-                  </h2>
-                )}
-                {introBodyJson && (
-                  <div className="prose prose-neutral mb-8 max-w-none text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
-                    <TiptapRenderer content={introBodyJson} />
-                  </div>
-                )}
-                {!introBodyJson && introBodyRaw && (
-                  <p className="mb-8 leading-relaxed whitespace-pre-line text-[#4b5563]">
-                    {introBodyRaw}
-                  </p>
-                )}
-                {ctaLink && ctaText && (
-                  <Link
-                    href={ctaLink}
-                    className={buttonVariants({
-                      size: "lg",
-                      className:
-                        "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
-                    })}
-                  >
-                    {ctaText}
-                  </Link>
-                )}
-              </div>
-            </FadeIn>
+      {hasIntroSection && (
+        <section className="bg-[#d4e8d4] py-20 md:py-32">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div
+              className={`grid items-center gap-12 lg:gap-16 ${hasIntroMedia ? "lg:grid-cols-2" : ""}`}
+            >
+              {/* Text column */}
+              <FadeIn direction="right">
+                <div>
+                  {introLabel && (
+                    <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">
+                      {introLabel}
+                    </p>
+                  )}
+                  {introHeading && (
+                    <h2 className="mb-6 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
+                      {introHeading}
+                    </h2>
+                  )}
+                  {hasIntroBody && introBodyJson && (
+                    <div className="prose prose-neutral mb-8 max-w-none text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
+                      <TiptapRenderer content={introBodyJson} />
+                    </div>
+                  )}
+                  {ctaLink && ctaText && (
+                    <Link
+                      href={ctaLink}
+                      className={buttonVariants({
+                        size: "lg",
+                        className:
+                          "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
+                      })}
+                    >
+                      {ctaText}
+                    </Link>
+                  )}
+                </div>
+              </FadeIn>
 
-            {/* Accent image/video column */}
-            <FadeIn direction="left" delay={0.1}>
-              <ServiceSectionMedia
-                imageSrc={accentImage}
-                videoSrc={introVideoSrc || undefined}
-                alt=""
-                className="relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md"
-              />
-            </FadeIn>
+              {/* Accent image/video column */}
+              {hasIntroMedia && (
+                <FadeIn direction="left" delay={0.1}>
+                  <ServiceSectionMedia
+                    imageSrc={accentImage || undefined}
+                    videoSrc={introVideoSrc || undefined}
+                    alt=""
+                    className="relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md"
+                  />
+                </FadeIn>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Service items grid ───────────────────────────────────────────── */}
-      {publishedItems.length > 0 && (
+      {items.length > 0 && (
         <section className="bg-white py-20 md:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn direction="up">
@@ -184,11 +218,12 @@ export function PollenSpaServicePage({
             </FadeIn>
 
             <StaggerContainer className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {publishedItems.map((item) => (
+              {items.map((item) => (
                 <StaggerItem key={item.id}>
                   <PollenSpaItemCard
                     item={item}
                     embedsEnabled={embedsEnabled}
+                    bookButtonText={bookButtonText}
                   />
                 </StaggerItem>
               ))}
@@ -203,9 +238,11 @@ export function PollenSpaServicePage({
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             {ctaLink && ctaText && (
               <FadeIn direction="up" className="mb-10 text-center">
-                <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
-                  Ready to begin?
-                </p>
+                {closingHeading && (
+                  <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
+                    {closingHeading}
+                  </p>
+                )}
                 <h2 className="mb-8 text-2xl font-bold text-white md:text-3xl">
                   {service.name}
                 </h2>
@@ -293,9 +330,11 @@ export function PollenSpaServicePage({
 function PollenSpaItemCard({
   item,
   embedsEnabled,
+  bookButtonText,
 }: {
   item: ServiceItem;
   embedsEnabled: boolean;
+  bookButtonText: string;
 }) {
   const tiers = parseServicePriceTiers(item.priceTiers);
   const addOns = parseServiceAddOns(item.addOns);
@@ -314,7 +353,19 @@ function PollenSpaItemCard({
         </div>
       )}
       <div className="flex flex-1 flex-col gap-3 p-6">
-        <h3 className="text-lg font-bold text-[#2a351f]">{item.name}</h3>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <h3 className="text-lg font-bold text-[#2a351f]">{item.name}</h3>
+          {item.isSignature && (
+            <span className="shrink-0 rounded-full bg-[#A8D081]/40 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#2a351f] uppercase">
+              Signature
+            </span>
+          )}
+        </div>
+        {item.category && (
+          <span className="-mt-2 text-xs font-semibold tracking-wide text-[#5e8b4a] uppercase">
+            {item.category}
+          </span>
+        )}
         {item.description && (
           <p className="flex-1 text-sm leading-relaxed text-[#6b7280]">
             {item.description}
@@ -345,7 +396,7 @@ function PollenSpaItemCard({
               embedSrc={item.bookingEmbedSrc ?? undefined}
               embedHeight={item.bookingEmbedHeight}
               embedsEnabled={embedsEnabled}
-              triggerLabel="Book"
+              triggerLabel={bookButtonText}
             />
           </div>
 

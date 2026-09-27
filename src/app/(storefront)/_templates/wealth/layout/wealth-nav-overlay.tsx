@@ -4,14 +4,14 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { X } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
-import { UserButton } from "~/components/auth/user/user-button";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
+
+import { WealthNavOverlayAccount } from "./wealth-nav-overlay-account";
 
 export type WealthNavChild = {
   label: string;
@@ -34,7 +34,8 @@ type WealthNavOverlayProps = {
   logoAlt: string;
   socialLinks?: { facebook?: string; instagram?: string };
   initialSession?: Session | null;
-  ordersEnabled: boolean;
+  /** Header's flag check; gates the account block's links. */
+  isEnabled: (flag: string) => boolean;
   accountsEnabled: boolean;
 };
 
@@ -64,16 +65,11 @@ export function WealthNavOverlay({
   logoAlt,
   socialLinks,
   initialSession,
-  ordersEnabled,
+  isEnabled,
   accountsEnabled,
 }: WealthNavOverlayProps) {
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession(initialSession);
-
-  // Business members reach /admin too, not just platform admins
-  const showAdminLink =
-    session?.user?.platformRole === "PLATFORM_ADMIN" ||
-    !!session?.session?.membershipId;
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -238,7 +234,7 @@ export function WealthNavOverlay({
       {/* Top bar mirrors the header for continuity: the close X sits exactly
           where the hamburger was (left), logo stays centered. */}
       <div
-        className="mx-auto flex w-full shrink-0 items-center justify-between gap-4 px-[var(--wealth-gutter)] [height:var(--wealth-header-h-mobile)] md:[height:var(--wealth-header-h)]"
+        className="mx-auto flex [height:var(--wealth-header-h-mobile)] w-full shrink-0 items-center justify-between gap-4 px-[var(--wealth-gutter)] md:[height:var(--wealth-header-h)]"
         style={{ maxWidth: "var(--wealth-container)" }}
       >
         <button
@@ -294,207 +290,172 @@ export function WealthNavOverlay({
         <div aria-hidden="true" className="min-w-11" />
       </div>
 
-      {/* Centered italic link column — the Squarespace drawer's voice. */}
-      <nav
-        className="flex flex-1 flex-col justify-center overflow-y-auto px-[var(--wealth-gutter)] py-6 text-center"
-        aria-label="Primary navigation"
-      >
-        <ul className="mx-auto flex w-full max-w-xl list-none flex-col p-0">
-          {items.map((item) => {
-            if (item.type === "link") {
-              const i = ++lineIndex;
-              const active = isActive(item.href);
-              return (
-                <li key={item.href + item.label}>
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    target={item.external ? "_blank" : undefined}
-                    rel={item.external ? "noopener noreferrer" : undefined}
-                    aria-current={active ? "page" : undefined}
-                    className="wealth-nav-overlay-line wealth-nav-overlay-item inline-block py-2"
-                    style={{ "--i": i } as React.CSSProperties}
-                    data-active={active ? "true" : undefined}
-                  >
-                    {item.label}
-                    {item.external ? (
-                      <span className="sr-only"> (opens in new tab)</span>
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            }
+      {/* One scroll region for nav + account: the signed-in account block can
+          be tall, so it scrolls with the links instead of squeezing them. */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        {/* Centered italic link column — the Squarespace drawer's voice. */}
+        <nav
+          className="flex flex-1 flex-col justify-center px-[var(--wealth-gutter)] py-6 text-center"
+          aria-label="Primary navigation"
+        >
+          <ul className="mx-auto flex w-full max-w-xl list-none flex-col p-0">
+            {items.map((item) => {
+              if (item.type === "link") {
+                const i = ++lineIndex;
+                const active = isActive(item.href);
+                return (
+                  <li key={item.href + item.label}>
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
+                      target={item.external ? "_blank" : undefined}
+                      rel={item.external ? "noopener noreferrer" : undefined}
+                      aria-current={active ? "page" : undefined}
+                      className="wealth-nav-overlay-line wealth-nav-overlay-item inline-block py-2"
+                      style={{ "--i": i } as React.CSSProperties}
+                      data-active={active ? "true" : undefined}
+                    >
+                      {item.label}
+                      {item.external ? (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              }
 
-            const i = ++lineIndex;
-            const expanded = openGroups[item.label] ?? false;
-            const groupId = `${menuId}-${item.label.replace(/\W+/g, "-")}`;
-            const groupActive = item.children.some((c) => isActive(c.href));
-            return (
-              <li key={item.label}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenGroups((prev) => ({
-                      ...prev,
-                      [item.label]: !expanded,
-                    }))
-                  }
-                  aria-expanded={expanded}
-                  aria-controls={groupId}
-                  className="wealth-nav-overlay-line wealth-nav-overlay-item inline-block py-2"
-                  style={
-                    {
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      "--i": i,
-                    } as React.CSSProperties
-                  }
-                  data-active={groupActive ? "true" : undefined}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="wealth-nav-overlay-plus"
+              const i = ++lineIndex;
+              const expanded = openGroups[item.label] ?? false;
+              const groupId = `${menuId}-${item.label.replace(/\W+/g, "-")}`;
+              const groupActive = item.children.some((c) => isActive(c.href));
+              return (
+                <li key={item.label}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenGroups((prev) => ({
+                        ...prev,
+                        [item.label]: !expanded,
+                      }))
+                    }
+                    aria-expanded={expanded}
+                    aria-controls={groupId}
+                    className="wealth-nav-overlay-line wealth-nav-overlay-item inline-block py-2"
+                    style={
+                      {
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        "--i": i,
+                      } as React.CSSProperties
+                    }
+                    data-active={groupActive ? "true" : undefined}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="wealth-nav-overlay-plus"
+                      data-expanded={expanded ? "true" : "false"}
+                    >
+                      +
+                    </span>{" "}
+                    {item.label}
+                  </button>
+                  <div
+                    id={groupId}
+                    className="wealth-nav-overlay-children"
                     data-expanded={expanded ? "true" : "false"}
                   >
-                    +
-                  </span>{" "}
-                  {item.label}
-                </button>
-                <div
-                  id={groupId}
-                  className="wealth-nav-overlay-children"
-                  data-expanded={expanded ? "true" : "false"}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    <ul className="m-0 flex list-none flex-col p-0 pb-2">
-                      {item.children.map((child) => {
-                        const active = isActive(child.href);
-                        return (
-                          <li key={child.href + child.label}>
-                            <Link
-                              href={child.href}
-                              onClick={onClose}
-                              target={child.external ? "_blank" : undefined}
-                              rel={
-                                child.external
-                                  ? "noopener noreferrer"
-                                  : undefined
-                              }
-                              aria-current={active ? "page" : undefined}
-                              tabIndex={expanded ? undefined : -1}
-                              className="wealth-nav-overlay-item wealth-nav-overlay-child inline-block py-1.5"
-                              data-active={active ? "true" : undefined}
-                            >
-                              {child.label}
-                              {child.external ? (
-                                <span className="sr-only">
-                                  {" "}
-                                  (opens in new tab)
-                                </span>
-                              ) : null}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    <div className="min-h-0 overflow-hidden">
+                      <ul className="m-0 flex list-none flex-col p-0 pb-2">
+                        {item.children.map((child) => {
+                          const active = isActive(child.href);
+                          return (
+                            <li key={child.href + child.label}>
+                              <Link
+                                href={child.href}
+                                onClick={onClose}
+                                target={child.external ? "_blank" : undefined}
+                                rel={
+                                  child.external
+                                    ? "noopener noreferrer"
+                                    : undefined
+                                }
+                                aria-current={active ? "page" : undefined}
+                                tabIndex={expanded ? undefined : -1}
+                                className="wealth-nav-overlay-item wealth-nav-overlay-child inline-block py-1.5"
+                                data-active={active ? "true" : undefined}
+                              >
+                                {child.label}
+                                {child.external ? (
+                                  <span className="sr-only">
+                                    {" "}
+                                    (opens in new tab)
+                                  </span>
+                                ) : null}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                </li>
+              );
+            })}
+          </ul>
 
-        {/* Social icons, centered beneath the links like the live drawer. */}
-        {socialLinks?.facebook || socialLinks?.instagram ? (
+          {/* Social icons, centered beneath the links like the live drawer. */}
+          {socialLinks?.facebook || socialLinks?.instagram ? (
+            <div
+              className="wealth-nav-overlay-line mt-8 flex items-center justify-center gap-6"
+              style={{ "--i": lineIndex + 1 } as React.CSSProperties}
+            >
+              {socialLinks.facebook ? (
+                <a
+                  href={socialLinks.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook (opens in new tab)"
+                  className="wealth-nav-overlay-social"
+                >
+                  <FacebookIcon className="h-5 w-5" aria-hidden="true" />
+                </a>
+              ) : null}
+              {socialLinks.instagram ? (
+                <a
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram (opens in new tab)"
+                  className="wealth-nav-overlay-social"
+                >
+                  <InstagramIcon className="h-5 w-5" aria-hidden="true" />
+                </a>
+              ) : null}
+            </div>
+          ) : null}
+        </nav>
+
+        {/* Bottom: account block — plain links, inside the focus trap. */}
+        {accountsEnabled ? (
           <div
-            className="wealth-nav-overlay-line mt-8 flex items-center justify-center gap-6"
-            style={{ "--i": lineIndex + 1 } as React.CSSProperties}
+            className="wealth-nav-overlay-line flex shrink-0 justify-center px-[var(--wealth-gutter)] py-5"
+            style={
+              {
+                borderTop: "1px solid var(--wealth-surface-2)",
+                "--i": lineIndex + 2,
+              } as React.CSSProperties
+            }
           >
-            {socialLinks.facebook ? (
-              <a
-                href={socialLinks.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook (opens in new tab)"
-                className="wealth-nav-overlay-social"
-              >
-                <FacebookIcon className="h-5 w-5" aria-hidden="true" />
-              </a>
-            ) : null}
-            {socialLinks.instagram ? (
-              <a
-                href={socialLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram (opens in new tab)"
-                className="wealth-nav-overlay-social"
-              >
-                <InstagramIcon className="h-5 w-5" aria-hidden="true" />
-              </a>
-            ) : null}
+            <WealthNavOverlayAccount
+              session={session}
+              isPending={isPending}
+              isEnabled={isEnabled}
+              onClose={onClose}
+            />
           </div>
         ) : null}
-      </nav>
-
-      {/* Bottom: quiet account row */}
-      {accountsEnabled ? (
-        <div
-          className="wealth-nav-overlay-line flex shrink-0 justify-center px-[var(--wealth-gutter)] py-5"
-          style={
-            {
-              borderTop: "1px solid var(--wealth-surface-2)",
-              "--i": lineIndex + 2,
-            } as React.CSSProperties
-          }
-        >
-          {isPending ? (
-            <div
-              className="h-8 w-8 animate-pulse rounded-full"
-              style={{ background: "var(--wealth-surface)" }}
-            />
-          ) : session?.user ? (
-            <UserButton
-              size="icon"
-              className="h-auto w-auto rounded-full p-0"
-              avatarClassName="size-8"
-              links={[
-                ...(ordersEnabled
-                  ? [
-                      {
-                        icon: <IconPackage className="h-4 w-4" />,
-                        label: "Orders",
-                        href: "/account/orders",
-                      },
-                    ]
-                  : []),
-                ...(showAdminLink
-                  ? [
-                      {
-                        icon: <IconLayoutDashboard className="h-4 w-4" />,
-                        label: "Admin",
-                        href: "/admin",
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-          ) : (
-            <Link
-              href="/auth/sign-in"
-              onClick={onClose}
-              className="wealth-btn-mono"
-              style={{
-                color: "var(--wealth-primary)",
-                textDecoration: "none",
-                letterSpacing: "1.9px",
-              }}
-            >
-              Sign In
-            </Link>
-          )}
-        </div>
-      ) : null}
+      </div>
     </div>
   );
 }

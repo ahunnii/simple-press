@@ -327,7 +327,10 @@ import { PollenAccountSettingsPage } from "./pollen/account/pollen-account-setti
 import { PollenAddressBookPage } from "./pollen/account/pollen-address-book-page";
 import { PollenOrderDetailPage } from "./pollen/account/pollen-order-detail-page";
 import { PollenOrdersPage } from "./pollen/account/pollen-orders-page";
+import { PollenInvoicesPage } from "./pollen/account/pollen-invoices-page";
 import { PollenPreferencesPage } from "./pollen/account/pollen-preferences-page";
+import { PollenRewardsPage } from "./pollen/account/pollen-rewards-page";
+import { PollenSubscriptionsPage } from "./pollen/account/pollen-subscriptions-page";
 import { PollenBlogPage } from "./pollen/blog/pollen-blog-page";
 import { PollenBlogPostPage } from "./pollen/blog/pollen-blog-post-page";
 import { PollenCartPage } from "./pollen/cart-checkout/pollen-cart-page";
@@ -337,9 +340,17 @@ import { PollenOrderSuccessPage } from "./pollen/cart-checkout/pollen-order-succ
 import { PollenCollectionPage } from "./pollen/collections/pollen-collection-page";
 import { PollenCollectionsPage } from "./pollen/collections/pollen-collections-page";
 import { PollenContactPage } from "./pollen/contact/pollen-contact-page";
+import {
+  PollenDonatePage,
+  PollenEventPage,
+  PollenEventsPage,
+  PollenFaqPage,
+  PollenVideosPage,
+} from "./pollen/fallback/pollen-fallback-pages";
 import { PollenLayout } from "./pollen/layout/pollen-layout";
 import { PollenGenericPage } from "./pollen/pollen-generic-page";
 import { PollenProductPage } from "./pollen/products/pollen-product-page";
+import { PollenServicesIndexPage } from "./pollen/services/pollen-services-index-page";
 import { PollenServicesPage } from "./pollen/services/pollen-services-page";
 import { PollenShopPage } from "./pollen/shop/pollen-shop-page";
 import { PollenTestimonialsPage } from "./pollen/testimonials/pollen-testimonials-page";
@@ -465,8 +476,9 @@ type AnyComponent = ComponentType<any>;
  * must satisfy all required slots; non-default templates provide a partial
  * override via `Partial<TemplateComponentSet>`.
  *
- * `ServicesPage` is optional — only pollen implements it. Routes check for its
- * presence and call `notFound()` when it is absent.
+ * `ServicesPage` is optional — the legacy services-flag-OFF page; only pollen
+ * implements it (pollen also ships `ServicesIndexPage` for flag ON). Routes
+ * check for its presence and call `notFound()` when it is absent.
  *
  * `EventsPage`, `EventPage`, `VideosPage` and `FaqPage` are optional in the
  * type but always present on `defaultEntry`, so their routes' presence checks
@@ -936,7 +948,18 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: PollenOrderDetailPage,
     OrdersPage: PollenOrdersPage,
     PreferencesPage: PollenPreferencesPage,
+    RewardsPage: PollenRewardsPage,
+    SubscriptionsPage: PollenSubscriptionsPage,
+    InvoicesPage: PollenInvoicesPage,
     ServicesPage: PollenServicesPage,
+    ServicesIndexPage: PollenServicesIndexPage,
+    // Default pages wrapped in a pt-28 offset — pollen's fixed 112px header
+    // otherwise covers their headings.
+    EventsPage: PollenEventsPage,
+    EventPage: PollenEventPage,
+    DonatePage: PollenDonatePage,
+    VideosPage: PollenVideosPage,
+    FaqPage: PollenFaqPage,
   },
 
   sledge: {

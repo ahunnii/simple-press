@@ -6,8 +6,9 @@ import { resolveSocialLinks } from "~/lib/social-links";
 import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
+import { externalLinkProps } from "~/app/(storefront)/_components/nav";
 
-import { hbExternalProps, resolveHappyBambooNav } from "../lib/nav";
+import { resolveHappyBambooNav } from "../lib/nav";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
 
 export async function HappyBambooFooter({
@@ -70,7 +71,7 @@ export async function HappyBambooFooter({
                 <li key={i}>
                   <Link
                     href={link.href}
-                    {...hbExternalProps(link.external)}
+                    {...externalLinkProps(link.external)}
                     className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
                   >
                     {link.label}

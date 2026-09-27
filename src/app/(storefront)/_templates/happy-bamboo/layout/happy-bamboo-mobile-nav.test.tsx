@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { HbNavItem } from "../lib/nav";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 
 import {
   HappyBambooMenuToggle,
@@ -66,7 +66,7 @@ type FakeSession = Parameters<typeof HappyBambooMobileMenu>[0]["session"];
 
 function makeBusiness(
   overrides: {
-    navigationItems?: HbNavItem[];
+    navigationItems?: NavItem[];
     socialLinks?: Record<string, string>;
   } = {},
 ): FakeBusiness {
@@ -230,6 +230,40 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("lists the flag-gated account links when signed in, with Orders only behind the orders flag", () => {
+    const session = {
+      user: { id: "u1", name: "Test" },
+      session: { id: "s1" },
+    } as unknown as FakeSession;
+
+    const { unmount } = renderHarness({
+      session,
+      isEnabled: (key) => key === "customerAccounts",
+    });
+    fireEvent.click(getToggle());
+    expect(screen.getByRole("link", { name: "Settings" })).toHaveAttribute(
+      "href",
+      "/account/settings",
+    );
+    expect(
+      screen.queryByRole("link", { name: "Orders" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Admin" }),
+    ).not.toBeInTheDocument();
+    unmount();
+
+    renderHarness({
+      session,
+      isEnabled: (key) => key === "customerAccounts" || key === "orders",
+    });
+    fireEvent.click(getToggle());
+    expect(screen.getByRole("link", { name: "Orders" })).toHaveAttribute(
+      "href",
+      "/account/orders",
+    );
+  });
+
   it("renders only the social links the owner configured", () => {
     renderHarness({
       business: makeBusiness({
@@ -283,7 +317,7 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
   });
 
   describe("sub-navigation groups", () => {
-    const GROUPED_NAV: HbNavItem[] = [
+    const GROUPED_NAV: NavItem[] = [
       { label: "Home", href: "/" },
       {
         label: "Services",

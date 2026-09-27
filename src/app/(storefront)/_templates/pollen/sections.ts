@@ -129,13 +129,26 @@ export const pollenSections: Record<string, TemplateSection[]> = {
     },
 
     // ── Services ──────────────────────────────────────────────────────────
+    // `products.list` renders only on the Services index (services feature
+    // on); `products.main`'s cards render only on the legacy page (feature
+    // off). The hero title/subtitle in `products.main` render on both.
+    {
+      id: "products.list",
+      page: "services",
+      title: "Service listings",
+      description:
+        "Heading, intro, and card/empty-state copy for the grid of real services from Admin → Services.",
+      groupIds: ["products.list"],
+      order: 0,
+      hideable: false,
+    },
     {
       id: "products.main",
       page: "services",
       title: "Services overview",
       description: "Page hero, intro copy, and service cards.",
       groupIds: ["products.main"],
-      order: 0,
+      order: 1,
       hideable: false,
     },
     {
@@ -144,7 +157,7 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       title: "FAQ",
       description: "Frequently asked questions accordion with an image.",
       groupIds: ["products.faq"],
-      order: 1,
+      order: 2,
       hideable: true,
       links: [SECTION_LINKS.faq],
     },
@@ -154,7 +167,7 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       title: "Helpful Resources",
       description: "Optional free-resource links band.",
       groupIds: ["products.resources"],
-      order: 2,
+      order: 3,
       hideable: true,
     },
 

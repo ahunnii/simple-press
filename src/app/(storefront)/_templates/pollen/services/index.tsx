@@ -1,5 +1,5 @@
-import { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+import { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
 
 /** Service cards beside the services page overview text. */
 const POLLEN_SERVICES_DEFAULT_ROWS = [
@@ -27,6 +27,14 @@ const POLLEN_SERVICES_DEFAULT_ROWS = [
 
 export const pollenServicesFieldGroups: TemplateFieldGroup[] = [
   {
+    id: "products.list",
+    title: "Service listings",
+    description:
+      "Heading and intro above the grid of real services from Admin → Services, plus card and empty-state copy.",
+    icon: "🗂️",
+    columns: 2,
+  },
+  {
     id: "products.main",
     title: "Services overview",
     description: "Page hero, intro copy, and service cards.",
@@ -48,6 +56,97 @@ export const pollenServicesFieldGroups: TemplateFieldGroup[] = [
       "Up to 12 free resource links for clients. The section only appears once you add at least one.",
     icon: "🔗",
     columns: 2,
+  },
+];
+
+// ─── products.list ──────────────────────────────────────────────────────────
+// Fields for the data-driven services index (`/services` with the services
+// feature flag on) — the grid of real Service rows from Admin → Services,
+// plus its card and empty-state copy. Only rendered by
+// `pollen-services-index-page.tsx`; the legacy `pollen-services-page.tsx`
+// (flag off) never reads these.
+
+const servicesListData: TemplateField[] = [
+  {
+    key: "pollen.services.list-heading",
+    label: "Heading",
+    description: "Heading above the grid of services.",
+    type: "text",
+    page: "services",
+    group: "products.list",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Services",
+    placeholder: "Our Services",
+  },
+  {
+    key: "pollen.services.list-intro",
+    label: "Intro text",
+    description:
+      "Short line below the heading, above the grid. Leave blank to hide.",
+    type: "textarea",
+    page: "services",
+    group: "products.list",
+    gridColumn: "col-span-full",
+    defaultValue: "Browse what we offer and find the right fit for you.",
+    placeholder: "Browse what we offer and find the right fit...",
+  },
+  {
+    key: "pollen.services.card-link-text",
+    label: "Card link text",
+    description: "Label shown on each service card, e.g. View Details.",
+    type: "text",
+    page: "services",
+    group: "products.list",
+    gridColumn: "col-span-1",
+    defaultValue: "View Details",
+    placeholder: "View Details",
+  },
+  {
+    key: "pollen.services.options-label",
+    label: "Options label word",
+    description:
+      "The word used in a card's count badge, e.g. 'option' shows as '3 options'.",
+    type: "text",
+    page: "services",
+    group: "products.list",
+    gridColumn: "col-span-1",
+    defaultValue: "option",
+    placeholder: "option",
+  },
+  {
+    key: "pollen.services.empty-heading",
+    label: "Empty state heading",
+    description:
+      "Shown in place of the grid when no services are published yet.",
+    type: "text",
+    page: "services",
+    group: "products.list",
+    gridColumn: "col-span-1",
+    defaultValue: "Services coming soon",
+    placeholder: "Services coming soon",
+  },
+  {
+    key: "pollen.services.empty-body",
+    label: "Empty state message",
+    description: "Line below the empty-state heading. Leave blank to hide.",
+    type: "textarea",
+    page: "services",
+    group: "products.list",
+    gridColumn: "col-span-full",
+    defaultValue: "We're putting together something special — check back soon.",
+    placeholder: "We're putting together something special...",
+  },
+  {
+    key: "pollen.services.empty-button-text",
+    label: "Empty state button text",
+    description:
+      "Label for the button in the empty state, linking to your contact page.",
+    type: "text",
+    page: "services",
+    group: "products.list",
+    gridColumn: "col-span-1",
+    defaultValue: "Get in Touch",
+    placeholder: "Get in Touch",
   },
 ];
 
@@ -306,6 +405,7 @@ const servicesResourcesData: TemplateField[] = [
 ];
 
 export const pollenServicesData = [
+  ...servicesListData,
   ...servicesPageData,
   ...servicesQuestionsData,
   ...servicesResourcesData,

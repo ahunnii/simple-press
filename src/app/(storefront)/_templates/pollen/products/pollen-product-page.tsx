@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import type { LucideIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RotateCcw, Truck } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
@@ -28,8 +29,12 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import { ProductReviews } from "~/components/product-reviews";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "..";
 import { PollenProductCard } from "../shared/pollen-product-card";
@@ -58,13 +63,19 @@ export function PollenProductPage({
     "pollen.product.related-heading",
     "pollen.product.coming-soon-heading",
     "pollen.product.coming-soon-body",
+    "pollen.product.reviews-heading",
   ]);
   const shippingSummary = (f["pollen.product.shipping-summary"] ?? "").trim();
   const returnsSummary = (f["pollen.product.returns-summary"] ?? "").trim();
   const questionText = (f["pollen.product.question-text"] ?? "").trim();
   const relatedHeading = f["pollen.product.related-heading"] ?? "";
+  const reviewsHeading = f["pollen.product.reviews-heading"] ?? "";
   const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   // A product's own features (Products → features) win; otherwise the
   // store-wide badges from the editor. No built-in fallback rows — an empty
@@ -173,6 +184,23 @@ export function PollenProductPage({
               {...sectionGroupAttr("product", "details")}
               className="flex flex-col gap-6"
             >
+              {/* Wishlist — kept as its own row above the buy panel so it
+                  stays visible across every PollenProductActions branch
+                  (coming soon, variants, out of stock, in stock), the same
+                  way the shop card's heart is never hidden by stock status.
+                  Self-gates on the wishlist flag (renders nothing when off). */}
+              <WishlistButton
+                item={{
+                  productId: product.id,
+                  name: product.name,
+                  slug: product.slug,
+                  price: displayPrice,
+                  imageUrl: product.images[0]?.url ?? null,
+                }}
+                className="static flex size-10 shrink-0 items-center justify-center self-start rounded-md border border-[#2a351f]/20 bg-white text-[#215935] shadow-none backdrop-blur-none hover:scale-100 hover:bg-[#f5f2ee]"
+                iconClassName="size-4"
+              />
+
               <PollenProductActions
                 product={product}
                 business={business}
@@ -222,52 +250,39 @@ export function PollenProductPage({
                 </div>
               ) : null}
 
-              {/* Shipping / Returns — each row only when its note is set */}
-              {shippingSummary || returnsSummary ? (
-                <div className="flex flex-col gap-4 rounded-md bg-[#f5f2ee] p-4">
+              {/* Shipping / Returns — each row renders when its note is set OR its policy is published */}
+              {shippingSummary ||
+              returnsSummary ||
+              hasShippingPolicy ||
+              hasRefundPolicy ? (
+                <div>
                   <h2 className="sr-only">Shipping and returns</h2>
-                  {shippingSummary ? (
-                    <div>
-                      <h3 className="text-sm font-semibold text-[#2a351f]">
-                        Shipping
-                      </h3>
-                      <p
-                        {...fieldAttr("pollen.product.shipping-summary")}
-                        className="mt-1 text-sm whitespace-pre-line text-[#4c566a]"
-                      >
-                        {shippingSummary}
-                      </p>
-                      {hasShippingPolicy ? (
-                        <Link
-                          href="/shipping-policy"
-                          className="mt-2 inline-block text-sm font-medium text-[#215935] underline underline-offset-4 hover:text-[#1a4729]"
-                        >
-                          Read the full shipping policy
-                        </Link>
-                      ) : null}
-                    </div>
-                  ) : null}
-                  {returnsSummary ? (
-                    <div>
-                      <h3 className="text-sm font-semibold text-[#2a351f]">
-                        Returns
-                      </h3>
-                      <p
-                        {...fieldAttr("pollen.product.returns-summary")}
-                        className="mt-1 text-sm whitespace-pre-line text-[#4c566a]"
-                      >
-                        {returnsSummary}
-                      </p>
-                      {hasRefundPolicy ? (
-                        <Link
-                          href="/refund-policy"
-                          className="mt-2 inline-block text-sm font-medium text-[#215935] underline underline-offset-4 hover:text-[#1a4729]"
-                        >
-                          Read the full returns policy
-                        </Link>
-                      ) : null}
-                    </div>
-                  ) : null}
+                  <div className="divide-y divide-[#e5ded4] rounded-md bg-[#f5f2ee]">
+                    {shippingSummary || hasShippingPolicy ? (
+                      <PolicyNote
+                        Icon={Truck}
+                        title="Shipping"
+                        fieldKey="pollen.product.shipping-summary"
+                        note={shippingSummary}
+                        policyHref={
+                          hasShippingPolicy ? "/shipping-policy" : undefined
+                        }
+                        policyLabel="Read the full shipping policy"
+                      />
+                    ) : null}
+                    {returnsSummary || hasRefundPolicy ? (
+                      <PolicyNote
+                        Icon={RotateCcw}
+                        title="Returns"
+                        fieldKey="pollen.product.returns-summary"
+                        note={returnsSummary}
+                        policyHref={
+                          hasRefundPolicy ? "/refund-policy" : undefined
+                        }
+                        policyLabel="Read the full returns policy"
+                      />
+                    ) : null}
+                  </div>
                 </div>
               ) : null}
 
@@ -298,6 +313,39 @@ export function PollenProductPage({
           }}
         />
 
+        {/* Reviews — only mounts (and only fires review queries) when the
+            reviews feature flag is enabled for this business. */}
+        {reviewsEnabled ? (
+          <FadeIn direction="up">
+            <section
+              aria-label="Reviews"
+              className="mt-4 mb-20 border-t border-[#2a351f]/10 pt-16"
+            >
+              {reviewsHeading ? (
+                <h2
+                  {...fieldAttr("pollen.product.reviews-heading")}
+                  className="text-2xl font-bold tracking-wide text-[#2a351f] uppercase"
+                >
+                  {reviewsHeading}
+                </h2>
+              ) : null}
+              <div className="mt-8">
+                <ProductReviews
+                  productId={product.id}
+                  onWriteReviewClick={() => setReviewDialogOpen(true)}
+                />
+              </div>
+              <WriteReviewDialog
+                productId={product.id}
+                productName={product.name}
+                isOpen={reviewDialogOpen}
+                onClose={() => setReviewDialogOpen(false)}
+                onSuccess={() => setReviewDialogOpen(false)}
+              />
+            </section>
+          </FadeIn>
+        ) : null}
+
         {/* Related Products — the whole block (heading included) only
             renders when there is something to show. */}
         {hasRelatedProducts ? (
@@ -324,5 +372,51 @@ export function PollenProductPage({
         ) : null}
       </section>
     </PageTransition>
+  );
+}
+
+/** One Shipping / Returns row: optional owner note plus a policy link when that page is published. */
+function PolicyNote({
+  Icon,
+  title,
+  fieldKey,
+  note,
+  policyHref,
+  policyLabel,
+}: {
+  Icon: LucideIcon;
+  title: string;
+  fieldKey: string;
+  note?: string;
+  /** Only set when the matching policy page is published. */
+  policyHref: string | undefined;
+  policyLabel: string;
+}) {
+  return (
+    <div className="flex gap-3 px-4 py-3">
+      <Icon
+        className="mt-0.5 size-4 shrink-0 text-[#215935]"
+        aria-hidden="true"
+      />
+      <div className="min-w-0">
+        <h3 className="text-sm font-semibold text-[#2a351f]">{title}</h3>
+        {note ? (
+          <p
+            {...fieldAttr(fieldKey)}
+            className="mt-1 text-sm leading-relaxed whitespace-pre-line text-[#4c566a]"
+          >
+            {note}
+          </p>
+        ) : null}
+        {policyHref ? (
+          <Link
+            href={policyHref}
+            className="mt-2 inline-block text-sm font-medium text-[#215935] underline underline-offset-4 hover:text-[#1a4729]"
+          >
+            {policyLabel}
+          </Link>
+        ) : null}
+      </div>
+    </div>
   );
 }

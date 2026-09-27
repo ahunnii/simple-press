@@ -1,15 +1,29 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Heart, Leaf, ShoppingCart } from "lucide-react";
+import {
+  ChevronDown,
+  FileText,
+  Gift,
+  Heart,
+  LayoutDashboard,
+  Leaf,
+  MapPin,
+  Package,
+  Repeat,
+  Shield,
+  ShoppingCart,
+  SlidersHorizontal,
+} from "lucide-react";
 import { motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import type { HbNavItem } from "../lib/nav";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { isActiveNavLink } from "~/lib/nav-utils";
@@ -20,20 +34,33 @@ import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { HappyBambooCartDrawer } from "../cart-checkout/happy-bamboo-cart-drawer";
-import {
-  hbActiveEntryIndex,
-  hbExternalProps,
-  hbGroupEntries,
-  isHbItemActive,
-  resolveHappyBambooNav,
-} from "../lib/nav";
+import { resolveHappyBambooNav } from "../lib/nav";
 import {
   HappyBambooMenuToggle,
   HappyBambooMobileMenu,
 } from "./happy-bamboo-mobile-nav";
+
+/** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
+  orders: <Package className="h-4 w-4" />,
+  "address-book": <MapPin className="h-4 w-4" />,
+  subscriptions: <Repeat className="h-4 w-4" />,
+  invoices: <FileText className="h-4 w-4" />,
+  rewards: <Gift className="h-4 w-4" />,
+  security: <Shield className="h-4 w-4" />,
+  preferences: <SlidersHorizontal className="h-4 w-4" />,
+  admin: <LayoutDashboard className="h-4 w-4" />,
+};
 
 export function HappyBambooHeader({
   business,
@@ -135,28 +162,28 @@ export function HappyBambooHeader({
     </>
   );
 
+  // Desktop avatar menu: the same flag-gated account links the mobile panel
+  // and Default's account sidebar use. Settings is dropped because
+  // `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+    isEnabled,
+    includeAdmin:
+      session?.user?.platformRole === "PLATFORM_ADMIN" ||
+      !!session?.session?.membershipId,
+  })
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
+
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       className="border-primary border"
       avatarClassName="size-10"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        !!session?.session?.membershipId
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 
@@ -168,12 +195,12 @@ export function HappyBambooHeader({
 
   const externalHint = <span className="sr-only"> (opens in new tab)</span>;
 
-  const renderNavItem = (link: HbNavItem, i: number) => {
+  const renderNavItem = (link: NavItem, i: number) => {
     if (link.children?.length) {
       const isOpen = openDropdown === i;
       const panelId = `hb-nav-dropdown-${i}`;
-      const entries = hbGroupEntries(link);
-      const activeEntry = hbActiveEntryIndex(pathname, entries);
+      const entries = navGroupEntries(link);
+      const activeEntry = activeEntryIndex(pathname, entries);
       return (
         <div
           key={i}
@@ -212,7 +239,7 @@ export function HappyBambooHeader({
               setOpenDropdown(isOpen && !keepOpen ? null : i);
             }}
             className={cn(
-              navLinkClass(isHbItemActive(pathname, link)),
+              navLinkClass(isNavItemActive(pathname, link)),
               "inline-flex cursor-pointer items-center gap-1",
             )}
           >
@@ -238,7 +265,7 @@ export function HappyBambooHeader({
                     <li key={j}>
                       <Link
                         href={child.href}
-                        {...hbExternalProps(child.external)}
+                        {...externalLinkProps(child.external)}
                         aria-current={childActive ? "page" : undefined}
                         onClick={() => setOpenDropdown(null)}
                         className={cn(
@@ -266,7 +293,7 @@ export function HappyBambooHeader({
       <Link
         key={i}
         href={link.href}
-        {...hbExternalProps(link.external)}
+        {...externalLinkProps(link.external)}
         aria-current={active ? "page" : undefined}
         className={navLinkClass(active)}
       >

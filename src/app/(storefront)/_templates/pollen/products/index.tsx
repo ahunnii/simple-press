@@ -14,7 +14,7 @@ export const pollenProductData: TemplateField[] = [
     key: "pollen.product.shipping-summary",
     label: "Shipping note",
     description:
-      "Short shipping note shown in a Shipping row under the buy button. Leave blank to hide the row. When your Shipping Policy page is published, a link to it appears here too.",
+      "Short note in the Shipping row on every product page, e.g. delivery times. A link to your shipping policy is added automatically when that page is published. Leave blank to show just the link, or nothing if the policy isn't published.",
     type: "textarea",
     page: "product",
     group: "product.details",
@@ -26,7 +26,7 @@ export const pollenProductData: TemplateField[] = [
     key: "pollen.product.returns-summary",
     label: "Returns note",
     description:
-      "Short returns note shown in a Returns row under the buy button. Leave blank to hide the row. When your Returns & Refunds Policy page is published, a link to it appears here too.",
+      "Short note in the Returns row on every product page, e.g. refund terms. A link to your refund policy is added automatically when that page is published. Leave blank to show just the link, or nothing if the policy isn't published.",
     type: "textarea",
     page: "product",
     group: "product.details",
@@ -43,8 +43,8 @@ export const pollenProductData: TemplateField[] = [
     page: "product",
     group: "product.details",
     gridColumn: "col-span-full",
-    defaultValue: "",
-    placeholder: "e.g. Questions about this product? Ask us.",
+    defaultValue: "Questions about this product? Contact us.",
+    placeholder: "e.g. Need help choosing? Ask us.",
   },
   {
     key: "pollen.product.trust-badges",
@@ -110,6 +110,18 @@ export const pollenProductData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "This product isn't available yet. Check back later!",
     placeholder: "e.g. Back in stock next month.",
+  },
+  {
+    key: "pollen.product.reviews-heading",
+    label: "Reviews heading",
+    description:
+      "Heading above customer reviews near the bottom of every product page. Only shown when reviews are enabled for your store. Leave blank to hide the heading.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "What Customers Are Saying",
+    placeholder: "What Customers Are Saying",
   },
 ];
 
