@@ -105,7 +105,7 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
         <div className="bg-primary/10 mb-6 inline-flex size-16 items-center justify-center rounded-full">
           <CheckCircle2 className="text-primary size-8" aria-hidden="true" />
         </div>
-        <h1 className="font-heading text-foreground text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+        <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
           Order Confirmed!
         </h1>
         <p className="text-muted-foreground mt-3 text-lg">

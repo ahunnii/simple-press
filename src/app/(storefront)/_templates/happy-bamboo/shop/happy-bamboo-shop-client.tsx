@@ -31,6 +31,7 @@ type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc";
 interface Props {
   products: Product[];
   saleBadgeFormat: string;
+  shopSmallLabel: string;
   shopHeading: string;
   shopIntro: string;
 }
@@ -38,6 +39,7 @@ interface Props {
 export function HappyBambooShopClient({
   products,
   saleBadgeFormat,
+  shopSmallLabel,
   shopHeading,
   shopIntro,
 }: Props) {
@@ -108,13 +110,23 @@ export function HappyBambooShopClient({
   return (
     <PageTransition>
       <section
-        className="mx-auto max-w-7xl py-16 md:py-24"
+        className="mx-auto max-w-7xl px-4 py-16 md:py-24"
         {...sectionGroupAttr("shop", "listing")}
       >
         <FadeIn className="mx-auto max-w-3xl text-center">
-          <Badge className="mb-4">Eco-Friendly Products</Badge>
+          {!!shopSmallLabel && (
+            <Badge
+              className="mb-4"
+              {...fieldAttr("happy-bamboo.shop-listing-small-label")}
+            >
+              {shopSmallLabel}
+            </Badge>
+          )}
           <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-            <span {...fieldAttr("happy-bamboo.shop-listing-heading")}>
+            <span
+              className="font-serif"
+              {...fieldAttr("happy-bamboo.shop-listing-heading")}
+            >
               {shopHeading}
             </span>
           </h1>

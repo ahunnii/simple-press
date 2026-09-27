@@ -11,7 +11,6 @@ import {
   Leaf,
   Newspaper,
   Search,
-  Tag,
 } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
@@ -76,11 +75,13 @@ type Props = DefaultBlogPageTemplateProps & {
 
 export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
   const fields = resolveFields(customFields, [
+    "happy-bamboo.blog-listing-small-label",
     "happy-bamboo.blog-listing-title",
     "happy-bamboo.blog-listing-intro",
     "happy-bamboo.blog-listing-image",
   ]);
 
+  const smallLabel = fields["happy-bamboo.blog-listing-small-label"]!;
   const pageTitle = fields["happy-bamboo.blog-listing-title"]!;
   const pageIntro = fields["happy-bamboo.blog-listing-intro"]!;
   const blogImage = fields["happy-bamboo.blog-listing-image"]!;
@@ -140,18 +141,26 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
           <div className="mx-auto flex w-full flex-col items-center justify-center gap-12 md:flex-row">
             {/* Text content */}
             <FadeIn className="flex flex-1 flex-col justify-center text-left">
-              <Badge className="mb-4 w-fit">
-                <Leaf className="mr-1 h-3 w-3" />
-                Stories & Insights
-              </Badge>
+              {!!smallLabel && (
+                <Badge
+                  className="mb-4 w-fit"
+                  {...fieldAttr("happy-bamboo.blog-listing-small-label")}
+                >
+                  <Leaf className="mr-1 h-3 w-3" />
+                  {smallLabel}
+                </Badge>
+              )}
               <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-                <span {...fieldAttr("happy-bamboo.blog-listing-title")}>
+                <span
+                  className="font-serif"
+                  {...fieldAttr("happy-bamboo.blog-listing-title")}
+                >
                   {pageTitle}
                 </span>
               </h1>
               {pageIntro && (
                 <p
-                  className="text-muted-foreground mx-auto max-w-xl text-lg leading-relaxed"
+                  className="text-muted-foreground max-w-xl text-lg leading-relaxed"
                   {...fieldAttr("happy-bamboo.blog-listing-intro")}
                 >
                   {pageIntro}
@@ -173,45 +182,6 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
               </div>
             </FadeIn>
           </div>
-
-          {/* 
-          <FadeIn className="text-center">
-            <Badge className="mb-4">
-              <Leaf className="mr-1 h-3 w-3" />
-              Stories & Insights
-            </Badge>
-            <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-              {pageTitle}
-            </h1>
-            {pageIntro && (
-              <p className="text-muted-foreground mx-auto max-w-xl text-lg leading-relaxed">
-                {pageIntro}
-              </p>
-            )}
-
-     
-            <div className="mx-auto mt-8 max-w-lg">
-              <InputGroup>
-                <InputGroupAddon>
-                  <Search className="text-muted-foreground h-4 w-4" />
-                </InputGroupAddon>
-                <InputGroupInput
-                  type="search"
-                  placeholder="Search articles..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  aria-label="Search blog posts"
-                />
-              </InputGroup>
-              {query.trim() !== "" && (
-                <p className="text-muted-foreground mt-2 text-sm">
-                  {filtered.length === 0
-                    ? "No articles found. Try a different keyword."
-                    : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`}
-                </p>
-              )}
-            </div>
-          </FadeIn> */}
         </div>
       </section>
 
@@ -267,10 +237,6 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
                     />
                   </div>
                   <div className="bg-card flex flex-col justify-center p-8 md:p-12">
-                    <Badge variant="secondary" className="mb-4 w-fit">
-                      <Tag className="mr-1 h-3 w-3" />
-                      Latest Post
-                    </Badge>
                     <h2 className="text-foreground group-hover:text-primary mb-4 text-2xl leading-snug font-bold transition-colors md:text-3xl">
                       {featuredResult.title}
                     </h2>

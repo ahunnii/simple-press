@@ -477,7 +477,7 @@ const aboutHeroData: TemplateField[] = [
   {
     key: "happy-bamboo.about-hero-mission",
     label: "Mission statement",
-    description: "Paragraph under the \"Our Mission\" subheading.",
+    description: 'Paragraph under the "Our Mission" subheading.',
     type: "textarea",
     page: "about",
     group: "about.hero",
@@ -498,7 +498,7 @@ const aboutHeroData: TemplateField[] = [
   {
     key: "happy-bamboo.about-hero-vision",
     label: "Vision statement",
-    description: "Paragraph under the \"Our Vision\" subheading.",
+    description: 'Paragraph under the "Our Vision" subheading.',
     type: "textarea",
     page: "about",
     group: "about.hero",
@@ -794,7 +794,8 @@ const aboutConnectWithUsData: TemplateField[] = [
   {
     key: "happy-bamboo.about-connect-with-us-google-review-link",
     label: "Google review link",
-    description: "Link to your Google review page. Leave blank to hide the review button.",
+    description:
+      "Link to your Google review page. Leave blank to hide the review button.",
     type: "url",
     page: "about",
     group: "about.connect-with-us",
@@ -932,8 +933,7 @@ const contactFormData: TemplateField[] = [
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Thanks for reaching out. We'll get back to you soon.",
+    defaultValue: "Thanks for reaching out. We'll get back to you soon.",
     placeholder: "Thanks for reaching out. We'll be in touch shortly.",
   },
   {
@@ -993,7 +993,8 @@ const homepageCtaData: TemplateField[] = [
   {
     key: "happy-bamboo.homepage-cta-heading",
     label: "Heading",
-    description: "Heading for the closing banner at the bottom of the homepage.",
+    description:
+      "Heading for the closing banner at the bottom of the homepage.",
     type: "text",
     page: "homepage",
     group: "homepage.cta",
@@ -1061,6 +1062,17 @@ const homepageCtaData: TemplateField[] = [
 
 const blogListingData: TemplateField[] = [
   {
+    key: "happy-bamboo.blog-listing-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "Stories & Insights",
+    placeholder: "Stories & Insights",
+  },
+  {
     key: "happy-bamboo.blog-listing-title",
     label: "Heading",
     description: "Heading at the top of the blog page.",
@@ -1096,6 +1108,17 @@ const blogListingData: TemplateField[] = [
 ];
 
 const collectionsListingData: TemplateField[] = [
+  {
+    key: "happy-bamboo.collections-listing-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "collections",
+    group: "collections.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "Shop by Collection",
+    placeholder: "Shop by Collection",
+  },
   {
     key: "happy-bamboo.collections-listing-heading",
     label: "Heading",
@@ -1184,6 +1207,17 @@ const shopListingData: TemplateField[] = [
     defaultValue: "true",
   },
   {
+    key: "happy-bamboo.shop-listing-small-label",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "shop",
+    group: "shop.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "Eco-Friendly Products",
+    placeholder: "Eco-Friendly Products",
+  },
+  {
     key: "happy-bamboo.shop-listing-heading",
     label: "Heading",
     description: "Heading at the top of the shop page.",
@@ -1263,7 +1297,7 @@ const globalCartData: TemplateField[] = [
     key: "happy-bamboo.global.cart-empty-text",
     label: "Empty cart message",
     description:
-      "Line shown under \"Your cart is empty\" in the cart panel and on the full cart page. Leave blank to hide.",
+      'Line shown under "Your cart is empty" in the cart panel and on the full cart page. Leave blank to hide.',
     type: "text",
     page: "global",
     group: "global.cart",
@@ -1370,14 +1404,16 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
     title: "Hero",
-    description: "Photo, headline, and button in the main banner at the top of the homepage.",
+    description:
+      "Photo, headline, and button in the main banner at the top of the homepage.",
     icon: "🎯",
     columns: 2,
   },
   {
     id: "homepage.featured",
     title: "Featured products",
-    description: "Grid of products from your shop, with a heading and link below.",
+    description:
+      "Grid of products from your shop, with a heading and link below.",
     icon: "📦",
     columns: 2,
   },
@@ -1407,7 +1443,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.mission",
     title: "Mission banner",
-    description: "Highlighted banner with a short mission statement below the hero.",
+    description:
+      "Highlighted banner with a short mission statement below the hero.",
     icon: "🎯",
     columns: 2,
   },
@@ -1415,14 +1452,16 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.bamboo",
     title: "Why bamboo",
-    description: "Heading, fact cards, and photo grid explaining why you use bamboo.",
+    description:
+      "Heading, fact cards, and photo grid explaining why you use bamboo.",
     icon: "🎋",
     columns: 3,
   },
   {
     id: "about.services",
     title: "Services",
-    description: "Heading, intro text, and service cards below the mission banner.",
+    description:
+      "Heading, intro text, and service cards below the mission banner.",
     icon: "🛠️",
     columns: 2,
   },
@@ -1453,7 +1492,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.cta",
     title: "Closing banner",
-    description: "Heading, text, and up to two buttons at the bottom of the homepage.",
+    description:
+      "Heading, text, and up to two buttons at the bottom of the homepage.",
     icon: "🚀",
     columns: 2,
   },
@@ -1481,7 +1521,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.cta",
     title: "Closing banner",
-    description: "Bottom banner with a heading, text, and button on the collections page.",
+    description:
+      "Bottom banner with a heading, text, and button on the collections page.",
     icon: "🛒",
     columns: 2,
   },
@@ -1520,22 +1561,23 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.page",
     title: "Testimonials page",
-    description: "Small label and intro text at the top of the testimonials page.",
+    description:
+      "Small label and intro text at the top of the testimonials page.",
     icon: "🗣️",
     columns: 2,
   },
   {
     id: "global.cart",
     title: "Cart",
-    description:
-      "Wording inside the cart panel that slides out from the side.",
+    description: "Wording inside the cart panel that slides out from the side.",
     icon: "🛍️",
     columns: 2,
   },
   {
     id: "global.authentication",
     title: "Sign-in screens",
-    description: "Background image and logo size on the sign-in and sign-up screens.",
+    description:
+      "Background image and logo size on the sign-in and sign-up screens.",
     icon: "🔐",
     columns: 2,
   },

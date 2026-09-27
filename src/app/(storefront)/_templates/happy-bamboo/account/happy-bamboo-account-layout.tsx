@@ -70,7 +70,7 @@ export function HappyBambooAccountLayout({
             <p className="text-primary mb-2 text-sm font-semibold tracking-wider uppercase">
               Account
             </p>
-            <h1 className="font-heading text-foreground text-4xl font-bold">
+            <h1 className="text-foreground font-serif text-4xl font-bold">
               {heading}
             </h1>
             {breadcrumb && (

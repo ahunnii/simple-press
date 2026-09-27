@@ -182,7 +182,7 @@ export function HappyBambooBlogPostPage({
         <section className="border-border border-t py-16 md:py-20">
           <div className="container mx-auto px-4">
             <FadeIn className="mb-10">
-              <h2 className="text-2xl font-bold md:text-3xl">
+              <h2 className="font-serif text-2xl font-bold md:text-3xl">
                 You Might Also Like
               </h2>
             </FadeIn>

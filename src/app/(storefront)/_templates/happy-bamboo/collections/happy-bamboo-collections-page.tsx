@@ -22,6 +22,7 @@ type Props = DefaultCollectionsPageTemplateProps;
 
 export function HappyBambooCollectionsPage({ collections, business }: Props) {
   const fields = resolveFields(business.siteContent?.customFields, [
+    "happy-bamboo.collections-listing-small-label",
     "happy-bamboo.collections-listing-heading",
     "happy-bamboo.collections-listing-intro",
     "happy-bamboo.collections-cta-heading",
@@ -30,6 +31,7 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
     "happy-bamboo.collections-cta-button-link",
   ]);
 
+  const smallLabel = fields["happy-bamboo.collections-listing-small-label"]!;
   const listingHeading = fields["happy-bamboo.collections-listing-heading"]!;
   const listingIntro = fields["happy-bamboo.collections-listing-intro"]!;
   const ctaHeading = fields["happy-bamboo.collections-cta-heading"]!;
@@ -45,12 +47,20 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
       >
         <div className="container mx-auto px-4">
           <FadeIn className="mx-auto max-w-3xl text-center">
-            <Badge variant="secondary" className="mb-4">
-              <Leaf className="mr-1 h-3 w-3" />
-              Shop by Collection
-            </Badge>
+            {!!smallLabel && (
+              <Badge
+                className="mb-4"
+                {...fieldAttr("happy-bamboo.collections-listing-small-label")}
+              >
+                <Leaf className="mr-1 h-3 w-3" />
+                {smallLabel}
+              </Badge>
+            )}
             <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-              <span {...fieldAttr("happy-bamboo.collections-listing-heading")}>
+              <span
+                className="font-serif"
+                {...fieldAttr("happy-bamboo.collections-listing-heading")}
+              >
                 {listingHeading}
               </span>
             </h1>
@@ -72,7 +82,7 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
           <FadeIn className="mb-12">
             <div className="flex items-center gap-2">
               <Sparkles className="text-primary h-5 w-5" />
-              <h2 className="text-2xl font-bold md:text-3xl">
+              <h2 className="font-serif text-2xl font-bold md:text-3xl">
                 All Collections
               </h2>
             </div>
@@ -154,8 +164,11 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
           <div className="container mx-auto px-4">
             <FadeIn>
               <div className="mx-auto max-w-2xl text-center">
-                <h2 className="mb-4 text-2xl font-bold md:text-3xl">
-                  <span {...fieldAttr("happy-bamboo.collections-cta-heading")}>
+                <h2 className="mb-4 font-serif text-2xl font-bold md:text-3xl">
+                  <span
+                    className="font-serif"
+                    {...fieldAttr("happy-bamboo.collections-cta-heading")}
+                  >
                     {ctaHeading}
                   </span>
                 </h2>
@@ -171,7 +184,9 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
                   <Button asChild size="lg">
                     <Link href={ctaButtonLink}>
                       <span
-                        {...fieldAttr("happy-bamboo.collections-cta-button-text")}
+                        {...fieldAttr(
+                          "happy-bamboo.collections-cta-button-text",
+                        )}
                       >
                         {ctaButtonText}
                       </span>

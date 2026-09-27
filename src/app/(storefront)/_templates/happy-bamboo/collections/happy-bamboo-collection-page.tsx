@@ -44,47 +44,53 @@ export function HappyBambooCollectionPage({
   return (
     <PageTransition>
       {/* Hero Section with Collection Image */}
-      <section className="relative min-h-[400px] overflow-hidden md:min-h-[500px]">
-        <div className="absolute inset-0">
-          <Image
-            src={collection.imageUrl ?? "/placeholder.svg"}
-            alt={collection.name}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/50" />
-        </div>
+      <section className="bg-muted/50 py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto flex w-full flex-col items-center justify-center gap-12 md:flex-row">
+            <FadeIn className="flex flex-1 flex-col justify-center text-left">
+              <Link
+                href="/collections"
+                className="text-muted-foreground hover:text-primary mb-6 inline-flex w-fit items-center gap-2 text-sm transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Collections
+              </Link>
 
-        <div className="relative z-10 container mx-auto flex min-h-[400px] flex-col justify-center px-4 py-16 md:min-h-[500px]">
-          <FadeIn>
-            <Link
-              href="/collections"
-              className="mb-6 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Collections
-            </Link>
-          </FadeIn>
+              <Badge className="mb-4 w-fit">
+                <Package aria-hidden className="mr-1 h-3 w-3" />
+                {products.length}{" "}
+                {products.length === 1 ? "Product" : "Products"}
+              </Badge>
 
-          <FadeIn delay={0.1}>
-            <Badge className="mb-4 w-fit bg-white/20 text-white hover:bg-white/30">
-              <Package className="mr-1 h-3 w-3" />
-              {products.length} {products.length === 1 ? "Product" : "Products"}
-            </Badge>
-          </FadeIn>
+              <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
+                {collection.name}
+              </h1>
 
-          <FadeIn delay={0.15}>
-            <h1 className="mb-4 max-w-2xl text-4xl font-bold text-white md:text-5xl lg:text-6xl">
-              {collection.name}
-            </h1>
-          </FadeIn>
+              {!!collection.description && (
+                <p className="text-muted-foreground text-lg leading-relaxed">
+                  {collection.description}
+                </p>
+              )}
+            </FadeIn>
 
-          <FadeIn delay={0.2}>
-            <p className="max-w-xl text-lg leading-relaxed text-white/90">
-              {collection.description}
-            </p>
-          </FadeIn>
+            {!!collection.imageUrl && (
+              <FadeIn
+                direction="right"
+                className="flex w-full flex-1 items-center justify-center"
+              >
+                <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-xl border border-white/20 bg-white/20 shadow-md">
+                  <Image
+                    src={collection.imageUrl}
+                    alt={collection.name}
+                    fill
+                    priority
+                    sizes="(min-width: 768px) 448px, 100vw"
+                    className="object-cover object-center"
+                  />
+                </div>
+              </FadeIn>
+            )}
+          </div>
         </div>
       </section>
 
@@ -95,7 +101,7 @@ export function HappyBambooCollectionPage({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Leaf className="text-primary h-5 w-5" />
-                <h2 className="text-2xl font-bold md:text-3xl">
+                <h2 className="font-serif text-2xl font-bold md:text-3xl">
                   Products in This Collection
                 </h2>
               </div>
@@ -144,7 +150,7 @@ export function HappyBambooCollectionPage({
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <FadeIn className="mb-12">
-              <h2 className="text-2xl font-bold md:text-3xl">
+              <h2 className="font-serif text-2xl font-bold md:text-3xl">
                 Explore Other Collections
               </h2>
             </FadeIn>

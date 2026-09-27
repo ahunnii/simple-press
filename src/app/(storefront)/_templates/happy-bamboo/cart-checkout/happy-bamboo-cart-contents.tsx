@@ -44,7 +44,7 @@ export function HappyBambooCartContents({ business, cartEmptyText }: Props) {
             <div className="bg-secondary mx-auto flex size-20 items-center justify-center rounded-full">
               <ShoppingBag className="text-muted-foreground size-8" />
             </div>
-            <h1 className="text-foreground font-heading mt-6 text-2xl font-bold">
+            <h1 className="text-foreground mt-6 font-serif text-2xl font-bold">
               Your cart is empty
             </h1>
             {!!cartEmptyText && (

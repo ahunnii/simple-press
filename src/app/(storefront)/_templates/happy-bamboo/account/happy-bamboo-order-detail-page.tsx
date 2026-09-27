@@ -35,7 +35,7 @@ export function HappyBambooOrderDetailPage({
             <p className="text-primary mb-2 text-sm font-semibold tracking-wider uppercase">
               Account
             </p>
-            <h1 className="font-heading text-foreground text-4xl font-bold">
+            <h1 className="text-foreground font-serif text-4xl font-bold">
               Order #{order.orderNumber}
             </h1>
             <div className="text-muted-foreground mt-2 flex items-center text-sm">
