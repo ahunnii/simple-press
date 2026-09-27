@@ -5,17 +5,27 @@ import Link from "next/link";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { resolveFields } from "..";
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
+
+type Props = DefaultBlogPostPageTemplateProps & {
+  customFields?: Record<string, string>;
+};
 
 export function DarkTrendBlogPostPage({
   page,
   relatedPosts,
-}: DefaultBlogPostPageTemplateProps) {
+  customFields,
+}: Props) {
   const others = relatedPosts.filter((p) => p.slug !== page.slug);
+
+  const f = resolveFields(customFields, ["dark-trend.blog.post-more-heading"]);
+  const moreHeading = f["dark-trend.blog.post-more-heading"] ?? "";
 
   return (
     <>
@@ -54,10 +64,16 @@ export function DarkTrendBlogPostPage({
       </DarkTrendGeneralLayout>
 
       {others.length > 0 ? (
-        <section className="border-t border-white/10 bg-[#141414] px-4 py-16">
+        <section
+          {...sectionGroupAttr("blog", "post")}
+          className="border-t border-white/10 bg-[#141414] px-4 py-16"
+        >
           <div className="mx-auto max-w-7xl">
-            <h2 className="mb-10 text-center text-2xl font-bold text-white md:text-left">
-              More stories
+            <h2
+              {...fieldAttr("dark-trend.blog.post-more-heading")}
+              className="mb-10 text-center text-2xl font-bold text-white md:text-left"
+            >
+              {moreHeading}
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {others.slice(0, 6).map((post) => (

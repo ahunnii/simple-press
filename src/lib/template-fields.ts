@@ -525,6 +525,24 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "umsc.contact.hours",
   "umsc.homepage.reviews-override-quote",
   "umsc.homepage.reviews-override-name",
+  // dark-trend, retired 2026-09-27.
+  // - `about.feature-N-header` / `-description`: the about page's numbered
+  //   cards from before the `dark-trend.about.features-list` list field.
+  //   Never declared, but a live store saved them; while no list is saved
+  //   they're read as a silent fallback in
+  //   `_templates/dark-trend/about/dark-trend-about-features.ts`.
+  // - `second-section-image`: declared on the homepage's featured-product
+  //   section but never rendered (the section shows the first product's
+  //   photo instead); declaration removed.
+  "dark-trend.about.feature-1-header",
+  "dark-trend.about.feature-1-description",
+  "dark-trend.about.feature-2-header",
+  "dark-trend.about.feature-2-description",
+  "dark-trend.about.feature-3-header",
+  "dark-trend.about.feature-3-description",
+  "dark-trend.about.feature-4-header",
+  "dark-trend.about.feature-4-description",
+  "dark-trend.second-section-image",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

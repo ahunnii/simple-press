@@ -2,20 +2,38 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { resolveFields } from "..";
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export function DarkTrendCollectionsPage({
   collections,
+  business,
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
 
+  const f = resolveFields(business.siteContent?.customFields, [
+    "dark-trend.collections.listing-heading",
+    "dark-trend.collections.listing-empty",
+  ]);
+
+  const heading = f["dark-trend.collections.listing-heading"] ?? "";
+  const emptyText = f["dark-trend.collections.listing-empty"] ?? "";
+
   return (
-    <DarkTrendGeneralLayout title="Collections">
+    <DarkTrendGeneralLayout
+      title={heading}
+      titleFieldKey="dark-trend.collections.listing-heading"
+      sectionAttrs={sectionGroupAttr("collections", "listing")}
+    >
       {list.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-lg text-white/60">
-            No collections available at this time.
+          <p
+            {...fieldAttr("dark-trend.collections.listing-empty")}
+            className="text-lg text-white/60"
+          >
+            {emptyText}
           </p>
         </div>
       ) : (

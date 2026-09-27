@@ -2,25 +2,25 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 import { DarkTrendCheckoutForm } from "./dark-trend-checkout-form";
+import { DarkTrendCheckoutUnavailable } from "./dark-trend-checkout-unavailable";
 
+/**
+ * `checkout/page.tsx` already renders `t.CheckoutUnavailable` (no props)
+ * when the store has no Stripe account outside development. This guard is
+ * belt-and-suspenders for any caller that reaches this component anyway
+ * (same development bypass as the route and bamboo's `BambooCheckoutPage`),
+ * and hands the already-loaded `customFields` down so the unavailable screen
+ * doesn't have to re-fetch the tenant.
+ */
 export async function DarkTrendCheckoutPage({
   business,
   merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
-  // Check if Stripe is connected
-  if (!business.isStripeConnected) {
+  if (!business.isStripeConnected && process.env.NODE_ENV !== "development") {
     return (
-      <div className="flex min-h-[50vh] flex-1 items-center justify-center bg-[#1A1A1A] p-4">
-        <div className="max-w-md text-center">
-          <h1 className="mb-4 text-2xl font-bold text-white">
-            Checkout Unavailable
-          </h1>
-          <p className="text-white/70">
-            This store hasn&apos;t set up payment processing yet. Please contact
-            the store owner.
-          </p>
-        </div>
-      </div>
+      <DarkTrendCheckoutUnavailable
+        customFields={business.siteContent?.customFields}
+      />
     );
   }
 

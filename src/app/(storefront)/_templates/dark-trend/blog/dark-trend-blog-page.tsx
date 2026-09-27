@@ -7,7 +7,7 @@ import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 
@@ -52,10 +52,14 @@ export function DarkTrendBlogPage({ pages, customFields }: Props) {
   const f = resolveFields(customFields, [
     "dark-trend.blog.listing-title",
     "dark-trend.blog.listing-intro",
+    "dark-trend.blog.listing-more-heading",
+    "dark-trend.blog.listing-empty",
   ]);
 
   const listingTitle = f["dark-trend.blog.listing-title"] ?? "Journal";
   const listingIntro = f["dark-trend.blog.listing-intro"]?.trim() ?? "";
+  const moreHeading = f["dark-trend.blog.listing-more-heading"] ?? "";
+  const emptyText = f["dark-trend.blog.listing-empty"] ?? "";
 
   const [query, setQuery] = useState("");
 
@@ -174,8 +178,11 @@ export function DarkTrendBlogPage({ pages, customFields }: Props) {
         <>
           {rest.length > 0 ? (
             <section>
-              <h2 className="mb-8 text-center text-2xl font-bold text-white md:text-left">
-                More stories
+              <h2
+                {...fieldAttr("dark-trend.blog.listing-more-heading")}
+                className="mb-8 text-center text-2xl font-bold text-white md:text-left"
+              >
+                {moreHeading}
               </h2>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {gridPosts.map((post) => (
@@ -185,7 +192,12 @@ export function DarkTrendBlogPage({ pages, customFields }: Props) {
             </section>
           ) : !featured ? (
             <div className="py-20 text-center">
-              <p className="text-lg text-white/60">No blog posts yet.</p>
+              <p
+                {...fieldAttr("dark-trend.blog.listing-empty")}
+                className="text-lg text-white/60"
+              >
+                {emptyText}
+              </p>
             </div>
           ) : null}
         </>

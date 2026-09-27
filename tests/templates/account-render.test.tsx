@@ -33,6 +33,9 @@ import { SledgeRewardsPage } from "~/app/(storefront)/_templates/sledge/account/
 import { SledgeSubscriptionsPage } from "~/app/(storefront)/_templates/sledge/account/sledge-subscriptions-page";
 import { DarkTrendAccountSecurityPage } from "~/app/(storefront)/_templates/dark-trend/account/dark-trend-account-security-page";
 import { DarkTrendAccountSettingsPage } from "~/app/(storefront)/_templates/dark-trend/account/dark-trend-account-settings-page";
+import { DarkTrendInvoicesPage } from "~/app/(storefront)/_templates/dark-trend/account/dark-trend-invoices-page";
+import { DarkTrendRewardsPage } from "~/app/(storefront)/_templates/dark-trend/account/dark-trend-rewards-page";
+import { DarkTrendSubscriptionsPage } from "~/app/(storefront)/_templates/dark-trend/account/dark-trend-subscriptions-page";
 import { DefaultAccountSecurityPage } from "~/app/(storefront)/_templates/default/account/default-account-security-page";
 import { DefaultAccountSettingsPage } from "~/app/(storefront)/_templates/default/account/default-account-settings-page";
 import { ElegantAccountSecurityPage } from "~/app/(storefront)/_templates/elegant/account/elegant-account-security-page";
@@ -498,6 +501,87 @@ describe("sledge Subscriptions/Invoices/Rewards pages render", () => {
   it("Rewards shows the paused banner when the loyalty flag is off", () => {
     render(
       <SledgeRewardsPage
+        business={fakeBusiness as RewardsPageTemplateProps["business"]}
+        rewards={pausedRewards}
+      />,
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent(/paused right now/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// dark-trend Subscriptions/Invoices/Rewards — same flag-gated account pages,
+// built 2026-09-27 mirroring bamboo's 2026-09-25 and sledge's 2026-09-26
+// builds (see `docs/templates/sledge/build-state.md` "Account pages" in the
+// editor coverage pass).
+// ---------------------------------------------------------------------------
+
+describe("dark-trend Subscriptions/Invoices/Rewards pages render", () => {
+  it("Subscriptions renders the empty state with a manage-by-email link", () => {
+    render(
+      <DarkTrendSubscriptionsPage
+        business={fakeBusiness as SubscriptionsPageTemplateProps["business"]}
+        subscriptions={noSubscriptions}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: /no subscriptions yet/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /look up your subscription by email/i }),
+    ).toHaveAttribute("href", "/subscriptions/manage");
+  });
+
+  it("Subscriptions renders a subscription's name, status, and manage link", () => {
+    render(
+      <DarkTrendSubscriptionsPage
+        business={fakeBusiness as SubscriptionsPageTemplateProps["business"]}
+        subscriptions={oneSubscription}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Coffee Beans — Dark Roast" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /manage/i })).toHaveAttribute(
+      "href",
+      oneSubscription[0]!.manageUrl,
+    );
+  });
+
+  it("Invoices renders an invoice row", () => {
+    render(
+      <DarkTrendInvoicesPage
+        business={fakeBusiness as InvoicesPageTemplateProps["business"]}
+        invoices={oneInvoice}
+      />,
+    );
+
+    expect(screen.getByText("INV-0001")).toBeInTheDocument();
+    expect(screen.getByText(/awaiting payment/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /view invoice/i }),
+    ).toHaveAttribute("href", "/invoices/view?token=xyz");
+  });
+
+  it("Rewards renders a joined member's points balance", () => {
+    render(
+      <DarkTrendRewardsPage
+        business={fakeBusiness as RewardsPageTemplateProps["business"]}
+        rewards={joinedRewards}
+      />,
+    );
+
+    expect(screen.getByText("240")).toBeInTheDocument();
+    expect(screen.getByText("points")).toBeInTheDocument();
+  });
+
+  it("Rewards shows the paused banner when the loyalty flag is off", () => {
+    render(
+      <DarkTrendRewardsPage
         business={fakeBusiness as RewardsPageTemplateProps["business"]}
         rewards={pausedRewards}
       />,

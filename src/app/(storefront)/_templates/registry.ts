@@ -86,13 +86,17 @@ import { DarkTrendAboutPage } from "./dark-trend/about/dark-trend-about-page";
 import { DarkTrendAccountSecurityPage } from "./dark-trend/account/dark-trend-account-security-page";
 import { DarkTrendAccountSettingsPage } from "./dark-trend/account/dark-trend-account-settings-page";
 import { DarkTrendAddressBookPage } from "./dark-trend/account/dark-trend-address-book-page";
+import { DarkTrendInvoicesPage } from "./dark-trend/account/dark-trend-invoices-page";
 import { DarkTrendOrderDetailPage } from "./dark-trend/account/dark-trend-order-detail-page";
 import { DarkTrendOrdersPage } from "./dark-trend/account/dark-trend-orders-page";
 import { DarkTrendPreferencesPage } from "./dark-trend/account/dark-trend-preferences-page";
+import { DarkTrendRewardsPage } from "./dark-trend/account/dark-trend-rewards-page";
+import { DarkTrendSubscriptionsPage } from "./dark-trend/account/dark-trend-subscriptions-page";
 import { DarkTrendBlogPage } from "./dark-trend/blog/dark-trend-blog-page";
 import { DarkTrendBlogPostPage } from "./dark-trend/blog/dark-trend-blog-post-page";
 import { DarkTrendCartPage } from "./dark-trend/cart-checkout/dark-trend-cart-page";
 import { DarkTrendCheckoutPage } from "./dark-trend/cart-checkout/dark-trend-checkout-page";
+import { DarkTrendCheckoutUnavailable } from "./dark-trend/cart-checkout/dark-trend-checkout-unavailable";
 import { DarkTrendOrderSuccessPage } from "./dark-trend/cart-checkout/dark-trend-order-success-page";
 import { DarkTrendCollectionPage } from "./dark-trend/collections/dark-trend-collection-page";
 import { DarkTrendCollectionsPage } from "./dark-trend/collections/dark-trend-collections-page";
@@ -612,6 +616,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: DarkTrendBlogPostPage,
     CartPage: DarkTrendCartPage,
     CheckoutPage: DarkTrendCheckoutPage,
+    CheckoutUnavailable: DarkTrendCheckoutUnavailable,
     OrderSuccessPage: DarkTrendOrderSuccessPage,
     CollectionPage: DarkTrendCollectionPage,
     CollectionsPage: DarkTrendCollectionsPage,
@@ -626,6 +631,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: DarkTrendOrderDetailPage,
     OrdersPage: DarkTrendOrdersPage,
     PreferencesPage: DarkTrendPreferencesPage,
+    SubscriptionsPage: DarkTrendSubscriptionsPage,
+    InvoicesPage: DarkTrendInvoicesPage,
+    RewardsPage: DarkTrendRewardsPage,
   },
 
   elegant: {

@@ -5,9 +5,17 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package } from "lucide-react";
 
+import type { DarkTrendTextRow } from "./text-list";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+
+import { DARK_TREND_CONFIRMATION_STEPS_KEY } from "./order-fields";
 
 type Props = {
   business: {
@@ -17,9 +25,21 @@ type Props = {
       primaryColor: string | null;
     } | null;
   };
+  /** Resolved copy from `checkout.confirmation`, resolved server-side. */
+  heading: string;
+  nextHeading: string;
+  continueLabel: string;
+  /** Resolved `dark-trend.checkout.confirmation-next-steps` rows. */
+  steps: DarkTrendTextRow[];
 };
 
-export function DarkTrendOrderConfirmation({ business }: Props) {
+export function DarkTrendOrderConfirmation({
+  business,
+  heading,
+  nextHeading,
+  continueLabel,
+  steps,
+}: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [orderDetails, setOrderDetails] = useState<{
@@ -103,7 +123,10 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div
+      {...sectionGroupAttr("checkout", "confirmation")}
+      className="mx-auto max-w-3xl"
+    >
       {/* Fire purchase analytics event once — idempotent via sessionStorage */}
       {orderDetails && (
         <TrackPurchase
@@ -124,9 +147,10 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
         <h1
           ref={headingRef}
           tabIndex={-1}
+          {...fieldAttr("dark-trend.checkout.confirmation-heading")}
           className="mb-4 text-4xl font-bold text-white lg:text-5xl"
         >
-          Order Confirmed!
+          {heading}
         </h1>
         <p className="text-lg text-white/70">
           Thank you for your purchase from {business.name}
@@ -142,22 +166,23 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
             className="h-6 w-6 shrink-0 text-purple-400"
           />
           <div className="flex-1">
-            <h2 className="mb-3 text-xl font-semibold text-white">
-              What happens next?
+            <h2
+              {...fieldAttr("dark-trend.checkout.confirmation-next-heading")}
+              className="mb-3 text-xl font-semibold text-white"
+            >
+              {nextHeading}
             </h2>
             <ul className="space-y-2 text-white/70">
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400">•</span>
-                <span>You&apos;ll receive an email confirmation shortly</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400">•</span>
-                <span>We&apos;ll notify you when your order ships</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400">•</span>
-                <span>Track your order status via email</span>
-              </li>
+              {steps.map((step) => (
+                <li
+                  key={step.index}
+                  {...listItemAttr(DARK_TREND_CONFIRMATION_STEPS_KEY, step.index)}
+                  className="flex items-start gap-2"
+                >
+                  <span className="text-purple-400">•</span>
+                  <span>{step.text}</span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -176,12 +201,22 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-4 sm:flex-row">
-        <Button
-          asChild
-          className="flex-1 border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
-        >
-          <Link href="/shop">Continue Shopping</Link>
-        </Button>
+        {continueLabel ? (
+          <Button
+            asChild
+            className="flex-1 border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
+          >
+            <Link href="/shop">
+              <span
+                {...fieldAttr(
+                  "dark-trend.checkout.confirmation-continue-button",
+                )}
+              >
+                {continueLabel}
+              </span>
+            </Link>
+          </Button>
+        ) : null}
         {/* S-11: violet-600 */}
         <Button
           asChild

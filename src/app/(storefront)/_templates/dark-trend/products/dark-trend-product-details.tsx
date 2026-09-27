@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
+import { renderProductDescription } from "~/lib/product-description";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { isContentEmpty } from "~/lib/template-fields";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -81,9 +82,9 @@ export function DarkTrendProductDetails({ product }: Props) {
                   >
                     <div className="pr-4 pb-8 pl-12">
                       {panel.id === "description" && (
-                        <p className="text-base leading-relaxed whitespace-pre-line text-white/70">
-                          {product.description}
-                        </p>
+                        <div className="prose prose-invert prose-headings:mt-8 prose-headings:mb-3 prose-headings:font-semibold prose-headings:tracking-tight first:prose-headings:mt-0 max-w-none leading-relaxed text-white/70">
+                          {renderProductDescription(product.description)}
+                        </div>
                       )}
                       {panel.id === "additional" && (
                         <>

@@ -3,302 +3,139 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { aboutDarkTrendFieldGroups, aboutDarkTrendPageData } from "./about";
 import { darkTrendBlogData, darkTrendBlogFieldGroups } from "./blog";
+import {
+  darkTrendCartData,
+  darkTrendCartFieldGroups,
+} from "./cart-checkout/cart-fields";
+import {
+  darkTrendOrderData,
+  darkTrendOrderFieldGroups,
+} from "./cart-checkout/order-fields";
+import {
+  darkTrendCheckoutUnavailableData,
+  darkTrendCheckoutUnavailableFieldGroups,
+} from "./cart-checkout/unavailable-fields";
+import {
+  darkTrendCollectionsData,
+  darkTrendCollectionsFieldGroups,
+} from "./collections";
+import { darkTrendContactData, darkTrendContactFieldGroups } from "./contact";
+import {
+  darkTrendHomepageData,
+  darkTrendHomepageFieldGroups,
+} from "./homepage";
+import { darkTrendProductData, darkTrendProductFieldGroups } from "./products";
+import { darkTrendShopData, darkTrendShopFieldGroups } from "./shop";
+import {
+  darkTrendTestimonialsData,
+  darkTrendTestimonialsFieldGroups,
+} from "./testimonials";
 
-const homepageData: TemplateField[] = [
+// ─── Global: Footer ───────────────────────────────────────────────────────────
+
+const globalFooterData: TemplateField[] = [
   {
-    key: "dark-trend.first-section-title",
-    label: "First Section Title",
-    description: "Title for the first section",
+    key: "dark-trend.global.footer-nav-heading",
+    label: "Links heading",
+    description:
+      "Heading above the page links in the footer on every page. Leave blank to hide.",
     type: "text",
-    page: "homepage",
-    group: "homepage.first-section",
-    defaultValue: "Crafted With Precision",
-    placeholder: "e.g. Crafted With Precision",
-  },
-  {
-    key: "dark-trend.first-section-image",
-    label: "First Section Image",
-    description: "Image for the first section",
-    type: "image",
-    page: "homepage",
-    group: "homepage.first-section",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dark-trend.first-section-button-text",
-    label: "First Section Button Text",
-    description: "Button text for the first section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.first-section",
-    defaultValue: "Learn More",
-    placeholder: "Learn More",
-  },
-  {
-    key: "dark-trend.first-section-button-link",
-    label: "First Section Button Link",
-    description: "Button link for the first section",
-    type: "url",
-    page: "homepage",
-    group: "homepage.first-section",
-    defaultValue: "/about",
-    placeholder: "/about",
-  },
-  {
-    key: "dark-trend.first-section-description",
-    label: "First Section Description",
-    description: "Description for the first section",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.first-section",
-    defaultValue:
-      "From concept to creation, every detail is handled with care. We bring bold ideas to life with craftsmanship that speaks for itself.",
-    placeholder: "A short description for this section...",
-  },
-  {
-    key: "dark-trend.first-section-subheader",
-    label: "First Section Subheader",
-    description: "Subheader for the first section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.first-section",
-    defaultValue: "Our Craft",
-    placeholder: "e.g. Our Craft",
-  },
-  {
-    key: "dark-trend.second-section-title",
-    label: "Second Section Title",
-    description: "Title for the second section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.second-section",
-    defaultValue: "New Arrivals",
-    placeholder: "e.g. New Arrivals",
-  },
-  {
-    key: "dark-trend.second-section-description",
-    label: "Second Section Description",
-    description: "Description for the second section",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.second-section",
-    defaultValue:
-      "Explore our latest drops — limited runs, bold designs, built to stand out.",
-    placeholder: "A short description for this section...",
-  },
-  {
-    key: "dark-trend.second-section-image",
-    label: "Second Section Image",
-    description: "Image for the second section",
-    type: "image",
-    page: "homepage",
-    group: "homepage.second-section",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dark-trend.cta-header",
-    label: "CTA Header",
-    description: "Header for the CTA section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.cta",
-    defaultValue: "Ready to Make Something?",
-    placeholder: "e.g. Ready to Make Something?",
-  },
-  {
-    key: "dark-trend.cta-description",
-    label: "CTA Description",
-    description: "Description for the CTA section",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.cta",
-    defaultValue:
-      "Whether it's a custom order or something off the rack — we've got you covered.",
-    placeholder: "A short invitation to shop or get in touch...",
-  },
-  {
-    key: "dark-trend.cta-button-text",
-    label: "CTA Button Text",
-    description: "Button text for the CTA section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.cta",
-    defaultValue: "Get Started",
-    placeholder: "Get Started",
-  },
-  {
-    key: "dark-trend.cta-button-link",
-    label: "CTA Button Link",
-    description: "Button link for the CTA section",
-    type: "url",
-    page: "homepage",
-    group: "homepage.cta",
-    defaultValue: "/contact",
-    placeholder: "/contact",
-  },
-  {
-    key: "dark-trend.cta-image",
-    label: "CTA Image",
-    description: "Image for the CTA section",
-    type: "image",
-    page: "homepage",
-    group: "homepage.cta",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dark-trend.homepage.gallery",
-    label: "Homepage Gallery",
-    description: "Gallery to display on homepage",
-    type: "gallery",
-    page: "homepage",
-    group: "homepage.gallery",
-  },
-  {
-    key: "dark-trend.homepage.hero-image",
-    label: "Homepage Hero Image",
-    description: "Image for the hero section",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dark-trend.homepage.hero-title",
-    label: "Homepage Hero Title",
-    description: "Title for the hero section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-full",
-    defaultValue: "Bold Designs. Built Different.",
-    placeholder: "e.g. Bold Designs. Built Different.",
-  },
-  {
-    key: "dark-trend.homepage.hero-button-text",
-    label: "Homepage Hero Button Text",
-    description: "Button text for the hero section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
+    page: "global",
+    group: "global.footer",
     gridColumn: "col-span-1",
-    defaultValue: "Shop Now",
-    placeholder: "Shop Now",
+    defaultValue: "Navigate",
+    placeholder: "e.g. Explore",
   },
   {
-    key: "dark-trend.homepage.hero-button-link",
-    label: "Homepage Hero Button Link",
-    description: "Button link for the hero section",
-    type: "url",
-    page: "homepage",
-    group: "homepage.hero",
+    key: "dark-trend.global.footer-contact-heading",
+    label: "Contact heading",
+    description:
+      "Heading above your address, phone, and email in the footer (from Settings → General). Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.footer",
     gridColumn: "col-span-1",
-    defaultValue: "/shop",
-    placeholder: "/shop",
+    defaultValue: "Reach Out",
+    placeholder: "e.g. Get in touch",
+  },
+  {
+    key: "dark-trend.global.footer-social-heading",
+    label: "Social heading",
+    description:
+      "Heading above your social media icons in the footer (from Content → Branding). Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.footer",
+    gridColumn: "col-span-1",
+    defaultValue: "Follow Us On",
+    placeholder: "e.g. Find us online",
   },
 ];
 
-const contactPageData: TemplateField[] = [
+// ─── Global: Authentication ───────────────────────────────────────────────────
+
+const globalAuthenticationData: TemplateField[] = [
   {
-    key: "dark-trend.contact.header",
-    label: "Contact Header",
-    description: "Header for the contact page",
-    type: "text",
-    page: "contact",
-    group: "contact.info",
-    defaultValue: "Contact Us",
-    placeholder: "Contact Us",
-  },
-  {
-    key: "dark-trend.contact.subheader",
-    label: "Contact Subheader",
-    description: "Subheader for the contact page",
-    type: "text",
-    page: "contact",
-    group: "contact.info",
-    defaultValue: "Get in Touch",
-    placeholder: "Get in Touch",
-  },
-  {
-    key: "dark-trend.contact.description",
-    label: "Contact Description",
-    description: "Description for the contact page",
-    type: "textarea",
-    page: "contact",
-    group: "contact.info",
-    defaultValue:
-      "Have a question or a custom request? Send us a message and we'll get back to you shortly.",
-    placeholder: "A short intro for your contact page...",
-  },
-  {
-    key: "dark-trend.contact.image",
-    label: "Contact Image",
-    description: "Image for the contact page",
+    key: "dark-trend.global.authentication-image",
+    label: "Authentication image",
+    description:
+      "Image shown beside the sign-in and sign-up forms on larger screens.",
     type: "image",
-    page: "contact",
-    group: "contact.info",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
   },
 ];
+
+// ─── Field Groups ─────────────────────────────────────────────────────────────
 
 const fieldGroups: TemplateFieldGroup[] = [
+  ...darkTrendHomepageFieldGroups,
+  ...aboutDarkTrendFieldGroups,
+  ...darkTrendContactFieldGroups,
+  ...darkTrendBlogFieldGroups,
+  ...darkTrendProductFieldGroups,
+  ...darkTrendCheckoutUnavailableFieldGroups,
+  ...darkTrendShopFieldGroups,
+  ...darkTrendCollectionsFieldGroups,
+  ...darkTrendTestimonialsFieldGroups,
+  ...darkTrendCartFieldGroups,
+  ...darkTrendOrderFieldGroups,
   {
-    id: "homepage.hero",
-    title: "Hero Section",
-    description: "Main banner area at the top of homepage",
-    icon: "🎯",
+    id: "global.footer",
+    title: "Footer",
+    description:
+      "Column headings in the footer on every page. The tagline and social links come from Content → Branding; the address, phone, and email from Settings.",
+    icon: "🦶",
     columns: 2,
   },
   {
-    id: "homepage.gallery",
-    title: "Photo Gallery",
-    description: "Optional image gallery shown just below the hero.",
-    icon: "🖼️",
+    id: "global.authentication",
+    title: "Authentication",
+    description: "Image shown on the sign-in and sign-up pages.",
+    icon: "🔑",
     columns: 1,
   },
-  {
-    id: "homepage.first-section",
-    title: "First Feature Section",
-    description:
-      "Numbered story section (01.) with image, heading, subheader, description, and button.",
-    icon: "🧵",
-    columns: 2,
-  },
-  {
-    id: "homepage.second-section",
-    title: "Featured Product Section",
-    description:
-      "Numbered spotlight section (02.) pairing your heading and description with the first product.",
-    icon: "✨",
-    columns: 2,
-  },
-  {
-    id: "homepage.cta",
-    title: "CTA Banner",
-    description:
-      "Bottom call-to-action banner (04.) with heading, description, button, and image.",
-    icon: "📣",
-    columns: 2,
-  },
-  {
-    id: "contact.info",
-    title: "Contact Info",
-    description:
-      "Header, subheader, description, and image for the contact page.",
-    icon: "📞",
-    columns: 2,
-  },
-
-  ...aboutDarkTrendFieldGroups,
-  ...darkTrendBlogFieldGroups,
 ];
+
+// ─── Exports ──────────────────────────────────────────────────────────────────
 
 export const darkTrendData = {
   "dark-trend": [
     ...aboutDarkTrendPageData,
-    ...homepageData,
-    ...contactPageData,
+    ...darkTrendHomepageData,
+    ...darkTrendContactData,
     ...darkTrendBlogData,
+    ...darkTrendProductData,
+    ...darkTrendCheckoutUnavailableData,
+    ...darkTrendShopData,
+    ...darkTrendCollectionsData,
+    ...darkTrendTestimonialsData,
+    ...darkTrendCartData,
+    ...darkTrendOrderData,
+    ...globalFooterData,
+    ...globalAuthenticationData,
   ],
 };
 

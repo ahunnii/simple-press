@@ -23,6 +23,8 @@ export function DarkTrendHeroContent({
   buttonTextFieldKey,
 }: Props) {
   const shouldReduceMotion = useReducedMotion();
+  // A blank button text or link hides the button.
+  const showButton = !!buttonText.trim() && !!buttonLink.trim();
 
   return (
     <div className="max-w-3xl">
@@ -40,36 +42,35 @@ export function DarkTrendHeroContent({
       >
         {title}
       </motion.h1>
-      <motion.div
-        initial={
-          shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }
-        }
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: shouldReduceMotion ? 0 : 0.5,
-          delay: shouldReduceMotion ? 0 : 0.2,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
-      >
-        <Link
-          href={!buttonLink ? "/shop" : buttonLink}
-          className="mt-8 inline-block"
+      {showButton && (
+        <motion.div
+          initial={
+            shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }
+          }
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.5,
+            delay: shouldReduceMotion ? 0 : 0.2,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
         >
-          <motion.span
-            className="inline-flex items-center rounded-md bg-violet-600 px-8 py-3 text-sm font-medium tracking-wide text-white"
-            whileHover={
-              shouldReduceMotion
-                ? undefined
-                : { scale: 1.03, backgroundColor: "rgb(109, 40, 217)" }
-            }
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-            {...(buttonTextFieldKey ? fieldAttr(buttonTextFieldKey) : {})}
-          >
-            {!buttonText ? "SHOP NOW" : buttonText}
-          </motion.span>
-        </Link>
-      </motion.div>
+          <Link href={buttonLink} className="mt-8 inline-block">
+            <motion.span
+              className="inline-flex items-center rounded-md bg-violet-600 px-8 py-3 text-sm font-medium tracking-wide text-white"
+              whileHover={
+                shouldReduceMotion
+                  ? undefined
+                  : { scale: 1.03, backgroundColor: "rgb(109, 40, 217)" }
+              }
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              {...(buttonTextFieldKey ? fieldAttr(buttonTextFieldKey) : {})}
+            >
+              {buttonText}
+            </motion.span>
+          </Link>
+        </motion.div>
+      )}
     </div>
   );
 }
