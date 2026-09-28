@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { api } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 /**
  * Invisible component that reconciles the localStorage cart against live
@@ -17,9 +18,16 @@ import { useCart } from "~/providers/cart-context";
  *   excluded so a reconcile-driven price update never re-triggers the query.
  * - `reconcile()` guards setItems: it returns the existing array reference
  *   unchanged when nothing has changed, preventing unnecessary re-renders.
+ *
+ * Feature gate: `getCartItemsStatus` is behind `featureGate("products")`, so
+ * the query only runs when products is on. With products off, a stale cart is
+ * left untouched rather than cleared — the cart UI is already hidden (cart
+ * dependsOn products), and turning products back on should restore the
+ * shopper's cart as it was.
  */
 export function CartRevalidator() {
   const { items, isHydrated, reconcile } = useCart();
+  const productsEnabled = useStorefrontFlags().isEnabled("products");
 
   // Build a stable query input keyed by ids only.
   // We memoize manually using a ref so that price/qty changes (driven by
@@ -41,7 +49,7 @@ export function CartRevalidator() {
   const { data } = api.product.getCartItemsStatus.useQuery(
     { items: ids },
     {
-      enabled: isHydrated && ids.length > 0,
+      enabled: productsEnabled && isHydrated && ids.length > 0,
       refetchOnWindowFocus: false,
       staleTime: 60_000,
     },

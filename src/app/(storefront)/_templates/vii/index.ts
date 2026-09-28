@@ -1,6 +1,20 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
+import {
+  defaultDonateData,
+  defaultDonateFieldGroups,
+} from "../default/donate";
+import {
+  defaultEventsData,
+  defaultEventsFieldGroups,
+} from "../default/events";
+import { defaultFaqData, defaultFaqFieldGroups } from "../default/faq";
+import {
+  defaultVideosData,
+  defaultVideosFieldGroups,
+} from "../default/videos";
+
 import { viiAboutData, viiAboutFieldGroups } from "./about";
 import { viiBlogCtaFieldGroup, viiBlogFieldGroup, viiBlogFields } from "./blog";
 import { viiCartData, viiCartFieldGroups } from "./cart-checkout/cart-fields";
@@ -83,6 +97,13 @@ export const viiData = {
     ...viiOrderData,
     ...globalBrandingData,
     ...globalAuthenticationData,
+    // Optional pages (events, videos, donate, FAQ) reuse Default's `default.*`
+    // copy fields verbatim — vii's pages read them through Default's
+    // resolver, so declaring them here exposes them in vii's editor.
+    ...defaultEventsData,
+    ...defaultVideosData,
+    ...defaultDonateData,
+    ...defaultFaqData,
   ],
 };
 
@@ -116,6 +137,10 @@ export const viiFieldGroups = {
       icon: "🔐",
       columns: 1,
     } satisfies TemplateFieldGroup,
+    ...defaultEventsFieldGroups,
+    ...defaultVideosFieldGroups,
+    ...defaultDonateFieldGroups,
+    ...defaultFaqFieldGroups,
   ],
 };
 

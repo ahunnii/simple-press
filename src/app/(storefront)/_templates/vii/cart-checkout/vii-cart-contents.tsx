@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -32,6 +33,8 @@ export function ViiCartContents({
 }: Props) {
   const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
     useCart();
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
 
   const { ref, visible } = useViiReveal(0.05);
 
@@ -616,40 +619,42 @@ export function ViiCartContents({
             </span>
           </div>
 
-          {/* CTA — Continue to checkout */}
-          <Link
-            href="/checkout"
-            className="vii-cta-btn"
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              background: "var(--vii-copper-deep)",
-              color: "var(--vii-paper)",
-              fontFamily: "var(--font-sans)",
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-              padding: "14px 32px",
-              borderRadius: "var(--radius)",
-              transition: "background 0.25s",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background =
-                "var(--vii-copper)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background =
-                "var(--vii-copper-deep)";
-            }}
-          >
-            Continue to checkout
-          </Link>
+          {/* CTA — Continue to checkout (PF8: hidden when `checkout` is off) */}
+          {checkoutEnabled && (
+            <Link
+              href="/checkout"
+              className="vii-cta-btn"
+              style={{
+                position: "relative",
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                background: "var(--vii-copper-deep)",
+                color: "var(--vii-paper)",
+                fontFamily: "var(--font-sans)",
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                textDecoration: "none",
+                padding: "14px 32px",
+                borderRadius: "var(--radius)",
+                transition: "background 0.25s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background =
+                  "var(--vii-copper)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background =
+                  "var(--vii-copper-deep)";
+              }}
+            >
+              Continue to checkout
+            </Link>
+          )}
 
           {/* Quiet continue-shopping link */}
           <Link

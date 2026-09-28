@@ -16,12 +16,13 @@ export const viiCheckoutData: TemplateField[] = [
   {
     key: "vii.checkout.contact-overline",
     label: "Contact information: small label",
-    description: "Small label above the contact information fields.",
+    description:
+      "Short label shown next to the contact step's automatically-numbered step marker (e.g. 'Step 1').",
     type: "text",
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
-    defaultValue: "Step 1",
+    defaultValue: "Your details",
   },
   {
     key: "vii.checkout.contact-heading",
@@ -36,12 +37,13 @@ export const viiCheckoutData: TemplateField[] = [
   {
     key: "vii.checkout.delivery-overline",
     label: "Delivery: small label",
-    description: "Small label above the delivery method section.",
+    description:
+      "Short label shown next to the delivery step's automatically-numbered step marker (e.g. 'Step 2'). This step only appears when in-store pickup is offered, so the number shown adjusts automatically.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
-    defaultValue: "Step 2",
+    defaultValue: "Delivery method",
   },
   {
     key: "vii.checkout.delivery-heading",
@@ -56,12 +58,13 @@ export const viiCheckoutData: TemplateField[] = [
   {
     key: "vii.checkout.shipping-overline",
     label: "Shipping address: small label",
-    description: "Small label above the shipping address fields.",
+    description:
+      "Short label shown next to the shipping-address step's automatically-numbered step marker (e.g. 'Step 2' or 'Step 3', depending on whether the delivery step above is shown). Only shown when the customer chooses shipping over pickup.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
-    defaultValue: "Step 3",
+    defaultValue: "Where it ships",
   },
   {
     key: "vii.checkout.shipping-heading",

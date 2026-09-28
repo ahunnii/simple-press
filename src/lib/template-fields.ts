@@ -437,6 +437,14 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "vii.homepage.testimonial-author",
   "vii.homepage.instagram-feed-url",
   "vii.homepage.instagram-embed",
+  // vii, retired 2026-09-28 — the PDP "Shipping & returns" row split into
+  // Shipping / Returns / Questions rows (vii.product.shipping-summary,
+  // returns-summary, question-text). The two global descriptions are still
+  // read as fallbacks via getRawCustomFieldString; the link text is gone
+  // (the question text is now the link).
+  "vii.global.product-shipping-description",
+  "vii.global.product-question-description",
+  "vii.product.question-link-text",
   // noise, retired 2026-09-25 — the wordmark's small location label now comes
   // from Settings → General (address city) via
   // `_templates/noise/shared/noise-location-tag.ts`, and the footer tagline

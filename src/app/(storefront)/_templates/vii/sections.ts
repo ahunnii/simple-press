@@ -8,9 +8,10 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * preview overlay (`${page}.${group}`); `order` reflects the visual
  * top-to-bottom order in the rendered page.
  *
- * Product/collections/cart/checkout pages are intentionally not covered here
- * yet — they fall back to the derived (auto-generated) section list via
- * `getSectionsForTemplate` until a later pass curates them too.
+ * Also covers the product page (details + hideable shipping/returns/questions
+ * rows) and the optional events/videos/donate/FAQ pages (Default's groups).
+ * Cart/checkout pages fall back to the derived (auto-generated) section list
+ * via `getSectionsForTemplate`.
  */
 export const viiSections: Record<string, TemplateSection[]> = {
   vii: [
@@ -396,6 +397,126 @@ export const viiSections: Record<string, TemplateSection[]> = {
       order: 0,
       hideable: false,
       links: [SECTION_LINKS.products],
+    },
+    {
+      id: "product.shipping",
+      page: "product",
+      title: "Shipping row",
+      description:
+        "Shipping note and policy link, shown in its own row on every product page.",
+      groupIds: ["product.shipping"],
+      order: 1,
+      hideable: true,
+      links: [SECTION_LINKS.products],
+    },
+    {
+      id: "product.returns",
+      page: "product",
+      title: "Returns row",
+      description:
+        "Returns note and policy link, shown in its own row on every product page.",
+      groupIds: ["product.returns"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.products],
+    },
+    {
+      id: "product.questions",
+      page: "product",
+      title: "Questions row",
+      description:
+        "Contact link, shown in its own row on every product page.",
+      groupIds: ["product.questions"],
+      order: 3,
+      hideable: true,
+      links: [SECTION_LINKS.products],
+    },
+
+    // ── Optional pages (Default's `default.*` groups, vii markup) ─────
+    // vii's events/videos/donate/FAQ pages render Default's field groups
+    // inside ViiPageBand + ViiPageSection, so these mirror `default/sections.ts`.
+    // Events and Donate end with their own section (global CTA off there).
+    {
+      id: "events.hero",
+      page: "events",
+      title: "Hero",
+      groupIds: ["events.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "events.list",
+      page: "events",
+      title: "List",
+      description: "Upcoming event rows and empty-state copy",
+      groupIds: ["events.list"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.events],
+    },
+    {
+      id: "events.cta",
+      page: "events",
+      title: "Closing banner",
+      description: "Bottom banner inviting visitors to get in touch",
+      groupIds: ["events.cta"],
+      order: 2,
+      hideable: true,
+    },
+    {
+      id: "videos.hero",
+      page: "videos",
+      title: "Hero",
+      groupIds: ["videos.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "videos.list",
+      page: "videos",
+      title: "List",
+      description: "Video grid and empty-state copy",
+      groupIds: ["videos.list"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.videos],
+    },
+    {
+      id: "donate.hero",
+      page: "donate",
+      title: "Hero",
+      groupIds: ["donate.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "donate.thank-you",
+      page: "donate",
+      title: "Thank You",
+      description: "Copy shown after a successful donation",
+      groupIds: ["donate.thank-you"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "donate.other-ways",
+      page: "donate",
+      title: "Other Ways to Give",
+      description: "Heading for the Venmo/Cash App section",
+      groupIds: ["donate.other-ways"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.donations],
+    },
+    {
+      id: "faq.page",
+      page: "faq",
+      title: "FAQ page",
+      description: "Heading and empty state on the FAQ page",
+      groupIds: ["faq.page"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.faq],
     },
   ],
 };

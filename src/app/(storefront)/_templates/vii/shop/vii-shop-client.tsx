@@ -20,6 +20,9 @@ import { ViiShopPromoBand } from "./vii-shop-promo-band";
 
 type Collections = RouterOutputs["collections"]["getAllPublic"];
 
+/** Fallback cover for a collection with no saved image (`imageUrl` is nullable data, not a template field). */
+const PLACEHOLDER_IMAGE = "/placeholder.svg";
+
 type Props = {
   products: Product[];
   collections: Collections;
@@ -398,7 +401,7 @@ export function ViiShopClient({
                     }}
                   >
                     <Image
-                      src={collection.imageUrl ?? "/placeholder.svg"}
+                      src={collection.imageUrl ?? PLACEHOLDER_IMAGE}
                       alt=""
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"

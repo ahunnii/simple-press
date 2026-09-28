@@ -2,16 +2,54 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
+import {
+  externalLinkProps,
+  filterNavByFlags,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveViiLocationTag } from "../shared/vii-location-tag";
 import { nonBlank } from "../shared/vii-non-blank";
 import { hasViiSocialLinks, ViiSocialLinks } from "../shared/vii-social-links";
+import { ViiFooterAccount } from "./vii-footer-account";
+
+/** Same shipped default as `vii-header.tsx`'s `DEFAULT_NAV_LINKS` — the two
+ *  files each keep their own copy (server vs. client component; no shared
+ *  `lib/nav.ts` here yet) rather than reaching across the boundary, same as
+ *  pollen's footer/header pair. */
+const DEFAULT_NAV_LINKS: NavItem[] = [
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About" },
+  { href: "/blog", label: "Blog" },
+  { href: "/contact", label: "Contact" },
+];
+
+const columnHeadingStyle: React.CSSProperties = {
+  fontFamily: "var(--font-sans)",
+  fontSize: "10px",
+  letterSpacing: "0.28em",
+  textTransform: "uppercase",
+  color: "var(--vii-ink-soft)",
+  fontWeight: 500,
+  marginBottom: "20px",
+};
+
+const columnLinkStyle: React.CSSProperties = {
+  fontFamily: "var(--font-sans)",
+  fontSize: "13px",
+  color: "var(--vii-navy)",
+  textDecoration: "none",
+  lineHeight: 1.5,
+  transition: "opacity 0.4s var(--vii-ease)",
+  opacity: 0.85,
+};
 
 export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail?.trim();
@@ -44,22 +82,29 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
   const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  const refundPolicy = policies.find((p) => p.slug === "refund-policy");
 
-  const SHOP_LINKS = [
-    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop All" }] : []),
-    ...(isEnabled("collections")
-      ? [{ href: "/collections", label: "Collections" }]
-      : []),
-  ] as const;
-
-  const QUICK_LINKS = [
-    { href: "/about", label: "About Us" },
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
-    { href: "/contact", label: "Contact" },
-    ...(isEnabled("testimonials")
-      ? [{ href: "/testimonials", label: "Reviews" }]
-      : []),
-  ] as const;
+  // Owner nav, grouped (PF11, B10.2/B10.4): childless top-level links in one
+  // "Quick Links" column, plus one short column per parent with children,
+  // headed by its own label (pollen footer pattern). Same shared route→flag
+  // filter (P-NAV-FLAGS) the header applies, so a flag-disabled route never
+  // shows here even if it's in the owner's saved nav.
+  const footerNav = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
+    isEnabled,
+  );
+  const mainLinks = footerNav.filter(
+    (item) => item.href.trim() && !item.children?.some((c) => c.href.trim()),
+  );
+  const groupColumns = footerNav
+    .map((item) => ({
+      label: item.label,
+      href: item.href,
+      external: item.external,
+      links: (item.children ?? []).filter((c) => c.href.trim()),
+    }))
+    .filter((group) => group.links.length > 0);
 
   return (
     <footer
@@ -76,7 +121,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           maxWidth: "1320px",
         }}
       >
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.6fr_2.4fr]">
           {/* ── Col 1: Wordmark + tagline + social ── */}
           <div className="flex flex-col gap-6">
             {/* Wordmark */}
@@ -144,162 +189,173 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             )}
           </div>
 
-          {/* ── Col 2: Shop links ── */}
-          {SHOP_LINKS.length > 0 && (
-            <ViiFooterCol
-              title="Shop"
-              links={SHOP_LINKS.map((l) => ({ href: l.href, label: l.label }))}
-            />
-          )}
+          {/* ── Right: owner-nav columns + account + contact ── */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
+            {mainLinks.length > 0 && (
+              <ViiFooterCol
+                title="Quick Links"
+                links={mainLinks.map((l) => ({
+                  href: l.href,
+                  label: l.label,
+                  external: l.external,
+                }))}
+              />
+            )}
 
-          {/* ── Col 3: Quick links ── */}
-          <ViiFooterCol
-            title="Quick Links"
-            links={QUICK_LINKS.map((l) => ({ href: l.href, label: l.label }))}
-          />
+            {groupColumns.map((group, g) => (
+              <ViiFooterCol
+                key={`${group.label}-${g}`}
+                title={group.label}
+                titleHref={group.href || undefined}
+                titleExternal={group.external}
+                links={group.links.map((l) => ({
+                  href: l.href,
+                  label: l.label,
+                  external: l.external,
+                }))}
+              />
+            ))}
 
-          {/* ── Col 4: Contact info ── */}
-          {(!!address || !!email || !!phone || hourRows.length > 0) && (
-            <div>
-              <h2
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "10px",
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                  color: "var(--vii-ink-soft)",
-                  fontWeight: 500,
-                  marginBottom: "20px",
-                }}
-              >
-                Contact
-              </h2>
+            {/* Account — omitted when customerAccounts is off (PF10, B10.3) */}
+            {isEnabled("customerAccounts") && (
+              <ViiFooterAccount
+                ordersEnabled={isEnabled("orders")}
+                linkStyle={columnLinkStyle}
+                headingStyle={columnHeadingStyle}
+              />
+            )}
 
-              {address && (
-                <div style={{ marginBottom: "16px" }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "var(--vii-navy)",
-                      marginBottom: "4px",
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Location
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "13px",
-                      lineHeight: 1.8,
-                      color: "var(--vii-ink-soft)",
-                    }}
-                  >
-                    {address}
-                  </p>
-                </div>
-              )}
+            {/* ── Contact info ── */}
+            {(!!address || !!email || !!phone || hourRows.length > 0) && (
+              <div>
+                <h2 style={columnHeadingStyle}>Contact</h2>
 
-              {hourRows.length > 0 && (
-                <div style={{ marginBottom: "16px" }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "var(--vii-navy)",
-                      marginBottom: "4px",
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Hours
-                  </p>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "13px",
-                      lineHeight: 1.8,
-                      color: "var(--vii-ink-soft)",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                    }}
-                  >
-                    {hourRows.map((row) => (
-                      <div
-                        key={row.label}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 12,
-                        }}
-                      >
-                        <span style={{ color: "var(--vii-navy)" }}>
-                          {row.label}
-                        </span>
-                        <span>{row.value}</span>
-                      </div>
-                    ))}
+                {address && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--vii-navy)",
+                        marginBottom: "4px",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Location
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "13px",
+                        lineHeight: 1.8,
+                        color: "var(--vii-ink-soft)",
+                      }}
+                    >
+                      {address}
+                    </p>
                   </div>
-                </div>
-              )}
+                )}
 
-              {(!!email || !!phone) && (
-                <div>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "var(--vii-navy)",
-                      marginBottom: "4px",
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Reach out
-                  </p>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "13px",
-                      lineHeight: 1.8,
-                      color: "var(--vii-ink-soft)",
-                    }}
-                  >
-                    {email && (
-                      <a
-                        href={`mailto:${email}`}
-                        className="block hover:opacity-80"
-                        style={{
-                          color: "inherit",
-                          transition: "opacity 0.4s var(--vii-ease)",
-                        }}
-                      >
-                        {email}
-                      </a>
-                    )}
-                    {phone && (
-                      <a
-                        href={`tel:${phone.replace(/\s/g, "")}`}
-                        className="block hover:opacity-80"
-                        style={{
-                          color: "inherit",
-                          transition: "opacity 0.4s var(--vii-ease)",
-                        }}
-                      >
-                        {phone}
-                      </a>
-                    )}
+                {hourRows.length > 0 && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--vii-navy)",
+                        marginBottom: "4px",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Hours
+                    </p>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "13px",
+                        lineHeight: 1.8,
+                        color: "var(--vii-ink-soft)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                      }}
+                    >
+                      {hourRows.map((row) => (
+                        <div
+                          key={row.label}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 12,
+                          }}
+                        >
+                          <span style={{ color: "var(--vii-navy)" }}>
+                            {row.label}
+                          </span>
+                          <span>{row.value}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+
+                {(!!email || !!phone) && (
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--vii-navy)",
+                        marginBottom: "4px",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Reach out
+                    </p>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "13px",
+                        lineHeight: 1.8,
+                        color: "var(--vii-ink-soft)",
+                      }}
+                    >
+                      {email && (
+                        <a
+                          href={`mailto:${email}`}
+                          className="block hover:opacity-80"
+                          style={{
+                            color: "inherit",
+                            transition: "opacity 0.4s var(--vii-ease)",
+                          }}
+                        >
+                          {email}
+                        </a>
+                      )}
+                      {phone && (
+                        <a
+                          href={`tel:${phone.replace(/\s/g, "")}`}
+                          className="block hover:opacity-80"
+                          style={{
+                            color: "inherit",
+                            transition: "opacity 0.4s var(--vii-ease)",
+                          }}
+                        >
+                          {phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -323,6 +379,10 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           © {new Date().getFullYear()} {name}
         </span>
 
+        {/* Mandatory, non-hideable policy strip (B10.1, PF9) — privacy/terms
+            fall back to the platform's own policy; shipping/refund have no
+            platform equivalent, so they only appear once published. Index
+            last. */}
         <div
           className="flex flex-wrap gap-5"
           style={{
@@ -333,51 +393,59 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             color: "var(--vii-ink-soft)",
           }}
         >
-          {privacyPolicy ? (
+          <Link
+            href={
+              privacyPolicy
+                ? `/${privacyPolicy.slug}`
+                : "/platform/policies/privacy-policy"
+            }
+            className="hover:opacity-80"
+            style={{
+              color: "inherit",
+              transition: "opacity 0.4s var(--vii-ease)",
+            }}
+          >
+            Privacy Policy
+          </Link>
+
+          <Link
+            href={
+              termsOfService
+                ? `/${termsOfService.slug}`
+                : "/platform/policies/terms-of-service"
+            }
+            className="hover:opacity-80"
+            style={{
+              color: "inherit",
+              transition: "opacity 0.4s var(--vii-ease)",
+            }}
+          >
+            Terms of Service
+          </Link>
+
+          {shippingPolicy && (
             <Link
-              href={`/${privacyPolicy.slug}`}
+              href={`/${shippingPolicy.slug}`}
               className="hover:opacity-80"
               style={{
                 color: "inherit",
                 transition: "opacity 0.4s var(--vii-ease)",
               }}
             >
-              Privacy Policy
-            </Link>
-          ) : (
-            <Link
-              href="/platform/policies/privacy-policy"
-              className="hover:opacity-80"
-              style={{
-                color: "inherit",
-                transition: "opacity 0.4s var(--vii-ease)",
-              }}
-            >
-              Privacy Policy
+              Shipping Policy
             </Link>
           )}
 
-          {termsOfService ? (
+          {refundPolicy && (
             <Link
-              href={`/${termsOfService.slug}`}
+              href={`/${refundPolicy.slug}`}
               className="hover:opacity-80"
               style={{
                 color: "inherit",
                 transition: "opacity 0.4s var(--vii-ease)",
               }}
             >
-              Terms of Service
-            </Link>
-          ) : (
-            <Link
-              href="/platform/policies/terms-of-service"
-              className="hover:opacity-80"
-              style={{
-                color: "inherit",
-                transition: "opacity 0.4s var(--vii-ease)",
-              }}
-            >
-              Terms of Service
+              Refund Policy
             </Link>
           )}
 
@@ -399,43 +467,47 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
 
 function ViiFooterCol({
   title,
+  titleHref,
+  titleExternal,
   links,
 }: {
   title: string;
-  links: { href: string; label: string }[];
+  titleHref?: string;
+  titleExternal?: boolean;
+  links: { href: string; label: string; external?: boolean }[];
 }) {
   return (
     <div>
-      <h2
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "10px",
-          letterSpacing: "0.28em",
-          textTransform: "uppercase",
-          color: "var(--vii-ink-soft)",
-          fontWeight: 500,
-          marginBottom: "20px",
-        }}
-      >
-        {title}
+      <h2 style={columnHeadingStyle}>
+        {titleHref ? (
+          <Link
+            href={titleHref}
+            {...externalLinkProps(titleExternal)}
+            style={{ color: "inherit", textDecoration: "none" }}
+            className="hover:opacity-80"
+          >
+            {title}
+            {titleExternal ? (
+              <span className="sr-only"> (opens in new tab)</span>
+            ) : null}
+          </Link>
+        ) : (
+          title
+        )}
       </h2>
       <ul className="flex flex-col gap-3">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                color: "var(--vii-navy)",
-                textDecoration: "none",
-                lineHeight: 1.5,
-                transition: "opacity 0.4s var(--vii-ease)",
-                opacity: 0.85,
-              }}
+              {...externalLinkProps(link.external)}
+              style={columnLinkStyle}
               className="hover:opacity-100"
             >
               {link.label}
+              {link.external ? (
+                <span className="sr-only"> (opens in new tab)</span>
+              ) : null}
             </Link>
           </li>
         ))}

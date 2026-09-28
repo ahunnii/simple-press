@@ -1,4 +1,6 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
@@ -18,10 +20,14 @@ import { ViiAboutSteps } from "./vii-about-steps";
 import { ViiAboutTeam } from "./vii-about-team";
 import { ViiAboutTeamOwner } from "./vii-about-team-owner";
 
-export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
+export async function ViiAboutPage({
+  business,
+}: DefaultAboutPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
+
+  const { isEnabled } = await getBusinessFlags();
 
   const f = resolveFields(customFields, [
     // Hero
@@ -81,6 +87,13 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
     nonBlank(business.supportEmail) ??
     nonBlank(getRawCustomFieldString(customFields, "vii.about.cta-email")) ??
     "";
+
+  // B2.5: hide the closing CTA button when its href names a flag that's
+  // off — never swap in another destination.
+  const ctaButtonLink = f["vii.about.cta-button-link"] ?? "";
+  const ctaButtonLinkFlag = navHrefFlag(ctaButtonLink);
+  const ctaButtonAllowed =
+    ctaButtonLinkFlag === null || isEnabled(ctaButtonLinkFlag);
 
   return (
     <PageTransition>
@@ -150,8 +163,10 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
           heading={f["vii.about.cta-heading"] ?? ""}
           subheading={f["vii.about.cta-subheading"] ?? ""}
           body={f["vii.about.cta-body"] ?? ""}
-          buttonLabel={f["vii.about.cta-button-label"] ?? ""}
-          buttonHref={f["vii.about.cta-button-link"] ?? ""}
+          buttonLabel={
+            ctaButtonAllowed ? f["vii.about.cta-button-label"] ?? "" : ""
+          }
+          buttonHref={ctaButtonLink}
           phone={ctaPhone}
           email={ctaEmail}
           showPhone={f["vii.about.cta-show-phone"] !== "false"}

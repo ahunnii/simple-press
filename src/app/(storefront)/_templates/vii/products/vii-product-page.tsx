@@ -1,6 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -9,8 +10,10 @@ import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
 import { fieldAttr, listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
+  getRawCustomFieldString,
   isContentEmpty,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
@@ -20,8 +23,12 @@ import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
 import { PageTransition } from "~/components/page-animations";
+import { ProductReviews } from "~/components/product-reviews";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "..";
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -29,6 +36,16 @@ import { ViiAccordion, ViiAccordionItem } from "../shared/vii-accordion";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiProductGrid } from "../shared/vii-product-grid";
 import { ViiProductActions } from "./vii-product-actions";
+
+/**
+ * Returns `value` trimmed, or `undefined` when it's blank/absent. Used to
+ * chain a new field's saved value with a retired legacy key's raw saved
+ * value via `??` (see noise/olive location-tag helpers for the pattern).
+ */
+function nonBlank(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed?.length ? trimmed : undefined;
+}
 
 const TRUST_BADGES_KEY = "vii.global.product-trust-badges";
 
@@ -66,26 +83,61 @@ export function ViiProductPage({
   );
   const customFields = business?.siteContent?.customFields;
   const f = resolveFields(customFields, [
-    "vii.global.product-shipping-description",
-    "vii.global.product-question-description",
-    "vii.product.question-link-text",
+    "vii.product.shipping-summary",
+    "vii.product.returns-summary",
+    "vii.product.question-text",
     "vii.product.related-overline",
     "vii.product.related-heading",
     "vii.product.related-heading-accent",
     "vii.product.related-link-text",
     "vii.product.coming-soon-heading",
     "vii.product.coming-soon-body",
+    "vii.product.reviews-heading",
   ]);
 
-  const shippingDescription = (
-    f["vii.global.product-shipping-description"] ?? ""
-  ).trim();
-  const questionDescription = (
-    f["vii.global.product-question-description"] ?? ""
-  ).trim();
-  const questionLinkText = (f["vii.product.question-link-text"] ?? "").trim();
+  // Shipping / returns / questions used to be two combined fields
+  // (`vii.global.product-shipping-description`, `-question-description`,
+  // retired 2026-09-28 PF19). Their raw saved values are a read-only
+  // fallback so skinbar-vii's existing copy keeps showing until the owner
+  // re-saves the new split fields.
+  const shippingSummary =
+    nonBlank(f["vii.product.shipping-summary"]) ??
+    nonBlank(
+      getRawCustomFieldString(
+        customFields,
+        "vii.global.product-shipping-description",
+      ),
+    ) ??
+    "";
+  const returnsSummary = nonBlank(f["vii.product.returns-summary"]) ?? "";
+  const questionText =
+    nonBlank(f["vii.product.question-text"]) ??
+    nonBlank(
+      getRawCustomFieldString(
+        customFields,
+        "vii.global.product-question-description",
+      ),
+    ) ??
+    "";
+  const reviewsHeading = f["vii.product.reviews-heading"] ?? "";
   const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Each row is its own hideable section (product.shipping / product.returns
+  // / product.questions) so an owner can hide one without hiding the others.
+  const showShippingRow =
+    isSectionVisible(customFields, "vii", "product.shipping") &&
+    (shippingSummary !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "vii", "product.returns") &&
+    (returnsSummary !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "vii", "product.questions") &&
+    questionText !== "";
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   // A product's own features (Products → features) win; otherwise the
   // store-wide badges from the editor. No built-in fallback rows — an empty
@@ -287,6 +339,22 @@ export function ViiProductPage({
               {...sectionGroupAttr("product", "details")}
               style={{ display: "flex", flexDirection: "column", gap: 24 }}
             >
+              {/* Wishlist — its own row above the buy panel so it stays
+                  visible across every ViiProductActions branch (coming
+                  soon, variants, out of stock, in stock). Self-gates on the
+                  wishlist flag (renders nothing when off). */}
+              <WishlistButton
+                item={{
+                  productId: product.id,
+                  name: product.name,
+                  slug: product.slug,
+                  price: displayPrice,
+                  imageUrl: product.images[0]?.url ?? null,
+                }}
+                className="static flex size-10 shrink-0 items-center justify-center self-start rounded-[var(--radius)] border border-[var(--vii-hairline)] bg-[var(--vii-paper)] text-[var(--vii-navy)] shadow-none backdrop-blur-none hover:scale-100 hover:bg-[var(--vii-cream)]"
+                iconClassName="size-4"
+              />
+
               {/* Actions */}
               <ViiProductActions
                 product={product}
@@ -370,8 +438,14 @@ export function ViiProductPage({
                 </div>
               ) : null}
 
-              {/* Accordion */}
-              {(!isAdditionalEmpty || shippingDescription) && (
+              {/* Accordion — Details (not hideable), then Shipping / Returns
+                  / Questions, each its own hideable section
+                  (product.shipping / product.returns / product.questions)
+                  so an owner can hide one row without hiding the others. */}
+              {(!isAdditionalEmpty ||
+                showShippingRow ||
+                showReturnsRow ||
+                showQuestionsRow) && (
                 <ViiAccordion style={{ marginTop: 8 }}>
                   {!isAdditionalEmpty && (
                     <ViiAccordionItem title="Details" defaultOpen>
@@ -383,90 +457,127 @@ export function ViiProductPage({
                       />
                     </ViiAccordionItem>
                   )}
-                  {shippingDescription && (
-                    <ViiAccordionItem title="Shipping &amp; returns">
-                      <p
-                        {...fieldAttr("vii.global.product-shipping-description")}
-                        style={{ margin: "0 0 8px", whiteSpace: "pre-line" }}
-                      >
-                        {shippingDescription}
-                      </p>
-                      {(hasShippingPolicy || hasRefundPolicy) && (
-                        <p
-                          style={{
-                            margin: 0,
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 16,
-                          }}
-                        >
-                          {hasShippingPolicy && (
-                            <Link
-                              href="/shipping-policy"
-                              style={{
-                                color: "var(--vii-navy)",
-                                textDecoration: "underline",
-                                textUnderlineOffset: 2,
-                              }}
-                            >
-                              View shipping policy
-                            </Link>
-                          )}
-                          {hasRefundPolicy && (
-                            <Link
-                              href="/refund-policy"
-                              style={{
-                                color: "var(--vii-navy)",
-                                textDecoration: "underline",
-                                textUnderlineOffset: 2,
-                              }}
-                            >
-                              View returns policy
-                            </Link>
-                          )}
+                  {showShippingRow && (
+                    <div {...sectionGroupAttr("product", "shipping")}>
+                      <ViiAccordionItem title="Shipping">
+                        {shippingSummary && (
+                          <p
+                            {...fieldAttr("vii.product.shipping-summary")}
+                            style={{
+                              margin: "0 0 8px",
+                              whiteSpace: "pre-line",
+                            }}
+                          >
+                            {shippingSummary}
+                          </p>
+                        )}
+                        {hasShippingPolicy && (
+                          <Link
+                            href="/shipping-policy"
+                            style={{
+                              color: "var(--vii-navy)",
+                              textDecoration: "underline",
+                              textUnderlineOffset: 2,
+                            }}
+                          >
+                            Read the full shipping policy
+                          </Link>
+                        )}
+                      </ViiAccordionItem>
+                    </div>
+                  )}
+                  {showReturnsRow && (
+                    <div {...sectionGroupAttr("product", "returns")}>
+                      <ViiAccordionItem title="Returns">
+                        {returnsSummary && (
+                          <p
+                            {...fieldAttr("vii.product.returns-summary")}
+                            style={{
+                              margin: "0 0 8px",
+                              whiteSpace: "pre-line",
+                            }}
+                          >
+                            {returnsSummary}
+                          </p>
+                        )}
+                        {hasRefundPolicy && (
+                          <Link
+                            href="/refund-policy"
+                            style={{
+                              color: "var(--vii-navy)",
+                              textDecoration: "underline",
+                              textUnderlineOffset: 2,
+                            }}
+                          >
+                            Read the full returns policy
+                          </Link>
+                        )}
+                      </ViiAccordionItem>
+                    </div>
+                  )}
+                  {showQuestionsRow && (
+                    <div {...sectionGroupAttr("product", "questions")}>
+                      <ViiAccordionItem title="Questions">
+                        <p style={{ margin: 0 }}>
+                          <Link
+                            href="/contact"
+                            {...fieldAttr("vii.product.question-text")}
+                            style={{
+                              color: "var(--vii-navy)",
+                              textDecoration: "underline",
+                              textUnderlineOffset: 2,
+                            }}
+                          >
+                            {questionText}
+                          </Link>
                         </p>
-                      )}
-                    </ViiAccordionItem>
+                      </ViiAccordionItem>
+                    </div>
                   )}
                 </ViiAccordion>
-              )}
-
-              {/* Ask a question — inline */}
-              {questionDescription && (
-                <p
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: 12,
-                    color: "var(--vii-ink-soft)",
-                    margin: 0,
-                  }}
-                >
-                  <span
-                    {...fieldAttr("vii.global.product-question-description")}
-                  >
-                    {questionDescription}
-                  </span>
-                  {questionLinkText && (
-                    <>
-                      {" "}
-                      <Link
-                        href="/contact"
-                        {...fieldAttr("vii.product.question-link-text")}
-                        style={{
-                          color: "var(--vii-navy)",
-                          textDecoration: "underline",
-                          textUnderlineOffset: 2,
-                        }}
-                      >
-                        {questionLinkText}
-                      </Link>
-                    </>
-                  )}
-                </p>
               )}
             </div>
           </div>
         </div>
+
+        {/* Reviews — only mounts (and only fires review queries) when the
+            reviews feature flag is enabled for this business. */}
+        {reviewsEnabled && (
+          <section
+            aria-label="Reviews"
+            style={{
+              borderTop: "1px solid var(--vii-hairline)",
+              padding: "clamp(56px, 8vw, 96px) 0 clamp(64px, 9vw, 112px)",
+            }}
+          >
+            {reviewsHeading && (
+              <h2
+                {...fieldAttr("vii.product.reviews-heading")}
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontWeight: 400,
+                  fontSize: "clamp(26px, 3.6vw, 40px)",
+                  lineHeight: 1.1,
+                  color: "var(--vii-navy)",
+                  margin: "0 0 32px",
+                }}
+              >
+                {reviewsHeading}
+              </h2>
+            )}
+            <ProductReviews
+              productId={product.id}
+              onWriteReviewClick={() => setReviewDialogOpen(true)}
+            />
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </section>
+        )}
 
         {/* You may also like */}
         {(relatedProducts?.length ?? 0) > 0 && (

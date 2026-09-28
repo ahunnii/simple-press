@@ -95,31 +95,33 @@ export function ViiBlogPostCta({
           </p>
         )}
 
-        <Link
-          href={buttonLink ?? "/contact"}
-          className="vii-cta-btn"
-          {...fieldAttr("vii.blog.cta-button-text")}
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "14px 32px",
-            background: "var(--vii-copper-deep)",
-            color: "var(--vii-paper)",
-            fontFamily: "var(--font-sans)",
-            fontSize: 12,
-            fontWeight: 500,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            textDecoration: "none",
-            borderRadius: "var(--radius)",
-            transition:
-              "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
-          }}
-        >
-          {buttonText ?? "Book a visit"}
-        </Link>
+        {buttonLink?.trim() && (
+          <Link
+            href={buttonLink}
+            className="vii-cta-btn"
+            {...fieldAttr("vii.blog.cta-button-text")}
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "14px 32px",
+              background: "var(--vii-copper-deep)",
+              color: "var(--vii-paper)",
+              fontFamily: "var(--font-sans)",
+              fontSize: 12,
+              fontWeight: 500,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              borderRadius: "var(--radius)",
+              transition:
+                "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
+            }}
+          >
+            {buttonText ?? "Book a visit"}
+          </Link>
+        )}
       </div>
     </section>
   );

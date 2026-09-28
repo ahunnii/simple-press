@@ -4,11 +4,22 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
  * Product-page fields. They apply to EVERY product page — the visual editor
  * previews them on a representative published product (page "product").
  *
- * `vii.global.product-shipping-description`, `vii.global.product-question-description`,
- * and `vii.global.product-trust-badges` moved here from the root `index.ts`
- * "Global: Product Page" group (2026-09-25 vii cleanup) — their keys are
+ * `vii.global.product-trust-badges` moved here from the root `index.ts`
+ * "Global: Product Page" group (2026-09-25 vii cleanup) — its key is
  * UNCHANGED, only `page`/`group` moved, so previously saved values keep
  * resolving.
+ *
+ * `vii.product.shipping-summary` / `returns-summary` / `question-text`
+ * (2026-09-28 parity fix, PF19) replace the single "Shipping & returns"
+ * accordion item (one textarea covering both) with three independently
+ * hideable accordion rows — Shipping, Returns, Questions — matching the
+ * happy-bamboo/bamboo split. The retired `vii.global.product-shipping-description`,
+ * `vii.global.product-question-description`, and `vii.product.question-link-text`
+ * keys are no longer declared here; `ViiProductPage` reads them as a
+ * read-only fallback via `getRawCustomFieldString` so skinbar-vii's saved
+ * copy keeps showing until the owner re-saves the new fields. Ask the
+ * orchestrator to add all three to `RETIRED_TEMPLATE_KEYS`
+ * (`src/lib/template-fields.ts`) — never delete a saved key outright.
  *
  * Trust badges deliberately have no built-in fallback rows: an empty list
  * renders no store-wide badges at all, and a product's own features
@@ -18,40 +29,40 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
  */
 export const viiProductData: TemplateField[] = [
   {
-    key: "vii.global.product-shipping-description",
-    label: "Product Shipping & Returns Text",
+    key: "vii.product.shipping-summary",
+    label: "Shipping note",
     description:
-      "Shown in the 'Shipping & returns' accordion on every product page. Leave blank to hide that accordion. When your shipping or returns policy pages are published, links to them appear here too.",
+      "Short note in the Shipping row on every product page, e.g. delivery times. A link to your shipping policy is added automatically when that page is published. Leave blank to show just the link, or nothing if the policy isn't published.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.shipping",
     gridColumn: "col-span-full",
-    defaultValue:
-      "We ship within 1–2 business days. Returns are accepted within 30 days of delivery on unused items.",
+    defaultValue: "",
+    placeholder: "e.g. Ships within 1-2 business days.",
   },
   {
-    key: "vii.global.product-question-description",
-    label: "Product 'Ask a Question' Text",
+    key: "vii.product.returns-summary",
+    label: "Returns note",
     description:
-      "Shown below the buy button on every product page, above the link to your contact page. Leave blank to hide.",
+      "Short note in the Returns row on every product page, e.g. refund terms. A link to your refund policy is added automatically when that page is published. Leave blank to show just the link, or nothing if the policy isn't published.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.returns",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Have a question about this product? Our team is happy to help.",
+    defaultValue: "",
+    placeholder: "e.g. Unopened items can be returned within 30 days.",
   },
   {
-    key: "vii.product.question-link-text",
-    label: "Questions link text",
+    key: "vii.product.question-text",
+    label: "Questions link",
     description:
-      "Text for the link to your contact page, shown after the question text below the buy button.",
+      "One line under the buy button that links to your contact page. Leave blank to hide.",
     type: "text",
     page: "product",
-    group: "product.details",
-    gridColumn: "col-span-1",
-    defaultValue: "You can reach out to us here.",
-    placeholder: "You can reach out to us here.",
+    group: "product.questions",
+    gridColumn: "col-span-full",
+    defaultValue: "Have a question about this product? Get in touch.",
+    placeholder: "e.g. Questions about this product? Ask us.",
   },
   {
     key: "vii.global.product-trust-badges",
@@ -153,6 +164,18 @@ export const viiProductData: TemplateField[] = [
     defaultValue: "This product isn't available yet. Check back later!",
     placeholder: "e.g. Back in stock next month.",
   },
+  {
+    key: "vii.product.reviews-heading",
+    label: "Reviews heading",
+    description:
+      "Heading above customer reviews near the bottom of every product page. Only shown when reviews are enabled for your store. Leave blank to hide the heading.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "What customers are saying",
+    placeholder: "e.g. Customer reviews",
+  },
 ];
 
 export const viiProductFieldGroups: TemplateFieldGroup[] = [
@@ -161,6 +184,30 @@ export const viiProductFieldGroups: TemplateFieldGroup[] = [
     title: "Product page",
     description: "Text shown on every product page, around the buy button.",
     icon: "🛍️",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.shipping",
+    title: "Shipping row",
+    description:
+      "Shipping note shown on every product page. Can be hidden independently of the returns and questions rows.",
+    icon: "🚚",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.returns",
+    title: "Returns row",
+    description:
+      "Returns note shown on every product page. Can be hidden independently of the shipping and questions rows.",
+    icon: "↩️",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.questions",
+    title: "Questions row",
+    description:
+      "Contact link shown under the buy button on every product page. Can be hidden independently of the shipping and returns rows.",
+    icon: "❓",
     columns: 1,
   } satisfies TemplateFieldGroup,
 ];

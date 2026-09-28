@@ -75,6 +75,25 @@ export function ViiCheckoutForm({
     f.state.trim().length > 0 &&
     f.shippingPending;
 
+  // PF24 — number the steps from the sections actually rendered, instead of
+  // baking "Step N" into each section's saved text (which goes stale the
+  // moment a step above it is hidden). Contact always renders; delivery only
+  // renders when the store offers in-store pickup; the shipping-address
+  // fieldset only renders when the customer has shipping selected.
+  const deliveryStepVisible = f.shippingConfig.offersInStorePickup;
+  const shippingStepVisible = f.deliveryMethod === "ship";
+  let viiCheckoutStep = 1;
+  const contactStepNumber = viiCheckoutStep++;
+  const deliveryStepNumber = deliveryStepVisible ? viiCheckoutStep++ : null;
+  const shippingStepNumber = shippingStepVisible ? viiCheckoutStep++ : null;
+
+  // Saved values from before auto-numbering may still read "Step 3" — drop
+  // that stale prefix so the rendered number is the only one shown.
+  const stepOverline = (n: number, label: string) => {
+    const text = label.replace(/^\s*step\s*\d+\s*[·:.\-–—]?\s*/i, "").trim();
+    return text ? `Step ${n} · ${text}` : `Step ${n}`;
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
     await f.handleSubmit(e);
@@ -166,7 +185,7 @@ export function ViiCheckoutForm({
               }}
             >
               <ViiOverline style={{ marginBottom: 10 }}>
-                {contactOverline}
+                {stepOverline(contactStepNumber, contactOverline)}
               </ViiOverline>
               <h2
                 id="vii-co-contact-heading"
@@ -272,7 +291,10 @@ export function ViiCheckoutForm({
                 }}
               >
                 <ViiOverline style={{ marginBottom: 10 }}>
-                  {deliveryOverline}
+                  {/* deliveryStepNumber is non-null here: this block only
+                      renders when `deliveryStepVisible` is true, the same
+                      condition that assigned it. */}
+                  {stepOverline(deliveryStepNumber!, deliveryOverline)}
                 </ViiOverline>
                 <h2
                   id="vii-co-delivery-heading"
@@ -498,7 +520,10 @@ export function ViiCheckoutForm({
                 }}
               >
                 <ViiOverline style={{ marginBottom: 10 }}>
-                  {shippingOverline}
+                  {/* shippingStepNumber is non-null here: this fieldset only
+                      renders when `shippingStepVisible` is true, the same
+                      condition that assigned it. */}
+                  {stepOverline(shippingStepNumber!, shippingOverline)}
                 </ViiOverline>
                 <h2
                   id="vii-co-shipping-heading"

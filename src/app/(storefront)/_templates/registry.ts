@@ -433,9 +433,12 @@ import { ViiAboutPage } from "./vii/about/vii-about-page";
 import { ViiAccountSecurityPage } from "./vii/account/vii-account-security-page";
 import { ViiAccountSettingsPage } from "./vii/account/vii-account-settings-page";
 import { ViiAddressBookPage } from "./vii/account/vii-address-book-page";
+import { ViiInvoicesPage } from "./vii/account/vii-invoices-page";
 import { ViiOrderDetailPage } from "./vii/account/vii-order-detail-page";
 import { ViiOrdersPage } from "./vii/account/vii-orders-page";
 import { ViiPreferencesPage } from "./vii/account/vii-preferences-page";
+import { ViiRewardsPage } from "./vii/account/vii-rewards-page";
+import { ViiSubscriptionsPage } from "./vii/account/vii-subscriptions-page";
 import { ViiBlogPage } from "./vii/blog/vii-blog-page";
 import { ViiBlogPostPage } from "./vii/blog/vii-blog-post-page";
 import { ViiCartPage } from "./vii/cart-checkout/vii-cart-page";
@@ -445,6 +448,10 @@ import { ViiOrderSuccessPage } from "./vii/cart-checkout/vii-order-success-page"
 import { ViiCollectionPage } from "./vii/collections/vii-collection-page";
 import { ViiCollectionsPage } from "./vii/collections/vii-collections-page";
 import { ViiContactPage } from "./vii/contact/vii-contact-page";
+import { ViiDonatePage } from "./vii/donate/vii-donate-page";
+import { ViiEventPage } from "./vii/events/vii-event-page";
+import { ViiEventsPage } from "./vii/events/vii-events-page";
+import { ViiFaqPage } from "./vii/faq/vii-faq-page";
 import { ViiGenericPage } from "./vii/generic/vii-generic-page";
 import { ViiLayout } from "./vii/layout/vii-layout";
 import { ViiMaintenancePage } from "./vii/maintenance/vii-maintenance-page";
@@ -452,6 +459,7 @@ import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
 import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
+import { ViiVideosPage } from "./vii/videos/vii-videos-page";
 // ---------------------------------------------------------------------------
 // Detroit Community Wealth Fund
 // ---------------------------------------------------------------------------
@@ -1031,9 +1039,19 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: ViiOrderDetailPage,
     OrdersPage: ViiOrdersPage,
     PreferencesPage: ViiPreferencesPage,
+    RewardsPage: ViiRewardsPage,
+    SubscriptionsPage: ViiSubscriptionsPage,
+    InvoicesPage: ViiInvoicesPage,
     TestimonialsPage: ViiTestimonialsPage,
     ServicesIndexPage: ViiServicesIndexPage,
     MaintenancePage: ViiMaintenancePage,
+    // Optional pages built on vii's generic band (ViiPageBand), with
+    // Default's data logic and `default.*` copy fields (B1.2).
+    EventsPage: ViiEventsPage,
+    EventPage: ViiEventPage,
+    VideosPage: ViiVideosPage,
+    DonatePage: ViiDonatePage,
+    FaqPage: ViiFaqPage,
   },
 };
 

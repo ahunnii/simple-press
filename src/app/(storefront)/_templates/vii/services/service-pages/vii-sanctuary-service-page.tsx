@@ -44,6 +44,7 @@ import {
 } from "../../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
 import { ViiOverline } from "../../shared/vii-overline";
+import { VII_EDGE_CONTAINER } from "../../shared/vii-page-edge";
 import { resolveSanctuaryFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -922,7 +923,7 @@ function TreatmentMenu({
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
       }}
     >
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <div style={VII_EDGE_CONTAINER}>
         {/* Section heading */}
         <div
           ref={headRef}

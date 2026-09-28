@@ -37,15 +37,39 @@ export const viiOrderData: TemplateField[] = [
   },
   {
     key: "vii.order.next-steps",
-    label: "What happens next",
+    label: "What happens next (fallback)",
     description:
-      "Short paragraph or list shown below the confirmation details — e.g. email confirmation, shipping notice, order tracking. Use line breaks to create separate items.",
+      "Shown below the confirmation details when the order's delivery method can't be determined (e.g. this page was opened without a fresh Stripe session). Use line breaks to create separate items. See 'What happens next — shipping' and '— pickup' below for the versions shown on a real order.",
     type: "textarea",
     page: "cart",
     group: "order.main",
     gridColumn: "col-span-full",
     defaultValue:
       "You'll receive an email confirmation shortly.\nWe'll notify you as soon as your order ships.\nTrack your order status via your confirmation email.",
+  },
+  {
+    key: "vii.order.next-steps-ship",
+    label: "What happens next — shipping",
+    description:
+      "Shown below the confirmation details on orders being shipped to the customer. Use line breaks to create separate items.",
+    type: "textarea",
+    page: "cart",
+    group: "order.main",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "You'll receive an email confirmation shortly.\nWe'll notify you as soon as your order ships.\nTrack your order status via your confirmation email.",
+  },
+  {
+    key: "vii.order.next-steps-pickup",
+    label: "What happens next — pickup",
+    description:
+      "Shown below the confirmation details on in-store-pickup orders. Use line breaks to create separate items. The pickup address itself comes from Settings → Shipping, shown automatically beneath this text.",
+    type: "textarea",
+    page: "cart",
+    group: "order.main",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "You'll receive an email confirmation shortly.\nWe'll let you know as soon as your order is ready for pickup.",
   },
   {
     key: "vii.order.continue-cta",

@@ -1,6 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
@@ -60,6 +61,16 @@ export async function ViiShopPage({
   const heading = f["vii.shop.intro-heading"] ?? "";
   const accent = f["vii.shop.intro-accent"] ?? "";
 
+  // B2.5: hide a promo button when its href names a flag that's off — never
+  // swap in another destination.
+  const ctaFlagOk = (href: string): boolean => {
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  };
+
+  const promoLeftButtonLink = f["vii.shop.promo-left-button-link"] ?? "";
+  const promoRightButtonLink = f["vii.shop.promo-right-button-link"] ?? "";
+
   const promo = {
     left: {
       overline: f["vii.shop.promo-left-overline"] ?? "",
@@ -67,8 +78,10 @@ export async function ViiShopPage({
       accent: f["vii.shop.promo-left-accent"] ?? "",
       body: f["vii.shop.promo-left-body"] ?? "",
       image: f["vii.shop.promo-left-image"] ?? "",
-      buttonLabel: f["vii.shop.promo-left-button-label"] ?? "",
-      buttonLink: f["vii.shop.promo-left-button-link"] ?? "",
+      buttonLabel: ctaFlagOk(promoLeftButtonLink)
+        ? f["vii.shop.promo-left-button-label"] ?? ""
+        : "",
+      buttonLink: promoLeftButtonLink,
     },
     right: {
       overline: f["vii.shop.promo-right-overline"] ?? "",
@@ -76,8 +89,10 @@ export async function ViiShopPage({
       accent: f["vii.shop.promo-right-accent"] ?? "",
       body: f["vii.shop.promo-right-body"] ?? "",
       image: f["vii.shop.promo-right-image"] ?? "",
-      buttonLabel: f["vii.shop.promo-right-button-label"] ?? "",
-      buttonLink: f["vii.shop.promo-right-button-link"] ?? "",
+      buttonLabel: ctaFlagOk(promoRightButtonLink)
+        ? f["vii.shop.promo-right-button-label"] ?? ""
+        : "",
+      buttonLink: promoRightButtonLink,
     },
   };
 

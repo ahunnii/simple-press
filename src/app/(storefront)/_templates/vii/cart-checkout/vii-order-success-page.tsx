@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { getSession } from "~/server/better-auth/server";
 
 import { resolveFields } from "..";
 import { ViiOrderConfirmation } from "./vii-order-confirmation";
@@ -46,7 +47,7 @@ function ViiOrderLoadingFallback({ loadingText }: { loadingText: string }) {
 
 // ─── Server component entry ───────────────────────────────────────────────────
 
-export function ViiOrderSuccessPage({ business }: Props) {
+export async function ViiOrderSuccessPage({ business }: Props) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
@@ -56,6 +57,8 @@ export function ViiOrderSuccessPage({ business }: Props) {
     "vii.order.thank-you-heading",
     "vii.order.thank-you-accent",
     "vii.order.next-steps",
+    "vii.order.next-steps-ship",
+    "vii.order.next-steps-pickup",
     "vii.order.continue-cta",
     "vii.order.loading-text",
     "vii.order.no-order-heading",
@@ -63,6 +66,10 @@ export function ViiOrderSuccessPage({ business }: Props) {
   ]);
 
   const loadingText = f["vii.order.loading-text"] ?? "Confirming your order…";
+
+  // PF23 / B9.4 — resolved server-side so the account CTA is correct on the
+  // first paint; see the doc on `ViiOrderConfirmation`'s `initialSession` prop.
+  const initialSession = await getSession().catch(() => null);
 
   return (
     <Suspense fallback={<ViiOrderLoadingFallback loadingText={loadingText} />}>
@@ -72,10 +79,13 @@ export function ViiOrderSuccessPage({ business }: Props) {
         thankYouHeading={f["vii.order.thank-you-heading"] ?? ""}
         thankYouAccent={f["vii.order.thank-you-accent"] ?? ""}
         nextSteps={f["vii.order.next-steps"] ?? ""}
+        nextStepsShip={f["vii.order.next-steps-ship"] ?? ""}
+        nextStepsPickup={f["vii.order.next-steps-pickup"] ?? ""}
         continueCta={f["vii.order.continue-cta"] ?? ""}
         loadingText={loadingText}
         noOrderHeading={f["vii.order.no-order-heading"] ?? ""}
         noOrderBody={f["vii.order.no-order-body"] ?? ""}
+        initialSession={initialSession}
       />
     </Suspense>
   );

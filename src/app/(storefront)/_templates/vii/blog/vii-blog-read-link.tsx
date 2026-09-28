@@ -18,7 +18,7 @@ export function ViiBlogReadLink({
   children,
   tone = "light",
   as = "span",
-  href,
+  href = "/",
 }: Props) {
   const baseStyle: CSSProperties = {
     display: "inline-flex",
@@ -48,7 +48,7 @@ export function ViiBlogReadLink({
 
   if (as === "link") {
     return (
-      <Link href={href ?? "/"} style={baseStyle}>
+      <Link href={href} style={baseStyle}>
         {children}
         {icon}
       </Link>
