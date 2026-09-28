@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -14,6 +15,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveFields } from "../index";
 import { noiseMonogram } from "../shared/noise-monogram";
@@ -54,6 +56,11 @@ export function NoiseBlogPostPage({
   const shopCtaLink = nonBlank(f["noise.global.shop-cta-link"]) ?? "/shop";
   const shopCtaHeading = f["noise.blog.post-shop-cta-heading"] ?? "";
   const shopCtaSubheading = f["noise.blog.post-shop-cta-subheading"] ?? "";
+  // B2.5: the whole band is a pitch for the link, so it hides with it when
+  // the link's route is flag-gated off (e.g. `/shop` with `products` off).
+  const { isEnabled } = useStorefrontFlags();
+  const shopCtaFlag = navHrefFlag(shopCtaLink);
+  const showShopCta = shopCtaFlag === null || isEnabled(shopCtaFlag);
 
   const filtered = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
 
@@ -141,7 +148,7 @@ export function NoiseBlogPostPage({
       </section>
 
       {/* ── Shop CTA band ── */}
-      {isSectionVisible(customFields, "noise", "blog.post") && (
+      {showShopCta && isSectionVisible(customFields, "noise", "blog.post") && (
         <section
           className="px-7 py-0"
           style={{ background: "var(--vn-paper)" }}

@@ -209,13 +209,15 @@ export function NoiseHeroSection({
             {tagline}
           </p>
 
-          <Link
-            href={btnLink}
-            className="vn-btn-hero vn-focus-on-dark mt-1"
-            {...fieldAttr("noise.homepage.hero-primary-button-text")}
-          >
-            {btnText}
-          </Link>
+          {btnText && btnLink ? (
+            <Link
+              href={btnLink}
+              className="vn-btn-hero vn-focus-on-dark mt-1"
+              {...fieldAttr("noise.homepage.hero-primary-button-text")}
+            >
+              {btnText}
+            </Link>
+          ) : null}
         </motion.div>
       </div>
 

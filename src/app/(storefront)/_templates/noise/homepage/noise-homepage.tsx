@@ -1,8 +1,10 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isPreviewRequest } from "~/lib/preview/preview-context";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { getRichTextFieldValue } from "~/lib/template-fields";
 import { db } from "~/server/db";
@@ -21,6 +23,7 @@ import { NoiseHeroSection } from "./noise-hero-section";
 import { NoiseIntroWrapper } from "./noise-intro-wrapper";
 import { NoiseMarqueeStrip } from "./noise-marquee-strip";
 import { NoisePhilosophySection } from "./noise-philosophy-section";
+import { NoisePopup } from "./noise-popup";
 import { NoiseProductRail } from "./noise-product-rail";
 import { NoiseTestimonialStrip } from "./noise-testimonial-strip";
 
@@ -61,6 +64,24 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
     api.business.getHomepage(),
     getBusinessFlags(),
   ]);
+
+  // B2.4: the owner's popup. `getHomepage` doesn't select `popupConfig` (it's
+  // not needed for the fields/products it returns), so this reads from the
+  // richer `business` prop instead — same source olive/vii use.
+  const popup = resolvePopup(props?.business?.siteContent, flags.isEnabled("popups"));
+
+  // B2.5: hide a field-driven CTA/link when its route's flag is off — never
+  // swap in another destination. A section may already require its own flag
+  // to render at all; this only bites when the owner points a link at a
+  // *different*, flag-gated route (e.g. a "/shop" button on a section that
+  // isn't itself gated on "products"). `resolveFields` already applies each
+  // key's own default (e.g. "/shop") when the field is unset, so `f[key]`
+  // alone — never `?? "/shop"` — is the resolved href; a blank href (the
+  // owner cleared the field) stays blank rather than being overridden.
+  const ctaFlagOk = (href: string): boolean => {
+    const flag = navHrefFlag(href);
+    return flag === null || flags.isEnabled(flag);
+  };
 
   // `listRandom` is behind `featureGate("testimonials")` and FORBIDs when the
   // flag is off — fetched eagerly it 500s the whole homepage for a store that
@@ -172,8 +193,34 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
   const visible = (sectionId: string) =>
     isSectionVisible(themeFields, "noise", sectionId);
 
+  // ── Field-driven CTA/link hrefs (B2.5) ────────────────────────────────────
+  // Each key below has a matching `defaultValue` in `homepage/index.tsx`, so
+  // `resolveFields` already applies it for an unset field — no `?? "/shop"`
+  // fallback here. A blanked field stays blank (the CTA hides) rather than
+  // being overridden back to the old default.
+  const heroCtaRaw = f["noise.homepage.hero-primary-button-link"] ?? "";
+  const heroCtaHref = ctaFlagOk(heroCtaRaw) ? heroCtaRaw : "";
+
+  const aboutCtaRaw = f["noise.homepage-about-button-link"] ?? "";
+  const aboutCtaHref = ctaFlagOk(aboutCtaRaw) ? aboutCtaRaw : "";
+
+  const collectionsCtaRaw = f["noise.homepage-featured-button-link"] ?? "";
+  const collectionsCtaHref = ctaFlagOk(collectionsCtaRaw)
+    ? collectionsCtaRaw
+    : "";
+
+  const blogTeaserCtaRaw = f["noise.homepage.blog-teaser-button-link"] ?? "";
+  const blogTeaserCtaHref = ctaFlagOk(blogTeaserCtaRaw)
+    ? blogTeaserCtaRaw
+    : "";
+
+  const latestCtaRaw = f["noise.homepage.latest-button-link"] ?? "";
+  const latestCtaHref = ctaFlagOk(latestCtaRaw) ? latestCtaRaw : "";
+
   return (
     <HydrateClient>
+      {popup ? <NoisePopup popup={popup} /> : null}
+
       <NoiseIntroWrapper
         introImages={introImages}
         wordmark={businessName.length > 0 ? businessName : undefined}
@@ -190,9 +237,7 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
             heroPrimaryButtonText={
               f["noise.homepage.hero-primary-button-text"] ?? ""
             }
-            heroPrimaryButtonLink={
-              nonBlank(f["noise.homepage.hero-primary-button-link"]) ?? "/shop"
-            }
+            heroPrimaryButtonLink={heroCtaHref}
             wordmark={businessName.length > 0 ? businessName : undefined}
             locationTag={locationTag}
             monogram={monogram}
@@ -224,25 +269,21 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
               body={aboutTeaserBody as TiptapJSON | null}
               image={f["noise.homepage-about-image"] ?? ""}
               buttonText={f["noise.homepage-about-button-text"] ?? ""}
-              buttonLink={
-                nonBlank(f["noise.homepage-about-button-link"]) ?? "/about"
-              }
+              buttonLink={aboutCtaHref}
               monogram={monogram}
               sectionAttrs={sectionGroupAttr("homepage", "aboutTeaser")}
             />
           )}
 
-          {/* 5. Collections showcase */}
-          {visible("homepage.collections") && (
+          {/* 5. Collections showcase — B2.1: the whole section is a
+              collections surface */}
+          {flags.isEnabled("collections") && visible("homepage.collections") && (
             <NoiseCollectionShowcase
               overline={nonBlank(f["noise.homepage.rail-one-overline"])}
               title={nonBlank(f["noise.homepage-featured-title"])}
               description={nonBlank(f["noise.homepage-featured-description"])}
               ctaText={nonBlank(f["noise.homepage-featured-button-text"])}
-              ctaHref={
-                nonBlank(f["noise.homepage-featured-button-link"]) ??
-                "/collections"
-              }
+              ctaHref={collectionsCtaHref}
               collections={showcaseCollections}
               sectionAttrs={sectionGroupAttr("homepage", "collections")}
               showWhenEmpty={isPreview && flags.isEnabled("collections")}
@@ -256,16 +297,15 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
               heading={f["noise.homepage.blog-teaser-heading"] ?? ""}
               body={f["noise.homepage.blog-teaser-body"] ?? ""}
               ctaText={f["noise.homepage.blog-teaser-button-text"] ?? ""}
-              ctaHref={
-                nonBlank(f["noise.homepage.blog-teaser-button-link"]) ?? "/blog"
-              }
+              ctaHref={blogTeaserCtaHref}
               image={f["noise.homepage.blog-teaser-image"] ?? ""}
               sectionAttrs={sectionGroupAttr("homepage", "blogTeaser")}
             />
           )}
 
-          {/* 7. Latest arrivals — hidden on the live site when nothing is live */}
-          {visible("homepage.featured") && (
+          {/* 7. Latest arrivals — B2.1: the whole section is a products
+              surface; also hidden on the live site when nothing is live */}
+          {flags.isEnabled("products") && visible("homepage.featured") && (
             <NoiseProductRail
               overline={nonBlank(f["noise.homepage.rail-two-overline"])}
               overlineFieldKey="noise.homepage.rail-two-overline"
@@ -273,9 +313,7 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
               titleFieldKey="noise.homepage.rail-two-title"
               ctaText={nonBlank(f["noise.homepage.latest-button-text"])}
               ctaTextFieldKey="noise.homepage.latest-button-text"
-              ctaHref={
-                nonBlank(f["noise.homepage.latest-button-link"]) ?? "/shop"
-              }
+              ctaHref={latestCtaHref}
               products={latestProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
               showWhenEmpty={isPreview && flags.isEnabled("products")}

@@ -10,6 +10,7 @@ import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { nonBlank } from "../shared/noise-non-blank";
 import { NoiseVariantSelector } from "./noise-variant-selector";
@@ -69,6 +70,21 @@ export function NoiseProductActions({
 
   return (
     <>
+      {/* Wishlist — self-gates on the `wishlist` flag; visible across every
+          buy-box state (coming-soon, variants, sold out, in stock), same as
+          the heart on the related-product cards. */}
+      <WishlistButton
+        item={{
+          productId: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: displayPrice,
+          imageUrl: product.images[0]?.url ?? null,
+        }}
+        className="self-start rounded-none border border-[var(--vn-rule)] bg-[var(--vn-paper)] text-[var(--vn-ink)] shadow-none backdrop-blur-none hover:scale-100 hover:bg-[var(--vn-bone)]"
+        iconClassName="size-4"
+      />
+
       {/* Price row — lives here so it reacts to variant changes */}
       <div
         className="flex items-baseline justify-between border-t pt-5"

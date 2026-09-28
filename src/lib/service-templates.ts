@@ -28,6 +28,7 @@ import { buildersServiceTemplateDefs } from "~/app/(storefront)/_templates/build
 import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/default/services/service-pages/fields";
 import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
 import { happyBambooServiceTemplateDefs } from "~/app/(storefront)/_templates/happy-bamboo/services/service-pages/fields";
+import { noiseServiceTemplateDefs } from "~/app/(storefront)/_templates/noise/services/service-pages/fields";
 import { oliveServiceTemplateDefs } from "~/app/(storefront)/_templates/olive/services/service-pages/fields";
 import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/services/service-pages/fields";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
@@ -115,6 +116,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   "happy-bamboo": happyBambooServiceTemplateDefs,
   bamboo: bambooServiceTemplateDefs,
   olive: oliveServiceTemplateDefs,
+  noise: noiseServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -138,6 +140,7 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...happyBambooServiceTemplateDefs,
       ...bambooServiceTemplateDefs,
       ...oliveServiceTemplateDefs,
+      ...noiseServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

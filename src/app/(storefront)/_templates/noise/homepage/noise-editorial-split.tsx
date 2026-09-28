@@ -35,7 +35,7 @@ export function NoiseEditorialSplit({
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr]">
         {/* Left — ink panel */}
         <FadeIn
-          className="border-foreground flex flex-col justify-center gap-0 border-b px-8 py-20 md:border-r md:border-b-0 md:px-16 md:py-24"
+          className="border-foreground min-w-0 flex flex-col justify-center gap-0 border-b px-8 py-20 md:border-r md:border-b-0 md:px-16 md:py-24"
           style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
         >
           {overline ? (
@@ -71,7 +71,7 @@ export function NoiseEditorialSplit({
             </p>
           ) : null}
 
-          {ctaText ? (
+          {ctaText && ctaHref ? (
             <Link
               href={ctaHref}
               className="vn-focus-on-dark mt-8 self-start font-mono uppercase transition-opacity hover:opacity-60"
@@ -91,12 +91,14 @@ export function NoiseEditorialSplit({
           ) : null}
         </FadeIn>
 
-        {/* Right — editorial image */}
+        {/* Right — editorial image. No aspect-ratio: paired with a min-height
+            it transfers a min WIDTH (400px × 4/3 = 533px) that overflows a
+            390px phone and the md column. A fluid min-height keeps the old
+            ~4:3 proportion at 1440 and stretches to the ink panel's row. */}
         <div
-          className="relative overflow-hidden"
+          className="relative min-w-0 overflow-hidden"
           style={{
-            aspectRatio: "4/3",
-            minHeight: "400px",
+            minHeight: "clamp(300px, 36vw, 520px)",
             background: "var(--vn-steel)",
           }}
           {...fieldAttr("noise.homepage.blog-teaser-image")}

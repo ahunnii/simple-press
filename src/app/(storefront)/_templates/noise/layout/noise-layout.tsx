@@ -6,10 +6,15 @@ import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getSession } from "~/server/better-auth/server";
+import {
+  filterNavByFlags,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { NoiseAnnouncementBar } from "./noise-announcement-bar";
 import { NoiseFooter } from "./noise-footer";
 import { NoiseHeader } from "./noise-header";
+import { NOISE_DEFAULT_NAV, noiseNavLeftCount } from "./noise-nav";
 import { NoiseRouteAnnouncer } from "./noise-route-announcer";
 
 const fontSans = DM_Sans({
@@ -40,6 +45,18 @@ export async function NoiseLayout({
     getBusinessFlags(),
   ]);
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+
+  // The nav is resolved ONCE here: the owner's saved nav (`??` semantics
+  // inside `resolveNav`, so a saved empty list means no links) or
+  // `NOISE_DEFAULT_NAV`, then the shared route→flag filter (P-NAV-FLAGS).
+  // The header's desktop bar and its mobile menu both render this array.
+  const savedNav: unknown = business?.siteContent?.navigationItems;
+  const navItems = filterNavByFlags(
+    resolveNav(savedNav, NOISE_DEFAULT_NAV),
+    isEnabled,
+  );
+  const navLeftCount = noiseNavLeftCount(navItems, !Array.isArray(savedNav));
+
   return (
     <div
       className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} noise visual-noise dark:noise`}
@@ -54,11 +71,16 @@ export async function NoiseLayout({
       </a>
       <NoiseRouteAnnouncer />
       {banner && <NoiseAnnouncementBar banner={banner} />}
-      <NoiseHeader business={business} initialSession={session ?? null} />
+      <NoiseHeader
+        business={business}
+        initialSession={session ?? null}
+        navItems={navItems}
+        navLeftCount={navLeftCount}
+      />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>
-      <NoiseFooter business={business} />
+      <NoiseFooter business={business} initialSession={session ?? null} />
     </div>
   );
 }

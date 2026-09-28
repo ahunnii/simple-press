@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import type { NoiseCartCopy } from "./noise-cart-copy";
 import type { ShippingConfig } from "~/lib/shipping-utils";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -22,6 +23,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type NoiseCartDrawerProps = {
   shippingConfig: ShippingConfig;
@@ -36,6 +38,13 @@ export function NoiseCartDrawer({
   const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
     useCart();
   const reduce = useReducedMotion();
+  // PF8 / B2.1, B7.4: `/checkout` 404s with the flag off, and `/shop` (or
+  // whatever the owner set the empty-cart link to) 404s when `products` is
+  // off — neither CTA may render in that case.
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
+  const emptyLinkFlag = navHrefFlag(copy.emptyButtonLink);
+  const emptyLinkEnabled = emptyLinkFlag === null || isEnabled(emptyLinkFlag);
 
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -119,7 +128,7 @@ export function NoiseCartDrawer({
                 </p>
               ) : null}
             </div>
-            {copy.emptyButtonText ? (
+            {copy.emptyButtonText && emptyLinkEnabled ? (
               <Link
                 href={copy.emptyButtonLink}
                 onClick={() => setIsOpen(false)}
@@ -313,16 +322,18 @@ export function NoiseCartDrawer({
                 </span>
               </div>
 
-              {/* Checkout button */}
-              <Link
-                href="/checkout"
-                onClick={() => setIsOpen(false)}
-                className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.28em] uppercase transition-opacity hover:opacity-80"
-                style={{ background: "var(--vn-ink)", color: "#fff" }}
-              >
-                <span>Checkout</span>
-                <span>{formatPrice(subtotal)} →</span>
-              </Link>
+              {/* Checkout button — hidden when `checkout` is off (PF8) */}
+              {checkoutEnabled ? (
+                <Link
+                  href="/checkout"
+                  onClick={() => setIsOpen(false)}
+                  className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.28em] uppercase transition-opacity hover:opacity-80"
+                  style={{ background: "var(--vn-ink)", color: "#fff" }}
+                >
+                  <span>Checkout</span>
+                  <span>{formatPrice(subtotal)} →</span>
+                </Link>
+              ) : null}
 
               {/* Tax note */}
               <p

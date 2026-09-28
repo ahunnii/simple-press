@@ -12,6 +12,7 @@ import {
   SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { CART_NOTES_KEY } from "./index";
 import { noiseNoteGlyph } from "./noise-cart-copy";
@@ -27,6 +28,10 @@ type Props = {
 
 export function NoiseCartSummary({ shippingConfig, notes }: Props) {
   const { subtotal, itemCount, setIsOpen } = useCart();
+  // PF8 / B2.1, B7.4: `/checkout` 404s with the flag off, so the CTA that
+  // leads there must not render.
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
   // Zone+weight rates depend on the destination address, which isn't known in
   // the cart — defer to checkout rather than showing a misleading "Free".
   const isZoneWeight =
@@ -161,18 +166,20 @@ export function NoiseCartSummary({ shippingConfig, notes }: Props) {
         </div>
       </div>
 
-      {/* Checkout button */}
-      <div className="border-foreground/15 border-b px-6 py-5">
-        <Link
-          href="/checkout"
-          onClick={() => setIsOpen(false)}
-          className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all hover:opacity-80"
-          style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
-        >
-          <span>Proceed to checkout</span>
-          <span>→</span>
-        </Link>
-      </div>
+      {/* Checkout button — hidden when `checkout` is off (PF8) */}
+      {checkoutEnabled ? (
+        <div className="border-foreground/15 border-b px-6 py-5">
+          <Link
+            href="/checkout"
+            onClick={() => setIsOpen(false)}
+            className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all hover:opacity-80"
+            style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
+          >
+            <span>Proceed to checkout</span>
+            <span>→</span>
+          </Link>
+        </div>
+      ) : null}
 
       {/* Checkout notes — owner-written, hidden until set */}
       {notes.length > 0 && (

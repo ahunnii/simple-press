@@ -4,10 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import type { Session } from "~/server/better-auth/config";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 /** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
 type DeliveryMethod = "ship" | "pickup" | null;
@@ -74,11 +78,61 @@ type Props = {
   };
   /** Owner-authored note (`noise.checkout.success-note`); blank hides it. */
   note?: string;
+  /**
+   * Session resolved server-side by `noise-order-success-page.tsx`
+   * (`getSession()`), seeding `useHydratedSession` so the PF20 account CTA
+   * is correct on first paint instead of popping in after the client
+   * session fetch settles. `undefined` (e.g. tests rendering this
+   * component directly) falls back to the hook's unseeded mode, which
+   * suppresses the CTA via `isPending` until the client session resolves —
+   * never a flash of the wrong state either way.
+   */
+  initialSession?: Session | null;
 };
 
-export function NoiseOrderConfirmation({ business, note = "" }: Props) {
+type AccountCta = { href: string; label: string };
+
+/**
+ * PF20 / B9.4: signed in + `orders` on -> "View my orders"
+ * (`/account/orders`); signed out + `customerAccounts` on -> "Create an
+ * account" (`/auth/sign-up`); neither -> no CTA. Copied locally per the
+ * parity plan (P-ORDER-CTA stays optional; pollen/happy-bamboo/bamboo/vii/
+ * olive each carry their own copy too).
+ */
+function useOrderAccountCta(
+  initialSession: Session | null | undefined,
+): AccountCta | null {
+  const { data: session, isPending } = useHydratedSession(initialSession);
+  const { isEnabled } = useStorefrontFlags();
+
+  if (isPending) {
+    return null;
+  }
+
+  if (session?.user) {
+    return isEnabled("orders")
+      ? { href: "/account/orders", label: "View my orders" }
+      : null;
+  }
+
+  return isEnabled("customerAccounts")
+    ? { href: "/auth/sign-up", label: "Create an account" }
+    : null;
+}
+
+export function NoiseOrderConfirmation({
+  business,
+  note = "",
+  initialSession,
+}: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
+  const accountCta = useOrderAccountCta(initialSession);
+  // PF21 / B9.5, B2.5: the shop link on this page 404s when `products` is
+  // off, so it must not render in that case.
+  const { isEnabled } = useStorefrontFlags();
+  const shopFlag = navHrefFlag("/shop");
+  const shopEnabled = shopFlag === null || isEnabled(shopFlag);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const confirmationH1Ref = useRef<HTMLHeadingElement>(null);
@@ -146,9 +200,11 @@ export function NoiseOrderConfirmation({ business, note = "" }: Props) {
         >
           No order found.
         </p>
-        <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
-          Shop the Collection →
-        </Link>
+        {shopEnabled ? (
+          <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
+            Shop the Collection →
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -324,20 +380,26 @@ export function NoiseOrderConfirmation({ business, note = "" }: Props) {
         className="border-foreground/15 flex flex-col gap-3 border-b px-7 py-8 sm:flex-row"
         style={{ background: "var(--vn-bone)" }}
       >
-        <Link
-          href="/shop"
-          className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"
-          style={{ padding: "12px 20px" }}
-        >
-          Continue Shopping
-        </Link>
-        <Link
-          href="/account/orders"
-          className="vn-stamp vn-stamp-solid flex-1 justify-center text-[10.5px] transition-all hover:opacity-80"
-          style={{ padding: "12px 20px" }}
-        >
-          View My Orders →
-        </Link>
+        {/* PF21 — hidden when `products` is off */}
+        {shopEnabled ? (
+          <Link
+            href="/shop"
+            className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"
+            style={{ padding: "12px 20px" }}
+          >
+            Continue Shopping
+          </Link>
+        ) : null}
+        {/* PF20 — account next step (View my orders / Create an account) */}
+        {accountCta ? (
+          <Link
+            href={accountCta.href}
+            className="vn-stamp vn-stamp-solid flex-1 justify-center text-[10.5px] transition-all hover:opacity-80"
+            style={{ padding: "12px 20px" }}
+          >
+            {accountCta.label} →
+          </Link>
+        ) : null}
         <Link
           href="/"
           className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"

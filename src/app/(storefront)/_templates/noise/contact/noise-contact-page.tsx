@@ -16,6 +16,11 @@ import { resolveFields } from "../index";
 import { NoiseContactForm } from "./noise-contact-form";
 import { NoiseContactInfoBlock } from "./noise-contact-info-block";
 
+// B1.7: the info cards, the message form and the FAQ all share this one
+// column (the same width the centered header/cards block already uses) so
+// their left/right edges line up, whether or not a contact image is set.
+const CONTACT_COLUMN = "mx-auto max-w-[880px]";
+
 export function NoiseContactPage({
   business,
   faqItems,
@@ -109,9 +114,11 @@ export function NoiseContactPage({
       </section>
 
       {/* ── Form section — editorial image alongside the form when set ── */}
-      <section id="form" className="border-foreground/20 border-b">
+      <section id="form" className="border-foreground/20 border-b px-7">
         {contactImage ? (
-          <div className="mx-auto grid max-w-[1320px] grid-cols-1 items-stretch gap-0 px-7 py-16 md:grid-cols-2 md:gap-16">
+          <div
+            className={`${CONTACT_COLUMN} grid grid-cols-1 items-stretch gap-0 py-16 md:grid-cols-2 md:gap-16`}
+          >
             <FadeIn
               className="border-foreground relative order-2 hidden overflow-hidden border md:order-1 md:block"
               style={{ aspectRatio: "4/5" }}
@@ -134,7 +141,9 @@ export function NoiseContactPage({
             </FadeIn>
           </div>
         ) : (
-          <div className="border-foreground/15 mx-auto max-w-[880px] px-7 pt-16 pb-20">
+          <div
+            className={`border-foreground/15 ${CONTACT_COLUMN} pt-16 pb-20`}
+          >
             <FadeIn>
               <NoiseContactForm
                 successHeading={successHeading}
@@ -153,7 +162,7 @@ export function NoiseContactPage({
             style={{ background: "var(--vn-paper)" }}
             {...sectionGroupAttr("contact", "faq")}
           >
-            <FadeIn className="mx-auto max-w-4xl">
+            <FadeIn className={CONTACT_COLUMN}>
               <div className="border-foreground/15 mb-10 flex items-end justify-between border-b pb-6">
                 <div>
                   <p className="mb-3 font-mono text-[9.5px] tracking-[0.22em] text-(--vn-steel-mist) uppercase">

@@ -266,11 +266,17 @@ import { NoiseOrderSuccessPage } from "./noise/cart-checkout/noise-order-success
 import { NoiseCollectionPage } from "./noise/collections/noise-collection-page";
 import { NoiseCollectionsPage } from "./noise/collections/noise-collections-page";
 import { NoiseContactPage } from "./noise/contact/noise-contact-page";
+import { NoiseDonatePage } from "./noise/donate/noise-donate-page";
+import { NoiseEventPage } from "./noise/events/noise-event-page";
+import { NoiseEventsPage } from "./noise/events/noise-events-page";
+import { NoiseFaqPage } from "./noise/faq/noise-faq-page";
 import { NoiseLayout } from "./noise/layout/noise-layout";
 import { NoiseGenericPage } from "./noise/noise-generic-page";
 import { NoiseProductPage } from "./noise/products/noise-product-page";
+import { NoiseServicesIndexPage } from "./noise/services/noise-services-index-page";
 import { NoiseShopPage } from "./noise/shop/noise-shop-page";
 import { NoiseTestimonialsPage } from "./noise/testimonials/noise-testimonials-page";
+import { NoiseVideosPage } from "./noise/videos/noise-videos-page";
 // ---------------------------------------------------------------------------
 // Olive Mode
 // ---------------------------------------------------------------------------
@@ -924,6 +930,12 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     ProductPage: NoiseProductPage,
     ShopPage: NoiseShopPage,
     TestimonialsPage: NoiseTestimonialsPage,
+    ServicesIndexPage: NoiseServicesIndexPage,
+    EventsPage: NoiseEventsPage,
+    EventPage: NoiseEventPage,
+    VideosPage: NoiseVideosPage,
+    DonatePage: NoiseDonatePage,
+    FaqPage: NoiseFaqPage,
     AccountSettingsPage: NoiseAccountSettingsPage,
     AccountSecurityPage: NoiseAccountSecurityPage,
     AddressBookPage: NoiseAddressBookPage,

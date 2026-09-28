@@ -23,6 +23,7 @@ import { BUILDERS_SERVICE_COMPONENTS } from "../builders/services/service-pages/
 import { DEFAULT_SERVICE_COMPONENTS } from "../default/services/service-pages/components";
 import { DREAM_SERVICE_COMPONENTS } from "../dream/services/service-pages/components";
 import { HAPPY_BAMBOO_SERVICE_COMPONENTS } from "../happy-bamboo/services/service-pages/components";
+import { NOISE_SERVICE_COMPONENTS } from "../noise/services/service-pages/components";
 import { OLIVE_SERVICE_COMPONENTS } from "../olive/services/service-pages/components";
 import { PINK_SERVICE_COMPONENTS } from "../pink/services/service-pages/components";
 import { POLLEN_SERVICE_COMPONENTS } from "../pollen/services/service-pages/components";
@@ -69,6 +70,7 @@ export const SERVICE_TEMPLATE_COMPONENTS: Record<
   ...HAPPY_BAMBOO_SERVICE_COMPONENTS,
   ...BAMBOO_SERVICE_COMPONENTS,
   ...OLIVE_SERVICE_COMPONENTS,
+  ...NOISE_SERVICE_COMPONENTS,
 };
 
 /**

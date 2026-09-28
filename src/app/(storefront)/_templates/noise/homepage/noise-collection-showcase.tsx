@@ -95,7 +95,7 @@ export function NoiseCollectionShowcase({
               {description}
             </p>
           )}
-          {ctaText && (
+          {ctaText && ctaHref && (
             <Link
               href={ctaHref}
               className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"

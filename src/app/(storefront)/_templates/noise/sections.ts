@@ -1,6 +1,12 @@
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { noiseDonateSections } from "./donate";
+import { noiseEventsSections } from "./events";
+import { noiseFaqSections } from "./faq";
+import { noiseServicesSections } from "./services";
+import { noiseVideosSections } from "./videos";
+
 export const noiseSections: Record<string, TemplateSection[]> = {
   noise: [
     // Homepage
@@ -185,6 +191,38 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       order: 0,
       links: [SECTION_LINKS.products],
     },
+    {
+      id: "product.shipping",
+      page: "product",
+      title: "Shipping row",
+      description:
+        "Shipping note and policy link, shown in its own row on every product page.",
+      groupIds: ["product.shipping"],
+      order: 1,
+      hideable: true,
+      links: [SECTION_LINKS.products],
+    },
+    {
+      id: "product.returns",
+      page: "product",
+      title: "Returns row",
+      description:
+        "Returns note and policy link, shown in its own row on every product page.",
+      groupIds: ["product.returns"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.products],
+    },
+    {
+      id: "product.questions",
+      page: "product",
+      title: "Questions row",
+      description: "Contact link, shown in its own row on every product page.",
+      groupIds: ["product.questions"],
+      order: 3,
+      hideable: true,
+      links: [SECTION_LINKS.products],
+    },
 
     // Checkout
     {
@@ -239,6 +277,12 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       order: 0,
       links: [SECTION_LINKS.testimonials],
     },
+
+    ...noiseServicesSections,
+    ...noiseEventsSections,
+    ...noiseVideosSections,
+    ...noiseDonateSections,
+    ...noiseFaqSections,
 
     // Global
     {

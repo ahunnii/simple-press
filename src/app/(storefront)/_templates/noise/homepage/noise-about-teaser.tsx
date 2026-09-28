@@ -118,22 +118,24 @@ export function NoiseAboutTeaser({
             )}
           </div>
 
-          <Link
-            href={buttonLink}
-            className="mt-8 inline-block font-mono uppercase transition-opacity hover:opacity-60"
-            style={{
-              fontSize: "11px",
-              letterSpacing: ".28em",
-              borderBottom: "1px solid var(--vn-ink)",
-              paddingBottom: "6px",
-              color: "var(--vn-ink)",
-            }}
-          >
-            <span {...fieldAttr("noise.homepage-about-button-text")}>
-              {buttonText}
-            </span>{" "}
-            →
-          </Link>
+          {buttonText && buttonLink ? (
+            <Link
+              href={buttonLink}
+              className="mt-8 inline-block font-mono uppercase transition-opacity hover:opacity-60"
+              style={{
+                fontSize: "11px",
+                letterSpacing: ".28em",
+                borderBottom: "1px solid var(--vn-ink)",
+                paddingBottom: "6px",
+                color: "var(--vn-ink)",
+              }}
+            >
+              <span {...fieldAttr("noise.homepage-about-button-text")}>
+                {buttonText}
+              </span>{" "}
+              →
+            </Link>
+          ) : null}
         </div>
       </FadeIn>
     </section>

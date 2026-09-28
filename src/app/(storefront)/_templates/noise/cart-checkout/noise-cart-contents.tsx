@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -13,6 +14,7 @@ import {
 } from "~/lib/shipping-utils";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveNoiseCartCopy } from "./noise-cart-copy";
 import { NoiseCartItem } from "./noise-cart-item";
@@ -33,6 +35,15 @@ export function NoiseCartContents({ business }: Props) {
   const { items, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
   const copy = resolveNoiseCartCopy(business.siteContent?.customFields);
+  // PF8 / B2.1, B7.4: the empty-cart button and "Continue Shopping" both
+  // point at `/shop` (or the owner's own link) by default — 404s when
+  // `products` is off, so neither may render in that case.
+  const { isEnabled } = useStorefrontFlags();
+  const emptyLinkFlag = navHrefFlag(copy.emptyButtonLink);
+  const emptyLinkEnabled = emptyLinkFlag === null || isEnabled(emptyLinkFlag);
+  const continueShoppingFlag = navHrefFlag("/shop");
+  const continueShoppingEnabled =
+    continueShoppingFlag === null || isEnabled(continueShoppingFlag);
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
   const hasFreeBar =
@@ -80,7 +91,7 @@ export function NoiseCartContents({ business }: Props) {
                 </p>
               ) : null}
             </div>
-            {copy.emptyButtonText ? (
+            {copy.emptyButtonText && emptyLinkEnabled ? (
               <Link
                 href={copy.emptyButtonLink}
                 className="vn-stamp vn-stamp-solid mt-2 text-[10.5px]"
@@ -215,15 +226,19 @@ export function NoiseCartContents({ business }: Props) {
             />
           ))}
 
-          {/* Continue shopping */}
+          {/* Continue shopping — hidden when `products` is off (PF8) */}
           <div className="mt-6 flex items-center justify-between">
-            <Link
-              href="/shop"
-              className="flex items-center gap-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-60"
-              style={{ color: "var(--vn-steel)" }}
-            >
-              ← Continue Shopping
-            </Link>
+            {continueShoppingEnabled ? (
+              <Link
+                href="/shop"
+                className="flex items-center gap-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-steel)" }}
+              >
+                ← Continue Shopping
+              </Link>
+            ) : (
+              <span />
+            )}
             <span
               className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}

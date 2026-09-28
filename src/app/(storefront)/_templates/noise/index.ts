@@ -12,8 +12,13 @@ import {
   noiseCollectionsFieldGroups,
 } from "./collections";
 import { noiseContactData, noiseContactFieldGroups } from "./contact";
+import { noiseDonateData, noiseDonateFieldGroups } from "./donate";
+import { noiseEventsData, noiseEventsFieldGroups } from "./events";
+import { noiseFaqData, noiseFaqFieldGroups } from "./faq";
 import { noiseHomepageData, noiseHomepageFieldGroups } from "./homepage";
 import { noiseProductData, noiseProductFieldGroups } from "./products";
+import { noiseServicesData, noiseServicesFieldGroups } from "./services";
+import { noiseVideosData, noiseVideosFieldGroups } from "./videos";
 
 // ─── Shop Page ────────────────────────────────────────────────────────────────
 
@@ -176,6 +181,11 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...noiseContactFieldGroups,
   ...noiseProductFieldGroups,
   ...noiseCartCheckoutFieldGroups,
+  ...noiseServicesFieldGroups,
+  ...noiseEventsFieldGroups,
+  ...noiseVideosFieldGroups,
+  ...noiseDonateFieldGroups,
+  ...noiseFaqFieldGroups,
   {
     id: "global.branding",
     title: "Site branding",
@@ -218,6 +228,11 @@ export const noiseData = {
     ...shopListingData,
     ...noiseCollectionsData,
     ...noiseBlogData,
+    ...noiseServicesData,
+    ...noiseEventsData,
+    ...noiseVideosData,
+    ...noiseDonateData,
+    ...noiseFaqData,
     ...testimonialsPageData,
     ...noiseProductData,
     ...noiseCartCheckoutData,
