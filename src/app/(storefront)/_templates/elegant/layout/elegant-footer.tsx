@@ -1,10 +1,15 @@
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 
@@ -13,15 +18,21 @@ const BRAND_LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
+/** Ungated shipped default — `resolveFooterQuickLinks`'s `filterNavByFlags`
+ *  drops `/collections` and `/blog` when those flags are off, same as the
+ *  inline gating this replaced. */
+const ELEGANT_DEFAULT_NAV: NavItem[] = [
+  { href: "/shop", label: "All Products" },
+  { href: "/collections", label: "Collections" },
+  { href: "/about", label: "Our Story" },
+  { href: "/blog", label: "Journal" },
+];
+
 export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
   const { isEnabled } = await getBusinessFlags();
-
-  const navigationItems = business?.siteContent?.navigationItems as
-    | { label: string; href: string }[]
-    | undefined;
 
   const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
@@ -34,16 +45,12 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
   const infoHeading = f["elegant.global.footer-info-heading"] ?? "";
   const signoff = f["elegant.global.footer-signoff"] ?? "";
 
-  const DEFAULT_NAV_LINKS = [
-    { href: "/shop", label: "All Products" },
-    ...(isEnabled("collections")
-      ? [{ href: "/collections", label: "Collections" }]
-      : []),
-    { href: "/about", label: "Our Story" },
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
-  ];
-
-  const navLinks = navigationItems ?? DEFAULT_NAV_LINKS;
+  const navLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: ELEGANT_DEFAULT_NAV,
+    isEnabled,
+  });
 
   const brandLinks = BRAND_LINKS.filter(
     (l) => l.href !== "/testimonials" || isEnabled("testimonials"),
@@ -147,12 +154,15 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
               gridColumn: "span 3",
             }}
           >
-            {/* Shop column */}
-            <FooterColumn
-              title={shopHeading}
-              titleFieldKey="elegant.global.footer-shop-heading"
-              links={navLinks}
-            />
+            {/* Shop column — hidden (heading included) when the resolved
+                quick-links list is empty */}
+            {navLinks.length > 0 && (
+              <FooterColumn
+                title={shopHeading}
+                titleFieldKey="elegant.global.footer-shop-heading"
+                links={navLinks}
+              />
+            )}
 
             {/* Brand links column */}
             <FooterColumn
@@ -169,7 +179,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                 {policies.map((policy) => (
                   <li key={policy.id} style={{ marginBottom: 10 }}>
                     <Link
-                      href={policy.slug}
+                      href={`/${policy.slug}`}
                       style={{
                         fontSize: 14,
                         opacity: 0.8,
@@ -282,7 +292,7 @@ function FooterColumn({
 }: {
   title: string;
   titleFieldKey?: string;
-  links: { href: string; label: string }[];
+  links: { href: string; label: string; external?: boolean }[];
 }) {
   return (
     <div>
@@ -292,6 +302,7 @@ function FooterColumn({
           <li key={link.href + link.label} style={{ marginBottom: 10 }}>
             <Link
               href={link.href}
+              {...externalLinkProps(link.external)}
               style={{
                 fontSize: 14,
                 opacity: 0.8,
@@ -302,6 +313,9 @@ function FooterColumn({
               }}
             >
               {link.label}
+              {link.external && (
+                <span className="sr-only"> (opens in new tab)</span>
+              )}
             </Link>
           </li>
         ))}

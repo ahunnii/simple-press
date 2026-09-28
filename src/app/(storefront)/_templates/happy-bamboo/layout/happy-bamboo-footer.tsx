@@ -7,9 +7,12 @@ import { resolveSocialLinks } from "~/lib/social-links";
 import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
-import { externalLinkProps } from "~/app/(storefront)/_components/nav";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
 
-import { resolveHappyBambooNav } from "../lib/nav";
+import { HB_DEFAULT_NAV } from "../lib/nav";
 import { HappyBambooFooterAccount } from "./happy-bamboo-footer-account";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
 
@@ -24,18 +27,16 @@ export async function HappyBambooFooter({
 
   const { isEnabled } = await getBusinessFlags();
 
-  // Same list as the header/mobile panel, flattened: each top-level link,
-  // then its children right after it. A group with an empty href (a pure
-  // dropdown label) contributes only its children. The shared route→flag
-  // filter (P-NAV-FLAGS) drops anything the business has switched off, same
-  // as the header and mobile panel.
-  const quickLinks = resolveHappyBambooNav(
-    business?.siteContent?.navigationItems,
+  // Owner's flat footer Quick Links (falls back to the main nav's top level
+  // when unset; an explicit `[]` means "no quick links"). The shared
+  // route→flag filter (P-NAV-FLAGS) drops anything the business has switched
+  // off, same as the header and mobile panel.
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: HB_DEFAULT_NAV,
     isEnabled,
-  ).flatMap((item) => [
-    ...(item.href ? [item] : []),
-    ...(item.children ?? []).filter((child) => child.href),
-  ]);
+  });
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -103,32 +104,38 @@ export async function HappyBambooFooter({
             />
           </div>
 
-          {/* Shop */}
-          <div>
-            <h4 className="text-muted mb-4 font-semibold">Quick Links</h4>
-            <ul className="flex flex-col space-y-2">
-              {quickLinks.map((link, i) => (
-                <li key={i}>
-                  <Link
-                    href={link.href}
-                    {...externalLinkProps(link.external)}
-                    className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  >
-                    {link.label}
-                    {link.external && (
-                      <span className="sr-only"> (opens in new tab)</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-              {/* Account entry, end of Quick Links (B10.3) — gated on
-                  customerAccounts, own client component since the footer
-                  itself is a server component. */}
-              {isEnabled("customerAccounts") && (
-                <HappyBambooFooterAccount ordersEnabled={isEnabled("orders")} />
-              )}
-            </ul>
-          </div>
+          {/* Shop — hidden entirely when there's nothing to show (no
+              resolved links and accounts are off), rather than rendering
+              an empty heading. */}
+          {(quickLinks.length > 0 || isEnabled("customerAccounts")) && (
+            <div>
+              <h4 className="text-muted mb-4 font-semibold">Quick Links</h4>
+              <ul className="flex flex-col space-y-2">
+                {quickLinks.map((link, i) => (
+                  <li key={i}>
+                    <Link
+                      href={link.href}
+                      {...externalLinkProps(link.external)}
+                      className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+                {/* Account entry, end of Quick Links (B10.3) — gated on
+                    customerAccounts, own client component since the footer
+                    itself is a server component. */}
+                {isEnabled("customerAccounts") && (
+                  <HappyBambooFooterAccount
+                    ordersEnabled={isEnabled("orders")}
+                  />
+                )}
+              </ul>
+            </div>
+          )}
 
           {/* Support */}
           <div>

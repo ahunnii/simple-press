@@ -190,6 +190,37 @@ describe("parseManifest back-compat", () => {
     expect(parsed.content.invoiceSettings).toBeNull();
   });
 
+  it("parses a siteContent block without footerNavigationItems (absent in older manifests)", () => {
+    const parsed = parseManifest(
+      manifest({
+        ...minimalContent(),
+        siteContent: { exportId: "sc_1" },
+      }),
+    );
+    expect(parsed.content.siteContent?.footerNavigationItems).toBeUndefined();
+  });
+
+  it("parses a siteContent block carrying footerNavigationItems", () => {
+    const items = [{ label: "Shop", href: "/shop" }];
+    const parsedList = parseManifest(
+      manifest({
+        ...minimalContent(),
+        siteContent: { exportId: "sc_1", footerNavigationItems: items },
+      }),
+    );
+    expect(parsedList.content.siteContent?.footerNavigationItems).toEqual(
+      items,
+    );
+
+    const parsedNull = parseManifest(
+      manifest({
+        ...minimalContent(),
+        siteContent: { exportId: "sc_1", footerNavigationItems: null },
+      }),
+    );
+    expect(parsedNull.content.siteContent?.footerNavigationItems).toBeNull();
+  });
+
   it("accepts maintenanceMessage as a TipTap doc (current) or a string (legacy)", () => {
     const doc = {
       type: "doc",

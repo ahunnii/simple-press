@@ -1,10 +1,16 @@
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
 
-const NAV_LINKS = [
+const NAV_LINKS: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
@@ -16,10 +22,14 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
   const address = business?.businessAddress;
+  const { isEnabled } = await getBusinessFlags();
 
-  const navigationItems = business?.siteContent?.navigationItems as
-    | { label: string; href: string }[]
-    | undefined;
+  const navLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: NAV_LINKS,
+    isEnabled,
+  });
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -66,24 +76,30 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
             )}
           </div>
 
-          <div>
-            {/* M-10: demoted from h3 to h2 — no h2 ancestor existed after the page h1 */}
-            <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-              Navigate
-            </h2>
-            <ul className="mt-4 flex flex-col gap-3">
-              {(navigationItems ?? NAV_LINKS).map((link) => (
-                <li key={link.label + link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {navLinks.length > 0 && (
+            <div>
+              {/* M-10: demoted from h3 to h2 — no h2 ancestor existed after the page h1 */}
+              <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+                Navigate
+              </h2>
+              <ul className="mt-4 flex flex-col gap-3">
+                {navLinks.map((link) => (
+                  <li key={link.label + link.href}>
+                    <Link
+                      href={link.href}
+                      {...externalLinkProps(link.external)}
+                      className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div>
             {/* M-10: demoted from h3 to h2 */}

@@ -3,15 +3,28 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 
 const headingClass =
   "text-xs font-semibold tracking-widest text-white uppercase";
+
+/** Shipped default nav, used when the owner has set neither the main nav nor a footer quick-links list. */
+const DARK_TREND_DEFAULT_NAV: NavItem[] = [
+  { href: "/shop", label: "Shop" },
+  { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About" },
+];
 
 export async function DarkTrendFooter({
   business,
@@ -22,6 +35,7 @@ export async function DarkTrendFooter({
   const address = business?.businessAddress?.trim() ?? "";
   const phoneHref = telHref(phone);
   const hasContact = !!(email || phone || address);
+  const { isEnabled } = await getBusinessFlags();
 
   const f = resolveFields(business?.siteContent?.customFields, [
     "dark-trend.global.footer-nav-heading",
@@ -32,9 +46,12 @@ export async function DarkTrendFooter({
   const contactHeading = f["dark-trend.global.footer-contact-heading"] ?? "";
   const socialHeading = f["dark-trend.global.footer-social-heading"] ?? "";
 
-  const navigationItems = business?.siteContent?.navigationItems as
-    | { label: string; href: string }[]
-    | undefined;
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: DARK_TREND_DEFAULT_NAV,
+    isEnabled,
+  });
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -79,35 +96,35 @@ export async function DarkTrendFooter({
             )}
           </div>
 
-          <div>
-            {/* M-10: no h2 ancestor in footer — use <p> styled identically */}
-            {navHeading.trim() && (
-              <p
-                className={headingClass}
-                {...fieldAttr("dark-trend.global.footer-nav-heading")}
-              >
-                {navHeading}
-              </p>
-            )}
-            <ul className="mt-4 flex flex-col gap-3">
-              {(
-                navigationItems ?? [
-                  { href: "/shop", label: "Shop" },
-                  { href: "/contact", label: "Contact" },
-                  { href: "/about", label: "About" },
-                ]
-              ).map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/70 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {quickLinks.length > 0 && (
+            <div>
+              {/* M-10: no h2 ancestor in footer — use <p> styled identically */}
+              {navHeading.trim() && (
+                <p
+                  className={headingClass}
+                  {...fieldAttr("dark-trend.global.footer-nav-heading")}
+                >
+                  {navHeading}
+                </p>
+              )}
+              <ul className="mt-4 flex flex-col gap-3">
+                {quickLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      {...externalLinkProps(link.external)}
+                      className="text-sm text-white/70 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="space-y-4">
             {hasContact && (
@@ -195,7 +212,7 @@ export async function DarkTrendFooter({
               )}
               <p className="inline text-sm text-white/60">
                 <Link
-                  href={policy.slug}
+                  href={`/${policy.slug}`}
                   className="underline transition-colors hover:text-white"
                 >
                   {policy.title}

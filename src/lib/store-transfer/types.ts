@@ -178,6 +178,9 @@ export interface ExportedSiteContent {
   secondaryColor: string | null;
   accentColor: string | null;
   navigationItems: unknown; // [{ label, href }]
+  // Footer "Quick Links" — flat, no children. Added 2026-09-28 — absent in
+  // older manifests.
+  footerNavigationItems?: unknown;
   customFields: unknown; // { key: value }
   bannerConfig: unknown; // BannerConfig
   popupConfig: unknown; // PopupConfig

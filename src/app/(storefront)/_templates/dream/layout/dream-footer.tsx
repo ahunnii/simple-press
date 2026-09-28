@@ -1,9 +1,16 @@
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
+import {
+  filterNavByFlags,
+  resolveFooterNav,
+  resolveNav,
+  topLevelNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveDreamNav } from "../lib/nav";
 import { resolveDreamFields } from "../lib/resolve-fields";
@@ -43,9 +50,23 @@ export async function DreamFooter({ business }: DefaultFooterTemplateProps) {
   const serviceArea = f["dream.global.service-area"] ?? "";
   const ctaLabel = f["dream.global.header-cta-label"] ?? "";
   const ctaUrl = f["dream.global.header-cta-url"] ?? "";
-  const navItems = resolveDreamNav(
-    business?.siteContent?.navigationItems,
-    customFields,
+
+  const { isEnabled } = await getBusinessFlags();
+  // `resolveDreamNav` returns an owner-saved list as a raw cast (no
+  // sanitization) — run it through `resolveNav` so the shared footer
+  // helpers see properly sanitized `NavItem`s before flattening.
+  const dreamNavFallback = topLevelNav(
+    resolveNav(
+      resolveDreamNav(business?.siteContent?.navigationItems, customFields),
+      [],
+    ),
+  );
+  const navItems = filterNavByFlags(
+    resolveFooterNav(
+      business?.siteContent?.footerNavigationItems,
+      dreamNavFallback,
+    ),
+    isEnabled,
   );
 
   const {

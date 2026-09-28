@@ -16474,6 +16474,7 @@ export namespace Prisma {
     secondaryColor: number
     accentColor: number
     navigationItems: number
+    footerNavigationItems: number
     customFields: number
     bannerConfig: number
     popupConfig: number
@@ -16567,6 +16568,7 @@ export namespace Prisma {
     secondaryColor?: true
     accentColor?: true
     navigationItems?: true
+    footerNavigationItems?: true
     customFields?: true
     bannerConfig?: true
     popupConfig?: true
@@ -16677,6 +16679,7 @@ export namespace Prisma {
     secondaryColor: string | null
     accentColor: string | null
     navigationItems: JsonValue | null
+    footerNavigationItems: JsonValue | null
     customFields: JsonValue | null
     bannerConfig: JsonValue | null
     popupConfig: JsonValue | null
@@ -16731,6 +16734,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16769,6 +16773,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16807,6 +16812,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16845,6 +16851,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16854,7 +16861,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "seoBrandName" | "pageMeta" | "siteVerification" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
+  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "seoBrandName" | "pageMeta" | "siteVerification" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "footerNavigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
   export type SiteContentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -16898,6 +16905,7 @@ export namespace Prisma {
       secondaryColor: string | null
       accentColor: string | null
       navigationItems: Prisma.JsonValue | null
+      footerNavigationItems: Prisma.JsonValue | null
       customFields: Prisma.JsonValue | null
       bannerConfig: Prisma.JsonValue | null
       popupConfig: Prisma.JsonValue | null
@@ -17356,6 +17364,7 @@ export namespace Prisma {
     readonly secondaryColor: FieldRef<"SiteContent", 'String'>
     readonly accentColor: FieldRef<"SiteContent", 'String'>
     readonly navigationItems: FieldRef<"SiteContent", 'Json'>
+    readonly footerNavigationItems: FieldRef<"SiteContent", 'Json'>
     readonly customFields: FieldRef<"SiteContent", 'Json'>
     readonly bannerConfig: FieldRef<"SiteContent", 'Json'>
     readonly popupConfig: FieldRef<"SiteContent", 'Json'>
@@ -84466,6 +84475,7 @@ export namespace Prisma {
     secondaryColor: 'secondaryColor',
     accentColor: 'accentColor',
     navigationItems: 'navigationItems',
+    footerNavigationItems: 'footerNavigationItems',
     customFields: 'customFields',
     bannerConfig: 'bannerConfig',
     popupConfig: 'popupConfig',
@@ -86664,6 +86674,7 @@ export namespace Prisma {
     secondaryColor?: StringNullableFilter<"SiteContent"> | string | null
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableFilter<"SiteContent">
+    footerNavigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
     bannerConfig?: JsonNullableFilter<"SiteContent">
     popupConfig?: JsonNullableFilter<"SiteContent">
@@ -86702,6 +86713,7 @@ export namespace Prisma {
     secondaryColor?: SortOrderInput | SortOrder
     accentColor?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
+    footerNavigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
     bannerConfig?: SortOrderInput | SortOrder
     popupConfig?: SortOrderInput | SortOrder
@@ -86744,6 +86756,7 @@ export namespace Prisma {
     secondaryColor?: StringNullableFilter<"SiteContent"> | string | null
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableFilter<"SiteContent">
+    footerNavigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
     bannerConfig?: JsonNullableFilter<"SiteContent">
     popupConfig?: JsonNullableFilter<"SiteContent">
@@ -86781,6 +86794,7 @@ export namespace Prisma {
     secondaryColor?: SortOrderInput | SortOrder
     accentColor?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
+    footerNavigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
     bannerConfig?: SortOrderInput | SortOrder
     popupConfig?: SortOrderInput | SortOrder
@@ -86824,6 +86838,7 @@ export namespace Prisma {
     secondaryColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     accentColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableWithAggregatesFilter<"SiteContent">
+    footerNavigationItems?: JsonNullableWithAggregatesFilter<"SiteContent">
     customFields?: JsonNullableWithAggregatesFilter<"SiteContent">
     bannerConfig?: JsonNullableWithAggregatesFilter<"SiteContent">
     popupConfig?: JsonNullableWithAggregatesFilter<"SiteContent">
@@ -93767,6 +93782,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93804,6 +93820,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93841,6 +93858,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93878,6 +93896,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93915,6 +93934,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93952,6 +93972,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93988,6 +94009,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -101808,6 +101830,7 @@ export namespace Prisma {
     secondaryColor?: SortOrder
     accentColor?: SortOrder
     navigationItems?: SortOrder
+    footerNavigationItems?: SortOrder
     customFields?: SortOrder
     bannerConfig?: SortOrder
     popupConfig?: SortOrder
@@ -113007,6 +113030,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -113043,6 +113067,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -114846,6 +114871,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -114882,6 +114908,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue

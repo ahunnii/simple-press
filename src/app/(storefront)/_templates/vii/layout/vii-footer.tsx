@@ -11,8 +11,7 @@ import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import {
   externalLinkProps,
-  filterNavByFlags,
-  resolveNav,
+  resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveViiLocationTag } from "../shared/vii-location-tag";
@@ -85,26 +84,16 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
   const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
   const refundPolicy = policies.find((p) => p.slug === "refund-policy");
 
-  // Owner nav, grouped (PF11, B10.2/B10.4): childless top-level links in one
-  // "Quick Links" column, plus one short column per parent with children,
-  // headed by its own label (pollen footer pattern). Same shared route→flag
-  // filter (P-NAV-FLAGS) the header applies, so a flag-disabled route never
-  // shows here even if it's in the owner's saved nav.
-  const footerNav = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
+  // Owner's flat footer Quick Links (falls back to the main nav's top level
+  // when unset; an explicit `[]` means "no quick links"). Same shared
+  // route→flag filter (P-NAV-FLAGS) the header applies, so a flag-disabled
+  // route never shows here even if it's in the owner's saved nav.
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: DEFAULT_NAV_LINKS,
     isEnabled,
-  );
-  const mainLinks = footerNav.filter(
-    (item) => item.href.trim() && !item.children?.some((c) => c.href.trim()),
-  );
-  const groupColumns = footerNav
-    .map((item) => ({
-      label: item.label,
-      href: item.href,
-      external: item.external,
-      links: (item.children ?? []).filter((c) => c.href.trim()),
-    }))
-    .filter((group) => group.links.length > 0);
+  });
 
   return (
     <footer
@@ -189,32 +178,18 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             )}
           </div>
 
-          {/* ── Right: owner-nav columns + account + contact ── */}
+          {/* ── Right: quick links + account + contact ── */}
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
-            {mainLinks.length > 0 && (
+            {quickLinks.length > 0 && (
               <ViiFooterCol
                 title="Quick Links"
-                links={mainLinks.map((l) => ({
+                links={quickLinks.map((l) => ({
                   href: l.href,
                   label: l.label,
                   external: l.external,
                 }))}
               />
             )}
-
-            {groupColumns.map((group, g) => (
-              <ViiFooterCol
-                key={`${group.label}-${g}`}
-                title={group.label}
-                titleHref={group.href || undefined}
-                titleExternal={group.external}
-                links={group.links.map((l) => ({
-                  href: l.href,
-                  label: l.label,
-                  external: l.external,
-                }))}
-              />
-            ))}
 
             {/* Account — omitted when customerAccounts is off (PF10, B10.3) */}
             {isEnabled("customerAccounts") && (

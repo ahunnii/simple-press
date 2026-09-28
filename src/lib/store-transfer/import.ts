@@ -565,6 +565,13 @@ export async function importStoreBundle(args: {
       // emailOverrides holds copy text only (subject/introText) — no URLs to
       // rewrite.
       const rewrittenEmailOverrides = toJsonOrUndefined(sc.emailOverrides);
+      // footerNavigationItems is internal hrefs/labels only — no URLs to
+      // rewrite. `undefined` (absent from an older manifest) stays untouched;
+      // an explicit `null` must write as `Prisma.DbNull`, same as the
+      // JSON? columns above.
+      const rewrittenFooterNavigationItems = toJsonOrUndefined(
+        sc.footerNavigationItems,
+      );
 
       await db.siteContent.upsert({
         where: { businessId: targetBusinessId },
@@ -596,6 +603,7 @@ export async function importStoreBundle(args: {
           secondaryColor: sc.secondaryColor ?? null,
           accentColor: sc.accentColor ?? null,
           navigationItems: sc.navigationItems ?? undefined,
+          footerNavigationItems: rewrittenFooterNavigationItems,
           customFields: rewrittenCustomFields ?? undefined,
           bannerConfig: rewrittenBannerConfig ?? undefined,
           popupConfig: rewrittenPopupConfig ?? undefined,
@@ -635,6 +643,7 @@ export async function importStoreBundle(args: {
           secondaryColor: sc.secondaryColor ?? null,
           accentColor: sc.accentColor ?? null,
           navigationItems: sc.navigationItems ?? undefined,
+          footerNavigationItems: rewrittenFooterNavigationItems,
           customFields: rewrittenCustomFields ?? undefined,
           bannerConfig: rewrittenBannerConfig ?? undefined,
           popupConfig: rewrittenPopupConfig ?? undefined,

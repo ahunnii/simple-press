@@ -154,6 +154,9 @@ const exportedSiteContentSchema = z.object({
   secondaryColor: nullableString.optional(),
   accentColor: nullableString.optional(),
   navigationItems: z.unknown(),
+  // Footer "Quick Links" — flat, no children. Added 2026-09-28 — absent in
+  // older manifests.
+  footerNavigationItems: z.unknown().optional(),
   customFields: z.unknown(),
   bannerConfig: z.unknown(),
   popupConfig: z.unknown(),

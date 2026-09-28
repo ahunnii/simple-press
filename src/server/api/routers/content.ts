@@ -204,7 +204,20 @@ export const contentRouter = createTRPCRouter({
       // No `templateId` here on purpose — see the note on `siteContentSchema`.
       // Template switches must go through `business.updateTemplate`, which
       // enforces per-subdomain ownership of commercial templates.
-      const { clearPreviewDraft, publishCmsPageDrafts, ...data } = input;
+      const {
+        clearPreviewDraft,
+        publishCmsPageDrafts,
+        footerNavigationItems,
+        ...data
+      } = input;
+
+      // `footerNavigationItems` is a JSON? column — a plain JS `null` spread
+      // via `...data` writes as SQL NULL only by accident (Prisma's JSON
+      // filter/write semantics need `Prisma.DbNull` for that); `undefined`
+      // must stay `undefined` so an unrelated save never touches this column.
+      // Pulled out of `data` and re-added explicitly for that reason.
+      const footerNavigationItemsValue =
+        footerNavigationItems === null ? Prisma.DbNull : footerNavigationItems;
 
       const upsertSiteContent = (tx: TxClient) =>
         tx.siteContent.upsert({
@@ -212,9 +225,11 @@ export const contentRouter = createTRPCRouter({
           create: {
             businessId,
             ...data,
+            footerNavigationItems: footerNavigationItemsValue,
           },
           update: {
             ...data,
+            footerNavigationItems: footerNavigationItemsValue,
             // Only clear the durable /editor draft when the caller explicitly
             // says this save supersedes it (the visual editor's Publish
             // action). Unrelated saves — Branding, Navigation, the legacy

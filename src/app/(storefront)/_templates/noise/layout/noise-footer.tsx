@@ -7,6 +7,11 @@ import { resolveLogoAlt } from "~/lib/logo-alt";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
+import {
+  externalLinkProps,
+  filterNavByFlags,
+  resolveFooterNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
 import { nonBlank } from "../shared/noise-non-blank";
@@ -42,7 +47,10 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 
   const socialLinks = business?.siteContent?.socialLinks;
 
-  const QUICK_LINKS = [
+  // Same gating as before, kept as the fallback so an unset footer list
+  // renders identically to today; `filterNavByFlags` below is then a no-op
+  // on this list and only matters for an owner-saved footer list.
+  const quickLinksFallback = [
     { href: "/about", label: "About Us" },
     ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
     ...(isEnabled("testimonials")
@@ -50,7 +58,15 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
       : []),
     { href: "/contact", label: "Contact" },
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop All" }] : []),
-  ] as const;
+  ];
+
+  const quickLinks = filterNavByFlags(
+    resolveFooterNav(
+      business?.siteContent?.footerNavigationItems,
+      quickLinksFallback,
+    ),
+    isEnabled,
+  );
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
@@ -177,11 +193,11 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
               ]}
             />
 
-            {/* ── Col 3: Quick links ── */}
-            <FooterCol
-              title="Quick Links"
-              links={QUICK_LINKS.map((l) => ({ href: l.href, label: l.label }))}
-            />
+            {/* ── Col 3: Quick links — hidden (heading included) when the
+                resolved list is empty ── */}
+            {quickLinks.length > 0 && (
+              <FooterCol title="Quick Links" links={quickLinks} />
+            )}
 
             {/* ── Col 4: Contact info ── */}
             <div>
@@ -326,7 +342,7 @@ function FooterCol({
   className,
 }: {
   title: string;
-  links: { href: string; label: string }[];
+  links: { href: string; label: string; external?: boolean }[];
   className?: string;
 }) {
   return (
@@ -347,10 +363,14 @@ function FooterCol({
           <li key={link.href}>
             <Link
               href={link.href}
+              {...externalLinkProps(link.external)}
               className="vn-footer-link font-sans"
               style={{ fontSize: "13px" }}
             >
               {link.label}
+              {link.external && (
+                <span className="sr-only"> (opens in new tab)</span>
+              )}
             </Link>
           </li>
         ))}

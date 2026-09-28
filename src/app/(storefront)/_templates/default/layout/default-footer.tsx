@@ -9,6 +9,11 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
 import { EmailIcon } from "~/components/icons/email-icon";
+import {
+  externalLinkProps,
+  filterNavByFlags,
+  resolveFooterNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import {
@@ -39,6 +44,36 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
 
   const blogEnabled = isEnabled("blog");
+
+  // Same gating as before, kept as the fallback so an unset footer list
+  // renders identically to today; `filterNavByFlags` below is then a no-op
+  // on this list and only matters for an owner-saved footer list.
+  const quickLinksFallback = [
+    { href: "/about", label: "About us" },
+    ...(isEnabled("testimonials")
+      ? [{ href: "/testimonials", label: "Reviews" }]
+      : []),
+    ...(blogEnabled ? [{ href: "/blog", label: "Blog" }] : []),
+    ...(isEnabled("services")
+      ? [{ href: "/services", label: "Services" }]
+      : []),
+    ...(isEnabled("donations") && business.donationShowInFooter
+      ? [
+          {
+            href: "/donate",
+            label: resolveDonationLabel(business.donationLabel).verb,
+          },
+        ]
+      : []),
+  ];
+
+  const quickLinks = filterNavByFlags(
+    resolveFooterNav(
+      business?.siteContent?.footerNavigationItems,
+      quickLinksFallback,
+    ),
+    isEnabled,
+  );
 
   return (
     <footer
@@ -177,46 +212,35 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
             )}
           </div>
 
-          {/* Quick Links */}
-          <div className="flex flex-col gap-4">
-            <p
-              className="text-[11px] font-medium tracking-[0.18em] text-[#6b6b6b] uppercase"
-              aria-hidden="true"
-              {...fieldAttr("default.global.footer-quick-links-heading")}
-            >
-              {f["default.global.footer-quick-links-heading"] ??
-                DEFAULT_FOOTER_QUICK_LINKS_HEADING}
-            </p>
-            <nav aria-label="Quick links" className="flex flex-col gap-2.5">
-              {[
-                { href: "/about", label: "About us" },
-                ...(isEnabled("testimonials")
-                  ? [{ href: "/testimonials", label: "Reviews" }]
-                  : []),
-                ...(blogEnabled ? [{ href: "/blog", label: "Blog" }] : []),
-                ...(isEnabled("services")
-                  ? [{ href: "/services", label: "Services" }]
-                  : []),
-                ...(isEnabled("donations") && business.donationShowInFooter
-                  ? [
-                      {
-                        href: "/donate",
-                        label: resolveDonationLabel(business.donationLabel)
-                          .verb,
-                      },
-                    ]
-                  : []),
-              ].map(({ href, label }) => (
-                <Link
-                  key={`quick-links-${label}`}
-                  href={href}
-                  className="text-sm text-[#0a0a0a] hover:underline"
-                >
-                  {label}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          {/* Quick Links — hidden (heading included) when the resolved
+              list is empty */}
+          {quickLinks.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <p
+                className="text-[11px] font-medium tracking-[0.18em] text-[#6b6b6b] uppercase"
+                aria-hidden="true"
+                {...fieldAttr("default.global.footer-quick-links-heading")}
+              >
+                {f["default.global.footer-quick-links-heading"] ??
+                  DEFAULT_FOOTER_QUICK_LINKS_HEADING}
+              </p>
+              <nav aria-label="Quick links" className="flex flex-col gap-2.5">
+                {quickLinks.map((link) => (
+                  <Link
+                    key={link.href + link.label}
+                    href={link.href}
+                    {...externalLinkProps(link.external)}
+                    className="text-sm text-[#0a0a0a] hover:underline"
+                  >
+                    {link.label}
+                    {link.external && (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    )}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          )}
         </div>
 
         {/* Bottom bar */}

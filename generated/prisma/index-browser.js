@@ -280,6 +280,7 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   secondaryColor: 'secondaryColor',
   accentColor: 'accentColor',
   navigationItems: 'navigationItems',
+  footerNavigationItems: 'footerNavigationItems',
   customFields: 'customFields',
   bannerConfig: 'bannerConfig',
   popupConfig: 'popupConfig',

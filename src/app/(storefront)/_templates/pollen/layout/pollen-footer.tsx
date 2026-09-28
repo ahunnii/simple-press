@@ -18,14 +18,13 @@ import { resolveLogoAlt } from "~/lib/logo-alt";
 import { resolveSocialLinks } from "~/lib/social-links";
 import {
   externalLinkProps,
-  filterNavByFlags,
-  resolveNav,
+  resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
 
 // Pollen has never had a mega-menu, so the footer's Main Menu default mirrors
-// the header's own NAV_LINKS (`pollen-header.tsx`) one-for-one. An owner who
-// saves Admin → Content → Navigation entries with children gets those too —
-// each parent becomes its own footer column (see `groupColumns` below).
+// the header's own NAV_LINKS (`pollen-header.tsx`) one-for-one. An owner's
+// flat Footer Quick Links list (falls back to the main nav's top level when
+// unset) replaces this default once saved.
 const mainMenuLinks = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
@@ -178,30 +177,20 @@ export function PollenFooter({
   const { data: session, isPending } = useHydratedSession();
   const user = session?.user;
 
-  // Same list as the header (`pollen-header.tsx`'s NAV_LINKS), split into
-  // short link columns instead of one long list: top-level links without
-  // children stay together under "Main Menu", and every parent with children
-  // gets its own column headed by its label (a link when the parent has an
-  // href). Still plain link lists — no dropdowns (B10.4). The shared
+  // Owner's flat footer Quick Links (falls back to the header's own
+  // NAV_LINKS top level when unset; an explicit `[]` means "no quick
+  // links"). Still a plain link list — no dropdowns (B10.4). The shared
   // route→flag filter (P-NAV-FLAGS) drops anything the business has
-  // switched off, same as the header; a parent whose children were all
-  // filtered out falls back into Main Menu.
-  const footerNav = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, mainMenuLinks),
+  // switched off, same as the header.
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: mainMenuLinks,
     isEnabled,
-  );
-  const mainLinks = footerNav.filter(
-    (item) => item.href && !item.children?.some((child) => child.href),
-  );
-  const groupColumns = footerNav
-    .map((item) => ({
-      ...item,
-      links: (item.children ?? []).filter((child) => child.href),
-    }))
-    .filter((group) => group.links.length > 0);
-  // A long flat nav (no children to group by) still gets split, into two
-  // side-by-side columns under the one heading.
-  const splitMainLinks = mainLinks.length > 6;
+  });
+  // A long list still gets split, into two side-by-side columns under the
+  // one heading.
+  const splitMainLinks = quickLinks.length > 6;
 
   const accountsEnabled = isEnabled("customerAccounts");
   const ordersEnabled = isEnabled("orders");
@@ -335,9 +324,9 @@ export function PollenFooter({
             )}
           </div>
 
-          {/* Right: link columns — Main Menu, one per nav group, Account */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4">
-            {mainLinks.length > 0 && (
+          {/* Right: link columns — Main Menu, Account */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-8">
+            {quickLinks.length > 0 && (
               <div className={splitMainLinks ? "col-span-2" : undefined}>
                 <h4 className="mb-4 text-sm font-semibold text-[#374151]">
                   Main Menu
@@ -349,7 +338,7 @@ export function PollenFooter({
                       : "space-y-3"
                   }
                 >
-                  {mainLinks.map((link, i) => (
+                  {quickLinks.map((link, i) => (
                     <li key={i}>
                       <Link
                         href={link.href}
@@ -366,43 +355,6 @@ export function PollenFooter({
                 </ul>
               </div>
             )}
-
-            {groupColumns.map((group, g) => (
-              <div key={`${group.label}-${g}`}>
-                <h4 className="mb-4 text-sm font-semibold text-[#374151]">
-                  {group.href ? (
-                    <Link
-                      href={group.href}
-                      {...externalLinkProps(group.external)}
-                      className="transition-colors hover:text-[#215935]"
-                    >
-                      {group.label}
-                      {group.external && (
-                        <span className="sr-only"> (opens in new tab)</span>
-                      )}
-                    </Link>
-                  ) : (
-                    group.label
-                  )}
-                </h4>
-                <ul className="space-y-3">
-                  {group.links.map((link, i) => (
-                    <li key={i}>
-                      <Link
-                        href={link.href}
-                        {...externalLinkProps(link.external)}
-                        className={linkClass}
-                      >
-                        {link.label}
-                        {link.external && (
-                          <span className="sr-only"> (opens in new tab)</span>
-                        )}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
 
             {/* Account — omitted when customerAccounts is off */}
             {accountsEnabled && (

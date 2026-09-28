@@ -8,8 +8,7 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import {
   externalLinkProps,
-  filterNavByFlags,
-  resolveNav,
+  resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
@@ -77,18 +76,16 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
     type: "policy",
   });
 
-  // Same list the header/mobile sheet read, flattened (PF11): each top-level
-  // link, then its children right after it. A group with an empty href (a
-  // pure dropdown label) contributes only its children. The shared
+  // Owner's flat footer Quick Links (falls back to the main nav's top level
+  // when unset; an explicit `[]` means "no quick links"). The shared
   // route→flag filter (P-NAV-FLAGS) drops anything the business has switched
   // off, same as the header and mobile sheet.
-  const quickLinks = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, BAMBOO_DEFAULT_NAV),
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: BAMBOO_DEFAULT_NAV,
     isEnabled,
-  ).flatMap((item) => [
-    ...(item.href ? [item] : []),
-    ...(item.children ?? []).filter((child) => child.href),
-  ]);
+  });
 
   // Mandatory, non-hideable policy row (B10.1, PF9) — published merchant
   // Pages by slug; privacy/terms fall back to the platform's own policy
@@ -168,34 +165,41 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
               />
             </div>
 
-            {/* Quick links */}
-            <div>
-              <h2 className={columnHeadingClass}>Quick Links</h2>
-              <nav className="flex flex-col gap-2.5" aria-label="Quick links">
-                {quickLinks.map((link, i) => (
-                  <Link
-                    key={`${link.href}-${i}`}
-                    href={link.href}
-                    {...externalLinkProps(link.external)}
-                    className={columnLinkClass}
-                  >
-                    {link.label}
-                    {link.external && (
-                      <span className="sr-only"> (opens in new tab)</span>
-                    )}
-                  </Link>
-                ))}
-                {/* Account entry, end of Quick Links (B10.3, PF10) — gated
-                    on customerAccounts, own client component since the
-                    footer itself is a server component. */}
-                {isEnabled("customerAccounts") && (
-                  <BambooFooterAccount
-                    ordersEnabled={isEnabled("orders")}
-                    linkClassName={columnLinkClass}
-                  />
-                )}
-              </nav>
-            </div>
+            {/* Quick links — hidden entirely when there's nothing to show
+                (no resolved links and accounts are off), rather than
+                rendering an empty heading. */}
+            {(quickLinks.length > 0 || isEnabled("customerAccounts")) && (
+              <div>
+                <h2 className={columnHeadingClass}>Quick Links</h2>
+                <nav
+                  className="flex flex-col gap-2.5"
+                  aria-label="Quick links"
+                >
+                  {quickLinks.map((link, i) => (
+                    <Link
+                      key={`${link.href}-${i}`}
+                      href={link.href}
+                      {...externalLinkProps(link.external)}
+                      className={columnLinkClass}
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  ))}
+                  {/* Account entry, end of Quick Links (B10.3, PF10) — gated
+                      on customerAccounts, own client component since the
+                      footer itself is a server component. */}
+                  {isEnabled("customerAccounts") && (
+                    <BambooFooterAccount
+                      ordersEnabled={isEnabled("orders")}
+                      linkClassName={columnLinkClass}
+                    />
+                  )}
+                </nav>
+              </div>
+            )}
 
             {/* Policies — always rendered (B10.1, PF9), exactly these five
                 slots. */}
