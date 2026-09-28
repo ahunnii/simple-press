@@ -192,6 +192,7 @@ import { HappyBambooInvoicesPage } from "./happy-bamboo/account/happy-bamboo-inv
 import { HappyBambooOrderDetailPage } from "./happy-bamboo/account/happy-bamboo-order-detail-page";
 import { HappyBambooOrdersPage } from "./happy-bamboo/account/happy-bamboo-orders-page";
 import { HappyBambooPreferencesPage } from "./happy-bamboo/account/happy-bamboo-preferences-page";
+import { HappyBambooRewardsPage } from "./happy-bamboo/account/happy-bamboo-rewards-page";
 import { HappyBambooSubscriptionsPage } from "./happy-bamboo/account/happy-bamboo-subscriptions-page";
 import { HappyBambooBlogPage } from "./happy-bamboo/blog/happy-bamboo-blog-page";
 import { HappyBambooBlogPostPage } from "./happy-bamboo/blog/happy-bamboo-blog-post-page";
@@ -202,12 +203,17 @@ import { HappyBambooOrderSuccessPage } from "./happy-bamboo/cart-checkout/happy-
 import { HappyBambooCollectionPage } from "./happy-bamboo/collections/happy-bamboo-collection-page";
 import { HappyBambooCollectionsPage } from "./happy-bamboo/collections/happy-bamboo-collections-page";
 import { HappyBambooContactPage } from "./happy-bamboo/contact/happy-bamboo-contact-page";
+import { HappyBambooDonatePage } from "./happy-bamboo/donate/happy-bamboo-donate-page";
+import { HappyBambooEventPage } from "./happy-bamboo/events/happy-bamboo-event-page";
+import { HappyBambooEventsPage } from "./happy-bamboo/events/happy-bamboo-events-page";
+import { HappyBambooFaqPage } from "./happy-bamboo/faq/happy-bamboo-faq-page";
 import { HappyBambooGenericPage } from "./happy-bamboo/happy-bamboo-generic-page";
 import { HappyBambooLayout } from "./happy-bamboo/layout/happy-bamboo-layout";
 import { HappyBambooProductPage } from "./happy-bamboo/products/happy-bamboo-product-page";
 import { HappyBambooServicesIndexPage } from "./happy-bamboo/services/happy-bamboo-services-index-page";
 import { HappyBambooShopPage } from "./happy-bamboo/shop/happy-bamboo-shop-page";
 import { HappyBambooTestimonialsPage } from "./happy-bamboo/testimonials/happy-bamboo-testimonials-page";
+import { HappyBambooVideosPage } from "./happy-bamboo/videos/happy-bamboo-videos-page";
 // ---------------------------------------------------------------------------
 // Modern
 // ---------------------------------------------------------------------------
@@ -697,6 +703,12 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: HappyBambooPreferencesPage,
     SubscriptionsPage: HappyBambooSubscriptionsPage,
     InvoicesPage: HappyBambooInvoicesPage,
+    RewardsPage: HappyBambooRewardsPage,
+    EventsPage: HappyBambooEventsPage,
+    EventPage: HappyBambooEventPage,
+    VideosPage: HappyBambooVideosPage,
+    DonatePage: HappyBambooDonatePage,
+    FaqPage: HappyBambooFaqPage,
   },
 
   modern: {

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Leaf, Package, Sparkles } from "lucide-react";
+import { ArrowRight, Package, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -17,6 +17,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
+import { HappyBambooPageShelf } from "../shared/happy-bamboo-page-shelf";
 
 type Props = DefaultCollectionsPageTemplateProps;
 
@@ -40,41 +41,15 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
   const ctaButtonLink = fields["happy-bamboo.collections-cta-button-link"]!;
   return (
     <PageTransition>
-      {/* Hero Section */}
-      <section
-        className="bg-muted/50 py-16 md:py-24"
-        {...sectionGroupAttr("collections", "listing")}
-      >
-        <div className="container mx-auto px-4">
-          <FadeIn className="mx-auto max-w-3xl text-center">
-            {!!smallLabel && (
-              <Badge
-                className="mb-4"
-                {...fieldAttr("happy-bamboo.collections-listing-small-label")}
-              >
-                <Leaf className="mr-1 h-3 w-3" />
-                {smallLabel}
-              </Badge>
-            )}
-            <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-              <span
-                className="font-serif"
-                {...fieldAttr("happy-bamboo.collections-listing-heading")}
-              >
-                {listingHeading}
-              </span>
-            </h1>
-            {listingIntro && (
-              <p
-                className="text-muted-foreground text-lg leading-relaxed"
-                {...fieldAttr("happy-bamboo.collections-listing-intro")}
-              >
-                {listingIntro}
-              </p>
-            )}
-          </FadeIn>
-        </div>
-      </section>
+      <HappyBambooPageShelf
+        title={listingHeading}
+        titleFieldKey="happy-bamboo.collections-listing-heading"
+        smallLabel={smallLabel}
+        smallLabelFieldKey="happy-bamboo.collections-listing-small-label"
+        subtitle={listingIntro}
+        subtitleFieldKey="happy-bamboo.collections-listing-intro"
+        sectionAttrs={sectionGroupAttr("collections", "listing")}
+      />
 
       {/* Featured Collections */}
       <section className="py-16 md:py-24">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Leaf } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
@@ -9,6 +10,7 @@ import { Separator } from "~/components/ui/separator";
 import { externalLinkProps } from "~/app/(storefront)/_components/nav";
 
 import { resolveHappyBambooNav } from "../lib/nav";
+import { HappyBambooFooterAccount } from "./happy-bamboo-footer-account";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
 
 export async function HappyBambooFooter({
@@ -20,11 +22,16 @@ export async function HappyBambooFooter({
   const name = business?.name ?? "Business Name";
   const footerTagline = business?.siteContent?.footerText;
 
+  const { isEnabled } = await getBusinessFlags();
+
   // Same list as the header/mobile panel, flattened: each top-level link,
   // then its children right after it. A group with an empty href (a pure
-  // dropdown label) contributes only its children.
+  // dropdown label) contributes only its children. The shared route→flag
+  // filter (P-NAV-FLAGS) drops anything the business has switched off, same
+  // as the header and mobile panel.
   const quickLinks = resolveHappyBambooNav(
     business?.siteContent?.navigationItems,
+    isEnabled,
   ).flatMap((item) => [
     ...(item.href ? [item] : []),
     ...(item.children ?? []).filter((child) => child.href),
@@ -33,6 +40,39 @@ export async function HappyBambooFooter({
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
   });
+
+  // Mandatory, non-hideable policy row (B10.1) — published merchant Pages by
+  // slug; privacy/terms fall back to the platform's own policy since every
+  // store is covered by it regardless of what it has published. Shipping and
+  // refund have no platform equivalent, so they only appear once published.
+  // Only these four standard slugs plus Platform Policies — any other
+  // policy-type page (imports, seed data) is never auto-listed.
+  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
+  const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  const refundPolicy = policies.find((p) => p.slug === "refund-policy");
+
+  const policyLinks: { label: string; href: string }[] = [
+    {
+      label: "Privacy Policy",
+      href: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
+    },
+    {
+      label: "Terms of Service",
+      href: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+    },
+    ...(shippingPolicy
+      ? [{ label: "Shipping Policy", href: `/${shippingPolicy.slug}` }]
+      : []),
+    ...(refundPolicy
+      ? [{ label: "Refund Policy", href: `/${refundPolicy.slug}` }]
+      : []),
+    { label: "Platform Policies", href: "/platform/policies/" },
+  ];
 
   const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
@@ -81,6 +121,12 @@ export async function HappyBambooFooter({
                   </Link>
                 </li>
               ))}
+              {/* Account entry, end of Quick Links (B10.3) — gated on
+                  customerAccounts, own client component since the footer
+                  itself is a server component. */}
+              {isEnabled("customerAccounts") && (
+                <HappyBambooFooterAccount ordersEnabled={isEnabled("orders")} />
+              )}
             </ul>
           </div>
 
@@ -111,24 +157,22 @@ export async function HappyBambooFooter({
             </address>
           </div>
 
-          {/* Policies */}
-          {policies.length > 0 && (
-            <div>
-              <h4 className="text-muted mb-4 font-semibold">Policies</h4>
-              <ul className="flex flex-col space-y-2">
-                {policies.map((link) => (
-                  <li key={link.id}>
-                    <Link
-                      href={`/${link.slug}`}
-                      className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                    >
-                      {link.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Policies — always rendered (B10.1), exactly these five slots. */}
+          <div>
+            <h4 className="text-muted mb-4 font-semibold">Policies</h4>
+            <ul className="flex flex-col space-y-2">
+              {policyLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <Separator className="my-8" />

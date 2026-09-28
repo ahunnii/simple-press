@@ -99,8 +99,6 @@ export function HappyBambooCheckoutForm({
     await handleSubmit(e);
   };
 
-  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
-
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">
@@ -257,11 +255,6 @@ export function HappyBambooCheckoutForm({
                 variant={deliveryMethod === "ship" ? "default" : "outline"}
                 onClick={() => setDeliveryMethod("ship")}
                 aria-pressed={deliveryMethod === "ship"}
-                style={
-                  deliveryMethod === "ship"
-                    ? { backgroundColor: primaryColor }
-                    : undefined
-                }
               >
                 Ship to address
               </Button>
@@ -270,11 +263,6 @@ export function HappyBambooCheckoutForm({
                 variant={deliveryMethod === "pickup" ? "default" : "outline"}
                 onClick={() => setDeliveryMethod("pickup")}
                 aria-pressed={deliveryMethod === "pickup"}
-                style={
-                  deliveryMethod === "pickup"
-                    ? { backgroundColor: primaryColor }
-                    : undefined
-                }
               >
                 In-store pickup
               </Button>
@@ -483,9 +471,8 @@ export function HappyBambooCheckoutForm({
             type="submit"
             disabled={isProcessing || shippingCalculating}
             aria-busy={isProcessing || shippingCalculating}
-            className="w-full text-white"
+            className="w-full"
             size="lg"
-            style={{ backgroundColor: primaryColor }}
           >
             {isProcessing ? (
               <>

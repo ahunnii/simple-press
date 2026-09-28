@@ -5,11 +5,12 @@ import type { Ref, RefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, LogOut } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { isActiveNavLink } from "~/lib/nav-utils";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { cn } from "~/lib/utils";
@@ -21,8 +22,13 @@ import {
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
 
+import { HB_QUICK_ACCOUNT_KEYS } from "../lib/account-link-icons";
 import { resolveHappyBambooNav } from "../lib/nav";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
+
+/** Same route the header's `UserButton` menu (and pollen's overlay) navigate
+ *  to for sign-out — a real page that invalidates the session server-side. */
+const SIGN_OUT_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signOut}`;
 
 const MENU_ID = "hb-mobile-menu";
 /** Matches Tailwind's `md` breakpoint — the menu has no business being open
@@ -249,9 +255,13 @@ function MobileMenuPanel({
     return () => window.removeEventListener("resize", measure);
   }, [headerRef]);
 
-  // Shared resolver (lib/nav.ts, over `resolveNav`) — the header's desktop nav and the footer
-  // read the same list, so the three can't drift apart.
-  const links = resolveHappyBambooNav(business?.siteContent?.navigationItems);
+  // Shared resolver (lib/nav.ts, over `resolveNav` + `filterNavByFlags`) — the
+  // header's desktop nav and the footer read the same list, so the three
+  // can't drift apart or link to a flag-disabled route.
+  const links = resolveHappyBambooNav(
+    business?.siteContent?.navigationItems,
+    isEnabled,
+  );
   // One group open at a time. The panel mounts fresh on every open, so the
   // initializer auto-expands the group holding the current route.
   const [expanded, setExpanded] = useState<number | null>(() => {
@@ -468,34 +478,58 @@ function MobileMenuPanel({
                 <p className="mb-1 text-xs font-medium tracking-[0.18em] text-[var(--hb-brand-muted)] uppercase">
                   Your account
                 </p>
-                <ul className="flex flex-col">
-                  {getAccountNavLinks({
-                    isEnabled,
-                    includeAdmin: isAdmin,
-                  }).map((item) => (
-                    <li
-                      key={item.key}
-                      className="border-b border-[var(--hb-brand)]/10"
-                    >
+                {/* Quick-access subset (B4.3 decision) — Orders (if on),
+                    Settings, Admin (if a member). The full list lives in the
+                    account sidebar, one tap away via Settings. */}
+                <nav aria-label="Account">
+                  <ul className="flex flex-col">
+                    {getAccountNavLinks({
+                      isEnabled,
+                      includeAdmin: isAdmin,
+                    })
+                      .filter((item) => HB_QUICK_ACCOUNT_KEYS.has(item.key))
+                      .map((item) => (
+                        <li
+                          key={item.key}
+                          className="border-b border-[var(--hb-brand)]/10"
+                        >
+                          <Link
+                            href={item.href}
+                            onClick={onClose}
+                            aria-current={
+                              pathname === item.href ? "page" : undefined
+                            }
+                            className={cn(
+                              "flex min-h-12 items-center py-3 text-base transition-colors",
+                              focusRing,
+                              pathname === item.href
+                                ? "font-medium text-[var(--hb-brand-deep)]"
+                                : "text-foreground/80 hover:text-[var(--hb-brand-deep)]",
+                            )}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    {/* Quiet sign-out row — the bar's avatar menu is the
+                        desktop equivalent; this is the only sign-out reachable
+                        below md (B4.4). Navigates to the same better-auth-ui
+                        sign-out view the header's `UserButton` uses. */}
+                    <li>
                       <Link
-                        href={item.href}
+                        href={SIGN_OUT_HREF}
                         onClick={onClose}
-                        aria-current={
-                          pathname === item.href ? "page" : undefined
-                        }
                         className={cn(
-                          "flex min-h-12 items-center py-3 text-base transition-colors",
+                          "flex min-h-12 items-center gap-2 py-3 text-sm text-[var(--hb-brand-muted)] transition-colors hover:text-[var(--hb-brand-deep)]",
                           focusRing,
-                          pathname === item.href
-                            ? "font-medium text-[var(--hb-brand-deep)]"
-                            : "text-foreground/80 hover:text-[var(--hb-brand-deep)]",
                         )}
                       >
-                        {item.label}
+                        <LogOut aria-hidden="true" className="size-4" />
+                        Sign out
                       </Link>
                     </li>
-                  ))}
-                </ul>
+                  </ul>
+                </nav>
               </>
             ) : (
               <div className="flex flex-col gap-3 min-[420px]:flex-row">

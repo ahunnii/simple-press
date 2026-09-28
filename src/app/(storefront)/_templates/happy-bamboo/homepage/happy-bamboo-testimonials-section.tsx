@@ -47,7 +47,10 @@ export function HappyBambooTestimonialsSection({
             Testimonial
           </span>
           <h2 className="mt-2 font-serif text-4xl font-bold md:text-5xl">
-            <span {...fieldAttr("happy-bamboo.homepage-testimonials-heading")}>
+            <span
+              className="font-serif"
+              {...fieldAttr("happy-bamboo.homepage-testimonials-heading")}
+            >
               {heading}
             </span>
           </h2>

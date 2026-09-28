@@ -4,37 +4,36 @@ import { FadeIn, PageTransition } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { HappyBambooPageShelf } from "./shared/happy-bamboo-page-shelf";
+
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 };
 
+/**
+ * Owner-authored pages and policy pages (`/<slug>`, `/privacy-policy`, …).
+ * `page.title` + `page.excerpt` sit in the shared page shelf (no badge, no
+ * image); the body is a left-aligned `max-w-3xl` prose column on the shelf's
+ * container edge, so the h1 and the text share one left edge and lines keep
+ * a readable measure. No `sectionGroupAttr`: the copy lives on the page
+ * record, not in template fields, and Default's generic page declares no
+ * section for it.
+ */
 export function HappyBambooGenericPage({ page }: Props) {
   return (
     <PageTransition>
-      <section className="bg-secondary">
-        <div className="mx-auto flex max-w-7xl flex-col-reverse items-center gap-8 px-4 py-16 md:flex-row md:py-24 lg:px-8">
-          <FadeIn
-            direction="right"
-            className="flex flex-1 flex-col items-start gap-6"
-          >
-            <h1 className="text-foreground font-serif text-4xl leading-tight font-bold tracking-tight md:text-5xl">
-              <span className="font-serif text-balance">{page.title}</span>
-            </h1>
-            <p className="text-muted-foreground max-w-lg text-lg leading-relaxed">
-              {page.excerpt}
-            </p>
+      <HappyBambooPageShelf title={page.title} subtitle={page.excerpt ?? ""} />
+
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <FadeIn className="max-w-3xl min-w-0">
+            <TiptapRenderer
+              content={page.content as TiptapJSON}
+              className="prose prose-lg prose-headings:text-foreground prose-p:text-foreground/80 prose-li:text-foreground/80 prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-primary prose-pre:bg-background prose-pre:border prose-pre:border-border max-w-3xl break-words"
+            />
+            <PlatformPolicyNotice slug={page.slug} />
           </FadeIn>
         </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
-        <FadeIn direction="up">
-          <TiptapRenderer
-            content={page.content as TiptapJSON}
-            className="prose prose-lg prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-primary prose-pre:bg-background prose-pre:border prose-pre:border-border max-w-none"
-          />
-          <PlatformPolicyNotice slug={page.slug} />
-        </FadeIn>
       </section>
     </PageTransition>
   );

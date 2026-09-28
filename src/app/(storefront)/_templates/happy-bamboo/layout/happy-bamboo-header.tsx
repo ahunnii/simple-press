@@ -1,24 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ChevronDown,
-  FileText,
-  Gift,
-  Heart,
-  LayoutDashboard,
-  Leaf,
-  MapPin,
-  Package,
-  Repeat,
-  Shield,
-  ShoppingCart,
-  SlidersHorizontal,
-} from "lucide-react";
+import { ChevronDown, Heart, Leaf, ShoppingCart, User } from "lucide-react";
 import { motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
@@ -44,23 +30,15 @@ import {
 
 import { resolveFields } from "..";
 import { HappyBambooCartDrawer } from "../cart-checkout/happy-bamboo-cart-drawer";
+import {
+  HB_ACCOUNT_LINK_ICONS,
+  HB_QUICK_ACCOUNT_KEYS,
+} from "../lib/account-link-icons";
 import { resolveHappyBambooNav } from "../lib/nav";
 import {
   HappyBambooMenuToggle,
   HappyBambooMobileMenu,
 } from "./happy-bamboo-mobile-nav";
-
-/** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
-const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
-  orders: <Package className="h-4 w-4" />,
-  "address-book": <MapPin className="h-4 w-4" />,
-  subscriptions: <Repeat className="h-4 w-4" />,
-  invoices: <FileText className="h-4 w-4" />,
-  rewards: <Gift className="h-4 w-4" />,
-  security: <Shield className="h-4 w-4" />,
-  preferences: <SlidersHorizontal className="h-4 w-4" />,
-  admin: <LayoutDashboard className="h-4 w-4" />,
-};
 
 export function HappyBambooHeader({
   business,
@@ -138,7 +116,10 @@ export function HappyBambooHeader({
     }
   }, [itemCount]);
 
-  const links = resolveHappyBambooNav(business?.siteContent?.navigationItems);
+  const links = resolveHappyBambooNav(
+    business?.siteContent?.navigationItems,
+    isEnabled,
+  );
 
   const f = resolveFields(business.siteContent?.customFields, [
     "happy-bamboo.global.cart-label",
@@ -157,25 +138,31 @@ export function HappyBambooHeader({
         asChild
         className="text-background hover:bg-background/10 hidden hover:text-[var(--hb-gold)] md:inline-flex"
       >
-        <Link href="/auth/sign-in">Log in</Link>
+        <Link href="/auth/sign-in">
+          <User aria-hidden="true" className="h-4 w-4" />
+          Log in
+        </Link>
       </Button>
     </>
   );
 
-  // Desktop avatar menu: the same flag-gated account links the mobile panel
-  // and Default's account sidebar use. Settings is dropped because
-  // `UserButton` renders its own built-in Settings item.
+  // Desktop avatar menu: the quick-access subset (B4.3 decision) of the same
+  // flag-gated account links the mobile panel and Default's account sidebar
+  // use — the full list lives in the account sidebar. Settings is dropped
+  // because `UserButton` renders its own built-in Settings item.
   const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
     isEnabled,
     includeAdmin:
       session?.user?.platformRole === "PLATFORM_ADMIN" ||
       !!session?.session?.membershipId,
   })
-    .filter((link) => link.key !== "settings")
+    .filter(
+      (link) => HB_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
+    )
     .map((link) => ({
       label: link.label,
       href: link.href,
-      icon: ACCOUNT_LINK_ICONS[link.key],
+      icon: HB_ACCOUNT_LINK_ICONS[link.key],
     }));
 
   const userMenu = session?.user && (
@@ -381,27 +368,29 @@ export function HappyBambooHeader({
                 </Link>
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-background hover:bg-background/10 relative hover:text-[var(--hb-gold)]"
-              onClick={() => {
-                setMobileOpen(false);
-                setIsOpen(true);
-              }}
-              aria-label="Open cart"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {itemCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs"
-                >
-                  {itemCount}
-                </motion.span>
-              )}
-            </Button>
+            {isEnabled("cart") && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-background hover:bg-background/10 relative hover:text-[var(--hb-gold)]"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setIsOpen(true);
+                }}
+                aria-label="Open cart"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs"
+                  >
+                    {itemCount}
+                  </motion.span>
+                )}
+              </Button>
+            )}
 
             <HappyBambooMenuToggle
               ref={menuToggleRef}

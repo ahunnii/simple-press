@@ -37,7 +37,7 @@ export function HappyBambooAboutSection({
   sectionAttrs,
 }: Props) {
   return (
-    <section className="py-20 md:py-32" {...sectionAttrs}>
+    <section className="overflow-x-clip py-20 md:py-32" {...sectionAttrs}>
       <div className="container mx-auto px-4">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <FadeIn
@@ -128,9 +128,7 @@ export function HappyBambooAboutSection({
             )}
             <Button variant="outline" className="group" asChild>
               <Link href={aboutButtonLink ?? "/about"}>
-                <span
-                  {...fieldAttr("happy-bamboo.homepage-about-button-text")}
-                >
+                <span {...fieldAttr("happy-bamboo.homepage-about-button-text")}>
                   {aboutButtonText}
                 </span>
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, RotateCcw, Truck } from "lucide-react";
 
@@ -13,6 +13,7 @@ import {
   sectionGroupAttr,
 } from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateTrustBadgesListRows,
@@ -29,8 +30,12 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import { ProductReviews } from "~/components/product-reviews";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "../index";
 import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
@@ -72,6 +77,7 @@ export function HappyBambooProductPage({
     "happy-bamboo.product.related-heading",
     "happy-bamboo.product.coming-soon-heading",
     "happy-bamboo.product.coming-soon-body",
+    "happy-bamboo.product.reviews-heading",
   ]);
   const saleBadgeFormat = fields["happy-bamboo.sale-badge-format"] ?? "true";
   const shippingSummary = (
@@ -84,8 +90,26 @@ export function HappyBambooProductPage({
     fields["happy-bamboo.product.question-text"] ?? ""
   ).trim();
   const relatedHeading = fields["happy-bamboo.product.related-heading"] ?? "";
+  const reviewsHeading = fields["happy-bamboo.product.reviews-heading"] ?? "";
   const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Shipping / returns / questions are each their own hideable section
+  // (product.shipping / product.returns / product.questions) so an owner can
+  // hide one row without hiding the others.
+  const showShippingRow =
+    isSectionVisible(customFields, "happy-bamboo", "product.shipping") &&
+    (shippingSummary !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "happy-bamboo", "product.returns") &&
+    (returnsSummary !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "happy-bamboo", "product.questions") &&
+    questionText !== "";
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   // A product's own features (Products → features) win; otherwise the
   // store-wide badges from the editor. No built-in fallback rows — an empty
@@ -195,6 +219,23 @@ export function HappyBambooProductPage({
               {...sectionGroupAttr("product", "details")}
               className="flex flex-col gap-6"
             >
+              {/* Wishlist — its own row above the buy panel so it stays
+                  visible across every HappyBambooProductActions branch
+                  (coming soon, variants, out of stock, in stock), the same
+                  way the shop card's heart is never hidden by stock status.
+                  Self-gates on the wishlist flag (renders nothing when off). */}
+              <WishlistButton
+                item={{
+                  productId: product.id,
+                  name: product.name,
+                  slug: product.slug,
+                  price: displayPrice,
+                  imageUrl: product.images[0]?.url ?? null,
+                }}
+                className="border-border bg-background text-primary static flex size-10 shrink-0 items-center justify-center self-start rounded-lg border shadow-none backdrop-blur-none hover:scale-100 hover:bg-secondary/60"
+                iconClassName="size-4"
+              />
+
               {/* Quantity + Add to Cart Actions */}
               <HappyBambooProductActions
                 product={product}
@@ -247,13 +288,17 @@ export function HappyBambooProductPage({
                 </ul>
               ) : null}
 
-              {/* Shipping / Returns — each row renders when its note is set OR its policy is published */}
-              {shippingSummary || returnsSummary || hasShippingPolicy || hasRefundPolicy ? (
+              {/* Shipping / Returns — each row is its own hideable section
+                  (product.shipping / product.returns), rendering when its
+                  note is set OR its policy is published, and independently
+                  toggleable in the editor. */}
+              {showShippingRow || showReturnsRow ? (
                 <div>
                   <h2 className="sr-only">Shipping and returns</h2>
                   <div className="border-border divide-border divide-y rounded-lg border">
-                    {shippingSummary || hasShippingPolicy ? (
+                    {showShippingRow ? (
                       <PolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "shipping")}
                         Icon={Truck}
                         title="Shipping"
                         fieldKey="happy-bamboo.product.shipping-summary"
@@ -264,8 +309,9 @@ export function HappyBambooProductPage({
                         policyLabel="Read the full shipping policy"
                       />
                     ) : null}
-                    {returnsSummary || hasRefundPolicy ? (
+                    {showReturnsRow ? (
                       <PolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "returns")}
                         Icon={RotateCcw}
                         title="Returns"
                         fieldKey="happy-bamboo.product.returns-summary"
@@ -280,8 +326,11 @@ export function HappyBambooProductPage({
                 </div>
               ) : null}
 
-              {questionText ? (
-                <p className="text-sm">
+              {showQuestionsRow ? (
+                <p
+                  {...sectionGroupAttr("product", "questions")}
+                  className="text-sm"
+                >
                   <Link
                     href="/contact"
                     {...fieldAttr("happy-bamboo.product.question-text")}
@@ -305,6 +354,39 @@ export function HappyBambooProductPage({
               "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line ",
           }}
         />
+
+        {/* Reviews — only mounts (and only fires review queries) when the
+            reviews feature flag is enabled for this business. */}
+        {reviewsEnabled ? (
+          <FadeIn direction="up">
+            <section
+              aria-label="Reviews"
+              className="border-border mt-4 mb-20 border-t pt-16"
+            >
+              {reviewsHeading ? (
+                <h2
+                  {...fieldAttr("happy-bamboo.product.reviews-heading")}
+                  className="text-foreground font-heading text-2xl font-bold"
+                >
+                  {reviewsHeading}
+                </h2>
+              ) : null}
+              <div className="mt-8">
+                <ProductReviews
+                  productId={product.id}
+                  onWriteReviewClick={() => setReviewDialogOpen(true)}
+                />
+              </div>
+              <WriteReviewDialog
+                productId={product.id}
+                productName={product.name}
+                isOpen={reviewDialogOpen}
+                onClose={() => setReviewDialogOpen(false)}
+                onSuccess={() => setReviewDialogOpen(false)}
+              />
+            </section>
+          </FadeIn>
+        ) : null}
 
         {/* Related Products — the whole block (heading included) only
             renders when there is something to show. */}
@@ -349,6 +431,7 @@ function PolicyNote({
   note,
   policyHref,
   policyLabel,
+  sectionAttrs,
 }: {
   Icon: LucideIcon;
   title: string;
@@ -357,9 +440,11 @@ function PolicyNote({
   /** Only set when the matching policy page is published. */
   policyHref: string | undefined;
   policyLabel: string;
+  /** `sectionGroupAttr("product", "shipping" | "returns")` — makes this row its own editor hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   return (
-    <div className="flex gap-3 px-4 py-3">
+    <div {...sectionAttrs} className="flex gap-3 px-4 py-3">
       <Icon
         className="text-primary mt-0.5 size-4 shrink-0"
         aria-hidden="true"

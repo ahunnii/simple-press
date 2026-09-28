@@ -1,6 +1,12 @@
 import type * as MotionReact from "motion/react";
 import { useRef, useState } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";
@@ -100,7 +106,11 @@ function Harness({
   business = makeBusiness(),
   session = null,
   isPending = false,
-  isEnabled = () => false,
+  // Defaults to "everything on" so nav-filtering (P-NAV-FLAGS) doesn't gate
+  // routes the pre-existing structural tests don't care about; tests that
+  // exercise flags directly (account gating, the nav filter itself) pass a
+  // narrower function.
+  isEnabled = () => true,
 }: HarnessProps) {
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -230,26 +240,44 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("lists the flag-gated account links when signed in, with Orders only behind the orders flag", () => {
+  it("shows only the quick-access account links (Orders, Settings) plus a sign-out row, never the full list", () => {
     const session = {
       user: { id: "u1", name: "Test" },
       session: { id: "s1" },
     } as unknown as FakeSession;
 
+    // Every account-nav-producing flag is on, so the full 9-key list exists —
+    // this proves the panel narrows it to the quick subset (B4.3) rather than
+    // the flags themselves doing the narrowing.
     const { unmount } = renderHarness({
       session,
-      isEnabled: (key) => key === "customerAccounts",
+      isEnabled: (key) =>
+        [
+          "customerAccounts",
+          "checkout",
+          "subscriptions",
+          "invoices",
+          "loyalty",
+        ].includes(key),
     });
     fireEvent.click(getToggle());
+
+    const account = screen.getByRole("navigation", { name: "Account" });
+    expect(
+      Array.from(account.querySelectorAll("a"), (a) => a.textContent?.trim()),
+    ).toEqual(["Settings", "Sign out"]);
     expect(screen.getByRole("link", { name: "Settings" })).toHaveAttribute(
       "href",
       "/account/settings",
     );
+    expect(screen.getByRole("link", { name: "Sign out" })).toHaveAttribute(
+      "href",
+      "/auth/sign-out",
+    );
+    // Address Book / Subscriptions / Invoices / Rewards live only in the
+    // account sidebar, even with their flags on.
     expect(
-      screen.queryByRole("link", { name: "Orders" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: "Admin" }),
+      screen.queryByRole("link", { name: "Address Book" }),
     ).not.toBeInTheDocument();
     unmount();
 
@@ -262,6 +290,27 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
       "href",
       "/account/orders",
     );
+  });
+
+  it("adds Admin for a member, without Orders while the flag is off", () => {
+    const session = {
+      user: { id: "u1", name: "Owner" },
+      session: { id: "s1", membershipId: "m1" },
+    } as unknown as FakeSession;
+
+    renderHarness({
+      session,
+      isEnabled: (key) => key === "customerAccounts",
+    });
+    fireEvent.click(getToggle());
+
+    const account = screen.getByRole("navigation", { name: "Account" });
+    expect(
+      within(account).getByRole("link", { name: "Admin" }),
+    ).toHaveAttribute("href", "/admin");
+    expect(
+      within(account).queryByRole("link", { name: "Orders" }),
+    ).not.toBeInTheDocument();
   });
 
   it("renders only the social links the owner configured", () => {

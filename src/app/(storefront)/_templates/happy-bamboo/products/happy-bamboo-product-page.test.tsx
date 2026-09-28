@@ -34,6 +34,13 @@ vi.mock("~/hooks/use-product", () => ({
   }),
 }));
 
+let reviewsEnabled = false;
+vi.mock("~/providers/feature-flags-context", () => ({
+  useStorefrontFlags: () => ({
+    isEnabled: (flag: string) => (flag === "reviews" ? reviewsEnabled : false),
+  }),
+}));
+
 vi.mock("./happy-bamboo-product-actions", () => ({
   HappyBambooProductActions: () => <div data-testid="actions" />,
 }));
@@ -50,7 +57,16 @@ vi.mock(
   "~/app/(storefront)/_components/product-page/additional-info-tabs",
   () => ({ ProductDetailsAdditionalInfoTabs: () => null }),
 );
+vi.mock("~/app/(storefront)/_components/wishlist/wishlist-button", () => ({
+  WishlistButton: () => <div data-testid="wishlist-button" />,
+}));
 vi.mock("~/components/analytics/track-view", () => ({ TrackView: () => null }));
+vi.mock("~/components/product-reviews", () => ({
+  ProductReviews: () => <div data-testid="product-reviews" />,
+}));
+vi.mock("~/components/write-review-dialog", () => ({
+  WriteReviewDialog: () => null,
+}));
 vi.mock("~/components/page-animations", () => {
   const Pass = ({
     children,
@@ -87,6 +103,7 @@ function renderPage({
 beforeEach(() => {
   relatedProducts = [];
   displayTrustBadges = [];
+  reviewsEnabled = false;
 });
 
 describe("HappyBambooProductPage", () => {
@@ -209,5 +226,50 @@ describe("HappyBambooProductPage", () => {
     expect(
       container.querySelector('[data-sp-group="product.details"]'),
     ).not.toBeNull();
+  });
+
+  it("gives shipping, returns and questions each their own editor section", () => {
+    const { container } = renderPage({
+      customFields: {
+        "happy-bamboo.product.shipping-summary": "Ships in 2 days.",
+        "happy-bamboo.product.returns-summary": "30-day returns.",
+      },
+    });
+    expect(
+      container.querySelector('[data-sp-group="product.shipping"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-sp-group="product.returns"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-sp-group="product.questions"]'),
+    ).not.toBeNull();
+  });
+
+  it("shows the wishlist button in the buy panel", () => {
+    renderPage();
+    expect(screen.getByTestId("wishlist-button")).toBeInTheDocument();
+  });
+
+  it("mounts reviews only when the reviews flag is enabled", () => {
+    const first = renderPage();
+    expect(screen.queryByTestId("product-reviews")).toBeNull();
+    first.unmount();
+
+    reviewsEnabled = true;
+    renderPage();
+    expect(screen.getByTestId("product-reviews")).toBeInTheDocument();
+  });
+
+  it("shows the reviews heading field only when reviews are enabled and the field is set", () => {
+    reviewsEnabled = true;
+    renderPage({
+      customFields: {
+        "happy-bamboo.product.reviews-heading": "Loved by customers",
+      },
+    });
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Loved by customers" }),
+    ).toBeInTheDocument();
   });
 });

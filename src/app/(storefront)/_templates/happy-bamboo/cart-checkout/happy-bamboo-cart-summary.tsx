@@ -13,6 +13,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { Separator } from "~/components/ui/separator";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useCart } from "~/providers/cart-context";
 
 type CartSummaryProps = {
@@ -21,6 +22,7 @@ type CartSummaryProps = {
 
 export function HappyBambooCartSummary({ shippingConfig }: CartSummaryProps) {
   const { subtotal, itemCount, setIsOpen } = useCart();
+  const { isEnabled } = useStorefrontFlags();
   // Zone+weight rates depend on the destination address, which isn't known in
   // the cart — defer to checkout rather than showing a misleading "Free".
   const isZoneWeight =
@@ -82,14 +84,16 @@ export function HappyBambooCartSummary({ shippingConfig }: CartSummaryProps) {
           </span>
         </div>
       </div>
-      <Button
-        className="mt-6 w-full"
-        size="lg"
-        asChild
-        onClick={() => setIsOpen(false)}
-      >
-        <Link href="/checkout">Proceed to Checkout</Link>
-      </Button>
+      {isEnabled("checkout") && (
+        <Button
+          className="mt-6 w-full"
+          size="lg"
+          asChild
+          onClick={() => setIsOpen(false)}
+        >
+          <Link href="/checkout">Proceed to Checkout</Link>
+        </Button>
+      )}
     </div>
   );
 }

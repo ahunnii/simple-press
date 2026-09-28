@@ -51,10 +51,20 @@ describe("happy-bamboo product-page fields", () => {
     ).toEqual([]);
   });
 
-  it("every field sits on the product page in the product.details group", () => {
+  it("every field sits on the product page, grouped by its editor row", () => {
+    // Shipping/returns/questions are each their own hideable section
+    // (product.shipping / product.returns / product.questions) so an owner
+    // can hide one row without hiding the others; everything else (badges,
+    // related heading, coming-soon copy, reviews heading) stays in the
+    // always-visible product.details group with the buy box.
+    const rowGroups: Record<string, string> = {
+      "happy-bamboo.product.shipping-summary": "product.shipping",
+      "happy-bamboo.product.returns-summary": "product.returns",
+      "happy-bamboo.product.question-text": "product.questions",
+    };
     for (const field of happyBambooProductData) {
       expect(field.page).toBe("product");
-      expect(field.group).toBe("product.details");
+      expect(field.group).toBe(rowGroups[field.key] ?? "product.details");
     }
   });
 });

@@ -7,6 +7,19 @@ import { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import {
+  defaultDonateData,
+  defaultDonateFieldGroups,
+} from "../default/donate";
+import {
+  defaultEventsData,
+  defaultEventsFieldGroups,
+} from "../default/events";
+import { defaultFaqData, defaultFaqFieldGroups } from "../default/faq";
+import {
+  defaultVideosData,
+  defaultVideosFieldGroups,
+} from "../default/videos";
+import {
   happyBambooCheckoutUnavailableData,
   happyBambooCheckoutUnavailableFieldGroups,
 } from "./cart-checkout/unavailable-fields";
@@ -1613,6 +1626,11 @@ export const happyBambooData = {
     ...happyBambooServicesData,
     ...happyBambooProductData,
     ...happyBambooCheckoutUnavailableData,
+    // Optional pages render Default's `default.*` fields in happy-bamboo markup.
+    ...defaultEventsData,
+    ...defaultVideosData,
+    ...defaultDonateData,
+    ...defaultFaqData,
     ...globalCartData,
     ...globalAuthenticationData,
   ],
@@ -1624,6 +1642,10 @@ export const happyBambooFieldGroups = {
     ...happyBambooServicesFieldGroups,
     ...happyBambooProductFieldGroups,
     ...happyBambooCheckoutUnavailableFieldGroups,
+    ...defaultEventsFieldGroups,
+    ...defaultVideosFieldGroups,
+    ...defaultDonateFieldGroups,
+    ...defaultFaqFieldGroups,
   ],
 };
 

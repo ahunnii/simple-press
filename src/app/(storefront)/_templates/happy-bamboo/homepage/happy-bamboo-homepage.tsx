@@ -1,6 +1,8 @@
+import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isPreviewRequest } from "~/lib/preview/preview-context";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { getRichTextFieldValue } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
@@ -12,13 +14,23 @@ import { HappyBambooBenefitsSection } from "./happy-bamboo-benefits-section";
 import { HappyBambooCtaSection } from "./happy-bamboo-cta-section";
 import { HappyBambooFeaturedProducts } from "./happy-bamboo-featured-products";
 import { HappyBambooHeroSection } from "./happy-bamboo-hero-section";
+import { HappyBambooPopup } from "./happy-bamboo-popup";
 import { HappyBambooTestimonialsSection } from "./happy-bamboo-testimonials-section";
 
-export async function HappyBambooHomepage() {
+export async function HappyBambooHomepage({
+  business,
+}: DefaultHomepageTemplateProps) {
   const [homepage, flags] = await Promise.all([
     api.business.getHomepage(),
     getBusinessFlags(),
   ]);
+
+  // `getHomepage` doesn't select `popupConfig` — reuse the `business` prop
+  // (already fetched by the root page with `siteContent.popupConfig` and
+  // `featureFlags`, and already passed to every template's homepage
+  // component) the same way `pollen-homepage.tsx` resolves its popup,
+  // instead of adding a second business fetch here.
+  const popup = resolvePopup(business?.siteContent, flags.isEnabled("popups"));
 
   const testimonialsEnabled = flags.isEnabled("testimonials");
   const testimonials = testimonialsEnabled
@@ -84,12 +96,14 @@ export async function HappyBambooHomepage() {
   const isPreview = await isPreviewRequest();
   const hasProducts = (homepage?.products?.length ?? 0) > 0;
   const hasFeatured =
+    flags.isEnabled("products") &&
     isSectionVisible(customFields, "happy-bamboo", "homepage.featured") &&
     (hasProducts || isPreview);
 
   return (
     <HydrateClient>
       <PageTransition>
+        {popup && <HappyBambooPopup popup={popup} />}
         {/* Hero Section */}
         <HappyBambooHeroSection
           heroImage={f["happy-bamboo.homepage.hero-image"]}

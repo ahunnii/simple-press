@@ -45,7 +45,7 @@ export function HappyBambooCtaSection({
           </ScaleIn>
 
           <h2
-            className="text-primary-foreground mb-6 text-4xl font-bold md:text-5xl"
+            className="text-primary-foreground mb-6 font-serif text-4xl font-bold md:text-5xl"
             {...fieldAttr("happy-bamboo.homepage-cta-heading")}
           >
             {heading}
@@ -67,7 +67,11 @@ export function HappyBambooCtaSection({
               asChild
             >
               <Link href={primaryButtonLink}>
-                <span {...fieldAttr("happy-bamboo.homepage-cta-primary-button-text")}>
+                <span
+                  {...fieldAttr(
+                    "happy-bamboo.homepage-cta-primary-button-text",
+                  )}
+                >
                   {primaryButtonText}
                 </span>
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

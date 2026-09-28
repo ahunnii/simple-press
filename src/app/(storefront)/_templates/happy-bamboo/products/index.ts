@@ -17,7 +17,7 @@ export const happyBambooProductData: TemplateField[] = [
       "Short note in the Shipping row on every product page, e.g. delivery times. A link to your shipping policy is added automatically when that page is published. Leave blank to show just the link, or nothing if the policy isn't published.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.shipping",
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "e.g. Ships within 2 business days.",
@@ -29,7 +29,7 @@ export const happyBambooProductData: TemplateField[] = [
       "Short note in the Returns row on every product page, e.g. refund terms. A link to your refund policy is added automatically when that page is published. Leave blank to show just the link, or nothing if the policy isn't published.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.returns",
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "e.g. Unopened items can be returned within 30 days.",
@@ -41,7 +41,7 @@ export const happyBambooProductData: TemplateField[] = [
       "One line under the buy button that links to your contact page. Leave blank to hide.",
     type: "text",
     page: "product",
-    group: "product.details",
+    group: "product.questions",
     gridColumn: "col-span-full",
     defaultValue: "Questions about this product? Contact us.",
     placeholder: "e.g. Need help choosing? Ask us.",
@@ -110,6 +110,18 @@ export const happyBambooProductData: TemplateField[] = [
     defaultValue: "This product isn't available yet. Check back later!",
     placeholder: "e.g. Back in stock next month.",
   },
+  {
+    key: "happy-bamboo.product.reviews-heading",
+    label: "Reviews heading",
+    description:
+      "Heading above customer reviews near the bottom of every product page. Only shown when reviews are enabled for your store. Leave blank to hide the heading.",
+    type: "text",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "What customers are saying",
+    placeholder: "e.g. Customer reviews",
+  },
 ];
 
 export const happyBambooProductFieldGroups: TemplateFieldGroup[] = [
@@ -118,6 +130,30 @@ export const happyBambooProductFieldGroups: TemplateFieldGroup[] = [
     title: "Product page",
     description: "Text shown on every product page, around the buy button.",
     icon: "🛍️",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.shipping",
+    title: "Shipping row",
+    description:
+      "Shipping note shown on every product page. Can be hidden independently of the returns and questions rows.",
+    icon: "🚚",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.returns",
+    title: "Returns row",
+    description:
+      "Returns note shown on every product page. Can be hidden independently of the shipping and questions rows.",
+    icon: "↩️",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.questions",
+    title: "Questions row",
+    description:
+      "Contact link shown under the buy button on every product page. Can be hidden independently of the shipping and returns rows.",
+    icon: "❓",
     columns: 1,
   } satisfies TemplateFieldGroup,
 ];
