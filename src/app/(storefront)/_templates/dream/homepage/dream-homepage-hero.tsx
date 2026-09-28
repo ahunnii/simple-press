@@ -21,8 +21,12 @@ type HeroField = {
   lede: string;
   ctaLabel: string;
   ctaUrl: string;
+  /** B2.5: false when `ctaUrl` points at a flag-disabled route — hide the button, never swap its destination. */
+  ctaVisible: boolean;
   ctaSecondaryLabel: string;
   ctaSecondaryUrl: string;
+  /** B2.5: same gating as `ctaVisible`, for the secondary button. */
+  ctaSecondaryVisible: boolean;
   /** Six photos, left to right — see `SHELF_ASPECTS` for each slot's shape. */
   shelf: HeroShelfPhoto[];
 };
@@ -116,18 +120,26 @@ export function DreamHomepageHero({
           `.dream-js .dream-hero-safe > .dream-hero-ctas` — the wrapper
           itself, not the buttons — so the row fades in as one.
         */}
-        <div className="dream-hero-ctas">
-          <DreamButton href={f.ctaUrl} variant="primary">
-            <span {...fieldAttr("dream.homepage.hero-cta-label")}>
-              {f.ctaLabel}
-            </span>
-          </DreamButton>
-          <DreamButton href={f.ctaSecondaryUrl} variant="secondary">
-            <span {...fieldAttr("dream.homepage.hero-cta-secondary-label")}>
-              {f.ctaSecondaryLabel}
-            </span>
-          </DreamButton>
-        </div>
+        {(f.ctaVisible || f.ctaSecondaryVisible) && (
+          <div className="dream-hero-ctas">
+            {f.ctaVisible && (
+              <DreamButton href={f.ctaUrl} variant="primary">
+                <span {...fieldAttr("dream.homepage.hero-cta-label")}>
+                  {f.ctaLabel}
+                </span>
+              </DreamButton>
+            )}
+            {f.ctaSecondaryVisible && (
+              <DreamButton href={f.ctaSecondaryUrl} variant="secondary">
+                <span
+                  {...fieldAttr("dream.homepage.hero-cta-secondary-label")}
+                >
+                  {f.ctaSecondaryLabel}
+                </span>
+              </DreamButton>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="dream-hero-shelf" role="group" aria-label="Recent setups">

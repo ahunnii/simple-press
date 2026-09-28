@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Award,
   Bell,
   BookUser,
   FileText,
@@ -13,38 +14,29 @@ import {
   Settings,
 } from "lucide-react";
 
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { DreamH1 } from "../shared/dream-h1";
 import { DreamReveal } from "../shared/dream-reveal";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: typeof Package;
-  flag?: string;
+/**
+ * `getAccountNavLinks` returns bare `{key, label, href}` entries — dream
+ * pairs each key with a lucide icon here (design.md Chrome: lucide, 1.5px
+ * stroke). Any key the mapping doesn't recognize (there shouldn't be one)
+ * falls back to `Package` rather than disappearing.
+ */
+const NAV_ICONS: Record<string, typeof Package> = {
+  orders: Package,
+  "address-book": BookUser,
+  subscriptions: Repeat,
+  invoices: FileText,
+  rewards: Award,
+  settings: Settings,
+  security: Lock,
+  preferences: Bell,
 };
-
-const BASE_NAV_ITEMS: NavItem[] = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  {
-    href: "/account/subscriptions",
-    label: "Subscriptions",
-    icon: Repeat,
-    flag: "subscriptions",
-  },
-  {
-    href: "/account/invoices",
-    label: "Invoices",
-    icon: FileText,
-    flag: "invoices",
-  },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
-];
 
 type Props = {
   children: ReactNode;
@@ -65,8 +57,8 @@ export function DreamAccountLayout({ children, heading, breadcrumb }: Props) {
   const pathname = usePathname();
   const flags = useStorefrontFlags();
 
-  const navItems = BASE_NAV_ITEMS.filter(
-    (item) => !item.flag || flags.isEnabled(item.flag),
+  const navItems = getAccountNavLinks({ isEnabled: flags.isEnabled }).map(
+    (link) => ({ ...link, icon: NAV_ICONS[link.key] ?? Package }),
   );
 
   return (

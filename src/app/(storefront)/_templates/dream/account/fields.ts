@@ -3,16 +3,19 @@ import type { TemplateSection } from "~/lib/template-sections";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 /**
- * Empty-state copy for the Orders and Subscriptions account pages — the only
- * owner-editable content on the account pages (Settings, Security, Address
- * Book, Order Detail and Preferences stay thin skins over shared/DB-driven
- * UI, per `./index.ts`'s existing note). One `global` group/section so both
- * pages register in a single editor spot instead of two near-empty ones.
+ * Empty-state copy for the Orders, Subscriptions and Rewards account pages —
+ * the only owner-editable content on the account pages (Settings, Security,
+ * Address Book, Order Detail and Preferences stay thin skins over
+ * shared/DB-driven UI, per `./index.ts`'s existing note). One `global`
+ * group/section so every page registers in a single editor spot instead of
+ * several near-empty ones.
  *
  * Subscriptions reuses `dream.global.orders-empty-button` for its own empty
  * state's button — both pages currently ship the exact same label
  * ("Request an estimate") linking to `/contact`, so a second, identical
- * field would just be a second place to keep that text in sync.
+ * field would just be a second place to keep that text in sync. Rewards has
+ * no button of its own (a missing program isn't something the customer can
+ * act on), so it only declares a heading + body pair.
  *
  * Deliberately resolved WITHOUT the root `../index.ts` aggregator: these two
  * pages are the only dream account pages that read `business.siteContent`
@@ -78,6 +81,28 @@ export const dreamAccountData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue:
       "Set up a recurring order with Selest and it will appear here.",
+  },
+  {
+    key: "dream.global.rewards-empty-heading",
+    label: "Rewards empty heading",
+    description:
+      "Heading shown on the Rewards page when no rewards program is set up.",
+    type: "text",
+    page: "global",
+    group: "global.account",
+    gridColumn: "col-span-1",
+    defaultValue: "No rewards program yet",
+  },
+  {
+    key: "dream.global.rewards-empty-body",
+    label: "Rewards empty message",
+    description:
+      "Line shown under the heading on the Rewards page when no rewards program is set up. Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.account",
+    gridColumn: "col-span-full",
+    defaultValue: "Selest hasn't turned on rewards yet. Check back soon.",
   },
 ];
 

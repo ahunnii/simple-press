@@ -44,7 +44,7 @@ export function DreamPageHero({
     <section
       {...sectionAttrs}
       className={cn("dream-page-hero", className)}
-      aria-label={title}
+      aria-label={[title, accent].filter(Boolean).join(" ")}
     >
       <DreamClouds variant="page" className="dream-page-hero-clouds" />
       <div className="dream-page-hero-content">

@@ -2,7 +2,7 @@ import { execSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// The 12 active storefront templates. Checkout/success logic is shared across all
+// The 13 active storefront templates. Checkout/success logic is shared across all
 // of them — only rendering differs — so each tenant is one render/wiring skin of
 // the same purchase flow.
 export const TEMPLATES = [
@@ -18,6 +18,7 @@ export const TEMPLATES = [
   "pink",
   "olive",
   "umsc",
+  "dream",
 ] as const;
 
 export type SeedTenant = {

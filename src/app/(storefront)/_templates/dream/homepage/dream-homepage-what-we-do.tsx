@@ -15,6 +15,8 @@ type WhatWeDoRow = {
   linkLabel: string;
   linkLabelFieldKey: string;
   linkUrl: string;
+  /** B2.5: false when `linkUrl` points at a flag-disabled route — hide the link, never swap its destination. */
+  linkVisible: boolean;
   photo: string;
   photoAlt: string;
   sidePhoto: string;
@@ -76,11 +78,13 @@ export function DreamHomepageWhatWeDo({
               >
                 {row.body}
               </p>
-              <DreamLink href={row.linkUrl} className="mt-6 inline-block">
-                <span {...fieldAttr(row.linkLabelFieldKey)}>
-                  {row.linkLabel}
-                </span>
-              </DreamLink>
+              {row.linkVisible && (
+                <DreamLink href={row.linkUrl} className="mt-6 inline-block">
+                  <span {...fieldAttr(row.linkLabelFieldKey)}>
+                    {row.linkLabel}
+                  </span>
+                </DreamLink>
+              )}
             </div>
             <div
               className={cn(

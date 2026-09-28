@@ -7,6 +7,7 @@ import { CartProvider } from "~/providers/cart-context";
 import { CheckoutForm as BambooCheckoutForm } from "~/app/(storefront)/_templates/bamboo/cart-checkout/bamboo-checkout-form";
 import { DarkTrendCheckoutForm } from "~/app/(storefront)/_templates/dark-trend/cart-checkout/dark-trend-checkout-form";
 import { DefaultCheckoutForm } from "~/app/(storefront)/_templates/default/cart-checkout/default-checkout-form";
+import { DreamCheckoutForm } from "~/app/(storefront)/_templates/dream/cart-checkout/dream-checkout-form";
 import { ElegantCheckoutForm } from "~/app/(storefront)/_templates/elegant/cart-checkout/elegant-checkout-form";
 import { HappyBambooCheckoutForm } from "~/app/(storefront)/_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-form";
 import { ModernCheckoutForm } from "~/app/(storefront)/_templates/modern/cart-checkout/modern-checkout-form";
@@ -146,6 +147,7 @@ const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["dark-trend", DarkTrendCheckoutForm],
   ["sledge", SledgeCheckoutForm],
   ["pink", PinkCheckoutForm],
+  ["dream", DreamCheckoutForm],
 ];
 
 describe("checkout form renders for every template", () => {

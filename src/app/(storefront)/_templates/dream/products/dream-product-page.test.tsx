@@ -99,15 +99,77 @@ describe("DreamProductPage", () => {
     ).not.toBeNull();
   });
 
-  it("hides shipping/returns and the questions line when the fields are blank", () => {
+  it("hides shipping/returns and the questions line when there is no note, no published policy, and the question text is blanked", () => {
     renderPage({
-      productPolicies: { hasShippingPolicy: true, hasRefundPolicy: true },
+      customFields: { "dream.product.question-text": "" },
+      productPolicies: { hasShippingPolicy: false, hasRefundPolicy: false },
     });
     expect(screen.queryByRole("heading", { name: "Shipping" })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Returns" })).toBeNull();
     expect(screen.queryByText("Read our shipping policy")).toBeNull();
     expect(screen.queryByText("Read our returns policy")).toBeNull();
     expect(screen.queryByRole("link", { name: /ask us/i })).toBeNull();
+  });
+
+  it("shows a policy-only row, each with its own hotspot, when a policy is published but no note is set", () => {
+    const { container } = renderPage({
+      productPolicies: { hasShippingPolicy: true, hasRefundPolicy: true },
+    });
+    expect(
+      screen.getByRole("heading", { name: "Shipping" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Returns" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Read our shipping policy" }),
+    ).toHaveAttribute("href", "/shipping-policy");
+    expect(
+      screen.getByRole("link", { name: "Read our returns policy" }),
+    ).toHaveAttribute("href", "/refund-policy");
+    expect(
+      container.querySelector('[data-sp-group="product.shipping"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-sp-group="product.returns"]'),
+    ).not.toBeNull();
+  });
+
+  it("shows the default questions line linking to /contact", () => {
+    renderPage({
+      productPolicies: { hasShippingPolicy: false, hasRefundPolicy: false },
+    });
+    expect(
+      screen.getByRole("link", { name: "Questions about this piece? Ask us." }),
+    ).toHaveAttribute("href", "/contact");
+  });
+
+  it("wires the questions row's own hotspot when shown", () => {
+    const { container } = renderPage({
+      customFields: {
+        "dream.product.question-text": "Questions about this piece? Ask us",
+      },
+    });
+    expect(
+      container.querySelector('[data-sp-group="product.questions"]'),
+    ).not.toBeNull();
+  });
+
+  it("hides a row independently when the owner hides it in the visual editor, leaving the other row shown", () => {
+    renderPage({
+      customFields: {
+        "dream.product.shipping-note": "Delivered and set up for you.",
+        "dream.product.returns-note": "Rentals come back the next day.",
+        _sp: { sections: { "product.shipping": { hidden: true } } },
+      },
+    });
+    expect(screen.queryByRole("heading", { name: "Shipping" })).toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Returns" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Rentals come back the next day."),
+    ).toBeInTheDocument();
   });
 
   it("links a policy page only when it is published", () => {

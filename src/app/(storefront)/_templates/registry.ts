@@ -154,15 +154,29 @@ import { DreamInvoicesPage } from "./dream/account/dream-invoices-page";
 import { DreamOrderDetailPage } from "./dream/account/dream-order-detail-page";
 import { DreamOrdersPage } from "./dream/account/dream-orders-page";
 import { DreamPreferencesPage } from "./dream/account/dream-preferences-page";
+import { DreamRewardsPage } from "./dream/account/dream-rewards-page";
 import { DreamSubscriptionsPage } from "./dream/account/dream-subscriptions-page";
+import { DreamBlogPage } from "./dream/blog/dream-blog-page";
+import { DreamBlogPostPage } from "./dream/blog/dream-blog-post-page";
+import { DreamCartPage } from "./dream/cart-checkout/dream-cart-page";
+import { DreamCheckoutPage } from "./dream/cart-checkout/dream-checkout-page";
 import { DreamCheckoutUnavailable } from "./dream/cart-checkout/dream-checkout-unavailable";
+import { DreamOrderSuccessPage } from "./dream/cart-checkout/dream-order-success-page";
+import { DreamCollectionPage } from "./dream/collections/dream-collection-page";
+import { DreamCollectionsPage } from "./dream/collections/dream-collections-page";
 import { DreamContactPage } from "./dream/contact/dream-contact-page";
+import { DreamDonatePage } from "./dream/donate/dream-donate-page";
+import { DreamEventPage } from "./dream/events/dream-event-page";
+import { DreamEventsPage } from "./dream/events/dream-events-page";
+import { DreamFaqPage } from "./dream/faq/dream-faq-page";
 import { DreamGenericPage } from "./dream/generic/dream-generic-page";
 import { DreamLayout } from "./dream/layout/dream-layout";
 import { DreamMaintenancePage } from "./dream/maintenance/dream-maintenance-page";
 import { DreamProductPage } from "./dream/products/dream-product-page";
 import { DreamServicesIndexPage } from "./dream/services/dream-services-index-page";
+import { DreamShopPage } from "./dream/shop/dream-shop-page";
 import { DreamTestimonialsPage } from "./dream/testimonials/dream-testimonials-page";
+import { DreamVideosPage } from "./dream/videos/dream-videos-page";
 // ---------------------------------------------------------------------------
 // Elegant
 // ---------------------------------------------------------------------------
@@ -862,10 +876,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     SubscriptionsPage: WealthSubscriptionsPage,
     InvoicesPage: WealthInvoicesPage,
   },
-  // Dream Your Theme — service archetype (event decor / rentals / draping):
-  // ProductPage + CheckoutUnavailable are styled (2026-09-26); the other
-  // commerce slots (shop, cart, checkout form, confirmation) fall back to
-  // Default, as do blog/faq/events/videos/donate by scope.
+  // Dream Your Theme — service-led (event decor / rentals / draping) but owns
+  // the full baseline since the 2026-09-28 parity run: purchase path, content
+  // (collections, blog) and optional pages (events, videos, donate, faq).
   dream: {
     Layout: DreamLayout,
     AboutPage: DreamAboutPage,
@@ -882,8 +895,22 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: DreamPreferencesPage,
     SubscriptionsPage: DreamSubscriptionsPage,
     InvoicesPage: DreamInvoicesPage,
+    RewardsPage: DreamRewardsPage,
+    ShopPage: DreamShopPage,
     ProductPage: DreamProductPage,
+    CollectionsPage: DreamCollectionsPage,
+    CollectionPage: DreamCollectionPage,
+    CartPage: DreamCartPage,
+    CheckoutPage: DreamCheckoutPage,
     CheckoutUnavailable: DreamCheckoutUnavailable,
+    OrderSuccessPage: DreamOrderSuccessPage,
+    BlogPage: DreamBlogPage,
+    BlogPostPage: DreamBlogPostPage,
+    EventsPage: DreamEventsPage,
+    EventPage: DreamEventPage,
+    VideosPage: DreamVideosPage,
+    DonatePage: DreamDonatePage,
+    FaqPage: DreamFaqPage,
   },
   // Unique Monique — retail archetype (candles / soaps / body care / home care).
   // Blog, events, videos, donate and services fall back to Default by scope.

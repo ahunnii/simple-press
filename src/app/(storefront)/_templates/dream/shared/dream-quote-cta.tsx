@@ -14,6 +14,7 @@ type DreamQuoteCtaProps = {
   /** `list` field the chips come from — tags each chip for the editor preview. */
   chipsFieldKey?: string;
   ctaLabel: string;
+  /** Empty hides the button (e.g. its route's feature flag is off, B2.5). */
   ctaUrl: string;
   headingFieldKey?: string;
   accentFieldKey?: string;
@@ -76,11 +77,13 @@ export function DreamQuoteCta({
             ))}
           </ul>
         ) : null}
-        <DreamButton href={ctaUrl} variant="primary">
-          <span {...(ctaLabelFieldKey ? fieldAttr(ctaLabelFieldKey) : {})}>
-            {ctaLabel}
-          </span>
-        </DreamButton>
+        {ctaUrl ? (
+          <DreamButton href={ctaUrl} variant="primary">
+            <span {...(ctaLabelFieldKey ? fieldAttr(ctaLabelFieldKey) : {})}>
+              {ctaLabel}
+            </span>
+          </DreamButton>
+        ) : null}
       </div>
     </section>
   );

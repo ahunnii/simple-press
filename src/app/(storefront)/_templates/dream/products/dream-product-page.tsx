@@ -8,6 +8,7 @@ import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { isContentEmpty } from "~/lib/template-fields";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
@@ -41,30 +42,39 @@ const FIELD_KEYS = [
 /** Italiana section heading at h3 scale — for the page's quieter h2s. */
 const SMALL_H2 = "text-[clamp(26px,2.6vw,34px)] leading-[1.1]";
 
-/** One shipping/returns row: small Italiana heading, note, optional policy link. */
+/**
+ * One shipping/returns row: small Italiana heading, optional note, optional
+ * policy link. The row shows when it has a note OR a published policy —
+ * `sectionAttrs` (`sectionGroupAttr("product", "shipping" | "returns")`)
+ * makes it its own editor hotspot, independent of the other row.
+ */
 function PolicyNote({
   title,
   fieldKey,
   note,
   policyHref,
   policyLabel,
+  sectionAttrs,
 }: {
   title: string;
   fieldKey: string;
-  note: string;
+  note?: string;
   /** Only passed when the matching policy page is published. */
   policyHref?: string;
   policyLabel: string;
+  sectionAttrs?: Record<string, string>;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 py-4">
+    <div {...sectionAttrs} className="flex flex-col gap-1.5 py-4">
       <h2 className="text-[22px] leading-[1.2]">{title}</h2>
-      <p
-        {...fieldAttr(fieldKey)}
-        className="max-w-[60ch] text-[15px] leading-[1.65] whitespace-pre-line text-[var(--dream-soft)]"
-      >
-        {note}
-      </p>
+      {note ? (
+        <p
+          {...fieldAttr(fieldKey)}
+          className="max-w-[60ch] text-[15px] leading-[1.65] whitespace-pre-line text-[var(--dream-soft)]"
+        >
+          {note}
+        </p>
+      ) : null}
       {policyHref ? (
         <Link href={policyHref} className="dream-link self-start text-[15px]">
           {policyLabel}
@@ -109,6 +119,20 @@ export function DreamProductPage({
   const relatedHeading = (f["dream.product.related-heading"] ?? "").trim();
   const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Shipping / returns / questions are each their own hideable section
+  // (product.shipping / product.returns / product.questions) so an owner
+  // can hide one row without hiding the others; a row still needs either
+  // its own note or a published policy to have anything to show.
+  const showShippingRow =
+    isSectionVisible(customFields, "dream", "product.shipping") &&
+    (shippingNote !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "dream", "product.returns") &&
+    (returnsNote !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "dream", "product.questions") &&
+    questionText !== "";
 
   const { isEnabled } = useStorefrontFlags();
   const reviewsEnabled = isEnabled("reviews");
@@ -258,25 +282,30 @@ export function DreamProductPage({
 
               <hr className="m-0 border-0 border-t border-[var(--dream-line)]" />
 
-              {/* Buy panel — everything the "Product page" editor section
-                  controls sits inside this wrapper so its hotspot covers it. */}
-              <div
-                {...sectionGroupAttr("product", "details")}
-                className="flex flex-col gap-5"
-              >
-                <DreamProductActions
-                  product={product}
-                  state={state}
-                  comingSoonHeading={
-                    f["dream.product.coming-soon-heading"] ?? ""
-                  }
-                  comingSoonBody={f["dream.product.coming-soon-body"] ?? ""}
-                />
+              {/* Buy panel: the add-to-cart actions keep their own,
+                  non-hideable "Product page" hotspot; the shipping,
+                  returns and questions rows below are each an independently
+                  hideable section (B6.2). */}
+              <div className="flex flex-col gap-5">
+                <div
+                  {...sectionGroupAttr("product", "details")}
+                  className="flex flex-col gap-5"
+                >
+                  <DreamProductActions
+                    product={product}
+                    state={state}
+                    comingSoonHeading={
+                      f["dream.product.coming-soon-heading"] ?? ""
+                    }
+                    comingSoonBody={f["dream.product.coming-soon-body"] ?? ""}
+                  />
+                </div>
 
-                {shippingNote || returnsNote ? (
+                {showShippingRow || showReturnsRow ? (
                   <div className="flex flex-col divide-y divide-[var(--dream-line)] border-y border-[var(--dream-line)]">
-                    {shippingNote ? (
+                    {showShippingRow ? (
                       <PolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "shipping")}
                         title="Shipping"
                         fieldKey="dream.product.shipping-note"
                         note={shippingNote}
@@ -286,8 +315,9 @@ export function DreamProductPage({
                         policyLabel="Read our shipping policy"
                       />
                     ) : null}
-                    {returnsNote ? (
+                    {showReturnsRow ? (
                       <PolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "returns")}
                         title="Returns"
                         fieldKey="dream.product.returns-note"
                         note={returnsNote}
@@ -300,8 +330,11 @@ export function DreamProductPage({
                   </div>
                 ) : null}
 
-                {questionText ? (
-                  <p className="text-[15px]">
+                {showQuestionsRow ? (
+                  <p
+                    {...sectionGroupAttr("product", "questions")}
+                    className="text-[15px]"
+                  >
                     <Link
                       href="/contact"
                       {...fieldAttr("dream.product.question-text")}

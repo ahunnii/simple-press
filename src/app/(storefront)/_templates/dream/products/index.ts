@@ -23,10 +23,10 @@ export const dreamProductData: TemplateField[] = [
     key: "dream.product.shipping-note",
     label: "Shipping note",
     description:
-      "Short note shown under the add-to-cart button. Leave blank to hide. When your shipping policy page is published, a link to it appears beside the note.",
+      "Short note shown in the Shipping row under the add-to-cart button. Leave blank to hide the note — the row still shows when your shipping policy page is published, with a link to it. Can be hidden independently of the returns and questions rows.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.shipping",
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "e.g. Local delivery and setup are arranged after you order.",
@@ -35,10 +35,10 @@ export const dreamProductData: TemplateField[] = [
     key: "dream.product.returns-note",
     label: "Returns note",
     description:
-      "Short note shown under the add-to-cart button. Leave blank to hide. When your returns policy page is published, a link to it appears beside the note.",
+      "Short note shown in the Returns row under the add-to-cart button. Leave blank to hide the note — the row still shows when your returns policy page is published, with a link to it. Can be hidden independently of the shipping and questions rows.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.returns",
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "e.g. Rentals are returned the day after your event.",
@@ -47,13 +47,13 @@ export const dreamProductData: TemplateField[] = [
     key: "dream.product.question-text",
     label: "Questions link",
     description:
-      "One line under the add-to-cart button that links to your contact page. Leave blank to hide.",
+      "One line under the add-to-cart button that links to your contact page. Leave blank to hide. Can be hidden independently of the shipping and returns rows.",
     type: "text",
     page: "product",
-    group: "product.details",
+    group: "product.questions",
     gridColumn: "col-span-full",
-    defaultValue: "",
-    placeholder: "e.g. Questions about this piece? Ask us.",
+    defaultValue: "Questions about this piece? Ask us.",
+    placeholder: "e.g. Questions about this rental? Send Selest a note.",
   },
   {
     key: "dream.product.related-heading",
@@ -102,6 +102,30 @@ export const dreamProductFieldGroups: TemplateFieldGroup[] = [
     icon: "🛍️",
     columns: 1,
   },
+  {
+    id: "product.shipping",
+    title: "Shipping row",
+    description:
+      "Shipping note shown on every product page. Can be hidden independently of the returns and questions rows.",
+    icon: "🚚",
+    columns: 1,
+  },
+  {
+    id: "product.returns",
+    title: "Returns row",
+    description:
+      "Returns note shown on every product page. Can be hidden independently of the shipping and questions rows.",
+    icon: "↩️",
+    columns: 1,
+  },
+  {
+    id: "product.questions",
+    title: "Questions row",
+    description:
+      "Contact link shown under the add-to-cart button on every product page. Can be hidden independently of the shipping and returns rows.",
+    icon: "❓",
+    columns: 1,
+  },
 ];
 
 export const dreamProductSections: TemplateSection[] = [
@@ -115,6 +139,36 @@ export const dreamProductSections: TemplateSection[] = [
     order: 0,
     hideable: false,
     links: [SECTION_LINKS.products],
+  },
+  {
+    id: "product.shipping",
+    page: "product",
+    title: "Shipping row",
+    description:
+      "Shipping note under the add-to-cart button on every product page. Hide it without hiding returns or questions.",
+    groupIds: ["product.shipping"],
+    order: 1,
+    hideable: true,
+  },
+  {
+    id: "product.returns",
+    page: "product",
+    title: "Returns row",
+    description:
+      "Returns note under the add-to-cart button on every product page. Hide it without hiding shipping or questions.",
+    groupIds: ["product.returns"],
+    order: 2,
+    hideable: true,
+  },
+  {
+    id: "product.questions",
+    page: "product",
+    title: "Questions row",
+    description:
+      "Contact link under the add-to-cart button on every product page. Hide it without hiding shipping or returns.",
+    groupIds: ["product.questions"],
+    order: 3,
+    hideable: true,
   },
 ];
 

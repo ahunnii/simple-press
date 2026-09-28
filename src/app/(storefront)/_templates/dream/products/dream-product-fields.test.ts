@@ -10,16 +10,35 @@ import {
 const OPTIONAL_BLANK_KEYS = [
   "dream.product.shipping-note",
   "dream.product.returns-note",
-  "dream.product.question-text",
 ];
 
+/** Each support-row field lives in its own hideable group, split from the
+ * rest of the buy panel (B6.2: field group id == section id). */
+const ROW_GROUP_BY_KEY: Record<string, string> = {
+  "dream.product.shipping-note": "product.shipping",
+  "dream.product.returns-note": "product.returns",
+  "dream.product.question-text": "product.questions",
+};
+
 describe("dream product-page fields", () => {
-  it("every field sits on the product page in the product.details group", () => {
+  it("every field sits on the product page", () => {
     expect(dreamProductData.length).toBeGreaterThan(0);
     for (const field of dreamProductData) {
       expect(field.key.startsWith("dream.product.")).toBe(true);
       expect(field.page).toBe("product");
-      expect(field.group).toBe("product.details");
+    }
+  });
+
+  it("splits shipping/returns/questions out of product.details into their own groups", () => {
+    for (const [key, group] of Object.entries(ROW_GROUP_BY_KEY)) {
+      const field = dreamProductData.find((f) => f.key === key);
+      expect(field?.group, key).toBe(group);
+    }
+    const detailsKeys = dreamProductData
+      .filter((f) => f.group === "product.details")
+      .map((f) => f.key);
+    for (const key of Object.keys(ROW_GROUP_BY_KEY)) {
+      expect(detailsKeys).not.toContain(key);
     }
   });
 
@@ -31,7 +50,15 @@ describe("dream product-page fields", () => {
     }
   });
 
-  it("section title equals its field group's title and wires the group", () => {
+  it("ships the questions line with default copy (B6.2) that blank hides", () => {
+    const field = dreamProductData.find(
+      (f) => f.key === "dream.product.question-text",
+    );
+    expect(field?.defaultValue).toBe("Questions about this piece? Ask us.");
+    expect(field?.description).toMatch(/Leave blank to hide/);
+  });
+
+  it("wires product.details as the non-hideable buy-panel section matching its field group", () => {
     const group = dreamProductFieldGroups.find(
       (g) => g.id === "product.details",
     );
@@ -45,6 +72,19 @@ describe("dream product-page fields", () => {
     expect(section?.groupIds).toEqual(["product.details"]);
     expect(section?.hideable).toBe(false);
     expect(section?.links?.length).toBe(1);
+  });
+
+  it("wires shipping/returns/questions as independently hideable sections matching their field groups", () => {
+    for (const groupId of Object.values(ROW_GROUP_BY_KEY)) {
+      const group = dreamProductFieldGroups.find((g) => g.id === groupId);
+      const section = dreamProductSections.find((s) => s.id === groupId);
+      expect(group, groupId).toBeDefined();
+      expect(section, groupId).toBeDefined();
+      expect(section?.title).toBe(group?.title);
+      expect(section?.page).toBe("product");
+      expect(section?.groupIds).toEqual([groupId]);
+      expect(section?.hideable).toBe(true);
+    }
   });
 
   it("resolves defaults, keeps a saved blank blank, and trims saved text", () => {

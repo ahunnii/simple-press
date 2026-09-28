@@ -14,6 +14,7 @@ import { DreamAmbientController } from "../shared/dream-ambient-controller";
 import { nonBlank } from "../shared/dream-non-blank";
 import { DreamFooter } from "./dream-footer";
 import { DreamHeader } from "./dream-header";
+import { resolveDreamNav } from "./dream-nav";
 import { DreamPlatformBanner } from "./dream-platform-banner";
 import { DreamTopbar } from "./dream-topbar";
 
@@ -64,6 +65,14 @@ export async function DreamLayout({
     getBusinessFlags(),
   ]);
   const customFields = business.siteContent?.customFields;
+
+  // One flag-filtered nav for the header, its mobile overlay and the footer's
+  // quick-links fallback, so the three never disagree (P-NAV-FLAGS).
+  const navItems = resolveDreamNav(
+    business.siteContent?.navigationItems,
+    customFields,
+    isEnabled,
+  );
 
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
 
@@ -116,13 +125,21 @@ export async function DreamLayout({
         />
       ) : null}
 
-      <DreamHeader business={business} initialSession={session ?? null} />
+      <DreamHeader
+        business={business}
+        initialSession={session ?? null}
+        navItems={navItems}
+      />
 
       <main id="main-content" className="flex-1">
         {children}
       </main>
 
-      <DreamFooter business={business} />
+      <DreamFooter
+        business={business}
+        navItems={navItems}
+        initialSession={session ?? null}
+      />
 
       <DreamAmbientController />
     </div>

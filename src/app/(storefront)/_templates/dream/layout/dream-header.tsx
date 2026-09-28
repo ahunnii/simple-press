@@ -1,36 +1,71 @@
 "use client";
 
-import { useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Menu, ShoppingBag } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import type { DreamNavItem } from "../lib/nav";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { isActiveNavLink } from "~/lib/nav-utils";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
-import { isDreamNavActive, resolveDreamNav } from "../lib/nav";
 import { resolveDreamFields } from "../lib/resolve-fields";
+import {
+  DREAM_QUICK_ACCOUNT_KEYS,
+  dreamCtaHref,
+  resolveDreamNav,
+} from "./dream-nav";
 import { DreamNavOverlay } from "./dream-nav-overlay";
+
+type DreamHeaderProps = DefaultHeaderTemplateProps & {
+  /** Owner nav (or dream's shipped defaults), already flag-filtered by the
+   *  layout — the same array feeds the overlay and the footer. When omitted
+   *  the header resolves the same list itself. */
+  navItems?: NavItem[];
+};
+
+/** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <IconLayoutDashboard className="h-4 w-4" />,
+};
+
+/** Screen-reader hint on links that open in a new tab. */
+function externalHint(external?: boolean) {
+  return external ? <span className="sr-only"> (opens in new tab)</span> : null;
+}
 
 /**
  * Sticky translucent header (design.md "Chrome › Header"). Desktop is a single
  * flex row: logo then the Admin → Content → Navigation links on the left, and
  * — pushed right by `margin-left:auto` — the account slot ("Sign in" when
  * logged out, `UserButton` when signed in) followed by the Estimate Quote CTA
- * pill. Nav entries with children open a hover/click dropdown.
+ * pill. Nav entries with children open a hover/click dropdown whose first
+ * entry is the parent's own href (`navGroupEntries` — the trigger never
+ * navigates); Escape closes it and returns focus to its trigger.
  *
  * The cart link sits at the far right at every width. Dream has no cart
- * drawer, so it goes straight to `/cart`. It only shows once the store has a
- * published product or the shopper already has something in the cart, so a
- * services-only store never gets an empty cart icon.
+ * drawer, so it goes straight to `/cart`. It only shows while the `cart` flag
+ * is on AND the store has a published product or the shopper already has
+ * something in the cart, so a services-only store never gets an empty cart
+ * icon.
  *
  * Below 960px only the logo, the cart link, and the hamburger show; the
  * hamburger opens
@@ -41,10 +76,12 @@ import { DreamNavOverlay } from "./dream-nav-overlay";
 export function DreamHeader({
   business,
   initialSession,
-}: DefaultHeaderTemplateProps) {
+  navItems: navItemsProp,
+}: DreamHeaderProps) {
   const [open, setOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const triggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession(
     initialSession ?? null,
@@ -55,8 +92,9 @@ export function DreamHeader({
   });
   const accountsEnabled = isEnabled("customerAccounts");
   const { itemCount } = useCart();
-  const showCart = (business?.products?.length ?? 0) > 0 || itemCount > 0;
-  const ordersEnabled = isEnabled("orders");
+  const showCart =
+    isEnabled("cart") &&
+    ((business?.products?.length ?? 0) > 0 || itemCount > 0);
 
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
@@ -65,9 +103,13 @@ export function DreamHeader({
     "dream.global.header-cta-label",
     "dream.global.header-cta-url",
   ]);
-  // A blank label or an unsafe/blank link (resolved to "") hides the pill.
+  // A blank label, an unsafe/blank link (resolved to ""), or a link into a
+  // flag-disabled feature (B2.5) hides the pill.
   const ctaLabel = f["dream.global.header-cta-label"] ?? "";
-  const ctaUrl = f["dream.global.header-cta-url"] ?? "";
+  const ctaUrl = dreamCtaHref(
+    f["dream.global.header-cta-url"] ?? "",
+    isEnabled,
+  );
 
   const businessName = business?.name ?? "";
   const logoUrl =
@@ -81,41 +123,77 @@ export function DreamHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  const navItems = resolveDreamNav(
-    business?.siteContent?.navigationItems,
-    customFields,
-  );
+  // Desktop avatar menu: the quick-access subset of the flag-gated account
+  // links (B4.3) — Orders only while `orders` is on. Settings is dropped
+  // here because `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  })
+    .filter(
+      (link) =>
+        DREAM_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
+    )
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
 
-  const renderNavItem = (item: DreamNavItem, i: number) => {
+  const navItems =
+    navItemsProp ??
+    resolveDreamNav(
+      business?.siteContent?.navigationItems,
+      customFields,
+      isEnabled,
+    );
+
+  // Escape closes the open dropdown and returns focus to its trigger — the
+  // focused entry unmounts with the panel, which would otherwise drop focus
+  // to <body>.
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      const trigger = triggerRefs.current.get(openDropdown);
+      const wrapper = trigger?.parentElement;
+      // Only steal focus back when it was inside this dropdown; a hover-open
+      // closed with Escape leaves focus wherever the shopper had it.
+      if (wrapper?.contains(document.activeElement)) trigger?.focus();
+      setOpenDropdown(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [openDropdown]);
+
+  const renderNavItem = (item: NavItem, i: number) => {
     if (item.children?.length) {
-      const childActive = item.children.some((child) =>
-        isDreamNavActive(pathname, child.href),
-      );
-      const active = childActive || isDreamNavActive(pathname, item.href);
+      const active = isNavItemActive(pathname, item);
+      const entries = navGroupEntries(item);
+      const activeEntry = activeEntryIndex(pathname, entries);
       const dropdownId = `dream-nav-dropdown-${i}`;
       const isOpen = openDropdown === i;
 
       return (
         <div
-          key={item.href + item.label}
+          key={`${i}-${item.href}`}
           className="dream-header-dropdown-wrap"
           onMouseEnter={() => setOpenDropdown(i)}
           onMouseLeave={() => setOpenDropdown(null)}
           onBlur={(e) => {
             // Close once focus has left the wrapper entirely.
             if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-              setOpenDropdown(null);
-            }
-          }}
-          onKeyDown={(e) => {
-            // Escape closes but leaves focus on the trigger inside the wrapper.
-            if (e.key === "Escape" && openDropdown === i) {
-              e.stopPropagation();
-              setOpenDropdown(null);
+              setOpenDropdown((current) => (current === i ? null : current));
             }
           }}
         >
+          {/* The trigger never navigates — a non-empty parent href is the
+              panel's first entry. Active styling, but no aria-current. */}
           <button
+            ref={(el) => {
+              if (el) triggerRefs.current.set(i, el);
+              else triggerRefs.current.delete(i);
+            }}
             type="button"
             className="dream-header-link dream-header-dropdown-trigger"
             aria-haspopup="true"
@@ -130,46 +208,37 @@ export function DreamHeader({
 
           {isOpen ? (
             <div id={dropdownId} className="dream-header-dropdown" role="group">
-              {item.children.map((child) => {
-                const childIsActive = isDreamNavActive(pathname, child.href);
-                return (
-                  <Link
-                    key={child.href + child.label}
-                    href={child.href}
-                    target={child.external ? "_blank" : undefined}
-                    rel={child.external ? "noopener noreferrer" : undefined}
-                    aria-current={childIsActive ? "page" : undefined}
-                    onClick={() => setOpenDropdown(null)}
-                    className="dream-header-dropdown-link"
-                  >
-                    {child.label}
-                    {child.external ? (
-                      <span className="sr-only"> (opens in new tab)</span>
-                    ) : null}
-                  </Link>
-                );
-              })}
+              {entries.map((entry, j) => (
+                <Link
+                  key={`${j}-${entry.href}`}
+                  href={entry.href}
+                  {...externalLinkProps(entry.external)}
+                  aria-current={j === activeEntry ? "page" : undefined}
+                  onClick={() => setOpenDropdown(null)}
+                  className="dream-header-dropdown-link"
+                >
+                  {entry.label}
+                  {externalHint(entry.external)}
+                </Link>
+              ))}
             </div>
           ) : null}
         </div>
       );
     }
 
-    const active = isDreamNavActive(pathname, item.href);
+    const active = isActiveNavLink(pathname, item.href);
     return (
       <Link
-        key={item.href + item.label}
+        key={`${i}-${item.href}`}
         href={item.href}
-        target={item.external ? "_blank" : undefined}
-        rel={item.external ? "noopener noreferrer" : undefined}
+        {...externalLinkProps(item.external)}
         aria-current={active ? "page" : undefined}
         data-active={active ? "true" : undefined}
         className="dream-header-link"
       >
         {item.label}
-        {item.external ? (
-          <span className="sr-only"> (opens in new tab)</span>
-        ) : null}
+        {externalHint(item.external)}
       </Link>
     );
   };
@@ -207,26 +276,7 @@ export function DreamHeader({
                 size="icon"
                 className="dream-header-user"
                 avatarClassName="size-8"
-                links={[
-                  ...(ordersEnabled
-                    ? [
-                        {
-                          icon: <IconPackage className="h-4 w-4" />,
-                          label: "Orders",
-                          href: "/account/orders",
-                        },
-                      ]
-                    : []),
-                  ...(showAdminLink
-                    ? [
-                        {
-                          icon: <IconLayoutDashboard className="h-4 w-4" />,
-                          label: "Admin",
-                          href: "/admin",
-                        },
-                      ]
-                    : []),
-                ]}
+                links={userButtonLinks}
               />
             ) : null}
 
@@ -305,7 +355,7 @@ export function DreamHeader({
         socialLinks={business?.siteContent?.socialLinks}
         initialSession={initialSession}
         accountsEnabled={accountsEnabled}
-        ordersEnabled={ordersEnabled}
+        isEnabled={isEnabled}
       />
     </>
   );
