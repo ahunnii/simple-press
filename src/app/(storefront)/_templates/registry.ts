@@ -340,13 +340,10 @@ import { PollenOrderSuccessPage } from "./pollen/cart-checkout/pollen-order-succ
 import { PollenCollectionPage } from "./pollen/collections/pollen-collection-page";
 import { PollenCollectionsPage } from "./pollen/collections/pollen-collections-page";
 import { PollenContactPage } from "./pollen/contact/pollen-contact-page";
-import {
-  PollenDonatePage,
-  PollenEventPage,
-  PollenEventsPage,
-  PollenFaqPage,
-  PollenVideosPage,
-} from "./pollen/fallback/pollen-fallback-pages";
+import { PollenDonatePage } from "./pollen/donate/pollen-donate-page";
+import { PollenEventPage } from "./pollen/events/pollen-event-page";
+import { PollenEventsPage } from "./pollen/events/pollen-events-page";
+import { PollenFaqPage } from "./pollen/faq/pollen-faq-page";
 import { PollenLayout } from "./pollen/layout/pollen-layout";
 import { PollenGenericPage } from "./pollen/pollen-generic-page";
 import { PollenProductPage } from "./pollen/products/pollen-product-page";
@@ -354,6 +351,7 @@ import { PollenServicesIndexPage } from "./pollen/services/pollen-services-index
 import { PollenServicesPage } from "./pollen/services/pollen-services-page";
 import { PollenShopPage } from "./pollen/shop/pollen-shop-page";
 import { PollenTestimonialsPage } from "./pollen/testimonials/pollen-testimonials-page";
+import { PollenVideosPage } from "./pollen/videos/pollen-videos-page";
 // ---------------------------------------------------------------------------
 // PinkArt
 // ---------------------------------------------------------------------------
@@ -953,8 +951,8 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     InvoicesPage: PollenInvoicesPage,
     ServicesPage: PollenServicesPage,
     ServicesIndexPage: PollenServicesIndexPage,
-    // Default pages wrapped in a pt-28 offset — pollen's fixed 112px header
-    // otherwise covers their headings.
+    // Optional pages built on pollen's generic base (PollenGeneralLayout),
+    // with Default's data logic and `default.*` copy fields (B1.2).
     EventsPage: PollenEventsPage,
     EventPage: PollenEventPage,
     DonatePage: PollenDonatePage,

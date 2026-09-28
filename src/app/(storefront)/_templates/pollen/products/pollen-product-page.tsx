@@ -13,6 +13,7 @@ import {
   listItemAttr,
   sectionGroupAttr,
 } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateTrustBadgesListRows,
@@ -72,6 +73,19 @@ export function PollenProductPage({
   const reviewsHeading = f["pollen.product.reviews-heading"] ?? "";
   const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Shipping / returns / questions are each their own hideable section
+  // (product.shipping / product.returns / product.questions) so an owner
+  // can hide one row without hiding the others.
+  const showShippingRow =
+    isSectionVisible(customFields, "pollen", "product.shipping") &&
+    (shippingSummary !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "pollen", "product.returns") &&
+    (returnsSummary !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "pollen", "product.questions") &&
+    questionText !== "";
 
   const { isEnabled } = useStorefrontFlags();
   const reviewsEnabled = isEnabled("reviews");
@@ -250,16 +264,17 @@ export function PollenProductPage({
                 </div>
               ) : null}
 
-              {/* Shipping / Returns — each row renders when its note is set OR its policy is published */}
-              {shippingSummary ||
-              returnsSummary ||
-              hasShippingPolicy ||
-              hasRefundPolicy ? (
+              {/* Shipping / Returns — each row is its own hideable section
+                  (product.shipping / product.returns), rendering when its
+                  note is set OR its policy is published, and independently
+                  toggleable in the editor. */}
+              {showShippingRow || showReturnsRow ? (
                 <div>
                   <h2 className="sr-only">Shipping and returns</h2>
                   <div className="divide-y divide-[#e5ded4] rounded-md bg-[#f5f2ee]">
-                    {shippingSummary || hasShippingPolicy ? (
+                    {showShippingRow ? (
                       <PolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "shipping")}
                         Icon={Truck}
                         title="Shipping"
                         fieldKey="pollen.product.shipping-summary"
@@ -270,8 +285,9 @@ export function PollenProductPage({
                         policyLabel="Read the full shipping policy"
                       />
                     ) : null}
-                    {returnsSummary || hasRefundPolicy ? (
+                    {showReturnsRow ? (
                       <PolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "returns")}
                         Icon={RotateCcw}
                         title="Returns"
                         fieldKey="pollen.product.returns-summary"
@@ -286,8 +302,11 @@ export function PollenProductPage({
                 </div>
               ) : null}
 
-              {questionText ? (
-                <p className="text-sm">
+              {showQuestionsRow ? (
+                <p
+                  {...sectionGroupAttr("product", "questions")}
+                  className="text-sm"
+                >
                   <Link
                     href="/contact"
                     {...fieldAttr("pollen.product.question-text")}
@@ -383,6 +402,7 @@ function PolicyNote({
   note,
   policyHref,
   policyLabel,
+  sectionAttrs,
 }: {
   Icon: LucideIcon;
   title: string;
@@ -391,9 +411,11 @@ function PolicyNote({
   /** Only set when the matching policy page is published. */
   policyHref: string | undefined;
   policyLabel: string;
+  /** `sectionGroupAttr("product", "shipping" | "returns")` — makes this row its own editor hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   return (
-    <div className="flex gap-3 px-4 py-3">
+    <div {...sectionAttrs} className="flex gap-3 px-4 py-3">
       <Icon
         className="mt-0.5 size-4 shrink-0 text-[#215935]"
         aria-hidden="true"

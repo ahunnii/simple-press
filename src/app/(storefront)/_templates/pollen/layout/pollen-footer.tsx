@@ -6,6 +6,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import type { SocialNetworkKey } from "~/lib/social-links";
+import type { RouterOutputs } from "~/trpc/react";
 import {
   AUTH_BASE_PATHS,
   AUTH_VIEW_PATHS,
@@ -17,13 +18,14 @@ import { resolveLogoAlt } from "~/lib/logo-alt";
 import { resolveSocialLinks } from "~/lib/social-links";
 import {
   externalLinkProps,
+  filterNavByFlags,
   resolveNav,
 } from "~/app/(storefront)/_components/nav";
 
 // Pollen has never had a mega-menu, so the footer's Main Menu default mirrors
 // the header's own NAV_LINKS (`pollen-header.tsx`) one-for-one. An owner who
 // saves Admin → Content → Navigation entries with children gets those too —
-// see the flatten below.
+// each parent becomes its own footer column (see `groupColumns` below).
 const mainMenuLinks = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
@@ -146,7 +148,22 @@ const POLLEN_SOCIAL_ICONS: Partial<
   linkedin: PollenLinkedinIcon,
 };
 
-export function PollenFooter({ business }: DefaultFooterTemplateProps) {
+type PolicyPage = RouterOutputs["content"]["getSimplifiedPages"][number];
+
+type PollenFooterProps = DefaultFooterTemplateProps & {
+  /**
+   * Published policy Pages (type "policy"), resolved server-side by
+   * `pollen-layout.tsx` the same way `DefaultFooter` resolves them — this
+   * client component never fetches them itself. Defaults to `[]` (e.g. in
+   * tests that don't pass it), which just falls back to the platform pages.
+   */
+  policyPages?: PolicyPage[];
+};
+
+export function PollenFooter({
+  business,
+  policyPages = [],
+}: PollenFooterProps) {
   const email = business?.supportEmail;
   const phoneNumber = business?.phoneNumber;
   const physicalAddress = business?.businessAddress;
@@ -161,31 +178,81 @@ export function PollenFooter({ business }: DefaultFooterTemplateProps) {
   const { data: session, isPending } = useHydratedSession();
   const user = session?.user;
 
-  // Same list as the header (`pollen-header.tsx`'s NAV_LINKS), flattened:
-  // each top-level link, then its children right after it (mirrors
-  // happy-bamboo-footer.tsx's `quickLinks`). An owner-saved nav with no
-  // children behaves exactly like the old flat list did.
-  const footerNav = resolveNav(
-    business?.siteContent?.navigationItems,
-    mainMenuLinks.filter(
-      (l) => l.href !== "/services" || isEnabled("services"),
-    ),
-  ).flatMap((item) => [
-    ...(item.href ? [item] : []),
-    ...(item.children ?? []).filter((child) => child.href),
-  ]);
+  // Same list as the header (`pollen-header.tsx`'s NAV_LINKS), split into
+  // short link columns instead of one long list: top-level links without
+  // children stay together under "Main Menu", and every parent with children
+  // gets its own column headed by its label (a link when the parent has an
+  // href). Still plain link lists — no dropdowns (B10.4). The shared
+  // route→flag filter (P-NAV-FLAGS) drops anything the business has
+  // switched off, same as the header; a parent whose children were all
+  // filtered out falls back into Main Menu.
+  const footerNav = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, mainMenuLinks),
+    isEnabled,
+  );
+  const mainLinks = footerNav.filter(
+    (item) => item.href && !item.children?.some((child) => child.href),
+  );
+  const groupColumns = footerNav
+    .map((item) => ({
+      ...item,
+      links: (item.children ?? []).filter((child) => child.href),
+    }))
+    .filter((group) => group.links.length > 0);
+  // A long flat nav (no children to group by) still gets split, into two
+  // side-by-side columns under the one heading.
+  const splitMainLinks = mainLinks.length > 6;
 
   const accountsEnabled = isEnabled("customerAccounts");
   const ordersEnabled = isEnabled("orders");
 
   const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
+  // Mandatory, non-hideable policy row (B10.1) — published merchant Pages by
+  // slug; privacy/terms fall back to the platform's own policy, since every
+  // store is covered by those regardless of what it has published. Shipping
+  // and refund policies have no platform equivalent (they're merchant-
+  // specific), so they only appear once the merchant has published one —
+  // same "only link what exists" rule `CheckoutTermsNotice` and the product
+  // page's support rows already follow. Only these four standard slugs (the
+  // ones Admin → Policies creates) plus Platform Policies — any other
+  // policy-type page (imports, seed data) is not auto-listed.
+  const privacyPolicy = policyPages.find((p) => p.slug === "privacy-policy");
+  const termsOfService = policyPages.find((p) => p.slug === "terms-of-service");
+  const shippingPolicy = policyPages.find((p) => p.slug === "shipping-policy");
+  const refundPolicy = policyPages.find((p) => p.slug === "refund-policy");
+
+  const policyLinks: { label: string; href: string }[] = [
+    {
+      label: "Privacy Policy",
+      href: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
+    },
+    {
+      label: "Terms of Service",
+      href: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+    },
+    ...(shippingPolicy
+      ? [{ label: "Shipping Policy", href: `/${shippingPolicy.slug}` }]
+      : []),
+    ...(refundPolicy
+      ? [{ label: "Refund Policy", href: `/${refundPolicy.slug}` }]
+      : []),
+    { label: "Platform Policies", href: "/platform/policies/" },
+  ];
+
+  const linkClass =
+    "text-sm text-[#6b7280] transition-colors hover:text-[#374151]";
+
   return (
     <footer className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 lg:gap-16">
-          {/* Left: Logo and Contact */}
-          <div>
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+          {/* Left: Logo, contact, socials */}
+          <div className="lg:col-span-4">
             <Link href="/" className="mb-6 inline-block">
               {business?.siteContent?.logoUrl ? (
                 <Image
@@ -233,130 +300,197 @@ export function PollenFooter({ business }: DefaultFooterTemplateProps) {
                 </p>
               )}
             </div>
-          </div>
 
-          {/* Middle: Main Menu */}
-          <div>
-            <h4 className="mb-4 text-sm font-semibold text-[#374151]">
-              Main Menu
-            </h4>
-            <ul className="space-y-3">
-              {footerNav.map((link, i) => (
-                <li key={i}>
-                  <Link
-                    href={link.href}
-                    {...externalLinkProps(link.external)}
-                    className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
-                  >
-                    {link.label}
-                    {link.external && (
-                      <span className="sr-only"> (opens in new tab)</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Right: Account — omitted when customerAccounts is off */}
-          {accountsEnabled && (
-            <div>
-              <h4 className="mb-4 text-sm font-semibold text-[#374151]">
-                Account
-              </h4>
-              <ul className="space-y-3">
-                {isPending ? (
-                  <>
-                    <li>
-                      <span className="bg-muted block h-4 w-24 animate-pulse rounded" />
-                    </li>
-                    <li>
-                      <span className="bg-muted block h-4 w-20 animate-pulse rounded" />
-                    </li>
-                  </>
-                ) : user ? (
-                  <>
-                    <li>
-                      <Link
-                        href={ACCOUNT_HREF}
-                        className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+            {/* Social Links — Content → Branding, via the shared registry.
+                -ml-2 cancels the icons' p-2 so they line up with the text. */}
+            {/* M-11: p-2 raises hit area to ≥24px; M-3: sr-only new-tab warning; svg aria-hidden */}
+            {socialLinks.length > 0 && (
+              <ul
+                className="mt-5 -ml-2 flex items-center gap-1"
+                aria-label={`Follow ${business.name}`}
+              >
+                {socialLinks.map(({ key, ariaLabel, Icon, url }) => {
+                  const PollenIcon = POLLEN_SOCIAL_ICONS[key];
+                  return (
+                    <li key={key}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block p-2 text-[#6b7280] transition-colors hover:text-[#374151]"
                       >
-                        My account
+                        {PollenIcon ? (
+                          <PollenIcon />
+                        ) : (
+                          <Icon className="size-5" />
+                        )}
+                        <span className="sr-only">
+                          {ariaLabel} (opens in new tab)
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          {/* Right: link columns — Main Menu, one per nav group, Account */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4">
+            {mainLinks.length > 0 && (
+              <div className={splitMainLinks ? "col-span-2" : undefined}>
+                <h4 className="mb-4 text-sm font-semibold text-[#374151]">
+                  Main Menu
+                </h4>
+                <ul
+                  className={
+                    splitMainLinks
+                      ? "columns-2 gap-x-8 [&>li]:mb-3 [&>li]:break-inside-avoid"
+                      : "space-y-3"
+                  }
+                >
+                  {mainLinks.map((link, i) => (
+                    <li key={i}>
+                      <Link
+                        href={link.href}
+                        {...externalLinkProps(link.external)}
+                        className={linkClass}
+                      >
+                        {link.label}
+                        {link.external && (
+                          <span className="sr-only"> (opens in new tab)</span>
+                        )}
                       </Link>
                     </li>
-                    {ordersEnabled && (
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {groupColumns.map((group, g) => (
+              <div key={`${group.label}-${g}`}>
+                <h4 className="mb-4 text-sm font-semibold text-[#374151]">
+                  {group.href ? (
+                    <Link
+                      href={group.href}
+                      {...externalLinkProps(group.external)}
+                      className="transition-colors hover:text-[#215935]"
+                    >
+                      {group.label}
+                      {group.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  ) : (
+                    group.label
+                  )}
+                </h4>
+                <ul className="space-y-3">
+                  {group.links.map((link, i) => (
+                    <li key={i}>
+                      <Link
+                        href={link.href}
+                        {...externalLinkProps(link.external)}
+                        className={linkClass}
+                      >
+                        {link.label}
+                        {link.external && (
+                          <span className="sr-only"> (opens in new tab)</span>
+                        )}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            {/* Account — omitted when customerAccounts is off */}
+            {accountsEnabled && (
+              <div>
+                <h4 className="mb-4 text-sm font-semibold text-[#374151]">
+                  Account
+                </h4>
+                <ul className="space-y-3">
+                  {isPending ? (
+                    <>
+                      <li>
+                        <span className="bg-muted block h-4 w-24 animate-pulse rounded" />
+                      </li>
+                      <li>
+                        <span className="bg-muted block h-4 w-20 animate-pulse rounded" />
+                      </li>
+                    </>
+                  ) : user ? (
+                    <>
                       <li>
                         <Link
-                          href={ORDERS_HREF}
+                          href={ACCOUNT_HREF}
                           className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
                         >
-                          Orders
+                          My account
                         </Link>
                       </li>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <li>
-                      <Link
-                        href={SIGN_IN_HREF}
-                        className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
-                      >
-                        Sign in
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href={SIGN_UP_HREF}
-                        className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
-                      >
-                        Create account
-                      </Link>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </div>
-          )}
+                      {ordersEnabled && (
+                        <li>
+                          <Link
+                            href={ORDERS_HREF}
+                            className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+                          >
+                            Orders
+                          </Link>
+                        </li>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <li>
+                        <Link
+                          href={SIGN_IN_HREF}
+                          className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+                        >
+                          Sign in
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href={SIGN_UP_HREF}
+                          className="text-sm text-[#6b7280] transition-colors hover:text-[#374151]"
+                        >
+                          Create account
+                        </Link>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-[#e5e7eb] pt-8 md:flex-row">
-          <p className="text-sm text-[#6b7280]">
+        <div className="mt-16 flex flex-col items-center gap-4 border-t border-[#e5e7eb] pt-8 md:flex-row md:items-baseline md:justify-between md:gap-8">
+          <p className="shrink-0 text-sm text-[#6b7280]">
             Copyright © {new Date().getFullYear()} {business.name}. All rights
             reserved.
           </p>
 
-          {/* Social Links — Content → Branding, via the shared registry */}
-          {/* M-11: p-2 raises hit area to ≥24px; M-3: sr-only new-tab warning; svg aria-hidden */}
-          {socialLinks.length > 0 && (
-            <ul
-              className="flex items-center gap-2"
-              aria-label={`Follow ${business.name}`}
-            >
-              {socialLinks.map(({ key, ariaLabel, Icon, url }) => {
-                const PollenIcon = POLLEN_SOCIAL_ICONS[key];
-                return (
-                  <li key={key}>
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-2 text-[#6b7280] transition-colors hover:text-[#374151]"
-                    >
-                      {PollenIcon ? (
-                        <PollenIcon />
-                      ) : (
-                        <Icon className="size-5" />
-                      )}
-                      <span className="sr-only">
-                        {ariaLabel} (opens in new tab)
-                      </span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          {/* Mandatory policy row (B10.1) — never hidden by flags.
+              Right-aligned opposite the copyright on desktop, centered
+              under it on mobile. */}
+          <ul
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:justify-end"
+            aria-label="Policies"
+          >
+            {policyLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-sm text-[#6b7280] underline-offset-2 transition-colors hover:text-[#374151] hover:underline"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </footer>

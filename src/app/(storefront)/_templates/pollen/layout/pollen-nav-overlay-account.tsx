@@ -78,7 +78,7 @@ export function PollenNavOverlayAccount({
           onClick={onClose}
           className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/70 px-6 text-sm font-semibold tracking-wide text-white uppercase transition-colors hover:bg-white/10"
         >
-          Log in
+          Sign in
         </Link>
         {/* #1A1E1A on #A8D081 = 9.65:1. */}
         <Link

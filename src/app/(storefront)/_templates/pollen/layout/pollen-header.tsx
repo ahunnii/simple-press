@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Package,
   ShoppingBag,
+  User,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -33,6 +34,7 @@ import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
   externalLinkProps,
+  filterNavByFlags,
   getAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
@@ -154,13 +156,14 @@ export function PollenHeader({
   const showHeaderButton =
     buttonText.trim().length > 0 && isStorefrontEnabled("contactForm");
 
-  // Owner nav (children + external preserved) or the shipped default, which
-  // drops /services while the services feature is off.
-  const links = resolveNav(
-    business?.siteContent?.navigationItems,
-    POLLEN_DEFAULT_NAV.filter(
-      (l) => l.href !== "/services" || isEnabled("services"),
-    ),
+  // Owner nav (children + external preserved) or the shipped default, then
+  // the shared route→flag filter (P-NAV-FLAGS) drops anything the business
+  // has switched off — e.g. /services while `services` is off, or /shop
+  // while `products` is off (cascades: collections/cart depend on products).
+  // Consumed by both the desktop nav and the mobile overlay below.
+  const links = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, POLLEN_DEFAULT_NAV),
+    isStorefrontEnabled,
   );
 
   const accountsEnabled = isStorefrontEnabled("customerAccounts");
@@ -267,6 +270,19 @@ export function PollenHeader({
   }, [mobileMenuOpen]);
 
   const closeMenu = useCallback(() => setMobileMenuOpen(false), []);
+
+  // Close the mobile overlay on any route change (back/forward, programmatic
+  // pushes) — link taps close themselves via `closeMenu`, but not every
+  // navigation starts inside the overlay (e.g. browser Back). Compare
+  // pollen-header.test.tsx and happy-bamboo-mobile-nav.tsx:126-135. Releasing
+  // `mobileMenuOpen` here also unwinds the scroll-lock and inert effects
+  // above, since both are keyed off that same state.
+  const lastMobilePathname = useRef(pathname);
+  useEffect(() => {
+    if (lastMobilePathname.current === pathname) return;
+    lastMobilePathname.current = pathname;
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // --- Reduced-motion variants for overlay and per-link stagger ---
   const overlayTransitionDuration = shouldReduceMotion ? 0 : 0.2;
@@ -525,8 +541,15 @@ export function PollenHeader({
                   ) : user ? (
                     userMenu
                   ) : (
-                    <Link href="/auth/sign-in" className={navLinkClass(false)}>
-                      Log in
+                    <Link
+                      href="/auth/sign-in"
+                      className={cn(
+                        navLinkClass(false),
+                        "inline-flex items-center gap-1.5",
+                      )}
+                    >
+                      <User className="size-4" aria-hidden="true" />
+                      Sign in
                       {navUnderline(false)}
                     </Link>
                   ))}

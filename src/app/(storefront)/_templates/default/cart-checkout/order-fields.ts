@@ -5,10 +5,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
  * Rendered by `DefaultOrderConfirmation`, resolved server-side in
  * `DefaultOrderSuccessPage` and passed down as optional string/array props
  * with these same built-in defaults as fallbacks — `DefaultOrderConfirmation`
- * is also imported directly by `ModernOrderSuccessPage` and
- * `PollenOrderSuccessPage` WITHOUT these props, so every prop must be
- * optional and every fallback must match the original hardcoded copy
- * verbatim.
+ * is also imported directly by `ModernOrderSuccessPage` WITHOUT these props,
+ * so every prop must be optional and every fallback must match the original
+ * hardcoded copy verbatim.
  *
  * Kept free of runtime imports from `~/lib/template-fields` (only `import
  * type`) — that module imports the template root, which (once wired) imports

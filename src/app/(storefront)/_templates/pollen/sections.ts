@@ -5,7 +5,8 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * Curated section registry for the `pollen` storefront template.
  *
  * Covers homepage, about, contact, and services — the pages with the
- * richest section structure. Other reachable pages (blog, collections,
+ * richest section structure — plus the optional events/videos/donate/FAQ
+ * pages (Default's groups, see the bottom of the list). Other reachable pages (blog, collections,
  * shop, testimonials) have a single field group each, so the derived
  * fallback (one section per group, titled from `TemplateFieldGroup`
  * metadata) already gives owners a clean rail with no curation needed.
@@ -181,6 +182,36 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       order: 0,
       links: [SECTION_LINKS.products],
     },
+    {
+      id: "product.shipping",
+      page: "product",
+      title: "Shipping row",
+      description:
+        "Shipping note under the buy button on every product page. Hide it without hiding returns or questions.",
+      groupIds: ["product.shipping"],
+      order: 1,
+      hideable: true,
+    },
+    {
+      id: "product.returns",
+      page: "product",
+      title: "Returns row",
+      description:
+        "Returns note under the buy button on every product page. Hide it without hiding shipping or questions.",
+      groupIds: ["product.returns"],
+      order: 2,
+      hideable: true,
+    },
+    {
+      id: "product.questions",
+      page: "product",
+      title: "Questions row",
+      description:
+        "Contact link under the buy button on every product page. Hide it without hiding shipping or returns.",
+      groupIds: ["product.questions"],
+      order: 3,
+      hideable: true,
+    },
 
     // ── Checkout ──────────────────────────────────────────────────────────
     {
@@ -191,6 +222,24 @@ export const pollenSections: Record<string, TemplateSection[]> = {
         "Shown on the checkout page when online payments aren't set up yet.",
       groupIds: ["checkout.unavailable"],
       order: 0,
+    },
+    {
+      id: "checkout.confirmation",
+      page: "checkout",
+      title: "Order confirmation",
+      description:
+        "The page shoppers land on after paying: heading, next steps and buttons.",
+      groupIds: ["checkout.confirmation"],
+      order: 1,
+    },
+    {
+      id: "checkout.no-order",
+      page: "checkout",
+      title: "Order not found",
+      description:
+        "Shown on the order confirmation page when there's no order to show.",
+      groupIds: ["checkout.no-order"],
+      order: 2,
     },
 
     // ── Global ────────────────────────────────────────────────────────────
@@ -209,7 +258,8 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       id: "global.cart",
       page: "global",
       title: "Cart",
-      description: "Wording shown on the full cart page.",
+      description:
+        "Wording shown on the full cart page, and on checkout when the cart is empty.",
       groupIds: ["global.cart"],
       order: 1,
     },
@@ -222,6 +272,93 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       groupIds: ["global.cta"],
       order: 2,
       hideable: true,
+    },
+
+    // ── Optional pages (Default's `default.*` groups, pollen markup) ─────
+    // Pollen's events/videos/donate/FAQ pages render Default's field groups
+    // inside PollenGeneralLayout, so these mirror `default/sections.ts`.
+    // Events and Donate end with their own section (global CTA off there).
+    {
+      id: "events.hero",
+      page: "events",
+      title: "Hero",
+      groupIds: ["events.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "events.list",
+      page: "events",
+      title: "List",
+      description: "Upcoming event rows and empty-state copy",
+      groupIds: ["events.list"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.events],
+    },
+    {
+      id: "events.cta",
+      page: "events",
+      title: "Closing banner",
+      description: "Bottom banner inviting visitors to get in touch",
+      groupIds: ["events.cta"],
+      order: 2,
+      hideable: true,
+    },
+    {
+      id: "videos.hero",
+      page: "videos",
+      title: "Hero",
+      groupIds: ["videos.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "videos.list",
+      page: "videos",
+      title: "List",
+      description: "Video grid and empty-state copy",
+      groupIds: ["videos.list"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.videos],
+    },
+    {
+      id: "donate.hero",
+      page: "donate",
+      title: "Hero",
+      groupIds: ["donate.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "donate.thank-you",
+      page: "donate",
+      title: "Thank You",
+      description: "Copy shown after a successful donation",
+      groupIds: ["donate.thank-you"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "donate.other-ways",
+      page: "donate",
+      title: "Other Ways to Give",
+      description: "Heading for the Venmo/Cash App section",
+      groupIds: ["donate.other-ways"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.donations],
+    },
+    {
+      id: "faq.page",
+      page: "faq",
+      title: "FAQ page",
+      description: "Heading and empty state on the FAQ page",
+      groupIds: ["faq.page"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.faq],
     },
   ],
 };

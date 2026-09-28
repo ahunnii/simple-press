@@ -29,9 +29,7 @@ type Props = {
  * any reason, `resolveFields` substitutes the field defaults and the
  * shopper still gets a finished screen instead of a broken page.
  */
-export async function PollenCheckoutUnavailable({
-  customFields,
-}: Props = {}) {
+export async function PollenCheckoutUnavailable({ customFields }: Props = {}) {
   const resolved =
     customFields !== undefined
       ? customFields

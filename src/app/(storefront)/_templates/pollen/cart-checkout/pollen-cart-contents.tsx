@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
 
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   calculateShipping,
@@ -24,6 +23,7 @@ import {
 import { useCart } from "~/providers/cart-context";
 
 import { resolveFields } from "..";
+import { PollenCartEmptyState } from "./pollen-cart-empty-state";
 import { PollenCartItem } from "./pollen-cart-item";
 
 type Props = {
@@ -45,10 +45,8 @@ export function PollenCartContents({ business }: Props) {
   const shippingConfig = shippingConfigFromBusiness(business);
   const f = resolveFields(business.siteContent?.customFields, [
     "pollen.global.cart-label",
-    "pollen.global.cart-empty-text",
   ]);
   const cartLabel = f["pollen.global.cart-label"] ?? "";
-  const cartEmptyText = f["pollen.global.cart-empty-text"] ?? "";
   // Zone+weight rates depend on the destination address, which isn't known in
   // the cart — defer to checkout rather than showing a misleading "Free".
   const isZoneWeight =
@@ -67,41 +65,21 @@ export function PollenCartContents({ business }: Props) {
   if (items.length === 0) {
     return (
       <PageTransition>
-        <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-40 text-center sm:px-6 lg:px-8">
-          <FadeIn direction="up">
-            <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-[#f5f2ee]">
-              <ShoppingBag
-                className="size-8 text-[#4c566a]"
-                aria-hidden="true"
-              />
-            </div>
-            <h1 className="mt-6 text-2xl font-bold text-[#2a351f]">
-              Your cart is empty
-            </h1>
-            {cartEmptyText ? (
-              <p
-                {...fieldAttr("pollen.global.cart-empty-text")}
-                className="mx-auto mt-2 max-w-md text-[#4c566a]"
-              >
-                {cartEmptyText}
-              </p>
-            ) : null}
-            <Button
-              className="mt-8 bg-[#215935] text-white hover:bg-[#1a4729]"
-              size="lg"
-              asChild
-            >
-              <Link href="/shop">Continue Shopping</Link>
-            </Button>
-          </FadeIn>
-        </section>
+        <PollenCartEmptyState
+          customFields={business.siteContent?.customFields}
+          headingLevel="h1"
+          className="py-40"
+        />
       </PageTransition>
     );
   }
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-40 sm:px-6 lg:px-8">
+      <section
+        {...sectionGroupAttr("global", "cart")}
+        className="mx-auto max-w-7xl px-4 py-40 sm:px-6 lg:px-8"
+      >
         <FadeIn direction="up">
           <h1
             {...fieldAttr("pollen.global.cart-label")}

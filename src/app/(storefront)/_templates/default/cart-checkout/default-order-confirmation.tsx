@@ -41,9 +41,9 @@ const DEFAULT_STEPS: OrderConfirmationStep[] =
  * `heading`/`thanksPrefix`/`nextHeading`/`steps`/`continueLabel` are resolved
  * server-side in `DefaultOrderSuccessPage` from `checkout.confirmation`
  * fields. Every one is optional with the original hardcoded copy as its
- * fallback — `ModernOrderSuccessPage` and `PollenOrderSuccessPage` import
- * this component directly and don't pass any of them, so those templates
- * must keep rendering byte-identical output.
+ * fallback — `ModernOrderSuccessPage` imports this component directly and
+ * doesn't pass any of them, so that template must keep rendering
+ * byte-identical output.
  */
 type OrderConfirmationProps = {
   business: Business;

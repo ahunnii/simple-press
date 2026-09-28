@@ -113,19 +113,21 @@ export function PollenListServicePage({
     >
       {/* ── Back link + lead paragraph ───────────────────────────────────── */}
       <section className="bg-white pt-10 pb-2 md:pt-14">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/services"
-            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            All Services
-          </Link>
-          {service.description && (
-            <p className="text-lg leading-relaxed text-[#4b5563]">
-              {service.description}
-            </p>
-          )}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <Link
+              href="/services"
+              className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              All Services
+            </Link>
+            {service.description && (
+              <p className="text-lg leading-relaxed text-[#4b5563]">
+                {service.description}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -142,38 +144,40 @@ export function PollenListServicePage({
       {/* ── Centered intro ───────────────────────────────────────────────── */}
       {hasIntroSection && (
         <section className="bg-white py-20 md:py-28">
-          <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
-            <FadeIn direction="up">
-              {introLabel && (
-                <p
-                  className="mb-4 text-sm font-semibold tracking-wider uppercase"
-                  style={{ color: accentColor }}
-                >
-                  {introLabel}
-                </p>
-              )}
-              {introHeading && (
-                <h2 className="mb-8 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
-                  {introHeading}
-                </h2>
-              )}
-              {hasIntroBody && introBodyJson && (
-                <div className="prose prose-neutral mx-auto text-left text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
-                  <TiptapRenderer content={introBodyJson} />
-                </div>
-              )}
-              {(introVideoSrc || introImage) && (
-                <div className="mx-auto mt-8 max-w-xl">
-                  <ServiceSectionMedia
-                    imageSrc={introImage || undefined}
-                    videoSrc={introVideoSrc || undefined}
-                    alt=""
-                    className="relative aspect-video overflow-hidden rounded-2xl shadow-sm"
-                    rounded={false}
-                  />
-                </div>
-              )}
-            </FadeIn>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <FadeIn direction="up">
+                {introLabel && (
+                  <p
+                    className="mb-4 text-sm font-semibold tracking-wider uppercase"
+                    style={{ color: accentColor }}
+                  >
+                    {introLabel}
+                  </p>
+                )}
+                {introHeading && (
+                  <h2 className="mb-8 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
+                    {introHeading}
+                  </h2>
+                )}
+                {hasIntroBody && introBodyJson && (
+                  <div className="prose prose-neutral text-left text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
+                    <TiptapRenderer content={introBodyJson} />
+                  </div>
+                )}
+                {(introVideoSrc || introImage) && (
+                  <div className="mt-8 max-w-xl">
+                    <ServiceSectionMedia
+                      imageSrc={introImage || undefined}
+                      videoSrc={introVideoSrc || undefined}
+                      alt=""
+                      className="relative aspect-video overflow-hidden rounded-2xl shadow-sm"
+                      rounded={false}
+                    />
+                  </div>
+                )}
+              </FadeIn>
+            </div>
           </div>
         </section>
       )}

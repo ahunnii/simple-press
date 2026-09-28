@@ -1,6 +1,12 @@
 import type * as MotionReact from "motion/react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
@@ -96,7 +102,7 @@ const NAV: NavItem[] = [
   },
 ];
 
-function renderHeader({
+function buildTree({
   navigationItems = NAV as unknown,
   logoUrl,
 }: { navigationItems?: unknown; logoUrl?: string } = {}) {
@@ -105,15 +111,21 @@ function renderHeader({
     featureFlags: {},
     siteContent: { customFields: {}, navigationItems, logoUrl },
   } as unknown as DefaultHeaderTemplateProps["business"];
-  return render(
+  return (
     <div className="pollen">
       <PollenHeader business={business} />
       <main id="main-content">
         <button type="button">In main</button>
       </main>
       <footer>Footer</footer>
-    </div>,
+    </div>
   );
+}
+
+function renderHeader(
+  opts: { navigationItems?: unknown; logoUrl?: string } = {},
+) {
+  return render(buildTree(opts));
 }
 
 function getDesktopNav() {
@@ -124,6 +136,13 @@ function openOverlay() {
   fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
   return screen.getByRole("dialog", { name: "Menu" });
 }
+
+// The NAV fixture links to /services and /testimonials — enabled by default
+// so the dropdown-mechanics tests below exercise the fixture unfiltered.
+// Tests that care about P-NAV-FLAGS gating override this explicitly.
+beforeEach(() => {
+  enabledFlags = new Set(["services", "testimonials"]);
+});
 
 afterEach(() => {
   pathname = "/";
@@ -202,6 +221,7 @@ describe("PollenHeader desktop dropdown", () => {
   });
 
   it("falls back to the default nav (minus Services while it's off)", () => {
+    enabledFlags = new Set();
     renderHeader({ navigationItems: null });
     expect(
       Array.from(getDesktopNav().querySelectorAll("a"), (a) =>
@@ -210,18 +230,31 @@ describe("PollenHeader desktop dropdown", () => {
     ).toEqual(["/", "/about", "/contact"]);
   });
 
-  it("shows a Log in link when signed out and accounts are on", () => {
-    enabledFlags = new Set(["customerAccounts"]);
+  it("drops owner-saved nav links to flag-disabled features (P-NAV-FLAGS)", () => {
+    // Neither `services` nor `testimonials` is enabled: the Services group
+    // (its own href is gated) and the Misc group (its only child, gated,
+    // leaves it with an empty href and no surviving children) both vanish —
+    // this is the owner-saved-nav gating PF1 covers.
+    enabledFlags = new Set();
     renderHeader();
-    expect(screen.getAllByRole("link", { name: "Log in" })[0]).toHaveAttribute(
-      "href",
-      "/auth/sign-in",
-    );
+    expect(
+      Array.from(getDesktopNav().querySelectorAll("a, button"), (el) =>
+        el.textContent?.trim(),
+      ),
+    ).toEqual(["Home"]);
   });
 
-  it("hides desktop Log in when customer accounts are off", () => {
+  it("shows a Sign in link when signed out and accounts are on", () => {
+    enabledFlags = new Set(["customerAccounts"]);
     renderHeader();
-    expect(screen.queryByRole("link", { name: "Log in" })).toBeNull();
+    expect(
+      screen.getAllByRole("link", { name: "Sign in" })[0],
+    ).toHaveAttribute("href", "/auth/sign-in");
+  });
+
+  it("hides desktop Sign in when customer accounts are off", () => {
+    renderHeader();
+    expect(screen.queryByRole("link", { name: "Sign in" })).toBeNull();
   });
 });
 
@@ -282,12 +315,12 @@ describe("PollenHeader mobile overlay", () => {
     expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
   });
 
-  it("shows Log in + Sign up when signed out and accounts are on", () => {
+  it("shows Sign in + Sign up when signed out and accounts are on", () => {
     enabledFlags = new Set(["customerAccounts"]);
     renderHeader();
     const dialog = openOverlay();
     expect(
-      within(dialog).getByRole("link", { name: "Log in" }),
+      within(dialog).getByRole("link", { name: "Sign in" }),
     ).toHaveAttribute("href", "/auth/sign-in");
     expect(
       within(dialog).getByRole("link", { name: "Sign up" }),
@@ -297,7 +330,7 @@ describe("PollenHeader mobile overlay", () => {
   it("shows no account block when customer accounts are off", () => {
     renderHeader();
     const dialog = openOverlay();
-    expect(within(dialog).queryByRole("link", { name: "Log in" })).toBeNull();
+    expect(within(dialog).queryByRole("link", { name: "Sign in" })).toBeNull();
   });
 
   it("shows only the quick-access account links in the overlay, no UserButton", () => {
@@ -346,6 +379,22 @@ describe("PollenHeader mobile overlay", () => {
       within(account).getByRole("link", { name: "Admin" }),
     ).toHaveAttribute("href", "/admin");
     expect(within(account).queryByRole("link", { name: "Orders" })).toBeNull();
+  });
+
+  it("closes on a route change (e.g. browser Back) and releases the scroll lock", async () => {
+    const { rerender } = renderHeader();
+    openOverlay();
+    expect(document.body.style.overflow).toBe("hidden");
+
+    pathname = "/shop";
+    rerender(buildTree());
+
+    // The overlay unmounts via AnimatePresence's exit animation, which
+    // resolves a tick later even with `useReducedMotion` mocked true.
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Menu" })).toBeNull(),
+    );
+    expect(document.body.style.overflow).toBe("");
   });
 
   it("renders the owner logo without an invert filter", () => {

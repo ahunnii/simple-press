@@ -1,12 +1,13 @@
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 import { PollenFooter } from "./pollen-footer";
 import { PollenHeader } from "./pollen-header";
 
-export function PollenLayout({
+export async function PollenLayout({
   business,
   children,
 }: DefaultLayoutTemplateProps) {
@@ -22,6 +23,13 @@ export function PollenLayout({
     "pollen.global.header-button-text",
     "pollen.global.header-button-link",
   ]);
+
+  // Footer policy links (B10.1) — fetched here, server-side, the same way
+  // `DefaultFooter` fetches them, and handed down as a prop so the (client)
+  // `PollenFooter` never opens its own fetch waterfall for them.
+  const policyPages = await api.content.getSimplifiedPages({
+    type: "policy",
+  });
 
   return (
     <div className="pollen min-h-screen">
@@ -40,7 +48,7 @@ export function PollenLayout({
         buttonLink={f["pollen.global.header-button-link"] || "/contact"}
       />
       <main id="main-content">{children}</main>
-      <PollenFooter business={business} />
+      <PollenFooter business={business} policyPages={policyPages} />
     </div>
   );
 }

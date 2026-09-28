@@ -120,19 +120,21 @@ export function PollenSpaServicePage({
     >
       {/* ── Back link + lead paragraph ───────────────────────────────────── */}
       <section className="bg-white pt-10 pb-2 md:pt-14">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/services"
-            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            All Services
-          </Link>
-          {service.description && (
-            <p className="text-lg leading-relaxed text-[#4b5563]">
-              {service.description}
-            </p>
-          )}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <Link
+              href="/services"
+              className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              All Services
+            </Link>
+            {service.description && (
+              <p className="text-lg leading-relaxed text-[#4b5563]">
+                {service.description}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 

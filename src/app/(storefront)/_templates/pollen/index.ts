@@ -1,6 +1,19 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
+import {
+  defaultDonateData,
+  defaultDonateFieldGroups,
+} from "../default/donate";
+import {
+  defaultEventsData,
+  defaultEventsFieldGroups,
+} from "../default/events";
+import { defaultFaqData, defaultFaqFieldGroups } from "../default/faq";
+import {
+  defaultVideosData,
+  defaultVideosFieldGroups,
+} from "../default/videos";
 import { pollenAboutData, pollenAboutFieldGroups } from "./about";
 import { pollenBlogData, pollenBlogFieldGroups } from "./blog";
 import {
@@ -11,6 +24,10 @@ import {
   pollenCheckoutUnavailableData,
   pollenCheckoutUnavailableFieldGroups,
 } from "./cart-checkout/checkout-unavailable-fields";
+import {
+  pollenOrderConfirmationData,
+  pollenOrderConfirmationFieldGroups,
+} from "./cart-checkout/order-fields";
 import {
   pollenCollectionsData,
   pollenCollectionsFieldGroups,
@@ -258,6 +275,14 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...pollenProductFieldGroups,
   ...pollenCartFieldGroups,
   ...pollenCheckoutUnavailableFieldGroups,
+  ...pollenOrderConfirmationFieldGroups,
+  // Optional pages (events, videos, donate, FAQ) reuse Default's `default.*`
+  // copy fields verbatim — pollen's pages read them through Default's
+  // resolver, so declaring them here exposes them in pollen's editor.
+  ...defaultEventsFieldGroups,
+  ...defaultVideosFieldGroups,
+  ...defaultDonateFieldGroups,
+  ...defaultFaqFieldGroups,
 ];
 
 export const pollenData = {
@@ -276,6 +301,11 @@ export const pollenData = {
     ...pollenProductData,
     ...pollenCartData,
     ...pollenCheckoutUnavailableData,
+    ...pollenOrderConfirmationData,
+    ...defaultEventsData,
+    ...defaultVideosData,
+    ...defaultDonateData,
+    ...defaultFaqData,
   ],
 };
 

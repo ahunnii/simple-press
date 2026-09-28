@@ -125,19 +125,21 @@ export function PollenBloomServicePage({
     >
       {/* ── Back link + lead paragraph ───────────────────────────────────── */}
       <section className="bg-white pt-10 pb-2 md:pt-14">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/services"
-            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            All Services
-          </Link>
-          {service.description && (
-            <p className="text-lg leading-relaxed text-[#4b5563]">
-              {service.description}
-            </p>
-          )}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <Link
+              href="/services"
+              className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              All Services
+            </Link>
+            {service.description && (
+              <p className="text-lg leading-relaxed text-[#4b5563]">
+                {service.description}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -192,47 +194,49 @@ export function PollenBloomServicePage({
       {/* ── Centered intro ───────────────────────────────────────────────── */}
       {hasIntroSection && (
         <section className="bg-white py-20 md:py-32">
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <FadeIn direction="up">
-              {introLabel && (
-                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
-                  {introLabel}
-                </p>
-              )}
-              {introHeading && (
-                <h2 className="mb-8 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
-                  {introHeading}
-                </h2>
-              )}
-              {hasIntroBody && introBodyJson && (
-                <div className="prose prose-neutral mx-auto mb-10 text-left text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
-                  <TiptapRenderer content={introBodyJson} />
-                </div>
-              )}
-              {(introVideoSrc || introImage) && (
-                <div className="mx-auto mt-8 max-w-xl">
-                  <ServiceSectionMedia
-                    imageSrc={introImage || undefined}
-                    videoSrc={introVideoSrc || undefined}
-                    alt=""
-                    className="relative aspect-video overflow-hidden rounded-2xl shadow-md"
-                    rounded={false}
-                  />
-                </div>
-              )}
-              {ctaLink && ctaText && (
-                <Link
-                  href={ctaLink}
-                  className={buttonVariants({
-                    size: "lg",
-                    className:
-                      "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
-                  })}
-                >
-                  {ctaText}
-                </Link>
-              )}
-            </FadeIn>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <FadeIn direction="up">
+                {introLabel && (
+                  <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
+                    {introLabel}
+                  </p>
+                )}
+                {introHeading && (
+                  <h2 className="mb-8 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
+                    {introHeading}
+                  </h2>
+                )}
+                {hasIntroBody && introBodyJson && (
+                  <div className="prose prose-neutral mb-10 text-left text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
+                    <TiptapRenderer content={introBodyJson} />
+                  </div>
+                )}
+                {(introVideoSrc || introImage) && (
+                  <div className="mt-8 max-w-xl">
+                    <ServiceSectionMedia
+                      imageSrc={introImage || undefined}
+                      videoSrc={introVideoSrc || undefined}
+                      alt=""
+                      className="relative aspect-video overflow-hidden rounded-2xl shadow-md"
+                      rounded={false}
+                    />
+                  </div>
+                )}
+                {ctaLink && ctaText && (
+                  <Link
+                    href={ctaLink}
+                    className={buttonVariants({
+                      size: "lg",
+                      className:
+                        "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
+                    })}
+                  >
+                    {ctaText}
+                  </Link>
+                )}
+              </FadeIn>
+            </div>
           </div>
         </section>
       )}
