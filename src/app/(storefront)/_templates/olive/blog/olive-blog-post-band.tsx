@@ -83,13 +83,16 @@ export function OliveBlogPostBand({
             {ctaBody}
           </p>
         ) : null}
-        <OliveButton
-          variant="primary"
-          href={ctaButtonLink}
-          data-sp-field={CTA_BUTTON_TEXT_KEY}
-        >
-          {ctaButtonText}
-        </OliveButton>
+        {/* Blank link = hidden (also how a flag-gated href arrives, B2.5). */}
+        {ctaButtonText && ctaButtonLink ? (
+          <OliveButton
+            variant="primary"
+            href={ctaButtonLink}
+            data-sp-field={CTA_BUTTON_TEXT_KEY}
+          >
+            {ctaButtonText}
+          </OliveButton>
+        ) : null}
       </div>
     </OliveSection>
   );

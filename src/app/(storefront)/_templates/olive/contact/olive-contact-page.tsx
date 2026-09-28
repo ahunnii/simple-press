@@ -1,9 +1,11 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import {
   googleMapsUrls,
   resolveMapCoordinates,
 } from "~/lib/address/coordinates";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
@@ -22,13 +24,15 @@ import {
 import { OliveContactMain } from "./olive-contact-main";
 import { OliveContactMap } from "./olive-contact-map";
 
-export function OliveContactPage({
+export async function OliveContactPage({
   business,
   faqItems,
 }: DefaultContactPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
+
+  const { isEnabled } = await getBusinessFlags();
 
   const f = resolveFields(customFields, [
     "olive.contact.hero-heading",
@@ -83,6 +87,15 @@ export function OliveContactPage({
     getRawCustomFieldString(customFields, "olive.contact.map-lng"),
   );
   const mapUrls = coords ? googleMapsUrls(address || coords) : null;
+
+  // B2.5: hide the promo button (never swap in another destination) when its
+  // href names a flag that's off.
+  const promoButtonRaw = f["olive.contact.promo-button-link"] ?? "";
+  const promoButtonFlag = navHrefFlag(promoButtonRaw);
+  const promoButtonHref =
+    promoButtonFlag === null || isEnabled(promoButtonFlag)
+      ? promoButtonRaw
+      : "";
 
   return (
     <>
@@ -172,7 +185,7 @@ export function OliveContactPage({
           heading={f["olive.contact.promo-heading"] ?? ""}
           body={f["olive.contact.promo-body"] ?? ""}
           buttonLabel={f["olive.contact.promo-button-label"] ?? ""}
-          buttonLink={f["olive.contact.promo-button-link"] ?? ""}
+          buttonLink={promoButtonHref}
           tone="sage-tint"
           id="olive-promo-contact"
           sectionAttrs={sectionGroupAttr("contact", "promo")}

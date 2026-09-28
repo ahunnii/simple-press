@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
@@ -9,7 +8,9 @@ import { formatDate } from "~/lib/utils";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { hasOliveImage, OliveReveal, OliveSection } from "../shared";
+import { hasOliveImage, OliveReveal } from "../shared";
+import { OlivePageBand } from "./olive-page-band";
+import { OlivePageSection } from "./olive-page-section";
 
 type Page = NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 
@@ -145,6 +146,10 @@ function OliveToc({
  * pages, custom landing pages, and platform policy pages). No template
  * fields, no sections — the route also passes `business`, unused here, same
  * as `ViiGenericPage`.
+ *
+ * The base every optional page is built on: `OlivePageBand` (cover photo +
+ * edge-aligned title card, or the plain white title band) and
+ * `OlivePageSection` for the body, both on the page's one left edge.
  */
 export function OliveGenericPage({ page }: { page: Page }) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -173,51 +178,13 @@ export function OliveGenericPage({ page }: { page: Page }) {
 
   return (
     <>
-      {hasCover ? (
-        <section
-          aria-label={page.title}
-          className="relative w-full overflow-hidden"
-          style={{ minHeight: "clamp(280px, 36vw, 420px)" }}
-        >
-          <Image
-            src={page.image!}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 flex items-end p-4 sm:p-8">
-            <OliveReveal className="olive-card flex max-w-[min(34rem,90%)] flex-col gap-2 p-6">
-              <h1 className="olive-h1">{page.title}</h1>
-              {page.excerpt ? (
-                <p className="olive-caption" style={{ maxWidth: "48ch" }}>
-                  {page.excerpt}
-                </p>
-              ) : null}
-            </OliveReveal>
-          </div>
-        </section>
-      ) : (
-        <OliveSection tone="white" aria-label={page.title}>
-          <OliveReveal>
-            <h1 className="olive-h1">{page.title}</h1>
-            {page.excerpt ? (
-              <p
-                className="olive-caption"
-                style={{ marginTop: "0.75rem", maxWidth: "60ch" }}
-              >
-                {page.excerpt}
-              </p>
-            ) : null}
-          </OliveReveal>
-        </OliveSection>
-      )}
+      <OlivePageBand
+        title={page.title}
+        intro={page.excerpt}
+        image={page.image}
+      />
 
-      <OliveSection
-        tone="white"
-        style={hasCover ? undefined : { paddingTop: 0 }}
-      >
+      <OlivePageSection flush={!hasCover}>
         {showToc ? (
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
             <OliveToc contentRef={contentRef} />
@@ -226,7 +193,7 @@ export function OliveGenericPage({ page }: { page: Page }) {
         ) : (
           articleBody
         )}
-      </OliveSection>
+      </OlivePageSection>
     </>
   );
 }

@@ -11,6 +11,7 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import {
   colorFromName,
@@ -91,6 +92,10 @@ export function OliveCartContents({
 }: Props) {
   const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
     useCart();
+  // PF16 / B7.4: `/checkout` 404s with the flag off, so the CTA that leads
+  // there must not render — no disabled state, just no CTA (per bamboo/vii).
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
 
   // Rows mid-exit: the visual leaves immediately on click, but the actual
   // `removeItem` call — and the count the live region announces — waits for
@@ -247,14 +252,16 @@ export function OliveCartContents({
             </p>
           ) : null}
 
-          <OliveButton
-            variant="primary"
-            href="/checkout"
-            className="w-full"
-            data-sp-field={checkoutLabelFieldKey}
-          >
-            {checkoutLabel}
-          </OliveButton>
+          {checkoutEnabled ? (
+            <OliveButton
+              variant="primary"
+              href="/checkout"
+              className="w-full"
+              data-sp-field={checkoutLabelFieldKey}
+            >
+              {checkoutLabel}
+            </OliveButton>
+          ) : null}
         </div>
       </aside>
     </div>

@@ -5,18 +5,26 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
  * previews them on a representative published product (page "product").
  *
  * Field KEYS keep the legacy `olive.global.product-` prefix: `customFields`
- * is keyed by field key, so renaming would orphan saved owner values. Only
- * the page/group moved (was `global.product`, now `product.details`).
+ * is keyed by field key, so renaming would orphan saved owner values. The
+ * shipping/returns/questions fields originally lived in `product.details`
+ * (was `global.product` before that); as of the 2026-09-28 parity fix
+ * (PF13) each moved to its OWN group — `product.shipping` /
+ * `product.returns` / `product.questions` — so the owner can hide one row
+ * without hiding the others. Only `group` (and the description) changed;
+ * keys, defaults and everything else are untouched, so saved values keep
+ * resolving unchanged. See `docs/templates/olive/parity-plan-2026-09-28.md`
+ * (decision under B6.2) — olive keeps its accordion look and its existing
+ * keys; the platform baseline's own key names are waived for this template.
  */
 export const oliveProductData: TemplateField[] = [
   {
     key: "olive.global.product-shipping-description",
     label: "Shipping text",
     description:
-      "Shown in the 'Shipping' accordion on every product page. Leave blank to hide that accordion.",
+      "Shown in the 'Shipping' row on every product page. A link to your shipping policy is added automatically once that page is published. Leave this blank to show just the link — or hide the row entirely with its eye toggle if there's no policy either.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.shipping",
     gridColumn: "col-span-full",
     defaultValue:
       "Every order ships with a tracking link, sent the moment it leaves.",
@@ -25,10 +33,10 @@ export const oliveProductData: TemplateField[] = [
     key: "olive.global.product-returns-description",
     label: "Returns text",
     description:
-      "Shown in the 'Returns' accordion on every product page. Leave blank to hide that accordion.",
+      "Shown in the 'Returns' row on every product page. A link to your returns policy is added automatically once that page is published. Leave this blank to show just the link — or hide the row entirely with its eye toggle if there's no policy either.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.returns",
     gridColumn: "col-span-full",
     defaultValue:
       "Unworn pieces with tags can come back — message us and we'll sort out an exchange or store credit.",
@@ -37,12 +45,23 @@ export const oliveProductData: TemplateField[] = [
     key: "olive.global.product-question-text",
     label: "\"Questions?\" line",
     description:
-      "Short line under the accordions inviting a question; it links to the contact page. Leave blank to hide.",
+      "Short line under the accordion inviting a question; it links to the contact page. Leave blank to hide the row.",
+    type: "text",
+    page: "product",
+    group: "product.questions",
+    gridColumn: "col-span-full",
+    defaultValue: "Not sure about the fit or shade? Ask us.",
+  },
+  {
+    key: "olive.global.product-reviews-heading",
+    label: "Reviews heading",
+    description:
+      "Heading above customer reviews near the bottom of every product page. Only shown when reviews are turned on for your store. Leave blank to hide the heading.",
     type: "text",
     page: "product",
     group: "product.details",
-    gridColumn: "col-span-full",
-    defaultValue: "Not sure about the fit or shade? Ask us.",
+    gridColumn: "col-span-1",
+    defaultValue: "What people are saying",
   },
   {
     key: "olive.global.product-related-heading",
@@ -149,8 +168,32 @@ export const oliveProductFieldGroups: TemplateFieldGroup[] = [
     id: "product.details",
     title: "Product page",
     description:
-      "Shipping and returns text, the 'questions?' line and trust badges shown on every product page",
+      "Reviews heading, related products, coming-soon copy and trust badges shown on every product page",
     icon: "📦",
+    columns: 1,
+  },
+  {
+    id: "product.shipping",
+    title: "Shipping row",
+    description:
+      "Shipping text shown on every product page. Can be hidden independently of the returns and questions rows.",
+    icon: "🚚",
+    columns: 1,
+  },
+  {
+    id: "product.returns",
+    title: "Returns row",
+    description:
+      "Returns text shown on every product page. Can be hidden independently of the shipping and questions rows.",
+    icon: "↩️",
+    columns: 1,
+  },
+  {
+    id: "product.questions",
+    title: "Questions row",
+    description:
+      "Contact link shown under the accordion on every product page. Can be hidden independently of the shipping and returns rows.",
+    icon: "❓",
     columns: 1,
   },
 ];

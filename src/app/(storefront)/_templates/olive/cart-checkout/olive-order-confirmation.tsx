@@ -3,9 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+import type { Session } from "~/server/better-auth/config";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import {
   OliveButton,
@@ -15,24 +18,97 @@ import {
   OliveStatusBadge,
 } from "../shared";
 
+/** `session.metadata.deliveryMethod`, echoed back by `/api/stripe/session`. */
+type DeliveryMethod = "ship" | "pickup" | null;
+
 /** What `/api/stripe/session` answers with. */
 type OrderDetails = {
   customer_email: string;
   amount_total: number;
   currency: string;
   payment_status: string;
+  delivery_method?: DeliveryMethod;
+};
+
+/** Just enough of `business` for the PF17 pickup-location block. */
+type Business = {
+  /** Owner-set in Settings → Shipping. */
+  pickupLocation?: string | null;
+  pickupInstructions?: string | null;
 };
 
 type Props = {
+  business: Business;
   heading: string;
   body: string;
   nextHeading: string;
   nextSteps: string;
+  /** PF17: next-steps copy shown instead of `nextSteps` for pickup orders. */
+  nextStepsPickup: string;
   continueLabel: string;
   loadingText: string;
   noOrderHeading: string;
   noOrderBody: string;
+  /**
+   * Session resolved server-side by `olive-order-success-page.tsx`
+   * (`getSession()`), seeding `useHydratedSession` so the PF18 account CTA
+   * is correct on first paint instead of popping in after the client
+   * session fetch settles. `undefined` (e.g. tests rendering this
+   * component directly) falls back to the hook's unseeded mode, which
+   * suppresses the CTA via `isPending` until the client session resolves —
+   * never a flash of the wrong state either way.
+   */
+  initialSession?: Session | null;
 };
+
+type AccountCta = { href: string; label: string };
+
+/**
+ * PF18 / B9.4: signed in + `orders` on -> "View my orders"
+ * (`/account/orders`); signed out + `customerAccounts` on -> "Create an
+ * account" (`/auth/sign-up`); neither -> no CTA. Copied locally per the
+ * parity plan (P-ORDER-CTA stays optional; vii/pollen/bamboo/happy-bamboo
+ * each carry their own copy too). See the `initialSession` doc above for
+ * why this never flashes the wrong state.
+ */
+function useOrderAccountCta(
+  initialSession: Session | null | undefined,
+): AccountCta | null {
+  const { data: session, isPending } = useHydratedSession(initialSession);
+  const { isEnabled } = useStorefrontFlags();
+
+  if (isPending) {
+    return null;
+  }
+
+  if (session?.user) {
+    return isEnabled("orders")
+      ? { href: "/account/orders", label: "View my orders" }
+      : null;
+  }
+
+  return isEnabled("customerAccounts")
+    ? { href: "/auth/sign-up", label: "Create an account" }
+    : null;
+}
+
+/**
+ * PF17: picks the pickup-specific next-steps copy when the order was
+ * placed for in-store pickup and the owner has written it; every other
+ * case (shipped, or the delivery method is unknown — no fresh Stripe
+ * session, or an order placed before this metadata existed) falls back to
+ * the general list.
+ */
+function resolveNextSteps(
+  deliveryMethod: DeliveryMethod | undefined,
+  nextSteps: string,
+  nextStepsPickup: string,
+): string {
+  if (deliveryMethod === "pickup" && nextStepsPickup.trim()) {
+    return nextStepsPickup;
+  }
+  return nextSteps;
+}
 
 function formatOrderTotal(amountCents: number, currency: string): string {
   try {
@@ -55,17 +131,21 @@ function formatOrderTotal(amountCents: number, currency: string): string {
  * attached, and the confirmation card itself.
  */
 export function OliveOrderConfirmation({
+  business,
   heading,
   body,
   nextHeading,
   nextSteps,
+  nextStepsPickup,
   continueLabel,
   loadingText,
   noOrderHeading,
   noOrderBody,
+  initialSession,
 }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
+  const accountCta = useOrderAccountCta(initialSession);
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -184,10 +264,17 @@ export function OliveOrderConfirmation({
   }
 
   // ── Confirmed ─────────────────────────────────────────────────────────────
-  const steps = nextSteps
+  const deliveryMethod = orderDetails?.delivery_method ?? null;
+
+  const steps = resolveNextSteps(deliveryMethod, nextSteps, nextStepsPickup)
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
+
+  // PF17 — owner-set in Settings → Shipping; only meaningful for pickup
+  // orders, and only shown once the store has actually written one.
+  const showPickupLocation =
+    deliveryMethod === "pickup" && !!business.pickupLocation?.trim();
 
   const total = orderDetails
     ? formatOrderTotal(orderDetails.amount_total, orderDetails.currency)
@@ -295,6 +382,33 @@ export function OliveOrderConfirmation({
                   </li>
                 ))}
               </ol>
+
+              {/* PF17 — pickup location/instructions, owner-set in
+                  Settings → Shipping. Not a template field: it is store
+                  data, the same way the receipt email and order total
+                  above are not fields. */}
+              {showPickupLocation ? (
+                <div
+                  className="pt-1 text-[0.9375rem] leading-relaxed"
+                  style={{ borderTop: "1px solid var(--olive-hairline)" }}
+                >
+                  <p className="olive-label pt-2">Pickup location</p>
+                  <p
+                    className="mt-1 whitespace-pre-line"
+                    style={{ color: "var(--olive-ink-soft)" }}
+                  >
+                    {business.pickupLocation}
+                  </p>
+                  {business.pickupInstructions?.trim() ? (
+                    <p
+                      className="mt-1 whitespace-pre-line"
+                      style={{ color: "var(--olive-ink-soft)" }}
+                    >
+                      {business.pickupInstructions}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </section>
           ) : null}
 
@@ -309,6 +423,12 @@ export function OliveOrderConfirmation({
             <OliveButton variant="ghost" href="/">
               Back to home
             </OliveButton>
+            {/* PF18 — account next step (View my orders / Create an account) */}
+            {accountCta ? (
+              <OliveButton variant="ghost" href={accountCta.href}>
+                {accountCta.label}
+              </OliveButton>
+            ) : null}
           </div>
         </div>
       </OliveReveal>

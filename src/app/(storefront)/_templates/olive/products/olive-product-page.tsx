@@ -13,6 +13,7 @@ import {
   listItemAttr,
   sectionGroupAttr,
 } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   isContentEmpty,
@@ -22,10 +23,14 @@ import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductReviews } from "~/components/product-reviews";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "..";
 import {
@@ -132,6 +137,10 @@ export function OliveProductPage({
     productId: product.id,
   });
 
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+
   const hasVariants = product.variants.length > 0;
 
   // `OliveVariantSelector` keeps its own quantity stepper (separate from
@@ -209,6 +218,7 @@ export function OliveProductPage({
     "olive.global.product-related-empty",
     "olive.global.product-preorder-note",
     "olive.global.product-max-in-bag",
+    "olive.global.product-reviews-heading",
   ]);
 
   const shippingText = (
@@ -231,8 +241,23 @@ export function OliveProductPage({
   const maxInBagNote =
     f["olive.global.product-max-in-bag"] ??
     "Everything we have is already in your bag.";
+  const reviewsHeading = f["olive.global.product-reviews-heading"] ?? "";
   const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Each row is its own hideable section (product.shipping / product.returns
+  // / product.questions) so an owner can hide one without hiding the others.
+  // A row still shows with blank owner text as long as its policy page is
+  // published, so the "Read the full … policy" link stays reachable.
+  const showShippingRow =
+    isSectionVisible(customFields, "olive", "product.shipping") &&
+    (shippingText !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "olive", "product.returns") &&
+    (returnsText !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "olive", "product.questions") &&
+    questionText !== "";
 
   // Product-level badges (icon + text, set per product) win over the store-wide
   // list; a product that says something specific should not be talked over.
@@ -357,6 +382,21 @@ export function OliveProductPage({
               }}
             />
 
+            {/* Wishlist — its own row above the buy controls so it stays
+                visible across every branch below (coming soon, variants,
+                out of stock, in stock). Self-gates on the wishlist flag. */}
+            <WishlistButton
+              item={{
+                productId: product.id,
+                name: product.name,
+                slug: product.slug,
+                price: displayPrice,
+                imageUrl: product.images[0]?.url ?? null,
+              }}
+              className="static flex size-10 shrink-0 items-center justify-center self-start rounded-[var(--olive-card-radius)] border border-[var(--olive-hairline)] bg-[var(--olive-paper)] text-[var(--olive-leaf)] shadow-none backdrop-blur-none hover:scale-100 hover:bg-[var(--olive-sage-tint)]"
+              iconClassName="size-4"
+            />
+
             {comingSoon ? (
               <div className="olive-card olive-card-paper flex flex-col items-start gap-1.5 p-4">
                 <span
@@ -478,7 +518,7 @@ export function OliveProductPage({
               </ul>
             ) : null}
 
-            {hasDetails || shippingText || returnsText ? (
+            {hasDetails || showShippingRow || showReturnsRow ? (
               <div
                 className="olive-reveal-item"
                 style={{ "--i": 3 } as CSSProperties}
@@ -498,89 +538,132 @@ export function OliveProductPage({
                     </OliveAccordionItem>
                   ) : null}
 
-                  {shippingText ? (
-                    <OliveAccordionItem
-                      headingLevel={2}
-                      id="shipping"
-                      title="Shipping"
-                    >
-                      <p
-                        {...fieldAttr(
-                          "olive.global.product-shipping-description",
-                        )}
+                  {showShippingRow ? (
+                    <div {...sectionGroupAttr("product", "shipping")}>
+                      <OliveAccordionItem
+                        headingLevel={2}
+                        id="shipping"
+                        title="Shipping"
                       >
-                        {shippingText}
-                      </p>
-                      {hasShippingPolicy ? (
-                        <Link
-                          href="/shipping-policy"
-                          className="mt-3 inline-block underline"
-                          style={{
-                            color: "var(--olive-leaf)",
-                            textDecorationColor: "var(--olive-sage-bright)",
-                            textUnderlineOffset: "5px",
-                          }}
-                        >
-                          Read the full shipping policy
-                        </Link>
-                      ) : null}
-                    </OliveAccordionItem>
+                        {shippingText ? (
+                          <p
+                            {...fieldAttr(
+                              "olive.global.product-shipping-description",
+                            )}
+                          >
+                            {shippingText}
+                          </p>
+                        ) : null}
+                        {hasShippingPolicy ? (
+                          <Link
+                            href="/shipping-policy"
+                            className="mt-3 inline-block underline"
+                            style={{
+                              color: "var(--olive-leaf)",
+                              textDecorationColor: "var(--olive-sage-bright)",
+                              textUnderlineOffset: "5px",
+                            }}
+                          >
+                            Read the full shipping policy
+                          </Link>
+                        ) : null}
+                      </OliveAccordionItem>
+                    </div>
                   ) : null}
 
-                  {returnsText ? (
-                    <OliveAccordionItem
-                      headingLevel={2}
-                      id="returns"
-                      title="Returns"
-                    >
-                      <p
-                        {...fieldAttr(
-                          "olive.global.product-returns-description",
-                        )}
+                  {showReturnsRow ? (
+                    <div {...sectionGroupAttr("product", "returns")}>
+                      <OliveAccordionItem
+                        headingLevel={2}
+                        id="returns"
+                        title="Returns"
                       >
-                        {returnsText}
-                      </p>
-                      {hasRefundPolicy ? (
-                        <Link
-                          href="/refund-policy"
-                          className="mt-3 inline-block underline"
-                          style={{
-                            color: "var(--olive-leaf)",
-                            textDecorationColor: "var(--olive-sage-bright)",
-                            textUnderlineOffset: "5px",
-                          }}
-                        >
-                          Read the full returns policy
-                        </Link>
-                      ) : null}
-                    </OliveAccordionItem>
+                        {returnsText ? (
+                          <p
+                            {...fieldAttr(
+                              "olive.global.product-returns-description",
+                            )}
+                          >
+                            {returnsText}
+                          </p>
+                        ) : null}
+                        {hasRefundPolicy ? (
+                          <Link
+                            href="/refund-policy"
+                            className="mt-3 inline-block underline"
+                            style={{
+                              color: "var(--olive-leaf)",
+                              textDecorationColor: "var(--olive-sage-bright)",
+                              textUnderlineOffset: "5px",
+                            }}
+                          >
+                            Read the full returns policy
+                          </Link>
+                        ) : null}
+                      </OliveAccordionItem>
+                    </div>
                   ) : null}
                 </OliveAccordion>
               </div>
             ) : null}
 
-            {questionText ? (
-              <p
-                className="olive-reveal-item olive-caption"
+            {showQuestionsRow ? (
+              <div
+                className="olive-reveal-item"
                 style={{ "--i": 4 } as CSSProperties}
+                {...sectionGroupAttr("product", "questions")}
               >
-                <Link
-                  href="/contact"
-                  className="underline"
-                  style={{
-                    color: "var(--olive-leaf)",
-                    textDecorationColor: "var(--olive-sage-bright)",
-                    textUnderlineOffset: "5px",
-                  }}
-                  {...fieldAttr("olive.global.product-question-text")}
-                >
-                  {questionText}
-                </Link>
-              </p>
+                <p className="olive-caption">
+                  <Link
+                    href="/contact"
+                    className="underline"
+                    style={{
+                      color: "var(--olive-leaf)",
+                      textDecorationColor: "var(--olive-sage-bright)",
+                      textUnderlineOffset: "5px",
+                    }}
+                    {...fieldAttr("olive.global.product-question-text")}
+                  >
+                    {questionText}
+                  </Link>
+                </p>
+              </div>
             ) : null}
           </OliveRevealGroup>
         </div>
       </div>
+
+      {/* Reviews — only mounts (and only fires review queries) when the
+          reviews feature flag is enabled for this business. */}
+      {reviewsEnabled ? (
+        <section
+          aria-label="Reviews"
+          className="pt-12 pb-16 md:pt-16 md:pb-24"
+          style={{ borderTop: "1px solid var(--olive-hairline)" }}
+        >
+          <OliveReveal threshold={0}>
+            {reviewsHeading ? (
+              <h2
+                className="olive-h2 mb-8"
+                {...fieldAttr("olive.global.product-reviews-heading")}
+              >
+                {reviewsHeading}
+              </h2>
+            ) : null}
+            <ProductReviews
+              productId={product.id}
+              onWriteReviewClick={() => setReviewDialogOpen(true)}
+            />
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </OliveReveal>
+        </section>
+      ) : null}
 
       {relatedProducts.length > 0 ? (
         <section

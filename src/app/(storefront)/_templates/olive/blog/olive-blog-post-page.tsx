@@ -3,7 +3,9 @@ import Image from "next/image";
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { deriveExcerpt } from "~/lib/blog-search";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { formatDate } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -35,7 +37,7 @@ const FIELD_KEYS = [
  * no cover, the post's excerpt is inlined once as the typographic masthead's
  * lede instead (never shown twice).
  */
-export function OliveBlogPostPage({
+export async function OliveBlogPostPage({
   page,
   relatedPosts,
   business,
@@ -43,6 +45,19 @@ export function OliveBlogPostPage({
 }: Props) {
   const fields = customFields ?? business.siteContent?.customFields;
   const f = resolveFields(fields, [...FIELD_KEYS]);
+
+  const { isEnabled } = await getBusinessFlags();
+
+  // B2.5: hide the closing CTA button (never swap in another destination)
+  // when its href names a flag that's off. `f["olive.blog.post-cta-button-
+  // link"]` already carries the field's own default ("/shop") for an unset
+  // key — resolveFields applies `defaultValue` — so no separate fallback.
+  const ctaButtonLinkRaw = f["olive.blog.post-cta-button-link"] ?? "";
+  const ctaButtonLinkFlag = navHrefFlag(ctaButtonLinkRaw);
+  const ctaButtonLink =
+    ctaButtonLinkFlag === null || isEnabled(ctaButtonLinkFlag)
+      ? ctaButtonLinkRaw
+      : "";
 
   const hasCover = hasOliveImage(page.image);
   const readingMinutes = estimateReadingMinutes(page.content);
@@ -131,7 +146,7 @@ export function OliveBlogPostPage({
           ctaHeading={f["olive.blog.post-cta-heading"] ?? ""}
           ctaBody={f["olive.blog.post-cta-body"] ?? ""}
           ctaButtonText={f["olive.blog.post-cta-button-text"] ?? ""}
-          ctaButtonLink={f["olive.blog.post-cta-button-link"] ?? "/shop"}
+          ctaButtonLink={ctaButtonLink}
         />
       ) : null}
     </>

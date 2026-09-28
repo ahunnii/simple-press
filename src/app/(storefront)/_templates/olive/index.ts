@@ -14,17 +14,24 @@ import {
   oliveCollectionsFieldGroups,
 } from "./collections";
 import { oliveContactData, oliveContactFieldGroups } from "./contact";
+import { oliveDonateData, oliveDonateFieldGroups } from "./donate";
+import { oliveEventsData, oliveEventsFieldGroups } from "./events";
+import { oliveFaqData, oliveFaqFieldGroups } from "./faq";
 import { oliveHomepageData, oliveHomepageFieldGroups } from "./homepage";
 import { oliveProductData, oliveProductFieldGroups } from "./products";
+import { oliveServicesData, oliveServicesFieldGroups } from "./services";
 import { oliveShopData, oliveShopFieldGroups } from "./shop";
 import {
   oliveTestimonialsData,
   oliveTestimonialsFieldGroups,
 } from "./testimonials";
+import { oliveVideosData, oliveVideosFieldGroups } from "./videos";
 
-// Page domains (homepage, shop, products, …) are aggregated below;
-// `generic/`, `account/` and `maintenance/` define no fields of their own —
-// they are chrome-only.
+// Page domains (homepage, shop, products, services, events, videos, donate,
+// faq, …) are aggregated below; `generic/`, `account/` and `maintenance/`
+// define no fields of their own — they are chrome-only. The events, videos,
+// donate and FAQ domains re-export Default's `default.*` fields (olive
+// markup, Default copy) so they appear in olive's editor.
 //
 // Footer tagline and social links are NOT template fields: they come from
 // Content → Branding (`SiteContent.footerText` / `socialLinks`). The retired
@@ -146,6 +153,11 @@ export const oliveData: Record<string, TemplateField[]> = {
     ...oliveContactData,
     ...oliveTestimonialsData,
     ...oliveBlogData,
+    ...oliveServicesData,
+    ...oliveEventsData,
+    ...oliveVideosData,
+    ...oliveDonateData,
+    ...oliveFaqData,
     ...oliveCartData,
     ...oliveCheckoutData,
     ...globalBrandingData,
@@ -163,6 +175,11 @@ export const oliveFieldGroups: Record<string, TemplateFieldGroup[]> = {
     ...oliveContactFieldGroups,
     ...oliveTestimonialsFieldGroups,
     ...oliveBlogFieldGroups,
+    ...oliveServicesFieldGroups,
+    ...oliveEventsFieldGroups,
+    ...oliveVideosFieldGroups,
+    ...oliveDonateFieldGroups,
+    ...oliveFaqFieldGroups,
     ...oliveCartFieldGroups,
     ...oliveCheckoutFieldGroups,
     ...oliveProductFieldGroups,

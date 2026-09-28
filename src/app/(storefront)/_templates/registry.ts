@@ -293,12 +293,18 @@ import { OliveOrderSuccessPage } from "./olive/cart-checkout/olive-order-success
 import { OliveCollectionPage } from "./olive/collections/olive-collection-page";
 import { OliveCollectionsPage } from "./olive/collections/olive-collections-page";
 import { OliveContactPage } from "./olive/contact/olive-contact-page";
+import { OliveDonatePage } from "./olive/donate/olive-donate-page";
+import { OliveEventPage } from "./olive/events/olive-event-page";
+import { OliveEventsPage } from "./olive/events/olive-events-page";
+import { OliveFaqPage } from "./olive/faq/olive-faq-page";
 import { OliveGenericPage } from "./olive/generic/olive-generic-page";
 import { OliveLayout } from "./olive/layout/olive-layout";
 import { OliveMaintenancePage } from "./olive/maintenance/olive-maintenance-page";
 import { OliveProductPage } from "./olive/products/olive-product-page";
+import { OliveServicesIndexPage } from "./olive/services/olive-services-index-page";
 import { OliveShopPage } from "./olive/shop/olive-shop-page";
 import { OliveTestimonialsPage } from "./olive/testimonials/olive-testimonials-page";
+import { OliveVideosPage } from "./olive/videos/olive-videos-page";
 import { PinkAboutPage } from "./pink/about/pink-about-page";
 import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
 import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
@@ -337,9 +343,9 @@ import { PollenAboutPage } from "./pollen/about/pollen-about-page";
 import { PollenAccountSecurityPage } from "./pollen/account/pollen-account-security-page";
 import { PollenAccountSettingsPage } from "./pollen/account/pollen-account-settings-page";
 import { PollenAddressBookPage } from "./pollen/account/pollen-address-book-page";
+import { PollenInvoicesPage } from "./pollen/account/pollen-invoices-page";
 import { PollenOrderDetailPage } from "./pollen/account/pollen-order-detail-page";
 import { PollenOrdersPage } from "./pollen/account/pollen-orders-page";
-import { PollenInvoicesPage } from "./pollen/account/pollen-invoices-page";
 import { PollenPreferencesPage } from "./pollen/account/pollen-preferences-page";
 import { PollenRewardsPage } from "./pollen/account/pollen-rewards-page";
 import { PollenSubscriptionsPage } from "./pollen/account/pollen-subscriptions-page";
@@ -954,6 +960,12 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     RewardsPage: OliveRewardsPage,
     SubscriptionsPage: OliveSubscriptionsPage,
     InvoicesPage: OliveInvoicesPage,
+    ServicesIndexPage: OliveServicesIndexPage,
+    EventsPage: OliveEventsPage,
+    EventPage: OliveEventPage,
+    VideosPage: OliveVideosPage,
+    DonatePage: OliveDonatePage,
+    FaqPage: OliveFaqPage,
     MaintenancePage: OliveMaintenancePage,
   },
   pollen: {

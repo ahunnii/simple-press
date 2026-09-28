@@ -59,7 +59,7 @@ export function OliveBandSection({
           bodyFieldKey={bodyFieldKey}
         />
 
-        {ctaLabel ? (
+        {ctaLabel && ctaHref ? (
           <OliveButton
             variant="secondary"
             href={ctaHref}

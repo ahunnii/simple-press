@@ -23,11 +23,12 @@ import {
   serviceTwoFieldGroups,
   serviceTwoFields,
 } from "~/app/(storefront)/_templates/_service-pages/service-two";
+import { bambooServiceTemplateDefs } from "~/app/(storefront)/_templates/bamboo/services/service-pages/fields";
 import { buildersServiceTemplateDefs } from "~/app/(storefront)/_templates/builders/services/service-pages/fields";
 import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/default/services/service-pages/fields";
 import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
-import { bambooServiceTemplateDefs } from "~/app/(storefront)/_templates/bamboo/services/service-pages/fields";
 import { happyBambooServiceTemplateDefs } from "~/app/(storefront)/_templates/happy-bamboo/services/service-pages/fields";
+import { oliveServiceTemplateDefs } from "~/app/(storefront)/_templates/olive/services/service-pages/fields";
 import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/services/service-pages/fields";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
@@ -113,6 +114,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   dream: dreamServiceTemplateDefs,
   "happy-bamboo": happyBambooServiceTemplateDefs,
   bamboo: bambooServiceTemplateDefs,
+  olive: oliveServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -135,6 +137,7 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...dreamServiceTemplateDefs,
       ...happyBambooServiceTemplateDefs,
       ...bambooServiceTemplateDefs,
+      ...oliveServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

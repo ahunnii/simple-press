@@ -263,13 +263,25 @@ export const oliveCheckoutData: TemplateField[] = [
     key: "olive.checkout.success-next-steps",
     label: "Next steps list",
     description:
-      "One step per line. Each line becomes a row in the list. Leave blank to hide the list.",
+      "One step per line. Each line becomes a row in the list. Shown for shipped orders, and for any order whose delivery method is unknown. Leave blank to hide the list.",
     type: "textarea",
     page: "checkout",
     group: "checkout.success",
     gridColumn: "col-span-full",
     defaultValue:
       "A confirmation email is on its way.\nWe pack every order by hand.\nYou will get a tracking link the moment it leaves.",
+  },
+  {
+    key: "olive.checkout.success-next-steps-pickup",
+    label: "Next steps list — pickup orders",
+    description:
+      "One step per line, shown instead of the list above when the order is for in-store pickup. Leave blank to reuse the list above.",
+    type: "textarea",
+    page: "checkout",
+    group: "checkout.success",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A confirmation email is on its way.\nWe will let you know as soon as your order is ready for pickup.",
   },
   {
     key: "olive.checkout.success-continue-label",

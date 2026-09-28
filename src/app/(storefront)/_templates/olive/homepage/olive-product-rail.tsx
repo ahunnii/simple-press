@@ -48,7 +48,11 @@ export function OliveProductRail({
         <OliveSectionHeading
           heading={heading}
           id="olive-rail-heading"
-          link={linkLabel ? { label: linkLabel, href: linkHref } : undefined}
+          link={
+            linkLabel && linkHref
+              ? { label: linkLabel, href: linkHref }
+              : undefined
+          }
           headingFieldKey={headingFieldKey}
           linkFieldKey={linkLabelFieldKey}
           className="mb-8"

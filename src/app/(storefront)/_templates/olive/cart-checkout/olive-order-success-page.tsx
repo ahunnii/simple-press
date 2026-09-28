@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { getSession } from "~/server/better-auth/server";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
@@ -45,7 +46,7 @@ function OliveOrderLoading({ loadingText }: { loadingText: string }) {
  * server-side and hands it to the client component, which needs the query
  * string and therefore has to sit inside a `<Suspense>` boundary.
  */
-export function OliveOrderSuccessPage({ business }: Props) {
+export async function OliveOrderSuccessPage({ business }: Props) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
@@ -55,6 +56,7 @@ export function OliveOrderSuccessPage({ business }: Props) {
     "olive.checkout.success-body",
     "olive.checkout.success-next-heading",
     "olive.checkout.success-next-steps",
+    "olive.checkout.success-next-steps-pickup",
     "olive.checkout.success-continue-label",
     "olive.checkout.success-loading",
     "olive.checkout.success-no-order-heading",
@@ -63,17 +65,28 @@ export function OliveOrderSuccessPage({ business }: Props) {
 
   const loadingText = f["olive.checkout.success-loading"] ?? "";
 
+  // PF18 / B9.4 — resolved server-side so the account CTA is correct on the
+  // first paint; see the doc on `OliveOrderConfirmation`'s `initialSession`
+  // prop.
+  const initialSession = await getSession().catch(() => null);
+
   return (
     <Suspense fallback={<OliveOrderLoading loadingText={loadingText} />}>
       <OliveOrderConfirmation
+        business={{
+          pickupLocation: business.pickupLocation,
+          pickupInstructions: business.pickupInstructions,
+        }}
         heading={f["olive.checkout.success-heading"] ?? ""}
         body={f["olive.checkout.success-body"] ?? ""}
         nextHeading={f["olive.checkout.success-next-heading"] ?? ""}
         nextSteps={f["olive.checkout.success-next-steps"] ?? ""}
+        nextStepsPickup={f["olive.checkout.success-next-steps-pickup"] ?? ""}
         continueLabel={f["olive.checkout.success-continue-label"] ?? ""}
         loadingText={loadingText}
         noOrderHeading={f["olive.checkout.success-no-order-heading"] ?? ""}
         noOrderBody={f["olive.checkout.success-no-order-body"] ?? ""}
+        initialSession={initialSession}
       />
     </Suspense>
   );

@@ -462,7 +462,7 @@ export function OliveHeroSection({
                 </p>
               ) : null}
 
-              {ctaLabel ? (
+              {ctaLabel && ctaHref ? (
                 <div
                   className="olive-reveal-item"
                   style={{ "--i": 4 } as CSSProperties}
