@@ -18,6 +18,25 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams,
 }));
 
+/**
+ * Mutable per-test session/flags (PF25 / B9.4 account CTA) — mirrors
+ * `happy-bamboo/layout/happy-bamboo-header.test.tsx`'s pattern.
+ */
+type FakeSession = { user: { name: string; email: string } } | null;
+
+let session: FakeSession = null;
+let sessionPending = false;
+vi.mock("~/lib/auth/use-hydrated-session", () => ({
+  useHydratedSession: () => ({ data: session, isPending: sessionPending }),
+}));
+
+let enabledFlags = new Set<string>(["orders", "customerAccounts"]);
+vi.mock("~/providers/feature-flags-context", () => ({
+  useStorefrontFlags: () => ({
+    isEnabled: (key: string) => enabledFlags.has(key),
+  }),
+}));
+
 const BUSINESS = {
   id: "biz_1",
   name: "Bamboo Co.",
@@ -39,6 +58,9 @@ describe("BambooOrderConfirmation", () => {
     clearCart.mockReset();
     vi.unstubAllGlobals();
     searchParams = new URLSearchParams();
+    session = null;
+    sessionPending = false;
+    enabledFlags = new Set(["orders", "customerAccounts"]);
     try {
       sessionStorage.clear();
     } catch {
@@ -166,5 +188,97 @@ describe("BambooOrderConfirmation", () => {
     expect(
       screen.queryByText("Orders ship in 2 days."),
     ).not.toBeInTheDocument();
+  });
+
+  // PF25 / B9.4 — account next step on the confirmed order page.
+  describe("account CTA", () => {
+    beforeEach(() => {
+      searchParams = new URLSearchParams({ session_id: "cs_test_cta" });
+      mockFetchResponse({
+        customer_email: "shopper@example.com",
+        amount_total: 4599,
+        currency: "usd",
+        payment_status: "paid",
+        delivery_method: "ship",
+      });
+    });
+
+    it('signed in + orders on shows "View my orders"', async () => {
+      session = { user: { name: "Shopper", email: "shopper@example.com" } };
+
+      render(<BambooOrderConfirmation business={BUSINESS} />);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("link", { name: "View my orders" }),
+        ).toHaveAttribute("href", "/account/orders"),
+      );
+      expect(
+        screen.queryByRole("link", { name: "Create an account" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('signed in + orders off shows no account CTA', async () => {
+      session = { user: { name: "Shopper", email: "shopper@example.com" } };
+      enabledFlags = new Set(["customerAccounts"]);
+
+      render(<BambooOrderConfirmation business={BUSINESS} />);
+
+      await waitFor(() =>
+        expect(screen.getByText(/Order total:/)).toBeInTheDocument(),
+      );
+      expect(
+        screen.queryByRole("link", { name: "View my orders" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Create an account" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('signed out + customerAccounts on shows "Create an account"', async () => {
+      session = null;
+
+      render(<BambooOrderConfirmation business={BUSINESS} />);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("link", { name: "Create an account" }),
+        ).toHaveAttribute("href", "/auth/sign-up"),
+      );
+      expect(
+        screen.queryByRole("link", { name: "View my orders" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("neither flag on shows no account CTA", async () => {
+      session = null;
+      enabledFlags = new Set();
+
+      render(<BambooOrderConfirmation business={BUSINESS} />);
+
+      await waitFor(() =>
+        expect(screen.getByText(/Order total:/)).toBeInTheDocument(),
+      );
+      expect(
+        screen.queryByRole("link", { name: "View my orders" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Create an account" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("suppresses the CTA while the session is still pending (no flash)", () => {
+      session = null;
+      sessionPending = true;
+
+      render(<BambooOrderConfirmation business={BUSINESS} />);
+
+      expect(
+        screen.queryByRole("link", { name: "View my orders" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Create an account" }),
+      ).not.toBeInTheDocument();
+    });
   });
 });

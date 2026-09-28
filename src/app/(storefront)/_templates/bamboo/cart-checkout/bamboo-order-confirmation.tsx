@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Package } from "lucide-react";
 
+import type { Session } from "~/server/better-auth/config";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatCurrency } from "~/lib/utils";
 
@@ -26,7 +29,47 @@ type Props = {
   };
   /** Owner-authored note (`bamboo.checkout.success-note`); blank hides it. */
   note?: string;
+  /**
+   * Session resolved server-side by `bamboo-order-success-page.tsx`
+   * (`getSession()`), seeding `useHydratedSession` so the account CTA below
+   * is correct on the very first paint instead of popping in after the
+   * client session fetch settles. `undefined` (e.g. in tests that render
+   * this component directly) falls back to the hook's unseeded mode, which
+   * suppresses the CTA via `isPending` until the client session resolves —
+   * never a flash of the wrong state either way.
+   */
+  initialSession?: Session | null;
 };
+
+type AccountCta = { href: string; label: string };
+
+/**
+ * B9.4 / PF25 (P-ORDER-CTA stays unbuilt this run — bamboo is the only
+ * consumer): signed in + `orders` on -> "View my orders"
+ * (`/account/orders`); signed out + `customerAccounts` on -> "Create an
+ * account" (`/auth/sign-up`); neither -> no CTA. See the `initialSession`
+ * doc above for why this never flashes the wrong state.
+ */
+function useOrderAccountCta(
+  initialSession: Session | null | undefined,
+): AccountCta | null {
+  const { data: session, isPending } = useHydratedSession(initialSession);
+  const { isEnabled } = useStorefrontFlags();
+
+  if (isPending) {
+    return null;
+  }
+
+  if (session?.user) {
+    return isEnabled("orders")
+      ? { href: "/account/orders", label: "View my orders" }
+      : null;
+  }
+
+  return isEnabled("customerAccounts")
+    ? { href: "/auth/sign-up", label: "Create an account" }
+    : null;
+}
 
 // Order-details fetch is best-effort only — it must never block the
 // "Order Confirmed!" heading. If it hangs or fails, the customer still
@@ -61,9 +104,14 @@ function nextStepsBullets(deliveryMethod: DeliveryMethod): string[] {
   ];
 }
 
-export function BambooOrderConfirmation({ business, note = "" }: Props) {
+export function BambooOrderConfirmation({
+  business,
+  note = "",
+  initialSession,
+}: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
+  const accountCta = useOrderAccountCta(initialSession);
   const [orderDetails, setOrderDetails] = useState<{
     customer_email: string;
     amount_total: number;
@@ -297,6 +345,15 @@ export function BambooOrderConfirmation({ business, note = "" }: Props) {
         >
           <Link href="/">Back to Home</Link>
         </Button>
+        {accountCta && (
+          <Button
+            asChild
+            variant="outline"
+            className="flex-1 rounded-full border-[var(--bam-forest)] text-[var(--bam-forest)] hover:bg-[var(--bam-cream-deep)] hover:text-[var(--bam-forest-deep)]"
+          >
+            <Link href={accountCta.href}>{accountCta.label}</Link>
+          </Button>
+        )}
       </div>
     </div>
   );

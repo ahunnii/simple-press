@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Quote, Star } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
@@ -16,6 +17,8 @@ import { BambooSectionHeading } from "./bamboo-section-heading";
 type Props = {
   customFields: unknown;
   testimonials: RouterOutputs["testimonial"]["listRandom"];
+  /** B2.5: gates the field-driven CTA when its href names an off flag. */
+  isEnabled: (key: string) => boolean;
 };
 
 function getInitials(name: string): string {
@@ -29,6 +32,7 @@ function getInitials(name: string): string {
 export function BambooTestimonialsSection({
   customFields,
   testimonials,
+  isEnabled,
 }: Props) {
   const f = resolveFields(customFields, [
     "bamboo.homepage.testimonials-eyebrow",
@@ -38,6 +42,18 @@ export function BambooTestimonialsSection({
   ]);
 
   const buttonText = f["bamboo.homepage.testimonials-button-text"] ?? "";
+
+  // B2.5: hide the CTA (never swap in another destination) when its href
+  // names a flag that's off. The section itself already only renders when
+  // testimonials exist (which requires `isEnabled("testimonials")` — see
+  // `bamboo-homepage.tsx`), so this only bites when a merchant points the
+  // button at a different, flag-gated route.
+  const buttonHref =
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+    f["bamboo.homepage.testimonials-button-link"] || "/testimonials";
+  const buttonFlag = navHrefFlag(buttonHref);
+  const showButton =
+    buttonText !== "" && (buttonFlag === null || isEnabled(buttonFlag));
 
   return (
     <section
@@ -108,14 +124,11 @@ export function BambooTestimonialsSection({
           ))}
         </StaggerContainer>
 
-        {buttonText ? (
+        {showButton ? (
           <FadeIn direction="up" delay={0.3}>
             <div className="mt-12 text-center">
               <Link
-                href={
-                  f["bamboo.homepage.testimonials-button-link"] ??
-                  "/testimonials"
-                }
+                href={buttonHref}
                 className="group text-foreground inline-flex items-center gap-2.5 border-b border-[var(--bam-gold)]/50 pb-1 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-[var(--bam-gold)] hover:text-[var(--bam-forest)]"
               >
                 <span

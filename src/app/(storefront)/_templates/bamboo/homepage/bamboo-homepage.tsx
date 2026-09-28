@@ -1,9 +1,11 @@
+import type { DefaultHomepageTemplateProps } from "../../types";
 import {
   googleMapsUrls,
   resolveMapCoordinates,
 } from "~/lib/address/coordinates";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isPreviewRequest } from "~/lib/preview/preview-context";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
@@ -19,6 +21,7 @@ import { BambooAboutTeaserSection } from "./bamboo-about-teaser-section";
 import { BambooFeaturedSection } from "./bamboo-featured-section";
 import { BambooHeroSection } from "./bamboo-hero-section";
 import { BambooLocationSection } from "./bamboo-location-section";
+import { BambooPopup } from "./bamboo-popup";
 import { BambooSustainabilitySection } from "./bamboo-sustainability-section";
 import { BambooTestimonialsSection } from "./bamboo-testimonials-section";
 import { BambooValueBandSection } from "./bamboo-value-band-section";
@@ -28,13 +31,23 @@ import { BambooValueBandSection } from "./bamboo-value-band-section";
  * section visibility gates; every band's markup lives in its own file so the
  * page reads as the running order it renders.
  */
-export async function BambooHomepage() {
+export async function BambooHomepage({
+  business,
+}: DefaultHomepageTemplateProps) {
   const [homepage, flags] = await Promise.all([
     api.business.getHomepage(),
     getBusinessFlags(),
   ]);
+  const { isEnabled } = flags;
 
-  const testimonials = flags.isEnabled("testimonials")
+  // `getHomepage` doesn't select `popupConfig` — reuse the `business` prop
+  // (already fetched by the root page with `siteContent.popupConfig` and
+  // `featureFlags`, and already passed to every template's homepage
+  // component) the same way `pollen-homepage.tsx` / `happy-bamboo-homepage.tsx`
+  // resolve their popup, instead of adding a second business fetch here.
+  const popup = resolvePopup(business?.siteContent, isEnabled("popups"));
+
+  const testimonials = isEnabled("testimonials")
     ? await api.testimonial.listRandom({ limit: 3 })
     : [];
 
@@ -97,6 +110,7 @@ export async function BambooHomepage() {
   const isPreview = await isPreviewRequest();
   const hasProducts = (homepage?.products?.length ?? 0) > 0;
   const hasFeatured =
+    isEnabled("products") &&
     isSectionVisible(customFields, "bamboo", "homepage.featured") &&
     (hasProducts || isPreview);
 
@@ -118,9 +132,12 @@ export async function BambooHomepage() {
   return (
     <HydrateClient>
       <PageTransition>
+        {popup && <BambooPopup popup={popup} />}
+
         <BambooHeroSection
           customFields={customFields}
           hasValueBand={hasValueBand}
+          isEnabled={isEnabled}
         />
 
         {hasValueBand && <BambooValueBandSection customFields={customFields} />}
@@ -128,13 +145,17 @@ export async function BambooHomepage() {
         {/* Order mirrors happy-bamboo: the about teaser sits between the hero
             band and the product grid, so the story lands before the shelf. */}
         {hasAboutTeaser && (
-          <BambooAboutTeaserSection customFields={customFields} />
+          <BambooAboutTeaserSection
+            customFields={customFields}
+            isEnabled={isEnabled}
+          />
         )}
 
         {hasFeatured && (
           <BambooFeaturedSection
             customFields={customFields}
             products={homepage?.products ?? []}
+            isEnabled={isEnabled}
           />
         )}
 
@@ -154,6 +175,7 @@ export async function BambooHomepage() {
           <BambooTestimonialsSection
             customFields={customFields}
             testimonials={testimonials}
+            isEnabled={isEnabled}
           />
         )}
 

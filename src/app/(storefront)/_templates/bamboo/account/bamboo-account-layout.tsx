@@ -3,42 +3,42 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BookUser, FileText, Gift, Lock, Package, Repeat, Settings } from "lucide-react";
+import {
+  Bell,
+  LayoutDashboard,
+  Lock,
+  MapPin,
+  Package,
+  FileText,
+  Gift,
+  Repeat,
+  Settings,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
-type BambooAccountNavItem = {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  flag?: string;
+/**
+ * Icon for every key `getAccountNavLinks` can return, keyed to match (mirrors
+ * happy-bamboo's `HB_ACCOUNT_LINK_ICONS`). Kept local since this template's
+ * account sidebar is the only bamboo consumer.
+ */
+const BAM_ACCOUNT_LINK_ICONS: Record<string, LucideIcon> = {
+  orders: Package,
+  "address-book": MapPin,
+  subscriptions: Repeat,
+  invoices: FileText,
+  rewards: Gift,
+  settings: Settings,
+  security: Lock,
+  preferences: Bell,
+  admin: LayoutDashboard,
 };
-
-const NAV_ITEMS: BambooAccountNavItem[] = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  {
-    href: "/account/subscriptions",
-    label: "Subscriptions",
-    icon: Repeat,
-    flag: "subscriptions",
-  },
-  {
-    href: "/account/invoices",
-    label: "Invoices",
-    icon: FileText,
-    flag: "invoices",
-  },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
-  { href: "/account/rewards", label: "Rewards", icon: Gift, flag: "loyalty" },
-];
 
 type Props = {
   children: ReactNode;
@@ -50,9 +50,11 @@ export function BambooAccountLayout({ children, heading, breadcrumb }: Props) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
 
-  const navItems = NAV_ITEMS.filter(
-    (item) => !item.flag || isEnabled(item.flag),
-  );
+  const navItems = getAccountNavLinks({ isEnabled }).map((link) => ({
+    href: link.href,
+    label: link.label,
+    icon: BAM_ACCOUNT_LINK_ICONS[link.key] ?? Settings,
+  }));
 
   return (
     <>

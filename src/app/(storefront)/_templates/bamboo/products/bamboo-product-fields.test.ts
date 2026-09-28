@@ -49,10 +49,15 @@ describe("bamboo product-page fields", () => {
     ).toEqual([]);
   });
 
-  it("every field sits on the product page in the product.details group", () => {
+  it("every field sits on the product page, grouped into its own hideable row where applicable", () => {
+    const expectedGroup: Record<string, string> = {
+      "bamboo.product.shipping-summary": "product.shipping",
+      "bamboo.product.returns-summary": "product.returns",
+      "bamboo.product.question-text": "product.questions",
+    };
     for (const field of bambooProductFields) {
       expect(field.page).toBe("product");
-      expect(field.group).toBe("product.details");
+      expect(field.group).toBe(expectedGroup[field.key] ?? "product.details");
     }
   });
 });

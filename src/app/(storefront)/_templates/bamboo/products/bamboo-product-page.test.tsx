@@ -32,6 +32,13 @@ vi.mock("~/hooks/use-product", () => ({
   }),
 }));
 
+let reviewsEnabled = false;
+vi.mock("~/providers/feature-flags-context", () => ({
+  useStorefrontFlags: () => ({
+    isEnabled: (flag: string) => (flag === "reviews" ? reviewsEnabled : false),
+  }),
+}));
+
 vi.mock("./bamboo-product-actions", () => ({
   BambooProductActions: () => <div data-testid="actions" />,
 }));
@@ -48,7 +55,16 @@ vi.mock(
   "~/app/(storefront)/_components/product-page/additional-info-tabs",
   () => ({ ProductDetailsAdditionalInfoTabs: () => null }),
 );
+vi.mock("~/app/(storefront)/_components/wishlist/wishlist-button", () => ({
+  WishlistButton: () => <div data-testid="wishlist-button" />,
+}));
 vi.mock("~/components/analytics/track-view", () => ({ TrackView: () => null }));
+vi.mock("~/components/product-reviews", () => ({
+  ProductReviews: () => <div data-testid="product-reviews" />,
+}));
+vi.mock("~/components/write-review-dialog", () => ({
+  WriteReviewDialog: () => null,
+}));
 vi.mock("~/components/page-animations", () => {
   const Pass = ({
     children,
@@ -85,6 +101,7 @@ function renderPage({
 beforeEach(() => {
   relatedProducts = [];
   additionalFields = undefined;
+  reviewsEnabled = false;
 });
 
 describe("BambooProductPage", () => {
@@ -105,28 +122,51 @@ describe("BambooProductPage", () => {
     expect(screen.getByText("Paper towels")).toBeInTheDocument();
   });
 
-  it("renders no Shipping/Returns rows when both notes are blank", () => {
+  it("renders no Shipping/Returns rows when both notes are blank and no policies are published", () => {
     renderPage({
-      productPolicies: { hasShippingPolicy: true, hasRefundPolicy: true },
+      productPolicies: { hasShippingPolicy: false, hasRefundPolicy: false },
     });
     expect(screen.queryByRole("button", { name: "Shipping" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Returns" })).toBeNull();
     expect(screen.queryByText(/full shipping policy/i)).toBeNull();
+    expect(screen.queryByText(/full returns policy/i)).toBeNull();
   });
 
-  it("links the shipping policy only when it is published", () => {
-    const customFields = {
-      "bamboo.product.shipping-summary": "Ships in 2 days.",
-    };
-    const { unmount } = renderPage({
-      customFields,
-      productPolicies: { hasShippingPolicy: false, hasRefundPolicy: true },
+  it("renders policy links when notes are blank but policies are published", () => {
+    renderPage({
+      productPolicies: { hasShippingPolicy: true, hasRefundPolicy: true },
     });
     expect(
       screen.getByRole("button", { name: "Shipping" }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Returns" })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Returns" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Read the full shipping policy").closest("a"),
+    ).toHaveAttribute("href", "/shipping-policy");
+    expect(
+      screen.getByText("Read the full returns policy").closest("a"),
+    ).toHaveAttribute("href", "/refund-policy");
+  });
+
+  it("links each policy only when it is published", () => {
+    const customFields = {
+      "bamboo.product.shipping-summary": "Ships in 2 days.",
+      "bamboo.product.returns-summary": "30-day returns.",
+    };
+    const { unmount } = renderPage({
+      customFields,
+      productPolicies: { hasShippingPolicy: false, hasRefundPolicy: false },
+    });
+    expect(
+      screen.getByRole("button", { name: "Shipping" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Returns" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Read the full shipping policy")).toBeNull();
+    expect(screen.queryByText("Read the full returns policy")).toBeNull();
     unmount();
 
     renderPage({
@@ -136,6 +176,7 @@ describe("BambooProductPage", () => {
     // Panels use the `hidden` attribute, so query including hidden nodes.
     const link = screen.getByText("Read the full shipping policy");
     expect(link.closest("a")).toHaveAttribute("href", "/shipping-policy");
+    expect(screen.queryByText("Read the full returns policy")).toBeNull();
   });
 
   it("shows no badges by default, store badges when saved, and product features over store badges", () => {
@@ -167,16 +208,70 @@ describe("BambooProductPage", () => {
     expect(screen.queryByText("Septic safe")).toBeNull();
   });
 
-  it("links the question line to /contact only when set", () => {
+  it("links the question line to /contact by default and hides it when blank", () => {
     const { unmount } = renderPage();
-    expect(screen.queryByRole("link", { name: /questions/i })).toBeNull();
+    expect(
+      screen.getByRole("link", {
+        name: "Questions about this product? Contact us.",
+      }),
+    ).toHaveAttribute("href", "/contact");
     unmount();
 
     renderPage({
-      customFields: { "bamboo.product.question-text": "Questions? Ask us." },
+      customFields: { "bamboo.product.question-text": "" },
+    });
+    expect(screen.queryByRole("link", { name: /questions/i })).toBeNull();
+  });
+
+  it("puts the buy panel inside the product.details editor section", () => {
+    const { container } = renderPage();
+    expect(
+      container.querySelector('[data-sp-group="product.details"]'),
+    ).not.toBeNull();
+  });
+
+  it("gives shipping, returns and questions each their own editor section", () => {
+    const { container } = renderPage({
+      customFields: {
+        "bamboo.product.shipping-summary": "Ships in 2 days.",
+        "bamboo.product.returns-summary": "30-day returns.",
+      },
     });
     expect(
-      screen.getByRole("link", { name: "Questions? Ask us." }),
-    ).toHaveAttribute("href", "/contact");
+      container.querySelector('[data-sp-group="product.shipping"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-sp-group="product.returns"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-sp-group="product.questions"]'),
+    ).not.toBeNull();
+  });
+
+  it("shows the wishlist button in the buy panel", () => {
+    renderPage();
+    expect(screen.getByTestId("wishlist-button")).toBeInTheDocument();
+  });
+
+  it("mounts reviews only when the reviews flag is enabled", () => {
+    const first = renderPage();
+    expect(screen.queryByTestId("product-reviews")).toBeNull();
+    first.unmount();
+
+    reviewsEnabled = true;
+    renderPage();
+    expect(screen.getByTestId("product-reviews")).toBeInTheDocument();
+  });
+
+  it("shows the reviews heading field only when reviews are enabled and the field is set", () => {
+    reviewsEnabled = true;
+    renderPage({
+      customFields: {
+        "bamboo.product.reviews-heading": "Loved by customers",
+      },
+    });
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Loved by customers" }),
+    ).toBeInTheDocument();
   });
 });

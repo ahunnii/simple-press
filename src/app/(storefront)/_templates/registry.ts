@@ -59,10 +59,16 @@ import { BambooOrderSuccessPage } from "./bamboo/cart-checkout/bamboo-order-succ
 import { BambooCollectionPage } from "./bamboo/collections/bamboo-collection-page";
 import { BambooCollectionsPage } from "./bamboo/collections/bamboo-collections-page";
 import { BambooContactPage } from "./bamboo/contact/bamboo-contact-page";
+import { BambooDonatePage } from "./bamboo/donate/bamboo-donate-page";
+import { BambooEventPage } from "./bamboo/events/bamboo-event-page";
+import { BambooEventsPage } from "./bamboo/events/bamboo-events-page";
+import { BambooFaqPage } from "./bamboo/faq/bamboo-faq-page";
 import { BambooLayout } from "./bamboo/layout/bamboo-general-layout";
 import { BambooProductPage } from "./bamboo/products/bamboo-product-page";
+import { BambooServicesIndexPage } from "./bamboo/services/bamboo-services-index-page";
 import { BambooShopPage } from "./bamboo/shop/bamboo-shop-page";
 import { BambooTestimonialsPage } from "./bamboo/testimonials/bamboo-testimonials-page";
+import { BambooVideosPage } from "./bamboo/videos/bamboo-videos-page";
 import { BuildersAboutPage } from "./builders/about/builders-about-page";
 import { BuildersGenericPage } from "./builders/builders-generic-page";
 import { BuildersContactPage } from "./builders/contact/builders-contact-page";
@@ -591,6 +597,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     GenericPage: BambooGenericPage,
     ProductPage: BambooProductPage,
     ShopPage: BambooShopPage,
+    ServicesIndexPage: BambooServicesIndexPage,
     TestimonialsPage: BambooTestimonialsPage,
     AccountSettingsPage: BambooAccountSettingsPage,
     AccountSecurityPage: BambooAccountSecurityPage,
@@ -601,6 +608,11 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     SubscriptionsPage: BambooSubscriptionsPage,
     InvoicesPage: BambooInvoicesPage,
     RewardsPage: BambooRewardsPage,
+    EventsPage: BambooEventsPage,
+    EventPage: BambooEventPage,
+    DonatePage: BambooDonatePage,
+    VideosPage: BambooVideosPage,
+    FaqPage: BambooFaqPage,
   },
 
   "animated-bamboo": {

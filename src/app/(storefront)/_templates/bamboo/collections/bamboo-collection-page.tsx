@@ -52,8 +52,8 @@ export function BambooCollectionPage({
               sizes="100vw"
             />
             <div className="absolute inset-0 bg-black/60" />
-            <div className="absolute inset-0 flex flex-col justify-end px-4 pb-12 sm:px-6 lg:px-8">
-              <div className="mx-auto w-full max-w-7xl">
+            <div className="absolute inset-0 flex flex-col justify-end pb-12">
+              <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <FadeIn>
                   <Link
                     href="/collections"
@@ -90,12 +90,9 @@ export function BambooCollectionPage({
           </div>
         ) : (
           <div
-            className={cn(
-              "bg-[var(--bam-cream-deep)] px-4 py-20 sm:px-6 lg:px-8",
-              BAMBOO_EMBLEM_CLEAR,
-            )}
+            className={cn("bg-[var(--bam-cream-deep)]", BAMBOO_EMBLEM_CLEAR)}
           >
-            <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
               <FadeIn>
                 <Link
                   href="/collections"

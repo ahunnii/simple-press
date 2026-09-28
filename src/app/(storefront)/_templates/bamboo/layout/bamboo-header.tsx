@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +9,9 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Heart, Menu, ShoppingBag, UserRound } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { isActiveNavLink } from "~/lib/nav-utils";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -16,6 +19,15 @@ import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  filterNavByFlags,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { BambooCartDrawer } from "../cart-checkout/bamboo-cart-drawer";
@@ -27,20 +39,35 @@ import {
   readBambooSocialLinks,
 } from "./bamboo-social-icons";
 
-type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = {
-  label: string;
-  href: string;
-  external?: boolean;
-  children?: NavChild[];
-};
-
-const NAV_LINKS: NavLink[] = [
+/**
+ * bamboo's shipped nav default. `resolveNav` (from `_components/nav`,
+ * P-NAV-FLAGS) falls back to this only when the owner has never saved a
+ * Navigation list; the shared route→flag filter (`filterNavByFlags`) then
+ * drops any entry — owner-saved or shipped default — that points at a
+ * feature the business has switched off, so the header, mobile sheet, and
+ * footer never link to a route that 404s. Each of the three chrome files
+ * (this one, `bamboo-mobile-nav.tsx`, `bamboo-footer.tsx`) resolves
+ * independently from the same shape rather than sharing one module — bamboo's
+ * owned layout files can't add a cross-file `lib/` helper here.
+ */
+const BAMBOO_DEFAULT_NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
+
+/**
+ * Quick-access account keys shown in the desktop avatar menu — Orders,
+ * Settings, Admin (B4.3 decision, 2026-09-27). The full list (address book,
+ * subscriptions, invoices, rewards, security, preferences) lives only in the
+ * account sidebar, one tap away via Settings. `bamboo-nav-sheet-account.tsx`
+ * keeps its own copy of this set (same keys) rather than importing it from
+ * here, to avoid a header ↔ mobile-nav ↔ sheet-account import cycle
+ * (`BambooHeader` already imports `BambooMobileNav`, which imports the sheet
+ * account component).
+ */
+const BAMBOO_QUICK_ACCOUNT_KEYS = new Set(["orders", "settings", "admin"]);
 
 /**
  * BambooHeader — the "hanging emblem" nav, bamboo's signature moment.
@@ -132,6 +159,11 @@ export function BambooHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const triggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+  // Set right before the Escape handler below hands focus back to a
+  // trigger, so the `focus` event that follows doesn't immediately reopen
+  // the panel it just closed (PF4 opens on focus, which would otherwise
+  // fight the close-on-Escape contract).
+  const suppressFocusOpen = useRef(false);
 
   // Scroll-shrink. SSR and the first client render are always expanded, so the
   // server HTML and the hydrated tree agree; the observer settles the real
@@ -175,6 +207,7 @@ export function BambooHeader({
       if (e.key === "Escape") {
         const trigger = triggerRefs.current.get(openDropdown);
         setOpenDropdown(null);
+        suppressFocusOpen.current = true;
         trigger?.focus();
       }
     };
@@ -188,8 +221,10 @@ export function BambooHeader({
   // `shared/bamboo-emblem-clearance.ts` for the 72px overhang this implies).
   const isHome = pathname === "/";
 
-  const links =
-    (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
+  const links = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, BAMBOO_DEFAULT_NAV),
+    isEnabled,
+  );
   const socialLinks = readBambooSocialLinks(business?.siteContent?.socialLinks);
   const hasSocials = hasBambooSocialLinks(socialLinks);
   const logoUrl = business.siteContent?.logoUrl;
@@ -226,34 +261,44 @@ export function BambooHeader({
       asChild
       className="hidden text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)] lg:inline-flex"
     >
-      <Link href="/auth/sign-in" aria-label="Log in or create an account">
+      <Link href="/auth/sign-in" aria-label="Sign in">
         <UserRound className="size-5" aria-hidden="true" />
       </Link>
     </Button>
   );
+
+  const isAdmin =
+    session?.user?.platformRole === "PLATFORM_ADMIN" ||
+    !!session?.session?.membershipId;
+
+  // Desktop avatar menu: the quick-access subset (B4.3 decision) of the same
+  // flag-gated account links the mobile sheet and Default's account sidebar
+  // use — the full list lives in the account sidebar. Settings is dropped
+  // because `UserButton` renders its own built-in Settings item.
+  const accountLinkIcons: Record<string, ReactNode> = {
+    orders: <IconPackage className="h-4 w-4" />,
+    admin: <IconLayoutDashboard className="h-4 w-4" />,
+  };
+  const userButtonLinks = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: isAdmin,
+  })
+    .filter(
+      (link) =>
+        BAMBOO_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
+    )
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: accountLinkIcons[link.key],
+    }));
 
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       className="border-primary border"
       avatarClassName="size-10"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        !!session?.session?.membershipId
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 
@@ -272,15 +317,30 @@ export function BambooHeader({
     />
   );
 
-  const renderNavItem = (link: NavLink, i: number) => {
-    if (link.children?.length) {
-      const childActive = link.children.some((c) => pathname === c.href);
+  const renderNavItem = (item: NavItem, i: number) => {
+    if (item.children?.length) {
+      // The trigger never navigates — a non-empty parent href is the panel's
+      // first entry (`navGroupEntries`), so the parent's own page stays
+      // reachable instead of being dropped from the dropdown entirely.
+      const entries = navGroupEntries(item);
+      const activeIdx = activeEntryIndex(pathname, entries);
+      const itemActive = isNavItemActive(pathname, item);
+      const isOpen = openDropdown === i;
       return (
         <div
-          key={link.href + link.label}
+          key={item.href + item.label}
           className="relative"
           onMouseEnter={() => setOpenDropdown(i)}
           onMouseLeave={() => setOpenDropdown(null)}
+          // Opens on keyboard focus too (B3.2), not just hover — Tab onto the
+          // trigger reveals the panel instead of leaving it hidden.
+          onFocus={() => {
+            if (suppressFocusOpen.current) {
+              suppressFocusOpen.current = false;
+              return;
+            }
+            setOpenDropdown(i);
+          }}
           onBlur={(e) => {
             // Close when focus leaves the wrapper entirely
             if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
@@ -295,26 +355,26 @@ export function BambooHeader({
               else triggerRefs.current.delete(i);
             }}
             aria-haspopup="true"
-            aria-expanded={openDropdown === i ? "true" : "false"}
+            aria-expanded={isOpen}
             aria-controls={`bamboo-nav-dropdown-${i}`}
-            onClick={() => setOpenDropdown(openDropdown === i ? null : i)}
+            onClick={() => setOpenDropdown(isOpen ? null : i)}
             className={cn(
-              navLinkClass(childActive),
+              navLinkClass(itemActive),
               "cursor-pointer border-none bg-transparent px-0",
             )}
           >
-            {link.label}
+            {item.label}
             <ChevronDown
               className={cn(
                 "h-3 w-3 transition-transform duration-200",
-                openDropdown === i ? "rotate-180" : "",
+                isOpen ? "rotate-180" : "",
               )}
               aria-hidden="true"
             />
-            {childActive && activeUnderline}
+            {itemActive && activeUnderline}
           </button>
 
-          {openDropdown === i && (
+          {isOpen && (
             <div
               id={`bamboo-nav-dropdown-${i}`}
               // z-20: the emblem link is z-10 and overhangs the bar, so a
@@ -322,27 +382,29 @@ export function BambooHeader({
               className="absolute top-full left-1/2 z-20 -translate-x-1/2 pt-3"
             >
               <div className="min-w-[180px] overflow-hidden rounded-(--radius) border border-[var(--bam-hairline)] bg-[var(--bam-cream)] shadow-lg">
-                {link.children.map((child) => (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    target={child.external ? "_blank" : undefined}
-                    rel={child.external ? "noopener noreferrer" : undefined}
-                    aria-current={pathname === child.href ? "page" : undefined}
-                    onClick={() => setOpenDropdown(null)}
-                    className={cn(
-                      "block px-4 py-2.5 text-sm transition-colors",
-                      pathname === child.href
-                        ? "bg-[var(--bam-cream-deep)] font-medium text-[var(--bam-forest-deep)]"
-                        : "text-[var(--bam-forest)] hover:bg-[var(--bam-cream-deep)]",
-                    )}
-                  >
-                    {child.label}
-                    {child.external && (
-                      <span className="sr-only"> (opens in new tab)</span>
-                    )}
-                  </Link>
-                ))}
+                {entries.map((child, j) => {
+                  const childActive = j === activeIdx;
+                  return (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      {...externalLinkProps(child.external)}
+                      aria-current={childActive ? "page" : undefined}
+                      onClick={() => setOpenDropdown(null)}
+                      className={cn(
+                        "block px-4 py-2.5 text-sm transition-colors",
+                        childActive
+                          ? "bg-[var(--bam-cream-deep)] font-medium text-[var(--bam-forest-deep)]"
+                          : "text-[var(--bam-forest)] hover:bg-[var(--bam-cream-deep)]",
+                      )}
+                    >
+                      {child.label}
+                      {child.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -350,18 +412,17 @@ export function BambooHeader({
       );
     }
 
-    const isActive = pathname === link.href;
+    const isActive = isActiveNavLink(pathname, item.href);
     return (
       <Link
-        key={link.href}
-        href={link.href}
-        target={link.external ? "_blank" : undefined}
-        rel={link.external ? "noopener noreferrer" : undefined}
+        key={item.href}
+        href={item.href}
+        {...externalLinkProps(item.external)}
         aria-current={isActive ? "page" : undefined}
         className={navLinkClass(isActive)}
       >
-        {link.label}
-        {link.external && <span className="sr-only"> (opens in new tab)</span>}
+        {item.label}
+        {item.external && <span className="sr-only"> (opens in new tab)</span>}
         {isActive && activeUnderline}
       </Link>
     );
@@ -694,22 +755,24 @@ export function BambooHeader({
               </Button>
             )}
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(true)}
-              aria-label={`Shopping cart with ${itemCount} items`}
-              className="text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)]"
-            >
-              <span className="relative" aria-hidden="true">
-                <ShoppingBag className="size-5" />
-                {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full bg-[var(--bam-gold-soft)] text-[10px] font-bold text-[var(--bam-forest-deep)]">
-                    {itemCount}
-                  </span>
-                )}
-              </span>
-            </Button>
+            {isEnabled("cart") && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(true)}
+                aria-label={`Shopping cart with ${itemCount} items`}
+                className="text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)]"
+              >
+                <span className="relative" aria-hidden="true">
+                  <ShoppingBag className="size-5" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full bg-[var(--bam-gold-soft)] text-[10px] font-bold text-[var(--bam-forest-deep)]">
+                      {itemCount}
+                    </span>
+                  )}
+                </span>
+              </Button>
+            )}
 
             <Button
               variant="ghost"
@@ -728,15 +791,18 @@ export function BambooHeader({
         open={mobileOpen}
         onOpenChange={setMobileOpen}
         business={business}
-        isAuthenticated={!!session?.user}
+        session={session}
+        isPending={isPending}
         menuTagline={menuTagline}
       />
 
-      <BambooCartDrawer
-        shippingConfig={shippingConfigFromBusiness(business)}
-        cartLabel={cartLabel}
-        cartEmptyText={cartEmptyText}
-      />
+      {isEnabled("cart") && (
+        <BambooCartDrawer
+          shippingConfig={shippingConfigFromBusiness(business)}
+          cartLabel={cartLabel}
+          cartEmptyText={cartEmptyText}
+        />
+      )}
 
       <span
         role="status"

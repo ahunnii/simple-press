@@ -36,6 +36,12 @@ type Props = {
   sectionAttrs?: Record<string, string>;
   /** Extra content under the lede (e.g. the blog page's search box). */
   children?: ReactNode;
+  /**
+   * Optional content above the eyebrow (e.g. the event detail page's "All
+   * events" back link, mirroring the blog post band's back link → h1
+   * order). Omitted → nothing renders, so existing callers are unchanged.
+   */
+  preheader?: ReactNode;
   className?: string;
 };
 
@@ -76,6 +82,7 @@ export function BambooPageHero({
   bgImage,
   sectionAttrs,
   children,
+  preheader,
   className,
 }: Props) {
   const hasBg = (bgImage ?? "").length > 0;
@@ -178,6 +185,7 @@ export function BambooPageHero({
               direction="right"
               className="flex-1 text-center md:text-left"
             >
+              {preheader}
               {eyebrowBlock}
               {titleBlock}
               {ruleBlock}
@@ -211,6 +219,7 @@ export function BambooPageHero({
             direction="up"
             className="mx-auto max-w-2xl text-center md:mx-0 md:text-left"
           >
+            {preheader}
             {eyebrowBlock}
             {titleBlock}
             {ruleBlock}

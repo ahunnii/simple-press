@@ -1,6 +1,19 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
+import {
+  defaultDonateData,
+  defaultDonateFieldGroups,
+} from "../default/donate";
+import {
+  defaultEventsData,
+  defaultEventsFieldGroups,
+} from "../default/events";
+import { defaultFaqData, defaultFaqFieldGroups } from "../default/faq";
+import {
+  defaultVideosData,
+  defaultVideosFieldGroups,
+} from "../default/videos";
 import { aboutBambooData, bambooAboutFieldGroups } from "./about";
 import { bambooBlogData, bambooBlogFieldGroups } from "./blog";
 import {
@@ -18,6 +31,7 @@ import {
 import { bambooContactData, bambooContactFieldGroups } from "./contact";
 import { bambooHomepageFieldGroups, homepageBambooData } from "./homepage";
 import { bambooProductFieldGroups, bambooProductFields } from "./products";
+import { bambooServicesData, bambooServicesFieldGroups } from "./services";
 import { bambooProductsData, bambooProductsFieldGroups } from "./shop";
 import {
   bambooTestimonialsData,
@@ -180,6 +194,14 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...bambooProductFieldGroups,
   ...bambooCheckoutSuccessFieldGroups,
   ...bambooCheckoutUnavailableFieldGroups,
+  ...bambooServicesFieldGroups,
+  // Optional pages (events, videos, donate, FAQ) reuse Default's `default.*`
+  // copy fields verbatim — bamboo's pages read them through Default's
+  // resolver, so the groups must be listed here to reach bamboo's editor.
+  ...defaultEventsFieldGroups,
+  ...defaultVideosFieldGroups,
+  ...defaultDonateFieldGroups,
+  ...defaultFaqFieldGroups,
 ];
 
 export const bambooData = {
@@ -194,10 +216,15 @@ export const bambooData = {
     ...bambooProductFields,
     ...bambooCheckoutSuccessData,
     ...bambooCheckoutUnavailableData,
+    ...bambooServicesData,
     ...globalBrandingData,
     ...globalCartData,
     ...globalAuthenticationData,
     ...globalPageHeroData,
+    ...defaultEventsData,
+    ...defaultVideosData,
+    ...defaultDonateData,
+    ...defaultFaqData,
   ],
 };
 

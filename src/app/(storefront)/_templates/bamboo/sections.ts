@@ -1,6 +1,8 @@
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { bambooServicesSections } from "./services";
+
 export const bambooSections: Record<string, TemplateSection[]> = {
   bamboo: [
     // Homepage
@@ -231,6 +233,36 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       order: 0,
       links: [SECTION_LINKS.products],
     },
+    {
+      id: "product.shipping",
+      page: "product",
+      title: "Shipping row",
+      description:
+        "Shipping note under the buy button on every product page. Hide it without hiding returns or questions.",
+      groupIds: ["product.shipping"],
+      order: 1,
+      hideable: true,
+    },
+    {
+      id: "product.returns",
+      page: "product",
+      title: "Returns row",
+      description:
+        "Returns note under the buy button on every product page. Hide it without hiding shipping or questions.",
+      groupIds: ["product.returns"],
+      order: 2,
+      hideable: true,
+    },
+    {
+      id: "product.questions",
+      page: "product",
+      title: "Questions row",
+      description:
+        "Contact link under the buy button on every product page. Hide it without hiding shipping or returns.",
+      groupIds: ["product.questions"],
+      order: 3,
+      hideable: true,
+    },
 
     // Blog
     {
@@ -286,6 +318,9 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       links: [SECTION_LINKS.testimonials],
     },
 
+    // Services
+    ...bambooServicesSections,
+
     // Global
     {
       id: "global.branding",
@@ -322,6 +357,92 @@ export const bambooSections: Record<string, TemplateSection[]> = {
         "Site-wide background photo for the top section of secondary pages (contact, blog, about, and other custom pages). Contact, blog, and about can each use their own photo instead.",
       groupIds: ["global.pageHero"],
       order: 3,
+    },
+
+    // ── Optional pages (Default's `default.*` groups, bamboo markup) ─────
+    // Bamboo's events/videos/donate/FAQ pages render Default's field groups on
+    // the BambooPageHero band, so these mirror `default/sections.ts`.
+    {
+      id: "events.hero",
+      page: "events",
+      title: "Hero",
+      groupIds: ["events.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "events.list",
+      page: "events",
+      title: "List",
+      description: "Upcoming event rows and empty-state copy",
+      groupIds: ["events.list"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.events],
+    },
+    {
+      id: "events.cta",
+      page: "events",
+      title: "Closing banner",
+      description: "Bottom banner inviting visitors to get in touch",
+      groupIds: ["events.cta"],
+      order: 2,
+      hideable: true,
+    },
+    {
+      id: "videos.hero",
+      page: "videos",
+      title: "Hero",
+      groupIds: ["videos.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "videos.list",
+      page: "videos",
+      title: "List",
+      description: "Video grid and empty-state copy",
+      groupIds: ["videos.list"],
+      order: 1,
+      hideable: false,
+      links: [SECTION_LINKS.videos],
+    },
+    {
+      id: "donate.hero",
+      page: "donate",
+      title: "Hero",
+      groupIds: ["donate.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "donate.thank-you",
+      page: "donate",
+      title: "Thank You",
+      description: "Copy shown after a successful donation",
+      groupIds: ["donate.thank-you"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "donate.other-ways",
+      page: "donate",
+      title: "Other Ways to Give",
+      description: "Heading for the Venmo/Cash App section",
+      groupIds: ["donate.other-ways"],
+      order: 2,
+      hideable: true,
+      links: [SECTION_LINKS.donations],
+    },
+    {
+      id: "faq.page",
+      page: "faq",
+      title: "FAQ page",
+      description: "Heading and empty state on the FAQ page",
+      groupIds: ["faq.page"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.faq],
     },
   ],
 };

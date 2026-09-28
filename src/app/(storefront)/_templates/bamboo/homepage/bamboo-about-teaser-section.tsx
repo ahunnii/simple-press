@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 
-type Props = { customFields: unknown };
+type Props = {
+  customFields: unknown;
+  /** B2.5: gates the field-driven CTA when its href names an off flag. */
+  isEnabled: (key: string) => boolean;
+};
 
 /**
  * About teaser — happy-bamboo's about-section composition: a two-column
@@ -22,7 +27,7 @@ type Props = { customFields: unknown };
  * empty frame or a second printing of the hero image. Stacked at <lg the
  * reading order is identical to happy-bamboo's: eyebrow → h2 → body → CTA.
  */
-export function BambooAboutTeaserSection({ customFields }: Props) {
+export function BambooAboutTeaserSection({ customFields, isEnabled }: Props) {
   const f = resolveFields(customFields, [
     "bamboo.homepage.about-teaser-eyebrow",
     "bamboo.homepage.about-teaser-heading",
@@ -34,6 +39,14 @@ export function BambooAboutTeaserSection({ customFields }: Props) {
   const eyebrow = f["bamboo.homepage.about-teaser-eyebrow"] ?? "";
   const body = f["bamboo.homepage.about-teaser-body"] ?? "";
   const buttonText = f["bamboo.homepage.about-teaser-button-text"] ?? "";
+
+  // B2.5: hide the CTA (never swap in another destination) when its href
+  // names a flag that's off.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+  const buttonHref = f["bamboo.homepage.about-teaser-button-link"] || "/about";
+  const buttonFlag = navHrefFlag(buttonHref);
+  const showButton =
+    buttonText !== "" && (buttonFlag === null || isEnabled(buttonFlag));
 
   return (
     <section
@@ -76,12 +89,10 @@ export function BambooAboutTeaserSection({ customFields }: Props) {
               </p>
             ) : null}
 
-            {buttonText ? (
+            {showButton ? (
               <div>
                 <Link
-                  href={
-                    f["bamboo.homepage.about-teaser-button-link"] ?? "/about"
-                  }
+                  href={buttonHref}
                   className="group inline-flex items-center gap-2.5 rounded-full border border-[var(--bam-forest)] px-7 py-3 text-sm font-semibold tracking-widest text-[var(--bam-forest)] uppercase transition-colors hover:bg-[var(--bam-forest)] hover:text-[var(--bam-cream)]"
                 >
                   <span

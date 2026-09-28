@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -14,10 +14,12 @@ import {
   sectionGroupAttr,
 } from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
@@ -30,8 +32,12 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import { ProductReviews } from "~/components/product-reviews";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "..";
 import {
@@ -72,13 +78,33 @@ export function BambooProductPage({
     "bamboo.product.related-heading",
     "bamboo.product.coming-soon-heading",
     "bamboo.product.coming-soon-body",
+    "bamboo.product.reviews-heading",
   ]);
   const shippingSummary = (f["bamboo.product.shipping-summary"] ?? "").trim();
   const returnsSummary = (f["bamboo.product.returns-summary"] ?? "").trim();
   const questionText = (f["bamboo.product.question-text"] ?? "").trim();
   const relatedHeading = f["bamboo.product.related-heading"] ?? "";
+  const reviewsHeading = f["bamboo.product.reviews-heading"] ?? "";
   const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Shipping / returns / questions are each their own hideable section
+  // (product.shipping / product.returns / product.questions) so an owner can
+  // hide one row without hiding the others. A row shows when its note is set
+  // OR its policy page is published (B6.2) — the note alone is not required.
+  const showShippingRow =
+    isSectionVisible(customFields, "bamboo", "product.shipping") &&
+    (shippingSummary !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "bamboo", "product.returns") &&
+    (returnsSummary !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "bamboo", "product.questions") &&
+    questionText !== "";
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   // A product's own features (Products → features) win; otherwise the
   // store-wide badges from the editor. No built-in fallback rows — an empty
@@ -140,6 +166,7 @@ export function BambooProductPage({
             <ProductGalleryHorizontal
               images={product.images}
               productName={product.name}
+              enableLightbox
             />
           </FadeIn>
 
@@ -190,6 +217,22 @@ export function BambooProductPage({
               {...sectionGroupAttr("product", "details")}
               className="flex flex-col gap-6"
             >
+              {/* Wishlist — its own row above the buy panel so it stays
+                  visible across every BambooProductActions branch (coming
+                  soon, variants, out of stock, in stock). Self-gates on the
+                  wishlist flag (renders nothing when off). */}
+              <WishlistButton
+                item={{
+                  productId: product.id,
+                  name: product.name,
+                  slug: product.slug,
+                  price: displayPrice,
+                  imageUrl: product.images[0]?.url ?? null,
+                }}
+                className="border-[var(--bam-hairline)] bg-background text-[var(--bam-forest)] static flex size-10 shrink-0 items-center justify-center self-start rounded-lg border shadow-none backdrop-blur-none hover:scale-100 hover:bg-[var(--bam-cream-deep)]"
+                iconClassName="size-4"
+              />
+
               <BambooProductActions
                 product={product}
                 business={business}
@@ -239,53 +282,75 @@ export function BambooProductPage({
                 </ul>
               ) : null}
 
-              {/* Shipping / Returns — each row only when its note is set */}
-              {shippingSummary || returnsSummary ? (
+              {/* Shipping / Returns — each row is its own hideable section
+                  (product.shipping / product.returns), rendering when its
+                  note is set OR its policy is published, and independently
+                  toggleable in the editor. The extra wrapping div carries the
+                  section attrs since BambooAccordionItem's root isn't ours to
+                  extend (shared/bamboo-accordion.tsx is chrome-owned). */}
+              {showShippingRow || showReturnsRow ? (
                 <div>
                   <h2 className="sr-only">Shipping and returns</h2>
                   <BambooAccordion className="space-y-3">
-                    {shippingSummary ? (
-                      <BambooAccordionItem id="shipping" title="Shipping">
-                        <p
-                          {...fieldAttr("bamboo.product.shipping-summary")}
-                          className="text-sm leading-relaxed whitespace-pre-line"
-                        >
-                          {shippingSummary}
-                        </p>
-                        {hasShippingPolicy ? (
-                          <Link
-                            href="/shipping-policy"
-                            className="mt-3 inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]"
-                          >
-                            Read the full shipping policy
-                          </Link>
-                        ) : null}
-                      </BambooAccordionItem>
+                    {showShippingRow ? (
+                      <div {...sectionGroupAttr("product", "shipping")}>
+                        <BambooAccordionItem id="shipping" title="Shipping">
+                          {shippingSummary ? (
+                            <p
+                              {...fieldAttr("bamboo.product.shipping-summary")}
+                              className="text-sm leading-relaxed whitespace-pre-line"
+                            >
+                              {shippingSummary}
+                            </p>
+                          ) : null}
+                          {hasShippingPolicy ? (
+                            <Link
+                              href="/shipping-policy"
+                              className={cn(
+                                "inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]",
+                                shippingSummary && "mt-3",
+                              )}
+                            >
+                              Read the full shipping policy
+                            </Link>
+                          ) : null}
+                        </BambooAccordionItem>
+                      </div>
                     ) : null}
-                    {returnsSummary ? (
-                      <BambooAccordionItem id="returns" title="Returns">
-                        <p
-                          {...fieldAttr("bamboo.product.returns-summary")}
-                          className="text-sm leading-relaxed whitespace-pre-line"
-                        >
-                          {returnsSummary}
-                        </p>
-                        {hasRefundPolicy ? (
-                          <Link
-                            href="/refund-policy"
-                            className="mt-3 inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]"
-                          >
-                            Read the full returns policy
-                          </Link>
-                        ) : null}
-                      </BambooAccordionItem>
+                    {showReturnsRow ? (
+                      <div {...sectionGroupAttr("product", "returns")}>
+                        <BambooAccordionItem id="returns" title="Returns">
+                          {returnsSummary ? (
+                            <p
+                              {...fieldAttr("bamboo.product.returns-summary")}
+                              className="text-sm leading-relaxed whitespace-pre-line"
+                            >
+                              {returnsSummary}
+                            </p>
+                          ) : null}
+                          {hasRefundPolicy ? (
+                            <Link
+                              href="/refund-policy"
+                              className={cn(
+                                "inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]",
+                                returnsSummary && "mt-3",
+                              )}
+                            >
+                              Read the full returns policy
+                            </Link>
+                          ) : null}
+                        </BambooAccordionItem>
+                      </div>
                     ) : null}
                   </BambooAccordion>
                 </div>
               ) : null}
 
-              {questionText ? (
-                <p className="text-sm">
+              {showQuestionsRow ? (
+                <p
+                  {...sectionGroupAttr("product", "questions")}
+                  className="text-sm"
+                >
                   <Link
                     href="/contact"
                     {...fieldAttr("bamboo.product.question-text")}
@@ -313,6 +378,39 @@ export function BambooProductPage({
               "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line",
           }}
         />
+
+        {/* Reviews — only mounts (and only fires review queries) when the
+            reviews feature flag is enabled for this business. */}
+        {reviewsEnabled ? (
+          <FadeIn direction="up">
+            <section
+              aria-label="Reviews"
+              className="mt-4 mb-20 border-t border-[var(--bam-hairline)] pt-16"
+            >
+              {reviewsHeading ? (
+                <h2
+                  {...fieldAttr("bamboo.product.reviews-heading")}
+                  className="font-serif text-2xl font-bold tracking-tight text-[var(--bam-forest-deep)] md:text-3xl"
+                >
+                  {reviewsHeading}
+                </h2>
+              ) : null}
+              <div className="mt-8">
+                <ProductReviews
+                  productId={product.id}
+                  onWriteReviewClick={() => setReviewDialogOpen(true)}
+                />
+              </div>
+              <WriteReviewDialog
+                productId={product.id}
+                productName={product.name}
+                isOpen={reviewDialogOpen}
+                onClose={() => setReviewDialogOpen(false)}
+                onSuccess={() => setReviewDialogOpen(false)}
+              />
+            </section>
+          </FadeIn>
+        ) : null}
 
         {/* Related Products — the whole block (heading included) only
             renders when there is something to show. */}

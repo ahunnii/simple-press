@@ -10,6 +10,7 @@ import type { ShippingConfig } from "~/lib/shipping-utils";
 import type { CartItem } from "~/providers/cart-context";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
+import { cn } from "~/lib/utils";
 import {
   calculateShipping,
   getAmountUntilFreeShipping,
@@ -26,6 +27,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type BambooCartDrawerProps = {
   shippingConfig: ShippingConfig;
@@ -134,6 +136,8 @@ export function BambooCartDrawer({
 }: BambooCartDrawerProps) {
   const { items, itemCount, subtotal, isOpen, setIsOpen } = useCart();
   const reducedMotion = useReducedMotion();
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
 
   // The sheet portals to document.body by default, which escapes the .bamboo
   // scope class — every var(--bam-*) token and font variable would resolve to
@@ -284,17 +288,22 @@ export function BambooCartDrawer({
                   </span>
                 </div>
               </div>
-              <Button
-                className="mt-5 w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
-                size="lg"
-                asChild
-                onClick={() => setIsOpen(false)}
-              >
-                <Link href="/checkout">Proceed to Checkout</Link>
-              </Button>
+              {checkoutEnabled && (
+                <Button
+                  className="mt-5 w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+                  size="lg"
+                  asChild
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Link href="/checkout">Proceed to Checkout</Link>
+                </Button>
+              )}
               <Button
                 variant="ghost"
-                className="mt-1 w-full text-sm text-[var(--bam-forest)]/75 hover:bg-transparent hover:text-[var(--bam-forest-deep)]"
+                className={cn(
+                  "w-full text-sm text-[var(--bam-forest)]/75 hover:bg-transparent hover:text-[var(--bam-forest-deep)]",
+                  checkoutEnabled ? "mt-1" : "mt-5",
+                )}
                 onClick={() => setIsOpen(false)}
                 asChild
               >
