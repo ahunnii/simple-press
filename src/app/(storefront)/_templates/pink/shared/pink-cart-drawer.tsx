@@ -13,6 +13,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveFields } from "../index";
 import { PINK_SCOPE_CLASS } from "../layout/pink-scope";
@@ -56,6 +57,7 @@ export function PinkCartDrawer({
 }: PinkCartDrawerProps) {
   const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
     useCart();
+  const { isEnabled } = useStorefrontFlags();
   const f = resolveFields(customFields, CART_FIELD_KEYS);
   const title = f["pink.cart.heading"] ?? "";
   const emptyHeading = f["pink.cart.empty-heading"] ?? "";
@@ -137,7 +139,7 @@ export function PinkCartDrawer({
                 </p>
               )}
             </div>
-            {browseLabel && (
+            {browseLabel && isEnabled("products") && (
               <Link
                 href="/shop"
                 onClick={() => setIsOpen(false)}
@@ -277,16 +279,18 @@ export function PinkCartDrawer({
                 </span>
               </div>
 
-              <Link
-                href="/checkout"
-                onClick={() => setIsOpen(false)}
-                className="pink-btn pink-btn-solid w-full justify-between"
-              >
-                <span {...fieldAttr("pink.cart.checkout-label")}>
-                  {checkoutLabel}
-                </span>
-                <span>{formatPrice(subtotal)} →</span>
-              </Link>
+              {isEnabled("checkout") && (
+                <Link
+                  href="/checkout"
+                  onClick={() => setIsOpen(false)}
+                  className="pink-btn pink-btn-solid w-full justify-between"
+                >
+                  <span {...fieldAttr("pink.cart.checkout-label")}>
+                    {checkoutLabel}
+                  </span>
+                  <span>{formatPrice(subtotal)} →</span>
+                </Link>
+              )}
 
               {noteText && (
                 <p

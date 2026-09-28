@@ -4,7 +4,9 @@ import Link from "next/link";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkContactTopic } from "./pink-contact-form";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   fieldAttr,
   listItemAttr,
@@ -75,10 +77,14 @@ function defaultHeaderFacts(business: {
   return [{ label: "Location", value: state ? `${city}, ${state}` : city }];
 }
 
-export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
+export async function PinkContactPage({
+  business,
+}: DefaultContactPageTemplateProps) {
   const customFields = business.siteContent?.customFields;
   const rawCustomFields = customFields as Record<string, unknown> | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
+
+  const { isEnabled } = await getBusinessFlags();
 
   const headerFactsRaw = parseTemplateListRows(
     rawCustomFields?.["pink.contact.header-facts"],
@@ -102,8 +108,16 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
   const shortcutsRaw = parseTemplateListRows(
     rawCustomFields?.["pink.contact.shortcuts-items"],
   ) as ShortcutItem[];
-  const shortcuts: ShortcutItem[] =
+  const shortcutsSource: ShortcutItem[] =
     shortcutsRaw.length > 0 ? shortcutsRaw : DEFAULT_PINK_CONTACT_SHORTCUTS;
+  // PF15 (B2.5): drop — never redirect — a shortcut whose own href names a
+  // flag that's off (e.g. the default "Ask about a make & take" → /services
+  // row, with `services` off).
+  const shortcuts: ShortcutItem[] = shortcutsSource.filter((item) => {
+    const href = item.href ?? "";
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  });
 
   const socialLinks = resolveSocialLinks(business.siteContent?.socialLinks);
 
@@ -117,11 +131,12 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
     "pink",
     "contact.studio",
   );
-  const shortcutsVisible = isSectionVisible(
-    customFields,
-    "pink",
-    "contact.shortcuts",
-  );
+  // PF15 (B2.5): if every shortcut got filtered out above (e.g. both
+  // defaults' flags are off), don't render an empty wrapper around a heading
+  // with nothing under it.
+  const shortcutsVisible =
+    isSectionVisible(customFields, "pink", "contact.shortcuts") &&
+    shortcuts.length > 0;
 
   const hoursRows = formatBusinessHours(
     parseBusinessHours(business.businessHours),
@@ -159,7 +174,7 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
         sectionAttrs={sectionGroupAttr("contact", "header")}
       />
 
-      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-12 px-5 md:grid-cols-[1.15fr_0.85fr] md:px-10 md:pt-16">
+      <div className="mx-auto grid max-w-[1480px] grid-cols-1 gap-12 px-5 md:grid-cols-[1.15fr_0.85fr] md:px-10 md:pt-16">
         {/* ── contact.topics + contact.form (interactive) ─────────────── */}
         <div className="order-2 md:order-1 md:col-span-1">
           <PinkContactForm

@@ -12,8 +12,12 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * prefix — owner-saved values are keyed by these strings, so renaming them
  * would orphan saved content; fields added later use `pink.product.*`. The
  * gallery and per-product details (name, price, description, specs) are fully
- * DB-driven. `product.details` holds the copy around the buy panel (notes,
- * question link, coming-soon / sold-out / stock text).
+ * DB-driven. `product.details` holds the coming-soon / sold-out / stock text
+ * around the buy panel; the shipping note, returns note and question line
+ * each get their own hideable section (`product.shipping` / `.returns` /
+ * `.questions`) so an owner can hide one row without hiding the others — a
+ * row still shows when its note is blank but the matching policy page
+ * (`productPolicies` on `DefaultProductPageTemplateProps`) is published.
  */
 
 // ─── Built-in list defaults ─────────────────────────────────────────────────
@@ -37,10 +41,10 @@ export const pinkProductData: TemplateField[] = [
     key: "pink.product.shipping-note",
     label: "Shipping note",
     description:
-      "Short shipping note shown under the buy button on every product. Leave blank to hide. When your Shipping Policy page is published, a link to it appears next to the note.",
+      "Short shipping note shown under the buy button on every product. Leave blank to hide the note — the row still shows when your Shipping Policy page is published, with a link to it. Hide the row entirely with this section's visibility toggle.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.shipping",
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "e.g. Ships within 5 business days.",
@@ -49,10 +53,10 @@ export const pinkProductData: TemplateField[] = [
     key: "pink.product.returns-note",
     label: "Returns note",
     description:
-      "Short returns note shown under the buy button on every product. Leave blank to hide. When your Returns & Refunds Policy page is published, a link to it appears next to the note.",
+      "Short returns note shown under the buy button on every product. Leave blank to hide the note — the row still shows when your Returns & Refunds Policy page is published, with a link to it. Hide the row entirely with this section's visibility toggle.",
     type: "textarea",
     page: "product",
-    group: "product.details",
+    group: "product.returns",
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "e.g. Returns accepted within 14 days.",
@@ -64,7 +68,7 @@ export const pinkProductData: TemplateField[] = [
       "One short line under the buy button, followed by a link to your contact page. Leave blank to hide the line and the link.",
     type: "text",
     page: "product",
-    group: "product.details",
+    group: "product.questions",
     gridColumn: "col-span-full",
     defaultValue: "Have a question about this piece before you buy?",
     placeholder: "e.g. Not sure about sizing?",
@@ -76,7 +80,7 @@ export const pinkProductData: TemplateField[] = [
       "Text of the contact-page link after the question line. Leave blank to show the question line without a link.",
     type: "text",
     page: "product",
-    group: "product.details",
+    group: "product.questions",
     gridColumn: "col-span-1",
     defaultValue: "Ask us a question",
     placeholder: "e.g. Get in touch",
@@ -237,8 +241,32 @@ export const pinkProductFieldGroups: TemplateFieldGroup[] = [
     id: "product.details",
     title: "Product details",
     description:
-      "Text around the buy button on every product: shipping and returns notes, the question link, and coming-soon, sold-out and stock lines",
+      "Text around the buy button on every product: coming-soon, sold-out and stock lines",
     icon: "🛍️",
+    columns: 2,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.shipping",
+    title: "Shipping row",
+    description:
+      "Shipping note under the buy button on every product. Can be hidden independently of the returns and question rows.",
+    icon: "🚚",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.returns",
+    title: "Returns row",
+    description:
+      "Returns note under the buy button on every product. Can be hidden independently of the shipping and question rows.",
+    icon: "↩️",
+    columns: 1,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "product.questions",
+    title: "Question row",
+    description:
+      "Question line and contact link under the buy button on every product. Can be hidden independently of the shipping and returns rows.",
+    icon: "❓",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
@@ -271,11 +299,41 @@ export const pinkProductSections: TemplateSection[] = [
     page: "product",
     title: "Product details",
     description:
-      "Text around the buy button on every product: shipping and returns notes, the question link, and coming-soon, sold-out and stock lines",
+      "Text around the buy button on every product: coming-soon, sold-out and stock lines",
     groupIds: ["product.details"],
     order: 0,
     hideable: false,
     links: [SECTION_LINKS.products],
+  },
+  {
+    id: "product.shipping",
+    page: "product",
+    title: "Shipping row",
+    description:
+      "Shipping note under the buy button on every product. Hide it without hiding the returns or question rows.",
+    groupIds: ["product.shipping"],
+    order: 1,
+    hideable: true,
+  },
+  {
+    id: "product.returns",
+    page: "product",
+    title: "Returns row",
+    description:
+      "Returns note under the buy button on every product. Hide it without hiding the shipping or question rows.",
+    groupIds: ["product.returns"],
+    order: 2,
+    hideable: true,
+  },
+  {
+    id: "product.questions",
+    page: "product",
+    title: "Question row",
+    description:
+      "Question line and contact link under the buy button on every product. Hide it without hiding the shipping or returns rows.",
+    groupIds: ["product.questions"],
+    order: 3,
+    hideable: true,
   },
   {
     id: "product.panels",
@@ -284,7 +342,7 @@ export const pinkProductSections: TemplateSection[] = [
     description:
       "Expandable rows under every product's buy button, such as care and custom orders",
     groupIds: ["product.panels"],
-    order: 1,
+    order: 4,
     hideable: true,
   },
   {
@@ -293,7 +351,7 @@ export const pinkProductSections: TemplateSection[] = [
     title: "Studio story",
     description: "The section below the accordion: image and copy",
     groupIds: ["product.story"],
-    order: 2,
+    order: 5,
     hideable: true,
   },
   {
@@ -302,7 +360,7 @@ export const pinkProductSections: TemplateSection[] = [
     title: "Related products",
     description: "Heading and link over the related-products grid",
     groupIds: ["product.related"],
-    order: 3,
+    order: 6,
     hideable: true,
     links: [SECTION_LINKS.products],
   },

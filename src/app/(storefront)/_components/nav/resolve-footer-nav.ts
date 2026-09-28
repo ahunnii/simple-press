@@ -90,4 +90,5 @@ export const FOOTER_QUICK_LINKS_TEMPLATES: readonly string[] = [
   "default",
   "noise",
   "umsc",
+  "pink",
 ];

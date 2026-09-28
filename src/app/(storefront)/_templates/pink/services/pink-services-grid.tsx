@@ -29,7 +29,8 @@ type Props = {
   emptyHeading: string;
   emptyBody: string;
   emptyCtaLabel: string;
-  emptyCtaHref: string;
+  /** Already flag-gated by the server parent; undefined hides the button. */
+  emptyCtaHref?: string;
 };
 
 const ALL_FILTER_ID = "all";

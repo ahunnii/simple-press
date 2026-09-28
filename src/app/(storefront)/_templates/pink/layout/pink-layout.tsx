@@ -31,12 +31,20 @@ export async function PinkLayout({
 
   const themeVars = resolveThemeVars("pink", customFields);
 
-  // F6: a fresh pink store has no owner-authored footer-legal-links, so the
-  // footer shipped with NO legal links at all. Resolve real policy pages the
-  // same way `default-footer.tsx` does, falling back to the platform-wide
-  // policy pages when the business hasn't published its own yet.
+  // F6 / PF17 (B10.1): a fresh pink store has no owner-authored
+  // footer-legal-links, so the footer shipped with NO legal links at all,
+  // and even a store with published shipping/returns policies never showed
+  // them. Resolve exactly the four standard policy slugs Admin → Policies
+  // creates, the same way `noise-footer.tsx`/`umsc-footer.tsx` do — privacy
+  // and terms fall back to the platform's own policy when unpublished,
+  // shipping and returns show only once published (no platform
+  // equivalent), and the platform policies index is always last. Never any
+  // other policy-type page (imports/QA data, e.g. a "shipping-and-care"
+  // page some businesses have created on their own).
   const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  const refundPolicy = policies.find((p) => p.slug === "refund-policy");
   const resolvedLegalLinks = [
     {
       label: "Privacy Policy",
@@ -50,6 +58,13 @@ export async function PinkLayout({
         ? `/${termsOfService.slug}`
         : "/platform/policies/terms-of-service",
     },
+    ...(shippingPolicy
+      ? [{ label: "Shipping Policy", url: `/${shippingPolicy.slug}` }]
+      : []),
+    ...(refundPolicy
+      ? [{ label: "Returns & Refunds", url: `/${refundPolicy.slug}` }]
+      : []),
+    { label: "Platform Policies", url: "/platform/policies" },
   ];
 
   return (
@@ -78,7 +93,11 @@ export async function PinkLayout({
         {children}
       </main>
 
-      <PinkFooter business={business} resolvedLegalLinks={resolvedLegalLinks} />
+      <PinkFooter
+        business={business}
+        resolvedLegalLinks={resolvedLegalLinks}
+        initialSession={session ?? null}
+      />
     </div>
   );
 }

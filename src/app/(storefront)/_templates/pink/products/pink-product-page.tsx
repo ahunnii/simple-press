@@ -61,10 +61,12 @@ function parseProductSpecs(raw: unknown): { label: string; value: string }[] {
  * Product page — design.md → "Per-page section concepts → Product".
  *
  * Gallery + product info (name, description, specs) are fully DB-driven.
- * `product.details` wraps the buy panel (price/actions, shipping and returns
- * notes, question line); `product.panels` / `.story` / `.related` follow. All
- * sit on `page: "product"` — the editor previews them on a sample product;
- * older field keys keep the legacy `pink.global.product-` prefix.
+ * `product.details` wraps the buy panel's coming-soon/sold-out/stock copy;
+ * the shipping note, returns note and question line each sit in their own
+ * hideable section (`product.shipping` / `.returns` / `.questions` — B6.2),
+ * followed by `product.panels` / `.story` / `.related`. All sit on
+ * `page: "product"` — the editor previews them on a sample product; older
+ * field keys keep the legacy `pink.global.product-` prefix.
  */
 export async function PinkProductPage({
   product,
@@ -79,11 +81,23 @@ export async function PinkProductPage({
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
   const shippingNote = f["pink.product.shipping-note"] ?? "";
   const returnsNote = f["pink.product.returns-note"] ?? "";
-  const showShipping = shippingNote.trim().length > 0;
-  const showReturns = returnsNote.trim().length > 0;
   const questionLine = f["pink.global.product-question"] ?? "";
   const questionLinkLabel = f["pink.product.question-link-label"] ?? "";
   const comingSoonLabel = f["pink.product.coming-soon-label"] ?? "";
+
+  // Shipping / returns / questions are each their own hideable section
+  // (product.shipping / product.returns / product.questions — B6.2) so an
+  // owner can hide one row without hiding the others; a row still needs
+  // either its own note or a published policy page to have anything to show.
+  const showShipping =
+    isSectionVisible(customFields, "pink", "product.shipping") &&
+    (shippingNote.trim().length > 0 || hasShippingPolicy);
+  const showReturns =
+    isSectionVisible(customFields, "pink", "product.returns") &&
+    (returnsNote.trim().length > 0 || hasRefundPolicy);
+  const showQuestion =
+    isSectionVisible(customFields, "pink", "product.questions") &&
+    questionLine.trim().length > 0;
 
   const [collectionLink, related] = await Promise.all([
     db.collectionProduct.findFirst({
@@ -240,22 +254,25 @@ export async function PinkProductPage({
               </dl>
             )}
 
-            {/* Buy panel — everything the "Product details" editor section
-                controls sits inside this wrapper so its hotspot covers it. */}
-            <div
-              className="flex flex-col gap-5"
-              {...sectionGroupAttr("product", "details")}
-            >
-              <PinkProductActions
-                product={product}
-                comingSoonLabel={comingSoonLabel}
-                comingSoonMessage={f["pink.product.coming-soon-message"] ?? ""}
-                soldOutLabel={f["pink.product.sold-out-label"] ?? ""}
-                soldOutMessage={f["pink.product.sold-out-message"] ?? ""}
-                stockUntrackedLabel={
-                  f["pink.product.stock-untracked-label"] ?? ""
-                }
-              />
+            {/* Buy panel — the actions keep their own, non-hideable
+                "Product details" hotspot; the shipping, returns and
+                question rows below are each an independently hideable
+                section (B6.2). */}
+            <div className="flex flex-col gap-5">
+              <div {...sectionGroupAttr("product", "details")}>
+                <PinkProductActions
+                  product={product}
+                  comingSoonLabel={comingSoonLabel}
+                  comingSoonMessage={
+                    f["pink.product.coming-soon-message"] ?? ""
+                  }
+                  soldOutLabel={f["pink.product.sold-out-label"] ?? ""}
+                  soldOutMessage={f["pink.product.sold-out-message"] ?? ""}
+                  stockUntrackedLabel={
+                    f["pink.product.stock-untracked-label"] ?? ""
+                  }
+                />
+              </div>
 
               {(showShipping || showReturns) && (
                 <dl
@@ -266,18 +283,23 @@ export async function PinkProductPage({
                   }}
                 >
                   {showShipping && (
-                    <div className="flex flex-col gap-1">
+                    <div
+                      className="flex flex-col gap-1"
+                      {...sectionGroupAttr("product", "shipping")}
+                    >
                       <dt className="pink-label">Shipping</dt>
                       <dd style={{ color: "var(--pink-body)" }}>
-                        <span
-                          className="whitespace-pre-line"
-                          {...fieldAttr("pink.product.shipping-note")}
-                        >
-                          {shippingNote}
-                        </span>
+                        {shippingNote.trim().length > 0 && (
+                          <span
+                            className="whitespace-pre-line"
+                            {...fieldAttr("pink.product.shipping-note")}
+                          >
+                            {shippingNote}
+                          </span>
+                        )}
                         {hasShippingPolicy && (
                           <>
-                            {" "}
+                            {shippingNote.trim().length > 0 && " "}
                             <Link
                               href="/shipping-policy"
                               className="underline"
@@ -291,18 +313,23 @@ export async function PinkProductPage({
                     </div>
                   )}
                   {showReturns && (
-                    <div className="flex flex-col gap-1">
+                    <div
+                      className="flex flex-col gap-1"
+                      {...sectionGroupAttr("product", "returns")}
+                    >
                       <dt className="pink-label">Returns</dt>
                       <dd style={{ color: "var(--pink-body)" }}>
-                        <span
-                          className="whitespace-pre-line"
-                          {...fieldAttr("pink.product.returns-note")}
-                        >
-                          {returnsNote}
-                        </span>
+                        {returnsNote.trim().length > 0 && (
+                          <span
+                            className="whitespace-pre-line"
+                            {...fieldAttr("pink.product.returns-note")}
+                          >
+                            {returnsNote}
+                          </span>
+                        )}
                         {hasRefundPolicy && (
                           <>
-                            {" "}
+                            {returnsNote.trim().length > 0 && " "}
                             <Link
                               href="/refund-policy"
                               className="underline"
@@ -318,10 +345,11 @@ export async function PinkProductPage({
                 </dl>
               )}
 
-              {questionLine && (
+              {showQuestion && (
                 <p
                   className="text-[13px]"
                   style={{ color: "var(--pink-subtle)" }}
+                  {...sectionGroupAttr("product", "questions")}
                 >
                   <span {...fieldAttr("pink.global.product-question")}>
                     {questionLine}

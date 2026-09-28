@@ -154,7 +154,7 @@ export function PinkContactForm({
   if (isSuccess) {
     return (
       <section
-        className="px-5 py-16 md:px-10 md:py-24"
+        className="py-16 md:py-24"
         {...sectionGroupAttr("contact", "form")}
       >
         <div
@@ -206,7 +206,7 @@ export function PinkContactForm({
       {/* ── contact.topics ─────────────────────────────────────────────── */}
       {topicsVisible && (
         <section
-          className="px-5 pt-16 md:px-10 md:pt-24"
+          className="pt-16 md:pt-24"
           {...sectionGroupAttr("contact", "topics")}
         >
           <div className="mx-auto max-w-[1400px]">
@@ -262,7 +262,7 @@ export function PinkContactForm({
 
       {/* ── contact.form ───────────────────────────────────────────────── */}
       <section
-        className="px-5 py-16 md:px-10 md:py-24"
+        className="py-16 md:py-24"
         {...sectionGroupAttr("contact", "form")}
       >
         <div className="mx-auto max-w-[1400px]">

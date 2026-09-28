@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { PinkServiceCard } from "./pink-services-grid";
 import type { RouterOutputs } from "~/trpc/react";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   fieldAttr,
   listItemAttr,
@@ -10,6 +11,7 @@ import {
 } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkBadge } from "../shared/pink-badge";
@@ -68,6 +70,20 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
     "pink.services.cta-image-2",
   ]);
 
+  // B2.5: a field-driven CTA shows only when its link is set AND the link's
+  // feature is on — hidden, never swapped to another destination. Replaces
+  // the dead `?? "/contact"` / `?? "/shop"` fallbacks (`resolveFields`
+  // returns "" for a cleared field, never undefined).
+  const { isEnabled } = await getBusinessFlags();
+  const ctaHref = (link: string | undefined): string | undefined => {
+    const href = (link ?? "").trim();
+    if (!href) return undefined;
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag) ? href : undefined;
+  };
+  const primaryHref = ctaHref(f["pink.services.cta-primary-link"]);
+  const secondaryHref = ctaHref(f["pink.services.cta-secondary-link"]);
+
   const rawCustomFields = customFields as
     | Record<string, unknown>
     | null
@@ -121,98 +137,102 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
         introFieldKey="pink.services.header-intro"
       />
 
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-20 px-5 py-16 md:px-10 md:py-20">
-        {/* ── 2. Featured ────────────────────────────────────────────────── */}
-        {signatureItem &&
-          isSectionVisible(customFields, "pink", "services.featured") && (
-            <section {...sectionGroupAttr("services", "featured")}>
-              <PinkReveal>
-                <Link
-                  href={`/services/${signatureItem.service.slug}`}
-                  className="grid gap-0 md:grid-cols-[1.05fr_0.95fr]"
-                  style={{
-                    border: "1px solid var(--pink-line)",
-                    background: "var(--pink-white)",
-                  }}
-                >
-                  <div
-                    className="relative"
+      {/* Shell: gutter on the band, width on an unpadded wrapper — the same
+          left edge as `PinkPageHeader` at every width. */}
+      <div className="px-5 py-16 md:px-10 md:py-20">
+        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-20">
+          {/* ── 2. Featured ────────────────────────────────────────────────── */}
+          {signatureItem &&
+            isSectionVisible(customFields, "pink", "services.featured") && (
+              <section {...sectionGroupAttr("services", "featured")}>
+                <PinkReveal>
+                  <Link
+                    href={`/services/${signatureItem.service.slug}`}
+                    className="grid gap-0 md:grid-cols-[1.05fr_0.95fr]"
                     style={{
-                      aspectRatio: "16 / 10",
-                      background: "var(--pink-panel)",
+                      border: "1px solid var(--pink-line)",
+                      background: "var(--pink-white)",
                     }}
                   >
-                    <Image
-                      src={signatureItem.item.image ?? "/placeholder.svg"}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 55vw"
-                    />
-                    <span
-                      className="absolute top-3 left-3"
-                      {...fieldAttr("pink.services.featured-badge")}
-                    >
-                      <PinkBadge tone="rose">
-                        {f["pink.services.featured-badge"] ?? ""}
-                      </PinkBadge>
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col justify-center gap-4 p-8 md:p-12">
-                    <h2
-                      className="pink-display"
+                    <div
+                      className="relative"
                       style={{
-                        fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
-                        fontWeight: 600,
-                        letterSpacing: "-0.025em",
-                        lineHeight: 1.1,
+                        aspectRatio: "16 / 10",
+                        background: "var(--pink-panel)",
                       }}
                     >
-                      {signatureItem.item.name}
-                    </h2>
-                    {signatureItem.item.description && (
-                      <p
-                        className="max-w-[48ch] text-[16px] leading-[1.7]"
-                        style={{ color: "var(--pink-body)" }}
+                      <Image
+                        src={signatureItem.item.image ?? "/placeholder.svg"}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 55vw"
+                      />
+                      <span
+                        className="absolute top-3 left-3"
+                        {...fieldAttr("pink.services.featured-badge")}
                       >
-                        {signatureItem.item.description}
-                      </p>
-                    )}
-                    <p className="pink-label">
-                      {[
-                        signatureItem.item.priceLabel,
-                        signatureItem.item.category,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                    <span
-                      className="text-[15px] font-medium"
-                      style={{ color: "var(--pink-rose)" }}
-                      {...fieldAttr("pink.services.featured-cta-label")}
-                    >
-                      {f["pink.services.featured-cta-label"] ?? ""}
-                    </span>
-                  </div>
-                </Link>
-              </PinkReveal>
-            </section>
-          )}
+                        <PinkBadge tone="rose">
+                          {f["pink.services.featured-badge"] ?? ""}
+                        </PinkBadge>
+                      </span>
+                    </div>
 
-        {/* ── 3. Grid ────────────────────────────────────────────────────── */}
-        <section {...sectionGroupAttr("services", "grid")}>
-          <PinkServicesGrid
-            cards={cards}
-            headingSuffix={f["pink.services.grid-heading-suffix"] ?? ""}
-            audienceOneLabel={f["pink.services.audience-one-label"] ?? ""}
-            audienceGroupLabel={f["pink.services.audience-group-label"] ?? ""}
-            emptyHeading={f["pink.services.grid-empty-heading"] ?? ""}
-            emptyBody={f["pink.services.grid-empty-body"] ?? ""}
-            emptyCtaLabel={f["pink.services.grid-empty-cta-label"] ?? ""}
-            emptyCtaHref={f["pink.services.grid-empty-cta-link"] ?? "/contact"}
-          />
-        </section>
+                    <div className="flex flex-col justify-center gap-4 p-8 md:p-12">
+                      <h2
+                        className="pink-display"
+                        style={{
+                          fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                          fontWeight: 600,
+                          letterSpacing: "-0.025em",
+                          lineHeight: 1.1,
+                        }}
+                      >
+                        {signatureItem.item.name}
+                      </h2>
+                      {signatureItem.item.description && (
+                        <p
+                          className="max-w-[48ch] text-[16px] leading-[1.7]"
+                          style={{ color: "var(--pink-body)" }}
+                        >
+                          {signatureItem.item.description}
+                        </p>
+                      )}
+                      <p className="pink-label">
+                        {[
+                          signatureItem.item.priceLabel,
+                          signatureItem.item.category,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                      <span
+                        className="text-[15px] font-medium"
+                        style={{ color: "var(--pink-rose)" }}
+                        {...fieldAttr("pink.services.featured-cta-label")}
+                      >
+                        {f["pink.services.featured-cta-label"] ?? ""}
+                      </span>
+                    </div>
+                  </Link>
+                </PinkReveal>
+              </section>
+            )}
+
+          {/* ── 3. Grid ────────────────────────────────────────────────────── */}
+          <section {...sectionGroupAttr("services", "grid")}>
+            <PinkServicesGrid
+              cards={cards}
+              headingSuffix={f["pink.services.grid-heading-suffix"] ?? ""}
+              audienceOneLabel={f["pink.services.audience-one-label"] ?? ""}
+              audienceGroupLabel={f["pink.services.audience-group-label"] ?? ""}
+              emptyHeading={f["pink.services.grid-empty-heading"] ?? ""}
+              emptyBody={f["pink.services.grid-empty-body"] ?? ""}
+              emptyCtaLabel={f["pink.services.grid-empty-cta-label"] ?? ""}
+              emptyCtaHref={ctaHref(f["pink.services.grid-empty-cta-link"])}
+            />
+          </section>
+        </div>
       </div>
 
       {/* ── 4. Steps ──────────────────────────────────────────────────────── */}
@@ -291,8 +311,8 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
 
       {/* ── 5. CTA ────────────────────────────────────────────────────────── */}
       {isSectionVisible(customFields, "pink", "services.cta") && (
-        <div className="mx-auto w-full max-w-[1400px] px-5 py-16 md:px-10 md:py-20">
-          <PinkReveal>
+        <div className="px-5 py-16 md:px-10 md:py-20">
+          <PinkReveal className="mx-auto w-full max-w-[1400px]">
             <PinkCtaPanel
               sectionAttrs={sectionGroupAttr("services", "cta")}
               heading={f["pink.services.cta-heading"] ?? ""}
@@ -300,18 +320,18 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
               body={f["pink.services.cta-body"] ?? ""}
               bodyFieldKey="pink.services.cta-body"
               primaryCta={
-                f["pink.services.cta-primary-label"]
+                f["pink.services.cta-primary-label"] && primaryHref
                   ? {
-                      label: f["pink.services.cta-primary-label"] ?? "",
-                      href: f["pink.services.cta-primary-link"] ?? "/contact",
+                      label: f["pink.services.cta-primary-label"],
+                      href: primaryHref,
                     }
                   : undefined
               }
               secondaryCta={
-                f["pink.services.cta-secondary-label"]
+                f["pink.services.cta-secondary-label"] && secondaryHref
                   ? {
-                      label: f["pink.services.cta-secondary-label"] ?? "",
-                      href: f["pink.services.cta-secondary-link"] ?? "/shop",
+                      label: f["pink.services.cta-secondary-label"],
+                      href: secondaryHref,
                     }
                   : undefined
               }

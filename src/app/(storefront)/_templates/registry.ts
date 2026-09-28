@@ -345,6 +345,7 @@ import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
 import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
 import { PinkContactPage } from "./pink/contact/pink-contact-page";
 import { PinkDonatePage } from "./pink/donate/pink-donate-page";
+import { PinkFaqPage } from "./pink/faq/pink-faq-page";
 import { PinkEventPage } from "./pink/events/pink-event-page";
 import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
 import { PinkGenericPage } from "./pink/generic/pink-generic-page";
@@ -824,6 +825,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     CollectionsPage: PinkCollectionsPage,
     ContactPage: PinkContactPage,
     DonatePage: PinkDonatePage,
+    FaqPage: PinkFaqPage,
     EventsPage: PinkEventsIndexPage,
     EventPage: PinkEventPage,
     VideosPage: PinkVideosPage,

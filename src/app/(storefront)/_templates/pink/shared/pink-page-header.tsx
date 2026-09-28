@@ -25,6 +25,12 @@ type PinkPageHeaderProps = {
  *
  * H1 scale per design.md → Typography: `clamp(2.125rem, 4.6vw, 3.875rem)` / 600 /
  * `-.03em` / `1.0–1.02`.
+ *
+ * Shell convention (every pink band, B1.7): the gutter (`px-5 md:px-10`) sits
+ * on the full-bleed band and the content sits in an UNPADDED
+ * `mx-auto max-w-[1400px]` wrapper. Body sections under this header must do
+ * the same — padding inside the max-width lands 20px to the right of this
+ * title at 1440 and more beyond it.
  */
 export function PinkPageHeader({
   breadcrumb,

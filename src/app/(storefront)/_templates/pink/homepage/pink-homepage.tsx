@@ -3,6 +3,7 @@ import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import type { PinkFeaturedProduct } from "./pink-collection-section";
 import type { TemplateListRow } from "~/lib/template-fields";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -115,6 +116,15 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
   const { isEnabled } = await getBusinessFlags();
   const popup = resolvePopup(business.siteContent, isEnabled("popups"));
 
+  // PF14/PF15 (B2.1(4), B2.5): hide a field-driven CTA/chip when its route's
+  // flag is off — never swap in another destination. `resolveFields` already
+  // applies each key's own default (declared on the field itself) when unset,
+  // so `f[key] ?? ""` — never a literal `?? "/shop"` — is the resolved href.
+  const ctaFlagOk = (href: string): boolean => {
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  };
+
   // The old hero collage's rows (`pink.homepage.hero-panels`) are gone along
   // with the collage layout that read them, and the v1 doll-trio's
   // `pink.homepage.hero-doll-3` key went with it in the v2 makers revision;
@@ -209,6 +219,11 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
     .getPublic({ limit: videosLimit })
     .catch(() => []);
 
+  // PF14 (B2.1(4), B2.5): each chip's own href is flag-filtered individually
+  // — "All pieces" drops with `products` (moot in practice, since the whole
+  // `homepage.collection` section below is already gated on it), and each
+  // real collection chip drops with `collections` (which itself cascades off
+  // when `products` is off).
   const collectionChips: PinkFilterChipItem[] = [
     { id: "all", label: "All pieces", href: "/shop" },
     ...collections.slice(0, 4).map((c) => ({
@@ -216,7 +231,28 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
       label: c.name,
       href: `/collections/${c.slug}`,
     })),
-  ];
+  ].filter((chip) => ctaFlagOk(chip.href));
+
+  // PF15 (B2.5): hero primary/secondary CTA hrefs, filtered rather than
+  // swapped. Both fields declare their own `defaultValue` in the field
+  // registry, so `f[key]` already resolves to it when unset — the old
+  // `?? "/shop"` / `?? "#make-and-takes"` literals were dead code.
+  const heroPrimaryLinkRaw = f["pink.homepage.hero-cta-primary-link"] ?? "";
+  const heroPrimaryLink = ctaFlagOk(heroPrimaryLinkRaw)
+    ? heroPrimaryLinkRaw
+    : "";
+  const heroSecondaryLinkRaw = f["pink.homepage.hero-cta-secondary-link"] ?? "";
+  const heroSecondaryLink = ctaFlagOk(heroSecondaryLinkRaw)
+    ? heroSecondaryLinkRaw
+    : "";
+
+  // PF15 (B2.5): the collection band's "See all pieces" CTA — same reasoning.
+  // The band itself is also skipped entirely when `products` is off (below),
+  // so this only bites when the owner points it at a *different* gated route.
+  const collectionCtaLinkRaw = f["pink.homepage.collection-cta-link"] ?? "";
+  const collectionCtaLink = ctaFlagOk(collectionCtaLinkRaw)
+    ? collectionCtaLinkRaw
+    : "";
 
   return (
     <HydrateClient>
@@ -229,11 +265,9 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
           headingLine2={f["pink.homepage.hero-heading-line-2"] ?? ""}
           body={f["pink.homepage.hero-body"] ?? ""}
           ctaPrimaryLabel={f["pink.homepage.hero-cta-primary-label"] ?? ""}
-          ctaPrimaryLink={f["pink.homepage.hero-cta-primary-link"] ?? "/shop"}
+          ctaPrimaryLink={heroPrimaryLink}
           ctaSecondaryLabel={f["pink.homepage.hero-cta-secondary-label"] ?? ""}
-          ctaSecondaryLink={
-            f["pink.homepage.hero-cta-secondary-link"] ?? "#make-and-takes"
-          }
+          ctaSecondaryLink={heroSecondaryLink}
           image={f["pink.homepage.hero-image"] ?? ""}
           businessName={business.name}
           accentWord={f["pink.global.accent-word"] ?? ""}
@@ -255,16 +289,20 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
           <PinkPromisesSection items={promiseItems} />
         )}
 
-        {isSectionVisible(customFields, "pink", "homepage.collection") && (
-          <PinkCollectionSection
-            heading={f["pink.homepage.collection-heading"] ?? ""}
-            note={f["pink.homepage.collection-note"] ?? ""}
-            ctaLabel={f["pink.homepage.collection-cta-label"] ?? ""}
-            ctaLink={f["pink.homepage.collection-cta-link"] ?? "/shop"}
-            products={products}
-            collectionChips={collectionChips}
-          />
-        )}
+        {/* PF14 (B2.1(4)): this band shows real Product records (links into
+            /shop/[slug]) plus a "See all pieces" → /shop CTA, so it must not
+            render at all when `products` is off. */}
+        {isSectionVisible(customFields, "pink", "homepage.collection") &&
+          isEnabled("products") && (
+            <PinkCollectionSection
+              heading={f["pink.homepage.collection-heading"] ?? ""}
+              note={f["pink.homepage.collection-note"] ?? ""}
+              ctaLabel={f["pink.homepage.collection-cta-label"] ?? ""}
+              ctaLink={collectionCtaLink}
+              products={products}
+              collectionChips={collectionChips}
+            />
+          )}
 
         {/* Make & Takes leads the calendar: it explains what a make & take
             actually is, which the dated cards below assume the reader already

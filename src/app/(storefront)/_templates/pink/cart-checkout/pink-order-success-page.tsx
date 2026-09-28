@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import { getSession } from "~/server/better-auth/server";
 
 import { resolveFields } from "..";
 import { PinkOrderConfirmation } from "./pink-order-confirmation";
@@ -43,7 +44,7 @@ function PinkOrderLoadingFallback({ loadingText }: { loadingText: string }) {
  * the pickup copy plus the Settings pickup location (falling back to the
  * business address) and instructions.
  */
-export function PinkOrderSuccessPage({ business }: Props) {
+export async function PinkOrderSuccessPage({ business }: Props) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
@@ -81,6 +82,11 @@ export function PinkOrderSuccessPage({ business }: Props) {
 
   const loadingText = f["pink.order.loading-text"] ?? "Confirming your order…";
 
+  // PF16 / B9.4 (P-ORDER-CTA) — resolved server-side so the account CTA is
+  // correct on the first paint; see the doc on `PinkOrderConfirmation`'s
+  // `initialSession` prop.
+  const initialSession = await getSession().catch(() => null);
+
   return (
     <Suspense fallback={<PinkOrderLoadingFallback loadingText={loadingText} />}>
       <PinkOrderConfirmation
@@ -105,9 +111,10 @@ export function PinkOrderSuccessPage({ business }: Props) {
         ctaHeading={f["pink.order.cta-heading"] ?? ""}
         ctaBody={f["pink.order.cta-body"] ?? ""}
         ctaButton={f["pink.order.cta-button"] ?? ""}
-        ctaLink={f["pink.order.cta-link"] ?? "/shop"}
+        ctaLink={f["pink.order.cta-link"] ?? ""}
         ctaSecondaryLabel={f["pink.order.cta-secondary-label"] ?? ""}
-        ctaSecondaryLink={f["pink.order.cta-secondary-link"] ?? "/services"}
+        ctaSecondaryLink={f["pink.order.cta-secondary-link"] ?? ""}
+        initialSession={initialSession}
       />
     </Suspense>
   );

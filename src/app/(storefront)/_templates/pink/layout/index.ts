@@ -135,7 +135,7 @@ export const pinkGlobalData: TemplateField[] = [
     key: "pink.global.footer-col2-links",
     label: "Column 2 links",
     description:
-      "Links in the second footer column. Leave empty and it shows About, plus Journal, Events, Videos and Testimonials once those features are turned on, then Contact.",
+      "Links in the second footer column. Content → Navigation's footer quick links take over this column when set. Otherwise, leave this empty and it shows About, plus Journal, Events, Videos and Testimonials once those features are turned on, then Contact.",
     type: "list",
     page: "global",
     group: "global.footer",

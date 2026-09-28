@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,29 +9,43 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { isActiveNavLink } from "~/lib/nav-utils";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  externalLinkProps,
+  getAccountNavLinks,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkCartDrawer } from "../shared/pink-cart-drawer";
 import { PinkMobileMenu } from "./pink-mobile-menu";
+import {
+  PINK_QUICK_ACCOUNT_KEYS,
+  pinkActiveNav,
+  resolvePinkNav,
+} from "./pink-nav";
 import { PinkNavDropdown } from "./pink-nav-dropdown";
 
-/** Platform nav shape — `Business.siteContent.navigationItems` (one level of
- *  children), as validated by `navigationItemsSchema` in
- *  `src/lib/validators/content.ts` and mirrored by every other header. */
-export type PinkNavChild = { href: string; label: string; external?: boolean };
-export type PinkNavLink = PinkNavChild & { children?: PinkNavChild[] };
+/** Re-exported for existing imports — the nav model lives in `./pink-nav`. */
+export type { PinkNavChild, PinkNavLink } from "./pink-nav";
 
 const FIELD_KEYS = ["pink.global.accent-word", "pink.global.basket-label"];
+
+/** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <IconLayoutDashboard className="h-4 w-4" />,
+};
 
 /**
  * Splits a business name into { prefix, tail } where `tail` is the trailing
@@ -68,8 +83,7 @@ export function PinkHeader({
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuId = useId();
 
-  // Mirrors vii/happy-bamboo's UserButton wiring — same additionalLinks shape,
-  // same admin-visibility rule.
+  // Same admin-visibility rule as every other template's account menu.
   const showAdminLink =
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
@@ -78,6 +92,8 @@ export function PinkHeader({
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
@@ -101,39 +117,22 @@ export function PinkHeader({
 
   const basketLabel = f["pink.global.basket-label"] ?? "Basket";
 
-  // Shipped nav, used until the owner saves their own items in
-  // /admin/content/navigation. Gated per entry: a default link to a page the
-  // store has switched off would 404. Contact is ungated, matching the
-  // footer's fallback column.
-  const DEFAULT_NAV: PinkNavLink[] = [
-    { href: "/shop", label: "Shop" },
-    ...(isEnabled("collections")
-      ? [{ href: "/collections", label: "Collections" }]
-      : []),
-    ...(isEnabled("services")
-      ? [{ href: "/services", label: "Services" }]
-      : []),
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
-    ...(isEnabled("events") ? [{ href: "/events", label: "Events" }] : []),
-    ...(isEnabled("videos") ? [{ href: "/videos", label: "Videos" }] : []),
-    { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
-  ];
-
-  // `??`, never `||` (and never a `.length` check): an owner who saves an empty
-  // item list in the Navigation builder means "no nav links", which either of
-  // those would silently overwrite with the shipped default. Owner-configured
-  // items are rendered as-is — the flag gating above shapes DEFAULT_NAV only.
-  const navLinks =
-    (business?.siteContent?.navigationItems as PinkNavLink[] | undefined) ??
-    DEFAULT_NAV;
+  // Owner nav (children + external preserved) or pink's shipped defaults,
+  // then the shared route→flag filter (P-NAV-FLAGS) drops anything the store
+  // has switched off — owner-saved items included (e.g. `/videos` with
+  // `videos` off). `??` semantics live in `resolveNav`: a saved `[]` means
+  // "no nav links". See `./pink-nav`.
+  const navLinks = resolvePinkNav(
+    business?.siteContent?.navigationItems,
+    isEnabled,
+  );
 
   // Pink renders donate as a chrome-level CTA (right actions cluster) rather than
-  // folding it into DEFAULT_NAV like default-header does. Reason: pink's nav can be
-  // fully owner-replaced via the Navigation builder (see the `??` comment above), and
-  // if donate only existed as a spliced-in DEFAULT_NAV entry, an owner who saves ANY
-  // custom nav would silently lose the toggle's effect. Rendering it at chrome level
-  // keeps `donationShowInHeader` authoritative regardless of custom nav content.
+  // folding it into the default nav like default-header does. Reason: pink's nav
+  // can be fully owner-replaced via the Navigation builder, and if donate only
+  // existed as a default entry, an owner who saves ANY custom nav would silently
+  // lose the toggle's effect. Rendering it at chrome level keeps
+  // `donationShowInHeader` authoritative regardless of custom nav content.
   // `navHasDonate` avoids a duplicate CTA when the owner already links to /donate
   // themselves (in a top-level link or inside a dropdown's children).
   const donationVerb = resolveDonationLabel(business?.donationLabel).verb;
@@ -145,16 +144,34 @@ export function PinkHeader({
   const showDonateCta =
     isEnabled("donations") && !!business?.donationShowInHeader && !navHasDonate;
 
-  // The drawer is one flat level, so a parent is replaced by its children. The
-  // donate CTA is appended last so it doesn't reorder the owner's own nav.
-  const mobileLinks = [
-    ...navLinks.flatMap((link) =>
-      link.children?.length ? link.children : [link],
-    ),
-    ...(showDonateCta ? [{ href: "/donate", label: donationVerb }] : []),
-  ];
+  // The mobile menu lists the donate CTA as a last top-level row (the desktop
+  // shows it as a button instead), so it doesn't reorder the owner's own nav.
+  const mobileItems: NavItem[] = showDonateCta
+    ? [...navLinks, { href: "/donate", label: donationVerb }]
+    : navLinks;
 
-  const isActive = (href: string) => isActiveNavLink(pathname ?? "/", href);
+  // The single current entry (longest match) across the whole nav — its group
+  // trigger gets `data-current`, the entry itself `aria-current`. Computed on
+  // `mobileItems`; `navLinks` is its prefix, so the indexes line up for the
+  // desktop nav too.
+  const active = pinkActiveNav(pathname ?? "/", mobileItems);
+
+  // Desktop avatar menu: the quick-access subset (Orders, Admin) of the
+  // flag-gated account links — Orders drops with `orders` off. Settings is
+  // dropped because `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  })
+    .filter(
+      (link) =>
+        PINK_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
+    )
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
 
   const openCart = () => setIsOpen(true);
 
@@ -220,24 +237,23 @@ export function PinkHeader({
             className="hidden items-center gap-x-[22px] gap-y-2 lg:flex"
             aria-label="Primary navigation"
           >
-            {navLinks.map((link) =>
+            {navLinks.map((link, i) =>
               link.children?.length ? (
-                // A parent with children renders as a dropdown TRIGGER and its
-                // own `href` is never navigated to — the platform convention
-                // every other header follows.
+                // A parent with children renders as a dropdown trigger; a
+                // non-empty parent href is the dropdown's first entry
+                // (`navGroupEntries`), so it stays reachable.
                 <PinkNavDropdown
-                  key={link.href + link.label}
+                  key={i}
                   label={link.label}
-                  links={link.children}
-                  activePath={pathname ?? "/"}
+                  entries={navGroupEntries(link)}
+                  activeEntry={active.item === i ? active.entry : -1}
                 />
               ) : (
                 <Link
-                  key={link.href + link.label}
+                  key={i}
                   href={link.href}
-                  target={link.external ? "_blank" : undefined}
-                  rel={link.external ? "noopener noreferrer" : undefined}
-                  aria-current={isActive(link.href) ? "page" : undefined}
+                  {...externalLinkProps(link.external)}
+                  aria-current={active.item === i ? "page" : undefined}
                   className="pink-nav-link"
                 >
                   {link.label}
@@ -262,22 +278,7 @@ export function PinkHeader({
                     size="icon"
                     className="h-auto w-auto rounded-full p-0"
                     avatarClassName="size-8 ring-1 ring-[var(--pink-rose)] ring-offset-1 ring-offset-[var(--pink-paper)]"
-                    links={[
-                      {
-                        icon: <IconPackage className="h-4 w-4" />,
-                        label: "Orders",
-                        href: "/account/orders",
-                      },
-                      ...(showAdminLink
-                        ? [
-                            {
-                              icon: <IconLayoutDashboard className="h-4 w-4" />,
-                              label: "Admin",
-                              href: "/admin",
-                            },
-                          ]
-                        : []),
-                    ]}
+                    links={userButtonLinks}
                   />
                 ) : (
                   <Link
@@ -330,7 +331,7 @@ export function PinkHeader({
                 // Outline sibling of the solid basket button below: same
                 // padding/type scale, inverted fill so the two chrome CTAs
                 // read as a pair without competing. Hidden on mobile — the
-                // drawer carries its own donate row via `mobileLinks`.
+                // menu carries its own donate row via `mobileItems`.
                 className="hidden items-center text-[14px] font-semibold transition-colors sm:inline-flex"
                 style={{
                   background: "transparent",
@@ -351,46 +352,48 @@ export function PinkHeader({
               </Link>
             )}
 
-            <button
-              type="button"
-              onClick={openCart}
-              aria-label={
-                itemCount > 0
-                  ? `Open basket, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                  : "Open basket"
-              }
-              className="inline-flex items-center gap-2 text-[14px] font-semibold transition-colors"
-              style={{
-                background: "var(--pink-rose)",
-                border: "1px solid var(--pink-rose)",
-                color: "var(--pink-on-accent)",
-                padding: "11px 20px",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--pink-ink)";
-                e.currentTarget.style.borderColor = "var(--pink-ink)";
-                e.currentTarget.style.color = "var(--pink-paper)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "var(--pink-rose)";
-                e.currentTarget.style.borderColor = "var(--pink-rose)";
-                e.currentTarget.style.color = "var(--pink-on-accent)";
-              }}
-            >
-              <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-              <span {...fieldAttr("pink.global.basket-label")}>
-                {basketLabel}
-              </span>
-              {/* `opacity: 0.7` composited white onto `--pink-rose` at 4.05:1,
+            {isEnabled("cart") && (
+              <button
+                type="button"
+                onClick={openCart}
+                aria-label={
+                  itemCount > 0
+                    ? `Open basket, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "Open basket"
+                }
+                className="inline-flex items-center gap-2 text-[14px] font-semibold transition-colors"
+                style={{
+                  background: "var(--pink-rose)",
+                  border: "1px solid var(--pink-rose)",
+                  color: "var(--pink-on-accent)",
+                  padding: "11px 20px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--pink-ink)";
+                  e.currentTarget.style.borderColor = "var(--pink-ink)";
+                  e.currentTarget.style.color = "var(--pink-paper)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "var(--pink-rose)";
+                  e.currentTarget.style.borderColor = "var(--pink-rose)";
+                  e.currentTarget.style.color = "var(--pink-on-accent)";
+                }}
+              >
+                <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                <span {...fieldAttr("pink.global.basket-label")}>
+                  {basketLabel}
+                </span>
+                {/* `opacity: 0.7` composited white onto `--pink-rose` at 4.05:1,
                   under AA. 0.85 measures 5.29:1 and keeps the de-emphasis
                   (full white is 6.7:1). `aria-hidden` because the button's
                   aria-label already announces the item count. */}
-              {itemCount > 0 && (
-                <span aria-hidden="true" style={{ opacity: 0.85 }}>
-                  ({itemCount})
-                </span>
-              )}
-            </button>
+                {itemCount > 0 && (
+                  <span aria-hidden="true" style={{ opacity: 0.85 }}>
+                    ({itemCount})
+                  </span>
+                )}
+              </button>
+            )}
 
             <button
               ref={hamburgerRef}
@@ -420,25 +423,18 @@ export function PinkHeader({
       <PinkMobileMenu
         id={mobileMenuId}
         open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
+        onClose={closeMobile}
         triggerRef={hamburgerRef}
-        links={mobileLinks}
-        activeHref={pathname ?? "/"}
-        basketLabel={basketLabel}
-        itemCount={itemCount}
+        items={mobileItems}
+        active={active}
+        basket={isEnabled("cart") ? { label: basketLabel, itemCount } : null}
         wishlist={
           isEnabled("wishlist")
             ? { count: wishlistCount, hydrated: wishlistHydrated }
             : null
         }
-        account={
-          isEnabled("customerAccounts") && !isPending
-            ? {
-                href: session?.user ? "/account/orders" : "/auth/sign-in",
-                label: session?.user ? "My account" : "Sign in",
-              }
-            : null
-        }
+        isEnabled={isEnabled}
+        initialSession={initialSession}
         onOpenCart={() => {
           setMobileOpen(false);
           openCart();

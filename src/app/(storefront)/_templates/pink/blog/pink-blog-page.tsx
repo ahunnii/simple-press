@@ -1,6 +1,8 @@
 import type { DefaultBlogPageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
@@ -41,8 +43,18 @@ const JOURNAL_LABEL = "Journal";
  * every field once, then hands the interactive featured/grid/sort UI off to
  * `PinkBlogListing` (server → client handoff idiom).
  */
-export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
+export async function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
   const f = resolveFields(customFields, FIELD_KEYS);
+
+  // B2.5: the empty-state button (default `/shop`) hides — never swaps
+  // destination — when its link's feature is off. "" hides it downstream
+  // (`PinkEmptyState` needs both a label and an href). The old `?? "/shop"`
+  // was dead: `resolveFields` returns "" for a cleared field.
+  const { isEnabled } = await getBusinessFlags();
+  const emptyCtaTarget = (f["pink.blog.grid-empty-cta-link"] ?? "").trim();
+  const emptyCtaFlag = emptyCtaTarget ? navHrefFlag(emptyCtaTarget) : null;
+  const emptyCtaLink =
+    emptyCtaFlag === null || isEnabled(emptyCtaFlag) ? emptyCtaTarget : "";
 
   const heading = f["pink.blog.header-heading"] ?? "The journal";
   const intro = f["pink.blog.header-intro"] ?? "";
@@ -132,7 +144,7 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
         }
         emptyBody={f["pink.blog.grid-empty-body"] ?? ""}
         emptyCtaLabel={f["pink.blog.grid-empty-cta-label"] ?? ""}
-        emptyCtaLink={f["pink.blog.grid-empty-cta-link"] ?? "/shop"}
+        emptyCtaLink={emptyCtaLink}
         searchEmptyMessage={
           f["pink.blog.search-empty-state"] ?? "No posts match your search."
         }

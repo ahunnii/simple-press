@@ -6,33 +6,9 @@ import { usePathname } from "next/navigation";
 
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 import { PinkPageHeader } from "../shared/pink-page-header";
-
-/**
- * `flag` optionally gates a nav item behind a storefront feature flag
- * (Subscriptions → `"subscriptions"`, Invoices → `"invoices"`, Rewards →
- * `"loyalty"`); omitted means always-on. Same items, order and flags as
- * `DefaultAccountLayout`/`NoiseAccountLayout`.
- */
-const BASE_NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders", flag: undefined },
-  {
-    href: "/account/subscriptions",
-    label: "Subscriptions",
-    flag: "subscriptions",
-  },
-  { href: "/account/invoices", label: "Invoices", flag: "invoices" },
-  { href: "/account/settings", label: "Settings", flag: undefined },
-  { href: "/account/security", label: "Security", flag: undefined },
-  {
-    href: "/account/address-book",
-    label: "Address Book",
-    flag: undefined,
-  },
-  { href: "/account/preferences", label: "Preferences", flag: undefined },
-  { href: "/account/rewards", label: "Rewards", flag: "loyalty" },
-] as const;
 
 type PinkAccountLayoutProps = {
   children: ReactNode;
@@ -69,9 +45,7 @@ export function PinkAccountLayout({
   const { data: session } = useHydratedSession();
   const flags = useStorefrontFlags();
 
-  const NAV_ITEMS = BASE_NAV_ITEMS.filter(
-    (item) => !item.flag || flags.isEnabled(item.flag),
-  );
+  const NAV_ITEMS = getAccountNavLinks({ isEnabled: flags.isEnabled });
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -81,7 +55,7 @@ export function PinkAccountLayout({
       <PinkPageHeader
         breadcrumb={[
           { label: "Home", href: "/" },
-          { label: "Account", href: "/account/orders" },
+          { label: "Account", href: NAV_ITEMS[0]?.href ?? "/account/settings" },
           { label: title },
         ]}
         heading="Your account"

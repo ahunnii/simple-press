@@ -4,11 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import type { Session } from "~/server/better-auth/config";
 import type { CartItem } from "~/providers/cart-context";
+import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
 import { PinkFactRows } from "../shared/pink-fact-rows";
@@ -52,6 +56,14 @@ type Props = {
   ctaLink: string;
   ctaSecondaryLabel: string;
   ctaSecondaryLink: string;
+  /**
+   * Session resolved server-side (`getSession()`), seeding the shared
+   * `useOrderAccountCta` hook (PF16 / B9.4 / P-ORDER-CTA) so the account
+   * button is right on first paint. `undefined` falls back to the hook's
+   * unseeded mode, which suppresses the button until the client session
+   * resolves — never a flash of the wrong branch.
+   */
+  initialSession?: Session | null;
 };
 
 function formatOrderTotal(amountCents: number, currency: string): string {
@@ -106,10 +118,21 @@ export function PinkOrderConfirmation({
   ctaLink,
   ctaSecondaryLabel,
   ctaSecondaryLink,
+  initialSession,
 }: Props) {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { items, clearCart, isHydrated } = useCart();
+  const { isEnabled } = useStorefrontFlags();
+  const accountCta = useOrderAccountCta(initialSession);
+
+  // PF15 (B2.5): every field-driven or default CTA href here is gated on
+  // its route's feature flag and hidden (never re-pointed) when that
+  // feature is off — same contract as `navHrefFlag`'s other adopters.
+  const hrefEnabled = (href: string): boolean => {
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  };
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loadingOrder, setLoadingOrder] = useState(true);
@@ -190,13 +213,15 @@ export function PinkOrderConfirmation({
         >
           {noOrderBody}
         </p>
-        <Link
-          href="/shop"
-          className="pink-btn pink-btn-solid mt-2"
-          {...fieldAttr("pink.order.no-order-cta")}
-        >
-          {noOrderCta}
-        </Link>
+        {hrefEnabled("/shop") && (
+          <Link
+            href="/shop"
+            className="pink-btn pink-btn-solid mt-2"
+            {...fieldAttr("pink.order.no-order-cta")}
+          >
+            {noOrderCta}
+          </Link>
+        )}
       </div>
     );
   }
@@ -271,7 +296,7 @@ export function PinkOrderConfirmation({
       </header>
 
       {/* Item list + ink summary panel */}
-      <div className="mx-auto max-w-[1400px] px-5 py-16 md:px-10 md:py-20">
+      <div className="mx-auto max-w-[1480px] px-5 py-16 md:px-10 md:py-20">
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.15fr_.85fr]">
           {/* Items — order-2 on mobile so the summary panel shows first */}
           <div className="order-2 flex flex-col gap-1 lg:order-1">
@@ -407,32 +432,46 @@ export function PinkOrderConfirmation({
                   {successNote}
                 </p>
               )}
-              <div className="p-7 pt-0 md:p-8 md:pt-0">
-                <Link
-                  href="/shop"
-                  className="pink-btn pink-btn-solid w-full justify-center"
-                  {...fieldAttr("pink.order.continue-cta")}
-                >
-                  {continueCta}
-                </Link>
-              </div>
+              {(hrefEnabled("/shop") || accountCta) && (
+                <div className="flex flex-wrap gap-3 p-7 pt-0 md:p-8 md:pt-0">
+                  {hrefEnabled("/shop") && (
+                    <Link
+                      href="/shop"
+                      className="pink-btn pink-btn-solid flex-1 justify-center"
+                      {...fieldAttr("pink.order.continue-cta")}
+                    >
+                      {continueCta}
+                    </Link>
+                  )}
+                  {accountCta && (
+                    <Link
+                      href={accountCta.href}
+                      className="pink-btn pink-btn-ghost flex-1 justify-center"
+                    >
+                      {accountCta.label}
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           </aside>
         </div>
       </div>
 
       {/* Closing CTA */}
-      <div className="mx-auto max-w-[1400px] px-5 pb-20 md:px-10 md:pb-28">
+      <div className="mx-auto max-w-[1480px] px-5 pb-20 md:px-10 md:pb-28">
         <PinkCtaPanel
           heading={ctaHeading}
           headingFieldKey="pink.order.cta-heading"
           body={ctaBody}
           bodyFieldKey="pink.order.cta-body"
           primaryCta={
-            ctaButton ? { label: ctaButton, href: ctaLink } : undefined
+            ctaButton && hrefEnabled(ctaLink)
+              ? { label: ctaButton, href: ctaLink }
+              : undefined
           }
           secondaryCta={
-            ctaSecondaryLabel
+            ctaSecondaryLabel && hrefEnabled(ctaSecondaryLink)
               ? { label: ctaSecondaryLabel, href: ctaSecondaryLink }
               : undefined
           }

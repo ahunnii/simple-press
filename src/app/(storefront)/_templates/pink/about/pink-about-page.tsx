@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   fieldAttr,
   listItemAttr,
@@ -16,6 +17,7 @@ import {
   parseTemplateListRows,
 } from "~/lib/template-fields";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
@@ -114,9 +116,12 @@ function valuesGridClass(count: number): string {
   return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
 }
 
-export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
+export async function PinkAboutPage({
+  business,
+}: DefaultAboutPageTemplateProps) {
   const customFields = business.siteContent?.customFields;
   const f = resolveFields(customFields, FIELD_KEYS);
+  const { isEnabled } = await getBusinessFlags();
 
   const storyRichContent = getRichTextFieldValue(
     customFields as unknown,
@@ -160,9 +165,28 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
         }))
       : DEFAULT_COMMISSION_FACTS;
 
+  // B2.5: a commissions button shows only with a label AND a destination
+  // whose feature is on (`/shop` with products off hides the button — never
+  // swap it to another destination). A blank link hides it too: the old
+  // `?? "/shop"` fallbacks were dead (`resolveFields` returns "" for a
+  // cleared field), so a cleared link used to render a self-link.
+  const ctaHref = (labelKey: string, linkKey: string): string | null => {
+    const label = (f[labelKey] ?? "").trim();
+    const href = (f[linkKey] ?? "").trim();
+    if (!label || !href) return null;
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag) ? href : null;
+  };
+  const commissionPrimaryHref = ctaHref(
+    "pink.about.commissions-cta-label",
+    "pink.about.commissions-cta-link",
+  );
+  const commissionSecondaryHref = ctaHref(
+    "pink.about.commissions-secondary-label",
+    "pink.about.commissions-secondary-link",
+  );
   const hasCommissionCta =
-    Boolean(f["pink.about.commissions-cta-label"]) ||
-    Boolean(f["pink.about.commissions-secondary-label"]);
+    commissionPrimaryHref !== null || commissionSecondaryHref !== null;
 
   return (
     <>
@@ -515,20 +539,18 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
               </p>
               {hasCommissionCta && (
                 <div className="mt-2 flex flex-wrap gap-3">
-                  {f["pink.about.commissions-cta-label"] && (
+                  {commissionPrimaryHref && (
                     <Link
-                      href={f["pink.about.commissions-cta-link"] ?? "/contact"}
+                      href={commissionPrimaryHref}
                       className="pink-btn pink-btn-solid"
                       {...fieldAttr("pink.about.commissions-cta-label")}
                     >
                       {f["pink.about.commissions-cta-label"]}
                     </Link>
                   )}
-                  {f["pink.about.commissions-secondary-label"] && (
+                  {commissionSecondaryHref && (
                     <Link
-                      href={
-                        f["pink.about.commissions-secondary-link"] ?? "/shop"
-                      }
+                      href={commissionSecondaryHref}
                       className="pink-btn pink-btn-ghost"
                       {...fieldAttr("pink.about.commissions-secondary-label")}
                     >

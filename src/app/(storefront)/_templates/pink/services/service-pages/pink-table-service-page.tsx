@@ -1,4 +1,5 @@
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   getRichTextFieldValue,
   isContentEmpty,
@@ -7,6 +8,7 @@ import {
   resolveFaqPickerItems,
 } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 
 import { PinkFactRows } from "../../shared/pink-fact-rows";
 import { PinkPhotoHeader } from "../../shared/pink-photo-header";
@@ -102,6 +104,18 @@ export async function PinkTableServicePage({
     "pink-table.request-submit-label",
     "pink-table.request-fallback-label",
   ]);
+
+  // B2.5: the second quick link hides (never swaps destination) when its
+  // feature is off — the default `/shop` with products off. A blank saved
+  // link still means the field's `/shop` default, as it did before.
+  const { isEnabled } = await getBusinessFlags();
+  const quicklink2Target =
+    (f["pink-table.quicklink-2-href"] ?? "").trim() || "/shop";
+  const quicklink2Flag = navHrefFlag(quicklink2Target);
+  const quicklink2Href =
+    quicklink2Flag === null || isEnabled(quicklink2Flag)
+      ? quicklink2Target
+      : "";
 
   const richTextRaw = getRichTextFieldValue(
     customFields,
@@ -199,7 +213,7 @@ export async function PinkTableServicePage({
         priceCtaLabel={f["pink-table.price-cta-label"] ?? ""}
         quicklink1Label={f["pink-table.quicklink-1-label"] ?? ""}
         quicklink2Label={f["pink-table.quicklink-2-label"] ?? ""}
-        quicklink2Href={f["pink-table.quicklink-2-href"] ?? ""}
+        quicklink2Href={quicklink2Href}
         requestHeading={f["pink-table.request-heading"] ?? ""}
         requestIntro={f["pink-table.request-intro"] ?? ""}
         requestSubmitLabel={f["pink-table.request-submit-label"] ?? ""}
