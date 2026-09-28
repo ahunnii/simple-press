@@ -34,6 +34,7 @@ import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/serv
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
 import { wealthServiceTemplateDefs } from "~/app/(storefront)/_templates/wealth/services/service-pages/fields";
+import { umscServiceTemplateDefs } from "~/app/(storefront)/_templates/umsc/services/service-pages/fields";
 
 // ─── Core type ───────────────────────────────────────────────────────────────
 
@@ -117,6 +118,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   bamboo: bambooServiceTemplateDefs,
   olive: oliveServiceTemplateDefs,
   noise: noiseServiceTemplateDefs,
+  umsc: umscServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -141,6 +143,7 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...bambooServiceTemplateDefs,
       ...oliveServiceTemplateDefs,
       ...noiseServiceTemplateDefs,
+      ...umscServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

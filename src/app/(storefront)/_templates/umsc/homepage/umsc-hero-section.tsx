@@ -136,13 +136,17 @@ export function UmscHeroSection({
           </p>
         )}
 
-        {(primaryLabel || secondaryLabel) && (
+        {/* PF10 (B2.5): each button is hidden individually when its own
+            href's flag is off (hero.tsx-props already resolve `primaryUrl`/
+            `secondaryUrl` through `navHrefFlag`, blanking a gated href) —
+            never swap in another destination. */}
+        {((primaryLabel && primaryUrl) || (secondaryLabel && secondaryUrl)) && (
           <div
             className="umsc-hero-rise mt-9 flex flex-wrap items-center justify-center gap-4"
             style={{ transitionDelay: "200ms" }}
             data-visible={shown || undefined}
           >
-            {primaryLabel && (
+            {primaryLabel && primaryUrl && (
               <UmscButton
                 variant="gold"
                 href={primaryUrl}
@@ -152,7 +156,7 @@ export function UmscHeroSection({
                 {primaryLabel}
               </UmscButton>
             )}
-            {secondaryLabel && (
+            {secondaryLabel && secondaryUrl && (
               <UmscButton
                 variant="ghost"
                 href={secondaryUrl}

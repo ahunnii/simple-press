@@ -107,7 +107,7 @@ export async function UmscLayout({
         {children}
       </main>
 
-      <UmscFooter business={business} />
+      <UmscFooter business={business} initialSession={session ?? null} />
     </div>
   );
 }

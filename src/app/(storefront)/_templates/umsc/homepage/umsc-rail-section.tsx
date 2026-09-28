@@ -46,7 +46,7 @@ export function UmscRailSection({
         >
           {heading}
         </UmscHeading>
-        {ctaLabel && (
+        {ctaLabel && ctaUrl && (
           <UmscButton
             variant="link"
             href={ctaUrl}

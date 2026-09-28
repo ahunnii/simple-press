@@ -51,9 +51,10 @@ export function UmscCollectionPage({
       <section
         aria-label="Collection introduction"
         className="relative border-b-2 border-[var(--umsc-gold)] bg-[var(--umsc-black)]"
+        style={{ paddingInline: "var(--umsc-section-pad-x)" }}
       >
         <div
-          className="mx-auto grid items-center gap-10 px-6 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-24"
+          className="mx-auto grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24"
           style={{ maxWidth: "var(--umsc-container)" }}
         >
           <div>

@@ -20,6 +20,11 @@ import {
 import { umscCollectionsData, umscCollectionsFieldGroups } from "./collections";
 import { umscContactData, umscContactFieldGroups } from "./contact";
 import { umscFaqData, umscFaqFieldGroups } from "./faq";
+import { umscBlogData, umscBlogFieldGroups } from "./blog";
+import { umscEventsData, umscEventsFieldGroups } from "./events";
+import { umscVideosData, umscVideosFieldGroups } from "./videos";
+import { umscDonateData, umscDonateFieldGroups } from "./donate";
+import { umscServicesData, umscServicesFieldGroups } from "./services";
 import { umscHomepageData, umscHomepageFieldGroups } from "./homepage";
 import { umscProductData, umscProductFieldGroups } from "./products";
 import { umscShopData, umscShopFieldGroups } from "./shop";
@@ -175,6 +180,11 @@ export const umscData: Record<string, TemplateField[]> = {
     ...umscContactData,
     ...umscTestimonialsData,
     ...umscFaqData,
+    ...umscBlogData,
+    ...umscEventsData,
+    ...umscVideosData,
+    ...umscDonateData,
+    ...umscServicesData,
     ...umscCartData,
     ...umscCheckoutData,
     ...umscCheckoutUnavailableData,
@@ -195,6 +205,11 @@ export const umscFieldGroups: Record<string, TemplateFieldGroup[]> = {
     ...umscContactFieldGroups,
     ...umscTestimonialsFieldGroups,
     ...umscFaqFieldGroups,
+    ...umscBlogFieldGroups,
+    ...umscEventsFieldGroups,
+    ...umscVideosFieldGroups,
+    ...umscDonateFieldGroups,
+    ...umscServicesFieldGroups,
     ...umscCartFieldGroups,
     ...umscCheckoutFieldGroups,
     ...umscCheckoutUnavailableFieldGroups,

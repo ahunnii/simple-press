@@ -7,6 +7,11 @@ import { umscCartCheckoutSections } from "./cart-checkout";
 import { umscCollectionsSections } from "./collections";
 import { umscContactSections } from "./contact";
 import { umscFaqSections } from "./faq";
+import { umscBlogSections } from "./blog";
+import { umscEventsSections } from "./events";
+import { umscVideosSections } from "./videos";
+import { umscDonateSections } from "./donate";
+import { umscServicesSections } from "./services";
 import { umscHomepageSections } from "./homepage";
 import { umscProductSections } from "./products";
 import { umscShopSections } from "./shop";
@@ -59,6 +64,11 @@ export const umscSections: Record<string, TemplateSection[]> = {
     ...umscContactSections,
     ...umscTestimonialsSections,
     ...umscFaqSections,
+    ...umscBlogSections,
+    ...umscEventsSections,
+    ...umscVideosSections,
+    ...umscDonateSections,
+    ...umscServicesSections,
     ...umscAccountSections,
     ...umscCartCheckoutSections,
   ],

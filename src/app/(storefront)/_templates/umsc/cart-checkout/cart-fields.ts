@@ -68,6 +68,17 @@ export const umscCartData: TemplateField[] = [
     defaultValue: "Checkout",
   },
   {
+    key: "umsc.cart.empty-shop-all-label",
+    label: "Empty bag shop-all button text",
+    description:
+      "Button shown on the empty-bag state that links to the full shop — the way back when the doors below don't fit.",
+    type: "text",
+    page: "cart",
+    group: "cart.main",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop all",
+  },
+  {
     key: "umsc.cart.empty-doors",
     label: "Empty bag doors",
     description:

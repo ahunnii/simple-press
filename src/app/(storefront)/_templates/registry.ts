@@ -438,6 +438,8 @@ import { UmscOrdersPage } from "./umsc/account/umsc-orders-page";
 import { UmscPreferencesPage } from "./umsc/account/umsc-preferences-page";
 import { UmscRewardsPage } from "./umsc/account/umsc-rewards-page";
 import { UmscSubscriptionsPage } from "./umsc/account/umsc-subscriptions-page";
+import { UmscBlogPage } from "./umsc/blog/umsc-blog-page";
+import { UmscBlogPostPage } from "./umsc/blog/umsc-blog-post-page";
 import { UmscCartPage } from "./umsc/cart-checkout/umsc-cart-page";
 import { UmscCheckoutPage } from "./umsc/cart-checkout/umsc-checkout-page";
 import { UmscCheckoutUnavailable } from "./umsc/cart-checkout/umsc-checkout-unavailable";
@@ -445,13 +447,18 @@ import { UmscOrderSuccessPage } from "./umsc/cart-checkout/umsc-order-success-pa
 import { UmscCollectionPage } from "./umsc/collections/umsc-collection-page";
 import { UmscCollectionsPage } from "./umsc/collections/umsc-collections-page";
 import { UmscContactPage } from "./umsc/contact/umsc-contact-page";
+import { UmscDonatePage } from "./umsc/donate/umsc-donate-page";
+import { UmscEventPage } from "./umsc/events/umsc-event-page";
+import { UmscEventsPage } from "./umsc/events/umsc-events-page";
 import { UmscFaqPage } from "./umsc/faq/umsc-faq-page";
 import { UmscGenericPage } from "./umsc/generic/umsc-generic-page";
 import { UmscLayout } from "./umsc/layout/umsc-layout";
 import { UmscMaintenancePage } from "./umsc/maintenance/umsc-maintenance-page";
 import { UmscProductPage } from "./umsc/products/umsc-product-page";
+import { UmscServicesIndexPage } from "./umsc/services/umsc-services-index-page";
 import { UmscShopPage } from "./umsc/shop/umsc-shop-page";
 import { UmscTestimonialsPage } from "./umsc/testimonials/umsc-testimonials-page";
+import { UmscVideosPage } from "./umsc/videos/umsc-videos-page";
 // ---------------------------------------------------------------------------
 // Vii (Skinbar VII)
 // ---------------------------------------------------------------------------
@@ -928,6 +935,13 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderSuccessPage: UmscOrderSuccessPage,
     TestimonialsPage: UmscTestimonialsPage,
     FaqPage: UmscFaqPage,
+    BlogPage: UmscBlogPage,
+    BlogPostPage: UmscBlogPostPage,
+    ServicesIndexPage: UmscServicesIndexPage,
+    EventsPage: UmscEventsPage,
+    EventPage: UmscEventPage,
+    VideosPage: UmscVideosPage,
+    DonatePage: UmscDonatePage,
     GenericPage: UmscGenericPage,
     AccountSettingsPage: UmscAccountSettingsPage,
     AccountSecurityPage: UmscAccountSecurityPage,

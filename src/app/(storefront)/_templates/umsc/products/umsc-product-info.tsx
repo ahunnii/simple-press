@@ -28,10 +28,16 @@ type Props = {
   collectionName?: string;
   shippingDescription: string;
   hasShippingPolicy: boolean;
+  /** `product.shipping` section visibility (eye toggle) AND text-or-policy. */
+  showShippingRow: boolean;
   returnsNote: string;
   hasRefundPolicy: boolean;
+  /** `product.returns` section visibility (eye toggle) AND text-or-policy. */
+  showReturnsRow: boolean;
   questionDescription: string;
   questionLinkLabel: string;
+  /** `product.questions` section visibility (eye toggle) AND text set. */
+  showQuestionsRow: boolean;
   comingSoonHeading: string;
   comingSoonBody: string;
   /** Rows from the store-wide trust-badges list, in saved order. */
@@ -51,10 +57,13 @@ export function UmscProductInfo({
   collectionName,
   shippingDescription,
   hasShippingPolicy,
+  showShippingRow,
   returnsNote,
   hasRefundPolicy,
+  showReturnsRow,
   questionDescription,
   questionLinkLabel,
+  showQuestionsRow,
   comingSoonHeading,
   comingSoonBody,
   globalTrustBadges,
@@ -300,9 +309,18 @@ export function UmscProductInfo({
 
           {/* Trust badges — `storeIndex` is only present on store-list rows
               (see the comment above `trustBadges`), so only those get a
-              `listItemAttr`; a product's own badges get none. */}
+              `listItemAttr`; a product's own badges get none. The
+              `product.details` group also covers coming-soon copy and the
+              reviews/related headings (own `fieldAttr`s elsewhere in this
+              file and in `umsc-product-page.tsx`); this is the one
+              self-contained node in the group, so its rail hotspot lives
+              here (PF14/B6.2 split left `product.details` with no single
+              contiguous root otherwise). */}
           {trustBadges.length > 0 && (
-            <div className="umsc-sans flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-[var(--umsc-muted)]">
+            <div
+              {...sectionGroupAttr("product", "details")}
+              className="umsc-sans flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-[var(--umsc-muted)]"
+            >
               {trustBadges.map((badge, i) => (
                 <span
                   key={`${badge.label}-${i}`}
@@ -321,64 +339,86 @@ export function UmscProductInfo({
             </div>
           )}
 
-          {/* Shipping & pickup / Returns / Ask a question — `product.details`
-              copy. `UmscAccordion` doesn't forward arbitrary props, so the
-              hotspot attribute lives on this wrapping div. */}
-          <div {...sectionGroupAttr("product", "details")}>
-            <h2 className="sr-only">Product details</h2>
-            <UmscAccordion className="mt-2">
-              {shippingDescription && (
-                <UmscAccordionItem title="Shipping & pickup" defaultOpen>
-                  <p {...fieldAttr("umsc.global.product-shipping-description")}>
-                    {shippingDescription}
-                  </p>
-                  {hasShippingPolicy ? (
-                    <Link
-                      href="/shipping-policy"
-                      className="mt-3 inline-block text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
-                    >
-                      View our shipping policy
-                    </Link>
-                  ) : null}
-                </UmscAccordionItem>
-              )}
-              {returnsNote && (
-                <UmscAccordionItem title="Returns">
-                  <p {...fieldAttr("umsc.product.returns-note")}>
-                    {returnsNote}
-                  </p>
-                  {hasRefundPolicy ? (
-                    <Link
-                      href="/refund-policy"
-                      className="mt-3 inline-block text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
-                    >
-                      View our return policy
-                    </Link>
-                  ) : null}
-                </UmscAccordionItem>
-              )}
-              {questionDescription && (
-                <UmscAccordionItem title="Ask a question">
-                  <p>
-                    <span
-                      {...fieldAttr("umsc.global.product-question-description")}
-                    >
-                      {questionDescription}
-                    </span>{" "}
-                    {questionLinkLabel ? (
-                      <Link
-                        href="/contact"
-                        {...fieldAttr("umsc.product.question-link-label")}
-                        className="text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
-                      >
-                        {questionLinkLabel}
-                      </Link>
-                    ) : null}
-                  </p>
-                </UmscAccordionItem>
-              )}
-            </UmscAccordion>
-          </div>
+          {/* Shipping & pickup / Returns / Ask a question — each accordion
+              row is its OWN hideable section (`product.shipping` /
+              `product.returns` / `product.questions`, PF14/B6.2) so an
+              owner can hide one row without hiding the others.
+              `UmscAccordion` doesn't forward arbitrary props, so each
+              row's hotspot attribute lives on a wrapping div around its
+              own `UmscAccordionItem`. */}
+          {(showShippingRow || showReturnsRow || showQuestionsRow) && (
+            <>
+              <h2 className="sr-only">Product details</h2>
+              <UmscAccordion className="mt-2">
+                {showShippingRow && (
+                  <div {...sectionGroupAttr("product", "shipping")}>
+                    <UmscAccordionItem title="Shipping & pickup" defaultOpen>
+                      {shippingDescription ? (
+                        <p
+                          {...fieldAttr(
+                            "umsc.global.product-shipping-description",
+                          )}
+                        >
+                          {shippingDescription}
+                        </p>
+                      ) : null}
+                      {hasShippingPolicy ? (
+                        <Link
+                          href="/shipping-policy"
+                          className="mt-3 inline-block text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
+                        >
+                          View our shipping policy
+                        </Link>
+                      ) : null}
+                    </UmscAccordionItem>
+                  </div>
+                )}
+                {showReturnsRow && (
+                  <div {...sectionGroupAttr("product", "returns")}>
+                    <UmscAccordionItem title="Returns">
+                      {returnsNote ? (
+                        <p {...fieldAttr("umsc.product.returns-note")}>
+                          {returnsNote}
+                        </p>
+                      ) : null}
+                      {hasRefundPolicy ? (
+                        <Link
+                          href="/refund-policy"
+                          className="mt-3 inline-block text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
+                        >
+                          View our return policy
+                        </Link>
+                      ) : null}
+                    </UmscAccordionItem>
+                  </div>
+                )}
+                {showQuestionsRow && (
+                  <div {...sectionGroupAttr("product", "questions")}>
+                    <UmscAccordionItem title="Ask a question">
+                      <p>
+                        <span
+                          {...fieldAttr(
+                            "umsc.global.product-question-description",
+                          )}
+                        >
+                          {questionDescription}
+                        </span>{" "}
+                        {questionLinkLabel ? (
+                          <Link
+                            href="/contact"
+                            {...fieldAttr("umsc.product.question-link-label")}
+                            className="text-[var(--umsc-gold-ink)] underline underline-offset-[0.18em] hover:text-[var(--umsc-ink)]"
+                          >
+                            {questionLinkLabel}
+                          </Link>
+                        ) : null}
+                      </p>
+                    </UmscAccordionItem>
+                  </div>
+                )}
+              </UmscAccordion>
+            </>
+          )}
         </div>
       </div>
     </UmscSection>

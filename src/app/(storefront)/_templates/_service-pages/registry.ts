@@ -27,6 +27,7 @@ import { NOISE_SERVICE_COMPONENTS } from "../noise/services/service-pages/compon
 import { OLIVE_SERVICE_COMPONENTS } from "../olive/services/service-pages/components";
 import { PINK_SERVICE_COMPONENTS } from "../pink/services/service-pages/components";
 import { POLLEN_SERVICE_COMPONENTS } from "../pollen/services/service-pages/components";
+import { UMSC_SERVICE_COMPONENTS } from "../umsc/services/service-pages/components";
 import { VII_SERVICE_COMPONENTS } from "../vii/services/service-pages/components";
 import { WEALTH_SERVICE_COMPONENTS } from "../wealth/services/service-pages/components";
 import { ServiceTemplateOne } from "./service-one/service-one-page";
@@ -71,6 +72,7 @@ export const SERVICE_TEMPLATE_COMPONENTS: Record<
   ...BAMBOO_SERVICE_COMPONENTS,
   ...OLIVE_SERVICE_COMPONENTS,
   ...NOISE_SERVICE_COMPONENTS,
+  ...UMSC_SERVICE_COMPONENTS,
 };
 
 /**

@@ -59,7 +59,7 @@ export function UmscCategoriesSection({
             </UmscLede>
           )}
         </div>
-        {allLabel && (
+        {allLabel && allUrl && (
           <UmscButton
             variant="link"
             href={allUrl}

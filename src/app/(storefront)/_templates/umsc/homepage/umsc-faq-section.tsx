@@ -54,7 +54,7 @@ export function UmscFaqSection({
               {lede}
             </UmscLede>
           )}
-          {allLabel && (
+          {allLabel && allUrl && (
             <div className="mt-6">
               <UmscButton
                 variant="link"

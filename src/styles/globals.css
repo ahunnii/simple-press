@@ -12744,7 +12744,7 @@ body:has(.pollen) {
   animation: umsc-pulse 0.32s var(--umsc-ease);
 }
 
-/* Mobile nav dialog — slides in from the left; links stagger via nth-child. */
+/* Mobile nav dialog — slides in from the left (exit slide lives in umsc-nav-dialog.tsx). */
 @keyframes umsc-nav-dialog-in {
   from {
     transform: translateX(-100%);
@@ -13387,7 +13387,7 @@ body:has(.pollen) {
     transform: none;
   }
 
-  .umsc-nav-dialog {
+  .umsc .umsc-nav-dialog {
     animation: none;
   }
 

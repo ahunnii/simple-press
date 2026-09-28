@@ -35,13 +35,25 @@ export const umscOrderData: TemplateField[] = [
     key: "umsc.order.next-steps",
     label: "Next steps",
     description:
-      "Short lines shown under the next-steps heading — one per line — e.g. email confirmation, shipping notice, contact info. Leave blank to hide the list.",
+      "Short lines shown under the next-steps heading — one per line — e.g. email confirmation, shipping notice. Shown for shipped orders and for any order whose delivery method is unknown. A customer-service phone number from Settings is added automatically beneath the list. Leave blank to hide the list.",
     type: "textarea",
     page: "checkout",
     group: "checkout.success",
     gridColumn: "col-span-full",
     defaultValue:
-      "You'll receive an email confirmation shortly.\nWe'll let you know as soon as your order ships.\nQuestions? Call or text 313-826-9688.",
+      "You'll receive an email confirmation shortly.\nWe'll let you know as soon as your order ships.",
+  },
+  {
+    key: "umsc.order.next-steps-pickup",
+    label: "Next steps — pickup orders",
+    description:
+      "Shown instead of the list above when the order was placed for in-store pickup. One line per row. Leave blank to reuse the list above for pickup orders too.",
+    type: "textarea",
+    page: "checkout",
+    group: "checkout.success",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "You'll receive an email confirmation shortly.\nWe'll let you know when your order is ready for pickup.",
   },
   {
     key: "umsc.order.continue-cta",
@@ -105,7 +117,7 @@ export const umscOrderFieldGroups: TemplateFieldGroup[] = [
     id: "checkout.success",
     title: "Order confirmation",
     description:
-      "Thank-you heading, next-steps copy, and loading / no-order messaging.",
+      "Thank-you heading, next-steps copy (with a pickup-order variant), and loading / no-order messaging.",
     icon: "✓",
     columns: 2,
   },

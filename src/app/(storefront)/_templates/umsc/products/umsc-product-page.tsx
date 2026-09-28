@@ -1,6 +1,7 @@
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   isContentEmpty,
@@ -71,9 +72,11 @@ const PRODUCT_PROSE_STYLE = `
 
 /**
  * UmscProductPage — design.md "Product". Server half resolves the breadcrumb
- * collection, the product-page copy (`product.details`), and the
- * related-products grid; gallery/price/variant/cart state is handed off to
- * `UmscProductInfo` ("use client", per `useProduct`'s requirement).
+ * collection, the product-page copy (`product.details` plus the hideable
+ * `product.shipping` / `product.returns` / `product.questions` accordion
+ * rows), and the related-products grid; gallery/price/variant/cart state is
+ * handed off to `UmscProductInfo` ("use client", per `useProduct`'s
+ * requirement).
  */
 export async function UmscProductPage({
   product,
@@ -116,6 +119,24 @@ export async function UmscProductPage({
     ? !isContentEmpty(additionalInformation)
     : false;
 
+  // Each accordion row is its own hideable section (product.shipping /
+  // product.returns / product.questions) so an owner can hide one without
+  // hiding the others. A row still shows with blank owner text as long as
+  // its policy page is published, so the "View our … policy" link stays
+  // reachable (olive/noise/dream precedent, PF14/B6.2).
+  const shippingText = f["umsc.global.product-shipping-description"] ?? "";
+  const returnsText = f["umsc.product.returns-note"] ?? "";
+  const questionText = f["umsc.global.product-question-description"] ?? "";
+  const showShippingRow =
+    isSectionVisible(customFields, "umsc", "product.shipping") &&
+    (shippingText !== "" || (productPolicies?.hasShippingPolicy ?? false));
+  const showReturnsRow =
+    isSectionVisible(customFields, "umsc", "product.returns") &&
+    (returnsText !== "" || (productPolicies?.hasRefundPolicy ?? false));
+  const showQuestionsRow =
+    isSectionVisible(customFields, "umsc", "product.questions") &&
+    questionText !== "";
+
   return (
     <div>
       <TrackView
@@ -146,16 +167,15 @@ export async function UmscProductPage({
       <UmscProductInfo
         product={product}
         collectionName={firstCollection?.name}
-        shippingDescription={
-          f["umsc.global.product-shipping-description"] ?? ""
-        }
+        shippingDescription={shippingText}
         hasShippingPolicy={productPolicies?.hasShippingPolicy ?? false}
-        returnsNote={f["umsc.product.returns-note"] ?? ""}
+        showShippingRow={showShippingRow}
+        returnsNote={returnsText}
         hasRefundPolicy={productPolicies?.hasRefundPolicy ?? false}
-        questionDescription={
-          f["umsc.global.product-question-description"] ?? ""
-        }
+        showReturnsRow={showReturnsRow}
+        questionDescription={questionText}
         questionLinkLabel={f["umsc.product.question-link-label"] ?? ""}
+        showQuestionsRow={showQuestionsRow}
         comingSoonHeading={f["umsc.product.coming-soon-heading"] ?? ""}
         comingSoonBody={f["umsc.product.coming-soon-body"] ?? ""}
         globalTrustBadges={globalTrustBadges}

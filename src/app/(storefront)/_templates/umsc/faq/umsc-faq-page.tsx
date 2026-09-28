@@ -61,9 +61,10 @@ export function UmscFaqPage({ business, items }: DefaultFaqPageTemplateProps) {
         aria-label="Page introduction"
         {...sectionGroupAttr("faq", "hero")}
         className="umsc-black-surface relative border-b-2 border-[var(--umsc-gold)] bg-[var(--umsc-black)]"
+        style={{ paddingInline: "var(--umsc-section-pad-x)" }}
       >
         <div
-          className="mx-auto px-6 py-16 sm:px-8 lg:py-24"
+          className="mx-auto py-16 lg:py-24"
           style={{ maxWidth: "var(--umsc-container)" }}
         >
           <UmscHeading

@@ -1,66 +1,110 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Heart, Phone, X } from "lucide-react";
 
-import type { UmscNavLink } from "./umsc-header";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
 import { UmscButton } from "../shared/umsc-button";
 import { umscTelHref } from "../shared/umsc-contact-details";
 import { UmscNavDialogAccount } from "./umsc-nav-dialog-account";
 
 type Props = {
+  /** DOM id — the header's hamburger points `aria-controls` at it. */
+  id: string;
   open: boolean;
   onClose: () => void;
-  links: UmscNavLink[];
+  /** The header's nav — the same resolved, flag-filtered array. */
+  links: NavItem[];
+  /** Index of the current top-level item (-1: none), from the header. */
+  activeIndex: number;
   businessName: string;
   brand: React.ReactNode;
   phone?: string;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
   initialSession?: Session | null;
   accountsEnabled: boolean;
+  /** Business flag check, for the account block's flag-gated links. */
+  isEnabled: (flag: string) => boolean;
   /** `wishlist` storefront flag — the link is omitted entirely when off. */
   wishlistEnabled: boolean;
   wishlistCount?: number;
-  /** Pinned gold pill (`umsc.global.nav-cta-*`). Empty label hides it. */
+  /** Pinned gold pill (`umsc.global.nav-cta-*`). Empty label hides it (the
+   *  header also blanks it when the URL points at a flag-disabled route). */
   ctaLabel: string;
   ctaUrl: string;
 };
 
+/** Exit duration (design.md Motion: "close reverses at 200 ms"). */
+const EXIT_MS = 200;
+
+/** Screen-reader hint on links that open in a new tab. */
+function externalHint(external?: boolean) {
+  return external ? <span className="sr-only"> (opens in new tab)</span> : null;
+}
+
 /**
  * UmscNavDialog — full-screen black mobile menu. Slides in from the left
- * (`.umsc-nav-dialog` in globals.css), focus-trapped with inert siblings and
- * a body scroll lock, Marcellus 30px links, and an owner-editable gold pill
+ * (`.umsc-nav-dialog` keyframe in globals.css) and slides back out over
+ * 200 ms on close (kept mounted until the exit ends; unmounted at once under
+ * `prefers-reduced-motion`). Focus-trapped with inert siblings and a body
+ * scroll lock, Marcellus 30px links, and an owner-editable gold pill
  * (`umsc.global.nav-cta-label` / `-url`, default "Custom order") pinned at
- * the bottom — cleared label hides it. An account block (sign in / account links) and, when
- * the `wishlist` flag is on, a wishlist link are pinned above the phone number
- * and CTA. Closes on route change, Escape, or the X
+ * the bottom — cleared label hides it. An account block (sign in / account
+ * links) and, when the `wishlist` flag is on, a wishlist link are pinned
+ * above the phone number and CTA. Closes on route change, Escape, or the X
  * button, and returns focus to the trigger (`triggerRef`, the header's
  * hamburger button).
+ *
+ * A nav parent with children renders as a non-link group label with its
+ * entries indented underneath (`navGroupEntries`: the parent's own href
+ * first, when it has one) — never flattened, never a dead link. The group
+ * that owns the current page is marked, and exactly one entry carries
+ * `aria-current` (longest match).
  */
 export function UmscNavDialog({
+  id,
   open,
   onClose,
   links,
+  activeIndex,
   businessName,
   brand,
   phone,
   triggerRef,
   initialSession,
   accountsEnabled,
+  isEnabled,
   wishlistEnabled,
   wishlistCount = 0,
   ctaLabel,
   ctaUrl,
 }: Props) {
   const pathname = usePathname();
+  const reduced = useReducedMotion();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
-  const menuId = useId();
+
+  // Presence: stay mounted through the exit slide after `open` flips false.
+  const [present, setPresent] = useState(open);
+  useEffect(() => {
+    if (open) {
+      setPresent(true);
+      return;
+    }
+    const timer = setTimeout(() => setPresent(false), reduced ? 0 : EXIT_MS);
+    return () => clearTimeout(timer);
+  }, [open, reduced]);
 
   // Close on route change.
   useEffect(() => {
@@ -93,8 +137,8 @@ export function UmscNavDialog({
   useEffect(() => {
     if (open) {
       wasOpenRef.current = true;
-      const id = setTimeout(() => closeButtonRef.current?.focus(), 0);
-      return () => clearTimeout(id);
+      const timer = setTimeout(() => closeButtonRef.current?.focus(), 0);
+      return () => clearTimeout(timer);
     } else if (wasOpenRef.current) {
       wasOpenRef.current = false;
       triggerRef.current?.focus();
@@ -148,18 +192,39 @@ export function UmscNavDialog({
     return () => document.removeEventListener("keydown", handleTab);
   }, [open]);
 
-  if (!open) return null;
+  // Reduced motion: gone the moment `open` flips — no exit frame at all.
+  if (!(open || (present && !reduced))) return null;
+  const closing = !open;
 
   return (
     <div
       ref={dialogRef}
-      id={menuId}
+      id={id}
       role="dialog"
       aria-modal="true"
       aria-label="Navigation menu"
-      className="umsc-nav-dialog fixed inset-0 z-[60] flex flex-col bg-[var(--umsc-black)] max-[959px]:flex min-[960px]:hidden"
+      aria-hidden={closing || undefined}
+      inert={closing}
+      className="umsc-nav-dialog fixed inset-0 z-[60] flex flex-col overflow-y-auto overscroll-contain bg-[var(--umsc-black)] max-[959px]:flex min-[960px]:hidden"
+      style={
+        reduced
+          ? // The globals.css reduced-motion rule (`.umsc-nav-dialog`) loses
+            // to `.umsc .umsc-nav-dialog` on specificity, so settle the
+            // entrance here too.
+            { animation: "none" }
+          : closing
+            ? {
+                transform: "translateX(-100%)",
+                transition: `transform ${EXIT_MS}ms var(--umsc-ease)`,
+              }
+            : undefined
+      }
     >
-      <div className="flex shrink-0 items-center justify-between px-6 py-4">
+      {/* The whole sheet scrolls as one column (the header row stays
+          pinned) — an inner scroll region above a pinned account block
+          clipped the last nav rows cleanly at a row boundary once the
+          signed-in block grew, so the list looked like it just ended. */}
+      <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between bg-[var(--umsc-black)] px-6 py-4">
         <Link href="/" onClick={onClose} aria-label={`${businessName} — Home`}>
           {brand}
         </Link>
@@ -174,49 +239,76 @@ export function UmscNavDialog({
         </button>
       </div>
 
-      <nav
-        className="flex-1 overflow-y-auto px-6 py-2"
-        aria-label="Mobile navigation"
-      >
+      <nav className="flex-1 px-6 py-2" aria-label="Mobile navigation">
         <ul className="flex flex-col">
-          {links.map((link) => (
-            <li
-              key={link.href + link.label}
-              className="border-b border-[var(--umsc-line-gold)]"
-            >
-              <Link
-                href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
-                onClick={onClose}
-                className="umsc-serif flex items-center justify-between py-5 text-[30px] text-[var(--umsc-cream-on-black)] no-underline"
+          {links.map((item, i) => {
+            const current = i === activeIndex;
+
+            if (item.children?.length) {
+              const entries = navGroupEntries(item);
+              const activeEntry = current
+                ? activeEntryIndex(pathname, entries)
+                : -1;
+              const labelId = `${id}-group-${i}`;
+              return (
+                <li
+                  key={`${i}-${item.label}`}
+                  className="border-b border-[var(--umsc-line-gold)]"
+                >
+                  <span
+                    id={labelId}
+                    data-current={current ? "true" : undefined}
+                    className="umsc-serif block pt-5 pb-2 text-[30px] text-[var(--umsc-cream-on-black)] data-[current=true]:text-[var(--umsc-gold-soft)]"
+                  >
+                    {item.label}
+                  </span>
+                  <ul
+                    aria-labelledby={labelId}
+                    className="flex flex-col pb-4 pl-4"
+                  >
+                    {entries.map((entry, j) => (
+                      <li key={`${j}-${entry.href}-${entry.label}`}>
+                        <Link
+                          href={entry.href}
+                          {...externalLinkProps(entry.external)}
+                          onClick={onClose}
+                          aria-current={j === activeEntry ? "page" : undefined}
+                          data-current={j === activeEntry ? "true" : undefined}
+                          className="umsc-sans flex min-h-[44px] items-center gap-2 text-[14px] tracking-[0.06em] text-[var(--umsc-cream-on-black)] uppercase no-underline data-[current=true]:text-[var(--umsc-gold-soft)]"
+                        >
+                          <ChevronDown
+                            className="size-3 -rotate-90"
+                            aria-hidden="true"
+                          />
+                          {entry.label}
+                          {externalHint(entry.external)}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            }
+
+            return (
+              <li
+                key={`${i}-${item.label}`}
+                className="border-b border-[var(--umsc-line-gold)]"
               >
-                {link.label}
-                {link.external && (
-                  <span className="sr-only"> (opens in new tab)</span>
-                )}
-              </Link>
-              {link.children?.length ? (
-                <ul className="flex flex-col gap-1 pb-4 pl-4">
-                  {link.children.map((child) => (
-                    <li key={child.href + child.label}>
-                      <Link
-                        href={child.href}
-                        onClick={onClose}
-                        className="umsc-sans flex items-center gap-2 py-2 text-[14px] tracking-[0.06em] text-[var(--umsc-cream-on-black)] uppercase no-underline"
-                      >
-                        <ChevronDown
-                          className="size-3 -rotate-90"
-                          aria-hidden="true"
-                        />
-                        {child.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </li>
-          ))}
+                <Link
+                  href={item.href}
+                  {...externalLinkProps(item.external)}
+                  onClick={onClose}
+                  aria-current={current ? "page" : undefined}
+                  data-current={current ? "true" : undefined}
+                  className="umsc-serif flex items-center justify-between py-5 text-[30px] text-[var(--umsc-cream-on-black)] no-underline data-[current=true]:text-[var(--umsc-gold-soft)]"
+                >
+                  {item.label}
+                  {externalHint(item.external)}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 
@@ -224,6 +316,7 @@ export function UmscNavDialog({
         <UmscNavDialogAccount
           initialSession={initialSession}
           accountsEnabled={accountsEnabled}
+          isEnabled={isEnabled}
           onClose={onClose}
         />
         {wishlistEnabled && (

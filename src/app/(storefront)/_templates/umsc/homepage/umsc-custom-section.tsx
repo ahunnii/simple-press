@@ -80,7 +80,7 @@ export function UmscCustomSection({
               </UmscLede>
             )}
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              {ctaLabel && (
+              {ctaLabel && ctaUrl && (
                 <UmscButton
                   variant="gold"
                   href={ctaUrl}
@@ -90,7 +90,7 @@ export function UmscCustomSection({
                   {ctaLabel}
                 </UmscButton>
               )}
-              {secondaryLabel && (
+              {secondaryLabel && secondaryUrl && (
                 <UmscButton
                   variant="ghost"
                   href={secondaryUrl}

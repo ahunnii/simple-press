@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { Session } from "~/server/better-auth/config";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import {
@@ -11,6 +13,14 @@ import {
 } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
+import {
+  externalLinkProps,
+  filterNavByFlags,
+  getAccountNavLinks,
+  navHrefFlag,
+  resolveFooterNav,
+  type NavChild,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields, UMSC_FOOTER_SHOP_LINKS_DEFAULT } from "../index";
 import {
@@ -19,12 +29,36 @@ import {
 } from "../shared/umsc-contact-details";
 import { UmscGoogleReviewLink } from "../shared/umsc-google-review-link";
 import { UmscSocialIcons } from "../shared/umsc-social-icons";
+import { UmscFooterAccount } from "./umsc-footer-account";
 
 // Re-exported so the pre-migration import path (and the snapshot test) keep
 // working — the rows themselves now live in `../index.ts`'s `defaultRows`.
 export { UMSC_FOOTER_SHOP_LINKS_DEFAULT };
 
-export async function UmscFooter({ business }: DefaultFooterTemplateProps) {
+/**
+ * Help column defaults — today's hard-coded copy minus the retired policy
+ * link (B10.1: policy links now live only in the bottom legal strip, PF19).
+ * Overridden by an owner-saved footer quick-links list (Admin → Navigation →
+ * Footer Quick Links), flag-filtered either way (B10.2/B10.4, PF21).
+ */
+const UMSC_HELP_DEFAULTS: NavChild[] = [
+  { label: "FAQ", href: "/faq" },
+  { label: "Contact", href: "/contact" },
+  { label: "Custom orders", href: "/contact?type=custom" },
+];
+
+type UmscFooterProps = DefaultFooterTemplateProps & {
+  /** The layout's server-side session, seeding the account rows (B10.3) so
+   *  they never flash. Optional — when the layout doesn't pass one, the
+   *  account rows still render flash-free (they render nothing while the
+   *  client-side session fetch is pending). */
+  initialSession?: Session | null;
+};
+
+export async function UmscFooter({
+  business,
+  initialSession,
+}: UmscFooterProps) {
   const name = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
   const logoAlt = resolveLogoAlt(business?.siteContent?.logoAltText, name);
@@ -53,17 +87,79 @@ export async function UmscFooter({ business }: DefaultFooterTemplateProps) {
   const shopLinks =
     shopLinkRows.length > 0 ? shopLinkRows : UMSC_FOOTER_SHOP_LINKS_DEFAULT;
 
+  // Owner list + "All products", each row filtered by its own route flag
+  // (PF21/B10.2) — the column stays gated on `products` below, but a
+  // collection door (e.g. `/collections/candles`) must also drop out when
+  // `collections` is off, independent of the column-level gate.
+  const shopColLinks = [
+    ...shopLinks.map((row, i) => ({
+      href: typeof row.url === "string" ? row.url : "",
+      label: typeof row.label === "string" ? row.label : "",
+      itemIndex: i,
+    })),
+    { href: "/shop", label: "All products" },
+  ].filter((link) => {
+    const flag = navHrefFlag(link.href);
+    return flag === null || isEnabled(flag);
+  });
+
+  // Help column: owner-saved footer quick links (Admin → Navigation), else
+  // UMSC_HELP_DEFAULTS, flag-filtered (B10.2/B10.4, PF21).
+  const helpLinks = filterNavByFlags(
+    resolveFooterNav(business?.siteContent?.footerNavigationItems, UMSC_HELP_DEFAULTS),
+    isEnabled,
+  );
+
+  // Account rows appended to Help (B10.3, PF20): "My account" + "Orders"
+  // (only while `orders` is on) signed in, "Sign in" signed out.
+  const accountsEnabled = isEnabled("customerAccounts");
+  const accountLinksAll = getAccountNavLinks({ isEnabled });
+  const settingsLink = accountLinksAll.find((link) => link.key === "settings");
+  const ordersLink = accountLinksAll.find((link) => link.key === "orders");
+  const signedInLinks = [
+    ...(settingsLink ? [{ label: "My account", href: settingsLink.href }] : []),
+    ...(ordersLink ? [{ label: "Orders", href: ordersLink.href }] : []),
+  ];
+  // Column stays visible when only the account row would render (decision).
+  const showHelpCol = helpLinks.length > 0 || accountsEnabled;
+
   // Settings (phone) and Content → Branding (footer tagline, social links)
   // own this data; saved values from the retired `umsc.global.*` fields are
   // read only as a silent fallback — see `resolveUmscContactDetails`.
   const { phone, footerTagline, socials } = resolveUmscContactDetails(business);
 
+  // Bottom legal strip (B10.1, PF19): exactly the four standard policy
+  // slugs Admin → Policies creates, plus the platform policies index last.
+  // Privacy and terms fall back to the platform's own policy when
+  // unpublished; shipping and returns have no platform equivalent, so they
+  // show only once published. Never list any other policy-type page.
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
-  const storePolicy =
-    policies.find((p) => p.slug === "privacy-policy") ??
-    policies.find((p) => p.slug === "terms-of-service");
-  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
-  const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const bySlug = (slug: string) => policies.find((p) => p.slug === slug);
+  const privacyPolicy = bySlug("privacy-policy");
+  const termsOfService = bySlug("terms-of-service");
+  const shippingPolicy = bySlug("shipping-policy");
+  const refundPolicy = bySlug("refund-policy");
+  const legalLinks: { href: string; label: string }[] = [
+    {
+      href: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
+      label: "Privacy Policy",
+    },
+    {
+      href: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+      label: "Terms of Service",
+    },
+    ...(shippingPolicy
+      ? [{ href: `/${shippingPolicy.slug}`, label: "Shipping Policy" }]
+      : []),
+    ...(refundPolicy
+      ? [{ href: `/${refundPolicy.slug}`, label: "Returns & Refunds" }]
+      : []),
+    { href: "/platform/policies/", label: "Platform Policies" },
+  ];
 
   return (
     <footer
@@ -118,37 +214,32 @@ export async function UmscFooter({ business }: DefaultFooterTemplateProps) {
             )}
           </div>
 
-          {/* Col 2: Shop */}
-          {isEnabled("products") && (
+          {/* Col 2: Shop — gated on `products`, each row also filtered by
+              its own route flag (collections doors drop out on their own) */}
+          {isEnabled("products") && shopColLinks.length > 0 && (
             <UmscFooterCol
               title="Shop"
-              links={[
-                ...shopLinks.map((row, i) => ({
-                  href: typeof row.url === "string" ? row.url : "",
-                  label: typeof row.label === "string" ? row.label : "",
-                  itemIndex: i,
-                })),
-                { href: "/shop", label: "All products" },
-              ]}
+              links={shopColLinks}
               fieldKey="umsc.global.footer-shop-links"
             />
           )}
 
-          {/* Col 3: Help */}
-          <UmscFooterCol
-            title="Help"
-            links={[
-              { href: "/faq", label: "FAQ" },
-              {
-                href: storePolicy
-                  ? `/${storePolicy.slug}`
-                  : "/platform/policies/privacy-policy",
-                label: "Store Policy",
-              },
-              { href: "/contact", label: "Contact" },
-              { href: "/contact?type=custom", label: "Custom orders" },
-            ]}
-          />
+          {/* Col 3: Help — owner quick links (else UMSC_HELP_DEFAULTS) +
+              the account row (B10.3); hidden only when both are empty */}
+          {showHelpCol && (
+            <UmscFooterCol
+              title="Help"
+              links={helpLinks}
+              extra={
+                accountsEnabled ? (
+                  <UmscFooterAccount
+                    initialSession={initialSession}
+                    signedInLinks={signedInLinks}
+                  />
+                ) : null
+              }
+            />
+          )}
 
           {/* Col 4: Follow */}
           <div>
@@ -175,34 +266,23 @@ export async function UmscFooter({ business }: DefaultFooterTemplateProps) {
         <span className="umsc-sans text-[11px] tracking-[0.05em] text-[var(--umsc-cream-on-black)] opacity-80">
           © {new Date().getFullYear()} {name}
         </span>
-        <div className="umsc-sans flex flex-wrap gap-5 text-[10px] tracking-[0.1em] text-[var(--umsc-cream-on-black)] uppercase opacity-80">
-          <Link
-            href={
-              privacyPolicy
-                ? `/${privacyPolicy.slug}`
-                : "/platform/policies/privacy-policy"
-            }
-            className="text-inherit no-underline hover:opacity-100"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            href={
-              termsOfService
-                ? `/${termsOfService.slug}`
-                : "/platform/policies/terms-of-service"
-            }
-            className="text-inherit no-underline hover:opacity-100"
-          >
-            Terms of Service
-          </Link>
-          <Link
-            href="/platform/policies/"
-            className="text-inherit no-underline hover:opacity-100"
-          >
-            Platform Policies
-          </Link>
-        </div>
+        {/* Legal strip (B10.1): mandatory, never hidden — privacy, terms
+            (platform fallbacks), shipping + returns (only when published),
+            platform index last. */}
+        <nav aria-label="Policies">
+          <ul className="umsc-sans m-0 flex list-none flex-wrap gap-5 p-0 text-[10px] tracking-[0.1em] text-[var(--umsc-cream-on-black)] uppercase opacity-80">
+            {legalLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-inherit no-underline hover:opacity-100"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </footer>
   );
@@ -212,11 +292,19 @@ function UmscFooterCol({
   title,
   links,
   fieldKey,
+  extra,
 }: {
   title: string;
-  links: { href: string; label: string; itemIndex?: number }[];
+  links: {
+    href: string;
+    label: string;
+    itemIndex?: number;
+    external?: boolean;
+  }[];
   /** List field owning `itemIndex`-marked rows (e.g. `umsc.global.footer-shop-links`), for `data-sp-item`. */
   fieldKey?: string;
+  /** Extra `<li>` rows after the links (Help's account rows, B10.3). */
+  extra?: ReactNode;
 }) {
   return (
     <div>
@@ -235,12 +323,17 @@ function UmscFooterCol({
             >
               <Link
                 href={link.href}
+                {...externalLinkProps(link.external)}
                 className="umsc-sans text-[13px] text-[var(--umsc-cream-on-black)] no-underline opacity-90 hover:opacity-100"
               >
                 {link.label}
+                {link.external && (
+                  <span className="sr-only"> (opens in new tab)</span>
+                )}
               </Link>
             </li>
           ))}
+        {extra}
       </ul>
     </div>
   );

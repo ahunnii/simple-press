@@ -1,4 +1,5 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -70,6 +71,17 @@ export async function UmscAboutPage({
         })
       : null;
 
+  // B2.5: a field-driven CTA whose destination is a feature that is off
+  // (e.g. /shop with products off) hides — never swaps destinations. The
+  // fallbacks mirror the render components' `url || "/shop"` defaults.
+  const ctaAllowed = (url: string, fallback: string) => {
+    const flag = navHrefFlag(url || fallback);
+    return flag === null || isEnabled(flag);
+  };
+  const makerPrimaryUrl = f["umsc.about.maker-primary-url"] ?? "";
+  const makerSecondaryUrl = f["umsc.about.maker-secondary-url"] ?? "";
+  const ctaUrl = f["umsc.about.cta-button-url"] ?? "";
+
   return (
     <PageTransition>
       <UmscPageHero
@@ -89,10 +101,18 @@ export async function UmscAboutPage({
         body3={f["umsc.about.maker-body-3"] ?? ""}
         image={f["umsc.about.maker-image"] ?? undefined}
         imageAlt={f["umsc.about.maker-image-alt"] ?? ""}
-        primaryLabel={f["umsc.about.maker-primary-label"] ?? ""}
-        primaryUrl={f["umsc.about.maker-primary-url"] ?? ""}
-        secondaryLabel={f["umsc.about.maker-secondary-label"] ?? ""}
-        secondaryUrl={f["umsc.about.maker-secondary-url"] ?? ""}
+        primaryLabel={
+          ctaAllowed(makerPrimaryUrl, "/shop")
+            ? (f["umsc.about.maker-primary-label"] ?? "")
+            : ""
+        }
+        primaryUrl={makerPrimaryUrl}
+        secondaryLabel={
+          ctaAllowed(makerSecondaryUrl, "/contact")
+            ? (f["umsc.about.maker-secondary-label"] ?? "")
+            : ""
+        }
+        secondaryUrl={makerSecondaryUrl}
       />
 
       <UmscAboutMission quote={f["umsc.about.mission-quote"] ?? ""} />
@@ -114,8 +134,12 @@ export async function UmscAboutPage({
       {isSectionVisible(customFields, "umsc", "about.cta") && (
         <UmscAboutCta
           heading={f["umsc.about.cta-heading"] ?? ""}
-          buttonLabel={f["umsc.about.cta-button-label"] ?? ""}
-          buttonUrl={f["umsc.about.cta-button-url"] ?? ""}
+          buttonLabel={
+            ctaAllowed(ctaUrl, "/shop")
+              ? (f["umsc.about.cta-button-label"] ?? "")
+              : ""
+          }
+          buttonUrl={ctaUrl}
           businessName={business.name ?? ""}
         />
       )}
