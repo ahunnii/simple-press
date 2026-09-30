@@ -3,7 +3,9 @@ import type { OliveCardProduct } from "../shared";
 import type { OliveBlogTeaser } from "./olive-blog-section";
 import type { OliveCategoryEntry } from "./olive-category-section";
 import type { OliveFeedImage } from "./olive-feed-section";
+import type { OliveHeroImage } from "./olive-hero-section";
 import type { OlivePressLogo } from "./olive-press-section";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
@@ -128,6 +130,16 @@ export async function OliveHomepage({
   const railCollectionId = (f["olive.homepage.rail-collection"] ?? "").trim();
   const productsEnabled = isEnabled("products");
 
+  // B2.5: hide a field-driven CTA/link when its route's flag is off — never
+  // swap in another destination. A section may already require its own flag
+  // to render at all; this only bites when the owner points a link at a
+  // *different*, flag-gated route (e.g. a "/blog" tile on a section that
+  // isn't itself gated on "blog").
+  const ctaFlagOk = (href: string): boolean => {
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  };
+
   // Every remote read is optional: each procedure is feature-gated and throws
   // when its flag is off, so a missing catch would take the whole homepage
   // down with it.
@@ -168,8 +180,11 @@ export async function OliveHomepage({
       image: rowText(row, "image"),
       label: rowText(row, "label"),
       href: rowLink(row, "/shop"),
+      sourceIndex: index,
     }))
-    .filter((entry) => entry.label.length > 0);
+    // B2.5: a gated card (its href names an off flag) is dropped entirely —
+    // the whole tile is the link, so there is no separate CTA to hide.
+    .filter((entry) => entry.label.length > 0 && ctaFlagOk(entry.href));
 
   const categoryEntries: OliveCategoryEntry[] =
     ownerCategories.length > 0
@@ -195,11 +210,11 @@ export async function OliveHomepage({
   // Blank/placeholder rows are dropped here so the dots and the count only
   // ever see real photos; the first survivor is both the arrival frame and
   // the priority (LCP) frame the hero component pins to slide 0.
-  const heroImages: string[] = parseTemplateListRows(
+  const heroImages: OliveHeroImage[] = parseTemplateListRows(
     customFields?.["olive.homepage.hero-images"],
   )
-    .map((row) => rowText(row, "image"))
-    .filter(hasOliveImage)
+    .map((row, index) => ({ src: rowText(row, "image"), index }))
+    .filter((entry) => hasOliveImage(entry.src))
     .slice(0, 6);
 
   // ── Feed and press lists ──────────────────────────────────────────────────
@@ -210,6 +225,7 @@ export async function OliveHomepage({
       id: typeof row._id === "string" ? row._id : `feed-${index}`,
       image: rowText(row, "image"),
       caption: rowText(row, "caption"),
+      index,
     }))
     .filter((item) => hasOliveImage(item.image));
 
@@ -220,6 +236,7 @@ export async function OliveHomepage({
       id: typeof row._id === "string" ? row._id : `press-${index}`,
       image: rowText(row, "image"),
       name: rowText(row, "name"),
+      index,
     }))
     .filter((logo) => hasOliveImage(logo.image));
 
@@ -235,6 +252,42 @@ export async function OliveHomepage({
 
   const testimonial = testimonials[0] ?? null;
 
+  // ── Field-driven CTA/link hrefs ─────────────────────────────────────────
+  // B2.5: resolve each once, hiding it (never swapping in another
+  // destination) when its href names an off flag. Every key below has a
+  // matching `defaultValue` in `homepage/index.ts` (`resolveFields` already
+  // applies it for an unset field), so the `?? ""` here is only satisfying
+  // `noUncheckedIndexedAccess` — it never actually fires.
+  const heroCtaRaw = f["olive.homepage.hero-cta-link"] ?? "";
+  const heroCtaHref = ctaFlagOk(heroCtaRaw) ? heroCtaRaw : "";
+
+  const moodOneRaw = f["olive.homepage.mood-one-link"] ?? "";
+  const moodOneHref = ctaFlagOk(moodOneRaw) ? moodOneRaw : "";
+  const moodTwoRaw = f["olive.homepage.mood-two-link"] ?? "";
+  const moodTwoHref = ctaFlagOk(moodTwoRaw) ? moodTwoRaw : "";
+
+  const railLinkRaw = f["olive.homepage.rail-link"] ?? "";
+  const railLinkHref =
+    showingCollection && railCollection
+      ? `/collections/${railCollection.collection.slug}`
+      : ctaFlagOk(railLinkRaw)
+        ? railLinkRaw
+        : "";
+
+  const promoButtonRaw = f["olive.homepage.promo-button-link"] ?? "";
+  const promoButtonHref = ctaFlagOk(promoButtonRaw) ? promoButtonRaw : "";
+
+  const bandCtaRaw = f["olive.homepage.band-cta-link"] ?? "";
+  const bandCtaHref = ctaFlagOk(bandCtaRaw) ? bandCtaRaw : "";
+
+  const testimonialLinkRaw = f["olive.homepage.testimonial-link"] ?? "";
+  const testimonialLinkHref = ctaFlagOk(testimonialLinkRaw)
+    ? testimonialLinkRaw
+    : "";
+
+  const blogLinkRaw = f["olive.homepage.blog-link"] ?? "";
+  const blogLinkHref = ctaFlagOk(blogLinkRaw) ? blogLinkRaw : "";
+
   return (
     <HydrateClient>
       {popup ? <OlivePopup popup={popup} /> : null}
@@ -247,7 +300,7 @@ export async function OliveHomepage({
           heading={f["olive.homepage.hero-heading"] ?? ""}
           body={f["olive.homepage.hero-body"] ?? ""}
           ctaLabel={f["olive.homepage.hero-cta-label"] ?? ""}
-          ctaHref={f["olive.homepage.hero-cta-link"] ?? "/shop"}
+          ctaHref={heroCtaHref}
           sectionAttrs={sectionGroupAttr("homepage", "hero")}
           headingFieldKey="olive.homepage.hero-heading"
           bodyFieldKey="olive.homepage.hero-body"
@@ -266,15 +319,15 @@ export async function OliveHomepage({
         {isSectionVisible(customFields, "olive", "homepage.mood") ? (
           <OliveMoodSection
             first={{
-              image: f["olive.homepage.mood-one-image"] ?? "/placeholder.svg",
+              image: f["olive.homepage.mood-one-image"] ?? "",
               label: f["olive.homepage.mood-one-label"] ?? "",
-              href: f["olive.homepage.mood-one-link"] ?? "/shop",
+              href: moodOneHref,
               labelFieldKey: "olive.homepage.mood-one-label",
             }}
             second={{
-              image: f["olive.homepage.mood-two-image"] ?? "/placeholder.svg",
+              image: f["olive.homepage.mood-two-image"] ?? "",
               label: f["olive.homepage.mood-two-label"] ?? "",
-              href: f["olive.homepage.mood-two-link"] ?? "/blog",
+              href: moodTwoHref,
               labelFieldKey: "olive.homepage.mood-two-label",
             }}
             sectionAttrs={sectionGroupAttr("homepage", "mood")}
@@ -285,11 +338,7 @@ export async function OliveHomepage({
           <OliveProductRail
             heading={f["olive.homepage.rail-heading"] ?? ""}
             linkLabel={f["olive.homepage.rail-link-label"] ?? ""}
-            linkHref={
-              showingCollection && railCollection
-                ? `/collections/${railCollection.collection.slug}`
-                : (f["olive.homepage.rail-link"] ?? "/shop")
-            }
+            linkHref={railLinkHref}
             products={railProducts}
             emptyHeading={f["olive.homepage.rail-empty-heading"] ?? ""}
             emptyBody={f["olive.homepage.rail-empty-body"] ?? ""}
@@ -302,11 +351,11 @@ export async function OliveHomepage({
         {isSectionVisible(customFields, "olive", "homepage.promo") ? (
           <OlivePromoSection
             takeover={f["olive.homepage.promo-takeover"] === "true"}
-            image={f["olive.homepage.promo-image"] ?? "/placeholder.svg"}
+            image={f["olive.homepage.promo-image"] ?? ""}
             heading={f["olive.homepage.promo-heading"] ?? ""}
             body={f["olive.homepage.promo-body"] ?? ""}
             buttonLabel={f["olive.homepage.promo-button-label"] ?? ""}
-            buttonLink={f["olive.homepage.promo-button-link"] ?? ""}
+            buttonLink={promoButtonHref}
             tone="paper"
             id="olive-promo-homepage"
             sectionAttrs={sectionGroupAttr("homepage", "promo")}
@@ -321,8 +370,8 @@ export async function OliveHomepage({
             heading={f["olive.homepage.band-heading"] ?? ""}
             body={f["olive.homepage.band-body"] ?? ""}
             ctaLabel={f["olive.homepage.band-cta-label"] ?? ""}
-            ctaHref={f["olive.homepage.band-cta-link"] ?? "/about"}
-            image={f["olive.homepage.band-image"] ?? "/placeholder.svg"}
+            ctaHref={bandCtaHref}
+            image={f["olive.homepage.band-image"] ?? ""}
             sectionAttrs={sectionGroupAttr("homepage", "band")}
             headingFieldKey="olive.homepage.band-heading"
             bodyFieldKey="olive.homepage.band-body"
@@ -356,7 +405,7 @@ export async function OliveHomepage({
             quote={testimonial.text}
             author={testimonial.customerName}
             linkLabel={f["olive.homepage.testimonial-link-label"] ?? ""}
-            linkHref={f["olive.homepage.testimonial-link"] ?? "/testimonials"}
+            linkHref={testimonialLinkHref}
             sectionAttrs={sectionGroupAttr("homepage", "testimonial")}
             linkLabelFieldKey="olive.homepage.testimonial-link-label"
           />
@@ -366,7 +415,7 @@ export async function OliveHomepage({
           <OliveBlogSection
             heading={f["olive.homepage.blog-heading"] ?? ""}
             linkLabel={f["olive.homepage.blog-link-label"] ?? ""}
-            linkHref={f["olive.homepage.blog-link"] ?? "/blog"}
+            linkHref={blogLinkHref}
             posts={blogPosts}
             sectionAttrs={sectionGroupAttr("homepage", "blog")}
             headingFieldKey="olive.homepage.blog-heading"

@@ -8,6 +8,7 @@ import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { Product } from "~/types";
 import { isContentEmpty } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import {
@@ -20,7 +21,6 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
-import { ViiProductRail } from "../../homepage/vii-product-rail";
 import {
   heroHeadingStyle,
   heroMediaStyle,
@@ -28,7 +28,11 @@ import {
   useViiHeroMotion,
 } from "../../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { ViiCtaLink } from "../../shared/vii-cta-link";
 import { ViiOverline } from "../../shared/vii-overline";
+import { VII_EDGE_CONTAINER } from "../../shared/vii-page-edge";
+import { ViiProductGrid } from "../../shared/vii-product-grid";
+import { ViiSectionHeading } from "../../shared/vii-section-heading";
 
 // ─── LedgerHero ───────────────────────────────────────────────────────────────
 
@@ -379,8 +383,7 @@ export function LedgerNotes({
 
       <div
         style={{
-          maxWidth: 1100,
-          margin: "0 auto",
+          ...VII_EDGE_CONTAINER,
           borderTop:
             "1px solid color-mix(in srgb, var(--vii-paper) 18%, transparent)",
           paddingTop: "clamp(28px, 3.5vw, 40px)",
@@ -503,15 +506,94 @@ export function LedgerProductRail({
     : (railQ.data ?? []);
 
   return (
-    <ViiProductRail
+    <ServiceProductRail
       overline={overline || undefined}
       heading={heading}
       ctaText={ctaText}
       ctaHref={ctaHref}
-      products={
-        products as unknown as Parameters<typeof ViiProductRail>[0]["products"]
-      }
+      products={products as unknown as Product[]}
     />
+  );
+}
+
+/**
+ * The ledger/collection "shop the edit" rail. Same look as the homepage's
+ * `ViiProductRail` (paper band, `ViiSectionHeading`, `ViiProductGrid`,
+ * centered copper link), but on the page edge: `ViiProductRail` sits in the
+ * centered 1200px `ViiSection` (x=120 at 1440, off the hero's 86 — B1.7),
+ * and it tags itself with the homepage's `homepage.productRail` editor
+ * group and field keys, which point at nothing on a service page.
+ */
+function ServiceProductRail({
+  overline,
+  heading,
+  ctaText,
+  ctaHref,
+  products,
+  limit = 4,
+}: {
+  overline?: string;
+  heading: string;
+  ctaText: string;
+  ctaHref: string;
+  products: Product[];
+  limit?: number;
+}) {
+  const { ref, visible } = useViiReveal(0.08);
+  const shown = products.slice(0, limit);
+  if (shown.length === 0) return null;
+
+  return (
+    <section
+      aria-labelledby={heading ? "vii-service-rail-heading" : undefined}
+      aria-label={
+        heading ? undefined : overline?.trim() ? overline : "Featured products"
+      }
+      style={{
+        background: "var(--vii-paper)",
+        padding: "var(--vii-section-pad-y) var(--vii-section-pad-x)",
+      }}
+    >
+      <div
+        ref={ref}
+        className={cn("vii-reveal-group", visible && "is-visible")}
+        style={VII_EDGE_CONTAINER}
+      >
+        <div
+          className="vii-reveal-item"
+          style={
+            {
+              "--i": 0,
+              marginBottom: "clamp(32px, 4.5vw, 52px)",
+            } as React.CSSProperties
+          }
+        >
+          <ViiSectionHeading
+            overline={overline}
+            heading={heading}
+            headingId="vii-service-rail-heading"
+            tone="light"
+          />
+        </div>
+
+        <ViiProductGrid products={shown} />
+
+        {ctaText && (
+          <div
+            className="vii-reveal-item"
+            style={
+              {
+                "--i": Math.min(shown.length + 1, 8),
+                textAlign: "center",
+                marginTop: "clamp(36px, 5vw, 56px)",
+              } as React.CSSProperties
+            }
+          >
+            <ViiCtaLink href={ctaHref}>{ctaText}</ViiCtaLink>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 

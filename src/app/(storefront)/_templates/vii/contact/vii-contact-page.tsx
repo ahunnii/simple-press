@@ -1,9 +1,15 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
+import {
+  googleMapsUrls,
+  resolveMapCoordinates,
+} from "~/lib/address/coordinates";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { nonBlank } from "../shared/vii-non-blank";
 import { ViiContactHero } from "./vii-contact-hero";
 import { ViiContactMain } from "./vii-contact-main";
 import { ViiContactMap } from "./vii-contact-map";
@@ -25,10 +31,10 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
     "vii.contact.intro-heading-accent",
     "vii.contact.intro-body",
     "vii.contact.form-heading",
+    "vii.contact.form-success-heading",
+    "vii.contact.form-success-body",
     // Map
     "vii.contact.map-heading",
-    "vii.contact.map-lat",
-    "vii.contact.map-lng",
     // Review
     "vii.contact.review-heading",
     "vii.contact.review-heading-accent",
@@ -37,32 +43,30 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
     "vii.contact.review-facebook-url",
   ]);
 
-  const address = business.businessAddress ?? undefined;
-  const phone = business.phoneNumber ?? undefined;
-  const email = business.supportEmail ?? undefined;
-
-  const socialLinks = business.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-        linkedin?: string;
-        pinterest?: string;
-      }
-    | undefined;
+  // A cleared ("") Settings value resolves to undefined so its block hides.
+  const address = nonBlank(business.businessAddress);
+  const phone = nonBlank(business.phoneNumber);
+  const email = nonBlank(business.supportEmail);
 
   const hourRows = formatBusinessHours(
     parseBusinessHours(business.businessHours),
   );
 
-  const lat = Number(f["vii.contact.map-lat"]);
-  const lng = Number(f["vii.contact.map-lng"]);
-  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
-  const mapDest = address ? encodeURIComponent(address) : `${lat},${lng}`;
-  const viewUrl = `https://www.google.com/maps/search/?api=1&query=${mapDest}`;
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapDest}`;
+  // Map pin: Settings → General (Business.latitude/longitude) wins. The
+  // legacy per-template fields are a read-only fallback for sites that saved
+  // coordinates before the pin moved to Settings (retired 2026-09-25) — the
+  // saved values are never written to or cleared from here, and their old
+  // Detroit defaults are deliberately not applied.
+  const coords = resolveMapCoordinates(
+    business,
+    getRawCustomFieldString(customFields, "vii.contact.map-lat"),
+    getRawCustomFieldString(customFields, "vii.contact.map-lng"),
+  );
+  // The address string is the preferred Google Maps destination; the pin is
+  // the fallback.
+  const { viewUrl, directionsUrl } = googleMapsUrls(
+    address ?? coords ?? { latitude: 0, longitude: 0 },
+  );
 
   const googleUrl = f["vii.contact.review-google-url"]?.trim() ?? "";
   const facebookUrl = f["vii.contact.review-facebook-url"]?.trim() ?? "";
@@ -83,21 +87,23 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
         headingAccent={f["vii.contact.intro-heading-accent"] ?? ""}
         body={f["vii.contact.intro-body"] ?? ""}
         hourRows={hourRows}
-        socialLinks={socialLinks}
+        socialLinks={business.siteContent?.socialLinks}
         formHeading={f["vii.contact.form-heading"] ?? "Send a message"}
+        formSuccessHeading={f["vii.contact.form-success-heading"] ?? ""}
+        formSuccessBody={f["vii.contact.form-success-body"] ?? ""}
         address={address}
         phone={phone}
         email={email}
       />
 
-      {/* 3. Location map (only when coordinates are configured) */}
-      {hasCoords && (
+      {/* 3. Location map (only when a map pin resolves) */}
+      {coords && isSectionVisible(customFields, "vii", "contact.map") && (
         <ViiContactMap
           heading={f["vii.contact.map-heading"] ?? ""}
           businessName={business.name}
           address={address}
-          latitude={lat}
-          longitude={lng}
+          latitude={coords.latitude}
+          longitude={coords.longitude}
           viewUrl={viewUrl}
           directionsUrl={directionsUrl}
         />

@@ -5,43 +5,42 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const servicesHeroData: TemplateField[] = [
   {
     key: "vii.services.hero-overline",
-    label: "Hero Overline",
-    description:
-      "Small all-caps eyebrow text shown above the page heading in the hero.",
+    label: "Small label",
+    description: "Small label shown above the page heading in the hero.",
     type: "text",
     page: "services",
-    group: "vii.services.hero",
+    group: "services.hero",
     gridColumn: "col-span-1",
     defaultValue: "Skinbar VII · Services",
   },
   {
     key: "vii.services.hero-heading",
-    label: "Hero Heading",
-    description: "The plain part of the two-part hero heading.",
+    label: "Heading",
+    description: "The plain part of the hero heading.",
     type: "text",
     page: "services",
-    group: "vii.services.hero",
+    group: "services.hero",
     gridColumn: "col-span-1",
     defaultValue: "Our",
   },
   {
     key: "vii.services.hero-heading-accent",
-    label: "Hero Heading Accent",
-    description:
-      "The italic copper accent word completing the hero heading (renders italic copper).",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "services",
-    group: "vii.services.hero",
+    group: "services.hero",
     gridColumn: "col-span-1",
     defaultValue: "services.",
   },
   {
     key: "vii.services.hero-intro",
-    label: "Hero Intro",
-    description: "Optional short paragraph shown beneath the hero heading.",
+    label: "Intro text",
+    description:
+      "Optional short paragraph shown beneath the hero heading. Leave blank to hide.",
     type: "textarea",
     page: "services",
-    group: "vii.services.hero",
+    group: "services.hero",
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder:
@@ -49,71 +48,71 @@ const servicesHeroData: TemplateField[] = [
   },
   {
     key: "vii.services.hero-image",
-    label: "Hero Image",
+    label: "Background photo",
     description:
-      "Optional full-width background image for the hero. Leave blank for a cream typographic hero.",
+      "Optional full-width background photo for the hero. Leave both this and the video blank for a plain typographic hero.",
     type: "image",
     page: "services",
-    group: "vii.services.hero",
+    group: "services.hero",
     gridColumn: "col-span-full",
     defaultValue: "",
   },
   {
     key: "vii.services.hero-video",
-    label: "Hero Video",
+    label: "Background video",
     description:
-      "Optional background video (MP4). Takes precedence over the hero image. Leave both blank for a cream typographic hero.",
+      "Optional background video. Takes precedence over the background photo. Leave both blank for a plain typographic hero.",
     type: "video",
     page: "services",
-    group: "vii.services.hero",
+    group: "services.hero",
     gridColumn: "col-span-full",
     defaultValue: "",
   },
 ];
 
-// ─── Intro Section ────────────────────────────────────────────────────────────
+// ─── Intro ─────────────────────────────────────────────────────────────────────
 
 const servicesIntroData: TemplateField[] = [
   {
     key: "vii.services.intro-overline",
-    label: "Intro Overline",
+    label: "Small label",
     description:
-      "Small all-caps eyebrow shown above the intro heading. Leave blank to hide it.",
+      "Small label shown above the intro heading. Leave blank to hide it.",
     type: "text",
     page: "services",
-    group: "vii.services.intro",
+    group: "services.intro",
     gridColumn: "col-span-1",
     defaultValue: "The VII Approach",
   },
   {
     key: "vii.services.intro-heading",
-    label: "Intro Heading",
-    description: "Plain part of the two-part intro heading.",
+    label: "Heading",
+    description: "Plain part of the intro heading.",
     type: "text",
     page: "services",
-    group: "vii.services.intro",
+    group: "services.intro",
     gridColumn: "col-span-1",
     defaultValue: "Care, crafted",
   },
   {
     key: "vii.services.intro-heading-accent",
-    label: "Intro Heading Accent",
+    label: "Heading, highlighted words",
     description:
-      "Italic copper accent word completing the intro heading (e.g. 'around you.').",
+      "Shown in italics after the heading (e.g. 'around you.').",
     type: "text",
     page: "services",
-    group: "vii.services.intro",
+    group: "services.intro",
     gridColumn: "col-span-1",
     defaultValue: "around you.",
   },
   {
     key: "vii.services.intro-body",
-    label: "Intro Body",
+    label: "Body text",
     description:
-      "Short inviting paragraph shown beneath the intro heading. Leave blank to hide.",
+      "Short inviting paragraph shown beneath the intro heading. Leave blank to hide. The whole section hides when the small label, heading, highlighted words, and this are all blank.",
     type: "textarea",
     page: "services",
-    group: "vii.services.intro",
+    group: "services.intro",
     gridColumn: "col-span-full",
     defaultValue:
       "Every treatment begins with a conversation. Explore our full menu of services below, each designed to meet your skin exactly where it is.",
@@ -122,64 +121,64 @@ const servicesIntroData: TemplateField[] = [
   },
 ];
 
-// ─── Closing Gallery Strip ─────────────────────────────────────────────────────
+// ─── Photo gallery ─────────────────────────────────────────────────────────────
 
 const servicesGalleryData: TemplateField[] = [
   {
     key: "vii.services.gallery",
-    label: "Closing Gallery Strip",
+    label: "Photo gallery",
     description:
       "Pick one of your galleries to show as a closing photo strip beneath the service cards. The first images from that gallery are used. Leave empty to hide the strip.",
     type: "gallery",
     page: "services",
-    group: "vii.services.gallery",
+    group: "services.gallery",
     gridColumn: "col-span-full",
   },
 ];
 
-// ─── Closing Call to Action ────────────────────────────────────────────────────
+// ─── Contact ───────────────────────────────────────────────────────────────────
 
 const servicesCtaData: TemplateField[] = [
   {
     key: "vii.services.cta-image",
-    label: "Closing CTA Image",
+    label: "Background photo",
     description:
-      "Background image for the closing contact CTA section (shown at 30% opacity behind the navy overlay).",
+      "Background photo for this closing contact section, shown faded behind the overlay.",
     type: "image",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-full",
     defaultValue: "",
   },
   {
     key: "vii.services.cta-heading",
-    label: "Closing CTA Heading",
-    description: "Large italic serif heading in the closing CTA block.",
+    label: "Heading",
+    description: "Large italic heading in this closing contact section.",
     type: "text",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "Begin your ritual.",
     placeholder: "e.g. Begin your ritual.",
   },
   {
     key: "vii.services.cta-subheading",
-    label: "Closing CTA Subheading",
-    description: "Small all-caps line below the heading.",
+    label: "Small label",
+    description: "Small label below the heading.",
     type: "text",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "Detroit · By Appointment",
-    placeholder: "e.g. Detroit · By Appointment",
+    placeholder: "e.g. your city · By Appointment",
   },
   {
     key: "vii.services.cta-body",
-    label: "Closing CTA Body",
+    label: "Body text",
     description: "Short paragraph inviting guests to book.",
     type: "textarea",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-full",
     defaultValue:
       "Our specialists are ready to create a personalized experience for you. Reach out to reserve your session.",
@@ -187,68 +186,68 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "vii.services.cta-button-label",
-    label: "Closing CTA Button Label",
+    label: "Button text",
     description:
-      "Label for the primary action button in the closing CTA. Leave blank to hide the button.",
+      "Text for the primary button in this section. Leave blank to hide the button.",
     type: "text",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "Book Now",
     placeholder: "e.g. Book Now",
   },
   {
     key: "vii.services.cta-button-url",
-    label: "Closing CTA Button URL",
+    label: "Button link",
     description:
-      "URL the CTA button links to (e.g. an external booking page). Required for the button to appear.",
+      "Where the button sends visitors (e.g. an external booking page). Required for the button to appear.",
     type: "url",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "",
     placeholder: "https://…",
   },
   {
     key: "vii.services.cta-embed",
-    label: "Closing CTA Embed",
+    label: "Booking widget",
     description:
-      "Optional embed (e.g. a booking widget) shown in the closing CTA section. Paste an embed URL or <iframe> snippet. When embeds are disabled, a fallback external link is shown instead.",
+      "Optional embed (e.g. a booking widget) shown in this section. Paste an embed URL or <iframe> snippet. When embeds are disabled, a fallback external link is shown instead.",
     type: "iframe",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-full",
   },
   {
     key: "vii.services.cta-embed-reveal",
-    label: "Reveal booking behind a button",
+    label: "Reveal booking widget behind a button",
     description:
       "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
     type: "boolean",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "false",
   },
   {
     key: "vii.services.cta-show-phone",
-    label: "Show phone number in this section",
+    label: "Show phone number",
     description:
-      "Display the business phone number in the closing CTA. Turn off for booking-only CTAs.",
+      "Display the business phone number in this section. Turn off for booking-only sections.",
     type: "boolean",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "true",
   },
   {
     key: "vii.services.cta-show-email",
-    label: "Show email in this section",
+    label: "Show email",
     description:
-      "Display the business email in the closing CTA. Turn off for booking-only CTAs.",
+      "Display the business email in this section. Turn off for booking-only sections.",
     type: "boolean",
     page: "services",
-    group: "vii.services.cta",
+    group: "services.cta",
     gridColumn: "col-span-1",
     defaultValue: "true",
   },
@@ -265,34 +264,34 @@ export const viiServicesData: TemplateField[] = [
 
 export const viiServicesFieldGroups: TemplateFieldGroup[] = [
   {
-    id: "vii.services.hero",
-    title: "Hero",
+    id: "services.hero",
+    title: "Page header",
     description:
-      "Overline, split heading, optional intro paragraph, and optional background image or video for the services index hero",
+      "Small label, split heading, optional intro paragraph, and optional background photo or video for the services page hero",
     icon: "🎬",
     columns: 2,
   },
   {
-    id: "vii.services.intro",
-    title: "Intro Section",
+    id: "services.intro",
+    title: "Intro",
     description:
-      "Centered overline, split heading, and paragraph shown between the hero and the service cards. Leave all fields blank to hide the section.",
+      "Centered small label, split heading, and paragraph shown between the hero and the service cards. Leave all fields blank to hide the section.",
     icon: "✦",
     columns: 2,
   },
   {
-    id: "vii.services.gallery",
-    title: "Closing Gallery Strip",
+    id: "services.gallery",
+    title: "Photo gallery",
     description:
       "Choose an existing gallery to show as a photo strip beneath the service cards. Hidden when none is selected.",
     icon: "🖼️",
     columns: 1,
   },
   {
-    id: "vii.services.cta",
-    title: "Closing Call to Action",
+    id: "services.cta",
+    title: "Contact",
     description:
-      "Background image, heading, body copy, button, embed, and contact details for the closing navy CTA section",
+      "Background photo, heading, body text, button, booking widget, and contact details for the closing contact section",
     icon: "📞",
     columns: 2,
   },

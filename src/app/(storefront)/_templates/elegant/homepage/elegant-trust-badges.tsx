@@ -4,12 +4,31 @@ import { useState } from "react";
 import { Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import {
-  getListFieldValue,
-  parseTemplateIconListRows,
-} from "~/lib/template-fields";
+import { listItemAttr } from "~/lib/preview/section-attrs";
+import { getListFieldValue } from "~/lib/template-fields";
 
 import { DEFAULT_ELEGANT_TRUST_BADGES } from "..";
+
+const TRUST_BADGES_FIELD_KEY = "elegant.homepage.trust-badges-list";
+
+/**
+ * The marquee only ever shows a badge's `title` (no icon, no description),
+ * unlike the icon-card grid `parseTemplateIconListRows` was written for —
+ * that helper drops a whole row when `icon`/`description` are missing, which
+ * would silently empty the strip for rows saved with just a title. Read the
+ * raw rows and keep anything with a non-blank `title` instead.
+ */
+function getTrustBadgeTitles(customFields: unknown): string[] {
+  const raw = getListFieldValue(customFields, TRUST_BADGES_FIELD_KEY);
+  if (!raw) return [];
+  return raw
+    .map((row) => {
+      if (typeof row !== "object" || row === null) return "";
+      const title = (row as Record<string, unknown>).title;
+      return typeof title === "string" ? title.trim() : "";
+    })
+    .filter((title) => title.length > 0);
+}
 
 export function ElegantTrustBadges({
   homepage,
@@ -21,17 +40,12 @@ export function ElegantTrustBadges({
 }) {
   const [isPaused, setIsPaused] = useState(false);
 
-  const trustBadges = parseTemplateIconListRows(
-    getListFieldValue(
-      homepage?.siteContent?.customFields,
-      "elegant.homepage.trust-badges-list",
-    ),
-    DEFAULT_ELEGANT_TRUST_BADGES,
-  );
+  const savedTitles = getTrustBadgeTitles(homepage?.siteContent?.customFields);
 
-  const items = trustBadges?.length
-    ? trustBadges
-    : DEFAULT_ELEGANT_TRUST_BADGES;
+  const items: { title: string }[] =
+    savedTitles.length > 0
+      ? savedTitles.map((title) => ({ title }))
+      : DEFAULT_ELEGANT_TRUST_BADGES;
 
   return (
     <div
@@ -59,6 +73,7 @@ export function ElegantTrustBadges({
         {items.map((badge, i) => (
           <span
             key={i}
+            {...listItemAttr(TRUST_BADGES_FIELD_KEY, i)}
             style={{
               fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
               fontSize: 28,

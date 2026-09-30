@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import type { SectionLink, TemplateSection } from "./template-sections";
@@ -126,6 +128,20 @@ describe("SECTION_LINKS catalog", () => {
       const { featureKey } = link as SectionLink;
       if (!featureKey) continue;
       expect(featureKey in FEATURE_REGISTRY, `${key} → ${featureKey}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it("every href corresponds to a real admin route (a page.tsx on disk)", () => {
+    // The module comment claims this is checked here — actually enforce it,
+    // so a typo'd or moved admin route fails the suite instead of silently
+    // rendering a dead "Related content" link.
+    const adminDir = path.join(__dirname, "..", "app", "admin");
+    for (const [key, link] of Object.entries(SECTION_LINKS)) {
+      const routePath = link.href.replace(/^\/admin/, "").split("#")[0];
+      const pagePath = path.join(adminDir, routePath ?? "", "page.tsx");
+      expect(existsSync(pagePath), `${key} → ${link.href} (${pagePath})`).toBe(
         true,
       );
     }

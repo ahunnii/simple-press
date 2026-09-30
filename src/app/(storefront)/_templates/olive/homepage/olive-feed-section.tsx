@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 
+import { listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import {
@@ -15,6 +16,8 @@ export type OliveFeedImage = {
   id: string;
   image: string;
   caption: string;
+  /** Original (pre-filter) position in the owner's `feed-images` list. */
+  index: number;
 };
 
 type Props = {
@@ -86,6 +89,8 @@ export function OliveFeedSection({
           const frame =
             "olive-card olive-reveal-item relative aspect-square overflow-hidden";
 
+          const itemAttrs = listItemAttr("olive.homepage.feed-images", item.index);
+
           return href ? (
             <a
               key={item.id}
@@ -95,11 +100,12 @@ export function OliveFeedSection({
               aria-label={`${caption ? caption : `Photograph ${index + 1}`} (opens in a new tab)`}
               className={cn(frame, "olive-card-lift")}
               style={tileStyle}
+              {...itemAttrs}
             >
               {photo}
             </a>
           ) : (
-            <div key={item.id} className={frame} style={tileStyle}>
+            <div key={item.id} className={frame} style={tileStyle} {...itemAttrs}>
               {photo}
             </div>
           );

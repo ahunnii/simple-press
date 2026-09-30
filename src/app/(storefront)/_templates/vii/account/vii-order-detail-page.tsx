@@ -5,8 +5,8 @@ import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
-import { ViiOverline } from "../shared/vii-overline";
 import { ViiReveal, ViiRevealGroup } from "../shared/vii-reveal";
+import { ViiAccountLayout } from "./vii-account-layout";
 
 /** Returns inline-style objects for the order status badge — vii palette. */
 function statusStyles(status: string): {
@@ -87,149 +87,64 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
   const addr = order.shippingAddress;
 
   return (
-    <>
-      {/* Hero band — own heading (the layout heading is NOT used here;
-          this page renders its own h1 with order number) */}
-      <section
-        style={{
-          background: "var(--vii-cream)",
-          borderBottom: "1px solid var(--vii-hairline-strong)",
-          paddingTop: "clamp(168px, 16vh, 200px)",
-          paddingBottom: "clamp(32px, 5vh, 60px)",
-        }}
-      >
+    <ViiAccountLayout
+      heading={`Order #${order.orderNumber}`}
+      breadcrumb={[
+        { label: "Home", href: "/" },
+        { label: "Account", href: "/account/settings" },
+        { label: "Orders", href: "/account/orders" },
+        { label: `#${order.orderNumber}` },
+      ]}
+    >
+      {/* Status + date chips */}
+      <ViiReveal>
         <div
           style={{
-            maxWidth: 1320,
-            margin: "0 auto",
-            paddingInline: "clamp(20px, 4vw, 32px)",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            marginBottom: 24,
           }}
         >
-          <ViiReveal>
-            <ViiOverline style={{ marginBottom: 16 }}>Account</ViiOverline>
-            <h1
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
-                fontWeight: 500,
-                lineHeight: 1.1,
-                color: "var(--vii-navy)",
-                margin: "0 0 12px",
-              }}
-            >
-              Order #{order.orderNumber}
-            </h1>
-
-            {/* Breadcrumb */}
-            <nav aria-label="Breadcrumb">
-              <ol
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  listStyle: "none",
-                  margin: "0 0 16px",
-                  padding: 0,
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 13,
-                  color: "var(--vii-ink-soft)",
-                }}
-              >
-                {[
-                  { label: "Home", href: "/" },
-                  { label: "Account", href: "/account/settings" },
-                  { label: "Orders", href: "/account/orders" },
-                  { label: `#${order.orderNumber}` },
-                ].map((crumb, i) => (
-                  <li key={i} style={{ display: "flex", alignItems: "center" }}>
-                    {i > 0 && (
-                      <span
-                        aria-hidden
-                        style={{
-                          marginInline: "0.5rem",
-                          color: "var(--vii-tan)",
-                        }}
-                      >
-                        /
-                      </span>
-                    )}
-                    {crumb.href ? (
-                      <Link
-                        href={crumb.href}
-                        className="vii-nav-link"
-                        style={{
-                          color: "var(--vii-ink-soft)",
-                          textDecoration: "none",
-                          position: "relative",
-                        }}
-                      >
-                        {crumb.label}
-                      </Link>
-                    ) : (
-                      <span
-                        aria-current="page"
-                        style={{ color: "var(--vii-navy)" }}
-                      >
-                        {crumb.label}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </nav>
-
-            {/* Status + date chips */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              <span
-                style={{
-                  ...statusStyles(order.status),
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  letterSpacing: "0.1em",
-                  textTransform: "capitalize",
-                  padding: "4px 12px",
-                  borderRadius: "var(--radius)",
-                }}
-              >
-                {order.status}
-              </span>
-              <span
-                style={{
-                  background: "var(--vii-paper)",
-                  border: "1px solid var(--vii-hairline-strong)",
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 12,
-                  color: "var(--vii-ink-soft)",
-                  padding: "4px 12px",
-                  borderRadius: "var(--radius)",
-                }}
-              >
-                {formatDate(order.createdAt)}
-              </span>
-            </div>
-          </ViiReveal>
+          <span
+            style={{
+              ...statusStyles(order.status),
+              fontFamily: "var(--font-sans)",
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.1em",
+              textTransform: "capitalize",
+              padding: "4px 12px",
+              borderRadius: "var(--radius)",
+            }}
+          >
+            {order.status}
+          </span>
+          <span
+            style={{
+              background: "var(--vii-paper)",
+              border: "1px solid var(--vii-hairline-strong)",
+              fontFamily: "var(--font-sans)",
+              fontSize: 12,
+              color: "var(--vii-ink-soft)",
+              padding: "4px 12px",
+              borderRadius: "var(--radius)",
+            }}
+          >
+            {formatDate(order.createdAt)}
+          </span>
         </div>
-      </section>
+      </ViiReveal>
 
       {/* Content grid */}
-      <section
+      <div
         style={{
-          maxWidth: 1320,
-          margin: "0 auto",
-          paddingInline: "clamp(20px, 4vw, 32px)",
-          paddingTop: "clamp(32px, 5vh, 56px)",
-          paddingBottom: "clamp(48px, 7vh, 96px)",
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: 24,
         }}
+        className="lg:grid-cols-[1fr_320px]"
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: 24,
-          }}
-          className="lg:grid-cols-[1fr_320px]"
-        >
           {/* ── Left column ── */}
           <ViiRevealGroup
             style={{ display: "flex", flexDirection: "column", gap: 24 }}
@@ -661,7 +576,6 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
             </Link>
           </ViiRevealGroup>
         </div>
-      </section>
-    </>
+    </ViiAccountLayout>
   );
 }

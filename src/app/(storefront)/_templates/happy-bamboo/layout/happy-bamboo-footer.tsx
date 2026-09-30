@@ -1,21 +1,20 @@
 import Link from "next/link";
-import { TwitterLogoIcon } from "@radix-ui/react-icons";
 import { Leaf } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveSocialLinks } from "~/lib/social-links";
+import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
 
-const quickLinks = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-];
+import { HB_DEFAULT_NAV } from "../lib/nav";
+import { HappyBambooFooterAccount } from "./happy-bamboo-footer-account";
+import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
 
 export async function HappyBambooFooter({
   business,
@@ -26,26 +25,57 @@ export async function HappyBambooFooter({
   const name = business?.name ?? "Business Name";
   const footerTagline = business?.siteContent?.footerText;
 
-  const navigationItems = business?.siteContent?.navigationItems as
-    | {
-        label: string;
-        href: string;
-      }[]
-    | undefined;
+  const { isEnabled } = await getBusinessFlags();
+
+  // Owner's flat footer Quick Links (falls back to the main nav's top level
+  // when unset; an explicit `[]` means "no quick links"). The shared
+  // route→flag filter (P-NAV-FLAGS) drops anything the business has switched
+  // off, same as the header and mobile panel.
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: HB_DEFAULT_NAV,
+    isEnabled,
+  });
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
   });
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-      }
-    | undefined;
+  // Mandatory, non-hideable policy row (B10.1) — published merchant Pages by
+  // slug; privacy/terms fall back to the platform's own policy since every
+  // store is covered by it regardless of what it has published. Shipping and
+  // refund have no platform equivalent, so they only appear once published.
+  // Only these four standard slugs plus Platform Policies — any other
+  // policy-type page (imports, seed data) is never auto-listed.
+  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
+  const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  const refundPolicy = policies.find((p) => p.slug === "refund-policy");
+
+  const policyLinks: { label: string; href: string }[] = [
+    {
+      label: "Privacy Policy",
+      href: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
+    },
+    {
+      label: "Terms of Service",
+      href: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+    },
+    ...(shippingPolicy
+      ? [{ label: "Shipping Policy", href: `/${shippingPolicy.slug}` }]
+      : []),
+    ...(refundPolicy
+      ? [{ label: "Refund Policy", href: `/${refundPolicy.slug}` }]
+      : []),
+    { label: "Platform Policies", href: "/platform/policies/" },
+  ];
+
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
   return (
     <footer className="border-border bg-foreground border-t">
@@ -65,72 +95,47 @@ export async function HappyBambooFooter({
               </p>
             )}
 
-            <div className="flex gap-4">
-              {socialLinks?.facebook && (
-                <a
-                  href={socialLinks.facebook}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="Facebook"
-                >
-                  <FacebookIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
+            <HappyBambooSocialIcons
+              socialLinks={socialLinks}
+              label="Follow us on social media"
+              className="gap-4"
+              linkClassName="text-muted hover:text-[var(--hb-primary-on-dark)]"
+              iconClassName="h-5 w-5"
+            />
+          </div>
 
-              {socialLinks?.instagram && (
-                <a
-                  href={socialLinks.instagram}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="Instagram"
-                >
-                  <InstagramIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-              {socialLinks?.twitter && (
-                <a
-                  href={socialLinks.twitter}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="Twitter"
-                >
-                  <TwitterLogoIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-              {socialLinks?.tiktok && (
-                <a
-                  href={socialLinks.tiktok}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="TikTok"
-                >
-                  <TikTokIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
-              {socialLinks?.youtube && (
-                <a
-                  href={socialLinks.youtube}
-                  className="text-muted transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  aria-label="YouTube"
-                >
-                  <YouTubeIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              )}
+          {/* Shop — hidden entirely when there's nothing to show (no
+              resolved links and accounts are off), rather than rendering
+              an empty heading. */}
+          {(quickLinks.length > 0 || isEnabled("customerAccounts")) && (
+            <div>
+              <h4 className="text-muted mb-4 font-semibold">Quick Links</h4>
+              <ul className="flex flex-col space-y-2">
+                {quickLinks.map((link, i) => (
+                  <li key={i}>
+                    <Link
+                      href={link.href}
+                      {...externalLinkProps(link.external)}
+                      className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+                {/* Account entry, end of Quick Links (B10.3) — gated on
+                    customerAccounts, own client component since the footer
+                    itself is a server component. */}
+                {isEnabled("customerAccounts") && (
+                  <HappyBambooFooterAccount
+                    ordersEnabled={isEnabled("orders")}
+                  />
+                )}
+              </ul>
             </div>
-          </div>
-
-          {/* Shop */}
-          <div>
-            <h4 className="text-muted mb-4 font-semibold">Quick Links</h4>
-            <ul className="flex flex-col space-y-2">
-              {(navigationItems ?? quickLinks).map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
 
           {/* Support */}
           <div>
@@ -142,7 +147,7 @@ export async function HappyBambooFooter({
 
               {!!phone && (
                 <a
-                  href={`tel:${phone.replace(/\D/g, "")}`}
+                  href={telHref(phone)}
                   className="transition-colors hover:text-[var(--hb-primary-on-dark)]"
                 >
                   {phone}
@@ -159,24 +164,22 @@ export async function HappyBambooFooter({
             </address>
           </div>
 
-          {/* Policies */}
-          {policies.length > 0 && (
-            <div>
-              <h4 className="text-muted mb-4 font-semibold">Policies</h4>
-              <ul className="flex flex-col space-y-2">
-                {policies.map((link) => (
-                  <li key={link.id}>
-                    <Link
-                      href={`/${link.slug}`}
-                      className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
-                    >
-                      {link.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Policies — always rendered (B10.1), exactly these five slots. */}
+          <div>
+            <h4 className="text-muted mb-4 font-semibold">Policies</h4>
+            <ul className="flex flex-col space-y-2">
+              {policyLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-muted text-sm transition-colors hover:text-[var(--hb-primary-on-dark)]"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <Separator className="my-8" />

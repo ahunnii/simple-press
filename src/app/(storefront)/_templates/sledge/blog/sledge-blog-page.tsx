@@ -33,10 +33,8 @@ export function SledgeBlogPage({ pages, customFields }: Props) {
     "sledge.blog-listing-intro",
   ]);
 
-  const heading = f["sledge.blog-listing-heading"] ?? "Blog";
-  const intro =
-    f["sledge.blog-listing-intro"] ??
-    "News, studio notes, and stories from behind the scenes.";
+  const heading = f["sledge.blog-listing-heading"] ?? "";
+  const intro = f["sledge.blog-listing-intro"] ?? "";
 
   const [query, setQuery] = useState("");
 

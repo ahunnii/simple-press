@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { CheckCircle, Loader2 } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -14,7 +15,20 @@ import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-export function DarkTrendContactForm() {
+type DarkTrendContactFormProps = {
+  /** `dark-trend.contact.form-success-heading`, resolved server-side. */
+  successHeading: string;
+  /** `dark-trend.contact.form-success-body`; blank hides the line. */
+  successBody: string;
+  /** `dark-trend.contact.form-send-another-text`; blank hides the button. */
+  sendAnotherText: string;
+};
+
+export function DarkTrendContactForm({
+  successHeading,
+  successBody,
+  sendAnotherText,
+}: DarkTrendContactFormProps) {
   const {
     form,
     messageLength,
@@ -52,16 +66,32 @@ export function DarkTrendContactForm() {
           {/* N-1: decorative icon */}
           <CheckCircle aria-hidden="true" className="h-5 w-5 text-purple-400" />
           <AlertDescription className="text-purple-300">
-            <strong>Message sent successfully!</strong>
-            <br />
-            We&apos;ve received your message and will get back to you soon.
+            {successHeading.trim() && (
+              <strong
+                className="block"
+                {...fieldAttr("dark-trend.contact.form-success-heading")}
+              >
+                {successHeading}
+              </strong>
+            )}
+            {successBody.trim() && (
+              <span
+                className="block"
+                {...fieldAttr("dark-trend.contact.form-success-body")}
+              >
+                {successBody}
+              </span>
+            )}
           </AlertDescription>
-          <Button
-            onClick={resetSuccess}
-            className="mt-4 border border-purple-400/60 bg-purple-950/60 font-medium text-purple-100 transition-colors hover:border-purple-300 hover:bg-purple-900/70"
-          >
-            Send Another Message
-          </Button>
+          {sendAnotherText.trim() && (
+            <Button
+              onClick={resetSuccess}
+              className="mt-4 border border-purple-400/60 bg-purple-950/60 font-medium text-purple-100 transition-colors hover:border-purple-300 hover:bg-purple-900/70"
+              {...fieldAttr("dark-trend.contact.form-send-another-text")}
+            >
+              {sendAnotherText}
+            </Button>
+          )}
         </Alert>
       </div>
     );
@@ -88,7 +118,7 @@ export function DarkTrendContactForm() {
         <InputFormField
           form={form}
           name="name"
-          label="First Name *"
+          label="Name *"
           className="flex flex-col gap-2"
           labelClassName={"text-white"}
           inputClassName={

@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { OliveButton } from "./olive-button";
@@ -21,6 +22,9 @@ type OliveEmptyStateProps = {
   children?: ReactNode;
   className?: string;
   style?: CSSProperties;
+  /** Full template field keys, when `heading` / `body` are live-patchable fields. */
+  headingFieldKey?: string;
+  bodyFieldKey?: string;
 };
 
 /**
@@ -43,6 +47,8 @@ export function OliveEmptyState({
   children,
   className,
   style,
+  headingFieldKey,
+  bodyFieldKey,
 }: OliveEmptyStateProps) {
   const Heading = headingAs;
 
@@ -71,9 +77,21 @@ export function OliveEmptyState({
         <OliveLeafMark size={22} />
       </span>
 
-      <Heading className="olive-h3">{heading}</Heading>
+      <Heading
+        className="olive-h3"
+        {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
+      >
+        {heading}
+      </Heading>
 
-      {body ? <p className="olive-caption max-w-[46ch]">{body}</p> : null}
+      {body ? (
+        <p
+          className="olive-caption max-w-[46ch]"
+          {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
+        >
+          {body}
+        </p>
+      ) : null}
 
       {cta ? (
         <OliveButton variant="secondary" href={cta.href} className="mt-1">

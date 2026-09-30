@@ -1,6 +1,6 @@
 "use client";
 
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { getListFieldValue } from "~/lib/template-fields";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -13,7 +13,8 @@ import { parseHappyBambooBenefitsList } from "./happy-bamboo-benefits-data";
 
 type Props = {
   themeSpecificFieldsRaw: unknown;
-  heading?: string;
+  smallLabel?: string;
+  heading: string;
   intro?: string;
   closing?: string;
   /** Spread on root <section> for preview overlay hotspot. */
@@ -22,9 +23,10 @@ type Props = {
 
 export function HappyBambooBenefitsSection({
   themeSpecificFieldsRaw,
-  heading = "Why Choose Bamboo Products?",
-  intro = "Bamboo products come with a variety of benefits, making them an appealing option for many consumers.",
-  closing = "Overall, choosing bamboo products can be a responsible and eco-conscious decision that benefits both consumers and the environment.",
+  smallLabel,
+  heading,
+  intro,
+  closing,
   sectionAttrs,
 }: Props) {
   const benefitsListRaw = getListFieldValue(
@@ -37,9 +39,14 @@ export function HappyBambooBenefitsSection({
     <section className="bg-muted/50 py-20 md:py-32" {...sectionAttrs}>
       <div className="container mx-auto px-4">
         <FadeIn className="mb-16 text-center">
-          <span className="text-primary text-sm font-semibold tracking-wider uppercase">
-            Happy Bamboo
-          </span>
+          {!!smallLabel && (
+            <span
+              className="text-primary text-sm font-semibold tracking-wider uppercase"
+              {...fieldAttr("happy-bamboo.homepage-benefits-small-label")}
+            >
+              {smallLabel}
+            </span>
+          )}
           <h2
             className="mt-2 font-serif text-4xl font-bold md:text-5xl"
             {...fieldAttr("happy-bamboo.homepage-benefits-heading")}
@@ -60,7 +67,10 @@ export function HappyBambooBenefitsSection({
           {items.map((benefit, index) => {
             const Icon = benefit.icon;
             return (
-              <StaggerItem key={`${benefit.title}-${index}`}>
+              <StaggerItem
+                key={`${benefit.title}-${index}`}
+                {...listItemAttr("happy-bamboo.homepage-benefits-list", index)}
+              >
                 <Card className="h-full transition-shadow hover:shadow-lg">
                   <CardHeader>
                     <div className="bg-primary/10 mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg">

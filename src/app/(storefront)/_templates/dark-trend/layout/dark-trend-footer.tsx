@@ -3,36 +3,67 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
+import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
+
+import { resolveFields } from "..";
+
+const headingClass =
+  "text-xs font-semibold tracking-widest text-white uppercase";
+
+/** Shipped default nav, used when the owner has set neither the main nav nor a footer quick-links list. */
+const DARK_TREND_DEFAULT_NAV: NavItem[] = [
+  { href: "/shop", label: "Shop" },
+  { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About" },
+];
 
 export async function DarkTrendFooter({
   business,
 }: DefaultFooterTemplateProps) {
   const currentYear = new Date().getFullYear();
-  const email = business?.supportEmail;
-  const phone = business?.phoneNumber;
-  const address = business?.businessAddress;
+  const email = business?.supportEmail?.trim() ?? "";
+  const phone = business?.phoneNumber?.trim() ?? "";
+  const address = business?.businessAddress?.trim() ?? "";
+  const phoneHref = telHref(phone);
+  const hasContact = !!(email || phone || address);
+  const { isEnabled } = await getBusinessFlags();
 
-  const navigationItems = business?.siteContent?.navigationItems as
-    | { label: string; href: string }[]
-    | undefined;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "dark-trend.global.footer-nav-heading",
+    "dark-trend.global.footer-contact-heading",
+    "dark-trend.global.footer-social-heading",
+  ]);
+  const navHeading = f["dark-trend.global.footer-nav-heading"] ?? "";
+  const contactHeading = f["dark-trend.global.footer-contact-heading"] ?? "";
+  const socialHeading = f["dark-trend.global.footer-social-heading"] ?? "";
+
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: DARK_TREND_DEFAULT_NAV,
+    isEnabled,
+  });
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
   });
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
   return (
-    <footer className="border-t border-white/10 bg-[#121212] bg-[url('/dark-trend-footer.png')] bg-bottom bg-no-repeat">
+    <footer
+      className="border-t border-white/10 bg-[#121212] bg-[url('/dark-trend-footer.png')] bg-bottom bg-no-repeat"
+      {...sectionGroupAttr("global", "footer")}
+    >
       <div className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
@@ -65,43 +96,53 @@ export async function DarkTrendFooter({
             )}
           </div>
 
-          <div>
-            {/* M-10: no h2 ancestor in footer — use <p> styled identically */}
-            <p className="text-xs font-semibold tracking-widest text-white uppercase">
-              Navigate
-            </p>
-            <ul className="mt-4 flex flex-col gap-3">
-              {(
-                navigationItems ?? [
-                  { href: "/shop", label: "Shop" },
-                  { href: "/contact", label: "Contact" },
-                  { href: "/about", label: "About" },
-                ]
-              ).map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/70 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {quickLinks.length > 0 && (
+            <div>
+              {/* M-10: no h2 ancestor in footer — use <p> styled identically */}
+              {navHeading.trim() && (
+                <p
+                  className={headingClass}
+                  {...fieldAttr("dark-trend.global.footer-nav-heading")}
+                >
+                  {navHeading}
+                </p>
+              )}
+              <ul className="mt-4 flex flex-col gap-3">
+                {quickLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      {...externalLinkProps(link.external)}
+                      className="text-sm text-white/70 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="space-y-4">
-            {(email ?? phone ?? address) && (
+            {hasContact && (
               <>
-                <p className="text-xs font-semibold tracking-widest text-white uppercase">
-                  Reach Out
-                </p>
+                {contactHeading.trim() && (
+                  <p
+                    className={headingClass}
+                    {...fieldAttr("dark-trend.global.footer-contact-heading")}
+                  >
+                    {contactHeading}
+                  </p>
+                )}
                 <ul className="mt-4 flex flex-col gap-3 text-sm text-white/70">
                   {!!address && <li>{address}</li>}
-                  {!!phone && (
+                  {!!phoneHref && (
                     <li>
                       <a
-                        href={`tel:${phone.replace(/\D/g, "")}`}
+                        href={phoneHref}
                         className="transition-colors hover:text-white"
                       >
                         {phone}
@@ -122,142 +163,35 @@ export async function DarkTrendFooter({
               </>
             )}
 
-            <p className="text-xs font-semibold tracking-widest text-white uppercase">
-              Follow Us On
-            </p>
-            <ul className="mt-4 flex flex-row gap-4">
-              {socialLinks?.instagram && (
-                <li>
-                  <a
-                    href={socialLinks.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram (opens in new tab)"
-                    className="text-white/70 transition-colors hover:text-white"
+            {socialLinks.length > 0 && (
+              <>
+                {socialHeading.trim() && (
+                  <p
+                    className={headingClass}
+                    {...fieldAttr("dark-trend.global.footer-social-heading")}
                   >
-                    <svg
-                      aria-hidden="true"
-                      focusable="false"
-                      width="22"
-                      height="22"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="h-5 w-5"
-                    >
-                      <rect
-                        x="2"
-                        y="2"
-                        width="20"
-                        height="20"
-                        rx="5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                      <circle cx="17" cy="7" r="1.2" fill="currentColor" />
-                    </svg>
-                  </a>
-                </li>
-              )}
-              {socialLinks?.facebook && (
-                <li>
-                  <a
-                    href={socialLinks.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Facebook (opens in new tab)"
-                    className="text-white/70 transition-colors hover:text-white"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      focusable="false"
-                      width="22"
-                      height="22"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="h-5 w-5"
-                    >
-                      <rect
-                        x="2"
-                        y="2"
-                        width="20"
-                        height="20"
-                        rx="5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                      <path
-                        d="M16 8.5h-1.5A1.5 1.5 0 0 0 13 10v2h-1.5v2H13v4h2v-4h1.1l.4-2H15v-1.1A.4.4 0 0 1 15.4 10H16V8.5z"
-                        stroke="currentColor"
-                        strokeWidth="1.2"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </a>
-                </li>
-              )}
-              {socialLinks?.twitter && (
-                <li>
-                  <a
-                    href={socialLinks.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Twitter (opens in new tab)"
-                    className="text-white/70 transition-colors hover:text-white"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      focusable="false"
-                      width="22"
-                      height="22"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="h-5 w-5"
-                    >
-                      <rect
-                        x="2"
-                        y="2"
-                        width="20"
-                        height="20"
-                        rx="5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                      <path
-                        d="M19 7.5c-.4.2-.8.3-1.2.4.4-.3.7-.6.8-1.1-.4.2-.9.4-1.3.5A2.1 2.1 0 0 0 9.8 9c0 .2 0 .4.1.6C8.2 9.6 6.8 8.9 5.8 7.8c-.2.4-.3.7-.3 1.2 0 .8.4 1.5 1.1 1.9-.3 0-.7-.1-1-.3v.1c0 1.1.8 2 1.8 2.2-.2 0-.4.1-.7.1-.2 0-.4 0-.5-.1.3 1 1.2 1.7 2.2 1.7A4.3 4.3 0 0 1 5 17.1c-.3 0-.7 0-1-.1A6.1 6.1 0 0 0 8.3 18.5c7.5 0 11.6-6.2 11.6-11.6v-.5c.8-.6 1.2-1.1 1.4-1.8z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </a>
-                </li>
-              )}
-              {socialLinks?.youtube && (
-                <li>
-                  <a
-                    href={socialLinks.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="YouTube (opens in new tab)"
-                    className="text-white/70 transition-colors hover:text-white"
-                  >
-                    <YouTubeIcon className="h-5 w-5" />
-                  </a>
-                </li>
-              )}
-            </ul>
+                    {socialHeading}
+                  </p>
+                )}
+                <ul className="mt-4 flex flex-row flex-wrap gap-4">
+                  {socialLinks.map(({ key, ariaLabel, Icon, url }) => (
+                    <li key={key}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/70 transition-colors hover:text-white"
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span className="sr-only">
+                          {ariaLabel} (opens in new tab)
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -278,7 +212,7 @@ export async function DarkTrendFooter({
               )}
               <p className="inline text-sm text-white/60">
                 <Link
-                  href={policy.slug}
+                  href={`/${policy.slug}`}
                   className="underline transition-colors hover:text-white"
                 >
                   {policy.title}

@@ -85,7 +85,7 @@ export function HappyBambooVariantSelector({
     <div className="space-y-4">
       {/* Variant Selection */}
       <div className="mb-6">
-        <Label className="mb-3 block text-sm font-medium text-white">
+        <Label className="text-foreground mb-3 block text-sm font-medium">
           Select Variant
         </Label>
         <div className="flex flex-wrap gap-3">

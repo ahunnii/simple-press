@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -11,9 +12,18 @@ import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe
 
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 
+type BambooProductActionsProps = DefaultProductPageTemplateProps & {
+  /** Resolved `bamboo.product.coming-soon-heading` (page resolves fields). */
+  comingSoonHeading: string;
+  /** Resolved `bamboo.product.coming-soon-body`; blank hides the line. */
+  comingSoonBody: string;
+};
+
 export function BambooProductActions({
   product,
-}: DefaultProductPageTemplateProps) {
+  comingSoonHeading,
+  comingSoonBody,
+}: BambooProductActionsProps) {
   const {
     formatPrice,
     inStock,
@@ -44,13 +54,21 @@ export function BambooProductActions({
   return (
     <>
       {additionalFields?.comingSoon ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
-          <p className="font-semibold text-amber-700 dark:text-amber-300">
-            Coming Soon
+        <div className="rounded-2xl border border-[var(--bam-hairline)] bg-[var(--bam-cream-deep)] px-5 py-4">
+          <p
+            {...fieldAttr("bamboo.product.coming-soon-heading")}
+            className="text-foreground font-semibold"
+          >
+            {comingSoonHeading}
           </p>
-          <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
-            This product isn&apos;t available yet. Check back later!
-          </p>
+          {comingSoonBody.trim() ? (
+            <p
+              {...fieldAttr("bamboo.product.coming-soon-body")}
+              className="text-muted-foreground mt-1 text-sm"
+            >
+              {comingSoonBody}
+            </p>
+          ) : null}
         </div>
       ) : hasVariants ? (
         <BambooVariantSelector
@@ -79,59 +97,47 @@ export function BambooProductActions({
       ) : (
         <>
           {canAddMore && (
-            <>
+            <div className="flex flex-col gap-2">
               {/* Quantity Selector */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex flex-col gap-1.5">
-                  <div className="border-border flex items-center gap-1 rounded-lg border">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-11"
-                      onClick={() => handleDecrement()}
-                      disabled={quantity <= 1}
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="size-4" aria-hidden="true" />
-                    </Button>
-                    <span
-                      className="text-foreground w-10 text-center text-base font-semibold"
-                      aria-live="polite"
-                      aria-atomic="true"
-                    >
-                      {quantity}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-11"
-                      onClick={() => handleIncrement()}
-                      disabled={quantity >= remainingStock}
-                      aria-label="Increase quantity"
-                      aria-describedby={
-                        isInventoryTracked
-                          ? "bamboo-actions-stock-msg"
-                          : undefined
-                      }
-                    >
-                      <Plus className="size-4" aria-hidden="true" />
-                    </Button>
-                  </div>
-                  {isInventoryTracked && !product.allowBackorders && (
-                    <span
-                      id="bamboo-actions-stock-msg"
-                      className="text-muted-foreground text-sm"
-                    >
-                      {remainingStock > 1
-                        ? `${remainingStock} available`
-                        : "Last one!"}
-                    </span>
-                  )}
+                <div className="border-border flex h-12 items-center gap-1 rounded-lg border">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-11"
+                    onClick={() => handleDecrement()}
+                    disabled={quantity <= 1}
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="size-4" aria-hidden="true" />
+                  </Button>
+                  <span
+                    className="text-foreground w-10 text-center text-base font-semibold"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-11"
+                    onClick={() => handleIncrement()}
+                    disabled={quantity >= remainingStock}
+                    aria-label="Increase quantity"
+                    aria-describedby={
+                      isInventoryTracked
+                        ? "bamboo-actions-stock-msg"
+                        : undefined
+                    }
+                  >
+                    <Plus className="size-4" aria-hidden="true" />
+                  </Button>
                 </div>
                 <Button
                   size="lg"
                   onClick={handleAddToCart}
-                  className="flex-1 gap-2 rounded-full hover:bg-[var(--bam-forest-deep)] sm:flex-none"
+                  className="h-12 gap-2 rounded-full hover:bg-[var(--bam-forest-deep)]"
                 >
                   {justAdded ? (
                     <>
@@ -150,6 +156,16 @@ export function BambooProductActions({
                   {justAdded ? `${product.name} added to cart` : ""}
                 </div>
               </div>
+              {isInventoryTracked && !product.allowBackorders && (
+                <span
+                  id="bamboo-actions-stock-msg"
+                  className="text-muted-foreground text-sm"
+                >
+                  {remainingStock > 1
+                    ? `${remainingStock} available`
+                    : "Last one!"}
+                </span>
+              )}
               {product.trackInventory &&
                 product.allowBackorders &&
                 (product.inventoryQty ?? 0) === 0 && (
@@ -157,7 +173,7 @@ export function BambooProductActions({
                     Backordered — ships when available
                   </p>
                 )}
-            </>
+            </div>
           )}
 
           {!canAddMore && inStock && (

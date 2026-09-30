@@ -19,7 +19,7 @@ import { SECTION_LINKS } from "~/lib/section-links";
 const donateHeaderData: TemplateField[] = [
   {
     key: "pink.donate.header-heading",
-    label: "Header Heading",
+    label: "Heading",
     description:
       "Main heading for the Donate page. Leave blank to use the page title derived from the donation label (Donate / Leave a Tip / Support Us) set in Donation settings.",
     type: "text",
@@ -30,14 +30,13 @@ const donateHeaderData: TemplateField[] = [
   },
   {
     key: "pink.donate.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     description: "Short paragraph below the heading.",
     type: "textarea",
     page: "donate",
     group: "donate.header",
     gridColumn: "col-span-full",
     defaultValue: "Every contribution helps us keep doing what we love.",
-    placeholder: "Every contribution helps us keep doing what we love.",
   },
 ];
 
@@ -46,24 +45,22 @@ const donateHeaderData: TemplateField[] = [
 const donateThankYouData: TemplateField[] = [
   {
     key: "pink.donate.thank-you-heading",
-    label: "Thank-You Heading",
+    label: "Heading",
     description: "Heading shown after a successful donation (?status=success).",
     type: "text",
     page: "donate",
     group: "donate.thank-you",
     defaultValue: "Thank you for your support!",
-    placeholder: "Thank you for your support!",
   },
   {
     key: "pink.donate.thank-you-body",
-    label: "Thank-You Body",
+    label: "Text",
     description: "Supporting copy shown below the thank-you heading.",
     type: "textarea",
     page: "donate",
     group: "donate.thank-you",
     gridColumn: "col-span-full",
     defaultValue: "Your gift has been received and means the world to us.",
-    placeholder: "Your gift has been received and means the world to us.",
   },
 ];
 
@@ -72,14 +69,13 @@ const donateThankYouData: TemplateField[] = [
 const donateFormData: TemplateField[] = [
   {
     key: "pink.donate.form-heading",
-    label: "Form Heading",
+    label: "Heading",
     description: "Heading above the amount picker / checkout form.",
     type: "text",
     page: "donate",
     group: "donate.form",
     gridColumn: "col-span-full",
     defaultValue: "Choose an amount",
-    placeholder: "Choose an amount",
   },
 ];
 
@@ -88,13 +84,12 @@ const donateFormData: TemplateField[] = [
 const donateOtherWaysData: TemplateField[] = [
   {
     key: "pink.donate.other-ways-heading",
-    label: "Other Ways to Give Heading",
+    label: "Heading",
     description: "Heading for the Venmo/Cash App section.",
     type: "text",
     page: "donate",
     group: "donate.other-ways",
     defaultValue: "Other ways to give",
-    placeholder: "Other ways to give",
   },
 ];
 
@@ -110,28 +105,28 @@ export const pinkDonateData: TemplateField[] = [
 export const pinkDonateFieldGroups: TemplateFieldGroup[] = [
   {
     id: "donate.header",
-    title: "Donate — Header",
+    title: "Header",
     description: "Page heading and intro.",
     icon: "💝",
     columns: 2,
   },
   {
     id: "donate.thank-you",
-    title: "Donate — Thank You",
+    title: "Thank you",
     description: "Copy shown after a successful donation.",
     icon: "🙏",
     columns: 2,
   },
   {
     id: "donate.form",
-    title: "Donate — Form",
+    title: "Form",
     description: "Heading above the amount picker / checkout form.",
     icon: "📝",
     columns: 2,
   },
   {
     id: "donate.other-ways",
-    title: "Donate — Other Ways to Give",
+    title: "Other ways to give",
     description: "Heading for the Venmo/Cash App section.",
     icon: "🤝",
     columns: 2,
@@ -151,7 +146,7 @@ export const pinkDonateSections: TemplateSection[] = [
   {
     id: "donate.thank-you",
     page: "donate",
-    title: "Thank You",
+    title: "Thank you",
     description: "Copy shown after a successful donation.",
     groupIds: ["donate.thank-you"],
     order: 1,
@@ -170,7 +165,7 @@ export const pinkDonateSections: TemplateSection[] = [
   {
     id: "donate.other-ways",
     page: "donate",
-    title: "Other Ways to Give",
+    title: "Other ways to give",
     description: "Heading for the Venmo/Cash App section",
     groupIds: ["donate.other-ways"],
     order: 3,

@@ -1,26 +1,36 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   isContentEmpty,
-  parseTemplateListRows,
+  parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductReviews } from "~/components/product-reviews";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "..";
 import {
@@ -104,6 +114,7 @@ const containerStyle: CSSProperties = {
 export function OliveProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const {
     additionalFields,
@@ -125,6 +136,10 @@ export function OliveProductPage({
   const { data: related } = api.product.getRelated.useQuery({
     productId: product.id,
   });
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   const hasVariants = product.variants.length > 0;
 
@@ -200,6 +215,10 @@ export function OliveProductPage({
     "olive.global.product-related-link-label",
     "olive.global.product-coming-soon-heading",
     "olive.global.product-coming-soon-body",
+    "olive.global.product-related-empty",
+    "olive.global.product-preorder-note",
+    "olive.global.product-max-in-bag",
+    "olive.global.product-reviews-heading",
   ]);
 
   const shippingText = (
@@ -213,22 +232,63 @@ export function OliveProductPage({
   const relatedLinkLabel = f["olive.global.product-related-link-label"] ?? "";
   const comingSoonHeading = f["olive.global.product-coming-soon-heading"] ?? "";
   const comingSoonBody = f["olive.global.product-coming-soon-body"] ?? "";
+  const relatedEmptyText =
+    f["olive.global.product-related-empty"] ??
+    "Nothing to pair with this one yet";
+  const preorderNote =
+    f["olive.global.product-preorder-note"] ??
+    "Pre-order — ships when available";
+  const maxInBagNote =
+    f["olive.global.product-max-in-bag"] ??
+    "Everything we have is already in your bag.";
+  const reviewsHeading = f["olive.global.product-reviews-heading"] ?? "";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Each row is its own hideable section (product.shipping / product.returns
+  // / product.questions) so an owner can hide one without hiding the others.
+  // A row still shows with blank owner text as long as its policy page is
+  // published, so the "Read the full … policy" link stays reachable.
+  const showShippingRow =
+    isSectionVisible(customFields, "olive", "product.shipping") &&
+    (shippingText !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "olive", "product.returns") &&
+    (returnsText !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "olive", "product.questions") &&
+    questionText !== "";
 
   // Product-level badges (icon + text, set per product) win over the store-wide
   // list; a product that says something specific should not be talked over.
-  const globalBadges = parseTemplateListRows(
-    getListFieldValue(customFields, "olive.global.product-trust-badges"),
+  // Olive's own list field is label-only (see products/index.ts itemSchema),
+  // so `row.icon` is always undefined here and the Check glyph carries every
+  // store-wide badge — kept for parity with `displayTrustBadges`, which does
+  // supply real icons. Index is assigned AFTER the parser has already
+  // dropped any invalid rows (mirrors bamboo's `bamboo-product-page.tsx`
+  // :97-102), so a row that fails validation shifts the indexes of the rows
+  // after it; there is no cheap way to recover the pre-validation index
+  // through this shared helper.
+  const globalBadges = (
+    parseTemplateTrustBadgesListRows(
+      getListFieldValue(customFields, "olive.global.product-trust-badges"),
+    ) ?? []
   )
-    .map((row) => (typeof row.label === "string" ? row.label.trim() : ""))
-    .filter((label) => label.length > 0);
+    .map((row, index) => ({
+      Icon: row.icon ?? Check,
+      label: row.label.trim(),
+      index,
+    }))
+    .filter((row) => row.label.length > 0);
 
-  const badges =
+  const badges: { Icon: LucideIcon; label: string; index: number | null }[] =
     displayTrustBadges.length > 0
       ? displayTrustBadges.map((badge) => ({
           Icon: badge.Icon,
           label: badge.label,
+          index: null,
         }))
-      : globalBadges.map((label) => ({ Icon: Check, label }));
+      : globalBadges;
 
   const comingSoon = additionalFields?.comingSoon === true;
   const tagline = additionalFields?.productTagline?.trim() ?? "";
@@ -280,7 +340,7 @@ export function OliveProductPage({
             refuses. */}
         <div
           className="lg:sticky lg:top-[calc(var(--olive-header-h)+1.5rem)] lg:self-start"
-          {...sectionGroupAttr("global", "product")}
+          {...sectionGroupAttr("product", "details")}
         >
           <OliveRevealGroup className="flex flex-col gap-5">
             <div
@@ -320,6 +380,21 @@ export function OliveProductPage({
                 border: 0,
                 borderTop: "1px solid var(--olive-hairline)",
               }}
+            />
+
+            {/* Wishlist — its own row above the buy controls so it stays
+                visible across every branch below (coming soon, variants,
+                out of stock, in stock). Self-gates on the wishlist flag. */}
+            <WishlistButton
+              item={{
+                productId: product.id,
+                name: product.name,
+                slug: product.slug,
+                price: displayPrice,
+                imageUrl: product.images[0]?.url ?? null,
+              }}
+              className="static flex size-10 shrink-0 items-center justify-center self-start rounded-[var(--olive-card-radius)] border border-[var(--olive-hairline)] bg-[var(--olive-paper)] text-[var(--olive-leaf)] shadow-none backdrop-blur-none hover:scale-100 hover:bg-[var(--olive-sage-tint)]"
+              iconClassName="size-4"
             />
 
             {comingSoon ? (
@@ -377,7 +452,8 @@ export function OliveProductPage({
                 product.inventoryQty === 0 ? (
                   <OliveStatusBadge
                     status="pre-order"
-                    label="Pre-order — ships when available"
+                    label={preorderNote}
+                    labelFieldKey="olive.global.product-preorder-note"
                   />
                 ) : isInventoryTracked && remainingStock > 0 ? (
                   remainingStock <= LOW_STOCK ? (
@@ -391,8 +467,11 @@ export function OliveProductPage({
                 ) : null}
 
                 {!canAddMore ? (
-                  <p className="olive-caption">
-                    Everything we have is already in your bag.
+                  <p
+                    className="olive-caption"
+                    {...fieldAttr("olive.global.product-max-in-bag")}
+                  >
+                    {maxInBagNote}
                   </p>
                 ) : null}
               </div>
@@ -416,9 +495,15 @@ export function OliveProductPage({
                 className="olive-reveal-item flex flex-col gap-1.5"
                 style={{ "--i": 2 } as CSSProperties}
               >
-                {badges.map(({ Icon, label }, index) => (
+                {badges.map(({ Icon, label, index }, position) => (
                   <li
-                    key={`${label}-${index}`}
+                    key={`${label}-${position}`}
+                    {...(index !== null
+                      ? listItemAttr(
+                          "olive.global.product-trust-badges",
+                          index,
+                        )
+                      : {})}
                     className="flex items-start gap-2 text-[0.8125rem] leading-relaxed"
                     style={{ color: "var(--olive-ink-soft)" }}
                   >
@@ -433,7 +518,7 @@ export function OliveProductPage({
               </ul>
             ) : null}
 
-            {hasDetails || shippingText || returnsText ? (
+            {hasDetails || showShippingRow || showReturnsRow ? (
               <div
                 className="olive-reveal-item"
                 style={{ "--i": 3 } as CSSProperties}
@@ -453,69 +538,139 @@ export function OliveProductPage({
                     </OliveAccordionItem>
                   ) : null}
 
-                  {shippingText ? (
-                    <OliveAccordionItem
-                      headingLevel={2}
-                      id="shipping"
-                      title="Shipping"
-                    >
-                      <p
-                        {...fieldAttr(
-                          "olive.global.product-shipping-description",
-                        )}
+                  {showShippingRow ? (
+                    <div {...sectionGroupAttr("product", "shipping")}>
+                      <OliveAccordionItem
+                        headingLevel={2}
+                        id="shipping"
+                        title="Shipping"
                       >
-                        {shippingText}
-                      </p>
-                    </OliveAccordionItem>
+                        {shippingText ? (
+                          <p
+                            {...fieldAttr(
+                              "olive.global.product-shipping-description",
+                            )}
+                          >
+                            {shippingText}
+                          </p>
+                        ) : null}
+                        {hasShippingPolicy ? (
+                          <Link
+                            href="/shipping-policy"
+                            className="mt-3 inline-block underline"
+                            style={{
+                              color: "var(--olive-leaf)",
+                              textDecorationColor: "var(--olive-sage-bright)",
+                              textUnderlineOffset: "5px",
+                            }}
+                          >
+                            Read the full shipping policy
+                          </Link>
+                        ) : null}
+                      </OliveAccordionItem>
+                    </div>
                   ) : null}
 
-                  {returnsText ? (
-                    <OliveAccordionItem
-                      headingLevel={2}
-                      id="returns"
-                      title="Returns"
-                    >
-                      <p
-                        {...fieldAttr(
-                          "olive.global.product-returns-description",
-                        )}
+                  {showReturnsRow ? (
+                    <div {...sectionGroupAttr("product", "returns")}>
+                      <OliveAccordionItem
+                        headingLevel={2}
+                        id="returns"
+                        title="Returns"
                       >
-                        {returnsText}
-                      </p>
-                    </OliveAccordionItem>
+                        {returnsText ? (
+                          <p
+                            {...fieldAttr(
+                              "olive.global.product-returns-description",
+                            )}
+                          >
+                            {returnsText}
+                          </p>
+                        ) : null}
+                        {hasRefundPolicy ? (
+                          <Link
+                            href="/refund-policy"
+                            className="mt-3 inline-block underline"
+                            style={{
+                              color: "var(--olive-leaf)",
+                              textDecorationColor: "var(--olive-sage-bright)",
+                              textUnderlineOffset: "5px",
+                            }}
+                          >
+                            Read the full returns policy
+                          </Link>
+                        ) : null}
+                      </OliveAccordionItem>
+                    </div>
                   ) : null}
                 </OliveAccordion>
               </div>
             ) : null}
 
-            {questionText ? (
-              <p
-                className="olive-reveal-item olive-caption"
+            {showQuestionsRow ? (
+              <div
+                className="olive-reveal-item"
                 style={{ "--i": 4 } as CSSProperties}
+                {...sectionGroupAttr("product", "questions")}
               >
-                <Link
-                  href="/contact"
-                  className="underline"
-                  style={{
-                    color: "var(--olive-leaf)",
-                    textDecorationColor: "var(--olive-sage-bright)",
-                    textUnderlineOffset: "5px",
-                  }}
-                  {...fieldAttr("olive.global.product-question-text")}
-                >
-                  {questionText}
-                </Link>
-              </p>
+                <p className="olive-caption">
+                  <Link
+                    href="/contact"
+                    className="underline"
+                    style={{
+                      color: "var(--olive-leaf)",
+                      textDecorationColor: "var(--olive-sage-bright)",
+                      textUnderlineOffset: "5px",
+                    }}
+                    {...fieldAttr("olive.global.product-question-text")}
+                  >
+                    {questionText}
+                  </Link>
+                </p>
+              </div>
             ) : null}
           </OliveRevealGroup>
         </div>
       </div>
+
+      {/* Reviews — only mounts (and only fires review queries) when the
+          reviews feature flag is enabled for this business. */}
+      {reviewsEnabled ? (
+        <section
+          aria-label="Reviews"
+          className="pt-12 pb-16 md:pt-16 md:pb-24"
+          style={{ borderTop: "1px solid var(--olive-hairline)" }}
+        >
+          <OliveReveal threshold={0}>
+            {reviewsHeading ? (
+              <h2
+                className="olive-h2 mb-8"
+                {...fieldAttr("olive.global.product-reviews-heading")}
+              >
+                {reviewsHeading}
+              </h2>
+            ) : null}
+            <ProductReviews
+              productId={product.id}
+              onWriteReviewClick={() => setReviewDialogOpen(true)}
+            />
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </OliveReveal>
+        </section>
+      ) : null}
 
       {relatedProducts.length > 0 ? (
         <section
           aria-labelledby="olive-related-heading"
           className="pt-12 pb-16 md:pt-16 md:pb-24"
           style={{ borderTop: "1px solid var(--olive-hairline)" }}
+          {...sectionGroupAttr("product", "details")}
         >
           {/* The grid below deals its cards in, so without this the heading
               would arrive after the row it labels. Wrapped here rather than
@@ -535,7 +690,8 @@ export function OliveProductPage({
           <OliveProductGrid
             products={relatedProducts}
             columns={4}
-            emptyHeading="Nothing to pair with this one yet"
+            emptyHeading={relatedEmptyText}
+            emptyHeadingFieldKey="olive.global.product-related-empty"
           />
         </section>
       ) : null}

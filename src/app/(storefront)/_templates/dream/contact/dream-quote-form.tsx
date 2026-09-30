@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 
 import type {
   QuoteExtras,
+  QuoteLabels,
   QuoteSetting,
   QuoteYesNo,
 } from "./compose-quote-message";
@@ -41,6 +42,18 @@ type Step = {
   bodyFieldKey: string;
 };
 
+/**
+ * Owner-editable wording for the three decor questions
+ * (`dream.contact.form-draping-label` / `form-throne-label` /
+ * `form-full-decor-label`) plus the full-decor required message
+ * (`dream.contact.form-full-decor-error`). A blank label hides that
+ * question entirely; a blank `fullDecorError` just leaves the required
+ * message empty when it fires.
+ */
+type QuoteFormLabels = QuoteLabels & {
+  fullDecorError: string;
+};
+
 type Props = {
   heading: string;
   intro: string;
@@ -50,6 +63,7 @@ type Props = {
   successBody: string;
   nextHeading: string;
   nextSteps: Step[];
+  labels: QuoteFormLabels;
 };
 
 type ExtrasKey = keyof QuoteExtras;
@@ -91,6 +105,7 @@ export function DreamQuoteForm({
   successBody,
   nextHeading,
   nextSteps,
+  labels,
 }: Props) {
   const [extras, setExtras] = useState<QuoteExtras>(EMPTY_QUOTE_EXTRAS);
   const [extrasErrors, setExtrasErrors] = useState<ExtrasErrors>({});
@@ -99,7 +114,7 @@ export function DreamQuoteForm({
   // The hook rebuilds its zod schema every render, so recomputing the
   // dynamic cap off the CURRENT extras on every render keeps the theme
   // description's budget honest as the owner fills in event details.
-  const prefix = composeQuotePrefix(extras);
+  const prefix = composeQuotePrefix(extras, labels);
   const dynamicMessageMaxLength = Math.max(
     120,
     CONTACT_MESSAGE_MAX_LENGTH - prefix.length - 2,
@@ -152,8 +167,10 @@ export function DreamQuoteForm({
     if (!extras.setting) {
       errors.setting = "Choose a setting.";
     }
-    if (!extras.fullDecor) {
-      errors.fullDecor = "Let Selest know if you'd like full decor.";
+    // The full-decor question can be hidden entirely (blank label), in which
+    // case it's never required and never validated.
+    if (labels.fullDecor.trim() && !extras.fullDecor) {
+      errors.fullDecor = labels.fullDecorError;
     }
     if (extras.photoLink.trim()) {
       try {
@@ -179,7 +196,7 @@ export function DreamQuoteForm({
   const handleFormSubmit = async (data: Parameters<typeof onSubmit>[0]) => {
     if (!validateExtras()) return;
 
-    const composed = composeQuoteMessage(extras, data.message);
+    const composed = composeQuoteMessage(extras, data.message, labels);
     if (composed.length > CONTACT_MESSAGE_MAX_LENGTH) {
       form.setError("message", {
         message:
@@ -472,50 +489,56 @@ export function DreamQuoteForm({
                 />
               </label>
 
-              <DreamRadioPills
-                name="draping"
-                legend="Draping"
-                options={YES_NO_OPTIONS}
-                value={extras.draping}
-                onChange={(value) => setExtra("draping", value as QuoteYesNo)}
-              />
-
-              <DreamRadioPills
-                name="throneChair"
-                legend="Throne chair"
-                options={YES_NO_OPTIONS}
-                value={extras.throneChair}
-                onChange={(value) =>
-                  setExtra("throneChair", value as QuoteYesNo)
-                }
-              />
-
-              <div ref={registerExtraRef("fullDecor")} tabIndex={-1}>
+              {labels.draping ? (
                 <DreamRadioPills
-                  aria-invalid={extrasErrors.fullDecor ? true : undefined}
-                  aria-describedby={
-                    extrasErrors.fullDecor
-                      ? "dream-quote-full-decor-error"
-                      : undefined
-                  }
-                  name="fullDecor"
-                  legend="Full decor by Dream Your Theme (required)"
+                  name="draping"
+                  legend={labels.draping}
                   options={YES_NO_OPTIONS}
-                  value={extras.fullDecor}
+                  value={extras.draping}
+                  onChange={(value) => setExtra("draping", value as QuoteYesNo)}
+                />
+              ) : null}
+
+              {labels.throneChair ? (
+                <DreamRadioPills
+                  name="throneChair"
+                  legend={labels.throneChair}
+                  options={YES_NO_OPTIONS}
+                  value={extras.throneChair}
                   onChange={(value) =>
-                    setExtra("fullDecor", value as QuoteYesNo)
+                    setExtra("throneChair", value as QuoteYesNo)
                   }
                 />
-                {extrasErrors.fullDecor ? (
-                  <span
-                    id="dream-quote-full-decor-error"
-                    role="alert"
-                    className="text-sm text-[var(--dream-error)]"
-                  >
-                    {extrasErrors.fullDecor}
-                  </span>
-                ) : null}
-              </div>
+              ) : null}
+
+              {labels.fullDecor ? (
+                <div ref={registerExtraRef("fullDecor")} tabIndex={-1}>
+                  <DreamRadioPills
+                    aria-invalid={extrasErrors.fullDecor ? true : undefined}
+                    aria-describedby={
+                      extrasErrors.fullDecor
+                        ? "dream-quote-full-decor-error"
+                        : undefined
+                    }
+                    name="fullDecor"
+                    legend={`${labels.fullDecor} (required)`}
+                    options={YES_NO_OPTIONS}
+                    value={extras.fullDecor}
+                    onChange={(value) =>
+                      setExtra("fullDecor", value as QuoteYesNo)
+                    }
+                  />
+                  {extrasErrors.fullDecor ? (
+                    <span
+                      id="dream-quote-full-decor-error"
+                      role="alert"
+                      className="text-sm text-[var(--dream-error)]"
+                    >
+                      {extrasErrors.fullDecor}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
 
               <label className="flex flex-col gap-2 text-sm">
                 <span>Link to photos of the space</span>

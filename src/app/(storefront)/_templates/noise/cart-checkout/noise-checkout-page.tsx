@@ -2,11 +2,27 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { NoiseCheckoutForm } from "./noise-checkout-form";
+import { NoiseCheckoutUnavailable } from "./noise-checkout-unavailable";
 
+/**
+ * `checkout/page.tsx` already renders `t.CheckoutUnavailable` (no props) when
+ * the store has no Stripe account outside development. This guard is
+ * belt-and-suspenders for any caller that reaches this component anyway
+ * (bamboo/vii pattern), and hands the already-loaded `customFields` down so
+ * the unavailable screen doesn't re-fetch the tenant.
+ */
 export async function NoiseCheckoutPage({
   business,
   merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
+  if (!business.isStripeConnected && process.env.NODE_ENV !== "development") {
+    return (
+      <NoiseCheckoutUnavailable
+        customFields={business.siteContent?.customFields}
+      />
+    );
+  }
+
   return (
     <PageTransition>
       {/* ── Centered header: "Checkout" overline + "Almost yours." h1 ── */}

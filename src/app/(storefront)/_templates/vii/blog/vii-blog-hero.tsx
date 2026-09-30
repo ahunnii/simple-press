@@ -1,5 +1,7 @@
 "use client";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import {
   heroHeadingStyle,
   heroRevealStyle,
@@ -12,6 +14,8 @@ type Props = {
   headingAccent: string;
   intro: string;
   storyCount: number;
+  /** Settings city (or legacy saved tag) appended to the story count; omitted when unset. */
+  locationTag?: string;
 };
 
 /**
@@ -27,12 +31,14 @@ export function ViiBlogHero({
   headingAccent,
   intro,
   storyCount,
+  locationTag,
 }: Props) {
   const { shown, reduced } = useViiHeroMotion();
 
   return (
     <section
       aria-label="The Blog"
+      {...sectionGroupAttr("blog", "hero")}
       style={{
         background: "var(--vii-cream)",
         padding:
@@ -66,7 +72,8 @@ export function ViiBlogHero({
               color: "var(--vii-ink-soft)",
             }}
           >
-            {storyCount} {storyCount === 1 ? "Story" : "Stories"} · Detroit
+            {storyCount} {storyCount === 1 ? "Story" : "Stories"}
+            {locationTag ? ` · ${locationTag}` : null}
           </span>
         </div>
 
@@ -87,7 +94,10 @@ export function ViiBlogHero({
           {heading}
           {heading && headingAccent ? " " : ""}
           {headingAccent && (
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+            <em
+              {...fieldAttr("vii.blog.heading-accent")}
+              style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+            >
               {headingAccent}
             </em>
           )}
@@ -96,6 +106,7 @@ export function ViiBlogHero({
         {/* Intro — CTA beat (0.3s), narrow measure, offset right for editorial asymmetry */}
         {intro && (
           <p
+            {...fieldAttr("vii.blog.intro")}
             style={{
               ...heroRevealStyle(shown, reduced, 0.3),
               fontFamily: "var(--font-sans)",

@@ -6,8 +6,11 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+
+import { resolveFields } from "..";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -34,6 +37,7 @@ function useScrollReveal() {
 }
 
 export function ElegantCollectionPage({
+  business,
   collection,
   additionalCollections,
 }: DefaultCollectionPageTemplateProps) {
@@ -46,6 +50,32 @@ export function ElegantCollectionPage({
     const t = setTimeout(() => setShown(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  const customFields = business.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+  const f = resolveFields(customFields, [
+    "elegant.collections.detail-back-text",
+    "elegant.collections.detail-small-label",
+    "elegant.collections.detail-continue-text",
+    "elegant.collections.detail-products-label",
+    "elegant.collections.detail-count-word",
+    "elegant.collections.detail-empty-heading",
+    "elegant.collections.detail-browse-all-text",
+    "elegant.collections.detail-other-label",
+    "elegant.collections.detail-other-heading",
+    "elegant.collections.detail-other-accent",
+  ]);
+  const backText = f["elegant.collections.detail-back-text"] ?? "";
+  const smallLabel = f["elegant.collections.detail-small-label"] ?? "";
+  const continueText = f["elegant.collections.detail-continue-text"] ?? "";
+  const productsLabel = f["elegant.collections.detail-products-label"] ?? "";
+  const countWord = f["elegant.collections.detail-count-word"] ?? "";
+  const emptyHeading = f["elegant.collections.detail-empty-heading"] ?? "";
+  const browseAllText = f["elegant.collections.detail-browse-all-text"] ?? "";
+  const otherLabel = f["elegant.collections.detail-other-label"] ?? "";
+  const otherHeading = f["elegant.collections.detail-other-heading"] ?? "";
+  const otherAccent = f["elegant.collections.detail-other-accent"] ?? "";
 
   const products = collection.collectionProducts
     .map((cp) => cp.product)
@@ -97,7 +127,9 @@ export function ElegantCollectionPage({
               }}
             >
               <ArrowLeft aria-hidden={true} style={{ width: 13, height: 13 }} />
-              All collections
+              <span {...fieldAttr("elegant.collections.detail-back-text")}>
+                {backText}
+              </span>
             </Link>
           </div>
 
@@ -112,20 +144,27 @@ export function ElegantCollectionPage({
             }}
           >
             <div>
-              <div style={fadeStyle(0.05)}>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono, ui-monospace)",
-                    fontSize: 11,
-                    letterSpacing: "0.22em",
-                    textTransform: "uppercase",
-                    color: "var(--el-ink-soft, #6b6659)",
-                  }}
-                >
-                  Collection · {products.length}{" "}
-                  {products.length === 1 ? "item" : "items"}
-                </span>
-              </div>
+              {smallLabel && (
+                <div style={fadeStyle(0.05)}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono, ui-monospace)",
+                      fontSize: 11,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: "var(--el-ink-soft, #6b6659)",
+                    }}
+                  >
+                    <span
+                      {...fieldAttr("elegant.collections.detail-small-label")}
+                    >
+                      {smallLabel}
+                    </span>{" "}
+                    · {products.length}{" "}
+                    {products.length === 1 ? "item" : "items"}
+                  </span>
+                </div>
+              )}
 
               <h1
                 style={{
@@ -204,7 +243,11 @@ export function ElegantCollectionPage({
                   }}
                   className="el-btn-ghost"
                 >
-                  Continue browsing
+                  <span
+                    {...fieldAttr("elegant.collections.detail-continue-text")}
+                  >
+                    {continueText}
+                  </span>
                   <ArrowRight
                     aria-hidden={true}
                     style={{ width: 14, height: 14 }}
@@ -256,19 +299,22 @@ export function ElegantCollectionPage({
               marginBottom: 40,
             }}
           >
-            <span
-              style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-                display: "block",
-                marginBottom: 14,
-              }}
-            >
-              What&apos;s inside
-            </span>
+            {productsLabel && (
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                  display: "block",
+                  marginBottom: 14,
+                }}
+                {...fieldAttr("elegant.collections.detail-products-label")}
+              >
+                {productsLabel}
+              </span>
+            )}
             <h2
               style={{
                 fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
@@ -279,7 +325,13 @@ export function ElegantCollectionPage({
               }}
             >
               The{" "}
-              <em style={{ fontStyle: "italic" }}>{products.length} pieces</em>.
+              <em style={{ fontStyle: "italic" }}>
+                {products.length}{" "}
+                <span {...fieldAttr("elegant.collections.detail-count-word")}>
+                  {countWord}
+                </span>
+              </em>
+              .
             </h2>
           </div>
 
@@ -292,8 +344,9 @@ export function ElegantCollectionPage({
                   color: "var(--el-ink, #1c1a17)",
                   marginBottom: 10,
                 }}
+                {...fieldAttr("elegant.collections.detail-empty-heading")}
               >
-                Nothing here yet.
+                {emptyHeading}
               </p>
               <Link
                 href="/shop"
@@ -306,7 +359,12 @@ export function ElegantCollectionPage({
                   textDecoration: "none",
                 }}
               >
-                Browse all products →
+                <span
+                  {...fieldAttr("elegant.collections.detail-browse-all-text")}
+                >
+                  {browseAllText}
+                </span>{" "}
+                →
               </Link>
             </div>
           ) : (
@@ -425,19 +483,22 @@ export function ElegantCollectionPage({
                 marginBottom: 40,
               }}
             >
-              <span
-                style={{
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  fontSize: 11,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--el-ink-soft, #6b6659)",
-                  display: "block",
-                  marginBottom: 14,
-                }}
-              >
-                Other edits
-              </span>
+              {otherLabel && (
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    fontSize: 11,
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "var(--el-ink-soft, #6b6659)",
+                    display: "block",
+                    marginBottom: 14,
+                  }}
+                  {...fieldAttr("elegant.collections.detail-other-label")}
+                >
+                  {otherLabel}
+                </span>
+              )}
               <h3
                 style={{
                   fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
@@ -447,7 +508,18 @@ export function ElegantCollectionPage({
                   color: "var(--el-ink, #1c1a17)",
                 }}
               >
-                Or try one of <em style={{ fontStyle: "italic" }}>these</em>.
+                <span
+                  {...fieldAttr("elegant.collections.detail-other-heading")}
+                >
+                  {otherHeading}
+                </span>{" "}
+                <em
+                  style={{ fontStyle: "italic" }}
+                  {...fieldAttr("elegant.collections.detail-other-accent")}
+                >
+                  {otherAccent}
+                </em>
+                .
               </h3>
             </div>
 

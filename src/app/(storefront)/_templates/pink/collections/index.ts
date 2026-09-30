@@ -7,14 +7,14 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * both `page: "collections"` (design.md → "Per-page section concepts →
  * Collections"). Per-collection content (name, description, image, product
  * list) always comes from the `Collection` record; fields here cover
- * chrome/microcopy and the two owner-configured mosaics.
+ * chrome/microcopy and the two owner-configured image layouts.
  */
 export const pinkCollectionsData: TemplateField[] = [
   // ── collections.header (index) ──────────────────────────────────────────
   {
     key: "pink.collections.header-heading",
-    label: "Header Heading",
-    description: "The main H1 on the collections index.",
+    label: "Heading",
+    description: "The page's main heading, on the collections index.",
     type: "text",
     page: "collections",
     group: "collections.header",
@@ -23,7 +23,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     description: "Shown in the right column of the header, beside the heading.",
     type: "textarea",
     page: "collections",
@@ -36,7 +36,7 @@ export const pinkCollectionsData: TemplateField[] = [
   // ── collections.featured (index) ────────────────────────────────────────
   {
     key: "pink.collections.featured-badge",
-    label: "Featured Card Badge",
+    label: "Badge text",
     description: "Corner badge on the featured collection card.",
     type: "text",
     page: "collections",
@@ -46,7 +46,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.featured-cta-label",
-    label: "Featured Card Link Text",
+    label: "Link text",
     description: "Link to the featured collection.",
     type: "text",
     page: "collections",
@@ -58,7 +58,7 @@ export const pinkCollectionsData: TemplateField[] = [
   // ── collections.grid (index) ────────────────────────────────────────────
   {
     key: "pink.collections.grid-badge-open",
-    label: "Grid Badge — Open",
+    label: "Badge text — open",
     description: "Status badge on cards for collections still being added to.",
     type: "text",
     page: "collections",
@@ -68,7 +68,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.grid-badge-closed",
-    label: "Grid Badge — Closed",
+    label: "Badge text — closed",
     description:
       "Status badge on cards for unpublished-going-forward collections.",
     type: "text",
@@ -81,28 +81,28 @@ export const pinkCollectionsData: TemplateField[] = [
   // ── collections.next (index) ────────────────────────────────────────────
   {
     key: "pink.collections.next-heading",
-    label: "Next Series Heading",
+    label: "Heading",
     type: "text",
     page: "collections",
     group: "collections.next",
     gridColumn: "col-span-1",
-    description: "Heading in the closing ink band.",
+    description: "Heading in the closing band at the bottom of the page.",
     defaultValue: "The next series starts soon.",
   },
   {
     key: "pink.collections.next-body",
-    label: "Next Series Body",
+    label: "Body text",
     type: "textarea",
     page: "collections",
     group: "collections.next",
     gridColumn: "col-span-full",
-    description: "One or two sentences under the closing-band heading.",
+    description: "One or two sentences under the heading above.",
     defaultValue:
       "Get in touch to hear when new work goes up, or to ask about a piece of your own.",
   },
   {
     key: "pink.collections.next-cta-primary-label",
-    label: "Primary Button Text",
+    label: "Button text",
     type: "text",
     page: "collections",
     group: "collections.next",
@@ -112,17 +112,17 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.next-cta-primary-href",
-    label: "Primary Button Link",
+    label: "Button link",
     type: "url",
     page: "collections",
     group: "collections.next",
     gridColumn: "col-span-1",
-    description: "Where the primary button goes.",
+    description: "Where the button goes.",
     defaultValue: "/contact",
   },
   {
     key: "pink.collections.next-cta-secondary-label",
-    label: "Secondary Button Text",
+    label: "Button text — second button",
     type: "text",
     page: "collections",
     group: "collections.next",
@@ -132,33 +132,33 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.next-cta-secondary-href",
-    label: "Secondary Button Link",
+    label: "Button link — second button",
     type: "url",
     page: "collections",
     group: "collections.next",
     gridColumn: "col-span-1",
-    description: "Where the secondary button goes.",
+    description: "Where the second button goes.",
     defaultValue: "/shop",
   },
   {
     key: "pink.collections.next-image-1",
-    label: "Closing Band Image 1",
+    label: "Image 1",
     type: "image",
     page: "collections",
     group: "collections.next",
     gridColumn: "col-span-1",
-    description: "Left image of the 2-up pair.",
+    description: "Left image of the pair in the closing band.",
     // Empty on purpose — the pair sits on a dark band.
     defaultValue: "",
   },
   {
     key: "pink.collections.next-image-2",
-    label: "Closing Band Image 2",
+    label: "Image 2",
     type: "image",
     page: "collections",
     group: "collections.next",
     gridColumn: "col-span-1",
-    description: "Right image of the 2-up pair.",
+    description: "Right image of the pair in the closing band.",
     // Empty on purpose — the pair sits on a dark band.
     defaultValue: "",
   },
@@ -166,7 +166,7 @@ export const pinkCollectionsData: TemplateField[] = [
   // ── collections.detail-hero (detail) ────────────────────────────────────
   {
     key: "pink.collections.detail-hero-fact-pieces-label",
-    label: "Fact Row — Pieces Label",
+    label: "Label — piece count",
     type: "text",
     page: "collections",
     group: "collections.detail-hero",
@@ -176,7 +176,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-hero-fact-available-label",
-    label: "Fact Row — Available Label",
+    label: "Label — available count",
     type: "text",
     page: "collections",
     group: "collections.detail-hero",
@@ -186,7 +186,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-hero-fact-price-label",
-    label: "Fact Row — From-Price Label",
+    label: "Label — starting price",
     type: "text",
     page: "collections",
     group: "collections.detail-hero",
@@ -198,39 +198,49 @@ export const pinkCollectionsData: TemplateField[] = [
   // ── collections.detail-intro (detail) ───────────────────────────────────
   {
     key: "pink.collections.detail-intro-heading",
-    label: "Detail Intro Heading",
+    label: "Heading",
     type: "text",
     page: "collections",
     group: "collections.detail-intro",
     gridColumn: "col-span-1",
-    description: "Heading beside the collection's description.",
+    description: "Heading beside the collection's own description.",
     defaultValue: "What holds it together.",
   },
 
   // ── collections.detail-gallery (detail) ─────────────────────────────────
   {
     key: "pink.collections.detail-gallery-images",
-    label: "Detail Gallery Mosaic",
+    label: "Gallery images",
     description:
-      "Up to 6 images in the mosaic band on every collection detail page. Leave empty to use the built-in example mosaic.",
+      "Up to 6 photos in a layout shown on every collection detail page. Leave blank to hide this section until you add photos.",
     type: "list",
     page: "collections",
     group: "collections.detail-gallery",
     gridColumn: "col-span-full",
     maxItems: 6,
+    itemLabel: "photo",
     itemSchema: [
-      { key: "image", label: "Image", type: "image" },
+      {
+        key: "image",
+        label: "Image",
+        type: "image",
+        description: "One photo for the layout.",
+      },
       {
         key: "colSpan",
-        label: "Column Span (1–4)",
+        label: "Column span",
         type: "text",
+        description: "How many columns this photo fills — 1 to 4. Leave blank for 1.",
         placeholder: "1",
+        optional: true,
       },
       {
         key: "rowSpan",
-        label: "Row Span (1–2)",
+        label: "Row span",
         type: "text",
+        description: "How many rows this photo fills — 1 or 2. Leave blank for 1.",
         placeholder: "1",
+        optional: true,
       },
     ],
   },
@@ -238,7 +248,7 @@ export const pinkCollectionsData: TemplateField[] = [
   // ── collections.detail-grid (detail) ────────────────────────────────────
   {
     key: "pink.collections.detail-grid-heading-prefix",
-    label: "Detail Grid Heading Prefix",
+    label: "Heading prefix",
     description: "Prefix word before the piece count, e.g. 'The' → 'The 12'.",
     type: "text",
     page: "collections",
@@ -248,7 +258,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-grid-filter-all",
-    label: "Filter Chip — All",
+    label: "Filter chip — all",
     type: "text",
     page: "collections",
     group: "collections.detail-grid",
@@ -258,7 +268,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-grid-filter-available",
-    label: "Filter Chip — Available",
+    label: "Filter chip — available",
     type: "text",
     page: "collections",
     group: "collections.detail-grid",
@@ -268,7 +278,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-grid-filter-archive",
-    label: "Filter Chip — Archive",
+    label: "Filter chip — archive",
     type: "text",
     page: "collections",
     group: "collections.detail-grid",
@@ -278,7 +288,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-grid-sold-label",
-    label: "Sold Price Label",
+    label: "Sold price label",
     description: "Shown in place of a price on sold-out pieces.",
     type: "text",
     page: "collections",
@@ -288,7 +298,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-grid-sold-badge",
-    label: "Sold Badge Text",
+    label: "Sold badge text",
     description: "Corner badge on sold-out pieces.",
     type: "text",
     page: "collections",
@@ -298,7 +308,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-grid-sold-cta",
-    label: "Sold Piece Button Text",
+    label: "Sold piece button text",
     description: "Disabled button shown on sold-out pieces.",
     type: "text",
     page: "collections",
@@ -310,7 +320,7 @@ export const pinkCollectionsData: TemplateField[] = [
   // ── collections.detail-nav (detail) ─────────────────────────────────────
   {
     key: "pink.collections.detail-nav-prev-label",
-    label: "Previous Series Label",
+    label: "Label — previous",
     type: "text",
     page: "collections",
     group: "collections.detail-nav",
@@ -320,7 +330,7 @@ export const pinkCollectionsData: TemplateField[] = [
   },
   {
     key: "pink.collections.detail-nav-next-label",
-    label: "Next Series Label",
+    label: "Label — next",
     type: "text",
     page: "collections",
     group: "collections.detail-nav",
@@ -333,67 +343,65 @@ export const pinkCollectionsData: TemplateField[] = [
 export const pinkCollectionsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.header",
-    title: "Collections — Header",
-    description:
-      "Eyebrow, heading and intro at the top of the collections index",
+    title: "Header",
+    description: "Heading and intro at the top of the collections index.",
     icon: "🗂️",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.featured",
-    title: "Collections — Featured Card",
-    description: "Badge and link text on the featured collection card",
+    title: "Featured card",
+    description: "Badge and link text on the featured collection card.",
     icon: "⭐",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.grid",
-    title: "Collections — Grid Badges",
-    description: "Open/closed status badge text",
+    title: "Grid badges",
+    description: "Open/closed status badge text.",
     icon: "🧩",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.next",
-    title: "Collections — Closing Band",
-    description: "The ink band at the bottom of the collections index",
+    title: "Closing band",
+    description: "The band at the bottom of the collections index.",
     icon: "🔮",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.detail-hero",
-    title: "Collection Detail — Hero",
-    description:
-      "Eyebrow prefix and fact-row labels on every collection detail page",
+    title: "Hero",
+    description: "Fact-row labels on every collection detail page.",
     icon: "🖼️",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.detail-intro",
-    title: "Collection Detail — Intro",
-    description: "Eyebrow and heading beside the collection's description",
+    title: "Intro",
+    description: "Heading beside the collection's own description.",
     icon: "📝",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.detail-gallery",
-    title: "Collection Detail — Gallery Mosaic",
+    title: "Gallery",
     description:
-      "The shared image mosaic shown on every collection detail page",
+      "The shared image layout shown on every collection detail page.",
     icon: "🧵",
     columns: 1,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.detail-grid",
-    title: "Collection Detail — Piece Grid",
-    description: "Heading prefix, filter chips and sold-piece microcopy",
+    title: "Piece grid",
+    description: "Heading prefix, filter chips and sold-piece microcopy.",
     icon: "🧺",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "collections.detail-nav",
-    title: "Collection Detail — Prev/Next",
-    description: "Labels on the previous/next series band",
+    title: "Prev/next",
+    description: "Labels on the previous/next series band.",
     icon: "↔️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -403,9 +411,8 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.header",
     page: "collections",
-    title: "Collections — Header",
-    description:
-      "Eyebrow, heading and intro at the top of the collections index",
+    title: "Header",
+    description: "Heading and intro at the top of the collections index",
     groupIds: ["collections.header"],
     order: 0,
     hideable: false,
@@ -413,7 +420,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.featured",
     page: "collections",
-    title: "Collections — Featured Card",
+    title: "Featured card",
     description: "Featured collection card, sourced from the first collection",
     groupIds: ["collections.featured"],
     order: 1,
@@ -423,7 +430,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.grid",
     page: "collections",
-    title: "Collections — Grid",
+    title: "Grid badges",
     description: "The full collections grid",
     groupIds: ["collections.grid"],
     order: 2,
@@ -433,8 +440,8 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.next",
     page: "collections",
-    title: "Collections — Closing Band",
-    description: "Ink band at the bottom of the collections index",
+    title: "Closing band",
+    description: "Band at the bottom of the collections index",
     groupIds: ["collections.next"],
     order: 3,
     hideable: true,
@@ -442,7 +449,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.detail-hero",
     page: "collections",
-    title: "Collection Detail — Hero",
+    title: "Hero",
     description: "Photo hero with derived fact rows",
     groupIds: ["collections.detail-hero"],
     order: 4,
@@ -452,8 +459,8 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.detail-intro",
     page: "collections",
-    title: "Collection Detail — Intro",
-    description: "Eyebrow, heading and the collection's own description",
+    title: "Intro",
+    description: "Heading and the collection's own description",
     groupIds: ["collections.detail-intro"],
     order: 5,
     hideable: true,
@@ -462,8 +469,8 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.detail-gallery",
     page: "collections",
-    title: "Collection Detail — Gallery Mosaic",
-    description: "Image mosaic band",
+    title: "Gallery",
+    description: "Image layout band",
     groupIds: ["collections.detail-gallery"],
     order: 6,
     hideable: true,
@@ -471,7 +478,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.detail-grid",
     page: "collections",
-    title: "Collection Detail — Piece Grid",
+    title: "Piece grid",
     description: "The collection's products, with filter chips",
     groupIds: ["collections.detail-grid"],
     order: 7,
@@ -481,8 +488,8 @@ export const pinkCollectionsSections: TemplateSection[] = [
   {
     id: "collections.detail-nav",
     page: "collections",
-    title: "Collection Detail — Prev/Next",
-    description: "Ink band linking to neighbouring series",
+    title: "Prev/next",
+    description: "Band linking to neighbouring series",
     groupIds: ["collections.detail-nav"],
     order: 8,
     hideable: true,

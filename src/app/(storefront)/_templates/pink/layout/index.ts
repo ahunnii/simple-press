@@ -10,7 +10,7 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * in the visual editor. The generic page's chrome lives here too because the
  * `TemplatePage` union has no `generic` member (same convention as `coop`).
  *
- * The whole footer is ONE group/section (`global.footer`) — brand mark, blurb,
+ * The whole footer is ONE group/section (`global.footer`) — logo, tagline,
  * both link columns, and the bottom strip — so every part of it opens the same
  * panel from the editor. `global.branding` carries the wordmark accent word
  * alone: it is the only field the header and the footer share.
@@ -21,15 +21,14 @@ export const pinkGlobalData: TemplateField[] = [
   // ── global.branding ──────────────────────────────────────────────────────
   {
     key: "pink.global.accent-word",
-    label: "Wordmark Accent Word",
+    label: "Accent word",
     description:
-      "The part of your business name shown in the accent color, e.g. the 'Art' in 'PinkArt'. Leave blank to render the whole name in one color.",
+      "The part at the end of your business name shown in a second color — it can be more than one word. Leave blank to show the whole name in one color.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
     defaultValue: "Art",
-    placeholder: "Art",
   },
 
   // ── global.header ────────────────────────────────────────────────────────
@@ -38,9 +37,9 @@ export const pinkGlobalData: TemplateField[] = [
   // template.
   {
     key: "pink.global.basket-label",
-    label: "Cart Button Label",
+    label: "Cart button text",
     description:
-      "The filled cart button at the right of the header, and the cart button in the mobile menu drawer.",
+      "The cart button at the right of the header, and the cart button in the mobile menu drawer.",
     type: "text",
     page: "global",
     group: "global.header",
@@ -55,42 +54,38 @@ export const pinkGlobalData: TemplateField[] = [
   // `happy-bamboo` — see `PinkSocialLinks` in `../shared/pink-social-links`.
   {
     key: "pink.global.footer-brand-mark",
-    label: "Use the PinkArt Logo Mark in the Footer",
+    label: "Show the drawn logo mark",
     description:
-      "On: the footer shows the PinkArt logo's own letterforms, recolored to stay readable on the dark footer (and on the light one used by The Artist and blog posts). Off: it falls back to your footer logo image below, then to the logo in Content → Branding, then to your business name as text.",
+      "On: the footer shows the drawn PinkArt letterforms, recolored to stay readable on every page. Off: the footer shows the footer logo image below, then the logo from Content → Branding, then your business name as text.",
     type: "boolean",
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-1",
-    defaultValue: "true",
+    // Off by default since 2026-09-26 (pink cleanup): the drawn mark spells
+    // one specific business's name, so a fresh store shows its own logo or
+    // name instead. The original owner re-enables it here.
+    defaultValue: "false",
   },
   {
     key: "pink.global.footer-logo",
-    label: "Footer Logo Image",
+    label: "Footer logo",
     description:
-      "Used only when the logo mark above is off. Upload a version that reads on a DARK background — the footer is dark on every page except The Artist and blog posts. Leave blank to reuse the logo from Content → Branding.",
+      "Used only when the logo mark above is off. Upload a version that reads well on a dark background — the footer is dark on every page except The Artist and blog posts. Leave blank to reuse the logo from Content → Branding.",
     type: "image",
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-1",
     defaultValue: "",
+    visibleWhen: { key: "pink.global.footer-brand-mark", equals: "false" },
   },
-  {
-    key: "pink.global.footer-blurb",
-    label: "Footer Blurb",
-    description:
-      "One or two sentences under the wordmark in the footer, on every page.",
-    type: "textarea",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Handmade dolls, magnets, jewelry and small pieces — each one made on its own in Detroit. Studio visits by appointment.",
-  },
+  // `pink.global.footer-blurb` was retired 2026-09-26 (pink cleanup): the
+  // footer tagline now comes from Content → Branding (`SiteContent.footerText`).
+  // A value saved before the move is still read as a silent fallback in
+  // `pink-footer.tsx` — see `RETIRED_TEMPLATE_KEYS` in `~/lib/template-fields`.
   {
     key: "pink.global.footer-col1-title",
-    label: "Footer Column 1 Title",
-    description: "Small uppercase label above the first footer link column.",
+    label: "Column 1 title",
+    description: "Small label above the first footer link column.",
     type: "text",
     page: "global",
     group: "global.footer",
@@ -99,23 +94,37 @@ export const pinkGlobalData: TemplateField[] = [
   },
   {
     key: "pink.global.footer-col1-links",
-    label: "Footer Column 1 Links",
-    description: "Links in the first footer column.",
+    label: "Column 1 links",
+    description:
+      "Links in the first footer column. Leave empty and it shows Shop all, plus Collections and Services once those features are turned on.",
     type: "list",
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-full",
     maxItems: 8,
+    itemLabel: "link",
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Everything" },
-      { key: "url", label: "URL", type: "url", placeholder: "/shop" },
+      {
+        key: "label",
+        label: "Label",
+        description: "Text on the link.",
+        type: "text",
+        placeholder: "Everything",
+      },
+      {
+        key: "url",
+        label: "URL",
+        description: "Where the link goes.",
+        type: "url",
+        placeholder: "/shop",
+      },
     ],
     defaultValue: "",
   },
   {
     key: "pink.global.footer-col2-title",
-    label: "Footer Column 2 Title",
-    description: "Small uppercase label above the second footer link column.",
+    label: "Column 2 title",
+    description: "Small label above the second footer link column.",
     type: "text",
     page: "global",
     group: "global.footer",
@@ -124,16 +133,30 @@ export const pinkGlobalData: TemplateField[] = [
   },
   {
     key: "pink.global.footer-col2-links",
-    label: "Footer Column 2 Links",
-    description: "Links in the second footer column.",
+    label: "Column 2 links",
+    description:
+      "Links in the second footer column. Content → Navigation's footer quick links take over this column when set. Otherwise, leave this empty and it shows About, plus Journal, Events, Videos and Testimonials once those features are turned on, then Contact.",
     type: "list",
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-full",
     maxItems: 8,
+    itemLabel: "link",
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Journal" },
-      { key: "url", label: "URL", type: "url", placeholder: "/blog" },
+      {
+        key: "label",
+        label: "Label",
+        description: "Text on the link.",
+        type: "text",
+        placeholder: "Journal",
+      },
+      {
+        key: "url",
+        label: "URL",
+        description: "Where the link goes.",
+        type: "url",
+        placeholder: "/blog",
+      },
     ],
     defaultValue: "",
   },
@@ -142,7 +165,7 @@ export const pinkGlobalData: TemplateField[] = [
   // General instead of drifting out of sync with a separately-typed value.
   {
     key: "pink.global.footer-legal-links",
-    label: "Footer Legal Links",
+    label: "Legal links",
     description:
       "Extra links in the bottom strip of the footer. Your published Privacy Policy and Terms of Service are added automatically — list these only if you have more.",
     type: "list",
@@ -150,11 +173,19 @@ export const pinkGlobalData: TemplateField[] = [
     group: "global.footer",
     gridColumn: "col-span-full",
     maxItems: 5,
+    itemLabel: "link",
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Privacy" },
+      {
+        key: "label",
+        label: "Label",
+        description: "Text on the link.",
+        type: "text",
+        placeholder: "Privacy",
+      },
       {
         key: "url",
         label: "URL",
+        description: "Where the link goes.",
         type: "url",
         placeholder: "/pages/privacy-policy",
       },
@@ -172,7 +203,7 @@ export const pinkGlobalData: TemplateField[] = [
   // One shared set for every custom page — there is no per-page override.
   {
     key: "pink.global.page-facts",
-    label: "Page Header Facts",
+    label: "Facts",
     description:
       "One set of small label/value rows — e.g. 'Where / 8412 Main St' — shown in the dark header of every custom page, including your policy pages. Leave empty to hide.",
     type: "list",
@@ -180,9 +211,22 @@ export const pinkGlobalData: TemplateField[] = [
     group: "global.page-facts",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "fact",
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Where" },
-      { key: "value", label: "Value", type: "text", placeholder: "The studio" },
+      {
+        key: "label",
+        label: "Label",
+        description: "The small label on the left of the row.",
+        type: "text",
+        placeholder: "Where",
+      },
+      {
+        key: "value",
+        label: "Value",
+        description: "The text on the right of the row.",
+        type: "text",
+        placeholder: "The studio",
+      },
     ],
     defaultValue: "",
   },
@@ -191,7 +235,7 @@ export const pinkGlobalData: TemplateField[] = [
   // One shared sidebar for every custom page — there is no per-page override.
   {
     key: "pink.global.page-cta-heading",
-    label: "Page Sidebar CTA Heading",
+    label: "Heading",
     description:
       "Boxed callout in the sidebar of every custom page. Leave blank to hide the whole box.",
     type: "text",
@@ -202,7 +246,7 @@ export const pinkGlobalData: TemplateField[] = [
   },
   {
     key: "pink.global.page-cta-body",
-    label: "Page Sidebar CTA Text",
+    label: "Text",
     description: "One or two lines under the sidebar heading.",
     type: "textarea",
     page: "global",
@@ -213,8 +257,9 @@ export const pinkGlobalData: TemplateField[] = [
   },
   {
     key: "pink.global.page-cta-button",
-    label: "Page Sidebar CTA Button Text",
-    description: "Leave blank to hide the button.",
+    label: "Button text",
+    description:
+      "Text on the sidebar callout button. Leave blank to hide the button.",
     type: "text",
     page: "global",
     group: "global.page-sidebar",
@@ -223,7 +268,7 @@ export const pinkGlobalData: TemplateField[] = [
   },
   {
     key: "pink.global.page-cta-link",
-    label: "Page Sidebar CTA Button Link",
+    label: "Button link",
     description: "Where the sidebar button goes.",
     type: "url",
     page: "global",
@@ -233,7 +278,7 @@ export const pinkGlobalData: TemplateField[] = [
   },
   {
     key: "pink.global.page-contact-note",
-    label: "Page Sidebar Contact Note",
+    label: "Contact note",
     description:
       "Small line at the bottom of the sidebar on every custom page. Leave blank to hide.",
     type: "textarea",
@@ -246,7 +291,7 @@ export const pinkGlobalData: TemplateField[] = [
   // ── global.authentication ────────────────────────────────────────────────
   {
     key: "pink.global.authentication-image",
-    label: "Authentication Image",
+    label: "Image",
     description: "Image shown beside the sign-in and sign-up forms.",
     type: "image",
     page: "global",
@@ -256,25 +301,31 @@ export const pinkGlobalData: TemplateField[] = [
   },
   {
     key: "pink.global.logo-size-width",
-    label: "Logo Size Width",
-    description:
-      "Width (in pixels) of the logo on the sign-in and sign-up pages.",
+    label: "Logo width",
+    description: "Width of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
+    min: 24,
+    max: 400,
+    step: 1,
+    unit: "px",
   },
   {
     key: "pink.global.logo-size-height",
-    label: "Logo Size Height",
-    description:
-      "Height (in pixels) of the logo on the sign-in and sign-up pages.",
+    label: "Logo height",
+    description: "Height of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "80",
+    min: 24,
+    max: 400,
+    step: 1,
+    unit: "px",
   },
 ];
 
@@ -283,7 +334,7 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     id: "global.branding",
     title: "Wordmark",
     description:
-      "The two-color wordmark in the header and footer is built from your business name in Settings → General, split on the accent word below — 'Pink' + 'Art'. Change the name there, and the wordmark follows.",
+      "The wordmark in the header and footer is built from your business name in Settings → General; the accent word below picks the part shown in a second color. Change the name there, and the wordmark follows.",
     icon: "🏷️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -299,13 +350,13 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     id: "global.footer",
     title: "Footer",
     description:
-      "The whole footer on every page: brand mark or logo, blurb, the two link columns, and the bottom strip. Social icons appear automatically from the links in Content → Branding, and the bottom strip already includes your published policy pages plus a copyright line built from Settings → General.",
+      "The whole footer on every page: logo, tagline, the two link columns, and the bottom strip. The tagline and social icons come from Content → Branding, and the bottom strip already includes your published policy pages plus a copyright line built from Settings → General.",
     icon: "🔗",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "global.page-facts",
-    title: "Custom Pages — Header Facts",
+    title: "Custom page facts",
     description:
       "One shared set of label/value rows, rendered in the header of every custom CMS page (policy pages included) — not per page",
     icon: "📋",
@@ -313,7 +364,7 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
   } satisfies TemplateFieldGroup,
   {
     id: "global.page-sidebar",
-    title: "Custom Pages — Sidebar",
+    title: "Custom page sidebar",
     description:
       "One shared callout box and contact note, rendered in the sidebar of every custom CMS page — not per page",
     icon: "📄",
@@ -338,10 +389,7 @@ export const pinkGlobalSections: TemplateSection[] = [
     groupIds: ["global.branding"],
     order: 0,
     hideable: false,
-    links: [
-      { label: "Branding", href: "/admin/content/branding" },
-      { label: "Business info", href: "/admin/settings/general" },
-    ],
+    links: [SECTION_LINKS.branding, SECTION_LINKS.businessLocation],
   },
   {
     id: "global.header",
@@ -363,20 +411,20 @@ export const pinkGlobalSections: TemplateSection[] = [
     page: "global",
     title: "Footer",
     description:
-      "Brand mark, blurb, link columns, and the bottom strip — on every page. Social icons appear automatically from the links in Content → Branding, and the bottom strip already includes your published policy pages. The footer's donate link can be shown, hidden, or relabeled in Settings → Donations.",
+      "Logo, tagline, link columns, and the bottom strip — on every page. The tagline and social icons come from Content → Branding, and the bottom strip already includes your published policy pages. The footer's donate link can be shown, hidden, or relabeled in Settings → Donations.",
     groupIds: ["global.footer"],
     order: 2,
     hideable: false,
     links: [
-      { label: "Branding", href: "/admin/content/branding" },
-      { label: "Business info", href: "/admin/settings/general" },
+      SECTION_LINKS.branding,
+      SECTION_LINKS.businessLocation,
       SECTION_LINKS.donations,
     ],
   },
   {
     id: "global.page-facts",
     page: "global",
-    title: "Custom Pages — Header Facts",
+    title: "Custom page facts",
     description:
       "One shared set of label/value rows, rendered in the header of every custom CMS page (policy pages included) — not per page.",
     groupIds: ["global.page-facts"],
@@ -387,7 +435,7 @@ export const pinkGlobalSections: TemplateSection[] = [
   {
     id: "global.page-sidebar",
     page: "global",
-    title: "Custom Pages — Sidebar",
+    title: "Custom page sidebar",
     description:
       "One shared callout box and contact note, rendered in the sidebar of every custom CMS page — not per page.",
     groupIds: ["global.page-sidebar"],

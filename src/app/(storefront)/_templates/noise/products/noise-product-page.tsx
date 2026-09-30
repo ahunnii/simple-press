@@ -3,17 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductReviews } from "~/components/product-reviews";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
 import {
   FadeIn,
   PageTransition,
@@ -22,14 +26,106 @@ import {
 } from "~/components/page-animations";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
+import { resolveFields } from "..";
+import { noiseMonogram } from "../shared/noise-monogram";
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
+
+/** Mono label + short note row under the buy button (shipping / returns). */
+function PolicyNote({
+  label,
+  fieldKey,
+  note,
+  policyHref,
+  policyLabel,
+}: {
+  label: string;
+  fieldKey: string;
+  note: string;
+  /** Only passed when the matching policy page is published. */
+  policyHref?: string;
+  policyLabel: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h3
+        className="font-mono text-[10px] tracking-[0.22em] uppercase"
+        style={{ color: "var(--vn-steel)" }}
+      >
+        {label}
+      </h3>
+      {note ? (
+        <p
+          className="font-sans text-[13px] leading-relaxed whitespace-pre-line"
+          style={{ color: "var(--vn-ink-soft)" }}
+          {...fieldAttr(fieldKey)}
+        >
+          {note}
+        </p>
+      ) : null}
+      {policyHref ? (
+        <Link
+          href={policyHref}
+          className="self-start font-mono text-[10px] tracking-[0.18em] uppercase underline underline-offset-4 transition-opacity hover:opacity-60"
+          style={{ color: "var(--vn-ink)" }}
+        >
+          {policyLabel} →
+        </Link>
+      ) : null}
+    </div>
+  );
+}
 
 export function NoiseProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
+  const customFields = business.siteContent?.customFields;
+  const f = resolveFields(customFields, [
+    "noise.product.shipping-note",
+    "noise.product.returns-note",
+    "noise.product.question-text",
+    "noise.product.reviews-heading",
+    "noise.product.coming-soon-heading",
+    "noise.product.coming-soon-body",
+    "noise.product.sold-out-text",
+    "noise.product.sold-out-message",
+    "noise.product.related-overline",
+    "noise.product.related-heading",
+    "noise.product.related-link-text",
+  ]);
+  const shippingNote = (f["noise.product.shipping-note"] ?? "").trim();
+  const returnsNote = (f["noise.product.returns-note"] ?? "").trim();
+  const questionText = (f["noise.product.question-text"] ?? "").trim();
+  const reviewsHeading = (f["noise.product.reviews-heading"] ?? "").trim();
+  const relatedOverline = f["noise.product.related-overline"] ?? "";
+  const relatedHeading = f["noise.product.related-heading"] ?? "";
+  const relatedLinkText = f["noise.product.related-link-text"] ?? "";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Each support row is its own hideable section (triple-match:
+  // product.shipping/returns/questions == field group == data-sp-group),
+  // and shows when its own note is set OR (shipping/returns only) its
+  // policy page is published — so a blank note still surfaces the policy
+  // link once the owner publishes that page.
+  const showShippingRow =
+    isSectionVisible(customFields, "noise", "product.shipping") &&
+    (shippingNote !== "" || hasShippingPolicy);
+  const showReturnsRow =
+    isSectionVisible(customFields, "noise", "product.returns") &&
+    (returnsNote !== "" || hasRefundPolicy);
+  const showQuestionsRow =
+    isSectionVisible(customFields, "noise", "product.questions") &&
+    questionText !== "";
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
@@ -37,6 +133,8 @@ export function NoiseProductPage({
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
+  const lightboxPrevRef = useRef<HTMLButtonElement>(null);
+  const lightboxNextRef = useRef<HTMLButtonElement>(null);
 
   const { variantImageUrl } = useVariantImage();
   // Jump to the variant's image when the selected variant changes.
@@ -50,21 +148,48 @@ export function NoiseProductPage({
   const enlargeTriggerRef = useRef<HTMLButtonElement>(null);
   const reduce = useReducedMotion();
 
-  // C-2: Escape key for lightbox
+  const images = product.images.length > 0 ? product.images : [];
+
+  const goToPrevImage = () => {
+    setActiveImg((i) => (i - 1 + images.length) % images.length);
+  };
+  const goToNextImage = () => {
+    setActiveImg((i) => (i + 1) % images.length);
+  };
+
+  // C-2: Escape, arrow-key nav and a cyclic focus trap for the lightbox
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setLightboxOpen(false);
+      } else if (e.key === "ArrowLeft" && images.length > 1) {
+        goToPrevImage();
+      } else if (e.key === "ArrowRight" && images.length > 1) {
+        goToNextImage();
       } else if (e.key === "Tab") {
-        // Trap focus on the single close button
+        // Trap focus within the lightbox's own controls (close, and
+        // prev/next when there's more than one image).
         e.preventDefault();
-        lightboxCloseRef.current?.focus();
+        const focusables = [
+          lightboxPrevRef.current,
+          lightboxNextRef.current,
+          lightboxCloseRef.current,
+        ].filter((el): el is HTMLButtonElement => el !== null);
+        if (focusables.length === 0) return;
+        const currentIndex = focusables.indexOf(
+          document.activeElement as HTMLButtonElement,
+        );
+        const nextIndex = e.shiftKey
+          ? (currentIndex - 1 + focusables.length) % focusables.length
+          : (currentIndex + 1) % focusables.length;
+        focusables[nextIndex]?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lightboxOpen, images.length]);
 
   // C-2: Focus close button on open; return focus to trigger on close
   useEffect(() => {
@@ -93,13 +218,6 @@ export function NoiseProductPage({
   ).collectionProducts;
   const firstCollection = colProds?.[0]?.collection ?? null;
 
-  /* Simple in-stock check for the status indicator */
-  const inStock =
-    !product.trackInventory ||
-    (product.inventoryQty ?? 0) > 0 ||
-    product.allowBackorders;
-
-  const images = product.images.length > 0 ? product.images : [];
   const activeImage = images[activeImg];
 
   return (
@@ -172,14 +290,6 @@ export function NoiseProductPage({
             </li>
           </ol>
         </nav>
-        {product.sku && (
-          <span
-            className="ml-4 hidden flex-shrink-0 font-mono text-[10px] tracking-[0.16em] uppercase md:block"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            SKU · {product.sku}
-          </span>
-        )}
       </div>
 
       {/* ── Main layout: 3 columns on desktop ── */}
@@ -269,7 +379,10 @@ export function NoiseProductPage({
                 ref={enlargeTriggerRef}
                 type="button"
                 onClick={() => setLightboxOpen(true)}
-                className={cn("cursor-zoom-in")}
+                // Covers the frame: `fill` positions the image against the
+                // frame div, so an unsized button would be 0×0 and its focus
+                // ring invisible to keyboard users.
+                className={cn("absolute inset-0 block cursor-zoom-in")}
                 aria-label="Enlarge image"
               >
                 <Image
@@ -296,7 +409,7 @@ export function NoiseProductPage({
                     opacity: 0.12,
                   }}
                 >
-                  VN
+                  {noiseMonogram(business.name)}
                 </span>
               </div>
             )}
@@ -345,6 +458,7 @@ export function NoiseProductPage({
             delay={0.12}
             className="flex flex-col gap-6"
             style={{ paddingLeft: "20px" }}
+            {...sectionGroupAttr("product", "details")}
           >
             {/* Category eyebrow */}
             {firstCollection && (
@@ -385,7 +499,68 @@ export function NoiseProductPage({
             )}
 
             {/* Variant + add to cart + trust badges */}
-            <NoiseProductActions product={product} business={business} />
+            <NoiseProductActions
+              product={product}
+              copy={{
+                comingSoonHeading: f["noise.product.coming-soon-heading"] ?? "",
+                comingSoonBody: f["noise.product.coming-soon-body"] ?? "",
+                soldOutText: f["noise.product.sold-out-text"] ?? "",
+                soldOutMessage: f["noise.product.sold-out-message"] ?? "",
+              }}
+            />
+
+            {/* Shipping / returns / questions — each is its own hideable
+                section. A shipping/returns row shows when its note is set
+                OR its policy page is published (policy-only rows render
+                just the label + link); the questions row shows whenever
+                its (non-blank by default) text is set. */}
+            {showShippingRow || showReturnsRow || showQuestionsRow ? (
+              <div
+                className="flex flex-col gap-5 border-t pt-5"
+                style={{ borderColor: "var(--vn-rule)" }}
+              >
+                <h2 className="sr-only">Shipping, returns and questions</h2>
+                {showShippingRow ? (
+                  <div {...sectionGroupAttr("product", "shipping")}>
+                    <PolicyNote
+                      label="Shipping"
+                      fieldKey="noise.product.shipping-note"
+                      note={shippingNote}
+                      policyHref={
+                        hasShippingPolicy ? "/shipping-policy" : undefined
+                      }
+                      policyLabel="Shipping policy"
+                    />
+                  </div>
+                ) : null}
+                {showReturnsRow ? (
+                  <div {...sectionGroupAttr("product", "returns")}>
+                    <PolicyNote
+                      label="Returns"
+                      fieldKey="noise.product.returns-note"
+                      note={returnsNote}
+                      policyHref={
+                        hasRefundPolicy ? "/refund-policy" : undefined
+                      }
+                      policyLabel="Returns policy"
+                    />
+                  </div>
+                ) : null}
+                {showQuestionsRow ? (
+                  <div {...sectionGroupAttr("product", "questions")}>
+                    <Link
+                      href="/contact"
+                      className="self-start font-mono text-[10px] tracking-[0.18em] uppercase underline underline-offset-4 transition-opacity hover:opacity-60"
+                      style={{ color: "var(--vn-ink)" }}
+                    >
+                      <span {...fieldAttr("noise.product.question-text")}>
+                        {questionText}
+                      </span>
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </FadeIn>
         </div>
       </section>
@@ -409,41 +584,94 @@ export function NoiseProductPage({
         />
       </section>
 
+      {/* ── Reviews — only mounted (and only fires review queries) when the
+          reviews feature flag is on for this business. Reviews stay in the
+          always-on `product.details` group: the flag is the gate, not an
+          editor eye-toggle. */}
+      {reviewsEnabled ? (
+        <section
+          aria-label="Reviews"
+          className="px-7 py-16"
+          style={{
+            background: "var(--vn-paper)",
+            borderBottom: "1px solid var(--vn-line-soft)",
+          }}
+        >
+          <div className="mx-auto max-w-[1440px]">
+            {reviewsHeading ? (
+              <h2
+                className="mb-8 font-serif leading-none tracking-tight italic"
+                style={{
+                  fontSize: "clamp(2rem, 4vw, 3rem)",
+                  letterSpacing: "-0.02em",
+                }}
+                {...fieldAttr("noise.product.reviews-heading")}
+              >
+                {reviewsHeading}
+              </h2>
+            ) : null}
+            <ProductReviews
+              productId={product.id}
+              onWriteReviewClick={() => setReviewDialogOpen(true)}
+            />
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </div>
+        </section>
+      ) : null}
+
       {/* ── Related products ── */}
       {relatedProducts && relatedProducts.length > 0 && (
-        <section className="px-7 py-16">
+        <section
+          className="px-7 py-16"
+          {...sectionGroupAttr("product", "details")}
+        >
           <div className="mx-auto max-w-[1440px]">
             <FadeIn
               className="mb-10 flex items-end justify-between pb-6"
               style={{ borderColor: "var(--vn-rule)" }}
             >
               <div>
-                <p
-                  className="mb-3 font-mono text-[9.5px] tracking-[0.28em] uppercase"
-                  style={{ color: "var(--vn-steel-mist)" }}
-                >
-                  You may also like
-                </p>
-                <h2
-                  className="font-serif leading-none tracking-tight italic"
-                  style={{
-                    fontSize: "clamp(2rem, 4vw, 3rem)",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  More from the collection.
-                </h2>
+                {relatedOverline ? (
+                  <p
+                    className="mb-3 font-mono text-[9.5px] tracking-[0.28em] uppercase"
+                    style={{ color: "var(--vn-steel-mist)" }}
+                    {...fieldAttr("noise.product.related-overline")}
+                  >
+                    {relatedOverline}
+                  </p>
+                ) : null}
+                {relatedHeading ? (
+                  <h2
+                    className="font-serif leading-none tracking-tight italic"
+                    style={{
+                      fontSize: "clamp(2rem, 4vw, 3rem)",
+                      letterSpacing: "-0.02em",
+                    }}
+                    {...fieldAttr("noise.product.related-heading")}
+                  >
+                    {relatedHeading}
+                  </h2>
+                ) : null}
               </div>
-              <Link
-                href="/shop"
-                className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
-                style={{
-                  border: "1px solid var(--vn-ink)",
-                  color: "var(--vn-ink)",
-                }}
-              >
-                View all →
-              </Link>
+              {relatedLinkText ? (
+                <Link
+                  href="/shop"
+                  className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
+                  style={{
+                    border: "1px solid var(--vn-ink)",
+                    color: "var(--vn-ink)",
+                  }}
+                  {...fieldAttr("noise.product.related-link-text")}
+                >
+                  {relatedLinkText}
+                </Link>
+              ) : null}
             </FadeIn>
 
             <StaggerContainer
@@ -488,6 +716,34 @@ export function NoiseProductPage({
                 height={1200}
                 className="max-h-[90vh] max-w-[90vw] rounded-none object-contain"
               />
+              {images.length > 1 ? (
+                <>
+                  <button
+                    ref={lightboxPrevRef}
+                    type="button"
+                    onClick={goToPrevImage}
+                    aria-label="Previous image"
+                    className="bg-background/80 hover:bg-background absolute top-1/2 left-3 -translate-y-1/2 rounded-full p-2.5 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronLeft className="size-5" />
+                  </button>
+                  <button
+                    ref={lightboxNextRef}
+                    type="button"
+                    onClick={goToNextImage}
+                    aria-label="Next image"
+                    className="bg-background/80 hover:bg-background absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-2.5 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronRight className="size-5" />
+                  </button>
+                  <span
+                    aria-live="polite"
+                    className="bg-background/80 absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 font-mono text-[11px] tracking-[0.12em] backdrop-blur-sm"
+                  >
+                    {activeImg + 1} / {images.length}
+                  </span>
+                </>
+              ) : null}
               <button
                 ref={lightboxCloseRef}
                 type="button"

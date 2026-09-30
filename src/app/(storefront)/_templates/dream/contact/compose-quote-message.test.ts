@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import type { QuoteExtras } from "./compose-quote-message";
+import type { QuoteExtras, QuoteLabels } from "./compose-quote-message";
 import { CONTACT_MESSAGE_MAX_LENGTH } from "~/lib/validators/contact";
 
 import {
   composeQuoteMessage,
   composeQuotePrefix,
+  DEFAULT_QUOTE_LABELS,
 } from "./compose-quote-message";
 
 const fullExtras: QuoteExtras = {
@@ -75,6 +76,42 @@ describe("composeQuotePrefix", () => {
       "Throne chair: Not sure · Full decor by Dream Your Theme: Yes",
     );
     expect(prefix).not.toContain("Draping:");
+  });
+
+  it("uses the default labels (the fields' shipped defaults) when none are passed", () => {
+    const withDefaults = composeQuotePrefix(fullExtras);
+    const withExplicitDefaults = composeQuotePrefix(
+      fullExtras,
+      DEFAULT_QUOTE_LABELS,
+    );
+    expect(withDefaults).toBe(withExplicitDefaults);
+  });
+
+  it("uses custom labels for the decor questions when the owner renamed them", () => {
+    const customLabels: QuoteLabels = {
+      draping: "Fabric draping",
+      throneChair: "Sweetheart chair",
+      fullDecor: "Full styling",
+    };
+    const prefix = composeQuotePrefix(fullExtras, customLabels);
+    expect(prefix).toContain(
+      "Fabric draping: Yes · Sweetheart chair: No · Full styling: Yes",
+    );
+    expect(prefix).not.toContain("Draping:");
+    expect(prefix).not.toContain("Throne chair:");
+    expect(prefix).not.toContain("Full decor by Dream Your Theme:");
+  });
+
+  it("omits a decor question entirely when its label is blank, even if it was answered", () => {
+    const hiddenDrapingLabels: QuoteLabels = {
+      ...DEFAULT_QUOTE_LABELS,
+      draping: "",
+    };
+    const prefix = composeQuotePrefix(fullExtras, hiddenDrapingLabels);
+    expect(prefix).not.toContain("Draping:");
+    expect(prefix).toContain(
+      "Throne chair: No · Full decor by Dream Your Theme: Yes",
+    );
   });
 });
 

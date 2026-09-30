@@ -6,7 +6,10 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+
+import { resolveFields } from "..";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -38,6 +41,7 @@ function useScrollReveal() {
 
 export function ElegantCollectionsPage({
   collections,
+  business,
 }: DefaultCollectionsPageTemplateProps) {
   const [shown, setShown] = useState(false);
   const editorial = useScrollReveal();
@@ -47,6 +51,36 @@ export function ElegantCollectionsPage({
     const t = setTimeout(() => setShown(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  const customFields = business.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+  const f = resolveFields(customFields, [
+    "elegant.collections.small-label",
+    "elegant.collections.heading",
+    "elegant.collections.heading-accent",
+    "elegant.collections.heading-line3",
+    "elegant.collections.intro",
+    "elegant.collections.empty-heading",
+    "elegant.collections.empty-body",
+    "elegant.collections.cta-label",
+    "elegant.collections.cta-heading",
+    "elegant.collections.cta-heading-accent",
+    "elegant.collections.cta-body",
+    "elegant.collections.cta-button-text",
+  ]);
+  const smallLabel = f["elegant.collections.small-label"] ?? "";
+  const heading = f["elegant.collections.heading"] ?? "";
+  const headingAccent = f["elegant.collections.heading-accent"] ?? "";
+  const headingLine3 = f["elegant.collections.heading-line3"] ?? "";
+  const intro = f["elegant.collections.intro"] ?? "";
+  const emptyHeading = f["elegant.collections.empty-heading"] ?? "";
+  const emptyBody = f["elegant.collections.empty-body"] ?? "";
+  const ctaLabel = f["elegant.collections.cta-label"] ?? "";
+  const ctaHeading = f["elegant.collections.cta-heading"] ?? "";
+  const ctaHeadingAccent = f["elegant.collections.cta-heading-accent"] ?? "";
+  const ctaBody = f["elegant.collections.cta-body"] ?? "";
+  const ctaButtonText = f["elegant.collections.cta-button-text"] ?? "";
 
   const list = collections ?? [];
 
@@ -71,21 +105,29 @@ export function ElegantCollectionsPage({
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
       {/* ── Hero ── */}
-      <section style={{ padding: "48px 40px 40px" }}>
+      <section
+        {...sectionGroupAttr("collections", "header")}
+        style={{ padding: "48px 40px 40px" }}
+      >
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-          <div style={fadeStyle(0)}>
-            <span
-              style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-              }}
-            >
-              Collections · {list.length} {list.length === 1 ? "edit" : "edits"}
-            </span>
-          </div>
+          {smallLabel && (
+            <div style={fadeStyle(0)}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+              >
+                <span {...fieldAttr("elegant.collections.small-label")}>
+                  {smallLabel}
+                </span>{" "}
+                · {list.length} {list.length === 1 ? "edit" : "edits"}
+              </span>
+            </div>
+          )}
 
           <h1
             style={{
@@ -100,32 +142,48 @@ export function ElegantCollectionsPage({
             }}
           >
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={maskStyle(0.08)}>Small edits,</span>
+              <span
+                style={maskStyle(0.08)}
+                {...fieldAttr("elegant.collections.heading")}
+              >
+                {heading}
+              </span>
             </span>
             <span style={{ display: "block", overflow: "hidden" }}>
-              <em style={{ ...maskStyle(0.2), fontStyle: "italic" }}>
-                built around
+              <em
+                style={{ ...maskStyle(0.2), fontStyle: "italic" }}
+                {...fieldAttr("elegant.collections.heading-accent")}
+              >
+                {headingAccent}
               </em>
             </span>
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={maskStyle(0.32)}>a life.</span>
+              <span
+                style={maskStyle(0.32)}
+                {...fieldAttr("elegant.collections.heading-line3")}
+              >
+                {headingLine3}
+              </span>
             </span>
           </h1>
 
-          <div style={fadeStyle(0.55)}>
-            <p
-              style={{
-                marginTop: 28,
-                color: "var(--el-ink-soft, #6b6659)",
-                fontSize: 18,
-                maxWidth: 560,
-                lineHeight: 1.65,
-                fontFamily: "var(--font-sans, sans-serif)",
-              }}
-            >
-              Curated edits for moments in the day, thoughtfully arranged.
-            </p>
-          </div>
+          {intro && (
+            <div style={fadeStyle(0.55)}>
+              <p
+                style={{
+                  marginTop: 28,
+                  color: "var(--el-ink-soft, #6b6659)",
+                  fontSize: 18,
+                  maxWidth: 560,
+                  lineHeight: 1.65,
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+                {...fieldAttr("elegant.collections.intro")}
+              >
+                {intro}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -141,8 +199,9 @@ export function ElegantCollectionsPage({
                   color: "var(--el-ink, #1c1a17)",
                   marginBottom: 10,
                 }}
+                {...fieldAttr("elegant.collections.empty-heading")}
               >
-                Nothing here yet.
+                {emptyHeading}
               </p>
               <p
                 style={{
@@ -150,8 +209,9 @@ export function ElegantCollectionsPage({
                   fontSize: 15,
                   color: "var(--el-ink-soft, #6b6659)",
                 }}
+                {...fieldAttr("elegant.collections.empty-body")}
               >
-                Collections will appear once added.
+                {emptyBody}
               </p>
             </div>
           ) : (
@@ -288,6 +348,7 @@ export function ElegantCollectionsPage({
       {/* ── Editorial CTA ── */}
       <section
         ref={editorial.ref}
+        {...sectionGroupAttr("collections", "header")}
         style={{ padding: "80px 40px", background: "var(--el-paper, #fbf8f2)" }}
       >
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
@@ -313,19 +374,22 @@ export function ElegantCollectionsPage({
                     }
               }
             >
-              <span
-                style={{
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  fontSize: 11,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--el-ink-soft, #6b6659)",
-                  display: "block",
-                  marginBottom: 16,
-                }}
-              >
-                Don&apos;t see your ritual?
-              </span>
+              {ctaLabel && (
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    fontSize: 11,
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "var(--el-ink-soft, #6b6659)",
+                    display: "block",
+                    marginBottom: 16,
+                  }}
+                  {...fieldAttr("elegant.collections.cta-label")}
+                >
+                  {ctaLabel}
+                </span>
+              )}
               <h2
                 style={{
                   fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
@@ -337,47 +401,61 @@ export function ElegantCollectionsPage({
                   marginBottom: 22,
                 }}
               >
-                Something more <em style={{ fontStyle: "italic" }}>personal</em>
+                <span {...fieldAttr("elegant.collections.cta-heading")}>
+                  {ctaHeading}
+                </span>{" "}
+                <em
+                  style={{ fontStyle: "italic" }}
+                  {...fieldAttr("elegant.collections.cta-heading-accent")}
+                >
+                  {ctaHeadingAccent}
+                </em>
                 ?
               </h2>
-              <p
-                style={{
-                  fontSize: 17,
-                  color: "var(--el-ink-soft, #6b6659)",
-                  lineHeight: 1.7,
-                  marginBottom: 28,
-                  maxWidth: 480,
-                  fontFamily: "var(--font-sans, sans-serif)",
-                }}
-              >
-                Reach out and tell us what you&apos;re looking for. We&apos;d
-                love to help you find the right fit.
-              </p>
-              <Link
-                href="/contact"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "14px 26px",
-                  borderRadius: 999,
-                  fontSize: 13,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  background: "var(--el-ink, #1c1a17)",
-                  color: "var(--el-paper, #fbf8f2)",
-                  textDecoration: "none",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  transition: `background 0.4s ${ease}`,
-                }}
-              >
-                Get in touch
-                <ArrowRight
-                  aria-hidden={true}
-                  style={{ width: 14, height: 14 }}
-                />
-              </Link>
+              {ctaBody && (
+                <p
+                  style={{
+                    fontSize: 17,
+                    color: "var(--el-ink-soft, #6b6659)",
+                    lineHeight: 1.7,
+                    marginBottom: 28,
+                    maxWidth: 480,
+                    fontFamily: "var(--font-sans, sans-serif)",
+                  }}
+                  {...fieldAttr("elegant.collections.cta-body")}
+                >
+                  {ctaBody}
+                </p>
+              )}
+              {ctaButtonText && (
+                <Link
+                  href="/contact"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "14px 26px",
+                    borderRadius: 999,
+                    fontSize: 13,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    fontWeight: 500,
+                    background: "var(--el-ink, #1c1a17)",
+                    color: "var(--el-paper, #fbf8f2)",
+                    textDecoration: "none",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    transition: `background 0.4s ${ease}`,
+                  }}
+                >
+                  <span {...fieldAttr("elegant.collections.cta-button-text")}>
+                    {ctaButtonText}
+                  </span>
+                  <ArrowRight
+                    aria-hidden={true}
+                    style={{ width: 14, height: 14 }}
+                  />
+                </Link>
+              )}
             </div>
 
             <div

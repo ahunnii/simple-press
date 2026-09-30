@@ -1,10 +1,22 @@
+import { FlaskConical, Leaf, Sprout } from "lucide-react";
 import { describe, expect, it } from "vitest";
 
+import type { TemplateListItemField } from "./template-fields";
+
 import {
+  getListRowSummary,
+  getRawCustomFieldString,
+  iconRowsFromDefaults,
+  isRetiredTemplateKey,
   parseFaqPickerIds,
+  parseTemplateIconListRows,
   parseTemplateListRows,
+  parseTemplateTrustBadgesListRows,
   resolveFaqPickerItems,
+  RETIRED_TEMPLATE_KEYS,
+  TEMPLATE_FIELDS,
 } from "./template-fields";
+import { getLucideTemplateIcon } from "./lucide-template-icons";
 
 /**
  * List rows live inside `customFields` (`z.any()` on the wire), so the row
@@ -92,6 +104,198 @@ describe("parseTemplateListRows — link scrubbing", () => {
   });
 });
 
+describe("parseTemplateListRows — deterministic ids", () => {
+  it("assigns the same _id across repeated calls on the same input shape", () => {
+    const input = [{ title: "A" }, { title: "B" }, { title: "C" }];
+    const first = parseTemplateListRows(input);
+    const second = parseTemplateListRows(input);
+    expect(first.map((r) => r._id)).toEqual(second.map((r) => r._id));
+    expect(first.map((r) => r._id)).toEqual(["row-0", "row-1", "row-2"]);
+  });
+
+  it("preserves an existing _id unchanged", () => {
+    const rows = parseTemplateListRows([
+      { _id: "custom-id", title: "A" },
+      { title: "B" },
+    ]);
+    expect(rows[0]?._id).toBe("custom-id");
+    expect(rows[1]?._id).toBe("row-1");
+  });
+
+  it("de-dupes a generated id that collides with an existing _id elsewhere in the list", () => {
+    // Row at index 0 has no _id, so it would generate "row-1" — but row 1
+    // already claims that id, so it must fall back to "row-0-1".
+    const rows = parseTemplateListRows([
+      { title: "A" },
+      { _id: "row-0", title: "B" },
+    ]);
+    const ids = rows.map((r) => r._id);
+    expect(new Set(ids).size).toBe(2);
+    expect(rows[1]?._id).toBe("row-0");
+    expect(rows[0]?._id).not.toBe("row-0");
+  });
+});
+
+describe("getListRowSummary", () => {
+  const itemSchema: TemplateListItemField[] = [
+    { key: "icon", label: "Icon", type: "icon" },
+    { key: "title", label: "Title", type: "text" },
+    { key: "body", label: "Body", type: "textarea" },
+  ];
+
+  it("prefers summaryKey when given and non-empty", () => {
+    expect(
+      getListRowSummary(
+        { title: "Text title", body: "Body text" },
+        itemSchema,
+        "body",
+      ),
+    ).toBe("Body text");
+  });
+
+  it("falls back to the first non-empty text sub-field when summaryKey is unset", () => {
+    expect(
+      getListRowSummary({ title: "Text title", body: "Body text" }, itemSchema),
+    ).toBe("Text title");
+  });
+
+  it("falls back to the first non-empty textarea sub-field when no text field has a value", () => {
+    expect(
+      getListRowSummary({ title: "", body: "Body text" }, itemSchema),
+    ).toBe("Body text");
+  });
+
+  it("collapses internal whitespace/newlines in a textarea fallback to single spaces", () => {
+    expect(
+      getListRowSummary(
+        { title: "", body: "Line one\n\n  Line   two\tend" },
+        itemSchema,
+      ),
+    ).toBe("Line one Line two end");
+  });
+
+  it("falls back past a missing summaryKey to text/textarea", () => {
+    expect(
+      getListRowSummary(
+        { title: "Text title", body: "Body text" },
+        itemSchema,
+        "missingKey",
+      ),
+    ).toBe("Text title");
+  });
+
+  it("falls back past a whitespace-only summaryKey value to text/textarea", () => {
+    expect(
+      getListRowSummary(
+        { title: "   ", body: "Body text" },
+        itemSchema,
+        "title",
+      ),
+    ).toBe("Body text");
+  });
+
+  it("returns null when nothing usable is found", () => {
+    expect(getListRowSummary({}, itemSchema)).toBeNull();
+    expect(
+      getListRowSummary({ title: "  ", body: "\n\t " }, itemSchema),
+    ).toBeNull();
+    expect(
+      getListRowSummary({ icon: "star" }, [
+        { key: "icon", label: "Icon", type: "icon" },
+      ]),
+    ).toBeNull();
+  });
+});
+
+describe("getRawCustomFieldString", () => {
+  it("returns the saved string with no default applied", () => {
+    expect(getRawCustomFieldString({ foo: "bar" }, "foo")).toBe("bar");
+    expect(getRawCustomFieldString({ foo: "" }, "foo")).toBe("");
+  });
+
+  it("returns undefined when the key is missing", () => {
+    expect(getRawCustomFieldString({}, "foo")).toBeUndefined();
+    expect(getRawCustomFieldString({ other: "x" }, "foo")).toBeUndefined();
+  });
+
+  it("returns undefined for a non-string value", () => {
+    expect(getRawCustomFieldString({ foo: 42 }, "foo")).toBeUndefined();
+    expect(getRawCustomFieldString({ foo: null }, "foo")).toBeUndefined();
+    expect(getRawCustomFieldString({ foo: { a: 1 } }, "foo")).toBeUndefined();
+    expect(getRawCustomFieldString({ foo: ["x"] }, "foo")).toBeUndefined();
+  });
+
+  it("returns undefined for a non-object customFields input", () => {
+    expect(getRawCustomFieldString(null, "foo")).toBeUndefined();
+    expect(getRawCustomFieldString(undefined, "foo")).toBeUndefined();
+    expect(getRawCustomFieldString("string", "foo")).toBeUndefined();
+    expect(getRawCustomFieldString(["foo"], "foo")).toBeUndefined();
+  });
+});
+
+describe("isRetiredTemplateKey", () => {
+  it("recognises the retired keys", () => {
+    expect(isRetiredTemplateKey("bamboo.global.map-lat")).toBe(true);
+    expect(isRetiredTemplateKey("bamboo.global.map-lng")).toBe(true);
+    expect(isRetiredTemplateKey("bamboo.contact.hours")).toBe(true);
+    expect(isRetiredTemplateKey("vii.contact.map-lat")).toBe(true);
+    expect(isRetiredTemplateKey("vii.global.footer-tagline")).toBe(true);
+    expect(isRetiredTemplateKey("vii.homepage.instagram-embed")).toBe(true);
+    expect(isRetiredTemplateKey("noise.global.location-tag")).toBe(true);
+    expect(isRetiredTemplateKey("noise.global.footer-tagline")).toBe(true);
+  });
+
+  it("recognises dream's retired chrome keys (2026-09-26)", () => {
+    for (const key of [
+      "dream.global.announcement-text",
+      "dream.global.announcement-link-label",
+      "dream.global.announcement-url",
+      "dream.global.footer-tagline",
+      "dream.global.contact-email",
+      "dream.global.contact-phone",
+      "dream.global.contact-hours",
+    ]) {
+      expect(RETIRED_TEMPLATE_KEYS.has(key)).toBe(true);
+    }
+    // Service area stays a template field.
+    expect(isRetiredTemplateKey("dream.global.service-area")).toBe(false);
+  });
+
+  it("recognises umsc's retired Settings-owned keys (2026-09-26)", () => {
+    for (const key of [
+      "umsc.global.announcement-text",
+      "umsc.global.announcement-link-label",
+      "umsc.global.announcement-link-url",
+      "umsc.global.footer-tagline",
+      "umsc.global.customer-service-phone",
+      "umsc.global.instagram-url",
+      "umsc.global.facebook-url",
+      "umsc.global.tiktok-url",
+      "umsc.contact.hours",
+      "umsc.homepage.reviews-override-quote",
+      "umsc.homepage.reviews-override-name",
+    ]) {
+      expect(RETIRED_TEMPLATE_KEYS.has(key)).toBe(true);
+    }
+    // Template-owned chrome copy stays a field.
+    expect(isRetiredTemplateKey("umsc.global.google-review-url")).toBe(false);
+    expect(isRetiredTemplateKey("umsc.global.header-tagline")).toBe(false);
+  });
+
+  it("is never still declared by a template", () => {
+    const declared = Object.values(TEMPLATE_FIELDS)
+      .flat()
+      .map((field) => field.key)
+      .filter((key) => RETIRED_TEMPLATE_KEYS.has(key));
+    expect(declared).toEqual([]);
+  });
+
+  it("returns false for an active key", () => {
+    expect(isRetiredTemplateKey("bamboo.global.title")).toBe(false);
+    expect(isRetiredTemplateKey("")).toBe(false);
+  });
+});
+
 describe("parseFaqPickerIds", () => {
   it("returns ordered ids for a string array", () => {
     expect(parseFaqPickerIds(["b", " a ", ""])).toEqual(["b", "a"]);
@@ -137,5 +341,111 @@ describe("resolveFaqPickerItems", () => {
     expect(resolveFaqPickerItems(["gone"], published, 6)).toEqual([]);
     expect(resolveFaqPickerItems(undefined, [], 6)).toEqual([]);
     expect(resolveFaqPickerItems(["a"], published, 0)).toEqual([]);
+  });
+});
+
+describe("iconRowsFromDefaults", () => {
+  it("maps icon names to components", () => {
+    expect(
+      iconRowsFromDefaults([
+        { icon: "FlaskConical", title: "Flask", description: "d1" },
+        { icon: "Sprout", title: "Sprout", description: "d2" },
+      ]),
+    ).toEqual([
+      { icon: FlaskConical, title: "Flask", description: "d1" },
+      { icon: Sprout, title: "Sprout", description: "d2" },
+    ]);
+  });
+
+  it("falls back to Leaf for an unknown icon name", () => {
+    expect(
+      iconRowsFromDefaults([
+        { icon: "NotARealIcon", title: "Mystery", description: "d" },
+      ]),
+    ).toEqual([{ icon: Leaf, title: "Mystery", description: "d" }]);
+  });
+
+  it("defaults missing title/description to empty strings", () => {
+    expect(iconRowsFromDefaults([{ icon: "Sprout" }])).toEqual([
+      { icon: Sprout, title: "", description: "" },
+    ]);
+  });
+
+  it("returns [] for undefined", () => {
+    expect(iconRowsFromDefaults(undefined)).toEqual([]);
+  });
+});
+
+describe("parseTemplateIconListRows", () => {
+  const defaults = [{ icon: Leaf, title: "Default", description: "d" }];
+
+  it("falls back to defaults when raw is undefined", () => {
+    expect(parseTemplateIconListRows(undefined, defaults)).toEqual(defaults);
+  });
+
+  it("falls back to defaults when raw is an empty array", () => {
+    expect(parseTemplateIconListRows([], defaults)).toEqual(defaults);
+  });
+
+  it("falls back to defaults when every row is invalid", () => {
+    expect(
+      parseTemplateIconListRows(
+        [{ icon: "Leaf", title: "No description" }],
+        defaults,
+      ),
+    ).toEqual(defaults);
+  });
+
+  it("drops a row missing description and keeps the valid ones", () => {
+    expect(
+      parseTemplateIconListRows(
+        [
+          { icon: "Leaf", title: "No description" },
+          { icon: "Sprout", title: "Valid", description: "d" },
+        ],
+        defaults,
+      ),
+    ).toEqual([{ icon: Sprout, title: "Valid", description: "d" }]);
+  });
+
+  it("returns valid rows without falling back to defaults", () => {
+    expect(
+      parseTemplateIconListRows(
+        [{ icon: "FlaskConical", title: "Valid", description: "d" }],
+        defaults,
+      ),
+    ).toEqual([{ icon: FlaskConical, title: "Valid", description: "d" }]);
+  });
+});
+
+describe("getLucideTemplateIcon", () => {
+  it("returns null for a prototype property name instead of matching it", () => {
+    expect(getLucideTemplateIcon("toString")).toBeNull();
+  });
+});
+
+describe("parseTemplateTrustBadgesListRows", () => {
+  it("reads the default template's legacy `title` key", () => {
+    expect(
+      parseTemplateTrustBadgesListRows([
+        { _id: "a", icon: "Leaf", title: "Free returns" },
+      ]),
+    ).toEqual([{ icon: Leaf, label: "Free returns" }]);
+  });
+
+  it("prefers `label` over `title`", () => {
+    expect(
+      parseTemplateTrustBadgesListRows([{ label: "Label", title: "Title" }]),
+    ).toEqual([{ icon: undefined, label: "Label" }]);
+  });
+
+  it("drops rows with no text and falls back to defaults when none remain", () => {
+    const defaults = [{ label: "Built-in" }];
+    expect(
+      parseTemplateTrustBadgesListRows(
+        [{ icon: "Leaf", label: "  " }, { icon: "Leaf" }],
+        defaults,
+      ),
+    ).toBe(defaults);
   });
 });

@@ -1,5 +1,5 @@
 import type { GenericIconRow } from "~/lib/template-fields";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   StaggerContainer,
@@ -49,9 +49,12 @@ export function PollenHomepageAbout({
         </FadeIn>
 
         <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services?.map((service) => (
+          {services?.map((service, index) => (
             <StaggerItem key={service.title}>
-              <div className="flex h-full flex-col rounded-2xl bg-[#3d4d2f] p-6 text-left transition-all duration-300 hover:bg-[#455734]">
+              <div
+                {...listItemAttr("pollen.homepage.services-list", index)}
+                className="flex h-full flex-col rounded-2xl bg-[#3d4d2f] p-6 text-left transition-all duration-300 hover:bg-[#455734]"
+              >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center">
                   <service.icon className="h-6 w-6 text-white" />
                 </div>

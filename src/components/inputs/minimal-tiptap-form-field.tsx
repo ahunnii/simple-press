@@ -5,6 +5,7 @@ import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import * as React from "react";
 import { uploadFile } from "@better-upload/client";
 
+import { prepareImageForUpload } from "~/lib/image-prep";
 import { getStoredPath } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import {
@@ -34,10 +35,11 @@ const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
  * to be threaded through here.
  */
 export async function uploadRichTextImage(file: File): Promise<string> {
+  const prepared = await prepareImageForUpload(file);
   const result = await uploadFile({
     api: "/api/upload",
     route: "image",
-    file,
+    file: prepared,
   });
 
   const url = getStoredPath(result.file);

@@ -44,11 +44,7 @@ export function PinkBlogPostPage({
   // Fixed eyebrow label — see the DEVIATIONS note above.
   const journalLabel = "Journal";
 
-  const showRelated = isSectionVisible(
-    customFields,
-    "pink",
-    "blog.post-related",
-  );
+  const showRelated = isSectionVisible(customFields, "pink", "blog.post");
   const relatedHeading = f["pink.blog.post-related-heading"] ?? "Keep reading";
   const filteredRelated = relatedPosts
     .filter((p) => p.slug !== page.slug)

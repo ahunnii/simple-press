@@ -3,6 +3,7 @@
 import type { Content } from "@tiptap/react";
 import { X } from "lucide-react";
 
+import type { PanelVariant } from "./panel-variant";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -11,6 +12,12 @@ import { Label } from "~/components/ui/label";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
 import { Textarea } from "~/components/ui/textarea";
 import { uploadRichTextImage } from "~/components/inputs/minimal-tiptap-form-field";
+
+import {
+  PANEL_ASIDE_CLASS,
+  PANEL_CLOSE_BUTTON_CLASS,
+  PANEL_SHEET_BODY_CLASS,
+} from "./panel-variant";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
 
@@ -60,6 +67,8 @@ export type CmsPagePanelProps = {
   onClose: () => void;
   /** Link to the full page editor in Site Admin (opened in a new tab). */
   adminHref: string;
+  /** Desktop right column (default) or compact bottom-sheet content. */
+  variant?: PanelVariant;
   /** "page" for CMS pages, "blog" for blog posts. */
   kind: "page" | "blog";
 };
@@ -89,6 +98,7 @@ export function CmsPagePanel({
   disabled = false,
   onClose,
   adminHref,
+  variant = "sidebar",
   kind,
 }: CmsPagePanelProps) {
   const isBlog = kind === "blog";
@@ -101,7 +111,7 @@ export function CmsPagePanel({
     EMPTY_TIPTAP_DOC) as unknown as Content;
 
   return (
-    <aside className="bg-card animate-in slide-in-from-right-8 fade-in flex w-[380px] shrink-0 flex-col border-l duration-200">
+    <aside className={PANEL_ASIDE_CLASS[variant]}>
       {/* Header */}
       <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
         <div className="min-w-0">
@@ -116,7 +126,7 @@ export function CmsPagePanel({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-7 w-7 shrink-0"
+          className={PANEL_CLOSE_BUTTON_CLASS[variant]}
           aria-label="Close page editor"
           onClick={onClose}
         >
@@ -134,6 +144,7 @@ export function CmsPagePanel({
         className={cn(
           "flex-1 space-y-5 overflow-y-auto px-4 py-4",
           disabled && "pointer-events-none opacity-60",
+          variant === "sheet" && PANEL_SHEET_BODY_CLASS,
         )}
       >
         {!published && (

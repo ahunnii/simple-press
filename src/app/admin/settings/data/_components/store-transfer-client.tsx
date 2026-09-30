@@ -157,12 +157,18 @@ export function StoreTransferClient({ isPlatformAdmin }: Props) {
           <ul className="text-muted-foreground space-y-1 text-sm">
             <li>
               Includes products, collections, pages, blog posts, galleries,
-              services, discounts, shipping zones, and template fields
+              services, events, videos, FAQs, forms, quote calculators,
+              discounts, shipping zones, rewards and invoice settings, and
+              template fields
             </li>
             <li>All uploaded media files are bundled inside the archive</li>
             <li>
-              Orders, customers, and inventory history are <strong>not</strong>{" "}
-              included
+              Orders, customers, invoices, form and quote submissions, and
+              inventory history are <strong>not</strong> included
+            </li>
+            <li>
+              Invoice payment methods are left out — re-enter them after
+              importing
             </li>
           </ul>
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -13,7 +14,23 @@ import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-export function ElegantContactForm() {
+type ElegantContactFormProps = {
+  /** Resolved `elegant.contact.form-success-heading`; blank hides it. */
+  successHeading: string;
+  /** Resolved `elegant.contact.form-success-body`; blank hides it. */
+  successBody: string;
+  /** Resolved `elegant.contact.form-reset-label` (never blank). */
+  resetLabel: string;
+  /** Resolved `elegant.contact.form-button-label` (never blank). */
+  buttonLabel: string;
+};
+
+export function ElegantContactForm({
+  successHeading,
+  successBody,
+  resetLabel,
+  buttonLabel,
+}: ElegantContactFormProps) {
   const {
     form,
     messageLength,
@@ -33,10 +50,13 @@ export function ElegantContactForm() {
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  // Focus moves to the success heading, or to the panel itself when the
+  // owner has blanked the heading, so screen readers hear the outcome.
   const successHeadingRef = useRef<HTMLHeadingElement>(null);
+  const successPanelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (isSuccess) {
-      successHeadingRef.current?.focus();
+      (successHeadingRef.current ?? successPanelRef.current)?.focus();
     }
   }, [isSuccess]);
 
@@ -45,26 +65,39 @@ export function ElegantContactForm() {
 
   if (isSuccess) {
     return (
-      <div className="el-contact-success">
+      <div
+        ref={successPanelRef}
+        tabIndex={successHeading ? undefined : -1}
+        className="el-contact-success"
+      >
         <div className="el-contact-success-icon" aria-hidden="true">
           <CheckCircle2 style={{ width: 22, height: 22 }} />
         </div>
-        <h3
-          ref={successHeadingRef}
-          tabIndex={-1}
-          className="el-contact-success-heading"
-        >
-          Thank you.
-        </h3>
-        <p className="el-contact-success-body">
-          We&apos;ll be in touch within a day.
-        </p>
+        {successHeading ? (
+          <h3
+            ref={successHeadingRef}
+            tabIndex={-1}
+            className="el-contact-success-heading"
+            {...fieldAttr("elegant.contact.form-success-heading")}
+          >
+            {successHeading}
+          </h3>
+        ) : null}
+        {successBody ? (
+          <p
+            className="el-contact-success-body"
+            {...fieldAttr("elegant.contact.form-success-body")}
+          >
+            {successBody}
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={resetSuccess}
           className="el-contact-success-btn"
+          {...fieldAttr("elegant.contact.form-reset-label")}
         >
-          Send another message
+          {resetLabel}
         </button>
       </div>
     );
@@ -170,7 +203,9 @@ export function ElegantContactForm() {
               Sending…
             </>
           ) : (
-            "Send message"
+            <span {...fieldAttr("elegant.contact.form-button-label")}>
+              {buttonLabel}
+            </span>
           )}
         </button>
       </form>

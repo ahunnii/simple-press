@@ -1,20 +1,52 @@
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
-// design.md → "Per-page section concepts → Shop": three groups — the black
+// design.md → "Per-page section concepts → Shop": three groups — the dark
 // page hero, the hideable compact door row (falls back to these four fields
 // when the store has no published collections), and the grid's empty-state
 // copy. The toolbar (type chips, product count, in-stock filter, sort) and
 // pagination are structural, not fielded — see `umsc-shop-client.tsx`.
+
+/** Default doors shown when the store has no published collections and the
+ * owner hasn't customized `umsc.shop.doors` — door names are a design.md
+ * verbatim keep (Candles / Soaps / Body Care / Home Care). */
+const UMSC_SHOP_DOORS_DEFAULT_ROWS = [
+  {
+    image: "",
+    title: "Candles",
+    blurb: "Hand-poured soy, small batch.",
+    link: "/collections/candles",
+  },
+  {
+    image: "",
+    title: "Soaps",
+    blurb: "Gentle bars for everyday washing.",
+    link: "/collections/soaps",
+  },
+  {
+    image: "",
+    title: "Body Care",
+    blurb: "Butters and oils for dry skin.",
+    link: "/collections/body-care",
+  },
+  {
+    image: "",
+    title: "Home Care",
+    blurb: "Sprays and melts for every room.",
+    link: "/collections/home-care",
+  },
+] satisfies Record<string, string>[];
 
 // ─── Shop: Hero ─────────────────────────────────────────────────────────────
 
 const shopHeroData: TemplateField[] = [
   {
     key: "umsc.shop.hero-heading",
-    label: "Shop Heading",
+    label: "Heading",
     description:
-      "Headline in the black page-hero band at the top of the shop page.",
+      "Headline in the dark page-hero band at the top of the shop page.",
     type: "text",
     page: "shop",
     group: "shop.hero",
@@ -23,8 +55,8 @@ const shopHeroData: TemplateField[] = [
   },
   {
     key: "umsc.shop.hero-lede",
-    label: "Shop Lede",
-    description: "One sentence beneath the shop heading.",
+    label: "Intro text",
+    description: "One sentence beneath the heading.",
     type: "textarea",
     page: "shop",
     group: "shop.hero",
@@ -42,7 +74,7 @@ const shopHeroData: TemplateField[] = [
 const shopDoorsData: TemplateField[] = [
   {
     key: "umsc.shop.doors",
-    label: "Product Type Doors",
+    label: "Product type doors",
     description:
       "Shown only when your store has no published collections yet — otherwise your real collections are used automatically. Up to 4.",
     type: "list",
@@ -50,70 +82,40 @@ const shopDoorsData: TemplateField[] = [
     group: "shop.doors",
     gridColumn: "col-span-full",
     maxItems: 4,
+    itemLabel: "door",
+    summaryKey: "title",
+    defaultsWhenEmpty: true,
+    defaultRows: UMSC_SHOP_DOORS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "image",
         label: "Photo",
         type: "image",
+        description: "Photo shown on the door.",
         placeholder: "/placeholder.svg",
       },
       {
         key: "title",
         label: "Name",
         type: "text",
+        description: "Door name, e.g. Candles.",
         placeholder: "e.g. Candles",
       },
       {
         key: "blurb",
-        label: "Short Line",
+        label: "Description",
         type: "text",
+        description: "One short line under the name.",
         placeholder: "e.g. Hand-poured soy",
       },
       {
         key: "link",
         label: "Link",
         type: "url",
+        description: "Where the door goes, e.g. /collections/candles.",
         placeholder: "/collections/candles",
       },
     ],
-    // No `defaultValue` on list fields (its type is `string`, not an array —
-    // matches the convention in olive/homepage's list fields). The four
-    // default doors below live as a plain constant, read by
-    // `umsc-shop-page.tsx` when `parseTemplateListRows` returns empty.
-  },
-];
-
-/** Default doors shown when the store has no published collections and the
- * owner hasn't customized `umsc.shop.doors` — door names are a design.md
- * verbatim keep (Candles / Soaps / Body Care / Home Care). */
-export const UMSC_SHOP_DEFAULT_DOORS = [
-  {
-    _id: "door-candles",
-    image: "",
-    title: "Candles",
-    blurb: "Hand-poured soy, small batch.",
-    link: "/collections/candles",
-  },
-  {
-    _id: "door-soaps",
-    image: "",
-    title: "Soaps",
-    blurb: "Gentle bars for everyday washing.",
-    link: "/collections/soaps",
-  },
-  {
-    _id: "door-body-care",
-    image: "",
-    title: "Body Care",
-    blurb: "Butters and oils for dry skin.",
-    link: "/collections/body-care",
-  },
-  {
-    _id: "door-home-care",
-    image: "",
-    title: "Home Care",
-    blurb: "Sprays and melts for every room.",
-    link: "/collections/home-care",
   },
 ];
 
@@ -122,7 +124,7 @@ export const UMSC_SHOP_DEFAULT_DOORS = [
 const shopGridData: TemplateField[] = [
   {
     key: "umsc.shop.empty-heading",
-    label: "Empty Shop Heading",
+    label: "Heading",
     description:
       "Shown on the grid when the store has no published products at all.",
     type: "text",
@@ -133,7 +135,7 @@ const shopGridData: TemplateField[] = [
   },
   {
     key: "umsc.shop.empty-body",
-    label: "Empty Shop Text",
+    label: "Body text",
     description: "One line under the empty-shop heading.",
     type: "textarea",
     page: "shop",
@@ -144,9 +146,9 @@ const shopGridData: TemplateField[] = [
   },
   {
     key: "umsc.shop.empty-link-label",
-    label: "Empty Shop Link Text",
+    label: "Link text",
     description:
-      "Link text shown beneath the empty-shop message, pointing to the contact page.",
+      "Text for the link beneath the empty-shop message, pointing to the contact page.",
     type: "text",
     page: "shop",
     group: "shop.grid",
@@ -166,15 +168,15 @@ export const umscShopData: TemplateField[] = [
 export const umscShopFieldGroups: TemplateFieldGroup[] = [
   {
     id: "shop.hero",
-    title: "Shop Page Hero",
+    title: "Hero",
     description:
-      "Heading and lede in the black band at the top of the shop page",
+      "Heading and intro text in the dark band at the top of the shop page",
     icon: "🛍️",
     columns: 2,
   },
   {
     id: "shop.doors",
-    title: "Product Type Doors",
+    title: "Product type doors",
     description:
       "The compact door row shown when your store has no published collections yet",
     icon: "🚪",
@@ -182,7 +184,7 @@ export const umscShopFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "shop.grid",
-    title: "Shop Grid",
+    title: "Shop grid",
     description: "Copy shown when the product grid comes back empty",
     icon: "🧺",
     columns: 1,
@@ -194,7 +196,7 @@ export const umscShopSections: TemplateSection[] = [
     id: "shop.hero",
     page: "shop",
     title: "Hero",
-    description: "Black page-hero band with heading and lede",
+    description: "Dark page-hero band with heading and intro text",
     groupIds: ["shop.hero"],
     order: 0,
     hideable: false,
@@ -202,20 +204,29 @@ export const umscShopSections: TemplateSection[] = [
   {
     id: "shop.doors",
     page: "shop",
-    title: "Product Type Doors",
+    title: "Product type doors",
     description:
       "Compact door row — real collections, or the fallback rows below",
     groupIds: ["shop.doors"],
     order: 1,
     hideable: true,
+    links: [SECTION_LINKS.collections],
   },
   {
     id: "shop.grid",
     page: "shop",
-    title: "Toolbar & Grid",
-    description: "Filter/sort toolbar, product grid and pagination",
+    title: "Shop grid",
+    description:
+      "Filter/sort toolbar, product grid, and pagination — including the empty-state copy",
     groupIds: ["shop.grid"],
     order: 2,
     hideable: false,
   },
 ];
+
+// ─── Derived storefront constants ──────────────────────────────────────────
+
+export const UMSC_SHOP_DEFAULT_DOORS = listRowsFromDefaults(
+  UMSC_SHOP_DOORS_DEFAULT_ROWS,
+  "default-door",
+);

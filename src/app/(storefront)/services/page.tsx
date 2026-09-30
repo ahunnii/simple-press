@@ -22,7 +22,11 @@ export default async function ServicesPage() {
     if (!t.ServicesPage) {
       notFound();
     }
-    return <t.ServicesPage business={business} />;
+    // Published FAQ items for templates whose services page embeds a
+    // Content → FAQ picker (pollen); others ignore the prop.
+    return (
+      <t.ServicesPage business={business} faqItems={await api.faq.list()} />
+    );
   }
 
   // ── Services feature ENABLED → theme-aware index ──────────────────────────
@@ -42,7 +46,11 @@ export default async function ServicesPage() {
     return (
       <>
         <JsonLd data={itemListSchema} />
-        <t.ServicesIndexPage business={business} services={services} />
+        <t.ServicesIndexPage
+          business={business}
+          services={services}
+          faqItems={await api.faq.list()}
+        />
       </>
     );
   }

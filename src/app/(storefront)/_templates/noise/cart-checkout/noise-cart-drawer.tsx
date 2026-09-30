@@ -5,7 +5,10 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
+import type { NoiseCartCopy } from "./noise-cart-copy";
 import type { ShippingConfig } from "~/lib/shipping-utils";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   getAmountUntilFreeShipping,
@@ -20,15 +23,28 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type NoiseCartDrawerProps = {
   shippingConfig: ShippingConfig;
+  /** Resolved `global.cart` copy — see `resolveNoiseCartCopy`. */
+  copy: NoiseCartCopy;
 };
 
-export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
+export function NoiseCartDrawer({
+  shippingConfig,
+  copy,
+}: NoiseCartDrawerProps) {
   const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
     useCart();
   const reduce = useReducedMotion();
+  // PF8 / B2.1, B7.4: `/checkout` 404s with the flag off, and `/shop` (or
+  // whatever the owner set the empty-cart link to) 404s when `products` is
+  // off — neither CTA may render in that case.
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
+  const emptyLinkFlag = navHrefFlag(copy.emptyButtonLink);
+  const emptyLinkEnabled = emptyLinkFlag === null || isEnabled(emptyLinkFlag);
 
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -47,8 +63,9 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
           background: "var(--vn-paper)",
           color: "var(--vn-ink)",
         }}
+        {...sectionGroupAttr("global", "cart")}
       >
-        {/* ── Header — "Your Bag" + close (× provided by SheetContent) ── */}
+        {/* ── Header — cart label + close (× provided by SheetContent) ── */}
         <SheetHeader
           className="flex-none border-b"
           style={{ borderColor: "var(--vn-rule)" }}
@@ -58,12 +75,19 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
               className="flex items-center justify-between px-6 py-5"
               style={{ background: "var(--vn-paper)" }}
             >
-              <span
-                className="font-mono text-[10px] tracking-[0.32em] uppercase"
-                style={{ color: "var(--vn-ink)" }}
-              >
-                Your Bag
-              </span>
+              {/* The sheet always needs an accessible title — keep one for
+                  screen readers when the owner hides the visible label. */}
+              {copy.label ? (
+                <span
+                  className="font-mono text-[10px] tracking-[0.32em] uppercase"
+                  style={{ color: "var(--vn-ink)" }}
+                  {...fieldAttr("noise.global.cart-label")}
+                >
+                  {copy.label}
+                </span>
+              ) : (
+                <span className="sr-only">Cart</span>
+              )}
               {items.length > 0 && (
                 <span
                   className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
@@ -90,28 +114,37 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
               <p
                 className="font-serif leading-none italic"
                 style={{ fontSize: "24px", letterSpacing: "-0.01em" }}
+                {...fieldAttr("noise.global.cart-empty-heading")}
               >
-                Your bag is empty.
+                {copy.emptyHeading}
               </p>
-              <p
-                className="mt-2 font-sans text-[13px]"
-                style={{ color: "var(--vn-steel-mist)" }}
-              >
-                Anything you add will appear here.
-              </p>
+              {copy.emptyBody ? (
+                <p
+                  className="mt-2 font-sans text-[13px]"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                  {...fieldAttr("noise.global.cart-empty-body")}
+                >
+                  {copy.emptyBody}
+                </p>
+              ) : null}
             </div>
-            <Link
-              href="/shop"
-              onClick={() => setIsOpen(false)}
-              className="mt-2 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-70"
-              style={{
-                borderBottom: "1px solid var(--vn-ink)",
-                paddingBottom: "4px",
-                color: "var(--vn-ink)",
-              }}
-            >
-              Browse the Collection →
-            </Link>
+            {copy.emptyButtonText && emptyLinkEnabled ? (
+              <Link
+                href={copy.emptyButtonLink}
+                onClick={() => setIsOpen(false)}
+                className="mt-2 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-70"
+                style={{
+                  borderBottom: "1px solid var(--vn-ink)",
+                  paddingBottom: "4px",
+                  color: "var(--vn-ink)",
+                }}
+              >
+                <span {...fieldAttr("noise.global.cart-empty-button-text")}>
+                  {copy.emptyButtonText}
+                </span>{" "}
+                →
+              </Link>
+            ) : null}
           </div>
         )}
 
@@ -285,20 +318,22 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                   className="font-sans"
                   style={{ fontSize: "14px", fontWeight: 500 }}
                 >
-                  {formatPrice(subtotal)} USD
+                  {formatPrice(subtotal)}
                 </span>
               </div>
 
-              {/* Checkout button */}
-              <Link
-                href="/checkout"
-                onClick={() => setIsOpen(false)}
-                className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.28em] uppercase transition-opacity hover:opacity-80"
-                style={{ background: "var(--vn-ink)", color: "#fff" }}
-              >
-                <span>Checkout</span>
-                <span>{formatPrice(subtotal)} →</span>
-              </Link>
+              {/* Checkout button — hidden when `checkout` is off (PF8) */}
+              {checkoutEnabled ? (
+                <Link
+                  href="/checkout"
+                  onClick={() => setIsOpen(false)}
+                  className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.28em] uppercase transition-opacity hover:opacity-80"
+                  style={{ background: "var(--vn-ink)", color: "#fff" }}
+                >
+                  <span>Checkout</span>
+                  <span>{formatPrice(subtotal)} →</span>
+                </Link>
+              ) : null}
 
               {/* Tax note */}
               <p

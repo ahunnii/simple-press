@@ -3,8 +3,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const blogPageData: TemplateField[] = [
   {
     key: "modern.blog.listing-tagline",
-    label: "Blog listing tagline",
-    description: "Tagline shown at the top of the blog index",
+    label: "Small label",
+    description:
+      "Short label above the heading at the top of the blog index. Leave blank to hide.",
     type: "text",
     page: "blog",
     group: "blog.header",
@@ -14,8 +15,8 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "modern.blog.listing-title",
-    label: "Blog listing title",
-    description: "Heading shown at the top of the blog index",
+    label: "Heading",
+    description: "Main heading at the top of the blog index.",
     type: "text",
     page: "blog",
     group: "blog.header",
@@ -25,15 +26,15 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "modern.blog.listing-intro",
-    label: "Blog listing intro",
-    description: "Short text below the blog heading",
+    label: "Intro text",
+    description: "Short paragraph below the heading. Leave blank to hide.",
     type: "textarea",
     page: "blog",
     group: "blog.header",
     gridColumn: "col-span-full",
     defaultValue:
       "News, tips, and updates from our team. Use the search box to find a topic.",
-    placeholder: "Intro paragraph for your blog...",
+    placeholder: "A sentence or two about what readers will find here.",
   },
 ];
 
@@ -42,8 +43,8 @@ export const modernBlogData = [...blogPageData];
 export const modernBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.header",
-    title: "Blog listing",
-    description: "Heading and intro on the blog index",
+    title: "Intro",
+    description: "Small label, heading, and intro above the blog listing.",
     icon: "📝",
     columns: 1,
   },

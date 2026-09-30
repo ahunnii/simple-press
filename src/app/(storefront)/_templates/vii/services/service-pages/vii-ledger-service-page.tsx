@@ -30,6 +30,7 @@ import { PageTransition } from "~/components/page-animations";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { VII_EDGE_CONTAINER } from "../../shared/vii-page-edge";
 import {
   LedgerHero,
   LedgerIntro,
@@ -65,7 +66,7 @@ function LedgerList({
       }}
     >
       <LedgerListStyles />
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div style={VII_EDGE_CONTAINER}>
         {(listHeading || listIntro) && (
           <div
             ref={headRef}

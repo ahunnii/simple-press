@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 
+import { listItemAttr } from "~/lib/preview/section-attrs";
+
 import {
   OliveCategoryCard,
   OliveRevealGroup,
@@ -13,6 +15,13 @@ export type OliveCategoryEntry = {
   image: string;
   label: string;
   href: string;
+  /**
+   * Original (pre-filter) position in the owner's `categories-cards` list.
+   * `undefined` when this entry was built from the shop's own collections
+   * (the empty-list fallback) — those rows have no matching list item to
+   * click-target, so they never carry `listItemAttr`.
+   */
+  sourceIndex?: number;
 };
 
 type Props = {
@@ -75,19 +84,25 @@ export function OliveCategorySection({
 
       <OliveRevealGroup fan className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {shown.map((entry, index) => (
-          <OliveCategoryCard
+          <div
             key={entry.id}
-            image={entry.image}
-            alt=""
-            label={entry.label}
-            href={entry.href}
-            chipColor={
-              CATEGORY_CHIP_TOKENS[index % CATEGORY_CHIP_TOKENS.length]
-            }
+            {...(entry.sourceIndex !== undefined
+              ? listItemAttr("olive.homepage.categories-cards", entry.sourceIndex)
+              : {})}
             className="olive-reveal-item"
             style={{ "--i": index } as CSSProperties}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 320px"
-          />
+          >
+            <OliveCategoryCard
+              image={entry.image}
+              alt=""
+              label={entry.label}
+              href={entry.href}
+              chipColor={
+                CATEGORY_CHIP_TOKENS[index % CATEGORY_CHIP_TOKENS.length]
+              }
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 320px"
+            />
+          </div>
         ))}
       </OliveRevealGroup>
     </OliveSection>

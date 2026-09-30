@@ -4,6 +4,7 @@ import { Quote } from "lucide-react";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
@@ -15,6 +16,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "../";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
 function getInitials(name: string): string {
   return name
@@ -30,38 +32,48 @@ export async function BambooTestimonialsPage({
   const testimonials = await api.testimonial.list({ publicOnly: true });
 
   const f = resolveFields(business?.siteContent?.customFields, [
+    "bamboo.testimonials-page.eyebrow",
     "bamboo.testimonials-page.heading",
     "bamboo.testimonials-page.subheading",
   ]);
 
-  const heading = f["bamboo.testimonials-page.heading"] ?? "What Customers Say";
-  const subheading =
-    f["bamboo.testimonials-page.subheading"] ??
-    "Real stories from households that made the switch.";
+  const eyebrow = f["bamboo.testimonials-page.eyebrow"];
+  const heading = f["bamboo.testimonials-page.heading"];
+  const subheading = f["bamboo.testimonials-page.subheading"];
 
   return (
     <PageTransition>
       <section
         {...sectionGroupAttr("testimonials", "page")}
-        className="bg-[var(--bam-cream-deep)] py-20 md:py-28"
+        className={cn(
+          "bg-[var(--bam-cream-deep)] py-20 md:py-28",
+          BAMBOO_EMBLEM_CLEAR,
+        )}
       >
         <div className="mx-auto max-w-7xl px-4 text-center lg:px-8">
           <FadeIn>
-            <span className="mb-3 block text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
-              Testimonials
-            </span>
+            {eyebrow ? (
+              <span
+                className="mb-3 block text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase"
+                {...fieldAttr("bamboo.testimonials-page.eyebrow")}
+              >
+                {eyebrow}
+              </span>
+            ) : null}
             <h1
               className="text-foreground font-serif text-4xl font-bold tracking-tight md:text-5xl"
               {...fieldAttr("bamboo.testimonials-page.heading")}
             >
               {heading}
             </h1>
-            <p
-              className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed"
-              {...fieldAttr("bamboo.testimonials-page.subheading")}
-            >
-              {subheading}
-            </p>
+            {subheading ? (
+              <p
+                className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed"
+                {...fieldAttr("bamboo.testimonials-page.subheading")}
+              >
+                {subheading}
+              </p>
+            ) : null}
           </FadeIn>
         </div>
       </section>

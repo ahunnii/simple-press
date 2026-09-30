@@ -1,4 +1,7 @@
+import type { DefaultHomepageTemplateProps } from "../../types";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
@@ -17,10 +20,20 @@ import { PollenCallToAction } from "../shared/pollen-cta";
 import { PollenHomepageAbout } from "./pollen-homepage-about";
 import { PollenHomepageGallery } from "./pollen-homepage-gallery";
 import { PollenHero } from "./pollen-homepage-hero";
+import { PollenPopup } from "./pollen-popup";
 
-export async function PollenHomepage() {
+export async function PollenHomepage({
+  business,
+}: DefaultHomepageTemplateProps) {
   const homepage = await api.business.getHomepage();
   const customFields = homepage?.siteContent?.customFields;
+
+  // `getHomepage` doesn't select `popupConfig` — reuse the `business` prop
+  // (already fetched by the root page with `siteContent.popupConfig` and
+  // `featureFlags`) the same way the default template's homepage resolves
+  // its popup, instead of adding a second business fetch here.
+  const { isEnabled } = resolveFlags(business?.featureFlags);
+  const popup = resolvePopup(business?.siteContent, isEnabled("popups"));
 
   const f = resolveFields(customFields, [
     "pollen.homepage.hero-image",
@@ -61,6 +74,7 @@ export async function PollenHomepage() {
 
   return (
     <PageTransition>
+      {popup && <PollenPopup popup={popup} />}
       <div className="pt-24">
         <PollenHero
           title={f["pollen.homepage.hero-title"]}
@@ -86,20 +100,22 @@ export async function PollenHomepage() {
             sectionLabel={f["pollen.homepage.gallery-label"] ?? ""}
             sectionHeading={f["pollen.homepage.gallery-heading"] ?? ""}
             buttonText={f["pollen.homepage.gallery-button-text"]}
-            buttonLink={f["pollen.homepage.gallery-button-link"] ?? "/gallery"}
+            buttonLink={f["pollen.homepage.gallery-button-link"] ?? "/contact"}
             galleryItems={galleryItems ?? []}
             sectionAttrs={sectionGroupAttr("homepage", "gallery")}
           />
         )}
-        <PollenCallToAction
-          title={f["pollen.global.cta-title"] ?? ""}
-          subtitle={f["pollen.global.cta-subtitle"] ?? ""}
-          description={f["pollen.global.cta-text"] ?? ""}
-          buttonText={f["pollen.global.cta-button-text"] ?? ""}
-          buttonLink={f["pollen.global.cta-button-link"] ?? "/contact"}
-          imageUrl={f["pollen.global.cta-image"] ?? "/placeholder.svg"}
-          sectionAttrs={sectionGroupAttr("global", "cta")}
-        />{" "}
+        {isSectionVisible(customFields, "pollen", "global.cta") && (
+          <PollenCallToAction
+            title={f["pollen.global.cta-title"] ?? ""}
+            subtitle={f["pollen.global.cta-subtitle"] ?? ""}
+            description={f["pollen.global.cta-text"] ?? ""}
+            buttonText={f["pollen.global.cta-button-text"] ?? ""}
+            buttonLink={f["pollen.global.cta-button-link"] ?? "/contact"}
+            imageUrl={f["pollen.global.cta-image"] ?? "/placeholder.svg"}
+            sectionAttrs={sectionGroupAttr("global", "cta")}
+          />
+        )}
       </div>
     </PageTransition>
   );

@@ -1,12 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ListTree } from "lucide-react";
 import { toast } from "sonner";
 
 import type { CmsPageDraftValues } from "./cms-page-panel";
 import type { DeviceKind } from "./editor-preview";
 import type { EditorTopBarCmsPage, EditorTopBarPage } from "./editor-top-bar";
+import type { FieldFocusRequest } from "./field-panel";
+import type { PanelVariant } from "./panel-variant";
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
+import type { PreviewEditTarget } from "~/lib/preview/preview-target";
 import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
@@ -21,10 +25,22 @@ import {
 import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { isBlogPostContextSection } from "~/lib/template-sections";
 import { getTemplateTheme } from "~/lib/template-themes";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { useMediaQuery } from "~/hooks/use-media-query";
+import { Button } from "~/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "~/components/ui/drawer";
 
 import { CmsPagePanel } from "./cms-page-panel";
 import { CmsPageRail } from "./cms-page-rail";
+import { CompactEditSheet } from "./compact-edit-sheet";
 import { DEVICE_WIDTHS, EditorPreview } from "./editor-preview";
 import { EditorTopBar } from "./editor-top-bar";
 import { FieldPanel } from "./field-panel";
@@ -51,6 +67,17 @@ const AUTH_PAGE = "authentication";
 
 /** Section id whose fields the synthetic Authentication page previews. */
 const AUTH_SECTION_ID = "global.authentication";
+
+/**
+ * Below this width the editor switches to its compact (phone / portrait
+ * tablet) layout: full-bleed preview, sections in a bottom drawer, and the
+ * contextual panel in a bottom sheet. Mirrors Tailwind's `lg` breakpoint —
+ * at `lg` and up the 3-column desktop layout is unchanged.
+ */
+const COMPACT_QUERY = "(max-width: 1023px)";
+
+/** Height of `EditorTopBar` (`h-14`) — kept clear above the expanded sheet. */
+const COMPACT_TOP_BAR_PX = 56;
 
 /** Fallback used only if a draft is somehow requested for an unknown page. */
 const EMPTY_CMS_VALUES: CmsPageDraftValues = {
@@ -149,6 +176,12 @@ export type VisualEditorProps = {
   initialSection: string | null;
   /** True for PLATFORM_ADMIN users — surfaces the advanced editor link. */
   isPlatformAdmin: boolean;
+  /**
+   * Server-side guess (from the request user agent) at whether the compact
+   * layout applies — used for the first paint only, then the `COMPACT_QUERY`
+   * media query takes over.
+   */
+  initialCompact?: boolean;
 };
 
 // ── Pure helpers ──────────────────────────────────────────────────────────
@@ -256,7 +289,10 @@ export function VisualEditor({
   initialPage,
   initialSection,
   isPlatformAdmin,
+  initialCompact = false,
 }: VisualEditorProps) {
+  const compact = useMediaQuery(COMPACT_QUERY, initialCompact);
+
   /**
    * Whether the synthetic Authentication page is offered for this template.
    * Gated on the template actually declaring the auth section — the 5
@@ -386,6 +422,32 @@ export function VisualEditor({
     isCmsPage(clampedInitialPage),
   );
   const [notesOpen, setNotesOpen] = useState(false);
+
+  // ── Compact layout state ──
+  /** Sections drawer (compact only — the rail is always visible on desktop). */
+  const [sectionsOpen, setSectionsOpen] = useState(false);
+  /** Compact edit sheet at its top snap (vs. half height). */
+  const [sheetExpanded, setSheetExpanded] = useState(false);
+  /**
+   * Compact-only deferred preview focus. The preview shrinks to the strip
+   * above the edit sheet when the sheet opens, so focusing immediately would
+   * center the section in the OLD (full-height) viewport — i.e. under the
+   * sheet. The effect below posts it a couple of frames later instead.
+   */
+  const [pendingFocus, setPendingFocus] = useState<{
+    page: string;
+    group: string;
+  } | null>(null);
+  /**
+   * Field / list row the owner clicked in the preview (sp:edit-group with a
+   * `field` target). Tagged with the section it was issued for so it only
+   * reaches the FieldPanel while that section is open; selecting a section
+   * from the rail clears it.
+   */
+  const [fieldFocusRequest, setFieldFocusRequest] = useState<
+    (FieldFocusRequest & { sectionId: string }) | null
+  >(null);
+  const fieldFocusNonceRef = useRef(0);
   /** LIVE values per page id — the per-page dirty-comparison baseline. */
   const [cmsBaselines, setCmsBaselines] = useState<
     Record<string, CmsPageDraftValues>
@@ -1060,6 +1122,41 @@ export function VisualEditor({
     [cmsPages, cmsDrafts],
   );
 
+  /**
+   * Scroll the preview to a section and pulse it. Desktop focuses at once
+   * (unchanged); compact defers until the layout has settled — see
+   * `pendingFocus`.
+   */
+  const focusSection = useCallback(
+    (section: TemplateSection) => {
+      // focusGroup expects the BARE group name — the overlay rebuilds the
+      // full data-sp-group value as `${page}.${group}` (see preview-overlay).
+      const bareGroup = section.id.startsWith(`${section.page}.`)
+        ? section.id.slice(section.page.length + 1)
+        : section.id;
+      if (compact) {
+        setPendingFocus({ page: section.page, group: bareGroup });
+      } else {
+        previewRef.current?.focusGroup(section.page, bareGroup);
+      }
+    },
+    [compact],
+  );
+
+  useEffect(() => {
+    if (!pendingFocus) return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        previewRef.current?.focusGroup(pendingFocus.page, pendingFocus.group);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [pendingFocus]);
+
   const handleSelectSection = useCallback(
     (section: TemplateSection) => {
       setNotesOpen(false);
@@ -1068,6 +1165,8 @@ export function VisualEditor({
       // their article + site-wide sections) — swap the right panel to fields.
       setCmsPanelOpen(false);
       setActiveSectionId(section.id);
+      // A manual pick opens the section at the top — no field targeting.
+      setFieldFocusRequest(null);
 
       // The auth section renders ONLY on /auth/*, so it is never present in
       // the current preview document unless its own page is already open.
@@ -1085,14 +1184,9 @@ export function VisualEditor({
         return;
       }
 
-      // focusGroup expects the BARE group name — the overlay rebuilds the
-      // full data-sp-group value as `${page}.${group}` (see preview-overlay).
-      const bareGroup = section.id.startsWith(`${section.page}.`)
-        ? section.id.slice(section.page.length + 1)
-        : section.id;
-      previewRef.current?.focusGroup(section.page, bareGroup);
+      focusSection(section);
     },
-    [activePage, authPageAvailable],
+    [activePage, authPageAvailable, focusSection],
   );
 
   const handlePageChange = useCallback((page: string) => {
@@ -1203,7 +1297,22 @@ export function VisualEditor({
 
   // Hotspot click inside the iframe (sp:edit-group).
   const handleEditGroup = useCallback(
-    (page: string, group: string) => {
+    (page: string, group: string, target?: PreviewEditTarget) => {
+      // Narrow to the clicked field / list row when the overlay resolved
+      // one; a plain section click (or keyboard) clears any earlier request.
+      const requestFocus = () => {
+        fieldFocusNonceRef.current += 1;
+        setFieldFocusRequest(
+          target
+            ? {
+                sectionId: group,
+                fieldKey: target.field,
+                itemIndex: target.item,
+                nonce: fieldFocusNonceRef.current,
+              }
+            : null,
+        );
+      };
       // A CMS preview shows no template page, so the page-switch branch below
       // must never run here — it would navigate away from the entry the owner
       // is editing. Blog posts DO render template sections (the end-of-article
@@ -1221,6 +1330,10 @@ export function VisualEditor({
         setThemeOpen(false);
         setCmsPanelOpen(false);
         setActiveSectionId(group);
+        requestFocus();
+        // Compact: the edit sheet is about to cover the lower half of the
+        // preview — bring the tapped section into the strip above it.
+        if (compact) focusSection(section);
         return;
       }
       if (page !== activePage && isPreviewablePage(page)) {
@@ -1229,8 +1342,20 @@ export function VisualEditor({
       setNotesOpen(false);
       setThemeOpen(false);
       setActiveSectionId(group);
+      requestFocus();
+      if (compact) {
+        const tapped = sections.find((s) => s.id === group);
+        if (tapped) focusSection(tapped);
+      }
     },
-    [activePage, activeCmsPage, sections, isPreviewablePage],
+    [
+      activePage,
+      activeCmsPage,
+      sections,
+      isPreviewablePage,
+      compact,
+      focusSection,
+    ],
   );
 
   const handleSelectTheme = useCallback(() => {
@@ -1249,59 +1374,281 @@ export function VisualEditor({
     [notesListQuery.data],
   );
 
+  // ── Contextual panel (right column on desktop, bottom sheet on compact) ──
+  // One panel at a time: notes > CMS page > theme > field. The open-handlers
+  // keep these states mutually exclusive; this chain is the belt-and-
+  // suspenders guarantee.
+  const activePanel: "notes" | "cms" | "theme" | "field" | null = notesOpen
+    ? "notes"
+    : activeCmsPage && cmsPanelOpen && activeCmsId !== null
+      ? "cms"
+      : themeOpen && templateTheme
+        ? "theme"
+        : !themeOpen && activeSection
+          ? "field"
+          : null;
+
+  // Every newly opened panel (or newly picked section) starts the compact
+  // sheet at half height, so the section being edited stays in view above
+  // it. Adjusted during render (React's "reset state on prop change"
+  // pattern) rather than in an effect, so the sheet never paints expanded.
+  const panelKey =
+    activePanel === "field"
+      ? `field:${activeSectionId}`
+      : activePanel === "cms"
+        ? `cms:${activeCmsId}`
+        : activePanel;
+  const [prevPanelKey, setPrevPanelKey] = useState(panelKey);
+  if (panelKey !== prevPanelKey) {
+    setPrevPanelKey(panelKey);
+    if (panelKey !== null) setSheetExpanded(false);
+  }
+
+  const renderPanel = (variant: PanelVariant) =>
+    notesOpen ? (
+      <NotesPanel
+        activePageKey={activePage}
+        activePageLabel={activePageLabel}
+        onClose={() => setNotesOpen(false)}
+        variant={variant}
+      />
+    ) : activeCmsPage && cmsPanelOpen && activeCmsId !== null ? (
+      <CmsPagePanel
+        pageId={activeCmsId}
+        pageTitle={activeCmsTitle}
+        kind={activeCmsPage.type}
+        published={activeCmsPage.published}
+        values={cmsDrafts[activeCmsId] ?? activeCmsPage.live}
+        baseline={cmsBaselines[activeCmsId] ?? activeCmsPage.live}
+        onChange={(patch) => applyCmsUpdate(activeCmsId, patch)}
+        disabled={isPublishing || mutationPending}
+        onClose={() => setCmsPanelOpen(false)}
+        adminHref={cmsAdminHref(activeCmsPage)}
+        variant={variant}
+      />
+    ) : themeOpen && templateTheme ? (
+      <ThemePanel
+        theme={templateTheme}
+        selection={themeSelection}
+        onSelect={handleThemeSelect}
+        disabled={isPublishing || mutationPending}
+        onClose={() => setThemeOpen(false)}
+        variant={variant}
+      />
+    ) : !themeOpen && activeSection ? (
+      <FieldPanel
+        section={activeSection}
+        templateId={templateId}
+        fields={fields}
+        publishedFields={publishedFields}
+        onFieldChange={applyFieldUpdate}
+        embedsEnabled={embedsEnabled}
+        mediaEnabled={mediaEnabled}
+        enabledFeatures={enabledFeatureSet}
+        disabled={isPublishing || mutationPending}
+        onClose={() => setActiveSectionId(null)}
+        variant={variant}
+        focusRequest={
+          fieldFocusRequest?.sectionId === activeSection.id
+            ? fieldFocusRequest
+            : null
+        }
+        hint={
+          // Opened from a template page, but it only renders on posts —
+          // point the owner at the preview that actually shows it.
+          isBlogPostContextSection(activeSection) && !isCmsPage(activePage)
+            ? "This section appears at the end of every blog post — open a post from the page menu to preview it."
+            : undefined
+        }
+      />
+    ) : null;
+
+  // Compact: selecting from the Sections drawer closes it — the chosen
+  // panel then opens in the edit sheet.
+  const railHandlers = compact
+    ? {
+        onSelectSection: (section: TemplateSection) => {
+          setSectionsOpen(false);
+          handleSelectSection(section);
+        },
+        onSelectTheme: () => {
+          setSectionsOpen(false);
+          handleSelectTheme();
+        },
+        onOpenCmsPanel: () => {
+          setSectionsOpen(false);
+          handleOpenCmsPanel();
+        },
+      }
+    : {
+        onSelectSection: handleSelectSection,
+        onSelectTheme: handleSelectTheme,
+        onOpenCmsPanel: handleOpenCmsPanel,
+      };
+
+  const renderRail = (variant: "rail" | "sheet") =>
+    activeCmsPage && activeCmsId !== null ? (
+      <CmsPageRail
+        pageTitle={titleOrUntitled(activeCmsTitle)}
+        kind={activeCmsPage.type}
+        adminHref={cmsAdminHref(activeCmsPage)}
+        isActive={cmsPanelOpen}
+        onSelect={railHandlers.onOpenCmsPanel}
+        sections={blogPostSections}
+        globalSections={globalSections}
+        activeSectionId={activeSectionId}
+        hiddenSectionIds={hiddenSectionIds}
+        onSelectSection={railHandlers.onSelectSection}
+        onToggleVisibility={handleToggleVisibility}
+        variant={variant}
+      />
+    ) : (
+      <SectionRail
+        sections={sectionsForPage}
+        globalSections={globalSections}
+        activeSectionId={activeSectionId}
+        hiddenSectionIds={hiddenSectionIds}
+        onSelectSection={railHandlers.onSelectSection}
+        onToggleVisibility={handleToggleVisibility}
+        hasTheme={templateTheme !== null}
+        themeActive={themeOpen}
+        onSelectTheme={railHandlers.onSelectTheme}
+        isPlatformAdmin={isPlatformAdmin}
+        variant={variant}
+      />
+    );
+
+  const topBar = (
+    <EditorTopBar
+      businessName={businessName}
+      templateId={templateId}
+      pages={pages}
+      cmsPages={cmsPageSelectItems}
+      blogPosts={blogPostSelectItems}
+      activePage={activePage}
+      onPageChange={handlePageChange}
+      device={device}
+      onDeviceChange={setDevice}
+      hasUnpublishedChanges={hasUnpublishedChanges}
+      isPublishing={isPublishing}
+      flushPending={flushPending}
+      mutationPending={mutationPending}
+      saveFailed={saveFailed}
+      onPublish={handlePublish}
+      onDiscard={handleDiscard}
+      notesOpen={notesOpen}
+      openNotesCount={openNotesCount}
+      onToggleNotes={handleToggleNotes}
+      compact={compact}
+      onRefreshPreview={() => previewRef.current?.refresh()}
+      onOpenPreview={() =>
+        window.open(`${previewPath}?__preview=1`, "_blank", "noopener")
+      }
+    />
+  );
+
+  if (compact) {
+    const sheetOpen = activePanel !== null;
+    const sheetTitle =
+      activePanel === "notes"
+        ? "Notes"
+        : activePanel === "cms"
+          ? `Edit ${titleOrUntitled(activeCmsTitle)}`
+          : activePanel === "theme"
+            ? "Theme"
+            : activePanel === "field" && activeSection
+              ? `Edit ${activeSection.title}`
+              : "Editor";
+    const closeActivePanel = () => {
+      if (activePanel === "notes") setNotesOpen(false);
+      else if (activePanel === "cms") setCmsPanelOpen(false);
+      else if (activePanel === "theme") setThemeOpen(false);
+      else if (activePanel === "field") setActiveSectionId(null);
+    };
+    // Plain template pages (and blog posts) have tap-to-edit hotspots; a
+    // generic CMS page is edited only through its content panel.
+    const hasHotspots = !activeCmsPage || activeCmsPage.type === "blog";
+
+    return (
+      <div className="flex h-full flex-col overflow-x-hidden">
+        {topBar}
+
+        {/* While the sheet is open the preview shrinks to the strip above
+            it (the sheet's lowest snap is 55% of the viewport), so focused /
+            tapped sections center where the owner can actually see them. */}
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col",
+            sheetOpen && "pb-[55dvh]",
+          )}
+        >
+          <EditorPreview
+            compact
+            path={previewPath}
+            width="100%"
+            isUpdating={isUpdating}
+            notice={previewNotice}
+            onEditGroup={handleEditGroup}
+            onPatched={handlePatched}
+            frameRef={previewRef}
+          />
+        </div>
+
+        {/* Sections drawer + the slim bar that opens it. The bar steps aside
+            while the edit sheet is up (the sheet covers that edge anyway,
+            and the preview reclaims the space). */}
+        <Drawer open={sectionsOpen} onOpenChange={setSectionsOpen}>
+          {!sheetOpen && (
+            <div className="bg-card flex shrink-0 items-center gap-3 border-t px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+              <DrawerTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                >
+                  <ListTree className="h-4 w-4" aria-hidden="true" />
+                  {activeCmsPage ? "Content" : "Sections"}
+                </Button>
+              </DrawerTrigger>
+              <p className="text-muted-foreground min-w-0 truncate text-xs">
+                {hasHotspots
+                  ? "Tap anything on your site to edit it"
+                  : "Tap Content to edit this page"}
+              </p>
+            </div>
+          )}
+          <DrawerContent className="sm:mx-auto sm:max-w-lg sm:border-x">
+            <DrawerHeader className="pb-2 text-left">
+              <DrawerTitle>
+                {activeCmsPage ? "Content" : "Sections"}
+              </DrawerTitle>
+              <DrawerDescription>{activePageLabel}</DrawerDescription>
+            </DrawerHeader>
+            {renderRail("sheet")}
+          </DrawerContent>
+        </Drawer>
+
+        <CompactEditSheet
+          open={sheetOpen}
+          title={sheetTitle}
+          expanded={sheetExpanded}
+          onExpandedChange={setSheetExpanded}
+          topInset={COMPACT_TOP_BAR_PX}
+          onDismiss={closeActivePanel}
+        >
+          {renderPanel("sheet")}
+        </CompactEditSheet>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full flex-col">
-      <EditorTopBar
-        businessName={businessName}
-        templateId={templateId}
-        pages={pages}
-        cmsPages={cmsPageSelectItems}
-        blogPosts={blogPostSelectItems}
-        activePage={activePage}
-        onPageChange={handlePageChange}
-        device={device}
-        onDeviceChange={setDevice}
-        hasUnpublishedChanges={hasUnpublishedChanges}
-        isPublishing={isPublishing}
-        flushPending={flushPending}
-        mutationPending={mutationPending}
-        saveFailed={saveFailed}
-        onPublish={handlePublish}
-        onDiscard={handleDiscard}
-        notesOpen={notesOpen}
-        openNotesCount={openNotesCount}
-        onToggleNotes={handleToggleNotes}
-      />
+      {topBar}
 
       <div className="flex min-h-0 flex-1">
-        {activeCmsPage && activeCmsId !== null ? (
-          <CmsPageRail
-            pageTitle={titleOrUntitled(activeCmsTitle)}
-            kind={activeCmsPage.type}
-            adminHref={cmsAdminHref(activeCmsPage)}
-            isActive={cmsPanelOpen}
-            onSelect={handleOpenCmsPanel}
-            sections={blogPostSections}
-            globalSections={globalSections}
-            activeSectionId={activeSectionId}
-            hiddenSectionIds={hiddenSectionIds}
-            onSelectSection={handleSelectSection}
-            onToggleVisibility={handleToggleVisibility}
-          />
-        ) : (
-          <SectionRail
-            sections={sectionsForPage}
-            globalSections={globalSections}
-            activeSectionId={activeSectionId}
-            hiddenSectionIds={hiddenSectionIds}
-            onSelectSection={handleSelectSection}
-            onToggleVisibility={handleToggleVisibility}
-            hasTheme={templateTheme !== null}
-            themeActive={themeOpen}
-            onSelectTheme={handleSelectTheme}
-            isPlatformAdmin={isPlatformAdmin}
-          />
-        )}
+        {renderRail("rail")}
 
         <EditorPreview
           path={previewPath}
@@ -1313,57 +1660,7 @@ export function VisualEditor({
           frameRef={previewRef}
         />
 
-        {/* One right panel at a time: notes > CMS page > theme > field. The
-            open-handlers keep these states mutually exclusive; this chain is
-            the belt-and-suspenders guarantee. */}
-        {notesOpen ? (
-          <NotesPanel
-            activePageKey={activePage}
-            activePageLabel={activePageLabel}
-            onClose={() => setNotesOpen(false)}
-          />
-        ) : activeCmsPage && cmsPanelOpen && activeCmsId !== null ? (
-          <CmsPagePanel
-            pageId={activeCmsId}
-            pageTitle={activeCmsTitle}
-            kind={activeCmsPage.type}
-            published={activeCmsPage.published}
-            values={cmsDrafts[activeCmsId] ?? activeCmsPage.live}
-            baseline={cmsBaselines[activeCmsId] ?? activeCmsPage.live}
-            onChange={(patch) => applyCmsUpdate(activeCmsId, patch)}
-            disabled={isPublishing || mutationPending}
-            onClose={() => setCmsPanelOpen(false)}
-            adminHref={cmsAdminHref(activeCmsPage)}
-          />
-        ) : themeOpen && templateTheme ? (
-          <ThemePanel
-            theme={templateTheme}
-            selection={themeSelection}
-            onSelect={handleThemeSelect}
-            disabled={isPublishing || mutationPending}
-            onClose={() => setThemeOpen(false)}
-          />
-        ) : !themeOpen && activeSection ? (
-          <FieldPanel
-            section={activeSection}
-            templateId={templateId}
-            fields={fields}
-            publishedFields={publishedFields}
-            onFieldChange={applyFieldUpdate}
-            embedsEnabled={embedsEnabled}
-            mediaEnabled={mediaEnabled}
-            enabledFeatures={enabledFeatureSet}
-            disabled={isPublishing || mutationPending}
-            onClose={() => setActiveSectionId(null)}
-            hint={
-              // Opened from a template page, but it only renders on posts —
-              // point the owner at the preview that actually shows it.
-              isBlogPostContextSection(activeSection) && !isCmsPage(activePage)
-                ? "This section appears at the end of every blog post — open a post from the page menu to preview it."
-                : undefined
-            }
-          />
-        ) : null}
+        {renderPanel("sidebar")}
       </div>
     </div>
   );

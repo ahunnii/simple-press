@@ -21,7 +21,7 @@ const heroData: TemplateField[] = [
     key: "dream.homepage.hero-heading",
     label: "Heading",
     description:
-      "First part of the hero headline, before the script accent word.",
+      "First part of the hero headline, before the highlighted word.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -30,9 +30,9 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-accent",
-    label: "Heading Accent Word",
+    label: "Highlighted word",
     description:
-      "One script word rendered in rose, mid-headline (design.md: never more than one word).",
+      "One script-styled word in the middle of the hero headline. Never more than one word.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -41,8 +41,8 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-heading-after",
-    label: "Heading (after accent)",
-    description: "Rest of the headline, after the script accent word.",
+    label: "Heading (continued)",
+    description: "Rest of the hero headline, after the highlighted word.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -51,7 +51,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-lede",
-    label: "Lede",
+    label: "Intro",
     description: "Short line under the hero headline.",
     type: "textarea",
     page: "homepage",
@@ -62,7 +62,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-cta-label",
-    label: "Primary Button Label",
+    label: "Primary button label",
     description: "Label for the hero's primary button.",
     type: "text",
     page: "homepage",
@@ -72,7 +72,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-cta-url",
-    label: "Primary Button Link",
+    label: "Primary button link",
     description: "Where the hero's primary button links to.",
     type: "url",
     page: "homepage",
@@ -82,7 +82,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-cta-secondary-label",
-    label: "Secondary Button Label",
+    label: "Secondary button label",
     description: "Label for the hero's outlined secondary button.",
     type: "text",
     page: "homepage",
@@ -92,7 +92,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-cta-secondary-url",
-    label: "Secondary Button Link",
+    label: "Secondary button link",
     description: "Where the hero's secondary button links to.",
     type: "url",
     page: "homepage",
@@ -102,7 +102,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-1",
-    label: "Shelf Photo 1",
+    label: "Shelf photo 1",
     description:
       "Photo 1 on the hero shelf — a wide 3:2 frame. The shelf drifts slowly beneath the hero text.",
     type: "image",
@@ -113,7 +113,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-1-alt",
-    label: "Shelf Photo 1 Alt Text",
+    label: "Shelf photo 1 alt text",
     description:
       "Describes shelf photo 1 (the wide 3:2 frame) for screen readers.",
     type: "text",
@@ -124,7 +124,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-1-caption",
-    label: "Shelf Photo 1 Caption",
+    label: "Shelf photo 1 caption",
     description:
       "Short caption pill shown over shelf photo 1 (the wide 3:2 frame).",
     type: "text",
@@ -135,7 +135,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-2",
-    label: "Shelf Photo 2",
+    label: "Shelf photo 2",
     description:
       "Photo 2 on the hero shelf — a tall 4:5 frame. The shelf drifts slowly beneath the hero text.",
     type: "image",
@@ -146,7 +146,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-2-alt",
-    label: "Shelf Photo 2 Alt Text",
+    label: "Shelf photo 2 alt text",
     description:
       "Describes shelf photo 2 (the tall 4:5 frame) for screen readers.",
     type: "text",
@@ -157,7 +157,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-2-caption",
-    label: "Shelf Photo 2 Caption",
+    label: "Shelf photo 2 caption",
     description:
       "Short caption pill shown over shelf photo 2 (the tall 4:5 frame).",
     type: "text",
@@ -168,7 +168,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-3",
-    label: "Shelf Photo 3",
+    label: "Shelf photo 3",
     description:
       "Photo 3 on the hero shelf — a square frame. The shelf drifts slowly beneath the hero text.",
     type: "image",
@@ -179,7 +179,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-3-alt",
-    label: "Shelf Photo 3 Alt Text",
+    label: "Shelf photo 3 alt text",
     description:
       "Describes shelf photo 3 (the square frame) for screen readers.",
     type: "text",
@@ -190,7 +190,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-3-caption",
-    label: "Shelf Photo 3 Caption",
+    label: "Shelf photo 3 caption",
     description:
       "Short caption pill shown over shelf photo 3 (the square frame).",
     type: "text",
@@ -201,7 +201,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-4",
-    label: "Shelf Photo 4",
+    label: "Shelf photo 4",
     description:
       "Photo 4 on the hero shelf — a wide 3:2 frame. The shelf drifts slowly beneath the hero text.",
     type: "image",
@@ -212,7 +212,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-4-alt",
-    label: "Shelf Photo 4 Alt Text",
+    label: "Shelf photo 4 alt text",
     description:
       "Describes shelf photo 4 (the wide 3:2 frame) for screen readers.",
     type: "text",
@@ -223,7 +223,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-4-caption",
-    label: "Shelf Photo 4 Caption",
+    label: "Shelf photo 4 caption",
     description:
       "Short caption pill shown over shelf photo 4 (the wide 3:2 frame).",
     type: "text",
@@ -234,7 +234,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-5",
-    label: "Shelf Photo 5",
+    label: "Shelf photo 5",
     description:
       "Photo 5 on the hero shelf — a tall 4:5 frame. The shelf drifts slowly beneath the hero text.",
     type: "image",
@@ -245,7 +245,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-5-alt",
-    label: "Shelf Photo 5 Alt Text",
+    label: "Shelf photo 5 alt text",
     description:
       "Describes shelf photo 5 (the tall 4:5 frame) for screen readers.",
     type: "text",
@@ -256,7 +256,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-5-caption",
-    label: "Shelf Photo 5 Caption",
+    label: "Shelf photo 5 caption",
     description:
       "Short caption pill shown over shelf photo 5 (the tall 4:5 frame).",
     type: "text",
@@ -267,7 +267,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-6",
-    label: "Shelf Photo 6",
+    label: "Shelf photo 6",
     description:
       "Photo 6 on the hero shelf — a wide 3:2 frame. The shelf drifts slowly beneath the hero text.",
     type: "image",
@@ -278,7 +278,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-6-alt",
-    label: "Shelf Photo 6 Alt Text",
+    label: "Shelf photo 6 alt text",
     description:
       "Describes shelf photo 6 (the wide 3:2 frame) for screen readers.",
     type: "text",
@@ -289,7 +289,7 @@ const heroData: TemplateField[] = [
   },
   {
     key: "dream.homepage.hero-shelf-photo-6-caption",
-    label: "Shelf Photo 6 Caption",
+    label: "Shelf photo 6 caption",
     description:
       "Short caption pill shown over shelf photo 6 (the wide 3:2 frame).",
     type: "text",
@@ -306,7 +306,7 @@ const whatWeDoData: TemplateField[] = [
   {
     key: "dream.homepage.what-we-do-heading",
     label: "Heading",
-    description: "Heading for the What We Do section.",
+    description: "Heading for the What we do section.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -315,8 +315,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.what-we-do-lede",
-    label: "Lede",
-    description: "Short line under the What We Do heading.",
+    label: "Intro",
+    description: "Short line under the What we do heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -326,8 +326,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-heading",
-    label: "Row 1 Heading — Event Decor",
-    description: "Heading for the Event Decor row.",
+    label: "Row 1 heading",
+    description: "Heading for the first of the three alternating rows.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -336,8 +336,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-body",
-    label: "Row 1 Body — Event Decor",
-    description: "Short paragraph describing Event Decor.",
+    label: "Row 1 body",
+    description: "Short paragraph for the first row.",
     type: "textarea",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -347,8 +347,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-link-label",
-    label: "Row 1 Link Label",
-    description: "Label for the Event Decor row's link.",
+    label: "Row 1 link label",
+    description: "Label for the first row's link.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -357,8 +357,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-link-url",
-    label: "Row 1 Link URL",
-    description: "Where the Event Decor row's link points to.",
+    label: "Row 1 link",
+    description: "Where the first row's link points to.",
     type: "url",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -367,8 +367,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-photo",
-    label: "Row 1 Main Photo",
-    description: "Main photo for the Event Decor row.",
+    label: "Row 1 photo",
+    description: "Main photo for the first row.",
     type: "image",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -377,8 +377,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-photo-alt",
-    label: "Row 1 Main Photo Alt Text",
-    description: "Describes the Event Decor main photo for screen readers.",
+    label: "Row 1 photo alt text",
+    description: "Describes the first row's main photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -387,8 +387,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-side-photo",
-    label: "Row 1 Side Photo",
-    description: "Smaller companion photo for the Event Decor row.",
+    label: "Row 1 side photo",
+    description: "Smaller companion photo for the first row.",
     type: "image",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -397,8 +397,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-1-side-photo-alt",
-    label: "Row 1 Side Photo Alt Text",
-    description: "Describes the Event Decor side photo for screen readers.",
+    label: "Row 1 side photo alt text",
+    description: "Describes the first row's side photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -407,8 +407,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-heading",
-    label: "Row 2 Heading — Event Rentals",
-    description: "Heading for the Event Rentals row.",
+    label: "Row 2 heading",
+    description: "Heading for the second of the three alternating rows.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -417,8 +417,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-body",
-    label: "Row 2 Body — Event Rentals",
-    description: "Short paragraph describing Event Rentals.",
+    label: "Row 2 body",
+    description: "Short paragraph for the second row.",
     type: "textarea",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -428,8 +428,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-link-label",
-    label: "Row 2 Link Label",
-    description: "Label for the Event Rentals row's link.",
+    label: "Row 2 link label",
+    description: "Label for the second row's link.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -438,8 +438,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-link-url",
-    label: "Row 2 Link URL",
-    description: "Where the Event Rentals row's link points to.",
+    label: "Row 2 link",
+    description: "Where the second row's link points to.",
     type: "url",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -448,8 +448,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-photo",
-    label: "Row 2 Main Photo",
-    description: "Main photo for the Event Rentals row.",
+    label: "Row 2 photo",
+    description: "Main photo for the second row.",
     type: "image",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -458,8 +458,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-photo-alt",
-    label: "Row 2 Main Photo Alt Text",
-    description: "Describes the Event Rentals main photo for screen readers.",
+    label: "Row 2 photo alt text",
+    description: "Describes the second row's main photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -468,8 +468,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-side-photo",
-    label: "Row 2 Side Photo",
-    description: "Smaller companion photo for the Event Rentals row.",
+    label: "Row 2 side photo",
+    description: "Smaller companion photo for the second row.",
     type: "image",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -478,8 +478,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-2-side-photo-alt",
-    label: "Row 2 Side Photo Alt Text",
-    description: "Describes the Event Rentals side photo for screen readers.",
+    label: "Row 2 side photo alt text",
+    description: "Describes the second row's side photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -488,8 +488,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-heading",
-    label: "Row 3 Heading — Customized Draping",
-    description: "Heading for the Customized Draping row.",
+    label: "Row 3 heading",
+    description: "Heading for the third of the three alternating rows.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -498,8 +498,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-body",
-    label: "Row 3 Body — Customized Draping",
-    description: "Short paragraph describing Customized Draping.",
+    label: "Row 3 body",
+    description: "Short paragraph for the third row.",
     type: "textarea",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -509,8 +509,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-link-label",
-    label: "Row 3 Link Label",
-    description: "Label for the Customized Draping row's link.",
+    label: "Row 3 link label",
+    description: "Label for the third row's link.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -519,8 +519,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-link-url",
-    label: "Row 3 Link URL",
-    description: "Where the Customized Draping row's link points to.",
+    label: "Row 3 link",
+    description: "Where the third row's link points to.",
     type: "url",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -529,8 +529,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-photo",
-    label: "Row 3 Main Photo",
-    description: "Main photo for the Customized Draping row.",
+    label: "Row 3 photo",
+    description: "Main photo for the third row.",
     type: "image",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -539,9 +539,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-photo-alt",
-    label: "Row 3 Main Photo Alt Text",
-    description:
-      "Describes the Customized Draping main photo for screen readers.",
+    label: "Row 3 photo alt text",
+    description: "Describes the third row's main photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -550,8 +549,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-side-photo",
-    label: "Row 3 Side Photo",
-    description: "Smaller companion photo for the Customized Draping row.",
+    label: "Row 3 side photo",
+    description: "Smaller companion photo for the third row.",
     type: "image",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -560,9 +559,8 @@ const whatWeDoData: TemplateField[] = [
   },
   {
     key: "dream.homepage.row-3-side-photo-alt",
-    label: "Row 3 Side Photo Alt Text",
-    description:
-      "Describes the Customized Draping side photo for screen readers.",
+    label: "Row 3 side photo alt text",
+    description: "Describes the third row's side photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.what-we-do",
@@ -586,7 +584,7 @@ const galleryData: TemplateField[] = [
   },
   {
     key: "dream.homepage.gallery-lede",
-    label: "Lede",
+    label: "Intro",
     description: "Short line beside the gallery heading.",
     type: "textarea",
     page: "homepage",
@@ -607,8 +605,9 @@ const galleryData: TemplateField[] = [
   },
   {
     key: "dream.homepage.gallery-empty-message",
-    label: "Empty State Message",
-    description: "Shown when no gallery is set (or it has no photos yet).",
+    label: "Empty state text",
+    description:
+      "Shown when no gallery is set (or it has no photos yet), above the link to the contact page.",
     type: "text",
     page: "homepage",
     group: "homepage.gallery",
@@ -617,8 +616,8 @@ const galleryData: TemplateField[] = [
   },
   {
     key: "dream.homepage.gallery-empty-link-label",
-    label: "Empty State Link Label",
-    description: "Label for the empty state's link to the Estimate Quote page.",
+    label: "Empty state link text",
+    description: "Label for the empty state's link to the contact page.",
     type: "text",
     page: "homepage",
     group: "homepage.gallery",
@@ -642,7 +641,7 @@ const processData: TemplateField[] = [
   },
   {
     key: "dream.homepage.process-lede",
-    label: "Lede",
+    label: "Intro",
     description: "Short line under the process heading.",
     type: "textarea",
     page: "homepage",
@@ -652,7 +651,7 @@ const processData: TemplateField[] = [
   },
   {
     key: "dream.homepage.process-step-1-heading",
-    label: "Step 1 Heading",
+    label: "Step 1 heading",
     description: "Heading for the first step.",
     type: "text",
     page: "homepage",
@@ -662,7 +661,7 @@ const processData: TemplateField[] = [
   },
   {
     key: "dream.homepage.process-step-1-body",
-    label: "Step 1 Body",
+    label: "Step 1 body",
     description: "Short line describing the first step.",
     type: "textarea",
     page: "homepage",
@@ -673,7 +672,7 @@ const processData: TemplateField[] = [
   },
   {
     key: "dream.homepage.process-step-2-heading",
-    label: "Step 2 Heading",
+    label: "Step 2 heading",
     description: "Heading for the second step.",
     type: "text",
     page: "homepage",
@@ -683,7 +682,7 @@ const processData: TemplateField[] = [
   },
   {
     key: "dream.homepage.process-step-2-body",
-    label: "Step 2 Body",
+    label: "Step 2 body",
     description: "Short line describing the second step.",
     type: "textarea",
     page: "homepage",
@@ -694,7 +693,7 @@ const processData: TemplateField[] = [
   },
   {
     key: "dream.homepage.process-step-3-heading",
-    label: "Step 3 Heading",
+    label: "Step 3 heading",
     description: "Heading for the third step.",
     type: "text",
     page: "homepage",
@@ -704,7 +703,7 @@ const processData: TemplateField[] = [
   },
   {
     key: "dream.homepage.process-step-3-body",
-    label: "Step 3 Body",
+    label: "Step 3 body",
     description: "Short line describing the third step.",
     type: "textarea",
     page: "homepage",
@@ -717,11 +716,29 @@ const processData: TemplateField[] = [
 
 // ─── Estimate Quote band (hideable) ─────────────────────────────────────────
 
+/**
+ * Built-in checklist-chip rows — the single source for the
+ * `dream.homepage.quote-chips` field's `defaultRows` and (via
+ * `DREAM_QUOTE_CHIPS_FALLBACK` in `./dream-homepage-quote-chips.ts`) the
+ * storefront's render fallback when the saved list is empty.
+ */
+export const DREAM_QUOTE_CHIPS_DEFAULT_ROWS: Record<string, string>[] = [
+  { label: "Date + time" },
+  { label: "Location" },
+  { label: "Theme" },
+  { label: "Colors" },
+  { label: "Draping" },
+  { label: "Rentals" },
+  { label: "Space photos" },
+  { label: "Full decor?" },
+];
+
 const quoteData: TemplateField[] = [
   {
     key: "dream.homepage.quote-heading",
     label: "Heading",
-    description: "First part of the band's heading, before the accent.",
+    description:
+      "First part of this section's heading, before the highlighted words.",
     type: "text",
     page: "homepage",
     group: "homepage.quote",
@@ -730,9 +747,8 @@ const quoteData: TemplateField[] = [
   },
   {
     key: "dream.homepage.quote-accent",
-    label: "Heading Accent",
-    description:
-      'Script-styled rest of the heading (design.md must-keep: "Estimate Quote").',
+    label: "Highlighted words",
+    description: 'Script-styled rest of the heading (e.g. "Estimate Quote").',
     type: "text",
     page: "homepage",
     group: "homepage.quote",
@@ -741,8 +757,8 @@ const quoteData: TemplateField[] = [
   },
   {
     key: "dream.homepage.quote-lede",
-    label: "Lede",
-    description: "Short line under the band's heading.",
+    label: "Intro",
+    description: "Short line under this section's heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.quote",
@@ -752,7 +768,7 @@ const quoteData: TemplateField[] = [
   },
   {
     key: "dream.homepage.quote-chips",
-    label: "Checklist Chips",
+    label: "Checklist chips",
     description:
       "Up to 10 short chips listing what to have ready. Leave empty to use the default checklist.",
     type: "list",
@@ -760,19 +776,24 @@ const quoteData: TemplateField[] = [
     group: "homepage.quote",
     gridColumn: "col-span-full",
     maxItems: 10,
+    defaultsWhenEmpty: true,
+    itemLabel: "detail",
+    summaryKey: "label",
     itemSchema: [
       {
         key: "label",
         label: "Label",
         type: "text",
+        description: "Short checklist detail, e.g. a date or a headcount.",
         placeholder: "e.g. Date + time",
       },
     ],
+    defaultRows: DREAM_QUOTE_CHIPS_DEFAULT_ROWS,
   },
   {
     key: "dream.homepage.quote-cta-label",
-    label: "Button Label",
-    description: "Label for the band's button.",
+    label: "Button label",
+    description: "Label for this section's button.",
     type: "text",
     page: "homepage",
     group: "homepage.quote",
@@ -781,8 +802,8 @@ const quoteData: TemplateField[] = [
   },
   {
     key: "dream.homepage.quote-cta-url",
-    label: "Button Link",
-    description: "Where the band's button links to.",
+    label: "Button link",
+    description: "Where this section's button links to.",
     type: "url",
     page: "homepage",
     group: "homepage.quote",
@@ -804,37 +825,37 @@ export const dreamHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "The living-sky hero — logo, headline, lede, CTAs, and the drifting photo shelf beneath them.",
+      "Headline, intro, buttons, and the drifting photo shelf beneath them.",
     icon: "☁️",
     columns: 2,
   },
   {
     id: "homepage.what-we-do",
-    title: "What We Do",
+    title: "What we do",
     description:
-      "Heading, lede, and the three alternating Decor / Rentals / Draping rows.",
+      "Heading, intro, and the three alternating decor, rentals, and draping rows.",
     icon: "🪄",
     columns: 2,
   },
   {
     id: "homepage.gallery",
     title: "Gallery",
-    description: "Heading, lede, and the picked photo gallery.",
+    description: "Heading, intro, and the picked photo gallery.",
     icon: "🖼️",
     columns: 2,
   },
   {
     id: "homepage.process",
-    title: "From Idea to Theme",
-    description: "Heading, lede, and the three-step process.",
+    title: "From idea to theme",
+    description: "Heading, intro, and the three-step process.",
     icon: "🧭",
     columns: 2,
   },
   {
     id: "homepage.quote",
-    title: "Estimate Quote Band",
+    title: "Quote request",
     description:
-      "Closing band with the checklist chips and Estimate Quote button.",
+      "Closing section with the checklist chips and quote request button.",
     icon: "✉️",
     columns: 2,
   },
@@ -846,7 +867,7 @@ export const dreamHomepageSections: TemplateSection[] = [
     page: "homepage",
     title: "Hero",
     description:
-      "Living sky with the business logo, headline, CTAs, and the photo shelf",
+      "Animated hero background with the business logo, headline, buttons, and the photo shelf",
     groupIds: ["homepage.hero"],
     order: 0,
     hideable: false,
@@ -854,7 +875,7 @@ export const dreamHomepageSections: TemplateSection[] = [
   {
     id: "homepage.what-we-do",
     page: "homepage",
-    title: "What We Do",
+    title: "What we do",
     description:
       "Three alternating rows: Event Decor, Event Rentals, Customized Draping",
     groupIds: ["homepage.what-we-do"],
@@ -873,7 +894,7 @@ export const dreamHomepageSections: TemplateSection[] = [
   {
     id: "homepage.process",
     page: "homepage",
-    title: "From Idea to Theme",
+    title: "From idea to theme",
     description: "Three-step process from first message to styled event",
     groupIds: ["homepage.process"],
     order: 3,
@@ -882,8 +903,8 @@ export const dreamHomepageSections: TemplateSection[] = [
   {
     id: "homepage.quote",
     page: "homepage",
-    title: "Estimate Quote Band",
-    description: "Closing checklist band linking to the Estimate Quote page",
+    title: "Quote request",
+    description: "Closing checklist section linking to the contact page",
     groupIds: ["homepage.quote"],
     order: 4,
     hideable: true,

@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import type { ShippingConfig } from "~/lib/shipping-utils";
+import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   calculateShipping,
@@ -11,20 +12,26 @@ import {
   SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-const REASSURANCE = [
-  { icon: "✓", text: "Free shipping on qualifying orders" },
-  { icon: "✱", text: "Carefully packed and hand-finished" },
-  { icon: "↺", text: "14-day exchange policy" },
-  { icon: "✦", text: "Ships within five working days" },
-] as const;
+import { CART_NOTES_KEY } from "./index";
+import { noiseNoteGlyph } from "./noise-cart-copy";
 
 type Props = {
   shippingConfig: ShippingConfig;
+  /**
+   * Owner-written checkout notes (`noise.global.cart-reassurance`). Empty
+   * hides the block — shipping/returns promises are never built in.
+   */
+  notes: string[];
 };
 
-export function NoiseCartSummary({ shippingConfig }: Props) {
+export function NoiseCartSummary({ shippingConfig, notes }: Props) {
   const { subtotal, itemCount, setIsOpen } = useCart();
+  // PF8 / B2.1, B7.4: `/checkout` 404s with the flag off, so the CTA that
+  // leads there must not render.
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
   // Zone+weight rates depend on the destination address, which isn't known in
   // the cart — defer to checkout rather than showing a misleading "Free".
   const isZoneWeight =
@@ -70,20 +77,6 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
           </span>
           <span className="font-mono text-[12px] tracking-[0.06em]">
             {formatPrice(subtotal)}
-          </span>
-        </div>
-        <div className="flex items-baseline justify-between">
-          <span
-            className="font-mono text-[10.5px] tracking-[0.14em] uppercase"
-            style={{ color: "var(--vn-steel)" }}
-          >
-            Gift wrap
-          </span>
-          <span
-            className="font-mono text-[12px] tracking-[0.06em]"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            Free
           </span>
         </div>
         <div className="flex items-baseline justify-between">
@@ -173,61 +166,56 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
         </div>
       </div>
 
-      {/* Checkout button */}
-      <div className="border-foreground/15 border-b px-6 py-5">
-        <Link
-          href="/checkout"
-          onClick={() => setIsOpen(false)}
-          className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all hover:opacity-80"
-          style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
-        >
-          <span>Proceed to checkout</span>
-          <span>→</span>
-        </Link>
-      </div>
-
-      {/* Payment method pills */}
-      <div className="border-foreground/15 flex flex-wrap gap-2 border-b px-6 py-4">
-        {["Visa", "Mastercard", "Amex", "Apple Pay", "PayPal"].map((m) => (
-          <span
-            key={m}
-            className="border px-2 py-1 font-mono text-[9px] tracking-[0.16em] uppercase"
-            style={{
-              borderColor: "var(--vn-rule)",
-              color: "var(--vn-steel-mist)",
-            }}
+      {/* Checkout button — hidden when `checkout` is off (PF8) */}
+      {checkoutEnabled ? (
+        <div className="border-foreground/15 border-b px-6 py-5">
+          <Link
+            href="/checkout"
+            onClick={() => setIsOpen(false)}
+            className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all hover:opacity-80"
+            style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
           >
-            {m}
-          </span>
-        ))}
-      </div>
+            <span>Proceed to checkout</span>
+            <span>→</span>
+          </Link>
+        </div>
+      ) : null}
 
-      {/* Reassurance notes */}
-      <div className="grid grid-cols-1 gap-3 px-6 py-5">
-        {REASSURANCE.map((note) => (
-          <div key={note.icon} className="flex items-start gap-2.5">
-            <span
-              aria-hidden="true"
-              className="flex flex-shrink-0 items-center justify-center border font-serif italic"
-              style={{
-                width: "22px",
-                height: "22px",
-                borderColor: "var(--vn-ink)",
-                fontSize: "13px",
-                flexShrink: 0,
-              }}
+      {/* Checkout notes — owner-written, hidden until set */}
+      {notes.length > 0 && (
+        <ul
+          className="grid grid-cols-1 gap-3 px-6 py-5"
+          {...sectionGroupAttr("global", "cart")}
+        >
+          {notes.map((text, index) => (
+            <li
+              key={`${index}-${text}`}
+              className="flex items-start gap-2.5"
+              {...listItemAttr(CART_NOTES_KEY, index)}
             >
-              {note.icon}
-            </span>
-            <p
-              className="font-mono text-[9.5px] leading-relaxed tracking-[0.14em] uppercase"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              {note.text}
-            </p>
-          </div>
-        ))}
-      </div>
+              <span
+                aria-hidden="true"
+                className="flex flex-shrink-0 items-center justify-center border font-serif italic"
+                style={{
+                  width: "22px",
+                  height: "22px",
+                  borderColor: "var(--vn-ink)",
+                  fontSize: "13px",
+                  flexShrink: 0,
+                }}
+              >
+                {noiseNoteGlyph(index)}
+              </span>
+              <p
+                className="font-mono text-[9.5px] leading-relaxed tracking-[0.14em] uppercase"
+                style={{ color: "var(--vn-ink-soft)" }}
+              >
+                {text}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

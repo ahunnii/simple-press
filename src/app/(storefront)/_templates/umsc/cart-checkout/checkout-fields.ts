@@ -10,7 +10,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 export const umscCheckoutData: TemplateField[] = [
   {
     key: "umsc.checkout.heading",
-    label: "Checkout Heading",
+    label: "Heading",
     description: "The heading shown in the checkout header band.",
     type: "text",
     page: "checkout",
@@ -20,7 +20,7 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.contact-heading",
-    label: "Contact Information Heading",
+    label: "Contact information heading",
     description: "Heading for the contact-information card.",
     type: "text",
     page: "checkout",
@@ -30,7 +30,7 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.delivery-heading",
-    label: "Delivery Heading",
+    label: "Delivery heading",
     description:
       "Heading for the delivery-method card. Only shown when the store offers in-store pickup.",
     type: "text",
@@ -41,7 +41,7 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.shipping-heading",
-    label: "Shipping Address Heading",
+    label: "Shipping address heading",
     description: "Heading for the shipping-address card.",
     type: "text",
     page: "checkout",
@@ -51,7 +51,7 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.summary-heading",
-    label: "Order Summary Heading",
+    label: "Order summary heading",
     description: "Heading on the sticky order-summary card.",
     type: "text",
     page: "checkout",
@@ -61,7 +61,7 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.discount-label",
-    label: "Discount Code Label",
+    label: "Discount code label",
     description:
       "Label above the discount-code input, when coupons are enabled.",
     type: "text",
@@ -72,8 +72,8 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.submit-label",
-    label: "Submit Button Label",
-    description: "Label on the gold pill that places the order.",
+    label: "Submit button label",
+    description: "Label on the button that places the order.",
     type: "text",
     page: "checkout",
     group: "checkout.main",
@@ -82,7 +82,7 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.empty-heading",
-    label: "Empty Bag Heading",
+    label: "Empty bag heading",
     description: "Heading shown when checkout is reached with an empty bag.",
     type: "text",
     page: "checkout",
@@ -92,7 +92,7 @@ export const umscCheckoutData: TemplateField[] = [
   },
   {
     key: "umsc.checkout.empty-cta",
-    label: "Empty Bag CTA Label",
+    label: "Empty bag button label",
     description:
       "Label on the button shown when checkout is reached with an empty bag.",
     type: "text",
@@ -100,39 +100,6 @@ export const umscCheckoutData: TemplateField[] = [
     group: "checkout.main",
     gridColumn: "col-span-1",
     defaultValue: "Continue shopping",
-  },
-  {
-    key: "umsc.checkout.unavailable-heading",
-    label: "Checkout Unavailable Heading",
-    description:
-      "Heading shown when the store hasn't connected online payment yet.",
-    type: "text",
-    page: "checkout",
-    group: "checkout.main",
-    gridColumn: "col-span-1",
-    defaultValue: "Checkout unavailable",
-  },
-  {
-    key: "umsc.checkout.unavailable-body",
-    label: "Checkout Unavailable Body",
-    description:
-      "Body copy shown when checkout is unavailable. The phone number from your business settings is shown separately, under this message.",
-    type: "textarea",
-    page: "checkout",
-    group: "checkout.main",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "This shop hasn't connected online payment yet. Call or message and Monique will take your order directly.",
-  },
-  {
-    key: "umsc.checkout.unavailable-cta",
-    label: "Checkout Unavailable CTA Label",
-    description: "Label on the pill that returns the shopper to the shop.",
-    type: "text",
-    page: "checkout",
-    group: "checkout.main",
-    gridColumn: "col-span-1",
-    defaultValue: "Back to shop",
   },
 ];
 
@@ -143,7 +110,7 @@ export const umscCheckoutFieldGroups: TemplateFieldGroup[] = [
     id: "checkout.main",
     title: "Checkout",
     description:
-      "Headings, button labels, and the unavailable-checkout message.",
+      "Headings, button labels, and the empty-bag messaging on the checkout form.",
     icon: "💳",
     columns: 2,
   },

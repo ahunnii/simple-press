@@ -3,7 +3,11 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -34,6 +38,7 @@ function StepRow({
   return (
     <div
       className={cn("vii-reveal-item vii-step-row", reversed && "is-reversed")}
+      {...listItemAttr("vii.about.steps", index)}
       style={
         {
           "--i": Math.min(index + 1, 7),

@@ -2,9 +2,20 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 const testimonialsPageData: TemplateField[] = [
   {
+    key: "bamboo.testimonials-page.eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-1",
+    defaultValue: "Testimonials",
+    placeholder: "Testimonials",
+  },
+  {
     key: "bamboo.testimonials-page.heading",
-    label: "Testimonials page heading",
-    description: "Main heading on the /testimonials page",
+    label: "Heading",
+    description: "Main heading at the top of the testimonials page.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -13,8 +24,8 @@ const testimonialsPageData: TemplateField[] = [
   },
   {
     key: "bamboo.testimonials-page.subheading",
-    label: "Testimonials page subheading",
-    description: "Supporting line under the heading",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.page",
@@ -29,7 +40,7 @@ export const bambooTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.page",
     title: "Testimonials page",
-    description: "Heading and subheading for the testimonials page",
+    description: "Heading and subheading on the testimonials page.",
     icon: "💬",
     columns: 2,
   },

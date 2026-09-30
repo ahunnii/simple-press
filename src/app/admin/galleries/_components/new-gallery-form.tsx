@@ -340,7 +340,10 @@ export function NewGalleryForm() {
 
   const isDirty = form.formState.isDirty || upload.pendingFiles.length > 0;
   const isProcessing =
-    isSaving || upload.isUploading || createMutation.isPending;
+    isSaving ||
+    upload.isUploading ||
+    upload.isPreparing ||
+    createMutation.isPending;
 
   return (
     <Form {...form}>

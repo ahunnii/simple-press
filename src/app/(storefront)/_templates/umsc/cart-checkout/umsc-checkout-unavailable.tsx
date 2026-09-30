@@ -47,14 +47,19 @@ export async function UmscCheckoutUnavailable({
     "umsc.checkout.unavailable-heading",
     "umsc.checkout.unavailable-body",
     "umsc.checkout.unavailable-cta",
+    "umsc.checkout.unavailable-contact-label",
   ]);
+
+  const body = f["umsc.checkout.unavailable-body"] ?? "";
+  const ctaText = f["umsc.checkout.unavailable-cta"] ?? "";
+  const contactLabel = f["umsc.checkout.unavailable-contact-label"] ?? "";
 
   const phone = resolvedBusiness?.phoneNumber?.trim();
 
   return (
     <div
       className="flex flex-1 items-center justify-center px-6 py-24 sm:px-8"
-      {...sectionGroupAttr("checkout", "main")}
+      {...sectionGroupAttr("checkout", "unavailable")}
     >
       <div className="w-full max-w-[480px] border border-[var(--umsc-line)] bg-[var(--umsc-cream)] p-8 text-center sm:p-10">
         <h1
@@ -64,12 +69,14 @@ export async function UmscCheckoutUnavailable({
           {f["umsc.checkout.unavailable-heading"] ?? ""}
         </h1>
 
-        <p
-          {...fieldAttr("umsc.checkout.unavailable-body")}
-          className="umsc-sans mx-auto mt-4 max-w-[42ch] text-[15px] leading-[1.6] text-[var(--umsc-muted)]"
-        >
-          {f["umsc.checkout.unavailable-body"] ?? ""}
-        </p>
+        {body ? (
+          <p
+            {...fieldAttr("umsc.checkout.unavailable-body")}
+            className="umsc-sans mx-auto mt-4 max-w-[42ch] text-[15px] leading-[1.6] text-[var(--umsc-muted)]"
+          >
+            {body}
+          </p>
+        ) : null}
 
         {phone && (
           <a
@@ -82,18 +89,27 @@ export async function UmscCheckoutUnavailable({
         )}
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <UmscButton
-            as="link"
-            href="/shop"
-            variant="gold"
-            showArrow={false}
-            fieldKey="umsc.checkout.unavailable-cta"
-          >
-            {f["umsc.checkout.unavailable-cta"] ?? ""}
-          </UmscButton>
-          <UmscButton as="link" href="/contact" variant="link">
-            Contact us
-          </UmscButton>
+          {ctaText ? (
+            <UmscButton
+              as="link"
+              href="/shop"
+              variant="gold"
+              showArrow={false}
+              fieldKey="umsc.checkout.unavailable-cta"
+            >
+              {ctaText}
+            </UmscButton>
+          ) : null}
+          {contactLabel ? (
+            <UmscButton
+              as="link"
+              href="/contact"
+              variant="link"
+              fieldKey="umsc.checkout.unavailable-contact-label"
+            >
+              {contactLabel}
+            </UmscButton>
+          ) : null}
         </div>
       </div>
     </div>

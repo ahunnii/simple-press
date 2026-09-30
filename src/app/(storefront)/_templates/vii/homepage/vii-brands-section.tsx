@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Pause, Play } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
@@ -43,15 +43,27 @@ type LogoItemProps = {
   /** When true the item is in the aria-hidden duplicate track; links become
    *  non-focusable and images lose their alt text. */
   ariaHidden?: boolean;
+  /** Full template field key for the logos list. Only set on the primary
+   *  (non-duplicate) render so the marquee's aria-hidden loop copy doesn't
+   *  create a second click target for the same row. */
+  fieldKey?: string;
 };
 
-function LogoItem({ logo, index, ariaHidden = false }: LogoItemProps) {
+function LogoItem({
+  logo,
+  index,
+  ariaHidden = false,
+  fieldKey,
+}: LogoItemProps) {
   const image = typeof logo.image === "string" ? logo.image : "";
   const name = typeof logo.name === "string" ? logo.name : "";
   if (!image) return null;
 
   return (
-    <li key={logo._id ?? index}>
+    <li
+      key={logo._id ?? index}
+      {...(fieldKey ? listItemAttr(fieldKey, index) : {})}
+    >
       <span
         style={{
           position: "relative",
@@ -181,6 +193,7 @@ export function ViiBrandsSection({
                     key={`primary-${logo._id ?? i}`}
                     logo={logo}
                     index={i}
+                    fieldKey="vii.homepage.brands-logos"
                   />
                 ))}
                 {/* Duplicate set — aria-hidden so AT/keyboard only hit the real set */}
@@ -245,7 +258,12 @@ export function ViiBrandsSection({
               }}
             >
               {logos.map((logo, i) => (
-                <LogoItem key={logo._id ?? i} logo={logo} index={i} />
+                <LogoItem
+                  key={logo._id ?? i}
+                  logo={logo}
+                  index={i}
+                  fieldKey="vii.homepage.brands-logos"
+                />
               ))}
             </ul>
             <style>{`

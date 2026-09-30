@@ -20,6 +20,7 @@ import {
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "../index";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
 type Props = DefaultBlogPostPageTemplateProps & {
   customFields?: Record<string, string>;
@@ -39,8 +40,8 @@ export function BambooBlogPostPage({
 
   const ctaHeading = f["bamboo.blog.post-cta-heading"];
   const ctaBody = f["bamboo.blog.post-cta-body"];
-  const ctaButtonText = f["bamboo.blog.post-cta-button-text"];
-  const ctaHref = f["bamboo.blog.post-cta-button-link"];
+  const ctaButtonText = f["bamboo.blog.post-cta-button-text"] ?? "";
+  const ctaHref = f["bamboo.blog.post-cta-button-link"] ?? "";
   const ctaVisible = isSectionVisible(customFields, "bamboo", "blog.post");
 
   const others = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 2);
@@ -51,6 +52,7 @@ export function BambooBlogPostPage({
         className={cn(
           "bg-[var(--bam-cream-deep)] pt-12 md:pt-16",
           page?.image ? "pb-24 md:pb-28" : "pb-14 md:pb-16",
+          BAMBOO_EMBLEM_CLEAR,
         )}
       >
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -118,7 +120,7 @@ export function BambooBlogPostPage({
                 <TiptapRenderer content={page.content as TiptapJSON} />
               </article>
 
-              {(ctaHeading ?? ctaBody) && ctaVisible && (
+              {(!!ctaHeading?.trim() || !!ctaBody?.trim()) && ctaVisible && (
                 <FadeIn
                   delay={0.1}
                   className={cn(others.length > 0 ? "mt-10" : "my-10")}
@@ -151,22 +153,26 @@ export function BambooBlogPostPage({
                             {ctaBody}
                           </p>
                         ) : null}
-                        <Button
-                          asChild
-                          className="group rounded-full bg-[var(--bam-cream)] text-[var(--bam-forest)] hover:bg-[var(--bam-gold-soft)]"
-                        >
-                          <Link href={ctaHref!}>
-                            <span
-                              {...fieldAttr("bamboo.blog.post-cta-button-text")}
-                            >
-                              {ctaButtonText}
-                            </span>
-                            <ArrowRight
-                              className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
-                              aria-hidden="true"
-                            />
-                          </Link>
-                        </Button>
+                        {ctaButtonText.trim() && ctaHref ? (
+                          <Button
+                            asChild
+                            className="group rounded-full bg-[var(--bam-cream)] text-[var(--bam-forest)] hover:bg-[var(--bam-gold-soft)]"
+                          >
+                            <Link href={ctaHref}>
+                              <span
+                                {...fieldAttr(
+                                  "bamboo.blog.post-cta-button-text",
+                                )}
+                              >
+                                {ctaButtonText}
+                              </span>
+                              <ArrowRight
+                                className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+                                aria-hidden="true"
+                              />
+                            </Link>
+                          </Button>
+                        ) : null}
                       </div>
                     </div>
                   </div>

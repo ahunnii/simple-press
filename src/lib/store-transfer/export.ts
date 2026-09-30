@@ -17,13 +17,18 @@ import type {
   ExportedDiscountCode,
   ExportedEvent,
   ExportedFaqItem,
+  ExportedForm,
   ExportedGallery,
   ExportedGalleryImage,
   ExportedImage,
+  ExportedInvoiceSettings,
+  ExportedLoyaltyProgram,
+  ExportedLoyaltyRewardTier,
   ExportedPage,
   ExportedProduct,
   ExportedProductReview,
   ExportedProductVariant,
+  ExportedQuoteCalculator,
   ExportedService,
   ExportedServiceItem,
   ExportedShippingRate,
@@ -50,6 +55,12 @@ function mapBusiness(
     supportEmail: b.supportEmail,
     phoneNumber: b.phoneNumber,
     businessAddress: b.businessAddress,
+    addressStreet: b.addressStreet,
+    addressCity: b.addressCity,
+    addressState: b.addressState,
+    addressPostalCode: b.addressPostalCode,
+    latitude: b.latitude,
+    longitude: b.longitude,
     templateId: b.templateId,
     testimonialsAutoApprove: b.testimonialsAutoApprove,
     maintenanceMode: b.maintenanceMode,
@@ -65,6 +76,7 @@ function mapBusiness(
     localPresence: b.localPresence,
     areaServed: b.areaServed,
     allowAiCrawlers: b.allowAiCrawlers,
+    sendAbandonedCheckoutEmails: b.sendAbandonedCheckoutEmails,
     shippingType: b.shippingType,
     shippingFlatRate: b.shippingFlatRate,
     freeShippingThreshold: b.freeShippingThreshold,
@@ -77,6 +89,12 @@ function mapBusiness(
     shippingFallbackRate: b.shippingFallbackRate,
     shippingDefaultItemWeightLb: b.shippingDefaultItemWeightLb,
     salesCountries: b.salesCountries,
+    donationLabel: b.donationLabel,
+    donationPresetAmounts: b.donationPresetAmounts,
+    venmoHandle: b.venmoHandle,
+    cashAppHandle: b.cashAppHandle,
+    donationShowInHeader: b.donationShowInHeader,
+    donationShowInFooter: b.donationShowInFooter,
     featureFlags: b.featureFlags,
     timeZone: b.timeZone,
   };
@@ -104,15 +122,19 @@ function mapSiteContent(
     metaKeywords: sc.metaKeywords,
     ogImage: sc.ogImage,
     faviconUrl: sc.faviconUrl,
+    seoBrandName: sc.seoBrandName,
     logoUrl: sc.logoUrl,
     logoAltText: sc.logoAltText,
     primaryColor: sc.primaryColor,
     secondaryColor: sc.secondaryColor,
     accentColor: sc.accentColor,
     navigationItems: sc.navigationItems,
+    footerNavigationItems: sc.footerNavigationItems,
     customFields: sc.customFields,
     bannerConfig: sc.bannerConfig,
     popupConfig: sc.popupConfig,
+    pageMeta: sc.pageMeta,
+    emailOverrides: sc.emailOverrides,
     previewCustomFields: sc.previewCustomFields,
     previewUpdatedAt: sc.previewUpdatedAt?.toISOString() ?? null,
   };
@@ -214,6 +236,9 @@ function mapProduct(
     price: p.price,
     compareAtPrice: p.compareAtPrice,
     cost: p.cost,
+    subscriptionEnabled: p.subscriptionEnabled,
+    subscriptionIntervals: p.subscriptionIntervals,
+    subscriptionDiscountPercent: p.subscriptionDiscountPercent,
     sku: p.sku,
     barcode: p.barcode,
     trackInventory: p.trackInventory,
@@ -225,6 +250,7 @@ function mapProduct(
     weightUnit: p.weightUnit,
     published: p.published,
     featured: p.featured,
+    scheduledPublishAt: p.scheduledPublishAt?.toISOString() ?? null,
     sortOrder: p.sortOrder,
     metaTitle: p.metaTitle,
     metaDescription: p.metaDescription,
@@ -257,6 +283,11 @@ function mapServiceItem(
     image: item.image,
     priceLabel: item.priceLabel,
     durationLabel: item.durationLabel,
+    compareAtPriceLabel: item.compareAtPriceLabel,
+    priceTiers: item.priceTiers,
+    addOns: item.addOns,
+    category: item.category,
+    isSignature: item.isSignature,
     bookingEmbedSrc: item.bookingEmbedSrc,
     bookingEmbedHeight: item.bookingEmbedHeight,
     published: item.published,
@@ -279,6 +310,7 @@ function mapService(
     sortOrder: s.sortOrder,
     metaTitle: s.metaTitle,
     metaDescription: s.metaDescription,
+    metaKeywords: s.metaKeywords,
     ogImage: s.ogImage,
     items: s.items.map(mapServiceItem),
   };
@@ -300,6 +332,9 @@ function mapPage(
     ogImage: p.ogImage,
     published: p.published,
     sortOrder: p.sortOrder,
+    scheduledPublishAt: p.scheduledPublishAt?.toISOString() ?? null,
+    previewDraft: p.previewDraft,
+    previewDraftUpdatedAt: p.previewDraftUpdatedAt?.toISOString() ?? null,
     type: p.type,
     template: p.template,
   };
@@ -348,6 +383,7 @@ function mapDiscountCode(
     value: d.value,
     active: d.active,
     usageLimit: d.usageLimit,
+    perCustomerLimit: d.perCustomerLimit,
     startsAt: d.startsAt?.toISOString() ?? null,
     expiresAt: d.expiresAt?.toISOString() ?? null,
     minPurchase: d.minPurchase,
@@ -468,6 +504,82 @@ function mapShippingZone(
   };
 }
 
+function mapForm(
+  f: Awaited<ReturnType<typeof fetchForms>>[number],
+): ExportedForm {
+  return {
+    exportId: f.id,
+    name: f.name,
+    definition: f.definition,
+    published: f.published,
+  };
+}
+
+function mapQuoteCalculator(
+  c: Awaited<ReturnType<typeof fetchQuoteCalculators>>[number],
+): ExportedQuoteCalculator {
+  return {
+    exportId: c.id,
+    name: c.name,
+    definition: c.definition,
+    published: c.published,
+  };
+}
+
+function mapLoyaltyRewardTier(
+  t: NonNullable<
+    Awaited<ReturnType<typeof fetchLoyaltyProgram>>
+  >["tiers"][number],
+): ExportedLoyaltyRewardTier {
+  return {
+    exportId: t.id,
+    label: t.label,
+    pointsCost: t.pointsCost,
+    type: t.type,
+    value: t.value,
+    minPurchase: t.minPurchase,
+    sortOrder: t.sortOrder,
+    active: t.active,
+  };
+}
+
+function mapLoyaltyProgram(
+  p: Awaited<ReturnType<typeof fetchLoyaltyProgram>>,
+): ExportedLoyaltyProgram | null {
+  if (!p) return null;
+  return {
+    earnOnOrders: p.earnOnOrders,
+    pointsPerDollar: p.pointsPerDollar,
+    signupEnabled: p.signupEnabled,
+    signupBonus: p.signupBonus,
+    firstOrderEnabled: p.firstOrderEnabled,
+    firstOrderBonus: p.firstOrderBonus,
+    birthdayEnabled: p.birthdayEnabled,
+    birthdayBonus: p.birthdayBonus,
+    socialEnabled: p.socialEnabled,
+    socialFollowBonus: p.socialFollowBonus,
+    rewardCodeExpiryDays: p.rewardCodeExpiryDays,
+    tiers: p.tiers.map(mapLoyaltyRewardTier),
+  };
+}
+
+function mapInvoiceSettings(
+  s: Awaited<ReturnType<typeof fetchInvoiceSettings>>,
+): ExportedInvoiceSettings | null {
+  if (!s) return null;
+  return {
+    numberPrefix: s.numberPrefix,
+    numberPadding: s.numberPadding,
+    startingNumber: s.startingNumber,
+    defaultDueTerms: s.defaultDueTerms,
+    defaultTaxRateBps: s.defaultTaxRateBps,
+    defaultNotes: s.defaultNotes,
+    defaultTerms: s.defaultTerms,
+    overdueAlertsEnabled: s.overdueAlertsEnabled,
+    weeklyDigestEnabled: s.weeklyDigestEnabled,
+  };
+}
+
 // ─── Prisma fetchers ──────────────────────────────────────────────────────────
 
 async function fetchBusiness(businessId: string) {
@@ -481,6 +593,12 @@ async function fetchBusiness(businessId: string) {
       supportEmail: true,
       phoneNumber: true,
       businessAddress: true,
+      addressStreet: true,
+      addressCity: true,
+      addressState: true,
+      addressPostalCode: true,
+      latitude: true,
+      longitude: true,
       templateId: true,
       testimonialsAutoApprove: true,
       maintenanceMode: true,
@@ -496,6 +614,7 @@ async function fetchBusiness(businessId: string) {
       localPresence: true,
       areaServed: true,
       allowAiCrawlers: true,
+      sendAbandonedCheckoutEmails: true,
       shippingType: true,
       shippingFlatRate: true,
       freeShippingThreshold: true,
@@ -508,6 +627,12 @@ async function fetchBusiness(businessId: string) {
       shippingFallbackRate: true,
       shippingDefaultItemWeightLb: true,
       salesCountries: true,
+      donationLabel: true,
+      donationPresetAmounts: true,
+      venmoHandle: true,
+      cashAppHandle: true,
+      donationShowInHeader: true,
+      donationShowInFooter: true,
       featureFlags: true,
       timeZone: true,
     },
@@ -536,15 +661,19 @@ async function fetchSiteContent(businessId: string) {
       metaKeywords: true,
       ogImage: true,
       faviconUrl: true,
+      seoBrandName: true,
       logoUrl: true,
       logoAltText: true,
       primaryColor: true,
       secondaryColor: true,
       accentColor: true,
       navigationItems: true,
+      footerNavigationItems: true,
       customFields: true,
       bannerConfig: true,
       popupConfig: true,
+      pageMeta: true,
+      emailOverrides: true,
       previewCustomFields: true,
       previewUpdatedAt: true,
     },
@@ -602,6 +731,9 @@ async function fetchProducts(businessId: string) {
       price: true,
       compareAtPrice: true,
       cost: true,
+      subscriptionEnabled: true,
+      subscriptionIntervals: true,
+      subscriptionDiscountPercent: true,
       sku: true,
       barcode: true,
       trackInventory: true,
@@ -613,6 +745,7 @@ async function fetchProducts(businessId: string) {
       weightUnit: true,
       published: true,
       featured: true,
+      scheduledPublishAt: true,
       sortOrder: true,
       metaTitle: true,
       metaDescription: true,
@@ -695,6 +828,7 @@ async function fetchServices(businessId: string) {
       sortOrder: true,
       metaTitle: true,
       metaDescription: true,
+      metaKeywords: true,
       ogImage: true,
       items: {
         select: {
@@ -704,6 +838,11 @@ async function fetchServices(businessId: string) {
           image: true,
           priceLabel: true,
           durationLabel: true,
+          compareAtPriceLabel: true,
+          priceTiers: true,
+          addOns: true,
+          category: true,
+          isSignature: true,
           bookingEmbedSrc: true,
           bookingEmbedHeight: true,
           published: true,
@@ -732,6 +871,9 @@ async function fetchPages(businessId: string) {
       ogImage: true,
       published: true,
       sortOrder: true,
+      scheduledPublishAt: true,
+      previewDraft: true,
+      previewDraftUpdatedAt: true,
       type: true,
       template: true,
     },
@@ -773,7 +915,9 @@ async function fetchGalleries(businessId: string) {
 
 async function fetchDiscountCodes(businessId: string) {
   return db.discountCode.findMany({
-    where: { businessId },
+    // "loyalty" codes are single-use, customer-bound rewards redemptions —
+    // never exported. See the excluded-fields note in types.ts.
+    where: { businessId, source: "manual" },
     select: {
       id: true,
       code: true,
@@ -781,6 +925,7 @@ async function fetchDiscountCodes(businessId: string) {
       value: true,
       active: true,
       usageLimit: true,
+      perCustomerLimit: true,
       startsAt: true,
       expiresAt: true,
       minPurchase: true,
@@ -911,6 +1056,77 @@ async function fetchShippingZones(businessId: string) {
   });
 }
 
+async function fetchForms(businessId: string) {
+  return db.form.findMany({
+    where: { businessId },
+    select: { id: true, name: true, definition: true, published: true },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+async function fetchQuoteCalculators(businessId: string) {
+  return db.quoteCalculator.findMany({
+    where: { businessId },
+    select: { id: true, name: true, definition: true, published: true },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+async function fetchLoyaltyProgram(businessId: string) {
+  // Program config + reward tiers only — member accounts and the points
+  // ledger are customer data and never exported.
+  return db.loyaltyProgram.findUnique({
+    where: { businessId },
+    select: {
+      earnOnOrders: true,
+      pointsPerDollar: true,
+      signupEnabled: true,
+      signupBonus: true,
+      firstOrderEnabled: true,
+      firstOrderBonus: true,
+      birthdayEnabled: true,
+      birthdayBonus: true,
+      socialEnabled: true,
+      socialFollowBonus: true,
+      rewardCodeExpiryDays: true,
+      tiers: {
+        select: {
+          id: true,
+          label: true,
+          pointsCost: true,
+          type: true,
+          value: true,
+          minPurchase: true,
+          sortOrder: true,
+          active: true,
+        },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+}
+
+async function fetchInvoiceSettings(businessId: string) {
+  // `paymentMethods` is deliberately NOT selected — it may hold account
+  // numbers and the ZIP is plaintext. `defaultNotes`/`defaultTerms` are
+  // @encrypted columns; the prisma-field-encryption extension on `db`
+  // decrypts them transparently on read.
+  return db.invoiceSettings.findUnique({
+    where: { businessId },
+    select: {
+      numberPrefix: true,
+      numberPadding: true,
+      startingNumber: true,
+      defaultDueTerms: true,
+      defaultTaxRateBps: true,
+      defaultNotes: true,
+      defaultTerms: true,
+      overdueAlertsEnabled: true,
+      weeklyDigestEnabled: true,
+    },
+  });
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -943,6 +1159,10 @@ export async function collectStoreContent(businessId: string): Promise<{
     videoSourcesRaw,
     videosRaw,
     shippingZonesRaw,
+    formsRaw,
+    quoteCalculatorsRaw,
+    loyaltyProgramRaw,
+    invoiceSettingsRaw,
   ] = await Promise.all([
     fetchBusiness(businessId),
     fetchSiteContent(businessId),
@@ -960,6 +1180,10 @@ export async function collectStoreContent(businessId: string): Promise<{
     fetchVideoSources(businessId),
     fetchVideos(businessId),
     fetchShippingZones(businessId),
+    fetchForms(businessId),
+    fetchQuoteCalculators(businessId),
+    fetchLoyaltyProgram(businessId),
+    fetchInvoiceSettings(businessId),
   ]);
 
   const manifestContent: StoreTransferContent = {
@@ -979,6 +1203,10 @@ export async function collectStoreContent(businessId: string): Promise<{
     videoSources: videoSourcesRaw.map(mapVideoSource),
     videos: videosRaw.map(mapVideo),
     shippingZones: shippingZonesRaw.map(mapShippingZone),
+    forms: formsRaw.map(mapForm),
+    quoteCalculators: quoteCalculatorsRaw.map(mapQuoteCalculator),
+    loyaltyProgram: mapLoyaltyProgram(loyaltyProgramRaw),
+    invoiceSettings: mapInvoiceSettings(invoiceSettingsRaw),
   };
 
   return {

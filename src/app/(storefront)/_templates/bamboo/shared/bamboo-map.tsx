@@ -4,7 +4,6 @@ import { useState } from "react";
 import { MapPin } from "lucide-react";
 
 import type { MapViewport } from "~/components/ui/map";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import {
   Map,
@@ -40,7 +39,11 @@ export function BambooMap({
 
   return (
     <div
-      {...sectionGroupAttr("global", "location")}
+      // No `data-sp-group` here (retired 2026-09-25 with the
+      // `global.location` field group): coordinates are now a Settings →
+      // General value, not a template field, so a click on the map falls
+      // through to the enclosing section's own hotspot (`homepage.location`
+      // or `contact.map`) instead of a group id that no longer exists.
       role="region"
       aria-label="Location map"
       className="border-border/60 relative h-[420px] w-full overflow-hidden rounded-2xl border shadow-sm"

@@ -12,6 +12,11 @@ type Props = {
   index?: number;
   /** Element tag to render — defaults to "div". */
   as?: "div" | "section" | "article" | "li";
+  /**
+   * Extra attributes for the rendered root — e.g. `listItemAttr(fieldKey, i)`
+   * so a click on a row in the editor preview opens that list row.
+   */
+  attrs?: Record<string, string | undefined>;
 };
 
 /**
@@ -30,6 +35,7 @@ export function PinkReveal({
   style,
   index = 0,
   as = "div",
+  attrs,
 }: Props) {
   const { ref, revealed } = usePinkReveal(index);
   const Tag = as;
@@ -38,6 +44,7 @@ export function PinkReveal({
       ref={ref as never}
       className={cn("pink-reveal", revealed && "pink-revealed", className)}
       style={style}
+      {...attrs}
     >
       {children}
     </Tag>

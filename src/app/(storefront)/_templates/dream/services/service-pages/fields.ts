@@ -32,7 +32,7 @@ export const dreamLaneFields: TemplateField[] = [
   // Story block 1
   {
     key: "dream-lane.block-1-heading",
-    label: "Story Block 1 Heading",
+    label: "Block 1 heading",
     description: "Leave blank to hide this block entirely.",
     type: "text",
     page: "homepage",
@@ -42,7 +42,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-1-body",
-    label: "Story Block 1 Body",
+    label: "Block 1 body",
     type: "textarea",
     page: "homepage",
     group: "dream-lane.block-1",
@@ -53,7 +53,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-1-image",
-    label: "Story Block 1 Image",
+    label: "Block 1 image",
     description: "Photo shown alongside this block.",
     type: "image",
     page: "homepage",
@@ -63,7 +63,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-1-alt",
-    label: "Story Block 1 Image Alt Text",
+    label: "Block 1 image alt text",
     description: "Describes this block's photo for screen readers.",
     type: "text",
     page: "homepage",
@@ -75,7 +75,7 @@ export const dreamLaneFields: TemplateField[] = [
   // Story block 2
   {
     key: "dream-lane.block-2-heading",
-    label: "Story Block 2 Heading",
+    label: "Block 2 heading",
     description: "Leave blank to hide this block entirely.",
     type: "text",
     page: "homepage",
@@ -85,7 +85,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-2-body",
-    label: "Story Block 2 Body",
+    label: "Block 2 body",
     type: "textarea",
     page: "homepage",
     group: "dream-lane.block-2",
@@ -96,7 +96,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-2-image",
-    label: "Story Block 2 Image",
+    label: "Block 2 image",
     description: "Photo shown alongside this block.",
     type: "image",
     page: "homepage",
@@ -106,7 +106,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-2-alt",
-    label: "Story Block 2 Image Alt Text",
+    label: "Block 2 image alt text",
     description: "Describes this block's photo for screen readers.",
     type: "text",
     page: "homepage",
@@ -118,7 +118,7 @@ export const dreamLaneFields: TemplateField[] = [
   // Story block 3
   {
     key: "dream-lane.block-3-heading",
-    label: "Story Block 3 Heading",
+    label: "Block 3 heading",
     description: "Leave blank to hide this block entirely.",
     type: "text",
     page: "homepage",
@@ -128,7 +128,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-3-body",
-    label: "Story Block 3 Body",
+    label: "Block 3 body",
     type: "textarea",
     page: "homepage",
     group: "dream-lane.block-3",
@@ -139,7 +139,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-3-image",
-    label: "Story Block 3 Image",
+    label: "Block 3 image",
     description: "Photo shown alongside this block.",
     type: "image",
     page: "homepage",
@@ -149,7 +149,7 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.block-3-alt",
-    label: "Story Block 3 Image Alt Text",
+    label: "Block 3 image alt text",
     description: "Describes this block's photo for screen readers.",
     type: "text",
     page: "homepage",
@@ -161,7 +161,7 @@ export const dreamLaneFields: TemplateField[] = [
   // Options grid heading
   {
     key: "dream-lane.options-heading",
-    label: "Options Heading",
+    label: "Heading",
     description:
       "Heading above the grid built from this service's items. Only shown when the service has published items.",
     type: "text",
@@ -171,12 +171,12 @@ export const dreamLaneFields: TemplateField[] = [
     defaultValue: "Options",
   },
 
-  // Closing CTA
+  // Closing banner
   {
     key: "dream-lane.cta-heading",
-    label: "Closing CTA Heading",
+    label: "Heading",
     description:
-      "Heading for the closing Estimate Quote band (the script accent word follows it).",
+      "Heading for the closing section (the highlighted word follows it).",
     type: "text",
     page: "homepage",
     group: "dream-lane.cta",
@@ -185,9 +185,9 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.cta-accent",
-    label: "Closing CTA Accent Word",
+    label: "Highlighted word",
     description:
-      'Script accent rendered after the heading (e.g. "Estimate Quote"). Leave blank to hide.',
+      'Script-styled word rendered after the heading (e.g. "Estimate Quote"). Leave blank to hide.',
     type: "text",
     page: "homepage",
     group: "dream-lane.cta",
@@ -196,8 +196,8 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.cta-lede",
-    label: "Closing CTA Lede",
-    description: "Short line under the closing CTA heading.",
+    label: "Intro",
+    description: "Short line under this section's heading.",
     type: "textarea",
     page: "homepage",
     group: "dream-lane.cta",
@@ -207,8 +207,8 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.cta-label",
-    label: "Closing CTA Button Label",
-    description: "Label for the closing CTA button.",
+    label: "Button label",
+    description: "Label for this section's button.",
     type: "text",
     page: "homepage",
     group: "dream-lane.cta",
@@ -217,8 +217,8 @@ export const dreamLaneFields: TemplateField[] = [
   },
   {
     key: "dream-lane.cta-url",
-    label: "Closing CTA Button URL",
-    description: "Where the closing CTA button links to.",
+    label: "Button link",
+    description: "Where this section's button links to.",
     type: "url",
     page: "homepage",
     group: "dream-lane.cta",
@@ -230,28 +230,28 @@ export const dreamLaneFields: TemplateField[] = [
 export const dreamLaneFieldGroups: TemplateFieldGroup[] = [
   {
     id: "dream-lane.block-1",
-    title: "Story Block 1",
+    title: "Story block 1",
     description: "First alternating text/image block. Blank heading hides it.",
     icon: "🎀",
     columns: 2,
   },
   {
     id: "dream-lane.block-2",
-    title: "Story Block 2",
+    title: "Story block 2",
     description: "Second alternating text/image block. Blank heading hides it.",
     icon: "🎁",
     columns: 2,
   },
   {
     id: "dream-lane.block-3",
-    title: "Story Block 3",
+    title: "Story block 3",
     description: "Third alternating text/image block. Blank heading hides it.",
     icon: "✨",
     columns: 2,
   },
   {
     id: "dream-lane.options",
-    title: "Options Grid",
+    title: "Options grid",
     description:
       "Heading above the grid built from this service's items (name, price, duration, tiers, add-ons).",
     icon: "🗂️",
@@ -259,8 +259,8 @@ export const dreamLaneFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "dream-lane.cta",
-    title: "Closing Call to Action",
-    description: "Estimate Quote band beneath the Options grid.",
+    title: "Closing banner",
+    description: "Quote request section beneath the Options grid.",
     icon: "💌",
     columns: 2,
   },
@@ -271,7 +271,7 @@ export const dreamLaneFieldGroups: TemplateFieldGroup[] = [
 export const dreamPackageFields: TemplateField[] = [
   {
     key: "dream-package.intro",
-    label: "Intro Paragraph",
+    label: "Intro",
     description: "Short paragraph shown under the hero, before the tier grid.",
     type: "textarea",
     page: "homepage",
@@ -283,7 +283,7 @@ export const dreamPackageFields: TemplateField[] = [
 
   {
     key: "dream-package.how-to-choose-heading",
-    label: '"How to Choose" Heading',
+    label: "Heading",
     type: "text",
     page: "homepage",
     group: "dream-package.how-to-choose",
@@ -293,7 +293,7 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.how-to-choose-1",
-    label: "How to Choose — Paragraph 1",
+    label: "Paragraph 1",
     description: "Leave blank to hide.",
     type: "textarea",
     page: "homepage",
@@ -304,7 +304,7 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.how-to-choose-2",
-    label: "How to Choose — Paragraph 2",
+    label: "Paragraph 2",
     description: "Leave blank to hide.",
     type: "textarea",
     page: "homepage",
@@ -315,7 +315,7 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.how-to-choose-3",
-    label: "How to Choose — Paragraph 3",
+    label: "Paragraph 3",
     description: "Leave blank to hide.",
     type: "textarea",
     page: "homepage",
@@ -325,10 +325,10 @@ export const dreamPackageFields: TemplateField[] = [
       "Not sure where to start? Send a few photos of your space and she'll recommend a package.",
   },
 
-  // Closing CTA
+  // Closing banner
   {
     key: "dream-package.grid-heading",
-    label: "Package Grid Heading",
+    label: "Package grid heading",
     description:
       "Heading above the package tiers. Leave blank to hide the heading.",
     type: "text",
@@ -339,9 +339,9 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.cta-heading",
-    label: "Closing CTA Heading",
+    label: "Heading",
     description:
-      "Heading for the closing Estimate Quote band (the script accent word follows it).",
+      "Heading for the closing section (the highlighted word follows it).",
     type: "text",
     page: "homepage",
     group: "dream-package.cta",
@@ -350,9 +350,9 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.cta-accent",
-    label: "Closing CTA Accent Word",
+    label: "Highlighted word",
     description:
-      'Script accent rendered after the heading (e.g. "Estimate Quote"). Leave blank to hide.',
+      'Script-styled word rendered after the heading (e.g. "Estimate Quote"). Leave blank to hide.',
     type: "text",
     page: "homepage",
     group: "dream-package.cta",
@@ -361,8 +361,8 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.cta-lede",
-    label: "Closing CTA Lede",
-    description: "Short line under the closing CTA heading.",
+    label: "Intro",
+    description: "Short line under this section's heading.",
     type: "textarea",
     page: "homepage",
     group: "dream-package.cta",
@@ -372,8 +372,8 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.cta-label",
-    label: "Closing CTA Button Label",
-    description: "Label for the closing CTA button.",
+    label: "Button label",
+    description: "Label for this section's button.",
     type: "text",
     page: "homepage",
     group: "dream-package.cta",
@@ -382,8 +382,8 @@ export const dreamPackageFields: TemplateField[] = [
   },
   {
     key: "dream-package.cta-url",
-    label: "Closing CTA Button URL",
-    description: "Where the closing CTA button links to.",
+    label: "Button link",
+    description: "Where this section's button links to.",
     type: "url",
     page: "homepage",
     group: "dream-package.cta",
@@ -402,7 +402,7 @@ export const dreamPackageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "dream-package.how-to-choose",
-    title: "How to Choose",
+    title: "How to choose",
     description:
       "Heading and up to three short paragraphs beneath the tier grid.",
     icon: "🤔",
@@ -410,8 +410,8 @@ export const dreamPackageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "dream-package.cta",
-    title: "Closing Call to Action",
-    description: "Estimate Quote band beneath the how-to-choose paragraphs.",
+    title: "Closing banner",
+    description: "Quote request section beneath the how-to-choose paragraphs.",
     icon: "💌",
     columns: 2,
   },

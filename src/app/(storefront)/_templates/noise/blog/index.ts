@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const blogListingData: TemplateField[] = [
   {
     key: "noise.blog-listing-heading",
-    label: "Blog Page Heading",
-    description: "Heading for the blog listing page",
+    label: "Heading",
+    description: "Heading at the top of the blog page.",
     type: "text",
     page: "blog",
     group: "blog.listing",
@@ -13,8 +13,9 @@ const blogListingData: TemplateField[] = [
   },
   {
     key: "noise.blog-listing-intro",
-    label: "Blog Page Intro",
-    description: "Optional intro text below the blog heading",
+    label: "Intro text",
+    description:
+      "Optional text below the heading on the blog page. Leave blank to hide.",
     type: "textarea",
     page: "blog",
     group: "blog.listing",
@@ -25,9 +26,9 @@ const blogListingData: TemplateField[] = [
 const blogPostData: TemplateField[] = [
   {
     key: "noise.blog.post-shop-cta-heading",
-    label: "Blog Post Shop CTA Heading",
+    label: "Heading",
     description:
-      "Serif heading in the shop call-to-action band at the bottom of each blog post.",
+      "Heading shown in the shop banner at the bottom of every blog post.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -36,8 +37,8 @@ const blogPostData: TemplateField[] = [
   },
   {
     key: "noise.blog.post-shop-cta-subheading",
-    label: "Blog Post Shop CTA Subheading",
-    description: "Smaller line below the shop CTA heading.",
+    label: "Subheading",
+    description: "Smaller line below the heading in the shop banner.",
     type: "text",
     page: "blog",
     group: "blog.post",
@@ -53,15 +54,15 @@ export const noiseBlogData = [...blogListingData, ...blogPostData];
 export const noiseBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.listing",
-    title: "Blog Page",
-    description: "Heading and intro for the blog listing page",
+    title: "Blog page",
+    description: "Heading and intro text for the blog page.",
     icon: "✍️",
     columns: 1,
   },
   {
     id: "blog.post",
-    title: "Blog Post — Shop CTA",
-    description: "Call-to-action band at the bottom of each blog post",
+    title: "Blog post shop banner",
+    description: "Shop banner shown at the bottom of every blog post.",
     icon: "🛍️",
     columns: 2,
   },

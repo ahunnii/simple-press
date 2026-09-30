@@ -7,10 +7,12 @@
  * "shows as unused" bug — it is a live file getting deleted out of MinIO, which
  * a database restore does not bring back.
  *
- * These tests cover the two blind spots that were fixed:
+ * These tests cover blind spots that were fixed:
  *  - `Service.customFields` (service-page template fields) was not scanned at all
  *  - `Product.additionalFields` was scanned only at the `additionalInformation`
  *    key, so any other image URL in that free-form blob was invisible
+ *  - `SiteContent.pageMeta` / `popupConfig`, `Page.previewDraft` and
+ *    `Business.maintenanceImage` / `maintenanceMessage` were not scanned at all
  *
  * `~/server/db` is mocked, so this runs in the `unit` project (`pnpm test:nodb`)
  * with no Postgres. The service-template registry is NOT mocked — resolving a
@@ -22,6 +24,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("~/server/db", () => ({
   db: {
     siteContent: { findUnique: vi.fn() },
+    business: { findUnique: vi.fn() },
     product: { findMany: vi.fn() },
     productVariant: { findMany: vi.fn() },
     collection: { findMany: vi.fn() },
@@ -70,6 +73,7 @@ const EMPTY_TABLES = [
 beforeEach(() => {
   vi.clearAllMocks();
   asMock(db.siteContent.findUnique).mockResolvedValue(null);
+  asMock(db.business.findUnique).mockResolvedValue(null);
   for (const fn of EMPTY_TABLES) asMock(fn).mockResolvedValue([]);
 });
 
@@ -307,6 +311,154 @@ describe("buildUsedMediaIndex — Product gallery Image rows", () => {
           ],
         },
       }),
+    );
+  });
+});
+
+// ─── SiteContent.pageMeta / popupConfig ───────────────────────────────────────
+
+describe("buildUsedMediaIndex — SiteContent SEO + popup blobs", () => {
+  function siteContentRow(overrides: Record<string, unknown>) {
+    return {
+      heroImageUrl: null,
+      aboutImageUrl: null,
+      ogImage: null,
+      faviconUrl: null,
+      logoUrl: null,
+      pageMeta: null,
+      popupConfig: null,
+      customFields: null,
+      previewCustomFields: null,
+      business: { templateId: "modern" },
+      ...overrides,
+    };
+  }
+
+  it("reports a per-route pageMeta ogImage, labelled with the route", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-about-og.jpg`);
+    const retired = keyToPublicUrl(`${BUSINESS_ID}/image-retired-og.jpg`);
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentRow({
+        pageMeta: {
+          about: { title: "About us", ogImage: url },
+          contact: { title: "No image here" },
+          // A route key no longer in STATIC_SEO_ROUTES still blocks deletion.
+          "old-route": { ogImage: retired },
+        },
+      }),
+    );
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(url)).toEqual([
+      {
+        url,
+        location: "Page SEO image",
+        entityType: "siteContent",
+        entityLabel: "About",
+        adminHref: "/admin/content/seo",
+      },
+    ]);
+    expect(index.get(retired)?.[0]?.entityLabel).toBe("old-route");
+  });
+
+  it("reports the announcement popup image", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-popup.jpg`);
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentRow({ popupConfig: { mode: "image", imagePath: url } }),
+    );
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(url)?.[0]).toMatchObject({
+      location: "Announcement popup",
+      entityType: "siteContent",
+      adminHref: "/admin/content/announcements",
+    });
+  });
+
+  it("does not choke on malformed pageMeta / popupConfig blobs", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentRow({
+        pageMeta: { about: "nonsense", shop: null, blog: { ogImage: 42 } },
+        popupConfig: ["nonsense"],
+      }),
+    );
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.size).toBe(0);
+  });
+});
+
+// ─── Page.previewDraft ────────────────────────────────────────────────────────
+
+describe("buildUsedMediaIndex — Page.previewDraft", () => {
+  it("reports media referenced only from an unpublished visual-editor draft", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-draft-only.jpg`);
+    const videoUrl = keyToPublicUrl(`${BUSINESS_ID}/video-draft-only.mp4`);
+    asMock(db.page.findMany).mockResolvedValue([
+      {
+        id: "page_1",
+        title: "About",
+        slug: "about",
+        image: null,
+        ogImage: null,
+        content: { type: "doc", content: [] },
+        previewDraft: {
+          title: "About (new)",
+          excerpt: null,
+          content: {
+            type: "doc",
+            content: [
+              { type: "image", attrs: { src: url } },
+              { type: "video", attrs: { src: videoUrl } },
+            ],
+          },
+        },
+        type: "page",
+      },
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(url)?.[0]).toMatchObject({
+      location: "Page content (draft)",
+      entityType: "page",
+      entityId: "page_1",
+      adminHref: "/admin/content/pages/page_1",
+    });
+    expect(index.get(videoUrl)).toHaveLength(1);
+  });
+});
+
+// ─── Business maintenance page ────────────────────────────────────────────────
+
+describe("buildUsedMediaIndex — Business maintenance page", () => {
+  it("reports the maintenance flyer image and rich-text message images", async () => {
+    const flyer = keyToPublicUrl(`${BUSINESS_ID}/image-flyer.jpg`);
+    const inline = keyToPublicUrl(`${BUSINESS_ID}/image-inline.jpg`);
+    asMock(db.business.findUnique).mockResolvedValue({
+      maintenanceImage: flyer,
+      maintenanceMessage: {
+        type: "doc",
+        content: [{ type: "image", attrs: { src: inline } }],
+      },
+    });
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(flyer)).toEqual([
+      {
+        url: flyer,
+        location: "Maintenance page",
+        entityType: "business",
+        entityLabel: "Flyer image",
+        adminHref: "/admin/settings/availability",
+      },
+    ]);
+    expect(index.get(inline)?.[0]?.location).toBe(
+      "Maintenance page message (rich text)",
     );
   });
 });

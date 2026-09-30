@@ -1,15 +1,26 @@
 import { Suspense } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { getSession } from "~/server/better-auth/server";
 import { PageTransition } from "~/components/page-animations";
 
+import { resolveFields } from "..";
 import { NoiseOrderConfirmation } from "./noise-order-confirmation";
 
-export function NoiseOrderSuccessPage({
+export async function NoiseOrderSuccessPage({
   business,
 }: {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "noise.checkout.success-note",
+  ]);
+
+  // PF20 / B9.4 — resolved server-side so the account CTA is correct on the
+  // first paint; see the doc on `NoiseOrderConfirmation`'s `initialSession`
+  // prop.
+  const initialSession = await getSession().catch(() => null);
+
   return (
     <PageTransition>
       <Suspense
@@ -27,7 +38,11 @@ export function NoiseOrderSuccessPage({
           </div>
         }
       >
-        <NoiseOrderConfirmation business={business} />
+        <NoiseOrderConfirmation
+          business={business}
+          note={f["noise.checkout.success-note"] ?? ""}
+          initialSession={initialSession}
+        />
       </Suspense>
     </PageTransition>
   );

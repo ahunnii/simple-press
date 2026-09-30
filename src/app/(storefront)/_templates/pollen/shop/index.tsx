@@ -2,9 +2,21 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 const shopPageData: TemplateField[] = [
   {
+    key: "pollen.shop.listing-label",
+    label: "Small label",
+    description:
+      "Small label above the shop heading. Leave blank to hide.",
+    type: "text",
+    page: "products",
+    group: "products.shop",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "One or two words",
+  },
+  {
     key: "pollen.shop.listing-title",
-    label: "Shop Page Heading",
-    description: "Heading shown at the top of the shop/products page",
+    label: "Heading",
+    description: "Heading shown at the top of the shop page.",
     type: "text",
     page: "products",
     group: "products.shop",
@@ -14,8 +26,8 @@ const shopPageData: TemplateField[] = [
   },
   {
     key: "pollen.shop.listing-intro",
-    label: "Shop Page Intro",
-    description: "Short intro below the shop heading",
+    label: "Intro text",
+    description: "Short line below the shop heading.",
     type: "textarea",
     page: "products",
     group: "products.shop",
@@ -30,8 +42,8 @@ export const pollenShopData = [...shopPageData];
 export const pollenShopFieldGroups: TemplateFieldGroup[] = [
   {
     id: "products.shop",
-    title: "Shop Page",
-    description: "Heading and intro text for the shop/products listing page",
+    title: "Shop",
+    description: "Heading and intro text at the top of the shop page.",
     icon: "🛍️",
     columns: 2,
   },

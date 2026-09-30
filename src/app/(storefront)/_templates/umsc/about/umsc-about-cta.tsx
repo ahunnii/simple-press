@@ -9,19 +9,25 @@ type Props = {
   heading: string;
   buttonLabel: string;
   buttonUrl: string;
+  businessName: string;
 };
 
 /**
  * UmscAboutCta — design.md "About #6": black closing band, h2 + gold pill
  * to /shop. Hideable (about.cta).
  */
-export function UmscAboutCta({ heading, buttonLabel, buttonUrl }: Props) {
+export function UmscAboutCta({
+  heading,
+  buttonLabel,
+  buttonUrl,
+  businessName,
+}: Props) {
   if (!heading && !buttonLabel) return null;
 
   return (
     <UmscSection
       tone="black"
-      aria-label="Shop Unique Monique"
+      aria-label={businessName ? `Shop ${businessName}` : "Shop"}
       sectionAttrs={sectionGroupAttr("about", "cta")}
       className="border-t-2 border-[var(--umsc-gold)]"
     >

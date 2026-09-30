@@ -83,7 +83,7 @@ export function UmscStorySection({
               {paragraph}
             </p>
           )}
-          {ctaLabel && (
+          {ctaLabel && ctaUrl && (
             <div className="mt-8">
               <UmscButton
                 variant="gold"

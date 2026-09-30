@@ -7,6 +7,10 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Heart, Leaf } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { isActiveNavLink } from "~/lib/nav-utils";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -17,37 +21,43 @@ import {
 } from "~/components/ui/sheet";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  filterNavByFlags,
+  isNavItemActive,
+  navGroupEntries,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { BambooLeafSprig } from "../shared/bamboo-leaf-sprig";
+import { BambooNavSheetAccount } from "./bamboo-nav-sheet-account";
 import {
   BambooSocialIcons,
   readBambooSocialLinks,
 } from "./bamboo-social-icons";
 
-type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = {
-  label: string;
-  href: string;
-  external?: boolean;
-  children?: NavChild[];
-};
-
-const NAV_LINKS: NavLink[] = [
+/** Same shipped default as `bamboo-header.tsx`'s `BAMBOO_DEFAULT_NAV` — see
+ *  that file's comment for why the three chrome files each keep their own
+ *  copy instead of sharing a `lib/` module. */
+const BAMBOO_DEFAULT_NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
 
+type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
+
 type MobileNavProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /**
-   * Session state from the header, which owns the hydrated session — only
-   * meaningful once the header's `isPending` resolves. The header passes
-   * `!!session?.user`.
-   */
-  isAuthenticated: boolean;
+  /** Hydrated session from the header's `useHydratedSession` — the header
+   *  owns it so the bar and the sheet can't disagree. */
+  session: HydratedSession;
+  isPending: boolean;
+  /** Short line at the bottom of the sheet, below socials. Blank hides it. */
+  menuTagline: string;
 } & DefaultHeaderTemplateProps;
 
 /** The stagger keyframe's own timing — kept in one place so the class and
@@ -90,14 +100,16 @@ const childLinkActive = "text-[var(--bam-gold-soft)]";
  * pinned brand row, a scrollable serif link list with a staggered fade-up
  * entrance and a short gold rule marking the active page (plus a hairline-
  * divided wishlist row when the flag is on), and a pinned bottom block
- * (signed-out-only auth pair, socials, tagline). Opens from the right and
- * closes on navigation.
+ * (signed-out auth pair OR the signed-in account block, socials, tagline).
+ * Opens from the right and closes on navigation.
  */
 export function BambooMobileNav({
   open,
   onOpenChange,
   business,
-  isAuthenticated,
+  session,
+  isPending,
+  menuTagline,
 }: MobileNavProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
@@ -116,8 +128,10 @@ export function BambooMobileNav({
     setContainer(document.querySelector<HTMLElement>("div.bamboo"));
   }, []);
 
-  const links =
-    (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
+  const links = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, BAMBOO_DEFAULT_NAV),
+    isEnabled,
+  );
   const logoUrl = business.siteContent?.logoUrl;
   const businessName = business.name ?? "Menu";
 
@@ -227,91 +241,99 @@ export function BambooMobileNav({
           aria-label="Mobile navigation"
         >
           <div className="flex flex-col">
-            {links.map((link, i) =>
-              link.children?.length ? (
-                <div
-                  key={link.href + link.label}
-                  // The stagger animation runs on this wrapper, so the
-                  // reduced-motion delay guard must target it too.
-                  className="bamboo-mobile-nav-item"
-                  style={fadeUpStyle(i)}
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleExpanded(i)}
-                    aria-expanded={expandedItems.has(i)}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-3 py-3 text-left font-serif text-3xl leading-tight transition-colors sm:py-4",
-                      link.children.some((c) => pathname === c.href)
-                        ? topLinkActive
-                        : topLinkIdle,
-                    )}
+            {links.map((link, i) => {
+              if (link.children?.length) {
+                // The trigger never navigates — a non-empty parent href is
+                // the accordion's first entry (`navGroupEntries`), so the
+                // parent's own page stays reachable instead of being dropped.
+                const entries = navGroupEntries(link);
+                const activeIdx = activeEntryIndex(pathname, entries);
+                const itemActive = isNavItemActive(pathname, link);
+                const sublistId = `bamboo-mobile-nav-group-${i}`;
+                return (
+                  <div
+                    key={link.href + link.label}
+                    // The stagger animation runs on this wrapper, so the
+                    // reduced-motion delay guard must target it too.
+                    className="bamboo-mobile-nav-item"
+                    style={fadeUpStyle(i)}
                   >
-                    <span className="flex flex-col items-start">
-                      <span>{link.label}</span>
-                      {link.children.some((c) => pathname === c.href) &&
-                        activeRule}
-                    </span>
-                    <ChevronDown
+                    <button
+                      type="button"
+                      onClick={() => toggleExpanded(i)}
+                      aria-expanded={expandedItems.has(i)}
+                      aria-controls={sublistId}
                       className={cn(
-                        "size-5 shrink-0 transition-transform duration-200",
-                        expandedItems.has(i) ? "rotate-180" : "",
+                        "flex w-full items-center justify-between gap-3 py-3 text-left font-serif text-3xl leading-tight transition-colors sm:py-4",
+                        itemActive ? topLinkActive : topLinkIdle,
                       )}
-                      aria-hidden="true"
-                    />
-                  </button>
-                  {expandedItems.has(i) && (
-                    <div className="flex flex-col pb-2 pl-4">
-                      {link.children.map((child) => (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          target={child.external ? "_blank" : undefined}
-                          rel={
-                            child.external ? "noopener noreferrer" : undefined
-                          }
-                          onClick={() => onOpenChange(false)}
-                          aria-current={
-                            pathname === child.href ? "page" : undefined
-                          }
-                          className={cn(
-                            childLinkBase,
-                            pathname === child.href
-                              ? childLinkActive
-                              : childLinkIdle,
-                          )}
-                        >
-                          {child.label}
-                          {child.external && (
-                            <span className="sr-only"> (opens in new tab)</span>
-                          )}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
+                    >
+                      <span className="flex flex-col items-start">
+                        <span>{link.label}</span>
+                        {itemActive && activeRule}
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "size-5 shrink-0 transition-transform duration-200",
+                          expandedItems.has(i) ? "rotate-180" : "",
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {expandedItems.has(i) && (
+                      <div id={sublistId} className="flex flex-col pb-2 pl-4">
+                        {entries.map((child, j) => {
+                          const childActive = j === activeIdx;
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              {...externalLinkProps(child.external)}
+                              onClick={() => onOpenChange(false)}
+                              aria-current={childActive ? "page" : undefined}
+                              className={cn(
+                                childLinkBase,
+                                childActive ? childLinkActive : childLinkIdle,
+                              )}
+                            >
+                              {child.label}
+                              {child.external && (
+                                <span className="sr-only">
+                                  {" "}
+                                  (opens in new tab)
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const isActive = isActiveNavLink(pathname, link.href);
+              return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  target={link.external ? "_blank" : undefined}
-                  rel={link.external ? "noopener noreferrer" : undefined}
+                  {...externalLinkProps(link.external)}
                   onClick={() => onOpenChange(false)}
-                  aria-current={pathname === link.href ? "page" : undefined}
+                  aria-current={isActive ? "page" : undefined}
                   style={fadeUpStyle(i)}
                   className={cn(
                     topLinkBase,
-                    pathname === link.href ? topLinkActive : topLinkIdle,
+                    isActive ? topLinkActive : topLinkIdle,
                   )}
                 >
                   <span>{link.label}</span>
-                  {pathname === link.href && activeRule}
+                  {isActive && activeRule}
                   {link.external && (
                     <span className="sr-only"> (opens in new tab)</span>
                   )}
                 </Link>
-              ),
-            )}
+              );
+            })}
           </div>
 
           {isEnabled("wishlist") && (
@@ -344,29 +366,43 @@ export function BambooMobileNav({
           )}
         </nav>
 
-        {/* Bottom block — pinned, signed-out auth pair + socials + tagline */}
+        {/* Bottom block — pinned. Signed-out auth pair OR the signed-in
+            account block (PF7), then socials + tagline. Nothing renders
+            while the session is pending (B4.5 — no flash of the wrong
+            state). */}
         <div className="shrink-0 px-6 pt-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-8">
-          {isEnabled("customerAccounts") && !isAuthenticated && (
-            <div className="mb-6 flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="rounded-full border-[var(--bam-gold-soft)]/70 bg-transparent px-5 text-[var(--bam-gold-soft)] shadow-none hover:border-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)]"
-              >
-                <Link href="/auth/sign-up" onClick={() => onOpenChange(false)}>
-                  Sign up
+          {isEnabled("customerAccounts") &&
+            !isPending &&
+            (session?.user ? (
+              <BambooNavSheetAccount
+                session={session}
+                isEnabled={isEnabled}
+                onClose={() => onOpenChange(false)}
+              />
+            ) : (
+              <div className="mb-6 flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="rounded-full border-[var(--bam-gold-soft)]/70 bg-transparent px-5 text-[var(--bam-gold-soft)] shadow-none hover:border-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)]"
+                >
+                  <Link
+                    href="/auth/sign-up"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Sign up
+                  </Link>
+                </Button>
+                <Link
+                  href="/auth/sign-in"
+                  onClick={() => onOpenChange(false)}
+                  className="text-sm font-medium text-[var(--bam-cream)] underline-offset-4 hover:underline"
+                >
+                  Log in
                 </Link>
-              </Button>
-              <Link
-                href="/auth/sign-in"
-                onClick={() => onOpenChange(false)}
-                className="text-sm font-medium text-[var(--bam-cream)] underline-offset-4 hover:underline"
-              >
-                Log in
-              </Link>
-            </div>
-          )}
+              </div>
+            ))}
 
           <BambooSocialIcons
             socialLinks={socialLinks}
@@ -376,9 +412,14 @@ export function BambooMobileNav({
             onLinkClick={() => onOpenChange(false)}
           />
 
-          <p className="mt-4 text-xs text-[var(--bam-cream)]/70">
-            Tree-free products · Crafted with care
-          </p>
+          {!!menuTagline && (
+            <p
+              className="mt-4 text-xs text-[var(--bam-cream)]/70"
+              {...fieldAttr("bamboo.global.menu-tagline")}
+            >
+              {menuTagline}
+            </p>
+          )}
         </div>
       </SheetContent>
     </Sheet>

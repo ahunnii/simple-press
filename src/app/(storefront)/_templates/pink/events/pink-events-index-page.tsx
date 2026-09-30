@@ -1,6 +1,8 @@
 import type { DefaultEventsPageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
@@ -77,6 +79,17 @@ export async function PinkEventsIndexPage({
     f["pink.events.cta-image-2"] ?? "",
   ].filter(hasCustomImage);
 
+  // B2.5: a field-driven CTA hides (never swaps destination) when its link's
+  // feature is off — e.g. the empty state's default `/shop` with products off.
+  const { isEnabled } = await getBusinessFlags();
+  const ctaHref = (link: string | undefined): string | undefined => {
+    const href = link?.trim();
+    if (!href) return undefined;
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag) ? href : undefined;
+  };
+  const primaryHref = ctaHref(f["pink.events.cta-primary-link"]);
+
   return (
     <div className="flex flex-col">
       {/* ── 1. Header ─────────────────────────────────────────────────────── */}
@@ -90,62 +103,65 @@ export async function PinkEventsIndexPage({
       />
 
       {/* ── 2. List ───────────────────────────────────────────────────────── */}
+      {/* Shell: gutter on the band, width on an unpadded wrapper — the same
+          left edge as `PinkPageHeader` at every width. */}
       <section
-        className="mx-auto w-full max-w-[1400px] px-5 py-16 md:px-10 md:py-20"
+        className="px-5 py-16 md:px-10 md:py-20"
         aria-label="Upcoming events"
         {...sectionGroupAttr("events", "list")}
       >
-        {events.length === 0 ? (
-          <PinkEmptyState
-            heading={
-              firstNonBlank(
-                f["pink.events.list-empty-heading"],
-                "Nothing on the calendar yet",
-              ) ?? "Nothing on the calendar yet"
-            }
-            body={f["pink.events.list-empty-body"] ?? ""}
-            ctaLabel={firstNonBlank(f["pink.events.list-empty-cta-label"])}
-            ctaHref={firstNonBlank(
-              f["pink.events.list-empty-cta-link"],
-              "/shop",
-            )}
-          />
-        ) : (
-          <>
-            {hasAnyFlier && flierHint && (
-              <p className="pink-label mb-8">{flierHint}</p>
-            )}
+        <div className="mx-auto w-full max-w-[1400px]">
+          {events.length === 0 ? (
+            <PinkEmptyState
+              heading={
+                firstNonBlank(
+                  f["pink.events.list-empty-heading"],
+                  "Nothing on the calendar yet",
+                ) ?? "Nothing on the calendar yet"
+              }
+              body={f["pink.events.list-empty-body"] ?? ""}
+              ctaLabel={firstNonBlank(f["pink.events.list-empty-cta-label"])}
+              ctaHref={ctaHref(
+                firstNonBlank(f["pink.events.list-empty-cta-link"], "/shop"),
+              )}
+            />
+          ) : (
+            <>
+              {hasAnyFlier && flierHint && (
+                <p className="pink-label mb-8">{flierHint}</p>
+              )}
 
-            <PinkHairlineGrid columnsClassName="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {events.map((event, i) => (
-                <PinkReveal key={event.id} index={i}>
-                  <PinkEventCard
-                    event={event}
-                    timeZone={timeZone}
-                    // Per-event label first, then the owner's template-wide
-                    // fallback, then a hardcoded one — a cleared field must
-                    // never leave an unnamed link behind.
-                    linkLabel={
-                      firstNonBlank(
-                        event.externalUrlLabel,
-                        linkFallbackLabel,
-                        "Details & tickets",
-                      ) ?? "Details & tickets"
-                    }
-                    logoUrl={business.siteContent?.logoUrl}
-                    priority={i < 3}
-                  />
-                </PinkReveal>
-              ))}
-            </PinkHairlineGrid>
-          </>
-        )}
+              <PinkHairlineGrid columnsClassName="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {events.map((event, i) => (
+                  <PinkReveal key={event.id} index={i}>
+                    <PinkEventCard
+                      event={event}
+                      timeZone={timeZone}
+                      // Per-event label first, then the owner's template-wide
+                      // fallback, then a hardcoded one — a cleared field must
+                      // never leave an unnamed link behind.
+                      linkLabel={
+                        firstNonBlank(
+                          event.externalUrlLabel,
+                          linkFallbackLabel,
+                          "Details & tickets",
+                        ) ?? "Details & tickets"
+                      }
+                      logoUrl={business.siteContent?.logoUrl}
+                      priority={i < 3}
+                    />
+                  </PinkReveal>
+                ))}
+              </PinkHairlineGrid>
+            </>
+          )}
+        </div>
       </section>
 
       {/* ── 3. Closing CTA ────────────────────────────────────────────────── */}
       {isSectionVisible(customFields, "pink", "events.cta") && (
-        <div className="mx-auto w-full max-w-[1400px] px-5 pb-16 md:px-10 md:pb-20">
-          <PinkReveal>
+        <div className="px-5 pb-16 md:px-10 md:pb-20">
+          <PinkReveal className="mx-auto w-full max-w-[1400px]">
             <PinkCtaPanel
               sectionAttrs={sectionGroupAttr("events", "cta")}
               heading={f["pink.events.cta-heading"] ?? ""}
@@ -153,10 +169,10 @@ export async function PinkEventsIndexPage({
               body={f["pink.events.cta-body"] ?? ""}
               bodyFieldKey="pink.events.cta-body"
               primaryCta={
-                f["pink.events.cta-primary-label"]
+                f["pink.events.cta-primary-label"] && primaryHref
                   ? {
-                      label: f["pink.events.cta-primary-label"] ?? "",
-                      href: f["pink.events.cta-primary-link"] ?? "/contact",
+                      label: f["pink.events.cta-primary-label"],
+                      href: primaryHref,
                     }
                   : undefined
               }

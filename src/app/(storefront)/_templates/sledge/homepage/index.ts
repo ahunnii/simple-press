@@ -9,7 +9,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const homepageHeroData: TemplateField[] = [
   {
     key: "sledge.homepage.intro-gallery",
-    label: "Hero Gallery",
+    label: "Hero gallery",
     description:
       "Photos shown in the animated mosaic at the top of the homepage. They animate in on page load. Use up to 8 striking product shots.",
     type: "gallery",
@@ -19,7 +19,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "sledge.homepage.hero-tagline",
-    label: "Hero Tagline",
+    label: "Tagline",
     description: "Italic line shown below the mosaic.",
     type: "text",
     page: "homepage",
@@ -29,8 +29,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "sledge.homepage.hero-primary-button-text",
-    label: "Hero Button Text",
-    description: "Call-to-action button below the tagline.",
+    label: "Button text",
+    description: "Label for the button below the tagline.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -39,7 +39,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "sledge.homepage.hero-primary-button-link",
-    label: "Hero Button Link",
+    label: "Button link",
     description: "Where the hero button points.",
     type: "url",
     page: "homepage",
@@ -54,8 +54,8 @@ const homepageHeroData: TemplateField[] = [
 const homepageGetToKnowData: TemplateField[] = [
   {
     key: "sledge.homepage.get-to-know-image",
-    label: "Section Image",
-    description: "Photo shown on the left of the 'Get to Know Judy' section.",
+    label: "Photo",
+    description: "Photo shown beside the introduction section on the homepage.",
     type: "image",
     page: "homepage",
     group: "homepage.getToKnow",
@@ -65,7 +65,7 @@ const homepageGetToKnowData: TemplateField[] = [
   {
     key: "sledge.homepage.get-to-know-overline",
     label: "Heading",
-    description: "Heading for the 'Get to Know Judy' section.",
+    description: "Heading for the introduction section on the homepage.",
     type: "text",
     page: "homepage",
     group: "homepage.getToKnow",
@@ -75,13 +75,56 @@ const homepageGetToKnowData: TemplateField[] = [
   {
     key: "sledge.homepage.get-to-know-quote",
     label: "Body",
-    description: "Short introduction shown beside the heading.",
+    description:
+      "Short introduction shown beside the heading. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
     group: "homepage.getToKnow",
     gridColumn: "col-span-full",
     defaultValue:
       "Judy Sledge is an incredible clothing designer who uses the chemistry of wool & fabrics to make unique pieces, that not only look amazing but are a true work of art.",
+  },
+  {
+    key: "sledge.homepage.get-to-know-button-1-text",
+    label: "Button 1 text",
+    description:
+      "Text for the first button below the body text. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.getToKnow",
+    gridColumn: "col-span-1",
+    defaultValue: "Find Out More",
+  },
+  {
+    key: "sledge.homepage.get-to-know-button-1-link",
+    label: "Button 1 link",
+    description: "Where the first button points.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.getToKnow",
+    gridColumn: "col-span-1",
+    defaultValue: "/about",
+  },
+  {
+    key: "sledge.homepage.get-to-know-button-2-text",
+    label: "Button 2 text",
+    description:
+      "Text for the second button below the body text. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.getToKnow",
+    gridColumn: "col-span-1",
+    defaultValue: "Contact Judy",
+  },
+  {
+    key: "sledge.homepage.get-to-know-button-2-link",
+    label: "Button 2 link",
+    description: "Where the second button points.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.getToKnow",
+    gridColumn: "col-span-1",
+    defaultValue: "/contact",
   },
 ];
 
@@ -105,7 +148,7 @@ const homepageTestimonialsData: TemplateField[] = [
 const homepageSubscribeData: TemplateField[] = [
   {
     key: "sledge.homepage-guarantee-image",
-    label: "Section Image",
+    label: "Photo",
     description:
       "Large photo shown beside the testimonials and subscribe sections.",
     type: "image",
@@ -116,7 +159,7 @@ const homepageSubscribeData: TemplateField[] = [
   },
   {
     key: "sledge.homepage-guarantee-heading",
-    label: "Subscribe Heading",
+    label: "Heading",
     description: "Heading for the newsletter signup section.",
     type: "text",
     page: "homepage",
@@ -126,14 +169,13 @@ const homepageSubscribeData: TemplateField[] = [
   },
   {
     key: "sledge.homepage-guarantee-quote",
-    label: "Subscribe Body",
-    description: "Short copy above the email signup field.",
+    label: "Body",
+    description: "Short copy shown below the heading. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
     group: "homepage.subscribe",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Be the first to know about new wearable-art pieces, limited drops, and behind-the-scenes studio moments.",
+    defaultValue: "",
   },
 ];
 
@@ -149,29 +191,29 @@ export const sledgeHomepageData = [
 export const sledgeHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
-    title: "Hero Mosaic",
-    description: "Animated photo mosaic, tagline, and button at the top",
+    title: "Hero",
+    description: "Animated photo mosaic, tagline, and button at the top.",
     icon: "🎨",
     columns: 2,
   },
   {
     id: "homepage.getToKnow",
-    title: "Get to Know Judy",
-    description: "Intro section about Judy",
+    title: "Introduction",
+    description: "Intro section with image, heading, body text, and buttons.",
     icon: "👋",
     columns: 1,
   },
   {
     id: "homepage.testimonials",
     title: "Testimonials",
-    description: "Customer quote section heading",
+    description: "Customer quote section heading.",
     icon: "💬",
     columns: 1,
   },
   {
     id: "homepage.subscribe",
     title: "Subscribe",
-    description: "Newsletter signup section and its image",
+    description: "Newsletter signup section and its image.",
     icon: "✉️",
     columns: 1,
   },

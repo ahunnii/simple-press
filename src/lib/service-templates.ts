@@ -23,13 +23,18 @@ import {
   serviceTwoFieldGroups,
   serviceTwoFields,
 } from "~/app/(storefront)/_templates/_service-pages/service-two";
+import { bambooServiceTemplateDefs } from "~/app/(storefront)/_templates/bamboo/services/service-pages/fields";
 import { buildersServiceTemplateDefs } from "~/app/(storefront)/_templates/builders/services/service-pages/fields";
 import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/default/services/service-pages/fields";
+import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
+import { happyBambooServiceTemplateDefs } from "~/app/(storefront)/_templates/happy-bamboo/services/service-pages/fields";
+import { noiseServiceTemplateDefs } from "~/app/(storefront)/_templates/noise/services/service-pages/fields";
+import { oliveServiceTemplateDefs } from "~/app/(storefront)/_templates/olive/services/service-pages/fields";
 import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/services/service-pages/fields";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
 import { wealthServiceTemplateDefs } from "~/app/(storefront)/_templates/wealth/services/service-pages/fields";
-import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
+import { umscServiceTemplateDefs } from "~/app/(storefront)/_templates/umsc/services/service-pages/fields";
 
 // ─── Core type ───────────────────────────────────────────────────────────────
 
@@ -109,6 +114,11 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   pink: pinkServiceTemplateDefs,
   wealth: wealthServiceTemplateDefs,
   dream: dreamServiceTemplateDefs,
+  "happy-bamboo": happyBambooServiceTemplateDefs,
+  bamboo: bambooServiceTemplateDefs,
+  olive: oliveServiceTemplateDefs,
+  noise: noiseServiceTemplateDefs,
+  umsc: umscServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -129,6 +139,11 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...pinkServiceTemplateDefs,
       ...wealthServiceTemplateDefs,
       ...dreamServiceTemplateDefs,
+      ...happyBambooServiceTemplateDefs,
+      ...bambooServiceTemplateDefs,
+      ...oliveServiceTemplateDefs,
+      ...noiseServiceTemplateDefs,
+      ...umscServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

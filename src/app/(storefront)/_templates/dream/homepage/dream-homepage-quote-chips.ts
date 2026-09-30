@@ -1,5 +1,7 @@
 import { parseTemplateListRows } from "~/lib/template-fields";
 
+import { DREAM_QUOTE_CHIPS_DEFAULT_ROWS } from "./index";
+
 /**
  * List-row parser for `dream.homepage.quote-chips`.
  *
@@ -10,20 +12,14 @@ import { parseTemplateListRows } from "~/lib/template-fields";
  * module would create a circular-evaluation TDZ crash (same reasoning as
  * `wealth/homepage/wealth-homepage-news.ts`).
  *
- * `list` fields have no `defaultValue` slot in the schema, so the fallback
- * checklist (design.md "Per-page section concepts › Homepage" #5) lives
- * here, not in `index.ts`.
+ * The fallback checklist (design.md "Per-page section concepts › Homepage"
+ * #5) is declared once, in the field itself, via
+ * `DREAM_QUOTE_CHIPS_DEFAULT_ROWS` (`dream.homepage.quote-chips`'s
+ * `defaultRows` in `./index.ts`) — this constant just reshapes those rows
+ * into the flat string list this module's callers use.
  */
-export const DREAM_QUOTE_CHIPS_FALLBACK: string[] = [
-  "Date + time",
-  "Location",
-  "Theme",
-  "Colors",
-  "Draping",
-  "Rentals",
-  "Space photos",
-  "Full decor?",
-];
+export const DREAM_QUOTE_CHIPS_FALLBACK: string[] =
+  DREAM_QUOTE_CHIPS_DEFAULT_ROWS.map((row) => row.label ?? "");
 
 function readLabel(row: Record<string, unknown>): string {
   const value = row.label;

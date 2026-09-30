@@ -4,9 +4,20 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 const aboutNoiseData: TemplateField[] = [
   {
+    key: "noise.about-overline",
+    label: "Small label",
+    description:
+      "Small label above the heading at the top of the about page. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.main",
+    gridColumn: "col-span-full",
+    defaultValue: "Our Story",
+  },
+  {
     key: "noise.about-hero-heading",
-    label: "About Hero Heading",
-    description: "Primary heading for the about page hero section",
+    label: "Heading",
+    description: "Main heading at the top of the about page.",
     type: "text",
     page: "about",
     group: "about.main",
@@ -16,8 +27,8 @@ const aboutNoiseData: TemplateField[] = [
 
   {
     key: "noise.about-story-body",
-    label: "Brand Story Body",
-    description: "Full brand story content (richtext)",
+    label: "Brand story",
+    description: "Full brand story shown on the about page.",
     type: "richtext",
     page: "about",
     group: "about.main",
@@ -32,9 +43,9 @@ export const noiseAboutData = [...aboutNoiseData];
 export const noiseAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.main",
-    title: "About Content",
-    description: "Main content section for the about page",
-    icon: "�",
+    title: "About page",
+    description: "Small label, heading, and story text for the about page.",
+    icon: "📖",
     columns: 2,
   },
 ];

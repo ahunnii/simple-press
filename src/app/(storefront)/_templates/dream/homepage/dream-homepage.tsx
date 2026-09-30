@@ -4,9 +4,11 @@ import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { db } from "~/server/db";
 import { HydrateClient } from "~/trpc/server";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { DREAM_CLOUD_PRESETS } from "../lib/cloud-presets";
@@ -16,6 +18,7 @@ import { DreamHomepageHero } from "./dream-homepage-hero";
 import { DreamHomepageProcess } from "./dream-homepage-process";
 import { toDreamQuoteChips } from "./dream-homepage-quote-chips";
 import { DreamHomepageWhatWeDo } from "./dream-homepage-what-we-do";
+import { DreamPopup } from "./dream-popup";
 
 const FIELD_KEYS = [
   // Hero
@@ -111,6 +114,26 @@ export async function DreamHomepage({
   const f = resolveFields(customFields, FIELD_KEYS);
   const { isEnabled } = await getBusinessFlags();
 
+  // B2.4: the owner's announcement popup — same source/shape every other
+  // template's homepage uses (`business.siteContent.popupConfig`, gated on
+  // the `popups` flag).
+  const popup = resolvePopup(business.siteContent, isEnabled("popups"));
+
+  // B2.5: a field-driven CTA/link must be HIDDEN (never redirected) when its
+  // destination route's own feature flag is off — e.g. a "What We Do" row
+  // pointed at `/services` while `services` is disabled would otherwise
+  // 404. `resolveFields` already applies each key's registered default
+  // (declared in this domain's `index.ts`, e.g. "/services", "/contact"),
+  // so `f[key] ?? ""` alone is the resolved href — never a second
+  // `?? "/services"`-style literal fallback, which would silently point an
+  // always-rendered link at a route that may be gated off.
+  const ctaFlagOk = (href: string): boolean => {
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  };
+  const ctaVisible = (href: string): boolean =>
+    href.trim().length > 0 && ctaFlagOk(href);
+
   // Performance contract (design.md "Motion"): preload the two eager hero
   // sprites (`<DreamClouds variant="hero" eager={2} />` above renders these
   // same first two entries with `loading="eager"`).
@@ -141,9 +164,19 @@ export async function DreamHomepage({
     customFields?.["dream.homepage.quote-chips"],
   );
 
+  const heroCtaUrl = f["dream.homepage.hero-cta-url"] ?? "";
+  const heroCtaSecondaryUrl = f["dream.homepage.hero-cta-secondary-url"] ?? "";
+  const row1LinkUrl = f["dream.homepage.row-1-link-url"] ?? "";
+  const row2LinkUrl = f["dream.homepage.row-2-link-url"] ?? "";
+  const row3LinkUrl = f["dream.homepage.row-3-link-url"] ?? "";
+  const galleryEmptyLinkUrl = "/contact";
+  const quoteCtaUrl = f["dream.homepage.quote-cta-url"] ?? "";
+
   return (
     <HydrateClient>
       <>
+        {popup && <DreamPopup popup={popup} />}
+
         <DreamHomepageHero
           logoUrl={logoUrl}
           logoAlt={logoAlt}
@@ -153,11 +186,12 @@ export async function DreamHomepage({
             headingAfter: f["dream.homepage.hero-heading-after"] ?? "",
             lede: f["dream.homepage.hero-lede"] ?? "",
             ctaLabel: f["dream.homepage.hero-cta-label"] ?? "",
-            ctaUrl: f["dream.homepage.hero-cta-url"] ?? "/contact",
+            ctaUrl: heroCtaUrl,
+            ctaVisible: ctaVisible(heroCtaUrl),
             ctaSecondaryLabel:
               f["dream.homepage.hero-cta-secondary-label"] ?? "",
-            ctaSecondaryUrl:
-              f["dream.homepage.hero-cta-secondary-url"] ?? "#what-we-do",
+            ctaSecondaryUrl: heroCtaSecondaryUrl,
+            ctaSecondaryVisible: ctaVisible(heroCtaSecondaryUrl),
             shelf: [
               {
                 src:
@@ -218,7 +252,8 @@ export async function DreamHomepage({
                 bodyFieldKey: "dream.homepage.row-1-body",
                 linkLabel: f["dream.homepage.row-1-link-label"] ?? "",
                 linkLabelFieldKey: "dream.homepage.row-1-link-label",
-                linkUrl: f["dream.homepage.row-1-link-url"] ?? "/services",
+                linkUrl: row1LinkUrl,
+                linkVisible: ctaVisible(row1LinkUrl),
                 photo: f["dream.homepage.row-1-photo"] ?? "/placeholder.svg",
                 photoAlt: f["dream.homepage.row-1-photo-alt"] ?? "",
                 sidePhoto:
@@ -234,7 +269,8 @@ export async function DreamHomepage({
                 bodyFieldKey: "dream.homepage.row-2-body",
                 linkLabel: f["dream.homepage.row-2-link-label"] ?? "",
                 linkLabelFieldKey: "dream.homepage.row-2-link-label",
-                linkUrl: f["dream.homepage.row-2-link-url"] ?? "/services",
+                linkUrl: row2LinkUrl,
+                linkVisible: ctaVisible(row2LinkUrl),
                 photo: f["dream.homepage.row-2-photo"] ?? "/placeholder.svg",
                 photoAlt: f["dream.homepage.row-2-photo-alt"] ?? "",
                 sidePhoto:
@@ -250,7 +286,8 @@ export async function DreamHomepage({
                 bodyFieldKey: "dream.homepage.row-3-body",
                 linkLabel: f["dream.homepage.row-3-link-label"] ?? "",
                 linkLabelFieldKey: "dream.homepage.row-3-link-label",
-                linkUrl: f["dream.homepage.row-3-link-url"] ?? "/services",
+                linkUrl: row3LinkUrl,
+                linkVisible: ctaVisible(row3LinkUrl),
                 photo: f["dream.homepage.row-3-photo"] ?? "/placeholder.svg",
                 photoAlt: f["dream.homepage.row-3-photo-alt"] ?? "",
                 sidePhoto:
@@ -269,6 +306,8 @@ export async function DreamHomepage({
             gallery={gallery}
             emptyMessage={f["dream.homepage.gallery-empty-message"] ?? ""}
             emptyLinkLabel={f["dream.homepage.gallery-empty-link-label"] ?? ""}
+            emptyLinkUrl={galleryEmptyLinkUrl}
+            emptyLinkVisible={ctaVisible(galleryEmptyLinkUrl)}
           />
         )}
 
@@ -300,8 +339,10 @@ export async function DreamHomepage({
             accent={f["dream.homepage.quote-accent"] ?? ""}
             lede={f["dream.homepage.quote-lede"] ?? ""}
             chips={quoteChips}
+            chipsFieldKey="dream.homepage.quote-chips"
             ctaLabel={f["dream.homepage.quote-cta-label"] ?? ""}
-            ctaUrl={f["dream.homepage.quote-cta-url"] ?? "/contact"}
+            // B2.5: hide just the button when it points at a flag-off route
+            ctaUrl={ctaVisible(quoteCtaUrl) ? quoteCtaUrl : ""}
             headingFieldKey="dream.homepage.quote-heading"
             accentFieldKey="dream.homepage.quote-accent"
             ledeFieldKey="dream.homepage.quote-lede"

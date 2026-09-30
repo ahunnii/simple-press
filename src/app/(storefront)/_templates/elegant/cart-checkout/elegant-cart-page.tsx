@@ -1,14 +1,29 @@
 import type { DefaultCartPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { resolveFields } from "..";
 import { ElegantCartContent } from "./elegant-cart-content";
 
-export function ElegantCartPage({ business: _ }: DefaultCartPageTemplateProps) {
+export function ElegantCartPage({ business }: DefaultCartPageTemplateProps) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "elegant.global.cart-page-label",
+    "elegant.global.cart-page-heading",
+    "elegant.global.cart-page-empty-heading",
+    "elegant.global.cart-empty-body",
+    "elegant.global.cart-browse-button",
+    "elegant.global.cart-page-note",
+  ]);
+
   return (
-    <div style={{ background: "var(--el-cream, #f5f1ea)", minHeight: "100vh" }}>
+    <div
+      style={{ background: "var(--el-cream, #f5f1ea)", minHeight: "100vh" }}
+      {...sectionGroupAttr("global", "cart")}
+    >
       {/* Header */}
       <section style={{ padding: "48px 40px 40px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <span
+            {...fieldAttr("elegant.global.cart-page-label")}
             style={{
               fontFamily: "var(--font-mono, ui-monospace)",
               fontSize: 11,
@@ -19,9 +34,10 @@ export function ElegantCartPage({ business: _ }: DefaultCartPageTemplateProps) {
               marginBottom: 16,
             }}
           >
-            Review
+            {f["elegant.global.cart-page-label"] ?? ""}
           </span>
           <h1
+            {...fieldAttr("elegant.global.cart-page-heading")}
             style={{
               fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
               fontWeight: 400,
@@ -31,7 +47,7 @@ export function ElegantCartPage({ business: _ }: DefaultCartPageTemplateProps) {
               color: "var(--el-ink, #1c1a17)",
             }}
           >
-            Your bag.
+            {f["elegant.global.cart-page-heading"] ?? ""}
           </h1>
         </div>
       </section>
@@ -39,7 +55,12 @@ export function ElegantCartPage({ business: _ }: DefaultCartPageTemplateProps) {
       {/* Content */}
       <section style={{ padding: "0 40px 80px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-          <ElegantCartContent />
+          <ElegantCartContent
+            emptyHeading={f["elegant.global.cart-page-empty-heading"] ?? ""}
+            emptyBody={f["elegant.global.cart-empty-body"] ?? ""}
+            browseButtonText={f["elegant.global.cart-browse-button"] ?? ""}
+            checkoutNote={f["elegant.global.cart-page-note"] ?? ""}
+          />
         </div>
       </section>
     </div>

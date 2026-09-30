@@ -3,18 +3,42 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
+import {
+  Bell,
+  LayoutDashboard,
+  Lock,
+  MapPin,
+  Package,
+  FileText,
+  Gift,
+  Repeat,
+  Settings,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-const NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
-] as const;
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
+
+/**
+ * Icon for every key `getAccountNavLinks` can return, keyed to match (mirrors
+ * happy-bamboo's `HB_ACCOUNT_LINK_ICONS`). Kept local since this template's
+ * account sidebar is the only bamboo consumer.
+ */
+const BAM_ACCOUNT_LINK_ICONS: Record<string, LucideIcon> = {
+  orders: Package,
+  "address-book": MapPin,
+  subscriptions: Repeat,
+  invoices: FileText,
+  rewards: Gift,
+  settings: Settings,
+  security: Lock,
+  preferences: Bell,
+  admin: LayoutDashboard,
+};
 
 type Props = {
   children: ReactNode;
@@ -24,11 +48,23 @@ type Props = {
 
 export function BambooAccountLayout({ children, heading, breadcrumb }: Props) {
   const pathname = usePathname();
+  const { isEnabled } = useStorefrontFlags();
+
+  const navItems = getAccountNavLinks({ isEnabled }).map((link) => ({
+    href: link.href,
+    label: link.label,
+    icon: BAM_ACCOUNT_LINK_ICONS[link.key] ?? Settings,
+  }));
 
   return (
     <>
       <section className="bg-secondary">
-        <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
+        <div
+          className={cn(
+            "mx-auto max-w-7xl px-4 py-16 lg:px-8",
+            BAMBOO_EMBLEM_CLEAR,
+          )}
+        >
           <FadeIn direction="up">
             <p className="mb-2 text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
               Account
@@ -62,7 +98,7 @@ export function BambooAccountLayout({ children, heading, breadcrumb }: Props) {
           className="mb-8 flex gap-1 overflow-x-auto pb-2 md:hidden"
           aria-label="Account navigation"
         >
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {navItems.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
@@ -87,7 +123,7 @@ export function BambooAccountLayout({ children, heading, breadcrumb }: Props) {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[220px_1fr]">
           <nav className="hidden md:block" aria-label="Account navigation">
             <ul className="space-y-1">
-              {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              {navItems.map(({ href, label, icon: Icon }) => {
                 const active =
                   pathname === href || pathname.startsWith(href + "/");
                 return (

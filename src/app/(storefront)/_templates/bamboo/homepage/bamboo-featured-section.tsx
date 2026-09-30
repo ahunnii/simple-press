@@ -3,6 +3,7 @@ import { ArrowRight, Package } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
@@ -17,15 +18,35 @@ import { BambooSectionHeading } from "./bamboo-section-heading";
 type Props = {
   customFields: unknown;
   products: NonNullable<RouterOutputs["business"]["getHomepage"]>["products"];
+  /** B2.5: gates the field-driven CTA when its href names an off flag. */
+  isEnabled: (key: string) => boolean;
 };
 
-export function BambooFeaturedSection({ customFields, products }: Props) {
+export function BambooFeaturedSection({
+  customFields,
+  products,
+  isEnabled,
+}: Props) {
   const f = resolveFields(customFields, [
     "bamboo.homepage.featured-eyebrow",
     "bamboo.homepage.featured-title",
     "bamboo.homepage.featured-description",
     "bamboo.homepage.featured-button-text",
+    "bamboo.homepage.featured-button-link",
   ]);
+
+  const buttonText = f["bamboo.homepage.featured-button-text"] ?? "";
+
+  // B2.5: hide the CTA (never swap in another destination) when its href
+  // names a flag that's off. The section itself already requires
+  // `isEnabled("products")` to render at all (see `bamboo-homepage.tsx`), so
+  // this only bites when a merchant points the button at a different,
+  // flag-gated route.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+  const buttonHref = f["bamboo.homepage.featured-button-link"] || "/shop";
+  const buttonFlag = navHrefFlag(buttonHref);
+  const showButton =
+    buttonText !== "" && (buttonFlag === null || isEnabled(buttonFlag));
 
   // happy-bamboo's featured grid: four products, two up from md.
   const featured = products?.slice(0, 4) ?? [];
@@ -79,22 +100,24 @@ export function BambooFeaturedSection({ customFields, products }: Props) {
           )}
         </StaggerContainer>
 
-        <FadeIn direction="up" delay={0.3}>
-          <div className="mt-12 text-center">
-            <Link
-              href="/shop"
-              className="group text-foreground inline-flex items-center gap-2.5 border-b border-[var(--bam-gold)]/50 pb-1 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-[var(--bam-gold)] hover:text-[var(--bam-forest)]"
-            >
-              <span {...fieldAttr("bamboo.homepage.featured-button-text")}>
-                {f["bamboo.homepage.featured-button-text"] ?? ""}
-              </span>
-              <ArrowRight
-                className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
-            </Link>
-          </div>
-        </FadeIn>
+        {showButton ? (
+          <FadeIn direction="up" delay={0.3}>
+            <div className="mt-12 text-center">
+              <Link
+                href={buttonHref}
+                className="group text-foreground inline-flex items-center gap-2.5 border-b border-[var(--bam-gold)]/50 pb-1 text-sm font-semibold tracking-widest uppercase transition-colors hover:border-[var(--bam-gold)] hover:text-[var(--bam-forest)]"
+              >
+                <span {...fieldAttr("bamboo.homepage.featured-button-text")}>
+                  {buttonText}
+                </span>
+                <ArrowRight
+                  className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
+            </div>
+          </FadeIn>
+        ) : null}
       </div>
     </section>
   );

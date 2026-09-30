@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+
+import { resolveFields } from "..";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -29,8 +32,10 @@ function useReveal() {
 }
 
 export function ElegantNewsletter({
+  customFields,
   sectionAttrs,
 }: {
+  customFields?: unknown;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 } = {}) {
@@ -38,6 +43,19 @@ export function ElegantNewsletter({
   const [submitted, setSubmitted] = useState(false);
   const { ref, visible } = useReveal();
   const reducedMotion = useReducedMotion();
+
+  const f = resolveFields(customFields, [
+    "elegant.homepage.newsletter-label",
+    "elegant.homepage.newsletter-heading",
+    "elegant.homepage.newsletter-heading-accent",
+    "elegant.homepage.newsletter-body",
+    "elegant.homepage.newsletter-button",
+  ]);
+  const label = f["elegant.homepage.newsletter-label"] ?? "";
+  const heading = f["elegant.homepage.newsletter-heading"] ?? "";
+  const headingAccent = f["elegant.homepage.newsletter-heading-accent"] ?? "";
+  const body = f["elegant.homepage.newsletter-body"] ?? "";
+  const buttonText = f["elegant.homepage.newsletter-button"] ?? "";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +93,12 @@ export function ElegantNewsletter({
         }}
       >
         <div style={revealStyle(0)}>
-          <span className="el-newsletter-eyebrow">Letters from the studio</span>
+          <span
+            className="el-newsletter-eyebrow"
+            {...fieldAttr("elegant.homepage.newsletter-label")}
+          >
+            {label}
+          </span>
         </div>
 
         <div style={revealStyle(0.1)}>
@@ -90,26 +113,38 @@ export function ElegantNewsletter({
               color: "var(--el-paper, #fbf8f2)",
             }}
           >
-            One short note,{" "}
-            <em style={{ fontStyle: "italic" }}>once a month</em>.
+            <span {...fieldAttr("elegant.homepage.newsletter-heading")}>
+              {heading}
+            </span>
+            {heading && headingAccent ? " " : ""}
+            {headingAccent && (
+              <em
+                style={{ fontStyle: "italic" }}
+                {...fieldAttr("elegant.homepage.newsletter-heading-accent")}
+              >
+                {headingAccent}
+              </em>
+            )}
           </h2>
         </div>
 
-        <div style={revealStyle(0.2)}>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.65)",
-              maxWidth: 480,
-              margin: "0 auto 36px",
-              lineHeight: 1.65,
-              fontSize: 16,
-              fontFamily: "var(--font-sans, sans-serif)",
-            }}
-          >
-            New arrivals, restocks, and the occasional behind-the-scenes note.
-            No noise.
-          </p>
-        </div>
+        {body && (
+          <div style={revealStyle(0.2)}>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.65)",
+                maxWidth: 480,
+                margin: "0 auto 36px",
+                lineHeight: 1.65,
+                fontSize: 16,
+                fontFamily: "var(--font-sans, sans-serif)",
+              }}
+              {...fieldAttr("elegant.homepage.newsletter-body")}
+            >
+              {body}
+            </p>
+          </div>
+        )}
 
         <div style={revealStyle(0.3)}>
           {submitted ? (
@@ -169,7 +204,9 @@ export function ElegantNewsletter({
                   flexShrink: 0,
                 }}
               >
-                Subscribe
+                <span {...fieldAttr("elegant.homepage.newsletter-button")}>
+                  {buttonText}
+                </span>
                 <ArrowRight
                   aria-hidden={true}
                   style={{ width: 14, height: 14 }}

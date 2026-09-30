@@ -128,7 +128,9 @@ export function PinkCollectionSection({
           })}
         </div>
 
-        {ctaLabel && (
+        {/* PF15 (B2.5): hides — rather than swapping its destination — when
+            the caller has blanked `ctaLink` because its route flag is off. */}
+        {ctaLabel && ctaLink && (
           <div className="mt-12 flex justify-center">
             <Link
               href={ctaLink}

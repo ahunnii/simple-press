@@ -88,6 +88,11 @@ export const businessRouter = createTRPCRouter({
         addressCity: true,
         addressState: true,
         addressPostalCode: true,
+        // Map pin. Public by design — resolved and rendered on the
+        // storefront homepage / contact page map. See
+        // `~/lib/address/coordinates`.
+        latitude: true,
+        longitude: true,
         businessHours: true,
         timeZone: true,
         supportEmail: true,
@@ -120,6 +125,7 @@ export const businessRouter = createTRPCRouter({
             footerText: true,
             primaryColor: true,
             navigationItems: true,
+            footerNavigationItems: true,
             socialLinks: true,
             customFields: true,
             previewCustomFields: true,
@@ -187,6 +193,12 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         featureFlags: true,
         businessAddress: true,
+        // City only (public, like `businessAddress`) — vii's wordmark
+        // location tag. See `_templates/vii/shared/vii-location-tag.ts`.
+        addressCity: true,
+        // Map pin. Public by design — see `~/lib/address/coordinates`.
+        latitude: true,
+        longitude: true,
         businessHours: true,
         timeZone: true,
         stripeAccountId: true,
@@ -242,6 +254,7 @@ export const businessRouter = createTRPCRouter({
             primaryColor: true,
             footerText: true,
             navigationItems: true,
+            footerNavigationItems: true,
             socialLinks: true,
             customFields: true,
             previewCustomFields: true,
@@ -349,6 +362,9 @@ export const businessRouter = createTRPCRouter({
         phoneNumber: true,
         supportEmail: true,
         businessAddress: true,
+        // Map pin. Public by design — see `~/lib/address/coordinates`.
+        latitude: true,
+        longitude: true,
         templateId: true,
         siteContent: {
           select: {
@@ -1015,22 +1031,41 @@ export const businessRouter = createTRPCRouter({
 
   updateGeneral: ownerAdminProcedure
     .input(
-      z.object({
-        name: z.string(),
-        ownerEmail: z.string().email(),
-        supportEmail: z.string().email(),
-        // Legacy single-line address. Still accepted so callers that have not
-        // moved to the structured parts keep working; when any part below is
-        // set, it is recomputed from them instead.
-        businessAddress: z.string().optional(),
-        addressStreet: z.string().optional(),
-        addressCity: z.string().optional(),
-        addressState: z.string().optional(),
-        addressPostalCode: z.string().optional(),
-        phoneNumber: z.string().optional(),
-        sendAbandonedCheckoutEmails: z.boolean().optional(),
-        timeZone: z.string().optional(),
-      }),
+      z
+        .object({
+          name: z.string(),
+          ownerEmail: z.string().email(),
+          supportEmail: z.string().email(),
+          // Legacy single-line address. Still accepted so callers that have not
+          // moved to the structured parts keep working; when any part below is
+          // set, it is recomputed from them instead.
+          businessAddress: z.string().optional(),
+          addressStreet: z.string().optional(),
+          addressCity: z.string().optional(),
+          addressState: z.string().optional(),
+          addressPostalCode: z.string().optional(),
+          // Map pin. `undefined` = no change (matches the address-part
+          // convention above); `null` = clear. See
+          // `~/lib/address/coordinates`.
+          latitude: z.number().min(-90).max(90).nullable().optional(),
+          longitude: z.number().min(-180).max(180).nullable().optional(),
+          phoneNumber: z.string().optional(),
+          sendAbandonedCheckoutEmails: z.boolean().optional(),
+          timeZone: z.string().optional(),
+        })
+        .refine(
+          (data) => {
+            const latSet =
+              data.latitude !== null && data.latitude !== undefined;
+            const lngSet =
+              data.longitude !== null && data.longitude !== undefined;
+            return latSet === lngSet;
+          },
+          {
+            message: "Enter both latitude and longitude, or leave both blank.",
+            path: ["longitude"],
+          },
+        ),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -1043,6 +1078,8 @@ export const businessRouter = createTRPCRouter({
         addressCity,
         addressState,
         addressPostalCode,
+        latitude,
+        longitude,
         phoneNumber,
         sendAbandonedCheckoutEmails,
         timeZone,
@@ -1083,6 +1120,8 @@ export const businessRouter = createTRPCRouter({
           addressCity: normalizeAddressPart(addressCity),
           addressState: normalizeAddressPart(addressState),
           addressPostalCode: normalizeAddressPart(addressPostalCode),
+          latitude,
+          longitude,
           phoneNumber,
           sendAbandonedCheckoutEmails,
           timeZone,

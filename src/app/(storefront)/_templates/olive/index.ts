@@ -14,45 +14,47 @@ import {
   oliveCollectionsFieldGroups,
 } from "./collections";
 import { oliveContactData, oliveContactFieldGroups } from "./contact";
+import { oliveDonateData, oliveDonateFieldGroups } from "./donate";
+import { oliveEventsData, oliveEventsFieldGroups } from "./events";
+import { oliveFaqData, oliveFaqFieldGroups } from "./faq";
 import { oliveHomepageData, oliveHomepageFieldGroups } from "./homepage";
+import { oliveProductData, oliveProductFieldGroups } from "./products";
+import { oliveServicesData, oliveServicesFieldGroups } from "./services";
 import { oliveShopData, oliveShopFieldGroups } from "./shop";
 import {
   oliveTestimonialsData,
   oliveTestimonialsFieldGroups,
 } from "./testimonials";
+import { oliveVideosData, oliveVideosFieldGroups } from "./videos";
 
-// Page domains (homepage, shop, …) are aggregated below; `products/`,
-// `generic/`, `account/` and `maintenance/` define no fields of their own —
-// the product page reads the `global.product` group, the rest are chrome-only.
+// Page domains (homepage, shop, products, services, events, videos, donate,
+// faq, …) are aggregated below; `generic/`, `account/` and `maintenance/`
+// define no fields of their own — they are chrome-only. The events, videos,
+// donate and FAQ domains re-export Default's `default.*` fields (olive
+// markup, Default copy) so they appear in olive's editor.
+//
+// Footer tagline and social links are NOT template fields: they come from
+// Content → Branding (`SiteContent.footerText` / `socialLinks`). The retired
+// `olive.global.footer-tagline` / `olive.global.social-*` keys are read only
+// as a silent fallback (see RETIRED_TEMPLATE_KEYS in ~/lib/template-fields).
 
 // ─── Global: Branding ─────────────────────────────────────────────────────────
 
 const globalBrandingData: TemplateField[] = [
   {
     key: "olive.global.wordmark-tagline",
-    label: "Wordmark Tagline",
+    label: "Wordmark tagline",
     description:
-      "Short line under the wordmark in the footer (e.g. 'Detroit · Est. 2020'). Leave blank to hide.",
+      "Short line under the wordmark in the footer. Leave blank to hide.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "Detroit · Est. 2020",
-  },
-  {
-    key: "olive.global.footer-tagline",
-    label: "Footer Tagline",
-    description: "One-sentence brand line shown in the footer's cover panel.",
-    type: "textarea",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue:
-      "Apparel, beauty and home for the woman who dresses on purpose.",
+    defaultValue: "",
   },
   {
     key: "olive.global.footer-cta-heading",
-    label: "Footer CTA Heading",
+    label: "Heading",
     description:
       "Heading of the footer's call-to-action card. Leave the link blank to hide the whole card.",
     type: "text",
@@ -63,182 +65,35 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "olive.global.footer-cta-body",
-    label: "Footer CTA Body",
-    description: "One line under the footer CTA heading.",
+    label: "Body",
+    description: "One line under the footer call-to-action heading.",
     type: "textarea",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
     defaultValue:
-      "Follow along for new arrivals, restocks and the occasional Detroit pop-up.",
+      "Follow along for new arrivals, restocks and the occasional pop-up.",
   },
   {
     key: "olive.global.footer-cta-label",
-    label: "Footer CTA Button Label",
-    description: "Label of the footer CTA button.",
+    label: "Button label",
+    description: "Label of the footer call-to-action button.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "Follow Olive Mode",
+    defaultValue: "Follow along",
   },
   {
     key: "olive.global.footer-cta-link",
-    label: "Footer CTA Button Link",
+    label: "Button link",
     description:
-      "Where the footer CTA button goes (an Instagram profile, a newsletter page, anything). Leave blank to hide the CTA card.",
+      "Where the footer call-to-action button goes (an Instagram profile, a newsletter page, anything). Leave blank to hide the card.",
     type: "url",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
     defaultValue: "",
-  },
-  {
-    key: "olive.global.social-instagram",
-    label: "Instagram URL",
-    description:
-      "Full URL to your Instagram profile. Leave blank to hide the icon.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "olive.global.social-tiktok",
-    label: "TikTok URL",
-    description:
-      "Full URL to your TikTok profile. Leave blank to hide the icon.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "olive.global.social-facebook",
-    label: "Facebook URL",
-    description:
-      "Full URL to your Facebook page. Leave blank to hide the icon.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "olive.global.social-pinterest",
-    label: "Pinterest URL",
-    description:
-      "Full URL to your Pinterest profile. Leave blank to hide the icon.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-];
-
-// ─── Global: Product Page ─────────────────────────────────────────────────────
-
-const globalProductData: TemplateField[] = [
-  {
-    key: "olive.global.product-shipping-description",
-    label: "Product Shipping Text",
-    description:
-      "Shown in the 'Shipping' accordion on every product page. Leave blank to hide that accordion.",
-    type: "textarea",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Everything ships from Detroit. You'll get a tracking link the moment your order leaves.",
-  },
-  {
-    key: "olive.global.product-returns-description",
-    label: "Product Returns Text",
-    description:
-      "Shown in the 'Returns' accordion on every product page. Leave blank to hide that accordion.",
-    type: "textarea",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Unworn pieces with tags can come back — message us and we'll sort out an exchange or store credit.",
-  },
-  {
-    key: "olive.global.product-question-text",
-    label: "Product 'Questions?' Line",
-    description:
-      "Short line under the accordions inviting a question; it links to the contact page. Leave blank to hide.",
-    type: "text",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    defaultValue: "Not sure about the fit or shade? Ask us.",
-  },
-  {
-    key: "olive.global.product-related-heading",
-    label: "Related Products Heading",
-    description:
-      "Heading above the related-products rail on every product page.",
-    type: "text",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-1",
-    defaultValue: "Complete the look",
-  },
-  {
-    key: "olive.global.product-related-link-label",
-    label: "Related Products Link",
-    description:
-      "Text link beside the related-products heading; points to the shop.",
-    type: "text",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-1",
-    defaultValue: "See everything",
-  },
-  {
-    key: "olive.global.product-coming-soon-heading",
-    label: "Coming Soon Heading",
-    description:
-      "Shown instead of the buy controls when a product is marked coming soon.",
-    type: "text",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-1",
-    defaultValue: "Coming soon",
-  },
-  {
-    key: "olive.global.product-coming-soon-body",
-    label: "Coming Soon Body",
-    description: "One line under the coming-soon heading.",
-    type: "textarea",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-1",
-    defaultValue:
-      "This one isn't in the shop yet. Check back soon, or ask us when it lands.",
-  },
-  {
-    key: "olive.global.product-trust-badges",
-    label: "Product Trust Badges",
-    description:
-      "Short reassurance lines shown beneath the add-to-bag button on every product page (max 4).",
-    type: "list",
-    page: "global",
-    group: "global.product",
-    gridColumn: "col-span-full",
-    maxItems: 4,
-    itemSchema: [
-      {
-        key: "label",
-        label: "Badge Text",
-        type: "text",
-        placeholder: "e.g. Ships from Detroit in 1–2 days",
-      },
-    ],
   },
 ];
 
@@ -249,7 +104,7 @@ const globalProductData: TemplateField[] = [
 const globalAuthenticationData: TemplateField[] = [
   {
     key: "olive.global.authentication-image",
-    label: "Authentication Image",
+    label: "Image",
     description: "Image shown beside the sign-in and sign-up forms.",
     type: "image",
     page: "global",
@@ -259,23 +114,31 @@ const globalAuthenticationData: TemplateField[] = [
   },
   {
     key: "olive.global.logo-size-width",
-    label: "Auth Logo Width (px)",
+    label: "Logo width",
     description: "Width of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "120",
+    min: 24,
+    max: 400,
+    step: 1,
+    unit: "px",
   },
   {
     key: "olive.global.logo-size-height",
-    label: "Auth Logo Height (px)",
+    label: "Logo height",
     description: "Height of the logo on the sign-in and sign-up screens.",
     type: "number",
     page: "global",
     group: "global.authentication",
     gridColumn: "col-span-1",
     defaultValue: "40",
+    min: 24,
+    max: 400,
+    step: 1,
+    unit: "px",
   },
 ];
 
@@ -290,10 +153,15 @@ export const oliveData: Record<string, TemplateField[]> = {
     ...oliveContactData,
     ...oliveTestimonialsData,
     ...oliveBlogData,
+    ...oliveServicesData,
+    ...oliveEventsData,
+    ...oliveVideosData,
+    ...oliveDonateData,
+    ...oliveFaqData,
     ...oliveCartData,
     ...oliveCheckoutData,
     ...globalBrandingData,
-    ...globalProductData,
+    ...oliveProductData,
     ...globalAuthenticationData,
   ],
 };
@@ -307,27 +175,25 @@ export const oliveFieldGroups: Record<string, TemplateFieldGroup[]> = {
     ...oliveContactFieldGroups,
     ...oliveTestimonialsFieldGroups,
     ...oliveBlogFieldGroups,
+    ...oliveServicesFieldGroups,
+    ...oliveEventsFieldGroups,
+    ...oliveVideosFieldGroups,
+    ...oliveDonateFieldGroups,
+    ...oliveFaqFieldGroups,
     ...oliveCartFieldGroups,
     ...oliveCheckoutFieldGroups,
+    ...oliveProductFieldGroups,
     {
       id: "global.branding",
-      title: "Global Branding",
+      title: "Footer",
       description:
-        "Wordmark tagline, footer tagline, footer call-to-action card and social links",
+        "Wordmark tagline and the footer call-to-action card. Footer tagline and social links live in Content → Branding.",
       icon: "🏷️",
       columns: 2,
     } satisfies TemplateFieldGroup,
     {
-      id: "global.product",
-      title: "Global Product Page",
-      description:
-        "Shipping and returns text, the 'questions?' line and trust badges shown on every product page",
-      icon: "📦",
-      columns: 1,
-    } satisfies TemplateFieldGroup,
-    {
       id: "global.authentication",
-      title: "Authentication",
+      title: "Sign-in screens",
       description: "Image and logo size on the sign-in and sign-up screens",
       icon: "🔐",
       columns: 2,

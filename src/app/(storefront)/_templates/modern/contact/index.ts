@@ -3,8 +3,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const contactPageData: TemplateField[] = [
   {
     key: "modern.contact.page-tagline",
-    label: "Page Tagline",
-    description: "Tagline for the page",
+    label: "Small label",
+    description:
+      "Short label above the heading at the top of the Contact page.",
     type: "text",
     page: "contact",
     group: "contact.main",
@@ -13,8 +14,8 @@ const contactPageData: TemplateField[] = [
   },
   {
     key: "modern.contact.page-header",
-    label: "Page Header",
-    description: "Title for the header section",
+    label: "Heading",
+    description: "Main heading at the top of the Contact page.",
     type: "text",
     page: "contact",
     group: "contact.main",
@@ -23,46 +24,46 @@ const contactPageData: TemplateField[] = [
   },
   {
     key: "modern.contact.page-description",
-    label: "Page Description",
-    description: "Description for the header section",
+    label: "Intro text",
+    description: "Short paragraph below the heading.",
     type: "textarea",
     page: "contact",
     group: "contact.main",
     defaultValue:
       "Whether you have a question about an order, want to learn more about our products, or are interested in a partnership, we're here to help.",
-    placeholder: "e.g. A short intro paragraph for your contact page...",
+    placeholder: "A sentence or two inviting people to reach out.",
   },
 ];
 
 const contactInfoData: TemplateField[] = [
   {
     key: "modern.contact.info-title",
-    label: "Info Section Title",
-    description: "Title for the contact information section",
+    label: "Heading",
+    description: "Heading above your contact details.",
     type: "text",
     page: "contact",
     group: "contact.info",
     defaultValue: "Contact Information",
-    placeholder: "Contact Information",
+    placeholder: "e.g. Contact Information",
   },
   {
     key: "modern.contact.info-description",
-    label: "Info Section Description",
-    description: "Description for the contact information section",
+    label: "Intro text",
+    description: "Short text below the contact info heading.",
     type: "textarea",
     page: "contact",
     group: "contact.info",
     defaultValue:
       "Reach out through any of these channels and we'll get back to you as soon as possible.",
-    placeholder: "Short blurb about how to reach you...",
+    placeholder: "A short line about how to reach you.",
   },
 ];
 
 const contactFormData: TemplateField[] = [
   {
     key: "modern.contact.form-title",
-    label: "Form Title",
-    description: "Title for the contact form section",
+    label: "Heading",
+    description: "Heading above the contact form.",
     type: "text",
     page: "contact",
     group: "contact.form",
@@ -71,20 +72,42 @@ const contactFormData: TemplateField[] = [
   },
   {
     key: "modern.contact.form-description",
-    label: "Form Description",
-    description: "Description for the contact form section",
+    label: "Intro text",
+    description: "Short text below the form heading.",
     type: "textarea",
     page: "contact",
     group: "contact.form",
     defaultValue: "We'll get back to you as soon as possible.",
-    placeholder: "e.g. We'll get back to you as soon as possible.",
+    placeholder: "A sentence assuring visitors you'll respond quickly.",
+  },
+  {
+    key: "modern.contact.form-success-heading",
+    label: "Success heading",
+    description:
+      "Heading shown in place of the contact form after a message is sent.",
+    type: "text",
+    page: "contact",
+    group: "contact.form",
+    defaultValue: "Message received",
+    placeholder: "e.g. Message received",
+  },
+  {
+    key: "modern.contact.form-success-body",
+    label: "Success message",
+    description:
+      "Text shown under the success heading after a message is sent.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.form",
+    defaultValue: "Thank you for reaching out. We'll get back to you soon.",
+    placeholder: "e.g. Thank you for reaching out. We'll get back to you soon.",
   },
 ];
 const contactPageQuestionsData: TemplateField[] = [
   {
     key: "modern.contact.faq-tagline",
-    label: "FAQ Tagline",
-    description: "Tagline for the FAQ section",
+    label: "Small label",
+    description: "Short label above the FAQ heading.",
     type: "text",
     page: "contact",
     group: "contact.questions",
@@ -93,8 +116,8 @@ const contactPageQuestionsData: TemplateField[] = [
   },
   {
     key: "modern.contact.faq-heading",
-    label: "FAQ Title",
-    description: "Title for the FAQ section",
+    label: "Heading",
+    description: "Heading above the FAQ list.",
     type: "text",
     page: "contact",
     group: "contact.questions",
@@ -104,7 +127,7 @@ const contactPageQuestionsData: TemplateField[] = [
 
   {
     key: "modern.contact.faq-list",
-    label: "FAQ List",
+    label: "Questions",
     description:
       "Pick questions from Content → FAQ. Leave empty to show the first 6 published questions.",
     type: "faq",
@@ -125,29 +148,32 @@ export const modernContactData = [
 export const modernContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.main",
-    title: "Contact Main",
-    description: "Main section for the contact page",
+    title: "Intro",
+    description:
+      "Small label, heading, and intro at the top of the Contact page.",
     icon: "🎯",
     columns: 2,
   },
   {
     id: "contact.info",
-    title: "Contact Info",
-    description: "Contact information for your business",
+    title: "Contact info",
+    description:
+      "Heading and intro for the contact details column. Your email, phone, address, and hours come from Settings.",
     icon: "📧",
     columns: 2,
   },
   {
     id: "contact.form",
-    title: "Contact Form",
-    description: "Contact form for your business",
+    title: "Contact form",
+    description:
+      "Heading and intro above the contact form, plus the message shown after it's sent.",
     icon: "📝",
     columns: 2,
   },
   {
     id: "contact.questions",
-    title: "Contact Questions",
-    description: "Add some frequently asked questions for your business",
+    title: "FAQ",
+    description: "Common questions answered at the bottom of the Contact page.",
     icon: "💬",
     columns: 1,
   },

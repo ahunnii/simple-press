@@ -9,9 +9,11 @@ import { PageTransition } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { ViiOverline } from "../shared/vii-overline";
+import { VII_TEXT_MEASURE } from "../shared/vii-page-edge";
 import { ViiReveal } from "../shared/vii-reveal";
 import { ViiGenericCoverHero } from "./vii-generic-cover-hero";
+import { ViiPageBand } from "./vii-page-band";
+import { ViiPageSection } from "./vii-page-section";
 
 type Page = NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 
@@ -166,8 +168,12 @@ export function ViiGenericPage({ page }: { page: Page }) {
   const hasCover = !!page.image?.trim();
 
   // Article body — identical regardless of whether the TOC sidebar is shown.
+  // It sits on vii's page edge (the hero's left edge, 86px at 1440 — B1.7):
+  // running text (paragraphs, headings, lists, quotes) is capped at a
+  // readable measure, while galleries, images and tables keep the full
+  // column so media isn't shrunk to the text width.
   const articleBody = (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       {isPolicy && (
         <p
           className="mb-8 text-[11px] font-medium tracking-[0.12em] uppercase"
@@ -184,7 +190,9 @@ export function ViiGenericPage({ page }: { page: Page }) {
         <TiptapRenderer
           content={page.content as TiptapJSON}
           className={cn(
-            "prose w-full max-w-[1440px]",
+            "prose w-full max-w-none",
+            // Readable measure for running text; media stays column-wide.
+            "[&_:is(p,h2,h3,h4,h5,h6,ul,ol,blockquote,pre,hr)]:max-w-[720px]",
             // Headings — Playfair Display, navy
             "prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight",
             "prose-headings:text-[var(--vii-navy)]",
@@ -205,85 +213,55 @@ export function ViiGenericPage({ page }: { page: Page }) {
         />
       </div>
 
-      <PlatformPolicyNotice slug={page.slug} />
+      <div style={{ maxWidth: VII_TEXT_MEASURE }}>
+        <PlatformPolicyNotice slug={page.slug} />
+      </div>
     </div>
   );
 
   return (
     <PageTransition>
-      <div className="vii">
-        {/* ── Page hero ───────────────────────────────────────────────── */}
-        {hasCover ? (
-          <ViiGenericCoverHero
-            image={page.image!}
-            title={page.title}
-            excerpt={page.excerpt ?? undefined}
-            kicker={kicker}
-          />
-        ) : (
-          /* Cream editorial fallback — shown when no cover image is set */
-          <section
-            className="px-6 pt-36 pb-16 lg:px-8 lg:pt-44"
-            style={{
-              background: "var(--vii-cream)",
-              borderBottom: "1px solid var(--vii-hairline)",
-            }}
-          >
-            <div className="mx-auto max-w-[1440px]">
-              {kicker && (
-                <div className="mb-5">
-                  <ViiOverline align="left" tone="light">
-                    {kicker}
-                  </ViiOverline>
-                </div>
-              )}
-              <h1
-                className="font-serif font-semibold tracking-tight"
-                style={{
-                  fontSize: "clamp(2rem, 4vw, 3.5rem)",
-                  lineHeight: 1.1,
-                  color: "var(--vii-navy)",
-                  textWrap: "balance",
-                }}
-              >
-                {page.title}
-              </h1>
-              {page.excerpt && (
-                <p
-                  className="mt-5 max-w-[560px] text-[17px] leading-[1.6]"
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    color: "var(--vii-ink-soft)",
-                  }}
-                >
-                  {page.excerpt}
-                </p>
-              )}
+      {/* No nested `.vii` scope here: the layout root already carries it
+          (plus the owner's palette overrides inline). A second `.vii` would
+          re-declare the stock tokens and mask the chosen palette. */}
+
+      {/* ── Page hero ───────────────────────────────────────────────── */}
+      {hasCover ? (
+        <ViiGenericCoverHero
+          image={page.image!}
+          title={page.title}
+          excerpt={page.excerpt ?? undefined}
+          kicker={kicker}
+        />
+      ) : (
+        /* Cream editorial band — shown when no cover image is set. The
+           optional pages (events, videos, donate, FAQ) reuse this band. */
+        <ViiPageBand
+          title={page.title}
+          overline={kicker}
+          intro={page.excerpt ?? undefined}
+        />
+      )}
+
+      {/* ── Content ─────────────────────────────────────────────────── */}
+      <ViiPageSection paddingY="clamp(48px, 6vw, 64px)">
+        <ViiReveal>
+          {showToc ? (
+            // Article on the page edge, TOC in a right-hand rail, so the
+            // body's left edge never moves off the hero's.
+            <div className="grid grid-cols-1 gap-16 lg:grid-cols-[minmax(0,1fr)_200px]">
+              <div className="lg:col-start-2 lg:row-start-1">
+                <ViiToc contentRef={contentRef} />
+              </div>
+              <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+                {articleBody}
+              </div>
             </div>
-          </section>
-        )}
-
-        {/* ── Content ─────────────────────────────────────────────────── */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto w-full max-w-[1440px]">
-            <ViiReveal>
-              {showToc ? (
-                <div className="grid grid-cols-1 gap-16 lg:grid-cols-[200px_1fr]">
-                  {/* TOC sidebar */}
-                  <ViiToc contentRef={contentRef} />
-
-                  {/* Article body */}
-                  {articleBody}
-                </div>
-              ) : (
-                // No headings → no TOC. Render full-width so galleries and
-                // other content aren't collapsed into the narrow grid track.
-                articleBody
-              )}
-            </ViiReveal>
-          </div>
-        </section>
-      </div>
+          ) : (
+            articleBody
+          )}
+        </ViiReveal>
+      </ViiPageSection>
     </PageTransition>
   );
 }

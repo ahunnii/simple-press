@@ -46,6 +46,18 @@ export default async function NavigationPage() {
             (business.siteContent.navigationItems as
               | { label: string; href: string; external?: boolean }[]
               | null) ?? [],
+          // `null`/missing is distinct from `[]` here — null falls back to the
+          // main nav's top level at read time (see `resolveFooterNav`), `[]`
+          // means "no footer quick links". Never `?? []` this one.
+          footerNavigationItems: Array.isArray(
+            business.siteContent.footerNavigationItems,
+          )
+            ? (business.siteContent.footerNavigationItems as {
+                label: string;
+                href: string;
+                external?: boolean;
+              }[])
+            : null,
         }}
         servicesEnabled={servicesEnabled}
         services={services}

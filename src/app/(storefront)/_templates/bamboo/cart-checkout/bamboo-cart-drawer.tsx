@@ -8,7 +8,9 @@ import { AnimatePresence, motion } from "motion/react";
 
 import type { ShippingConfig } from "~/lib/shipping-utils";
 import type { CartItem } from "~/providers/cart-context";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
+import { cn } from "~/lib/utils";
 import {
   calculateShipping,
   getAmountUntilFreeShipping,
@@ -25,9 +27,14 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type BambooCartDrawerProps = {
   shippingConfig: ShippingConfig;
+  /** Small label above the item count. Blank hides it. */
+  cartLabel: string;
+  /** Line under "Your cart is empty". Blank hides it. */
+  cartEmptyText: string;
 };
 
 const quantityButtonClass =
@@ -122,9 +129,15 @@ function BambooDrawerItem({ item }: { item: CartItem }) {
  * button (`useCart().setIsOpen`). Three bands like the mobile nav: forest
  * header, cream item list, cream-deep summary footer with the forest pill CTA.
  */
-export function BambooCartDrawer({ shippingConfig }: BambooCartDrawerProps) {
+export function BambooCartDrawer({
+  shippingConfig,
+  cartLabel,
+  cartEmptyText,
+}: BambooCartDrawerProps) {
   const { items, itemCount, subtotal, isOpen, setIsOpen } = useCart();
   const reducedMotion = useReducedMotion();
+  const { isEnabled } = useStorefrontFlags();
+  const checkoutEnabled = isEnabled("checkout");
 
   // The sheet portals to document.body by default, which escapes the .bamboo
   // scope class — every var(--bam-*) token and font variable would resolve to
@@ -160,9 +173,14 @@ export function BambooCartDrawer({ shippingConfig }: BambooCartDrawerProps) {
         {/* Band 1 — forest header */}
         <div className="bg-[var(--bam-forest)] pt-12 pr-14 pb-5 pl-5">
           <SheetTitle className="flex flex-col gap-0.5 text-left font-normal text-[var(--bam-cream)]">
-            <span className="text-xs font-semibold tracking-widest text-[var(--bam-gold-soft)] uppercase">
-              Your Basket
-            </span>
+            {!!cartLabel && (
+              <span
+                className="text-xs font-semibold tracking-widest text-[var(--bam-gold-soft)] uppercase"
+                {...fieldAttr("bamboo.global.cart-label")}
+              >
+                {cartLabel}
+              </span>
+            )}
             <span className="font-heading text-xl">
               {itemCount} {itemCount === 1 ? "item" : "items"}
             </span>
@@ -184,9 +202,14 @@ export function BambooCartDrawer({ shippingConfig }: BambooCartDrawerProps) {
             <p className="font-heading text-lg text-[var(--bam-forest-deep)]">
               Your cart is empty
             </p>
-            <p className="max-w-xs text-sm text-[var(--bam-forest)]/70">
-              Everything we make is tree-free, chemical-free and ready to ship.
-            </p>
+            {!!cartEmptyText && (
+              <p
+                className="max-w-xs text-sm text-[var(--bam-forest)]/70"
+                {...fieldAttr("bamboo.global.cart-empty-text")}
+              >
+                {cartEmptyText}
+              </p>
+            )}
             <Button
               className="mt-2 rounded-full bg-[var(--bam-forest)] px-6 text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
               onClick={() => setIsOpen(false)}
@@ -265,17 +288,22 @@ export function BambooCartDrawer({ shippingConfig }: BambooCartDrawerProps) {
                   </span>
                 </div>
               </div>
-              <Button
-                className="mt-5 w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
-                size="lg"
-                asChild
-                onClick={() => setIsOpen(false)}
-              >
-                <Link href="/checkout">Proceed to Checkout</Link>
-              </Button>
+              {checkoutEnabled && (
+                <Button
+                  className="mt-5 w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+                  size="lg"
+                  asChild
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Link href="/checkout">Proceed to Checkout</Link>
+                </Button>
+              )}
               <Button
                 variant="ghost"
-                className="mt-1 w-full text-sm text-[var(--bam-forest)]/75 hover:bg-transparent hover:text-[var(--bam-forest-deep)]"
+                className={cn(
+                  "w-full text-sm text-[var(--bam-forest)]/75 hover:bg-transparent hover:text-[var(--bam-forest-deep)]",
+                  checkoutEnabled ? "mt-1" : "mt-5",
+                )}
                 onClick={() => setIsOpen(false)}
                 asChild
               >

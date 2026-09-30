@@ -5,9 +5,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const homepageHeroData: TemplateField[] = [
   {
     key: "vii.homepage.hero-video",
-    label: "Hero Background Video",
+    label: "Background video",
     description:
-      "Optional full-viewport video for the hero. When set, plays instead of the background image. Use .mp4 or .webm.",
+      "Optional full-viewport video for the hero. Plays instead of the background photo when set. Use .mp4 or .webm.",
     type: "video",
     page: "homepage",
     group: "homepage.hero",
@@ -15,9 +15,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "vii.homepage.hero-image",
-    label: "Hero Background Image",
+    label: "Background photo",
     description:
-      "Full-viewport background image for the hero. Used when no video is set. Use a high-quality landscape photo.",
+      "Full-viewport background photo for the hero, used when no video is set. Use a high-quality landscape photo.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -25,8 +25,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "vii.homepage.hero-overline",
-    label: "Hero Overline",
-    description: "Small italic label above the main body copy.",
+    label: "Small label",
+    description: "Small italic label shown above the hero text. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -35,8 +35,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "vii.homepage.hero-heading",
-    label: "Hero Body Copy",
-    description: "The main paragraph text overlaid on the hero image or video.",
+    label: "Hero text",
+    description: "The main paragraph overlaid on the hero photo or video.",
     type: "textarea",
     page: "homepage",
     group: "homepage.hero",
@@ -46,8 +46,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "vii.homepage.hero-cta-text",
-    label: "Hero CTA Button Text",
-    description: "Text for the primary call-to-action button in the hero.",
+    label: "Button text",
+    description: "Text for the primary button in the hero. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -56,8 +56,9 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "vii.homepage.hero-cta-link",
-    label: "Hero CTA Button Link",
-    description: "URL the hero CTA button points to.",
+    label: "Button link",
+    description:
+      "Where the hero button sends visitors — e.g. your booking page.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
@@ -71,8 +72,8 @@ const homepageHeroData: TemplateField[] = [
 const homepageCategoriesData: TemplateField[] = [
   {
     key: "vii.homepage.categories-overline",
-    label: "Categories Overline",
-    description: "Small caps label above the categories heading.",
+    label: "Small label",
+    description: "Small label above the categories heading.",
     type: "text",
     page: "homepage",
     group: "homepage.categories",
@@ -81,8 +82,8 @@ const homepageCategoriesData: TemplateField[] = [
   },
   {
     key: "vii.homepage.categories-heading",
-    label: "Categories Heading",
-    description: "Section heading for the categories grid.",
+    label: "Heading",
+    description: "Heading shown above the category tiles.",
     type: "text",
     page: "homepage",
     group: "homepage.categories",
@@ -91,32 +92,37 @@ const homepageCategoriesData: TemplateField[] = [
   },
   {
     key: "vii.homepage.categories-cards",
-    label: "Category Cards",
+    label: "Category tiles",
     description:
-      "Category tiles, each with an image, title, and link. Up to 6 cards.",
+      "Tiles linking to your services or shop. The whole section hides when this list is empty. Up to 6 tiles.",
     type: "list",
     page: "homepage",
     group: "homepage.categories",
     gridColumn: "col-span-full",
+    itemLabel: "category",
     maxItems: 6,
     itemSchema: [
       {
         key: "image",
-        label: "Image",
+        label: "Photo",
         type: "image",
-        placeholder: "Upload a category image",
+        description: "Background photo for the tile.",
+        placeholder: "Upload a photo for this category",
       },
       {
         key: "title",
         label: "Title",
         type: "text",
+        description: "Name shown over the photo.",
         placeholder: "e.g. Facials",
       },
       {
         key: "link",
         label: "Link",
         type: "text",
+        description: "Where the tile links to. Defaults to /shop when blank.",
         placeholder: "e.g. /shop or /facials",
+        optional: true,
       },
     ],
   },
@@ -127,8 +133,8 @@ const homepageCategoriesData: TemplateField[] = [
 const homepageVideoData: TemplateField[] = [
   {
     key: "vii.homepage.video-overline",
-    label: "Video Section Overline",
-    description: "Small caps label above the video section heading.",
+    label: "Small label",
+    description: "Small label above the video section heading.",
     type: "text",
     page: "homepage",
     group: "homepage.video",
@@ -137,9 +143,9 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-heading",
-    label: "Video Section Heading",
+    label: "Heading",
     description:
-      "The plain part of the two-part video section heading (e.g. 'Wellness, the').",
+      "The plain part of the video section heading (e.g. 'Wellness, the').",
     type: "text",
     page: "homepage",
     group: "homepage.video",
@@ -148,9 +154,8 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-heading-accent",
-    label: "Video Heading Accent Word",
-    description:
-      "The italic accent word completing the heading (e.g. 'Detroit way').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "homepage",
     group: "homepage.video",
@@ -159,7 +164,7 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-body",
-    label: "Video Section Body",
+    label: "Body text",
     description: "Short paragraph beside the video.",
     type: "textarea",
     page: "homepage",
@@ -170,9 +175,9 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-file",
-    label: "Feature Video",
+    label: "Video",
     description:
-      "Video that plays when the viewer presses play. Use .mp4 or .webm.",
+      "Video that plays when the viewer presses play. The whole section hides when neither this nor the poster photo is set. Use .mp4 or .webm.",
     type: "video",
     page: "homepage",
     group: "homepage.video",
@@ -180,9 +185,9 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-poster",
-    label: "Video Poster Image",
+    label: "Poster photo",
     description:
-      "Image shown before the video plays (and as a fallback when no video is set).",
+      "Photo shown before the video plays, and as a fallback when no video is set.",
     type: "image",
     page: "homepage",
     group: "homepage.video",
@@ -190,8 +195,9 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-cta-text",
-    label: "Video CTA Text",
-    description: "Optional link text below the video section body.",
+    label: "Link text",
+    description:
+      "Optional link below the body text. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.video",
@@ -200,8 +206,8 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-cta-link",
-    label: "Video CTA Link",
-    description: "URL the video section link points to.",
+    label: "Link URL",
+    description: "Where the link below the body text points to.",
     type: "url",
     page: "homepage",
     group: "homepage.video",
@@ -210,9 +216,9 @@ const homepageVideoData: TemplateField[] = [
   },
   {
     key: "vii.homepage.video-aspect",
-    label: "Video Aspect Ratio",
+    label: "Video shape",
     description:
-      "Controls the shape of the video player. Allowed values: 16:9 (landscape, default), 4:3, 1:1 (square), 9:16 (vertical/portrait).",
+      "Controls the shape of the video player. Type one of: 16:9 (landscape, default), 4:3, 1:1 (square), or 9:16 (portrait).",
     type: "text",
     page: "homepage",
     group: "homepage.video",
@@ -227,9 +233,9 @@ const homepageVideoData: TemplateField[] = [
 const homepageBandData: TemplateField[] = [
   {
     key: "vii.homepage.band-image",
-    label: "Full-Width Band Image",
+    label: "Photo",
     description:
-      "Optional full-bleed visual break between the video and story sections. Falls back to a thin navy divider when left blank.",
+      "Full-width photo break between the video and product sections. A thin divider shows in its place when left blank.",
     type: "image",
     page: "homepage",
     group: "homepage.band",
@@ -237,9 +243,9 @@ const homepageBandData: TemplateField[] = [
   },
   {
     key: "vii.homepage.band-heading",
-    label: "Band Overlay Heading",
+    label: "Heading",
     description:
-      "Optional serif heading centered over the band image. Leave blank to show the image without text.",
+      "Optional heading centered over the photo. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.band",
@@ -247,9 +253,9 @@ const homepageBandData: TemplateField[] = [
   },
   {
     key: "vii.homepage.band-text",
-    label: "Band Overlay Text",
+    label: "Body text",
     description:
-      "Optional supporting sentence displayed beneath the band heading. Only shown when a band image is set.",
+      "Optional sentence beneath the heading. Only shown when a photo is set, and only when this is filled in.",
     type: "textarea",
     page: "homepage",
     group: "homepage.band",
@@ -262,8 +268,8 @@ const homepageBandData: TemplateField[] = [
 const homepageProductRailData: TemplateField[] = [
   {
     key: "vii.homepage.product-rail-overline",
-    label: "Product Rail Overline",
-    description: "Small caps label above the product rail heading.",
+    label: "Small label",
+    description: "Small label above the featured products heading.",
     type: "text",
     page: "homepage",
     group: "homepage.productRail",
@@ -272,8 +278,8 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "vii.homepage.product-rail-heading",
-    label: "Product Rail Heading",
-    description: "Section heading for the featured product rail.",
+    label: "Heading",
+    description: "Heading above the featured products.",
     type: "text",
     page: "homepage",
     group: "homepage.productRail",
@@ -282,7 +288,7 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "vii.homepage.product-rail-collection",
-    label: "Product Rail Collection",
+    label: "Collection",
     description:
       "Pick a collection to feature. Defaults to your latest products when left empty.",
     type: "collection",
@@ -292,8 +298,8 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "vii.homepage.product-rail-cta-text",
-    label: "Product Rail CTA Text",
-    description: "Text for the 'view all' link below the product rail.",
+    label: "Link text",
+    description: "Text for the 'view all' link below the featured products.",
     type: "text",
     page: "homepage",
     group: "homepage.productRail",
@@ -302,8 +308,8 @@ const homepageProductRailData: TemplateField[] = [
   },
   {
     key: "vii.homepage.product-rail-cta-link",
-    label: "Product Rail CTA Link",
-    description: "URL for the product rail 'view all' link.",
+    label: "Link URL",
+    description: "Where the 'view all' link points to.",
     type: "url",
     page: "homepage",
     group: "homepage.productRail",
@@ -317,33 +323,13 @@ const homepageProductRailData: TemplateField[] = [
 const homepageTestimonialData: TemplateField[] = [
   {
     key: "vii.homepage.testimonial-image",
-    label: "Testimonial Background Image",
+    label: "Background photo",
     description:
-      "Optional background image blended behind the testimonial quote.",
+      "Optional photo blended behind the testimonial quote below.",
     type: "image",
     page: "homepage",
     group: "homepage.testimonial",
     gridColumn: "col-span-full",
-  },
-  {
-    key: "vii.homepage.testimonial-quote",
-    label: "Testimonial Quote (manual override)",
-    description:
-      "Leave blank to automatically show your most recent approved testimonial.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.testimonial",
-    gridColumn: "col-span-full",
-  },
-  {
-    key: "vii.homepage.testimonial-author",
-    label: "Testimonial Author (manual override)",
-    description:
-      "Author name shown beneath the quote. Only used when a manual quote is set above.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonial",
-    gridColumn: "col-span-1",
   },
 ];
 
@@ -352,8 +338,8 @@ const homepageTestimonialData: TemplateField[] = [
 const homepageBrandsData: TemplateField[] = [
   {
     key: "vii.homepage.brands-overline",
-    label: "Brands Overline",
-    description: "Small caps label above the brands logos.",
+    label: "Small label",
+    description: "Small label above the brand logos.",
     type: "text",
     page: "homepage",
     group: "homepage.brands",
@@ -362,9 +348,9 @@ const homepageBrandsData: TemplateField[] = [
   },
   {
     key: "vii.homepage.brands-heading",
-    label: "Brands Heading",
+    label: "Heading",
     description:
-      "Optional heading for the brands section. Leave blank to show only the logos.",
+      "Optional heading for this section. Leave blank to show only the logos.",
     type: "text",
     page: "homepage",
     group: "homepage.brands",
@@ -373,26 +359,30 @@ const homepageBrandsData: TemplateField[] = [
   },
   {
     key: "vii.homepage.brands-logos",
-    label: "Brand Logos",
+    label: "Brand logos",
     description:
-      "Logos of the brands you carry, each with an optional link. Up to 12 items.",
+      "Logos of the brands you carry. The whole section hides when this list is empty. Up to 12 logos.",
     type: "list",
     page: "homepage",
     group: "homepage.brands",
     gridColumn: "col-span-full",
+    itemLabel: "brand",
     maxItems: 12,
     itemSchema: [
       {
         key: "image",
         label: "Logo",
         type: "image",
+        description: "Brand logo image.",
         placeholder: "Upload a brand logo",
       },
       {
         key: "name",
-        label: "Brand Name",
+        label: "Brand name",
         type: "text",
-        placeholder: "e.g. Dermalogica",
+        description: "Used as the logo's alt text.",
+        placeholder: "e.g. your favorite skincare brand",
+        optional: true,
       },
     ],
   },
@@ -403,9 +393,9 @@ const homepageBrandsData: TemplateField[] = [
 const homepageBlogData: TemplateField[] = [
   {
     key: "vii.homepage.blog-heading",
-    label: "Blog Section Heading",
+    label: "Heading",
     description:
-      "The plain part of the two-part blog heading (e.g. 'A playground of').",
+      "The plain part of the blog section heading (e.g. 'A playground of').",
     type: "text",
     page: "homepage",
     group: "homepage.blog",
@@ -414,9 +404,8 @@ const homepageBlogData: TemplateField[] = [
   },
   {
     key: "vii.homepage.blog-heading-accent",
-    label: "Blog Heading Accent Word",
-    description:
-      "The italic copper accent word completing the blog heading (e.g. 'wellbeing').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "homepage",
     group: "homepage.blog",
@@ -425,9 +414,9 @@ const homepageBlogData: TemplateField[] = [
   },
   {
     key: "vii.homepage.blog-intro",
-    label: "Blog Intro Text",
+    label: "Intro text",
     description:
-      "Short paragraph introducing the blog section beneath the heading.",
+      "Short paragraph introducing your blog, shown beneath the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.blog",
@@ -437,8 +426,8 @@ const homepageBlogData: TemplateField[] = [
   },
   {
     key: "vii.homepage.blog-cta-text",
-    label: "Blog CTA Text",
-    description: "Text for the link to the full blog below the post cards.",
+    label: "Link text",
+    description: "Text for the link to the full blog, below the post cards.",
     type: "text",
     page: "homepage",
     group: "homepage.blog",
@@ -447,8 +436,8 @@ const homepageBlogData: TemplateField[] = [
   },
   {
     key: "vii.homepage.blog-cta-link",
-    label: "Blog CTA Link",
-    description: "URL for the blog 'read more' link.",
+    label: "Link URL",
+    description: "Where the blog link points to.",
     type: "url",
     page: "homepage",
     group: "homepage.blog",
@@ -462,8 +451,8 @@ const homepageBlogData: TemplateField[] = [
 const homepageContactData: TemplateField[] = [
   {
     key: "vii.homepage.contact-image",
-    label: "Contact Section Background Image",
-    description: "Dark landscape image behind the contact CTA section.",
+    label: "Background photo",
+    description: "Photo behind this closing contact section.",
     type: "image",
     page: "homepage",
     group: "homepage.contact",
@@ -471,8 +460,8 @@ const homepageContactData: TemplateField[] = [
   },
   {
     key: "vii.homepage.contact-heading",
-    label: "Contact Heading",
-    description: "Large heading for the contact CTA section.",
+    label: "Heading",
+    description: "Large heading for this closing contact section.",
     type: "text",
     page: "homepage",
     group: "homepage.contact",
@@ -481,8 +470,8 @@ const homepageContactData: TemplateField[] = [
   },
   {
     key: "vii.homepage.contact-subheading",
-    label: "Contact Subheading",
-    description: "Smaller subheading below the contact heading.",
+    label: "Small label",
+    description: "Smaller line below the heading.",
     type: "text",
     page: "homepage",
     group: "homepage.contact",
@@ -491,8 +480,8 @@ const homepageContactData: TemplateField[] = [
   },
   {
     key: "vii.homepage.contact-body",
-    label: "Contact Body Text",
-    description: "Short paragraph with context or an invitation to reach out.",
+    label: "Body text",
+    description: "Short paragraph inviting visitors to reach out.",
     type: "textarea",
     page: "homepage",
     group: "homepage.contact",
@@ -502,9 +491,9 @@ const homepageContactData: TemplateField[] = [
   },
   {
     key: "vii.homepage.contact-cta-text",
-    label: "Button Label",
+    label: "Button text",
     description:
-      "Text for the primary action button in the contact section (e.g. 'Book Now'). Both label and link must be set for the button to appear.",
+      "Text for the button in this section (e.g. 'Book Now'). Both this and the button link must be set for the button to appear.",
     type: "text",
     page: "homepage",
     group: "homepage.contact",
@@ -513,20 +502,20 @@ const homepageContactData: TemplateField[] = [
   },
   {
     key: "vii.homepage.contact-cta-link",
-    label: "Button Link",
+    label: "Button link",
     description:
-      "URL the contact section button points to — e.g. your booking page or a scheduling tool.",
+      "Where the button sends visitors — e.g. your booking page or a scheduling tool.",
     type: "url",
     page: "homepage",
     group: "homepage.contact",
     gridColumn: "col-span-1",
-    placeholder: "e.g. https://bookings.skinbarvii.com",
+    placeholder: "e.g. your booking page URL",
   },
   {
     key: "vii.homepage.contact-show-phone",
-    label: "Show phone number in this section",
+    label: "Show phone number",
     description:
-      "Display the business phone number in the contact CTA. Turn off for booking-only CTAs.",
+      "Display your business phone number (from Settings) in this section. Turn off for booking-only sections.",
     type: "boolean",
     page: "homepage",
     group: "homepage.contact",
@@ -535,9 +524,9 @@ const homepageContactData: TemplateField[] = [
   },
   {
     key: "vii.homepage.contact-show-email",
-    label: "Show email in this section",
+    label: "Show email",
     description:
-      "Display the business email in the contact CTA. Turn off for booking-only CTAs.",
+      "Display your business email (from Settings) in this section. Turn off for booking-only sections.",
     type: "boolean",
     page: "homepage",
     group: "homepage.contact",
@@ -550,21 +539,10 @@ const homepageContactData: TemplateField[] = [
 
 const homepageInstagramData: TemplateField[] = [
   {
-    key: "vii.homepage.instagram-handle",
-    label: "Instagram Handle",
-    description:
-      "Your Instagram handle shown above the gallery strip (e.g. '@skinbarvii').",
-    type: "text",
-    page: "homepage",
-    group: "homepage.instagram",
-    gridColumn: "col-span-1",
-    defaultValue: "@skinbarvii",
-  },
-  {
     key: "vii.homepage.instagram-cta-text",
-    label: "Follow Button Label",
+    label: "Follow button text",
     description:
-      "Text for the follow button displayed alongside the Instagram handle.",
+      "Text for the follow button shown alongside your Instagram handle.",
     type: "text",
     page: "homepage",
     group: "homepage.instagram",
@@ -573,9 +551,8 @@ const homepageInstagramData: TemplateField[] = [
   },
   {
     key: "vii.homepage.instagram-gallery",
-    label: "Instagram Gallery",
-    description:
-      "Photos shown in the Instagram-style gallery strip at the bottom of the homepage.",
+    label: "Photos",
+    description: "Photos shown in the gallery strip at the bottom of the homepage.",
     type: "gallery",
     page: "homepage",
     group: "homepage.instagram",
@@ -583,13 +560,13 @@ const homepageInstagramData: TemplateField[] = [
   },
 ];
 
-// ─── Detroit / Location ───────────────────────────────────────────────────────
+// ─── Local roots ───────────────────────────────────────────────────────────────
 
 const homepageDetroitData: TemplateField[] = [
   {
     key: "vii.homepage.detroit-overline",
-    label: "Detroit Overline",
-    description: "Small label above the Detroit heading.",
+    label: "Small label",
+    description: "Small label above the heading below.",
     type: "text",
     page: "homepage",
     group: "homepage.detroit",
@@ -598,8 +575,9 @@ const homepageDetroitData: TemplateField[] = [
   },
   {
     key: "vii.homepage.detroit-heading",
-    label: "Detroit Heading",
-    description: "The plain part of the two-part Detroit heading.",
+    label: "Heading",
+    description:
+      "The plain part of this section's heading. The whole section hides when this, the highlighted words, and the body text are all blank.",
     type: "text",
     page: "homepage",
     group: "homepage.detroit",
@@ -608,8 +586,8 @@ const homepageDetroitData: TemplateField[] = [
   },
   {
     key: "vii.homepage.detroit-heading-accent",
-    label: "Detroit Heading Accent",
-    description: "The copper italic word completing the Detroit heading.",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "homepage",
     group: "homepage.detroit",
@@ -618,8 +596,8 @@ const homepageDetroitData: TemplateField[] = [
   },
   {
     key: "vii.homepage.detroit-body",
-    label: "Detroit Body",
-    description: "Short paragraph about the studio's Detroit roots.",
+    label: "Body text",
+    description: "Short paragraph about your local roots.",
     type: "textarea",
     page: "homepage",
     group: "homepage.detroit",
@@ -629,9 +607,9 @@ const homepageDetroitData: TemplateField[] = [
   },
   {
     key: "vii.homepage.detroit-image",
-    label: "Detroit Image",
+    label: "Photo",
     description:
-      "A meaningful Detroit photo — your storefront, the neighborhood, or the city. Portrait orientation works best.",
+      "A meaningful local photo — your storefront, the neighborhood, or the city. Shows your city name in its place when left blank. Portrait orientation works best.",
     type: "image",
     page: "homepage",
     group: "homepage.detroit",
@@ -639,27 +617,30 @@ const homepageDetroitData: TemplateField[] = [
   },
   {
     key: "vii.homepage.detroit-details",
-    label: "Detail Tags",
+    label: "Detail tags",
     description:
-      "Short tags shown in a row beneath the body (e.g. neighborhood, year established). Up to 4.",
+      "Short tags shown in a row beneath the body text (e.g. neighborhood, year established). Up to 4.",
     type: "list",
     page: "homepage",
     group: "homepage.detroit",
     gridColumn: "col-span-full",
+    itemLabel: "detail",
     maxItems: 4,
     itemSchema: [
       {
         key: "label",
         label: "Tag",
         type: "text",
-        placeholder: "e.g. Livernois Avenue",
+        description: "Short text shown as one tag in the row.",
+        placeholder: "e.g. your street name",
       },
     ],
   },
   {
     key: "vii.homepage.detroit-cta-text",
-    label: "Detroit CTA Text",
-    description: "Optional link beneath the Detroit section (e.g. 'Visit us').",
+    label: "Link text",
+    description:
+      "Optional link beneath this section (e.g. 'Visit us'). Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.detroit",
@@ -668,8 +649,8 @@ const homepageDetroitData: TemplateField[] = [
   },
   {
     key: "vii.homepage.detroit-cta-link",
-    label: "Detroit CTA Link",
-    description: "URL the Detroit CTA points to (e.g. a map or contact page).",
+    label: "Link URL",
+    description: "Where the link points to — e.g. a map or your contact page.",
     type: "url",
     page: "homepage",
     group: "homepage.detroit",
@@ -700,41 +681,39 @@ export const viiHomepageData: TemplateField[] = [
 export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
-    title: "Hero Section",
+    title: "Hero",
     description:
-      "Full-viewport hero with background image or video, overline copy, and booking CTA",
+      "Full-viewport hero with a background photo or video, a small label, and a booking button",
     icon: "🌿",
     columns: 2,
   },
   {
     id: "homepage.categories",
-    title: "Categories Grid",
-    description:
-      "Overline, heading, and category tiles linking to your services or shop",
+    title: "Categories",
+    description: "Small label, heading, and tiles linking to your services or shop",
     icon: "🧴",
     columns: 2,
   },
   {
     id: "homepage.video",
-    title: "Video Feature",
+    title: "Video",
     description:
-      "Split section pairing a two-part heading and body copy with a play-on-click video",
+      "Split section pairing a two-part heading and body text with a play-on-click video",
     icon: "🎬",
     columns: 2,
   },
   {
     id: "homepage.band",
-    title: "Image Band",
-    description:
-      "Optional full-bleed visual break between the video and studio sections",
+    title: "Photo banner",
+    description: "Optional full-width photo break between the video and product sections",
     icon: "🖼️",
     columns: 1,
   },
   {
     id: "homepage.productRail",
-    title: "Product Rail",
+    title: "Featured products",
     description:
-      "Featured product rail — pick a collection or show your latest products",
+      "Featured product row — pick a collection or show your latest products",
     icon: "🛍️",
     columns: 2,
   },
@@ -742,46 +721,46 @@ export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.testimonial",
     title: "Testimonial",
     description:
-      "Slate quote section with an optional background image — auto-shows your latest approved review",
+      "Quote section with an optional background photo — shows a random approved testimonial from Admin → Testimonials",
     icon: "❝",
     columns: 2,
   },
   {
     id: "homepage.brands",
-    title: "Brands We Carry",
-    description: "Overline, optional heading, and a row of brand logos",
+    title: "Brands we carry",
+    description: "Small label, optional heading, and a row of brand logos",
     icon: "🏷️",
     columns: 2,
   },
   {
     id: "homepage.blog",
-    title: "Blog",
+    title: "Blog preview",
     description:
-      "Two-part heading, intro, and a row of your latest published blog posts",
+      "Two-part heading, intro text, and a row of your latest published blog posts",
     icon: "📖",
     columns: 2,
   },
   {
     id: "homepage.detroit",
-    title: "Detroit / Location",
+    title: "Local roots",
     description:
-      "Split brand-identity section pairing a Detroit photo with roots copy, detail tags, and a CTA",
+      "Split section pairing a local photo with roots copy, detail tags, and a link",
     icon: "🏙️",
     columns: 2,
   },
   {
     id: "homepage.contact",
-    title: "Contact CTA",
+    title: "Contact",
     description:
-      "Dark contact section with heading, body text, phone, and email",
+      "Closing section with heading, body text, phone, and email",
     icon: "📞",
     columns: 2,
   },
   {
     id: "homepage.instagram",
-    title: "Instagram Gallery",
+    title: "Instagram",
     description:
-      "Handle and photo strip displayed at the bottom of the homepage",
+      "Photo strip and follow button displayed at the bottom of the homepage — the handle and link come from your Instagram link in Content → Branding",
     icon: "📸",
     columns: 1,
   },

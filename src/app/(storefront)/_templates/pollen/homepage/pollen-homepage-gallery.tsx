@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { GenericImageRow } from "~/lib/template-fields";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { buttonVariants } from "~/components/ui/button";
 import {
   FadeIn,
@@ -54,9 +54,12 @@ export function PollenHomepageGallery({
         </FadeIn>
 
         <StaggerContainer className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {galleryItems?.map((item) => (
+          {galleryItems?.map((item, index) => (
             <StaggerItem key={item.label}>
-              <div className="group relative aspect-4/3 overflow-hidden rounded-xl">
+              <div
+                {...listItemAttr("pollen.homepage.gallery-items", index)}
+                className="group relative aspect-4/3 overflow-hidden rounded-xl"
+              >
                 <Image
                   src={item.image}
                   alt=""

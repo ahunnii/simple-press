@@ -4,8 +4,14 @@ import Link from "next/link";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkContactTopic } from "./pink-contact-form";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { telHref } from "~/lib/tel-href";
@@ -20,6 +26,7 @@ import {
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkSocialLinks } from "../shared/pink-social-links";
+import { DEFAULT_PINK_CONTACT_SHORTCUTS } from "./index";
 import { PinkContactForm } from "./pink-contact-form";
 
 const FIELD_KEYS = [
@@ -34,6 +41,9 @@ const FIELD_KEYS = [
   "pink.contact.form-message-placeholder",
   "pink.contact.form-submit-label",
   "pink.contact.form-email-note",
+  "pink.contact.form-success-heading",
+  "pink.contact.form-success-body",
+  "pink.contact.form-success-again-label",
   "pink.contact.studio-image",
   "pink.contact.studio-label",
   "pink.contact.studio-access-note",
@@ -43,32 +53,53 @@ const FIELD_KEYS = [
 type FactRow = { label?: string; value?: string; _id?: string };
 type ShortcutItem = { label?: string; href?: string; _id?: string };
 
-const DEFAULT_HEADER_FACTS: PinkFactRow[] = [
-  { label: "Response time", value: "1–2 business days" },
-  { label: "Location", value: "Detroit, Michigan" },
-];
+/** Trims `value` and maps blank to `undefined`, for plain `??` chains. */
+function nonBlank(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed?.length ? trimmed : undefined;
+}
 
-const DEFAULT_SHORTCUTS: ShortcutItem[] = [
-  { label: "Ask about a make & take", href: "/services" },
-  { label: "Browse what's ready now", href: "/shop" },
-];
+/**
+ * The header facts shown when the owner hasn't saved any
+ * `pink.contact.header-facts` rows: a single Location row built from
+ * Settings → General (city, plus state when set — e.g. "Detroit, MI"). No
+ * city means no default rows at all, and the header drops its right slot.
+ * (Until 2026-09-26 this was a hardcoded "Response time: 1–2 business days"
+ * + "Location: Detroit, Michigan" pair.)
+ */
+function defaultHeaderFacts(business: {
+  addressCity?: string | null;
+  addressState?: string | null;
+}): PinkFactRow[] {
+  const city = nonBlank(business.addressCity);
+  if (!city) return [];
+  const state = nonBlank(business.addressState);
+  return [{ label: "Location", value: state ? `${city}, ${state}` : city }];
+}
 
-export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
+export async function PinkContactPage({
+  business,
+}: DefaultContactPageTemplateProps) {
   const customFields = business.siteContent?.customFields;
   const rawCustomFields = customFields as Record<string, unknown> | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
 
+  const { isEnabled } = await getBusinessFlags();
+
   const headerFactsRaw = parseTemplateListRows(
     rawCustomFields?.["pink.contact.header-facts"],
   ) as FactRow[];
-  const headerFacts =
-    headerFactsRaw.length > 0
-      ? headerFactsRaw.map((r) => ({
-          label: r.label ?? "",
-          value: r.value ?? "",
-          _id: r._id,
-        }))
-      : DEFAULT_HEADER_FACTS;
+  // Only saved rows are a real `header-facts` list item — the Settings
+  // location fallback isn't part of the saved list, so it never gets a
+  // `data-sp-item` (there's nothing in the list editor for it to focus).
+  const headerFactsFromSaved = headerFactsRaw.length > 0;
+  const headerFacts = headerFactsFromSaved
+    ? headerFactsRaw.map((r) => ({
+        label: r.label ?? "",
+        value: r.value ?? "",
+        _id: r._id,
+      }))
+    : defaultHeaderFacts(business);
 
   const topics = parseTemplateListRows(
     rawCustomFields?.["pink.contact.topics-items"],
@@ -77,7 +108,16 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
   const shortcutsRaw = parseTemplateListRows(
     rawCustomFields?.["pink.contact.shortcuts-items"],
   ) as ShortcutItem[];
-  const shortcuts = shortcutsRaw.length > 0 ? shortcutsRaw : DEFAULT_SHORTCUTS;
+  const shortcutsSource: ShortcutItem[] =
+    shortcutsRaw.length > 0 ? shortcutsRaw : DEFAULT_PINK_CONTACT_SHORTCUTS;
+  // PF15 (B2.5): drop — never redirect — a shortcut whose own href names a
+  // flag that's off (e.g. the default "Ask about a make & take" → /services
+  // row, with `services` off).
+  const shortcuts: ShortcutItem[] = shortcutsSource.filter((item) => {
+    const href = item.href ?? "";
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  });
 
   const socialLinks = resolveSocialLinks(business.siteContent?.socialLinks);
 
@@ -91,11 +131,12 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
     "pink",
     "contact.studio",
   );
-  const shortcutsVisible = isSectionVisible(
-    customFields,
-    "pink",
-    "contact.shortcuts",
-  );
+  // PF15 (B2.5): if every shortcut got filtered out above (e.g. both
+  // defaults' flags are off), don't render an empty wrapper around a heading
+  // with nothing under it.
+  const shortcutsVisible =
+    isSectionVisible(customFields, "pink", "contact.shortcuts") &&
+    shortcuts.length > 0;
 
   const hoursRows = formatBusinessHours(
     parseBusinessHours(business.businessHours),
@@ -117,11 +158,23 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
         headingFieldKey="pink.contact.header-heading"
         intro={f["pink.contact.header-intro"] ?? ""}
         introFieldKey="pink.contact.header-intro"
-        rightSlot={<PinkFactRows rows={headerFacts} surface="paper" />}
+        rightSlot={
+          headerFacts.length > 0 ? (
+            <PinkFactRows
+              rows={headerFacts}
+              surface="paper"
+              itemAttr={
+                headerFactsFromSaved
+                  ? (i) => listItemAttr("pink.contact.header-facts", i)
+                  : undefined
+              }
+            />
+          ) : undefined
+        }
         sectionAttrs={sectionGroupAttr("contact", "header")}
       />
 
-      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-12 px-5 md:grid-cols-[1.15fr_0.85fr] md:px-10 md:pt-16">
+      <div className="mx-auto grid max-w-[1480px] grid-cols-1 gap-12 px-5 md:grid-cols-[1.15fr_0.85fr] md:px-10 md:pt-16">
         {/* ── contact.topics + contact.form (interactive) ─────────────── */}
         <div className="order-2 md:order-1 md:col-span-1">
           <PinkContactForm
@@ -140,6 +193,9 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
             }
             submitLabel={f["pink.contact.form-submit-label"] ?? ""}
             emailNotePrefix={f["pink.contact.form-email-note"] ?? ""}
+            successHeading={f["pink.contact.form-success-heading"] ?? ""}
+            successBody={f["pink.contact.form-success-body"] ?? ""}
+            successAgainLabel={f["pink.contact.form-success-again-label"] ?? ""}
             supportEmail={business.supportEmail}
           />
         </div>
@@ -287,6 +343,7 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                             ? { borderTop: "1px solid var(--pink-line-button)" }
                             : undefined
                         }
+                        {...listItemAttr("pink.contact.shortcuts-items", i)}
                       >
                         <Link
                           href={item.href ?? "/contact"}

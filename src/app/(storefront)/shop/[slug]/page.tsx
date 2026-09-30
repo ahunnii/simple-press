@@ -66,7 +66,15 @@ export default async function ProductDetailPage({ params }: Props) {
   // the page; the inputs must match the client `useQuery` calls exactly or
   // the hydration cache key misses.
   const galleryIds = collectGalleryIds(product.additionalFields);
-  await Promise.all([
+  // Shipping / refund policy pages are optional (the admin only creates the
+  // Page row once the owner saves content, and `getSimplifiedPages` returns
+  // published pages only) — resolved here the same way the checkout page
+  // resolves its `merchantPolicies`, so product templates can link them
+  // without a client fetch. A failure just means "no policy links".
+  const [policyPages] = await Promise.all([
+    api.content
+      .getSimplifiedPages({ type: "policy" })
+      .catch(() => [] as Array<{ slug: string }>),
     reviewsEnabled
       ? api.review.getProductStats
           .prefetch({ productId: product.id })
@@ -89,6 +97,11 @@ export default async function ProductDetailPage({ params }: Props) {
     ),
   ]);
 
+  const productPolicies = {
+    hasShippingPolicy: policyPages.some((p) => p.slug === "shipping-policy"),
+    hasRefundPolicy: policyPages.some((p) => p.slug === "refund-policy"),
+  };
+
   const t = getTemplate(business.templateId);
 
   const productSchema = buildProductSchema(
@@ -107,7 +120,11 @@ export default async function ProductDetailPage({ params }: Props) {
     <HydrateClient>
       <JsonLd data={[productSchema, breadcrumbSchema]} />
       <VariantImageProvider>
-        <t.ProductPage product={product} business={business} />
+        <t.ProductPage
+          product={product}
+          business={business}
+          productPolicies={productPolicies}
+        />
       </VariantImageProvider>
     </HydrateClient>
   );

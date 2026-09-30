@@ -2,23 +2,58 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { TwitterIcon } from "~/components/icons/twitter-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
 
-import { resolveFields } from "../index";
+import { resolveViiLocationTag } from "../shared/vii-location-tag";
+import { nonBlank } from "../shared/vii-non-blank";
+import { hasViiSocialLinks, ViiSocialLinks } from "../shared/vii-social-links";
+import { ViiFooterAccount } from "./vii-footer-account";
+
+/** Same shipped default as `vii-header.tsx`'s `DEFAULT_NAV_LINKS` — the two
+ *  files each keep their own copy (server vs. client component; no shared
+ *  `lib/nav.ts` here yet) rather than reaching across the boundary, same as
+ *  pollen's footer/header pair. */
+const DEFAULT_NAV_LINKS: NavItem[] = [
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About" },
+  { href: "/blog", label: "Blog" },
+  { href: "/contact", label: "Contact" },
+];
+
+const columnHeadingStyle: React.CSSProperties = {
+  fontFamily: "var(--font-sans)",
+  fontSize: "10px",
+  letterSpacing: "0.28em",
+  textTransform: "uppercase",
+  color: "var(--vii-ink-soft)",
+  fontWeight: 500,
+  marginBottom: "20px",
+};
+
+const columnLinkStyle: React.CSSProperties = {
+  fontFamily: "var(--font-sans)",
+  fontSize: "13px",
+  color: "var(--vii-navy)",
+  textDecoration: "none",
+  lineHeight: 1.5,
+  transition: "opacity 0.4s var(--vii-ease)",
+  opacity: 0.85,
+};
 
 export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
-  const email = business?.supportEmail;
-  const phone = business?.phoneNumber;
-  const address = business?.businessAddress;
+  const email = business?.supportEmail?.trim();
+  const phone = business?.phoneNumber?.trim();
+  const address = business?.businessAddress?.trim();
   const hourRows = formatBusinessHours(
     parseBusinessHours(business?.businessHours),
   );
@@ -28,48 +63,37 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
 
   const { isEnabled } = await getBusinessFlags();
 
-  const customFields = business?.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
+  const customFields = business?.siteContent?.customFields;
 
-  const g = resolveFields(customFields, [
-    "vii.global.location-tag",
-    "vii.global.footer-tagline",
-  ]);
-  const locationTag = g["vii.global.location-tag"] ?? "";
+  const locationTag = resolveViiLocationTag(business, customFields);
+
+  // Tagline: Content → Branding → Footer tagline wins; else the legacy
+  // `vii.global.footer-tagline` field (retired 2026-09-25, a read-only
+  // fallback — never written or cleared from here); else hidden.
   const footerTagline =
-    g["vii.global.footer-tagline"] ??
-    "A sanctuary for the senses. Personalized wellness experiences crafted for your body, mind, and spirit.";
+    nonBlank(business?.siteContent?.footerText) ??
+    nonBlank(
+      getRawCustomFieldString(customFields, "vii.global.footer-tagline"),
+    );
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const socialLinks = business?.siteContent?.socialLinks;
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
   const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  const refundPolicy = policies.find((p) => p.slug === "refund-policy");
 
-  const SHOP_LINKS = [
-    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop All" }] : []),
-    ...(isEnabled("collections")
-      ? [{ href: "/collections", label: "Collections" }]
-      : []),
-  ] as const;
-
-  const QUICK_LINKS = [
-    { href: "/about", label: "About Us" },
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
-    { href: "/contact", label: "Contact" },
-    ...(isEnabled("testimonials")
-      ? [{ href: "/testimonials", label: "Reviews" }]
-      : []),
-  ] as const;
+  // Owner's flat footer Quick Links (falls back to the main nav's top level
+  // when unset; an explicit `[]` means "no quick links"). Same shared
+  // route→flag filter (P-NAV-FLAGS) the header applies, so a flag-disabled
+  // route never shows here even if it's in the owner's saved nav.
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: DEFAULT_NAV_LINKS,
+    isEnabled,
+  });
 
   return (
     <footer
@@ -86,7 +110,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           maxWidth: "1320px",
         }}
       >
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.6fr_2.4fr]">
           {/* ── Col 1: Wordmark + tagline + social ── */}
           <div className="flex flex-col gap-6">
             {/* Wordmark */}
@@ -117,7 +141,6 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                 </div>
                 {locationTag && (
                   <div
-                    {...fieldAttr("vii.global.location-tag")}
                     style={{
                       fontFamily: "var(--font-sans)",
                       fontSize: "9px",
@@ -137,7 +160,6 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             {/* Tagline */}
             {footerTagline && (
               <p
-                {...fieldAttr("vii.global.footer-tagline")}
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "13px",
@@ -151,237 +173,164 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             )}
 
             {/* Social icons */}
-            {(socialLinks?.instagram ??
-              socialLinks?.facebook ??
-              socialLinks?.twitter ??
-              socialLinks?.tiktok ??
-              socialLinks?.youtube) && (
-              <div className="flex gap-4">
-                {socialLinks?.instagram && (
-                  <a
-                    href={socialLinks.instagram}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="Instagram"
-                  >
-                    <InstagramIcon className="h-4 w-4" />
-                  </a>
+            {hasViiSocialLinks(socialLinks) && (
+              <ViiSocialLinks socialLinks={socialLinks} />
+            )}
+          </div>
+
+          {/* ── Right: quick links + account + contact ── */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
+            {quickLinks.length > 0 && (
+              <ViiFooterCol
+                title="Quick Links"
+                links={quickLinks.map((l) => ({
+                  href: l.href,
+                  label: l.label,
+                  external: l.external,
+                }))}
+              />
+            )}
+
+            {/* Account — omitted when customerAccounts is off (PF10, B10.3) */}
+            {isEnabled("customerAccounts") && (
+              <ViiFooterAccount
+                ordersEnabled={isEnabled("orders")}
+                linkStyle={columnLinkStyle}
+                headingStyle={columnHeadingStyle}
+              />
+            )}
+
+            {/* ── Contact info ── */}
+            {(!!address || !!email || !!phone || hourRows.length > 0) && (
+              <div>
+                <h2 style={columnHeadingStyle}>Contact</h2>
+
+                {address && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--vii-navy)",
+                        marginBottom: "4px",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Location
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "13px",
+                        lineHeight: 1.8,
+                        color: "var(--vii-ink-soft)",
+                      }}
+                    >
+                      {address}
+                    </p>
+                  </div>
                 )}
-                {socialLinks?.facebook && (
-                  <a
-                    href={socialLinks.facebook}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="Facebook"
-                  >
-                    <FacebookIcon className="h-4 w-4" />
-                  </a>
+
+                {hourRows.length > 0 && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--vii-navy)",
+                        marginBottom: "4px",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Hours
+                    </p>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "13px",
+                        lineHeight: 1.8,
+                        color: "var(--vii-ink-soft)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                      }}
+                    >
+                      {hourRows.map((row) => (
+                        <div
+                          key={row.label}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 12,
+                          }}
+                        >
+                          <span style={{ color: "var(--vii-navy)" }}>
+                            {row.label}
+                          </span>
+                          <span>{row.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                {socialLinks?.twitter && (
-                  <a
-                    href={socialLinks.twitter}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="X (Twitter)"
-                  >
-                    <TwitterIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.tiktok && (
-                  <a
-                    href={socialLinks.tiktok}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="TikTok"
-                  >
-                    <TikTokIcon className="h-4 w-4" />
-                  </a>
-                )}
-                {socialLinks?.youtube && (
-                  <a
-                    href={socialLinks.youtube}
-                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{
-                      color: "var(--vii-ink-soft)",
-                      transition: "opacity 0.4s var(--vii-ease)",
-                    }}
-                    aria-label="YouTube"
-                  >
-                    <YouTubeIcon className="h-4 w-4" />
-                  </a>
+
+                {(!!email || !!phone) && (
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--vii-navy)",
+                        marginBottom: "4px",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Reach out
+                    </p>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "13px",
+                        lineHeight: 1.8,
+                        color: "var(--vii-ink-soft)",
+                      }}
+                    >
+                      {email && (
+                        <a
+                          href={`mailto:${email}`}
+                          className="block hover:opacity-80"
+                          style={{
+                            color: "inherit",
+                            transition: "opacity 0.4s var(--vii-ease)",
+                          }}
+                        >
+                          {email}
+                        </a>
+                      )}
+                      {phone && (
+                        <a
+                          href={`tel:${phone.replace(/\s/g, "")}`}
+                          className="block hover:opacity-80"
+                          style={{
+                            color: "inherit",
+                            transition: "opacity 0.4s var(--vii-ease)",
+                          }}
+                        >
+                          {phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
           </div>
-
-          {/* ── Col 2: Shop links ── */}
-          {SHOP_LINKS.length > 0 && (
-            <ViiFooterCol
-              title="Shop"
-              links={SHOP_LINKS.map((l) => ({ href: l.href, label: l.label }))}
-            />
-          )}
-
-          {/* ── Col 3: Quick links ── */}
-          <ViiFooterCol
-            title="Quick Links"
-            links={QUICK_LINKS.map((l) => ({ href: l.href, label: l.label }))}
-          />
-
-          {/* ── Col 4: Contact info ── */}
-          {(address ?? email ?? phone ?? hourRows.length > 0) && (
-            <div>
-              <h2
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "10px",
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                  color: "var(--vii-ink-soft)",
-                  fontWeight: 500,
-                  marginBottom: "20px",
-                }}
-              >
-                Contact
-              </h2>
-
-              {address && (
-                <div style={{ marginBottom: "16px" }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "var(--vii-navy)",
-                      marginBottom: "4px",
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Location
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "13px",
-                      lineHeight: 1.8,
-                      color: "var(--vii-ink-soft)",
-                    }}
-                  >
-                    {address}
-                  </p>
-                </div>
-              )}
-
-              {hourRows.length > 0 && (
-                <div style={{ marginBottom: "16px" }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "var(--vii-navy)",
-                      marginBottom: "4px",
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Hours
-                  </p>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "13px",
-                      lineHeight: 1.8,
-                      color: "var(--vii-ink-soft)",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                    }}
-                  >
-                    {hourRows.map((row) => (
-                      <div
-                        key={row.label}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 12,
-                        }}
-                      >
-                        <span style={{ color: "var(--vii-navy)" }}>
-                          {row.label}
-                        </span>
-                        <span>{row.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {(email ?? phone) && (
-                <div>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "var(--vii-navy)",
-                      marginBottom: "4px",
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Reach out
-                  </p>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "13px",
-                      lineHeight: 1.8,
-                      color: "var(--vii-ink-soft)",
-                    }}
-                  >
-                    {email && (
-                      <a
-                        href={`mailto:${email}`}
-                        className="block hover:opacity-80"
-                        style={{
-                          color: "inherit",
-                          transition: "opacity 0.4s var(--vii-ease)",
-                        }}
-                      >
-                        {email}
-                      </a>
-                    )}
-                    {phone && (
-                      <a
-                        href={`tel:${phone.replace(/\s/g, "")}`}
-                        className="block hover:opacity-80"
-                        style={{
-                          color: "inherit",
-                          transition: "opacity 0.4s var(--vii-ease)",
-                        }}
-                      >
-                        {phone}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
@@ -405,6 +354,10 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           © {new Date().getFullYear()} {name}
         </span>
 
+        {/* Mandatory, non-hideable policy strip (B10.1, PF9) — privacy/terms
+            fall back to the platform's own policy; shipping/refund have no
+            platform equivalent, so they only appear once published. Index
+            last. */}
         <div
           className="flex flex-wrap gap-5"
           style={{
@@ -415,51 +368,59 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             color: "var(--vii-ink-soft)",
           }}
         >
-          {privacyPolicy ? (
+          <Link
+            href={
+              privacyPolicy
+                ? `/${privacyPolicy.slug}`
+                : "/platform/policies/privacy-policy"
+            }
+            className="hover:opacity-80"
+            style={{
+              color: "inherit",
+              transition: "opacity 0.4s var(--vii-ease)",
+            }}
+          >
+            Privacy Policy
+          </Link>
+
+          <Link
+            href={
+              termsOfService
+                ? `/${termsOfService.slug}`
+                : "/platform/policies/terms-of-service"
+            }
+            className="hover:opacity-80"
+            style={{
+              color: "inherit",
+              transition: "opacity 0.4s var(--vii-ease)",
+            }}
+          >
+            Terms of Service
+          </Link>
+
+          {shippingPolicy && (
             <Link
-              href={`/${privacyPolicy.slug}`}
+              href={`/${shippingPolicy.slug}`}
               className="hover:opacity-80"
               style={{
                 color: "inherit",
                 transition: "opacity 0.4s var(--vii-ease)",
               }}
             >
-              Privacy Policy
-            </Link>
-          ) : (
-            <Link
-              href="/platform/policies/privacy-policy"
-              className="hover:opacity-80"
-              style={{
-                color: "inherit",
-                transition: "opacity 0.4s var(--vii-ease)",
-              }}
-            >
-              Privacy Policy
+              Shipping Policy
             </Link>
           )}
 
-          {termsOfService ? (
+          {refundPolicy && (
             <Link
-              href={`/${termsOfService.slug}`}
+              href={`/${refundPolicy.slug}`}
               className="hover:opacity-80"
               style={{
                 color: "inherit",
                 transition: "opacity 0.4s var(--vii-ease)",
               }}
             >
-              Terms of Service
-            </Link>
-          ) : (
-            <Link
-              href="/platform/policies/terms-of-service"
-              className="hover:opacity-80"
-              style={{
-                color: "inherit",
-                transition: "opacity 0.4s var(--vii-ease)",
-              }}
-            >
-              Terms of Service
+              Refund Policy
             </Link>
           )}
 
@@ -481,43 +442,47 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
 
 function ViiFooterCol({
   title,
+  titleHref,
+  titleExternal,
   links,
 }: {
   title: string;
-  links: { href: string; label: string }[];
+  titleHref?: string;
+  titleExternal?: boolean;
+  links: { href: string; label: string; external?: boolean }[];
 }) {
   return (
     <div>
-      <h2
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "10px",
-          letterSpacing: "0.28em",
-          textTransform: "uppercase",
-          color: "var(--vii-ink-soft)",
-          fontWeight: 500,
-          marginBottom: "20px",
-        }}
-      >
-        {title}
+      <h2 style={columnHeadingStyle}>
+        {titleHref ? (
+          <Link
+            href={titleHref}
+            {...externalLinkProps(titleExternal)}
+            style={{ color: "inherit", textDecoration: "none" }}
+            className="hover:opacity-80"
+          >
+            {title}
+            {titleExternal ? (
+              <span className="sr-only"> (opens in new tab)</span>
+            ) : null}
+          </Link>
+        ) : (
+          title
+        )}
       </h2>
       <ul className="flex flex-col gap-3">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                color: "var(--vii-navy)",
-                textDecoration: "none",
-                lineHeight: 1.5,
-                transition: "opacity 0.4s var(--vii-ease)",
-                opacity: 0.85,
-              }}
+              {...externalLinkProps(link.external)}
+              style={columnLinkStyle}
               className="hover:opacity-100"
             >
               {link.label}
+              {link.external ? (
+                <span className="sr-only"> (opens in new tab)</span>
+              ) : null}
             </Link>
           </li>
         ))}

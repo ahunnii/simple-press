@@ -1,6 +1,7 @@
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { resolveFaqPickerItems } from "~/lib/template-fields";
@@ -25,6 +26,8 @@ export function ModernContactPage({
 
     "modern.contact.form-title",
     "modern.contact.form-description",
+    "modern.contact.form-success-heading",
+    "modern.contact.form-success-body",
 
     "modern.contact.faq-tagline",
     "modern.contact.faq-heading",
@@ -39,6 +42,9 @@ export function ModernContactPage({
   const displayEmail = business?.supportEmail;
   const displayAddress = business?.businessAddress;
   const displayPhone = business?.phoneNumber;
+  const hoursRows = formatBusinessHours(
+    parseBusinessHours(business?.businessHours),
+  );
 
   return (
     <div className="bg-background">
@@ -104,9 +110,12 @@ export function ModernContactPage({
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
                         Email
                       </h3>
-                      <p className="text-muted-foreground mt-1 text-sm">
+                      <a
+                        href={`mailto:${displayEmail}`}
+                        className="text-muted-foreground hover:text-foreground mt-1 block text-sm transition-colors hover:underline hover:underline-offset-4"
+                      >
                         {displayEmail}
-                      </p>
+                      </a>
                     </div>
                   </div>
                 )}
@@ -123,9 +132,12 @@ export function ModernContactPage({
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
                         Phone
                       </h3>
-                      <p className="text-muted-foreground mt-1 text-sm">
+                      <a
+                        href={`tel:${displayPhone}`}
+                        className="text-muted-foreground hover:text-foreground mt-1 block text-sm transition-colors hover:underline hover:underline-offset-4"
+                      >
                         {displayPhone}
-                      </p>
+                      </a>
                     </div>
                   </div>
                 )}
@@ -145,6 +157,34 @@ export function ModernContactPage({
                       <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
                         {displayAddress}
                       </p>
+                    </div>
+                  </div>
+                )}
+
+                {hoursRows.length > 0 && (
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <Clock
+                        className="text-primary h-4 w-4"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
+                        Hours
+                      </h3>
+                      <dl className="mt-1 flex flex-col gap-0.5">
+                        {hoursRows.map((row) => (
+                          <div key={row.label} className="flex gap-2 text-sm">
+                            <dt className="text-muted-foreground">
+                              {row.label}
+                            </dt>
+                            <dd className="text-muted-foreground">
+                              {row.value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
                     </div>
                   </div>
                 )}
@@ -169,7 +209,10 @@ export function ModernContactPage({
                 >
                   {f["modern.contact.form-description"]}
                 </p>
-                <ModernContactForm />
+                <ModernContactForm
+                  successHeading={f["modern.contact.form-success-heading"]}
+                  successBody={f["modern.contact.form-success-body"]}
+                />
               </div>
             </div>
           </div>

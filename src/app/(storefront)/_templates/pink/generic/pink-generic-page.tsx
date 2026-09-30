@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { getListFieldValue } from "~/lib/template-fields";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
@@ -46,12 +46,16 @@ export function PinkGenericPage({
 
   const rawFactRows =
     getListFieldValue(customFields, "pink.global.page-facts") ?? [];
+  // `_originalIndex` carries each row's position in the SAVED
+  // `page-facts` list through the blank-row filter below, so a click still
+  // opens the right list-editor row (see `itemAttr` on `PinkFactRows`).
   const factRows = rawFactRows
     .filter((r): r is Record<string, unknown> => !!r && typeof r === "object")
     .map((r, i) => ({
       _id: typeof r._id === "string" ? r._id : `fact-${i}`,
       label: typeof r.label === "string" ? r.label : "",
       value: typeof r.value === "string" ? r.value : "",
+      _originalIndex: i,
     }))
     .filter((r) => r.label && r.value);
   const showFacts =
@@ -76,7 +80,16 @@ export function PinkGenericPage({
         rightSlot={
           showFacts ? (
             <div {...sectionGroupAttr("global", "page-facts")}>
-              <PinkFactRows rows={factRows} surface="paper" />
+              <PinkFactRows
+                rows={factRows}
+                surface="paper"
+                itemAttr={(i) =>
+                  listItemAttr(
+                    "pink.global.page-facts",
+                    factRows[i]!._originalIndex,
+                  )
+                }
+              />
             </div>
           ) : undefined
         }

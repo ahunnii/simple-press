@@ -89,7 +89,7 @@ export function NoiseOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                 className="border-foreground/15 grid gap-4 border-b px-5 py-3"
                 style={{ gridTemplateColumns: "1fr auto auto" }}
               >
-                {["Garment", "Qty", "Total"].map((h) => (
+                {["Item", "Qty", "Total"].map((h) => (
                   <span
                     key={h}
                     className="font-mono text-[9.5px] tracking-[0.22em] uppercase"

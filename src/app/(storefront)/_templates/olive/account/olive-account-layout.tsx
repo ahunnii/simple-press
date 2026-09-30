@@ -6,30 +6,12 @@ import { usePathname } from "next/navigation";
 
 import type { OliveBreadcrumbItem } from "../shared";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  activeEntryIndex,
+  getAccountNavLinks,
+} from "~/app/(storefront)/_components/nav";
 
 import { OliveBreadcrumb, OliveChip, OliveSection } from "../shared";
-
-type OliveAccountNavItem = {
-  href: string;
-  label: string;
-  /** Gates the item behind a storefront feature flag. Omit for always-on items. */
-  flag?: string;
-};
-
-const NAV_ITEMS: OliveAccountNavItem[] = [
-  { href: "/account/orders", label: "Orders" },
-  {
-    href: "/account/subscriptions",
-    label: "Subscriptions",
-    flag: "subscriptions",
-  },
-  { href: "/account/invoices", label: "Invoices", flag: "invoices" },
-  { href: "/account/settings", label: "Settings" },
-  { href: "/account/security", label: "Security" },
-  { href: "/account/address-book", label: "Address Book" },
-  { href: "/account/preferences", label: "Preferences" },
-  { href: "/account/rewards", label: "Rewards", flag: "loyalty" },
-];
 
 type Props = {
   children: ReactNode;
@@ -54,13 +36,8 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
 
-  const navItems = NAV_ITEMS.filter(
-    (item) => !item.flag || isEnabled(item.flag),
-  );
-
-  function isActive(href: string): boolean {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  }
+  const navItems = getAccountNavLinks({ isEnabled });
+  const activeIndex = activeEntryIndex(pathname, navItems);
 
   return (
     <div className="olive-account">
@@ -85,10 +62,10 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
             role="list"
             className="m-0 flex list-none gap-1.5 overflow-x-auto p-0 pb-2"
           >
-            {navItems.map((item) => {
-              const active = isActive(item.href);
+            {navItems.map((item, i) => {
+              const active = i === activeIndex;
               return (
-                <li key={item.href} className="shrink-0">
+                <li key={item.key} className="shrink-0">
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
@@ -123,10 +100,10 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
                 padding: "0.75rem",
               }}
             >
-              {navItems.map((item) => {
-                const active = isActive(item.href);
+              {navItems.map((item, i) => {
+                const active = i === activeIndex;
                 return (
-                  <li key={item.href}>
+                  <li key={item.key}>
                     <Link
                       href={item.href}
                       aria-current={active ? "page" : undefined}

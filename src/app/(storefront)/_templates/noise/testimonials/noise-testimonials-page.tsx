@@ -46,23 +46,6 @@ export async function NoiseTestimonialsPage({
   const emptyStateText =
     f["noise.testimonials.empty-state-text"] ??
     "No voices yet. Check back soon.";
-  const count = testimonials.length;
-
-  /* Star distribution — use testimonial rating if available, otherwise assume 5 */
-  type TestimonialWithRating = (typeof testimonials)[number] & {
-    rating?: number;
-  };
-  const withRatings = testimonials as TestimonialWithRating[];
-  const dist = [5, 4, 3, 2, 1].map((star) => ({
-    star,
-    n: withRatings.filter((t) => (t.rating ?? 5) === star).length,
-  }));
-  const avgRating =
-    count > 0
-      ? (
-          withRatings.reduce((sum, t) => sum + (t.rating ?? 5), 0) / count
-        ).toFixed(1)
-      : "5.0";
 
   return (
     <PageTransition>
@@ -192,13 +175,13 @@ export async function NoiseTestimonialsPage({
 }
 
 /* ── Card component — server-safe ── */
-type TWithRating = Awaited<ReturnType<typeof api.testimonial.list>>[number] & {
-  rating?: number;
-  productName?: string;
-};
-
-function TestimonialCard({ t, i }: { t: TWithRating; i: number }) {
-  const stars = t.rating ?? 5;
+function TestimonialCard({
+  t,
+  i,
+}: {
+  t: Awaited<ReturnType<typeof api.testimonial.list>>[number];
+  i: number;
+}) {
   const headline = extractHeadline(t.text);
   const body =
     t.text.length > headline.replace(/[.!?]$/, "").length ? t.text : t.text;
@@ -216,28 +199,8 @@ function TestimonialCard({ t, i }: { t: TWithRating; i: number }) {
         gap: "12px",
       }}
     >
-      {/* Stars + date */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span
-          aria-hidden="true"
-          style={{
-            fontSize: "14px",
-            letterSpacing: "0.16em",
-            color: "var(--vn-ink)",
-          }}
-        >
-          {"★".repeat(stars)}
-          <span style={{ color: "var(--vn-rule)" }}>
-            {"★".repeat(5 - stars)}
-          </span>
-        </span>
-        <span className="sr-only">Rated {stars} out of 5 stars</span>
+      {/* Card number */}
+      <div>
         <span
           className="font-mono text-[10px] tracking-[0.14em] uppercase"
           style={{ color: "var(--vn-steel-mist)" }}
@@ -286,51 +249,29 @@ function TestimonialCard({ t, i }: { t: TWithRating; i: number }) {
         </div>
       )}
 
-      {/* Footer — name + location + product */}
+      {/* Footer — name + location */}
       <div
         style={{
           borderTop: "1px solid var(--vn-line-soft)",
           paddingTop: "16px",
           marginTop: "4px",
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: "12px",
         }}
       >
-        <div>
-          <p
-            className="font-mono text-[11px] tracking-[0.14em] uppercase"
-            style={{ color: "var(--vn-ink)", fontWeight: 500 }}
-          >
-            {t.customerName}
-          </p>
-          {(t.customerTitle ?? t.customerCompany) && (
-            <p
-              className="mt-0.5 font-mono text-[10px] tracking-[0.14em] uppercase"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
-              {t.customerTitle ?? t.customerCompany}
-            </p>
-          )}
-        </div>
-        <span
-          className="flex-shrink-0 text-right font-mono text-[9.5px] tracking-[0.14em] uppercase"
-          style={{ color: "var(--vn-steel-mist)" }}
-        >
-          Verified buyer
-        </span>
-      </div>
-
-      {/* Product name (if available) */}
-      {t.productName && (
         <p
-          className="font-mono text-[10px] tracking-[0.14em] uppercase"
-          style={{ color: "var(--vn-steel-mist)", marginTop: "-4px" }}
+          className="font-mono text-[11px] tracking-[0.14em] uppercase"
+          style={{ color: "var(--vn-ink)", fontWeight: 500 }}
         >
-          On · {t.productName}
+          {t.customerName}
         </p>
-      )}
+        {(t.customerTitle ?? t.customerCompany) && (
+          <p
+            className="mt-0.5 font-mono text-[10px] tracking-[0.14em] uppercase"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            {t.customerTitle ?? t.customerCompany}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

@@ -6,20 +6,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useCart } from "~/providers/cart-context";
+
+import { resolveFields } from "..";
 
 type Props = {
   business: {
     id: string;
     siteContent: {
       primaryColor: string | null;
+      customFields?: unknown;
     } | null;
   };
 };
 
-export function DarkTrendCartContents({ business: _business }: Props) {
+export function DarkTrendCartContents({ business }: Props) {
   const router = useRouter();
   const {
     items,
@@ -54,23 +58,51 @@ export function DarkTrendCartContents({ business: _business }: Props) {
   };
 
   if (items.length === 0) {
+    const f = resolveFields(business.siteContent?.customFields, [
+      "dark-trend.cart.empty-heading",
+      "dark-trend.cart.empty-body",
+      "dark-trend.cart.empty-button",
+    ]);
+    const emptyHeading = f["dark-trend.cart.empty-heading"] ?? "";
+    const emptyBody = (f["dark-trend.cart.empty-body"] ?? "").trim();
+    const emptyButton = (f["dark-trend.cart.empty-button"] ?? "").trim();
+
     return (
-      <div className="py-16 text-center">
+      <div
+        {...sectionGroupAttr("cart", "empty")}
+        className="py-16 text-center"
+      >
         {/* N-1: decorative icon */}
         <ShoppingBag
           aria-hidden="true"
           className="mx-auto mb-4 h-16 w-16 text-white/40"
         />
-        <h2 className="mb-2 text-2xl font-semibold text-white">
-          Your cart is empty
-        </h2>
-        <p className="mb-8 text-white/70">Add some products to get started!</p>
-        <Button
-          asChild
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+        <h2
+          {...fieldAttr("dark-trend.cart.empty-heading")}
+          className="mb-2 text-2xl font-semibold text-white"
         >
-          <Link href="/shop">Shop Products</Link>
-        </Button>
+          {emptyHeading}
+        </h2>
+        {emptyBody ? (
+          <p
+            {...fieldAttr("dark-trend.cart.empty-body")}
+            className="mb-8 text-white/70"
+          >
+            {emptyBody}
+          </p>
+        ) : null}
+        {emptyButton ? (
+          <Button
+            asChild
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Link href="/shop">
+              <span {...fieldAttr("dark-trend.cart.empty-button")}>
+                {emptyButton}
+              </span>
+            </Link>
+          </Button>
+        ) : null}
       </div>
     );
   }

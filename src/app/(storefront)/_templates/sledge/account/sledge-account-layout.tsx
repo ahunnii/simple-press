@@ -3,17 +3,48 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
+import {
+  Bell,
+  BookUser,
+  FileText,
+  Gift,
+  Lock,
+  Package,
+  Repeat,
+  Settings,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { cn } from "~/lib/utils";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-const NAV_ITEMS = [
+type SledgeAccountNavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  flag?: string;
+};
+
+const NAV_ITEMS: SledgeAccountNavItem[] = [
   { href: "/account/orders", label: "Orders", icon: Package },
+  {
+    href: "/account/subscriptions",
+    label: "Subscriptions",
+    icon: Repeat,
+    flag: "subscriptions",
+  },
+  {
+    href: "/account/invoices",
+    label: "Invoices",
+    icon: FileText,
+    flag: "invoices",
+  },
   { href: "/account/settings", label: "Settings", icon: Settings },
   { href: "/account/security", label: "Security", icon: Lock },
   { href: "/account/address-book", label: "Address Book", icon: BookUser },
   { href: "/account/preferences", label: "Preferences", icon: Bell },
-] as const;
+  { href: "/account/rewards", label: "Rewards", icon: Gift, flag: "loyalty" },
+];
 
 type Props = {
   children: ReactNode;
@@ -22,6 +53,11 @@ type Props = {
 
 export function SledgeAccountLayout({ children, heading }: Props) {
   const pathname = usePathname();
+  const { isEnabled } = useStorefrontFlags();
+
+  const navItems = NAV_ITEMS.filter(
+    (item) => !item.flag || isEnabled(item.flag),
+  );
 
   return (
     <>
@@ -37,7 +73,7 @@ export function SledgeAccountLayout({ children, heading }: Props) {
           className="mx-auto mt-6 flex max-w-7xl gap-2 overflow-x-auto pb-1 md:hidden"
           aria-label="Account navigation"
         >
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {navItems.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
@@ -61,7 +97,7 @@ export function SledgeAccountLayout({ children, heading }: Props) {
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 md:grid-cols-[220px_1fr]">
           <nav className="hidden md:block" aria-label="Account navigation">
             <ul className="flex flex-col gap-1">
-              {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              {navItems.map(({ href, label, icon: Icon }) => {
                 const active =
                   pathname === href || pathname.startsWith(`${href}/`);
                 return (

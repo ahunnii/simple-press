@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, ShoppingBag } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { useCart } from "~/providers/cart-context";
 
@@ -17,9 +18,17 @@ type Props = {
     freeShippingThreshold: number | null;
     offersInStorePickup: boolean;
   };
+  emptyHeading: string;
+  emptyText: string;
+  emptyButtonText: string;
 };
 
-export function ModernCartContents({ business }: Props) {
+export function ModernCartContents({
+  business,
+  emptyHeading,
+  emptyText,
+  emptyButtonText,
+}: Props) {
   const { items, isHydrated } = useCart();
 
   const shippingConfig = shippingConfigFromBusiness(business);
@@ -36,17 +45,25 @@ export function ModernCartContents({ business }: Props) {
           aria-hidden="true"
           className="text-muted-foreground/40 mx-auto h-12 w-12"
         />
-        <h2 className="text-foreground mt-4 font-serif text-2xl">
-          Your cart is empty
+        <h2
+          className="text-foreground mt-4 font-serif text-2xl"
+          {...fieldAttr("modern.global.cart-empty-heading")}
+        >
+          {emptyHeading}
         </h2>
-        <p className="text-muted-foreground mt-2 text-sm">
-          Looks like you have not added any items yet.
+        <p
+          className="text-muted-foreground mt-2 text-sm"
+          {...fieldAttr("modern.global.cart-empty-text")}
+        >
+          {emptyText}
         </p>
         <Link
           href="/shop"
           className="bg-primary text-primary-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
         >
-          Start Shopping
+          <span {...fieldAttr("modern.global.cart-empty-button")}>
+            {emptyButtonText}
+          </span>
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
       </div>

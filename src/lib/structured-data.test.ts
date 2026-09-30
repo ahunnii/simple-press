@@ -576,6 +576,135 @@ describe("buildLocalBusinessSchema", () => {
       expect(schema).not.toHaveProperty("areaServed");
     });
   });
+
+  describe("geo coordinates", () => {
+    it("emits geo with both valid coordinates for storefront mode", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: 42.33,
+        longitude: -83.14,
+      });
+
+      expect(schema.geo).toEqual({
+        "@type": "GeoCoordinates",
+        latitude: 42.33,
+        longitude: -83.14,
+      });
+    });
+
+    it("omits geo when latitude is out of range (> 90)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: 91.0,
+        longitude: -83.14,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when latitude is out of range (< -90)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: -91.0,
+        longitude: -83.14,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when longitude is out of range (> 180)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: 42.33,
+        longitude: 181.0,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when longitude is out of range (< -180)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: 42.33,
+        longitude: -181.0,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when only latitude is present (missing longitude)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: 42.33,
+        longitude: undefined,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when only longitude is present (missing latitude)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: undefined,
+        longitude: -83.14,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when both coordinates are null", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: null,
+        longitude: null,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("never emits geo for service_area mode even with valid coordinates", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "service_area",
+        addressCity: "Detroit",
+        addressState: "MI",
+        latitude: 42.33,
+        longitude: -83.14,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when coordinates are non-finite (NaN)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: NaN,
+        longitude: -83.14,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+
+    it("omits geo when coordinates are non-finite (Infinity)", () => {
+      const schema = buildLocalBusinessSchema({
+        ...business,
+        localPresence: "storefront",
+        latitude: Infinity,
+        longitude: -83.14,
+      });
+
+      expect(schema).not.toHaveProperty("geo");
+    });
+  });
 });
 
 describe("buildBlogPostingSchema", () => {

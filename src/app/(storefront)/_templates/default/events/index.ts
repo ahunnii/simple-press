@@ -3,8 +3,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const eventsHeroData: TemplateField[] = [
   {
     key: "default.events.hero-eyebrow",
-    label: "Hero Eyebrow",
-    description: "Small label above the page heading",
+    label: "Small label",
+    description:
+      "Short text above the page heading on the Events page. Leave blank to hide.",
     type: "text",
     page: "events",
     group: "events.hero",
@@ -13,8 +14,8 @@ const eventsHeroData: TemplateField[] = [
   },
   {
     key: "default.events.hero-heading",
-    label: "Hero Heading",
-    description: "Main heading for the Events page",
+    label: "Heading",
+    description: "Main heading at the top of the Events page.",
     type: "text",
     page: "events",
     group: "events.hero",
@@ -24,8 +25,8 @@ const eventsHeroData: TemplateField[] = [
   },
   {
     key: "default.events.hero-tagline",
-    label: "Hero Tagline",
-    description: "Short line below the heading",
+    label: "Intro text",
+    description: "Short line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "events",
     group: "events.hero",
@@ -38,9 +39,9 @@ const eventsHeroData: TemplateField[] = [
 const eventsListData: TemplateField[] = [
   {
     key: "default.events.list-link-fallback-label",
-    label: "Default Link Label",
+    label: "Default link label",
     description:
-      "Label used for an event's external link when the event itself doesn't set one",
+      "Label used for an event's external link when that event doesn't set its own link label.",
     type: "text",
     page: "events",
     group: "events.list",
@@ -49,8 +50,8 @@ const eventsListData: TemplateField[] = [
   },
   {
     key: "default.events.list-empty-heading",
-    label: "Empty Heading",
-    description: "Heading shown when there are no upcoming events",
+    label: "Empty state heading",
+    description: "Heading shown on the Events page when there are no upcoming events.",
     type: "text",
     page: "events",
     group: "events.list",
@@ -59,22 +60,23 @@ const eventsListData: TemplateField[] = [
   },
   {
     key: "default.events.list-empty-body",
-    label: "Empty Body",
-    description: "Supporting copy shown below the empty-state heading",
+    label: "Empty state message",
+    description:
+      "Line below the empty-state heading when there are no upcoming events. Leave blank to hide.",
     type: "textarea",
     page: "events",
     group: "events.list",
     gridColumn: "col-span-full",
     defaultValue: "Check back soon — new dates are posted here.",
-    placeholder: "Check back soon — new dates are posted here.",
+    placeholder: "One short sentence",
   },
 ];
 
 const eventsCtaData: TemplateField[] = [
   {
     key: "default.events.cta-heading",
-    label: "CTA Heading",
-    description: "Heading for the bottom call-to-action strip",
+    label: "Heading",
+    description: "Heading for the bottom call-to-action strip.",
     type: "text",
     page: "events",
     group: "events.cta",
@@ -84,19 +86,20 @@ const eventsCtaData: TemplateField[] = [
   },
   {
     key: "default.events.cta-body",
-    label: "CTA Body",
-    description: "Supporting copy shown below the CTA heading",
+    label: "Body text",
+    description:
+      "Line below the heading in the bottom call-to-action strip. Leave blank to hide.",
     type: "textarea",
     page: "events",
     group: "events.cta",
     gridColumn: "col-span-full",
     defaultValue: "Tell us the room and roughly how many people.",
-    placeholder: "Tell us the room and roughly how many people.",
+    placeholder: "One short sentence",
   },
   {
     key: "default.events.cta-button-text",
-    label: "CTA Button Text",
-    description: "Label for the CTA button",
+    label: "Button text",
+    description: "Label on the bottom call-to-action button.",
     type: "text",
     page: "events",
     group: "events.cta",
@@ -105,8 +108,8 @@ const eventsCtaData: TemplateField[] = [
   },
   {
     key: "default.events.cta-button-link",
-    label: "CTA Button Link",
-    description: "Where the CTA button points",
+    label: "Button link",
+    description: "Where the bottom button goes, e.g. /contact.",
     type: "url",
     page: "events",
     group: "events.cta",
@@ -124,22 +127,22 @@ export const defaultEventsData: TemplateField[] = [
 export const defaultEventsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "events.hero",
-    title: "Events — Hero",
-    description: "Page heading and tagline",
+    title: "Hero",
+    description: "Page heading and intro text.",
     icon: "🎫",
     columns: 2,
   },
   {
     id: "events.list",
-    title: "Events — List",
-    description: "Fallback link label and empty-state copy",
+    title: "List",
+    description: "Fallback link label and empty-state copy.",
     icon: "📅",
     columns: 2,
   },
   {
     id: "events.cta",
-    title: "Events — CTA",
-    description: "Bottom call-to-action strip",
+    title: "Closing banner",
+    description: "Bottom banner inviting visitors to get in touch.",
     icon: "👆",
     columns: 2,
   },

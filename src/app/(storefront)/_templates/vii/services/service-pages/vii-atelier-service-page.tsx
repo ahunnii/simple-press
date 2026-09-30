@@ -47,6 +47,7 @@ import {
 } from "../../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
 import { ViiOverline } from "../../shared/vii-overline";
+import { VII_EDGE_CONTAINER } from "../../shared/vii-page-edge";
 import { resolveAtelierFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -788,7 +789,7 @@ function AtelierList({
       }}
     >
       <AtelierListStyles />
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div style={VII_EDGE_CONTAINER}>
         {/* Section header */}
         <div
           ref={headRef}

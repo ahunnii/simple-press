@@ -3,46 +3,19 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Bell,
-  BookUser,
-  FileText,
-  Lock,
-  Package,
-  Repeat,
-  Settings,
-} from "lucide-react";
 
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
+import { HB_ACCOUNT_LINK_ICONS } from "../lib/account-link-icons";
+
 type NavItem = {
   href: string;
   label: string;
-  icon: typeof Package;
-  flag?: string;
+  icon: ReactNode;
 };
-
-const BASE_NAV_ITEMS: NavItem[] = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  {
-    href: "/account/subscriptions",
-    label: "Subscriptions",
-    icon: Repeat,
-    flag: "subscriptions",
-  },
-  {
-    href: "/account/invoices",
-    label: "Invoices",
-    icon: FileText,
-    flag: "invoices",
-  },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
-];
 
 type Props = {
   children: ReactNode;
@@ -58,9 +31,13 @@ export function HappyBambooAccountLayout({
   const pathname = usePathname();
   const flags = useStorefrontFlags();
 
-  const NAV_ITEMS = BASE_NAV_ITEMS.filter(
-    (item) => !item.flag || flags.isEnabled(item.flag),
-  );
+  const NAV_ITEMS: NavItem[] = getAccountNavLinks({
+    isEnabled: flags.isEnabled,
+  }).map((link) => ({
+    href: link.href,
+    label: link.label,
+    icon: HB_ACCOUNT_LINK_ICONS[link.key] ?? null,
+  }));
 
   return (
     <>
@@ -70,7 +47,7 @@ export function HappyBambooAccountLayout({
             <p className="text-primary mb-2 text-sm font-semibold tracking-wider uppercase">
               Account
             </p>
-            <h1 className="font-heading text-foreground text-4xl font-bold">
+            <h1 className="text-foreground font-serif text-4xl font-bold">
               {heading}
             </h1>
             {breadcrumb && (
@@ -99,14 +76,9 @@ export function HappyBambooAccountLayout({
           className="mb-8 flex gap-1 overflow-x-auto pb-2 md:hidden"
           aria-label="Account navigation"
         >
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {NAV_ITEMS.map(({ href, label, icon }) => {
             const active =
-              href === "/account/settings" || href === "/account/security"
-                ? pathname.startsWith("/account/settings") ||
-                  pathname.startsWith("/account/security")
-                  ? pathname.startsWith(href)
-                  : false
-                : pathname === href || pathname.startsWith(href + "/");
+              pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={href}
@@ -118,7 +90,7 @@ export function HappyBambooAccountLayout({
                     : "bg-secondary text-foreground hover:bg-secondary/80",
                 )}
               >
-                <Icon className="h-4 w-4" aria-hidden />
+                {icon}
                 {label}
               </Link>
             );
@@ -129,7 +101,7 @@ export function HappyBambooAccountLayout({
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[220px_1fr]">
           <nav className="hidden md:block" aria-label="Account navigation">
             <ul className="space-y-1">
-              {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              {NAV_ITEMS.map(({ href, label, icon }) => {
                 const active =
                   pathname === href || pathname.startsWith(href + "/");
                 return (
@@ -143,7 +115,7 @@ export function HappyBambooAccountLayout({
                           : "text-foreground/70 hover:bg-secondary/60 hover:text-foreground border-transparent",
                       )}
                     >
-                      <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                      <span className="shrink-0">{icon}</span>
                       {label}
                     </Link>
                   </li>

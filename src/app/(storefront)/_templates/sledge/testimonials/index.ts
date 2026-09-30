@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const testimonialsPageData: TemplateField[] = [
   {
     key: "sledge.testimonials.page-heading",
-    label: "Page Heading",
-    description: "Large heading at the top of the testimonials page",
+    label: "Heading",
+    description: "Large heading at the top of the testimonials page.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -13,8 +13,8 @@ const testimonialsPageData: TemplateField[] = [
   },
   {
     key: "sledge.testimonials.page-intro",
-    label: "Page Intro",
-    description: "Short line shown below the page heading",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.page",
@@ -22,19 +22,9 @@ const testimonialsPageData: TemplateField[] = [
     defaultValue: "Check out what our customers have been saying about us!",
   },
   {
-    key: "sledge.testimonials.trending-heading",
-    label: "Trending Section Heading",
-    description: "Heading for the product rail below the testimonials",
-    type: "text",
-    page: "testimonials",
-    group: "testimonials.page",
-    gridColumn: "col-span-1",
-    defaultValue: "Trending Now",
-  },
-  {
     key: "sledge.testimonials.empty-state-text",
-    label: "Empty State Text",
-    description: "Text shown when there are no testimonials yet",
+    label: "Empty state text",
+    description: "Text shown when there are no testimonials yet.",
     type: "text",
     page: "testimonials",
     group: "testimonials.page",
@@ -43,16 +33,39 @@ const testimonialsPageData: TemplateField[] = [
   },
 ];
 
-export const sledgeTestimonialsData = [...testimonialsPageData];
+const testimonialsTrendingData: TemplateField[] = [
+  {
+    key: "sledge.testimonials.trending-heading",
+    label: "Heading",
+    description: "Heading for the product rail below the testimonials.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.trending",
+    gridColumn: "col-span-1",
+    defaultValue: "Trending Now",
+  },
+];
+
+export const sledgeTestimonialsData = [
+  ...testimonialsPageData,
+  ...testimonialsTrendingData,
+];
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
 export const sledgeTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.page",
-    title: "Testimonials Page",
-    description: "Heading, intro, trending section, and empty state",
+    title: "Testimonials page",
+    description: "Heading, intro text, and empty state.",
     icon: "💬",
     columns: 2,
+  },
+  {
+    id: "testimonials.trending",
+    title: "Trending products",
+    description: "Product rail shown below the testimonials.",
+    icon: "🛍️",
+    columns: 1,
   },
 ];

@@ -4,6 +4,7 @@ import { ArrowRight, Package, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
+import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 
 export function BambooCollectionsPage({
   business,
@@ -21,6 +23,7 @@ export function BambooCollectionsPage({
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
   const f = resolveFields(business.siteContent?.customFields, [
+    "bamboo.collections.listing-eyebrow",
     "bamboo.collections.listing-title",
     "bamboo.collections.listing-intro",
   ]);
@@ -30,11 +33,19 @@ export function BambooCollectionsPage({
         {/* Header */}
         <FadeIn
           {...sectionGroupAttr("collections", "listing")}
-          className="bg-[var(--bam-cream-deep)] px-4 py-16 text-center sm:px-6 md:py-24 lg:px-8"
+          className={cn(
+            "bg-[var(--bam-cream-deep)] px-4 py-16 text-center sm:px-6 md:py-24 lg:px-8",
+            BAMBOO_EMBLEM_CLEAR,
+          )}
         >
-          <p className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
-            Collections
-          </p>
+          {f["bamboo.collections.listing-eyebrow"] ? (
+            <p
+              className="text-sm font-semibold tracking-widest text-[var(--bam-gold)] uppercase"
+              {...fieldAttr("bamboo.collections.listing-eyebrow")}
+            >
+              {f["bamboo.collections.listing-eyebrow"]}
+            </p>
+          ) : null}
           <h1
             className="font-serif text-foreground mt-3 text-4xl font-bold tracking-tight md:text-5xl"
             {...fieldAttr("bamboo.collections.listing-title")}

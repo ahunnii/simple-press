@@ -7,6 +7,7 @@ import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import type { ShippingConfig } from "~/lib/shipping-utils";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { Button } from "~/components/ui/button";
@@ -22,10 +23,16 @@ import { HappyBambooCartSummary } from "./happy-bamboo-cart-summary";
 
 type HappyBambooCartDrawerProps = {
   shippingConfig: ShippingConfig;
+  /** Title at the top of the cart panel. */
+  cartLabel: string;
+  /** Line under "Your cart is empty". Blank hides it. */
+  cartEmptyText: string;
 };
 
 export function HappyBambooCartDrawer({
   shippingConfig,
+  cartLabel,
+  cartEmptyText,
 }: HappyBambooCartDrawerProps) {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem } = useCart();
   const reducedMotion = useReducedMotion();
@@ -48,7 +55,9 @@ export function HappyBambooCartDrawer({
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-            Your Cart
+            <span {...fieldAttr("happy-bamboo.global.cart-label")}>
+              {cartLabel}
+            </span>
           </SheetTitle>
         </SheetHeader>
 
@@ -59,6 +68,14 @@ export function HappyBambooCartDrawer({
               aria-hidden="true"
             />
             <p className="text-muted-foreground">Your cart is empty</p>
+            {!!cartEmptyText && (
+              <p
+                className="text-muted-foreground max-w-xs text-center text-sm"
+                {...fieldAttr("happy-bamboo.global.cart-empty-text")}
+              >
+                {cartEmptyText}
+              </p>
+            )}
             <Button onClick={() => setIsOpen(false)} asChild>
               <Link href="/shop">Continue Shopping</Link>
             </Button>

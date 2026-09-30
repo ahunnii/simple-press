@@ -1,3 +1,9 @@
+import { TEMPLATES } from "~/lib/constants";
+
+// Runtime-QA business subdomain; gets every registered template, not just the
+// ones manually opted in below.
+export const DEMO_SUBDOMAIN = "demo";
+
 const AVAILABLE_FREE_TEMPLATES = [
   {
     value: "modern",
@@ -16,8 +22,7 @@ const AVAILABLE_FREE_TEMPLATES = [
 const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   bamboo: {
     label: "Bamboo",
-    // "demo" is included so runtime QA can switch the demo business to this template.
-    subdomains: ["finallyresults", "demo"],
+    subdomains: ["finallyresults"],
   },
   "happy-bamboo": {
     label: "Happy Bamboo",
@@ -40,11 +45,10 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     subdomains: ["buildingcooperatively", "detroit-coop"],
   },
   // Exact replica of buildingcooperatively.com (short-lived demo of their
-  // existing site; ideally they migrate to `builders`). "demo" is included so
-  // runtime QA can switch the demo business to this template.
+  // existing site; ideally they migrate to `builders`).
   coop: {
     label: "Coop",
-    subdomains: ["buildingcooperatively", "demo"],
+    subdomains: ["buildingcooperatively"],
   },
   sledge: {
     label: "Sledge",
@@ -52,45 +56,39 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   },
   vii: {
     label: "Skinbar VII",
-    subdomains: ["skinbar-vii", "demo"],
+    subdomains: ["skinbar-vii"],
   },
-  // PinkArt LLC — Evelyn Pinkard, Detroit fiber artist. "demo" is included so
-  // runtime QA can switch the demo business to this template.
+  // PinkArt LLC — Evelyn Pinkard, Detroit fiber artist.
   pink: {
     label: "PinkArt",
-    subdomains: ["pinkart", "demo"],
+    subdomains: ["pinkart"],
   },
-  // 1:1 recreation of handyrelocations.com (Detroit moving company). "demo"
-  // is included so runtime QA can switch the demo business to this template.
+  // 1:1 recreation of handyrelocations.com (Detroit moving company).
   relocation: {
     label: "Handy Relocations",
-    subdomains: ["handyrelocations", "demo"],
+    subdomains: ["handyrelocations"],
   },
   // 1:1 recreation of detroitcommunitywealth.org (Detroit Community Wealth
-  // Fund nonprofit). "demo" is included so runtime QA can switch the demo
-  // business to this template.
+  // Fund nonprofit).
   wealth: {
     label: "Detroit Community Wealth Fund",
-    subdomains: ["detroitcommunitywealth", "demo"],
+    subdomains: ["detroitcommunitywealth"],
   },
-  // Olive Mode — Detroit women's boutique. "demo" is included so runtime QA can
-  // point the demo business at this template.
+  // Olive Mode — Detroit women's boutique.
   olive: {
     label: "Olive Mode",
-    subdomains: ["olivemode", "demo"],
+    subdomains: ["olivemode"],
   },
-  // Dream Your Theme — event decor / rentals / draping (Selest). "demo" is
-  // included so runtime QA can point the demo business at this template.
+  // Dream Your Theme — event decor / rentals / draping (Selest).
   dream: {
     label: "Dream Your Theme",
-    subdomains: ["dreamyourtheme", "demo"],
+    subdomains: ["dreamyourtheme"],
   },
   // Unique Monique Scented Candles — handmade candles / soaps / body care /
-  // home care (Detroit). "demo" is included so runtime QA can point the demo
-  // business at this template.
+  // home care (Detroit).
   umsc: {
     label: "Unique Monique",
-    subdomains: ["uniquemonique", "demo"],
+    subdomains: ["uniquemonique"],
   },
 };
 
@@ -134,16 +132,28 @@ export const getCommercialTemplateSubdomains = (): string[] => {
 export const getFreeTemplateIds = (): string[] =>
   AVAILABLE_FREE_TEMPLATES.map((t) => t.value);
 
+// Every registered template (including ones with no ownership entry, e.g.
+// `animated-bamboo`), for the demo subdomain's unrestricted access.
+const getAllTemplates = (): { value: string; label: string }[] =>
+  TEMPLATES.map((t) => ({ value: t.id, label: t.name }));
+
 // Whether a given business (identified by its subdomain) is allowed to use a
 // template. Free templates are always allowed; commercial templates only for
-// their owning subdomain. Mirrors getAvailableTemplates (all allowed in dev).
+// their owning subdomain; the demo subdomain gets every template. Mirrors
+// getAvailableTemplates (all allowed in dev).
 export const isTemplateAvailableForSubdomain = (
   templateId: string,
   subdomain: string,
 ): boolean =>
   getAvailableTemplates(subdomain).some((t) => t.value === templateId);
 
-export const getAvailableTemplates = (subdomain: string) => {
+export const getAvailableTemplates = (
+  subdomain: string,
+): { value: string; label: string }[] => {
+  // The demo (runtime-QA) business gets every registered template.
+  if (subdomain === DEMO_SUBDOMAIN) {
+    return getAllTemplates();
+  }
   // In development, show all templates
   if (process.env.NODE_ENV === "development") {
     return [

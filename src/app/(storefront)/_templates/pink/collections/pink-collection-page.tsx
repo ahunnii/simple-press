@@ -4,7 +4,11 @@ import Link from "next/link";
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
@@ -144,12 +148,20 @@ export function PinkCollectionPage({
   // platform placeholder (same `hasCustomImage` rule as the events/services
   // CTA panels) — `DEFAULT_GALLERY`'s blank `image`s mean a fresh store
   // resolves to an empty array here, and the section hides below.
-  const gallery: (TemplateListRow & { image: string })[] = (
-    galleryRows.length > 0 ? galleryRows : DEFAULT_GALLERY
-  ).flatMap((row) => {
-    const image = typeof row.image === "string" ? row.image : "";
-    return hasCustomImage(image) ? [{ ...row, image }] : [];
-  });
+  const gallery: (TemplateListRow & {
+    image: string;
+    // Preserves the row's position in the saved/default list — the render
+    // below filters out imageless rows and slices to 6, so `i` there is NOT
+    // the saved index; the list editor needs the original position.
+    _originalIndex: number;
+  })[] = (galleryRows.length > 0 ? galleryRows : DEFAULT_GALLERY).flatMap(
+    (row, originalIndex) => {
+      const image = typeof row.image === "string" ? row.image : "";
+      return hasCustomImage(image)
+        ? [{ ...row, image, _originalIndex: originalIndex }]
+        : [];
+    },
+  );
 
   const description = collection.description?.trim() ?? "";
   const isLongDescription = description.length > HERO_INTRO_MAX_CHARS;
@@ -246,6 +258,10 @@ export function PinkCollectionPage({
                     gridColumn: `span ${colSpan}`,
                     gridRow: `span ${rowSpan}`,
                   }}
+                  {...listItemAttr(
+                    "pink.collections.detail-gallery-images",
+                    row._originalIndex,
+                  )}
                 >
                   <Image
                     src={row.image}

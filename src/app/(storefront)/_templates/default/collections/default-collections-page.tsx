@@ -2,22 +2,55 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
+import { resolveFields } from "..";
+import {
+  COLLECTIONS_LISTING_EMPTY_DEFAULT,
+  COLLECTIONS_LISTING_HEADING_DEFAULT,
+  COLLECTIONS_LISTING_LABEL_DEFAULT,
+} from "./index";
 
 export function DefaultCollectionsPage({
   collections,
+  business,
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
+
+  const f = resolveFields(business.siteContent?.customFields, [
+    "default.collections.listing-label",
+    "default.collections.listing-heading",
+    "default.collections.listing-empty",
+  ]);
+  const listingLabel =
+    (f["default.collections.listing-label"] ?? "").trim() ||
+    COLLECTIONS_LISTING_LABEL_DEFAULT;
+  const listingHeading =
+    (f["default.collections.listing-heading"] ?? "").trim() ||
+    COLLECTIONS_LISTING_HEADING_DEFAULT;
+  const listingEmpty =
+    (f["default.collections.listing-empty"] ?? "").trim() ||
+    COLLECTIONS_LISTING_EMPTY_DEFAULT;
 
   return (
     <div>
       {/* Page hero */}
-      <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
+      <section
+        {...sectionGroupAttr("collections", "listing")}
+        className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
-          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-            Shop by collection
+          <span
+            {...fieldAttr("default.collections.listing-label")}
+            className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+          >
+            {listingLabel}
           </span>
-          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
-            Collections
+          <h1
+            {...fieldAttr("default.collections.listing-heading")}
+            className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]"
+          >
+            {listingHeading}
           </h1>
           {list.length > 0 && (
             <p className="mt-4 text-[17px] text-[#6b6b6b]">
@@ -32,8 +65,11 @@ export function DefaultCollectionsPage({
         <div className="mx-auto max-w-[1440px]">
           {list.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="text-[#6b6b6b]">
-                No collections available at this time.
+              <p
+                {...fieldAttr("default.collections.listing-empty")}
+                className="text-[#6b6b6b]"
+              >
+                {listingEmpty}
               </p>
             </div>
           ) : (

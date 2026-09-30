@@ -2,11 +2,38 @@ import Link from "next/link";
 
 import type { DefaultCartPageTemplateProps } from "../../types";
 
+import { resolveFields } from "..";
+import {
+  CART_EMPTY_HEADING_DEFAULT,
+  CART_SUMMARY_CHECKOUT_BUTTON_DEFAULT,
+  CART_SUMMARY_HEADING_DEFAULT,
+} from "./cart-fields";
 import { DefaultCartContents } from "./default-cart-contents";
 
 export async function DefaultCartPage({
   business,
 }: DefaultCartPageTemplateProps) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "default.cart.empty-heading",
+    "default.cart.empty-body",
+    "default.cart.empty-button",
+    "default.cart.summary-heading",
+    "default.cart.summary-checkout-button",
+  ]);
+  const emptyHeading =
+    (f["default.cart.empty-heading"] ?? "").trim() ||
+    CART_EMPTY_HEADING_DEFAULT;
+  // Both fields hide their element when blank — resolve the trimmed value
+  // as-is (no CONSTANT fallback) so an owner can actually clear them.
+  const emptyBody = (f["default.cart.empty-body"] ?? "").trim();
+  const emptyButton = (f["default.cart.empty-button"] ?? "").trim();
+  const summaryHeading =
+    (f["default.cart.summary-heading"] ?? "").trim() ||
+    CART_SUMMARY_HEADING_DEFAULT;
+  const summaryCheckoutButton =
+    (f["default.cart.summary-checkout-button"] ?? "").trim() ||
+    CART_SUMMARY_CHECKOUT_BUTTON_DEFAULT;
+
   return (
     <div>
       {/* Page hero */}
@@ -30,7 +57,14 @@ export async function DefaultCartPage({
 
       <section className="px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <DefaultCartContents business={business} />
+          <DefaultCartContents
+            business={business}
+            emptyHeading={emptyHeading}
+            emptyBody={emptyBody}
+            emptyButton={emptyButton}
+            summaryHeading={summaryHeading}
+            summaryCheckoutButton={summaryCheckoutButton}
+          />
         </div>
       </section>
     </div>

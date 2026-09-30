@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
@@ -15,16 +16,31 @@ import { PinkProductVariantPills } from "./pink-product-variant-pills";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
+  /** `pink.product.*` copy, resolved by the page (group `product.details`). */
+  comingSoonLabel: string;
+  comingSoonMessage: string;
+  soldOutLabel: string;
+  soldOutMessage: string;
+  /** Blank hides the stock line for products that don't track inventory. */
+  stockUntrackedLabel: string;
 };
 
 /**
  * The buy row: variant pills (if any) → `1px solid ink` stepper → rose
  * add-to-basket → ghost save button → availability line (design.md →
- * Product → "Details"). Entirely DB-driven, no template fields. Uses the
+ * Product → "Details"). Coming-soon / sold-out / untracked-stock copy comes
+ * from the `product.details` fields via props. Uses the
  * shared `useProduct` hook exclusively for price/variant/cart state — never
  * calls `useCart` directly.
  */
-export function PinkProductActions({ product }: Props) {
+export function PinkProductActions({
+  product,
+  comingSoonLabel,
+  comingSoonMessage,
+  soldOutLabel,
+  soldOutMessage,
+  stockUntrackedLabel,
+}: Props) {
   const {
     inStock,
     variantOptions,
@@ -63,12 +79,19 @@ export function PinkProductActions({ product }: Props) {
         <p
           className="pink-display"
           style={{ fontSize: "17px", fontWeight: 600 }}
+          {...fieldAttr("pink.product.coming-soon-label")}
         >
-          Coming soon
+          {comingSoonLabel}
         </p>
-        <p className="text-[14px]" style={{ color: "var(--pink-muted)" }}>
-          This piece isn&apos;t available yet — check back soon.
-        </p>
+        {comingSoonMessage && (
+          <p
+            className="text-[14px]"
+            style={{ color: "var(--pink-muted)" }}
+            {...fieldAttr("pink.product.coming-soon-message")}
+          >
+            {comingSoonMessage}
+          </p>
+        )}
       </div>
     );
   }
@@ -95,9 +118,6 @@ export function PinkProductActions({ product }: Props) {
             {formatPrice(displayCompareAtPrice)}
           </span>
         )}
-        <span className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
-          Ships in 3–5 days
-        </span>
       </div>
 
       {hasVariants && (
@@ -120,12 +140,16 @@ export function PinkProductActions({ product }: Props) {
               color: "var(--pink-subtle)",
             }}
           >
-            Sold out
+            <span {...fieldAttr("pink.product.sold-out-label")}>
+              {soldOutLabel}
+            </span>
           </button>
           <NotifyMeForm
             productId={product.id}
             variantId={selectedVariant?.id}
-            message="Get notified when it's back in stock."
+            // Blank → NotifyMeForm's built-in line, which also labels the
+            // email input, so it can't simply be hidden.
+            message={soldOutMessage.trim() ? soldOutMessage : undefined}
             messageClassName="text-[13px]"
             inputClassName="pink-input"
             buttonClassName="pink-btn pink-btn-outline px-4 py-2.5"
@@ -204,13 +228,19 @@ export function PinkProductActions({ product }: Props) {
             {justAdded ? `${product.name} added to basket` : ""}
           </div>
 
-          <p className="text-[14px]" style={{ color: "var(--pink-muted)" }}>
-            {isInventoryTracked
-              ? showLowStockWarning
-                ? `${remainingStock} left`
-                : "In stock"
-              : "Made to order"}
-          </p>
+          {isInventoryTracked ? (
+            <p className="text-[14px]" style={{ color: "var(--pink-muted)" }}>
+              {showLowStockWarning ? `${remainingStock} left` : "In stock"}
+            </p>
+          ) : stockUntrackedLabel ? (
+            <p
+              className="text-[14px]"
+              style={{ color: "var(--pink-muted)" }}
+              {...fieldAttr("pink.product.stock-untracked-label")}
+            >
+              {stockUntrackedLabel}
+            </p>
+          ) : null}
         </>
       )}
 

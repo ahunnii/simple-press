@@ -2,7 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
@@ -208,6 +212,7 @@ export async function PinkTestimonialsPage({
                 index={i}
                 className="flex flex-col gap-4 p-6"
                 style={{ background: "var(--pink-ink-panel)" }}
+                attrs={listItemAttr("pink.testimonials.press-items", i)}
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <span

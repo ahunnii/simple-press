@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
@@ -34,7 +34,10 @@ type Props = {
  * one, already-owned file. Porting keeps design.md's layout pixel-identical
  * while closing the actual gap the finding cared about: focus trap,
  * Escape-to-close and `useReducedMotion`, mirrored from the shared
- * component's dialog (`product-gallery-vertical-sticky.tsx:59-79`).
+ * component's dialog (`product-gallery-vertical-sticky.tsx:59-79`), plus
+ * (B6.1) visible prev/next buttons, ArrowLeft/ArrowRight stepping and an
+ * "n / total" `aria-live` counter — all hidden for a single image, where the
+ * focus trap cycles the close button alone.
  */
 export function PinkProductGallery({ images, productName, badge }: Props) {
   const [active, setActive] = useState(0);
@@ -44,6 +47,8 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
 
   const enlargeBtnRef = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const prevBtnRef = useRef<HTMLButtonElement>(null);
+  const nextBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!variantImageUrl) return;
@@ -66,6 +71,9 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
     setTimeout(() => enlargeBtnRef.current?.focus(), 50);
   };
 
+  const goToPrev = () => setActive((i) => (i - 1 + list.length) % list.length);
+  const goToNext = () => setActive((i) => (i + 1) % list.length);
+
   // Move focus to the close button once the lightbox mounts.
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -73,8 +81,9 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
     return () => clearTimeout(t);
   }, [lightboxOpen]);
 
-  // Escape closes; Tab is trapped on the close button — the only
-  // interactive element inside the dialog.
+  // Escape closes; ArrowLeft/ArrowRight step through images (multi-image
+  // only); Tab cycles the focus trap through close → prev → next (prev/next
+  // dropped from the cycle for a single image, since they aren't rendered).
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -82,14 +91,39 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
         closeLightbox();
         return;
       }
+      if (hasThumbs && e.key === "ArrowRight") {
+        e.preventDefault();
+        goToNext();
+        return;
+      }
+      if (hasThumbs && e.key === "ArrowLeft") {
+        e.preventDefault();
+        goToPrev();
+        return;
+      }
       if (e.key === "Tab") {
         e.preventDefault();
-        closeBtnRef.current?.focus();
+        const trapOrder = hasThumbs
+          ? [closeBtnRef, prevBtnRef, nextBtnRef]
+          : [closeBtnRef];
+        const currentIndex = trapOrder.findIndex(
+          (ref) => ref.current === document.activeElement,
+        );
+        const delta = e.shiftKey ? -1 : 1;
+        const nextIndex =
+          currentIndex === -1
+            ? 0
+            : (currentIndex + delta + trapOrder.length) % trapOrder.length;
+        trapOrder[nextIndex]?.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxOpen]);
+    // goToNext/goToPrev close over `list`, which is stable per render; only
+    // re-binding on open/thumb-count changes avoids resubscribing every
+    // keystroke-driven re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lightboxOpen, hasThumbs, list.length]);
 
   return (
     <>
@@ -272,6 +306,63 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                 aria-hidden="true"
               />
             </button>
+
+            {/* Prev/next — hidden for a single image, where the trap only
+                cycles the close button. */}
+            {hasThumbs && (
+              <>
+                <button
+                  ref={prevBtnRef}
+                  type="button"
+                  onClick={goToPrev}
+                  aria-label="Previous image"
+                  className="absolute top-1/2 left-3 flex -translate-y-1/2 items-center justify-center"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    background: "var(--pink-white)",
+                    border: "1px solid var(--pink-line)",
+                  }}
+                >
+                  <ChevronLeft
+                    className="h-4 w-4"
+                    style={{ color: "var(--pink-ink)" }}
+                    aria-hidden="true"
+                  />
+                </button>
+                <button
+                  ref={nextBtnRef}
+                  type="button"
+                  onClick={goToNext}
+                  aria-label="Next image"
+                  className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center justify-center"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    background: "var(--pink-white)",
+                    border: "1px solid var(--pink-line)",
+                  }}
+                >
+                  <ChevronRight
+                    className="h-4 w-4"
+                    style={{ color: "var(--pink-ink)" }}
+                    aria-hidden="true"
+                  />
+                </button>
+                <div
+                  aria-live="polite"
+                  className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[12px] font-medium"
+                  style={{
+                    background: "var(--pink-white)",
+                    padding: "4px 10px",
+                    border: "1px solid var(--pink-line)",
+                    color: "var(--pink-ink)",
+                  }}
+                >
+                  {active + 1} / {list.length}
+                </div>
+              </>
+            )}
           </div>
           {/* Keyframes declared inline (rather than in globals.css, which
               this agent doesn't own) and skipped entirely under reduced

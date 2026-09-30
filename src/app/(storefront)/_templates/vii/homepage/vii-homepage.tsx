@@ -1,14 +1,21 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import {
+  getRawCustomFieldString,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { resolveViiLocationTag } from "../shared/vii-location-tag";
+import { nonBlank } from "../shared/vii-non-blank";
 import { ViiBlogSection } from "./vii-blog-section";
 import { ViiBrandsSection } from "./vii-brands-section";
 import { ViiCategorySection } from "./vii-category-section";
@@ -21,6 +28,21 @@ import { ViiPopup } from "./vii-popup";
 import { ViiProductRail } from "./vii-product-rail";
 import { ViiTestimonialQuote } from "./vii-testimonial-quote";
 import { ViiVideoFeature } from "./vii-video-feature";
+
+/**
+ * "@handle" from an Instagram profile URL's first path segment
+ * (`https://instagram.com/skinbar/` → "@skinbar"); "" when there isn't one.
+ */
+function instagramHandleFromUrl(url: string): string {
+  try {
+    const segment = new URL(url, "https://instagram.com").pathname
+      .split("/")
+      .find((part) => part.length > 0);
+    return segment ? `@${decodeURIComponent(segment).replace(/^@/, "")}` : "";
+  } catch {
+    return "";
+  }
+}
 
 export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
   const [homepage, { isEnabled }] = await Promise.all([
@@ -87,8 +109,6 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.product-rail-cta-link",
     // Testimonial
     "vii.homepage.testimonial-image",
-    "vii.homepage.testimonial-quote",
-    "vii.homepage.testimonial-author",
     // Brands
     "vii.homepage.brands-overline",
     "vii.homepage.brands-heading",
@@ -116,15 +136,30 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.contact-show-phone",
     "vii.homepage.contact-show-email",
     // Instagram
-    "vii.homepage.instagram-handle",
     "vii.homepage.instagram-cta-text",
     "vii.homepage.instagram-gallery",
   ]);
 
+  // B2.5: hide a field-driven CTA/link when its route's flag is off — never
+  // swap in another destination. A section may already require its own flag
+  // to render at all; this only bites when the owner points a link at a
+  // *different*, flag-gated route (e.g. a "/shop" button on a section that
+  // isn't itself gated on "products").
+  const ctaFlagOk = (href: string): boolean => {
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag);
+  };
+
   // ── Parse list fields from raw customFields ───────────────────────────────
   const categoryCards = parseTemplateListRows(
     customFields?.["vii.homepage.categories-cards"],
-  );
+  ).filter((card) => {
+    // Mirrors ViiCategorySection's own "/shop when blank" fallback so a
+    // gated card is dropped before it ever reaches the client component.
+    const link =
+      typeof card.link === "string" && card.link.trim() ? card.link : "/shop";
+    return ctaFlagOk(link);
+  });
   const brandLogos = parseTemplateListRows(
     customFields?.["vii.homepage.brands-logos"],
   );
@@ -140,7 +175,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
   const railProducts = railData?.products ?? homepage?.products ?? [];
   const railCtaHref = railData
     ? `/collections/${railData.collection.slug}`
-    : (f["vii.homepage.product-rail-cta-link"] ?? "/shop");
+    : (f["vii.homepage.product-rail-cta-link"] ?? "");
+  const railCtaAllowed = ctaFlagOk(railCtaHref);
 
   // ── Resolve Instagram gallery ─────────────────────────────────────────────
   const instagramGalleryId = f["vii.homepage.instagram-gallery"];
@@ -156,15 +192,55 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
       altText: img.altText ?? "",
     })) ?? [];
 
-  // ── Testimonial resolution (manual override wins; fallback to DB) ─────────
-  const testimonialQuote =
-    (f["vii.homepage.testimonial-quote"]?.trim()
-      ? f["vii.homepage.testimonial-quote"]
-      : latestTestimonial?.text) ?? "";
-  const testimonialAuthor =
-    (f["vii.homepage.testimonial-quote"]?.trim()
-      ? f["vii.homepage.testimonial-author"]
-      : latestTestimonial?.customerName) ?? "";
+  // ── Instagram profile (Content → Branding wins) ───────────────────────────
+  // Else the legacy `vii.homepage.instagram-handle` field (retired 2026-09-25,
+  // a read-only fallback — never written or cleared from here). Its old
+  // "@skinbarvii" default is deliberately not applied.
+  const instagramUrl = resolveSocialLinks(
+    homepage?.siteContent?.socialLinks,
+  ).find((link) => link.key === "instagram")?.url;
+  const legacyInstagramHandle = nonBlank(
+    getRawCustomFieldString(
+      customFields,
+      "vii.homepage.instagram-handle",
+    )?.replace(/^\s*@/, ""),
+  );
+  const instagramHref =
+    instagramUrl ??
+    (legacyInstagramHandle
+      ? `https://instagram.com/${encodeURIComponent(legacyInstagramHandle)}`
+      : undefined);
+  const instagramHandle = instagramUrl
+    ? instagramHandleFromUrl(instagramUrl)
+    : legacyInstagramHandle
+      ? `@${legacyInstagramHandle}`
+      : "";
+
+  // ── Testimonial (Admin → Testimonials wins) ───────────────────────────────
+  // Else the legacy manual quote/author fields (retired 2026-09-25, a
+  // read-only fallback for a site that saved an override before the move).
+  const adminQuote = nonBlank(latestTestimonial?.text);
+  const legacyQuote = nonBlank(
+    getRawCustomFieldString(customFields, "vii.homepage.testimonial-quote"),
+  );
+  const testimonialQuote = adminQuote ?? legacyQuote ?? "";
+  const testimonialAuthor = adminQuote
+    ? (latestTestimonial?.customerName ?? "")
+    : legacyQuote
+      ? (nonBlank(
+          getRawCustomFieldString(
+            customFields,
+            "vii.homepage.testimonial-author",
+          ),
+        ) ?? "")
+      : "";
+
+  // Local-roots photo placeholder: Settings city (or legacy saved tag), else
+  // the business name.
+  const detroitPlaceholder =
+    resolveViiLocationTag(props?.business, customFields) ??
+    homepage?.name ??
+    "";
 
   return (
     <HydrateClient>
@@ -176,45 +252,65 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
           heroImage={f["vii.homepage.hero-image"] ?? undefined}
           heroOverline={f["vii.homepage.hero-overline"] ?? ""}
           heroHeading={f["vii.homepage.hero-heading"] ?? ""}
-          heroCtaText={f["vii.homepage.hero-cta-text"] ?? ""}
-          heroCtaLink={f["vii.homepage.hero-cta-link"] ?? "/contact"}
+          heroCtaText={
+            ctaFlagOk(f["vii.homepage.hero-cta-link"] ?? "")
+              ? f["vii.homepage.hero-cta-text"] ?? ""
+              : ""
+          }
+          heroCtaLink={f["vii.homepage.hero-cta-link"] ?? ""}
         />
 
         {/* 2. Categories */}
-        <ViiCategorySection
-          overline={f["vii.homepage.categories-overline"] ?? ""}
-          heading={f["vii.homepage.categories-heading"] ?? ""}
-          cards={categoryCards}
-        />
+        {isSectionVisible(customFields, "vii", "homepage.categories") && (
+          <ViiCategorySection
+            overline={f["vii.homepage.categories-overline"] ?? ""}
+            heading={f["vii.homepage.categories-heading"] ?? ""}
+            cards={categoryCards}
+          />
+        )}
 
         {/* 4. Text + Video */}
-        <ViiVideoFeature
-          overline={f["vii.homepage.video-overline"] ?? ""}
-          heading={f["vii.homepage.video-heading"] ?? ""}
-          headingAccent={f["vii.homepage.video-heading-accent"] ?? ""}
-          body={f["vii.homepage.video-body"] ?? ""}
-          videoSrc={f["vii.homepage.video-file"] ?? undefined}
-          posterSrc={f["vii.homepage.video-poster"] ?? undefined}
-          ctaText={f["vii.homepage.video-cta-text"] ?? ""}
-          ctaHref={f["vii.homepage.video-cta-link"] ?? "/about"}
-          aspectRatio={f["vii.homepage.video-aspect"]}
-        />
+        {isSectionVisible(customFields, "vii", "homepage.video") && (
+          <ViiVideoFeature
+            overline={f["vii.homepage.video-overline"] ?? ""}
+            heading={f["vii.homepage.video-heading"] ?? ""}
+            headingAccent={f["vii.homepage.video-heading-accent"] ?? ""}
+            body={f["vii.homepage.video-body"] ?? ""}
+            videoSrc={f["vii.homepage.video-file"] ?? undefined}
+            posterSrc={f["vii.homepage.video-poster"] ?? undefined}
+            ctaText={
+              ctaFlagOk(f["vii.homepage.video-cta-link"] ?? "")
+                ? f["vii.homepage.video-cta-text"] ?? ""
+                : ""
+            }
+            ctaHref={f["vii.homepage.video-cta-link"] ?? ""}
+            aspectRatio={f["vii.homepage.video-aspect"]}
+          />
+        )}
 
         {/* 5. Image Band */}
-        <ViiImageBand
-          bandImage={f["vii.homepage.band-image"] ?? undefined}
-          bandHeading={f["vii.homepage.band-heading"] ?? ""}
-          bandText={f["vii.homepage.band-text"] ?? ""}
-        />
+        {isSectionVisible(customFields, "vii", "homepage.band") && (
+          <ViiImageBand
+            bandImage={f["vii.homepage.band-image"] ?? undefined}
+            bandHeading={f["vii.homepage.band-heading"] ?? ""}
+            bandText={f["vii.homepage.band-text"] ?? ""}
+          />
+        )}
 
-        {/* 7. Product Rail */}
-        <ViiProductRail
-          overline={f["vii.homepage.product-rail-overline"] ?? ""}
-          heading={f["vii.homepage.product-rail-heading"] ?? ""}
-          ctaText={f["vii.homepage.product-rail-cta-text"] ?? "Shop All"}
-          ctaHref={railCtaHref}
-          products={railProducts}
-        />
+        {/* 7. Product Rail — B2.1: the whole section is a products surface */}
+        {isEnabled("products") && (
+          <ViiProductRail
+            overline={f["vii.homepage.product-rail-overline"] ?? ""}
+            heading={f["vii.homepage.product-rail-heading"] ?? ""}
+            ctaText={
+              railCtaAllowed
+                ? f["vii.homepage.product-rail-cta-text"] ?? "Shop All"
+                : ""
+            }
+            ctaHref={railCtaHref}
+            products={railProducts}
+          />
+        )}
 
         {/* 8. Testimonial Quote */}
         {isEnabled("testimonials") &&
@@ -246,8 +342,12 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
             heading={f["vii.homepage.blog-heading"] ?? ""}
             headingAccent={f["vii.homepage.blog-heading-accent"] ?? ""}
             intro={f["vii.homepage.blog-intro"] ?? ""}
-            ctaText={f["vii.homepage.blog-cta-text"] ?? "Read the blog"}
-            ctaHref={f["vii.homepage.blog-cta-link"] ?? "/blog"}
+            ctaText={
+              ctaFlagOk(f["vii.homepage.blog-cta-link"] ?? "")
+                ? f["vii.homepage.blog-cta-text"] ?? "Read the blog"
+                : ""
+            }
+            ctaHref={f["vii.homepage.blog-cta-link"] ?? ""}
             posts={blogPosts}
           />
         )}
@@ -255,7 +355,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         {/* 11. Instagram Strip */}
         {isSectionVisible(customFields, "vii", "homepage.instagram") && (
           <ViiInstagramStrip
-            handle={f["vii.homepage.instagram-handle"] ?? ""}
+            handle={instagramHandle}
+            href={instagramHref}
             images={instagramImages}
             ctaText={
               f["vii.homepage.instagram-cta-text"] ?? "Follow on Instagram"
@@ -264,16 +365,23 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         )}
 
         {/* 12. Rooted in Detroit */}
-        <ViiDetroitSection
-          overline={f["vii.homepage.detroit-overline"] ?? ""}
-          heading={f["vii.homepage.detroit-heading"] ?? ""}
-          headingAccent={f["vii.homepage.detroit-heading-accent"] ?? ""}
-          body={f["vii.homepage.detroit-body"] ?? ""}
-          image={f["vii.homepage.detroit-image"] ?? undefined}
-          details={detroitDetails}
-          ctaText={f["vii.homepage.detroit-cta-text"] ?? ""}
-          ctaHref={f["vii.homepage.detroit-cta-link"] ?? "/contact"}
-        />
+        {isSectionVisible(customFields, "vii", "homepage.detroit") && (
+          <ViiDetroitSection
+            overline={f["vii.homepage.detroit-overline"] ?? ""}
+            heading={f["vii.homepage.detroit-heading"] ?? ""}
+            headingAccent={f["vii.homepage.detroit-heading-accent"] ?? ""}
+            body={f["vii.homepage.detroit-body"] ?? ""}
+            image={f["vii.homepage.detroit-image"] ?? undefined}
+            details={detroitDetails}
+            ctaText={
+              ctaFlagOk(f["vii.homepage.detroit-cta-link"] ?? "")
+                ? f["vii.homepage.detroit-cta-text"] ?? ""
+                : ""
+            }
+            ctaHref={f["vii.homepage.detroit-cta-link"] ?? ""}
+            placeholderLabel={detroitPlaceholder}
+          />
+        )}
 
         {/* 13. Contact CTA */}
         {isSectionVisible(customFields, "vii", "homepage.contact") && (
@@ -284,7 +392,11 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
             body={f["vii.homepage.contact-body"] ?? ""}
             phone={homepage?.phoneNumber ?? ""}
             email={homepage?.supportEmail ?? ""}
-            buttonLabel={f["vii.homepage.contact-cta-text"] ?? ""}
+            buttonLabel={
+              ctaFlagOk(f["vii.homepage.contact-cta-link"] ?? "")
+                ? f["vii.homepage.contact-cta-text"] ?? ""
+                : ""
+            }
             buttonHref={f["vii.homepage.contact-cta-link"] ?? ""}
             showPhone={f["vii.homepage.contact-show-phone"] !== "false"}
             showEmail={f["vii.homepage.contact-show-email"] !== "false"}

@@ -5,9 +5,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const aboutSledgeData: TemplateField[] = [
   {
     key: "sledge.about-hero-heading",
-    label: "About Page Heading",
+    label: "Heading",
     description:
-      'Large heading shown in the coral section (e.g. "About The Artist")',
+      'Large heading above the three introduction rows (e.g. "About The Artist").',
     type: "text",
     page: "about",
     group: "about.main",
@@ -16,8 +16,9 @@ const aboutSledgeData: TemplateField[] = [
   },
   {
     key: "sledge.about-hero-image",
-    label: "About Hero Image",
-    description: "Editorial image shown in the right half of the hero banner",
+    label: "Photo",
+    description:
+      "Full-width photo at the top of the about page. Shows a color panel when left blank.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -25,9 +26,8 @@ const aboutSledgeData: TemplateField[] = [
   },
   {
     key: "sledge.about.section-1-label",
-    label: "Section 1 Label",
-    description:
-      'Bold label on the left of the first content row (e.g. "My Story.")',
+    label: "Row 1 label",
+    description: 'Short bold label for the first row (e.g. "My Story.").',
     type: "text",
     page: "about",
     group: "about.main",
@@ -36,8 +36,8 @@ const aboutSledgeData: TemplateField[] = [
   },
   {
     key: "sledge.about.section-1-body",
-    label: "Section 1 Body",
-    description: "Paragraph text for the first content row",
+    label: "Row 1 text",
+    description: "Paragraph text for the first row.",
     type: "textarea",
     page: "about",
     group: "about.main",
@@ -45,9 +45,8 @@ const aboutSledgeData: TemplateField[] = [
   },
   {
     key: "sledge.about.section-2-label",
-    label: "Section 2 Label",
-    description:
-      'Bold label on the left of the second content row (e.g. "What I Do.")',
+    label: "Row 2 label",
+    description: 'Short bold label for the second row (e.g. "What I Do.").',
     type: "text",
     page: "about",
     group: "about.main",
@@ -56,8 +55,8 @@ const aboutSledgeData: TemplateField[] = [
   },
   {
     key: "sledge.about.section-2-body",
-    label: "Section 2 Body",
-    description: "Paragraph text for the second content row",
+    label: "Row 2 text",
+    description: "Paragraph text for the second row.",
     type: "textarea",
     page: "about",
     group: "about.main",
@@ -65,9 +64,8 @@ const aboutSledgeData: TemplateField[] = [
   },
   {
     key: "sledge.about.section-3-label",
-    label: "Section 3 Label",
-    description:
-      'Bold label on the left of the third content row (e.g. "My Services.")',
+    label: "Row 3 label",
+    description: 'Short bold label for the third row (e.g. "My Services.").',
     type: "text",
     page: "about",
     group: "about.main",
@@ -76,8 +74,8 @@ const aboutSledgeData: TemplateField[] = [
   },
   {
     key: "sledge.about.section-3-body",
-    label: "Section 3 Body",
-    description: "Paragraph text for the third content row",
+    label: "Row 3 text",
+    description: "Paragraph text for the third row.",
     type: "textarea",
     page: "about",
     group: "about.main",
@@ -85,23 +83,44 @@ const aboutSledgeData: TemplateField[] = [
   },
 ];
 
-export const sledgeAboutData = [...aboutSledgeData];
+const aboutTrendingData: TemplateField[] = [
+  {
+    key: "sledge.about.trending-heading",
+    label: "Heading",
+    description:
+      "Heading for the product rail at the bottom of the about page.",
+    type: "text",
+    page: "about",
+    group: "about.trending",
+    gridColumn: "col-span-1",
+    defaultValue: "Trending Now",
+  },
+];
+
+export const sledgeAboutData = [...aboutSledgeData, ...aboutTrendingData];
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
 export const sledgeAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "About Hero",
-    description: "Editorial image shown in the split hero banner",
+    title: "Hero",
+    description: "Full-width photo at the top of the about page.",
     icon: "🖼️",
     columns: 1,
   },
   {
     id: "about.main",
-    title: "About Content",
-    description: "Section heading and three labeled content rows",
+    title: "Introduction",
+    description: "Heading and three labeled rows introducing your story.",
     icon: "📖",
     columns: 2,
+  },
+  {
+    id: "about.trending",
+    title: "Trending products",
+    description: "Product rail shown below the about page content.",
+    icon: "🛍️",
+    columns: 1,
   },
 ];

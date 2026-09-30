@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { parseTemplateIframeValue } from "~/lib/template-fields";
+import { isContentEmpty, parseTemplateIframeValue } from "~/lib/template-fields";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -35,12 +36,15 @@ type Props = {
  * Pollen service-page template: pollen-list — Elegant List
  *
  * Layout:
- * 1. PollenGeneralLayout title-hero (service name + description)
- * 2. Optional hero video band
- * 3. Accent stripe
- * 4. Narrow centered intro: label + heading + richtext + optional media
- * 5. Alternating left/right image + text rows for each service item
- * 6. Optional footer CTA + embed
+ * 1. PollenGeneralLayout title-hero (service name; image falls back to this
+ *    service's own photo, then the site-wide header background)
+ * 2. Back link to /services + service description as a lead paragraph
+ * 3. Optional hero video band
+ * 4. Accent stripe
+ * 5. Narrow centered intro: label + heading + richtext + optional media —
+ *    hidden unless there's real body copy or media
+ * 6. Alternating left/right image + text rows for each service item
+ * 7. Optional footer CTA + embed
  */
 export function PollenListServicePage({
   business,
@@ -57,6 +61,8 @@ export function PollenListServicePage({
     "pollen-list.intro-image",
     "pollen-list.intro-video",
     "pollen-list.items-heading",
+    "pollen-list.book-button-text",
+    "pollen-list.closing-heading",
     "pollen-list.cta-text",
     "pollen-list.cta-link",
     "pollen-list.cta-embed",
@@ -71,6 +77,8 @@ export function PollenListServicePage({
   const introImage = f["pollen-list.intro-image"] ?? "";
   const introVideoSrc = f["pollen-list.intro-video"] ?? "";
   const itemsHeading = f["pollen-list.items-heading"] ?? "";
+  const bookButtonText = f["pollen-list.book-button-text"] ?? "Book This Service";
+  const closingHeading = f["pollen-list.closing-heading"] ?? "";
   const ctaText = f["pollen-list.cta-text"] ?? "";
   const ctaLink = f["pollen-list.cta-link"] ?? "";
   const ctaEmbedRaw = f["pollen-list.cta-embed"] ?? "";
@@ -87,14 +95,42 @@ export function PollenListServicePage({
     }
   }
 
-  const publishedItems = items.filter((item) => item.published);
+  const hasIntroMedia = Boolean(introVideoSrc) || Boolean(introImage);
+  const hasIntroBody = introBodyJson !== null && !isContentEmpty(introBodyJson);
+  // The heading/label both have default values, so on their own they would
+  // render an empty band for every service without real intro copy or media
+  // — require real body content or media before showing the section.
+  const hasIntroSection = hasIntroBody || hasIntroMedia;
+
+  const heroImage = service.image ?? undefined;
 
   return (
     <PollenGeneralLayout
       business={business}
       title={service.name}
-      subtitle={service.description ?? undefined}
+      imageUrl={heroImage}
+      showCTA={false}
     >
+      {/* ── Back link + lead paragraph ───────────────────────────────────── */}
+      <section className="bg-white pt-10 pb-2 md:pt-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <Link
+              href="/services"
+              className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#5e8b4a] transition-colors hover:text-[#2a351f]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              All Services
+            </Link>
+            {service.description && (
+              <p className="text-lg leading-relaxed text-[#4b5563]">
+                {service.description}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* ── Hero video band ─────────────────────────────────────────────── */}
       {heroVideoSrc && (
         <div className="relative min-h-[60vh] overflow-hidden">
@@ -106,53 +142,48 @@ export function PollenListServicePage({
       <div className="h-1.5 w-full" style={{ backgroundColor: accentColor }} />
 
       {/* ── Centered intro ───────────────────────────────────────────────── */}
-      {(introLabel ||
-        introHeading ||
-        introImage ||
-        introVideoSrc ||
-        introBodyRaw) && (
+      {hasIntroSection && (
         <section className="bg-white py-20 md:py-28">
-          <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
-            <FadeIn direction="up">
-              {introLabel && (
-                <p
-                  className="mb-4 text-sm font-semibold tracking-wider uppercase"
-                  style={{ color: accentColor }}
-                >
-                  {introLabel}
-                </p>
-              )}
-              {introHeading && (
-                <h2 className="mb-8 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
-                  {introHeading}
-                </h2>
-              )}
-              {introBodyJson && (
-                <div className="prose prose-neutral mx-auto text-left text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
-                  <TiptapRenderer content={introBodyJson} />
-                </div>
-              )}
-              {!introBodyJson && introBodyRaw && (
-                <p className="leading-relaxed text-[#4b5563]">{introBodyRaw}</p>
-              )}
-              {(introVideoSrc || introImage) && (
-                <div className="mx-auto mt-8 max-w-xl">
-                  <ServiceSectionMedia
-                    imageSrc={introImage || undefined}
-                    videoSrc={introVideoSrc || undefined}
-                    alt=""
-                    className="relative aspect-video overflow-hidden rounded-2xl shadow-sm"
-                    rounded={false}
-                  />
-                </div>
-              )}
-            </FadeIn>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <FadeIn direction="up">
+                {introLabel && (
+                  <p
+                    className="mb-4 text-sm font-semibold tracking-wider uppercase"
+                    style={{ color: accentColor }}
+                  >
+                    {introLabel}
+                  </p>
+                )}
+                {introHeading && (
+                  <h2 className="mb-8 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
+                    {introHeading}
+                  </h2>
+                )}
+                {hasIntroBody && introBodyJson && (
+                  <div className="prose prose-neutral text-left text-[#4b5563] [&_a]:text-[#5e8b4a] [&_a:hover]:text-[#2a351f]">
+                    <TiptapRenderer content={introBodyJson} />
+                  </div>
+                )}
+                {(introVideoSrc || introImage) && (
+                  <div className="mt-8 max-w-xl">
+                    <ServiceSectionMedia
+                      imageSrc={introImage || undefined}
+                      videoSrc={introVideoSrc || undefined}
+                      alt=""
+                      className="relative aspect-video overflow-hidden rounded-2xl shadow-sm"
+                      rounded={false}
+                    />
+                  </div>
+                )}
+              </FadeIn>
+            </div>
           </div>
         </section>
       )}
 
       {/* ── Alternating service rows ─────────────────────────────────────── */}
-      {publishedItems.length > 0 && (
+      {items.length > 0 && (
         <section className="bg-[#f9faf7] py-12 md:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {itemsHeading && (
@@ -164,13 +195,14 @@ export function PollenListServicePage({
             )}
 
             <div className="flex flex-col divide-y divide-[#d4e8d4]">
-              {publishedItems.map((item, idx) => (
+              {items.map((item, idx) => (
                 <PollenListItemRow
                   key={item.id}
                   item={item}
                   reversed={idx % 2 === 1}
                   embedsEnabled={embedsEnabled}
                   accentColor={accentColor}
+                  bookButtonText={bookButtonText}
                 />
               ))}
             </div>
@@ -184,9 +216,11 @@ export function PollenListServicePage({
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             {ctaLink && ctaText && (
               <FadeIn direction="up" className="mb-10 text-center">
-                <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
-                  Ready to begin?
-                </p>
+                {closingHeading && (
+                  <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
+                    {closingHeading}
+                  </p>
+                )}
                 <h2 className="mb-8 text-2xl font-bold text-white md:text-3xl">
                   {service.name}
                 </h2>
@@ -276,11 +310,13 @@ function PollenListItemRow({
   reversed,
   embedsEnabled,
   accentColor,
+  bookButtonText,
 }: {
   item: ServiceItem;
   reversed: boolean;
   embedsEnabled: boolean;
   accentColor: string;
+  bookButtonText: string;
 }) {
   return (
     <FadeIn
@@ -315,7 +351,19 @@ function PollenListItemRow({
           className="mb-6 h-0.5 w-10"
           style={{ backgroundColor: accentColor }}
         />
-        <h3 className="mb-3 text-2xl font-bold text-[#374151]">{item.name}</h3>
+        <div className="mb-3 flex flex-wrap items-center gap-3">
+          <h3 className="text-2xl font-bold text-[#374151]">{item.name}</h3>
+          {item.isSignature && (
+            <span className="rounded-full bg-[#A8D081]/40 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#2a351f] uppercase">
+              Signature
+            </span>
+          )}
+        </div>
+        {item.category && (
+          <p className="mb-3 text-xs font-semibold tracking-wide text-[#5e8b4a] uppercase">
+            {item.category}
+          </p>
+        )}
 
         <div className="mb-4 flex flex-wrap gap-2">
           {item.priceLabel && (
@@ -404,7 +452,7 @@ function PollenListItemRow({
           embedSrc={item.bookingEmbedSrc ?? undefined}
           embedHeight={item.bookingEmbedHeight}
           embedsEnabled={embedsEnabled}
-          triggerLabel="Book This Service"
+          triggerLabel={bookButtonText}
         />
       </div>
     </FadeIn>

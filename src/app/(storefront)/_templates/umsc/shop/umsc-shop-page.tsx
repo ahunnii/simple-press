@@ -1,7 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
@@ -103,6 +103,7 @@ export async function UmscShopPage({
                       }
                       className="umsc-reveal-item"
                       style={{ "--i": Math.min(i, 6) } as React.CSSProperties}
+                      {...listItemAttr("umsc.shop.doors", i)}
                     >
                       <UmscCollectionDoor
                         href={link}

@@ -1,12 +1,21 @@
-import { Droplets, Leaf, Shield, Sparkles } from "lucide-react";
-
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 const productsPageData: TemplateField[] = [
   {
+    key: "bamboo.products.listing-eyebrow",
+    label: "Small label",
+    description: "Short text above the heading. Leave blank to hide.",
+    type: "text",
+    page: "products",
+    group: "products.listing",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop",
+    placeholder: "Shop",
+  },
+  {
     key: "bamboo.products.listing-title",
-    label: "Products listing title",
-    description: "Main heading on the products index page",
+    label: "Heading",
+    description: "Main heading at the top of the shop page.",
     type: "text",
     page: "products",
     group: "products.listing",
@@ -16,14 +25,14 @@ const productsPageData: TemplateField[] = [
   },
   {
     key: "bamboo.products.listing-intro",
-    label: "Products listing intro",
-    description: "Short intro below the products listing title",
+    label: "Intro text",
+    description: "Line below the heading. Leave blank for no text.",
     type: "textarea",
     page: "products",
     group: "products.listing",
     gridColumn: "col-span-full",
     defaultValue: "Explore our collection of premium bamboo products.",
-    placeholder: "Explore our collection of premium bamboo products.",
+    placeholder: "Explore our collection of products.",
   },
 ];
 
@@ -32,18 +41,9 @@ export const bambooProductsData = [...productsPageData];
 export const bambooProductsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "products.listing",
-    title: "Products Listing Hero",
-    description: "Products index page hero (title, intro, image)",
+    title: "Shop page",
+    description: "Heading and intro at the top of the shop page.",
     icon: "📝",
     columns: 2,
   },
-];
-
-/////
-
-export const DEFAULT_LUCIDE_ICONS_WITH_LABELS = [
-  { icon: Leaf, label: "100% Tree-Free" },
-  { icon: Droplets, label: "Septic Safe" },
-  { icon: Shield, label: "Hypoallergenic" },
-  { icon: Sparkles, label: "Premium Quality" },
 ];

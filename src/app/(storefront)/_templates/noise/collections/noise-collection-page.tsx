@@ -33,16 +33,12 @@ export function NoiseCollectionPage({
     "noise.collections.more-heading",
   ]);
 
-  const detailOverline = f["noise.collections.detail-overline"] ?? "Collection";
-  const detailEmptyText =
-    f["noise.collections.detail-empty-text"] ??
-    "No garments in this collection yet.";
-  const detailBrowseText =
-    f["noise.collections.detail-browse-text"] ?? "Browse All Garments →";
-  const detailBackLabel =
-    f["noise.collections.detail-back-label"] ?? "All Collections";
-  const moreOverline = f["noise.collections.more-overline"] ?? "Continue exploring";
-  const moreHeading = f["noise.collections.more-heading"] ?? "More collections.";
+  const detailOverline = f["noise.collections.detail-overline"] ?? "";
+  const detailEmptyText = f["noise.collections.detail-empty-text"] ?? "";
+  const detailBrowseText = f["noise.collections.detail-browse-text"] ?? "";
+  const detailBackLabel = f["noise.collections.detail-back-label"] ?? "";
+  const moreOverline = f["noise.collections.more-overline"] ?? "";
+  const moreHeading = f["noise.collections.more-heading"] ?? "";
 
   const products = collection.collectionProducts
     .map((cp) => cp.product)

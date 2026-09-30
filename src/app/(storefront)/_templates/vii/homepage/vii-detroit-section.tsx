@@ -5,7 +5,11 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -19,6 +23,11 @@ type Props = {
   details: TemplateListRow[];
   ctaText: string;
   ctaHref: string;
+  /**
+   * Text shown over the tinted panel when no photo is set — the location tag
+   * (Settings city), else the business name.
+   */
+  placeholderLabel: string;
 };
 
 export function ViiDetroitSection({
@@ -30,6 +39,7 @@ export function ViiDetroitSection({
   details,
   ctaText,
   ctaHref,
+  placeholderLabel,
 }: Props) {
   const { ref: mediaRef, visible: mediaVisible } = useViiReveal(0.1);
   const { ref: textRef, visible: textVisible } = useViiReveal(0.1);
@@ -93,7 +103,7 @@ export function ViiDetroitSection({
                 color: "color-mix(in srgb, var(--vii-paper) 55%, transparent)",
               }}
             >
-              Detroit
+              {placeholderLabel}
             </span>
           )}
         </div>
@@ -182,6 +192,7 @@ export function ViiDetroitSection({
                 return (
                   <li
                     key={detail._id ?? i}
+                    {...listItemAttr("vii.homepage.detroit-details", i)}
                     style={{
                       fontFamily: "var(--font-sans)",
                       fontSize: 12,

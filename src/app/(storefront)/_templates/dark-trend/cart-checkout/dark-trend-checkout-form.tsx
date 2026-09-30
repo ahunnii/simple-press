@@ -8,6 +8,7 @@ import { CreditCard, Loader2, Tag, X } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
@@ -30,6 +31,8 @@ import {
   SavedAddressPicker,
 } from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
+import { resolveFields } from "..";
+
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
   merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
@@ -37,6 +40,15 @@ type Props = {
 
 export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
   const f = useCheckoutForm(business, merchantPolicies);
+
+  const checkoutCopy = resolveFields(business.siteContent?.customFields, [
+    "dark-trend.cart.empty-heading",
+    "dark-trend.checkout.secure-payment-note",
+  ]);
+  const emptyCartHeading = checkoutCopy["dark-trend.cart.empty-heading"] ?? "";
+  const secureNote = (
+    checkoutCopy["dark-trend.checkout.secure-payment-note"] ?? ""
+  ).trim();
 
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
@@ -62,7 +74,12 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
   if (f.items.length === 0) {
     return (
       <div className="py-16 text-center">
-        <p className="mb-4 text-white/70">Your cart is empty</p>
+        <p
+          {...fieldAttr("dark-trend.cart.empty-heading")}
+          className="mb-4 text-white/70"
+        >
+          {emptyCartHeading}
+        </p>
         <Button
           asChild
           className="bg-violet-600 text-white hover:bg-violet-700"
@@ -617,10 +634,15 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                 linkClassName="underline hover:text-white/80"
               />
 
-              <p className="text-center text-xs text-white/60">
-                All transactions are secure and encrypted via Stripe. 100%
-                Secure and Encrypted Payments.
-              </p>
+              {secureNote ? (
+                <p
+                  {...sectionGroupAttr("checkout", "form")}
+                  {...fieldAttr("dark-trend.checkout.secure-payment-note")}
+                  className="text-center text-xs text-white/60"
+                >
+                  {secureNote}
+                </p>
+              ) : null}
             </CardContent>
           </Card>
         </div>

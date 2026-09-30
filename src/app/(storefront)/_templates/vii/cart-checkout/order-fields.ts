@@ -6,9 +6,9 @@ export const viiOrderData: TemplateField[] = [
   // ── Success state ──────────────────────────────────────────────────────────
   {
     key: "vii.order.overline",
-    label: "Success Overline",
+    label: "Small label",
     description:
-      "Small uppercase kicker shown above the thank-you heading in the navy confirmation section.",
+      "Small label shown above the thank-you heading in the order confirmation section.",
     type: "text",
     page: "cart",
     group: "order.main",
@@ -17,9 +17,8 @@ export const viiOrderData: TemplateField[] = [
   },
   {
     key: "vii.order.thank-you-heading",
-    label: "Thank You Heading",
-    description:
-      "The main serif display heading shown in the navy confirmation room. The accent word renders in copper-light italic.",
+    label: "Heading",
+    description: "The main heading shown in the order confirmation section.",
     type: "text",
     page: "cart",
     group: "order.main",
@@ -28,9 +27,8 @@ export const viiOrderData: TemplateField[] = [
   },
   {
     key: "vii.order.thank-you-accent",
-    label: "Thank You Accent Word",
-    description:
-      "The italic copper-light accent word that follows the heading (e.g. 'you'). Renders as italic serif in copper-light on the navy background.",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading (e.g. 'you').",
     type: "text",
     page: "cart",
     group: "order.main",
@@ -39,9 +37,9 @@ export const viiOrderData: TemplateField[] = [
   },
   {
     key: "vii.order.next-steps",
-    label: "What Happens Next Body",
+    label: "What happens next (fallback)",
     description:
-      "Short paragraph or list shown below the confirmation details — e.g. email confirmation, shipping notice, order tracking. Use line breaks to create separate items.",
+      "Shown below the confirmation details when the order's delivery method can't be determined (e.g. this page was opened without a fresh Stripe session). Use line breaks to create separate items. See 'What happens next — shipping' and '— pickup' below for the versions shown on a real order.",
     type: "textarea",
     page: "cart",
     group: "order.main",
@@ -50,10 +48,34 @@ export const viiOrderData: TemplateField[] = [
       "You'll receive an email confirmation shortly.\nWe'll notify you as soon as your order ships.\nTrack your order status via your confirmation email.",
   },
   {
-    key: "vii.order.continue-cta",
-    label: "Continue Shopping CTA Label",
+    key: "vii.order.next-steps-ship",
+    label: "What happens next — shipping",
     description:
-      "Label for the primary CTA button that returns the customer to the shop.",
+      "Shown below the confirmation details on orders being shipped to the customer. Use line breaks to create separate items.",
+    type: "textarea",
+    page: "cart",
+    group: "order.main",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "You'll receive an email confirmation shortly.\nWe'll notify you as soon as your order ships.\nTrack your order status via your confirmation email.",
+  },
+  {
+    key: "vii.order.next-steps-pickup",
+    label: "What happens next — pickup",
+    description:
+      "Shown below the confirmation details on in-store-pickup orders. Use line breaks to create separate items. The pickup address itself comes from Settings → Shipping, shown automatically beneath this text.",
+    type: "textarea",
+    page: "cart",
+    group: "order.main",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "You'll receive an email confirmation shortly.\nWe'll let you know as soon as your order is ready for pickup.",
+  },
+  {
+    key: "vii.order.continue-cta",
+    label: "Continue shopping button text",
+    description:
+      "Text for the primary button that returns the customer to the shop.",
     type: "text",
     page: "cart",
     group: "order.main",
@@ -63,7 +85,7 @@ export const viiOrderData: TemplateField[] = [
   // ── Loading state ──────────────────────────────────────────────────────────
   {
     key: "vii.order.loading-text",
-    label: "Loading Text",
+    label: "Loading text",
     description:
       "Calm message shown while the order confirmation is being fetched from Stripe.",
     type: "text",
@@ -75,7 +97,7 @@ export const viiOrderData: TemplateField[] = [
   // ── No-session / error state ───────────────────────────────────────────────
   {
     key: "vii.order.no-order-heading",
-    label: "No Order Heading",
+    label: "No order heading",
     description: "Heading shown when no order session is present in the URL.",
     type: "text",
     page: "cart",
@@ -85,7 +107,7 @@ export const viiOrderData: TemplateField[] = [
   },
   {
     key: "vii.order.no-order-body",
-    label: "No Order Body",
+    label: "No order message",
     description:
       "Short explanatory copy shown beneath the no-order heading — e.g. directing the customer back to the shop.",
     type: "text",
@@ -102,9 +124,9 @@ export const viiOrderData: TemplateField[] = [
 export const viiOrderFieldGroups: TemplateFieldGroup[] = [
   {
     id: "order.main",
-    title: "Order Confirmation",
+    title: "Order confirmation",
     description:
-      "Thank-you heading, accent word, next-steps copy, CTA labels, and loading / no-order messaging.",
+      "Thank-you heading, highlighted words, next-steps copy, button text, and loading / no-order messaging.",
     icon: "✓",
     columns: 2,
   },

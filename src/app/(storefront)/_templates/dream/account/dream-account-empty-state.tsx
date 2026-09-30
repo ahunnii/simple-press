@@ -3,7 +3,9 @@ import { DreamReveal } from "../shared/dream-reveal";
 
 type Props = {
   heading: string;
+  /** Blank hides the message paragraph entirely. */
   body: string;
+  /** Blank (either one) hides the button entirely. */
   ctaLabel: string;
   ctaHref: string;
 };
@@ -41,12 +43,16 @@ export function DreamAccountEmptyState({
         <h2 className="m-0 [font-family:var(--font-dream-display)] text-[24px] text-[var(--dream-ink)]">
           {heading}
         </h2>
-        <p className="m-0 max-w-[38ch] text-[15px] leading-[1.7] text-[var(--dream-soft)]">
-          {body}
-        </p>
-        <DreamButton href={ctaHref} variant="primary">
-          {ctaLabel}
-        </DreamButton>
+        {body ? (
+          <p className="m-0 max-w-[38ch] text-[15px] leading-[1.7] text-[var(--dream-soft)]">
+            {body}
+          </p>
+        ) : null}
+        {ctaLabel && ctaHref ? (
+          <DreamButton href={ctaHref} variant="primary">
+            {ctaLabel}
+          </DreamButton>
+        ) : null}
       </div>
     </DreamReveal>
   );

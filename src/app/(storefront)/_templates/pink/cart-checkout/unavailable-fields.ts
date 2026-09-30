@@ -10,7 +10,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 export const pinkUnavailableData: TemplateField[] = [
   {
     key: "pink.checkout.unavailable-heading",
-    label: "Checkout Unavailable Heading",
+    label: "Heading",
     description:
       "Heading shown when the store hasn't set up payment processing yet.",
     type: "text",
@@ -21,8 +21,8 @@ export const pinkUnavailableData: TemplateField[] = [
   },
   {
     key: "pink.checkout.unavailable-body",
-    label: "Checkout Unavailable Body",
-    description: "Body copy shown alongside the unavailable heading.",
+    label: "Message",
+    description: "Text shown alongside the heading above.",
     type: "textarea",
     page: "checkout",
     group: "checkout.unavailable",
@@ -32,8 +32,8 @@ export const pinkUnavailableData: TemplateField[] = [
   },
   {
     key: "pink.checkout.unavailable-cta",
-    label: "Checkout Unavailable CTA Label",
-    description: "Label on the button back to the shop.",
+    label: "Button text",
+    description: "Text on the button back to the shop.",
     type: "text",
     page: "checkout",
     group: "checkout.unavailable",
@@ -45,9 +45,9 @@ export const pinkUnavailableData: TemplateField[] = [
 export const pinkUnavailableFieldGroups: TemplateFieldGroup[] = [
   {
     id: "checkout.unavailable",
-    title: "Checkout Unavailable",
+    title: "Checkout unavailable",
     description:
-      "Heading, body and CTA shown when the store hasn't connected payments yet",
+      "Heading, message and button shown when the store hasn't connected payments yet",
     icon: "🚫",
     columns: 2,
   } satisfies TemplateFieldGroup,

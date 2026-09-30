@@ -48,6 +48,19 @@ const navChildSchema = z.object({
   external: z.boolean().optional(),
 });
 
+/**
+ * Footer "Quick Links" — a separate, flat list (no `children`): reuses
+ * `navChildSchema` so it gets the same label/href/external shape and scheme
+ * guard as a nav child. `null` is a valid save (falls back to the main nav's
+ * top level at read time, see `resolveFooterNav`); a saved `[]` means "no
+ * links" and must round-trip as-is, same as `navigationItemsSchema`.
+ */
+export const footerNavigationItemsSchema = z
+  .array(navChildSchema)
+  .max(12)
+  .nullable()
+  .optional();
+
 const navigationItemsSchema = z
   .array(
     z.object({
@@ -107,6 +120,11 @@ export const siteContentSchema = z
 
     // Navigation
     navigationItems: navigationItemsSchema,
+
+    // Footer "Quick Links" — flat, no children. `null`/missing falls back to
+    // the main nav's top level; a saved `[]` means "no links". See
+    // `footerNavigationItemsSchema`.
+    footerNavigationItems: footerNavigationItemsSchema,
 
     // Template-specific — shape varies per template, validated at consumption time
     customFields: z.any().optional(),

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -13,9 +14,18 @@ import { ElegantVariantSelector } from "./elegant-variant-selector";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
+type Props = DefaultProductPageTemplateProps & {
+  /** `elegant.product.coming-soon-heading` — resolved by the product page. */
+  comingSoonHeading: string;
+  /** `elegant.product.coming-soon-body` — blank hides the line. */
+  comingSoonBody: string;
+};
+
 export function ElegantProductActions({
   product,
-}: DefaultProductPageTemplateProps) {
+  comingSoonHeading,
+  comingSoonBody,
+}: Props) {
   const {
     inStock,
     variantOptions,
@@ -66,6 +76,7 @@ export function ElegantProductActions({
           }}
         >
           <p
+            {...fieldAttr("elegant.product.coming-soon-heading")}
             style={{
               fontFamily: "var(--font-mono, ui-monospace)",
               fontSize: 11,
@@ -75,17 +86,21 @@ export function ElegantProductActions({
               marginBottom: 4,
             }}
           >
-            Coming Soon
+            {comingSoonHeading}
           </p>
-          <p
-            style={{
-              fontSize: 14,
-              color: "var(--el-ink-soft, #6b6659)",
-              fontFamily: "var(--font-sans, sans-serif)",
-            }}
-          >
-            This product isn&apos;t available yet. Check back soon.
-          </p>
+          {comingSoonBody ? (
+            <p
+              {...fieldAttr("elegant.product.coming-soon-body")}
+              style={{
+                fontSize: 14,
+                color: "var(--el-ink-soft, #6b6659)",
+                fontFamily: "var(--font-sans, sans-serif)",
+                whiteSpace: "pre-line",
+              }}
+            >
+              {comingSoonBody}
+            </p>
+          ) : null}
         </div>
         {subscribePanel}
       </>

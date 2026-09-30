@@ -5,10 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, X } from "lucide-react";
 
-import type { DreamNavItem } from "../lib/nav";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
+import { isActiveNavLink } from "~/lib/nav-utils";
+import { fieldAttr } from "~/lib/preview/section-attrs";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  isNavItemActive,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
-import { isDreamNavActive } from "../lib/nav";
 import { DreamSocialLinks } from "../shared/dream-social-links";
 import { DreamNavOverlayAccount } from "./dream-nav-overlay-account";
 
@@ -17,17 +24,20 @@ type DreamNavOverlayProps = {
   onClose: () => void;
   /** Ref of the hamburger trigger button, so focus returns to it on close. */
   triggerRef: React.RefObject<HTMLButtonElement | null>;
-  items: DreamNavItem[];
+  /** The header's nav — already flag-filtered (P-NAV-FLAGS). */
+  items: NavItem[];
   businessName: string;
   logoUrl: string;
   logoAlt: string;
+  /** Blank label or link hides the CTA pill. */
   ctaLabel: string;
   ctaUrl: string;
   /** Raw `business.siteContent.socialLinks` JSON — parsed by `DreamSocialLinks`. */
   socialLinks: unknown;
   initialSession?: Session | null;
   accountsEnabled: boolean;
-  ordersEnabled: boolean;
+  /** Business flag check — gates the account links (Orders needs `orders`). */
+  isEnabled: (flag: string) => boolean;
 };
 
 /** Milliseconds the exit fade runs before unmount. */
@@ -43,7 +53,9 @@ const EXIT_MS = 180;
  * mechanics structurally copied from `wealth/layout/wealth-nav-overlay.tsx`
  * (itself copied from `vii/layout/vii-header.tsx`'s mobile dialog). Nav items
  * that carry children (Admin → Content → Navigation) render as an in-place
- * accordion; the social row and the account list sit below the link list.
+ * accordion whose first entry is the parent's own href (`navGroupEntries` —
+ * the toggle never navigates); the social row and the account list sit below
+ * the link list.
  */
 export function DreamNavOverlay({
   open,
@@ -58,7 +70,7 @@ export function DreamNavOverlay({
   socialLinks,
   initialSession,
   accountsEnabled,
-  ordersEnabled,
+  isEnabled,
 }: DreamNavOverlayProps) {
   const pathname = usePathname();
 
@@ -231,16 +243,14 @@ export function DreamNavOverlay({
         <ul className="dream-nav-overlay-list">
           {items.map((item, i) => {
             if (item.children?.length) {
-              const childActive = item.children.some((child) =>
-                isDreamNavActive(pathname, child.href),
-              );
-              const active =
-                childActive || isDreamNavActive(pathname, item.href);
+              const active = isNavItemActive(pathname, item);
+              const entries = navGroupEntries(item);
+              const activeEntry = activeEntryIndex(pathname, entries);
               const isOpen = expanded === i;
               const sublistId = `dream-nav-overlay-sublist-${i}`;
 
               return (
-                <li key={item.href + item.label}>
+                <li key={`${i}-${item.href}`}>
                   <button
                     type="button"
                     aria-expanded={isOpen}
@@ -261,28 +271,20 @@ export function DreamNavOverlay({
 
                   {isOpen ? (
                     <ul id={sublistId} className="dream-nav-overlay-sublist">
-                      {item.children.map((child) => {
-                        const childIsActive = isDreamNavActive(
-                          pathname,
-                          child.href,
-                        );
+                      {entries.map((entry, j) => {
+                        const childIsActive = j === activeEntry;
                         return (
-                          <li key={child.href + child.label}>
+                          <li key={`${j}-${entry.href}`}>
                             <Link
-                              href={child.href}
-                              target={child.external ? "_blank" : undefined}
-                              rel={
-                                child.external
-                                  ? "noopener noreferrer"
-                                  : undefined
-                              }
+                              href={entry.href}
+                              {...externalLinkProps(entry.external)}
                               onClick={onClose}
                               aria-current={childIsActive ? "page" : undefined}
                               data-active={childIsActive ? "true" : undefined}
                               className="dream-nav-overlay-subitem"
                             >
-                              {child.label}
-                              {child.external ? (
+                              {entry.label}
+                              {entry.external ? (
                                 <span className="sr-only">
                                   {" "}
                                   (opens in new tab)
@@ -298,13 +300,12 @@ export function DreamNavOverlay({
               );
             }
 
-            const active = isDreamNavActive(pathname, item.href);
+            const active = isActiveNavLink(pathname, item.href);
             return (
-              <li key={item.href + item.label}>
+              <li key={`${i}-${item.href}`}>
                 <Link
                   href={item.href}
-                  target={item.external ? "_blank" : undefined}
-                  rel={item.external ? "noopener noreferrer" : undefined}
+                  {...externalLinkProps(item.external)}
                   onClick={onClose}
                   aria-current={active ? "page" : undefined}
                   className="dream-nav-overlay-line dream-nav-overlay-item"
@@ -335,16 +336,19 @@ export function DreamNavOverlay({
         <DreamNavOverlayAccount
           initialSession={initialSession}
           accountsEnabled={accountsEnabled}
-          ordersEnabled={ordersEnabled}
+          isEnabled={isEnabled}
           onClose={onClose}
         />
-        <Link
-          href={ctaUrl}
-          onClick={onClose}
-          className="dream-btn dream-nav-overlay-cta"
-        >
-          {ctaLabel}
-        </Link>
+        {ctaLabel && ctaUrl ? (
+          <Link
+            href={ctaUrl}
+            onClick={onClose}
+            className="dream-btn dream-nav-overlay-cta"
+            {...fieldAttr("dream.global.header-cta-label")}
+          >
+            {ctaLabel}
+          </Link>
+        ) : null}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { ArrowLeft, Leaf, Package } from "lucide-react";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
+import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import {
   FadeIn,
@@ -11,6 +12,11 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+
+import {
+  BAMBOO_EMBLEM_CLEAR,
+  BAMBOO_TOP_MARKER,
+} from "../shared/bamboo-emblem-clearance";
 
 export function BambooCollectionPage({
   collection,
@@ -31,7 +37,12 @@ export function BambooCollectionPage({
             description stack. The imageUrl-less fallback branch is bamboo's
             own (happy-bamboo always has a placeholder image), kept as-is. */}
         {collection.imageUrl ? (
-          <div className="relative h-[45vh] min-h-[320px] overflow-hidden">
+          <div
+            className={cn(
+              "relative h-[45vh] min-h-[320px] overflow-hidden",
+              BAMBOO_TOP_MARKER,
+            )}
+          >
             <Image
               src={collection.imageUrl}
               alt={collection.name}
@@ -41,8 +52,8 @@ export function BambooCollectionPage({
               sizes="100vw"
             />
             <div className="absolute inset-0 bg-black/60" />
-            <div className="absolute inset-0 flex flex-col justify-end px-4 pb-12 sm:px-6 lg:px-8">
-              <div className="mx-auto w-full max-w-7xl">
+            <div className="absolute inset-0 flex flex-col justify-end pb-12">
+              <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <FadeIn>
                   <Link
                     href="/collections"
@@ -78,8 +89,10 @@ export function BambooCollectionPage({
             </div>
           </div>
         ) : (
-          <div className="bg-[var(--bam-cream-deep)] px-4 py-20 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl">
+          <div
+            className={cn("bg-[var(--bam-cream-deep)]", BAMBOO_EMBLEM_CLEAR)}
+          >
+            <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
               <FadeIn>
                 <Link
                   href="/collections"

@@ -1,8 +1,9 @@
 /**
  * Pollen-specific service-page template field definitions.
  *
- * Three visually distinct layouts — all unmistakably pollen (greens, rounded
- * cards, soft shadows, Cormorant / Inter / system-sans pairing):
+ * Three visually distinct layouts — all unmistakably pollen (rounded cards,
+ * soft shadows, and the shared pollen green/cream palette; system-sans
+ * throughout, no custom font pairing):
  *
  *  pollen-spa   — Serene editorial: hero banner + two-column intro + 3-col card grid
  *  pollen-bloom — Gallery-forward: mosaic accent images + image-heavy staggered cards
@@ -20,19 +21,20 @@ const pollenSpaFields: TemplateField[] = [
   // Hero
   {
     key: "pollen-spa.hero-image",
-    label: "Hero Image",
-    description: "Full-width banner image shown behind the service name",
+    label: "Background image",
+    description:
+      "Full-width image shown behind the service name. Leave blank to use this service's own photo, or the site-wide header background if it has none.",
     type: "image",
     page: "homepage",
     group: "pollen-spa.hero",
     gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    defaultValue: "",
   },
   {
     key: "pollen-spa.hero-video",
-    label: "Hero Background Video",
+    label: "Background video",
     description:
-      "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
+      "Optional background video; takes precedence over the background image. Use .mp4 or .webm.",
     type: "video",
     page: "homepage",
     group: "pollen-spa.hero",
@@ -42,9 +44,8 @@ const pollenSpaFields: TemplateField[] = [
   // Intro section
   {
     key: "pollen-spa.intro-label",
-    label: "Intro Label",
-    description:
-      "Small uppercase label above the intro heading (e.g. 'Our Approach')",
+    label: "Small label",
+    description: "Short line above the intro heading, e.g. Our Approach.",
     type: "text",
     page: "homepage",
     group: "pollen-spa.intro",
@@ -54,8 +55,8 @@ const pollenSpaFields: TemplateField[] = [
   },
   {
     key: "pollen-spa.intro-heading",
-    label: "Intro Heading",
-    description: "Primary heading for the intro section",
+    label: "Heading",
+    description: "Main heading for the intro section.",
     type: "text",
     page: "homepage",
     group: "pollen-spa.intro",
@@ -65,8 +66,8 @@ const pollenSpaFields: TemplateField[] = [
   },
   {
     key: "pollen-spa.intro-body",
-    label: "Intro Body",
-    description: "Rich-text description of this service group",
+    label: "Body text",
+    description: "Rich-text description of this service group.",
     type: "richtext",
     page: "homepage",
     group: "pollen-spa.intro",
@@ -76,20 +77,20 @@ const pollenSpaFields: TemplateField[] = [
   },
   {
     key: "pollen-spa.intro-accent-image",
-    label: "Intro Accent Image",
+    label: "Accent image",
     description:
-      "Supporting image shown beside the intro text (portrait orientation works best)",
+      "Supporting image shown beside the intro text (portrait orientation works best). Leave blank to hide.",
     type: "image",
     page: "homepage",
     group: "pollen-spa.intro",
     gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    defaultValue: "",
   },
   {
     key: "pollen-spa.intro-video",
-    label: "Intro Accent Video",
+    label: "Accent video",
     description:
-      "Optional video for the intro accent column; takes precedence over the accent image when set.",
+      "Optional video beside the intro text; takes precedence over the accent image when set.",
     type: "video",
     page: "homepage",
     group: "pollen-spa.intro",
@@ -99,19 +100,19 @@ const pollenSpaFields: TemplateField[] = [
   // Items section heading
   {
     key: "pollen-spa.items-heading",
-    label: "Services Grid Heading",
-    description: "Heading above the grid of individual service items",
+    label: "Heading",
+    description: "Heading above the grid of individual services.",
     type: "text",
     page: "homepage",
     group: "pollen-spa.items",
     gridColumn: "col-span-full",
-    defaultValue: "Choose Your Treatment",
-    placeholder: "Choose Your Treatment",
+    defaultValue: "Choose a service",
+    placeholder: "Choose a service",
   },
   {
     key: "pollen-spa.items-subheading",
-    label: "Services Grid Subheading",
-    description: "Optional sentence below the grid heading",
+    label: "Subheading",
+    description: "Optional line below the grid heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "pollen-spa.items",
@@ -119,12 +120,35 @@ const pollenSpaFields: TemplateField[] = [
     defaultValue: "",
     placeholder: "All treatments are tailored to your needs.",
   },
+  {
+    key: "pollen-spa.book-button-text",
+    label: "Book button text",
+    description: "Label on the booking button shown on each service card.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-spa.items",
+    gridColumn: "col-span-1",
+    defaultValue: "Book",
+    placeholder: "Book",
+  },
 
   // CTA
   {
+    key: "pollen-spa.closing-heading",
+    label: "Closing heading",
+    description:
+      "Small line shown above the service name in the closing banner.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-spa.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Ready to begin?",
+    placeholder: "Ready to begin?",
+  },
+  {
     key: "pollen-spa.cta-text",
-    label: "CTA Button Text",
-    description: "Text for the call-to-action button below the intro",
+    label: "Button text",
+    description: "Label on the button below the intro.",
     type: "text",
     page: "homepage",
     group: "pollen-spa.cta",
@@ -134,8 +158,8 @@ const pollenSpaFields: TemplateField[] = [
   },
   {
     key: "pollen-spa.cta-link",
-    label: "CTA Button Link",
-    description: "URL the CTA button points to (leave blank to hide)",
+    label: "Button link",
+    description: "Where the button below the intro goes. Leave blank to hide the button.",
     type: "url",
     page: "homepage",
     group: "pollen-spa.cta",
@@ -145,9 +169,9 @@ const pollenSpaFields: TemplateField[] = [
   },
   {
     key: "pollen-spa.cta-embed",
-    label: "Booking Embed",
+    label: "Booking embed",
     description:
-      "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
+      "Optional iframe embed (e.g. a booking widget) shown in the closing banner.",
     type: "iframe",
     page: "homepage",
     group: "pollen-spa.cta",
@@ -157,7 +181,7 @@ const pollenSpaFields: TemplateField[] = [
     key: "pollen-spa.cta-embed-reveal",
     label: "Reveal booking behind a button",
     description:
-      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open. Only applies when a booking embed is set above.",
     type: "boolean",
     page: "homepage",
     group: "pollen-spa.cta",
@@ -169,8 +193,8 @@ const pollenSpaFields: TemplateField[] = [
 const pollenSpaFieldGroups: TemplateFieldGroup[] = [
   {
     id: "pollen-spa.hero",
-    title: "Hero Banner",
-    description: "Full-width image at the top of the service page",
+    title: "Hero",
+    description: "Full-width image at the top of the service page.",
     icon: "🖼️",
     columns: 1,
   },
@@ -178,23 +202,22 @@ const pollenSpaFieldGroups: TemplateFieldGroup[] = [
     id: "pollen-spa.intro",
     title: "Introduction",
     description:
-      "Two-column intro section: label, heading, rich-text body, and accent image",
+      "Two-column intro section: label, heading, rich-text body, and accent image.",
     icon: "📝",
     columns: 1,
   },
   {
     id: "pollen-spa.items",
-    title: "Services Grid",
-    description:
-      "Heading and sub-heading above the grid of individual service items",
+    title: "Services grid",
+    description: "Heading and subheading above the grid of individual services.",
     icon: "🌿",
     columns: 1,
   },
   {
     id: "pollen-spa.cta",
-    title: "Call to Action",
-    description: "Optional CTA button shown below the intro text",
-    icon: "👆",
+    title: "Closing banner",
+    description: "Optional button and booking embed shown below the intro.",
+    icon: "📣",
     columns: 2,
   },
 ];
@@ -205,25 +228,27 @@ const pollenBloomFields: TemplateField[] = [
   // Gallery mosaic
   {
     key: "pollen-bloom.gallery",
-    label: "Accent Gallery",
+    label: "Accent gallery",
     description:
       "2-4 images shown in a mosaic grid at the top of the page (portrait images recommended). Add up to 4.",
     type: "list",
     page: "homepage",
     group: "pollen-bloom.gallery",
     gridColumn: "col-span-full",
+    itemLabel: "photo",
     itemSchema: [
       {
         key: "image",
         label: "Image",
         type: "image",
-        description: "Accent photo for the mosaic",
+        description: "Accent photo for the mosaic.",
       },
       {
         key: "alt",
-        label: "Alt Text",
+        label: "Alt text",
         type: "text",
-        description: "Brief description for screen readers (optional)",
+        description: "Brief description for screen readers.",
+        optional: true,
       },
     ],
     minItems: 0,
@@ -231,9 +256,9 @@ const pollenBloomFields: TemplateField[] = [
   },
   {
     key: "pollen-bloom.hero-video",
-    label: "Hero Video Band",
+    label: "Video band",
     description:
-      "Optional background video; takes precedence over the hero image. Displayed as a full-width band before the gallery when set.",
+      "Optional background video shown as a full-width band before the gallery.",
     type: "video",
     page: "homepage",
     group: "pollen-bloom.gallery",
@@ -243,8 +268,8 @@ const pollenBloomFields: TemplateField[] = [
   // Intro
   {
     key: "pollen-bloom.intro-label",
-    label: "Intro Label",
-    description: "Small uppercase label above the intro heading",
+    label: "Small label",
+    description: "Short line above the intro heading.",
     type: "text",
     page: "homepage",
     group: "pollen-bloom.intro",
@@ -254,8 +279,8 @@ const pollenBloomFields: TemplateField[] = [
   },
   {
     key: "pollen-bloom.intro-heading",
-    label: "Intro Heading",
-    description: "Main heading for the intro section",
+    label: "Heading",
+    description: "Main heading for the intro section.",
     type: "text",
     page: "homepage",
     group: "pollen-bloom.intro",
@@ -265,8 +290,8 @@ const pollenBloomFields: TemplateField[] = [
   },
   {
     key: "pollen-bloom.intro-body",
-    label: "Intro Body",
-    description: "Rich-text overview of this service group",
+    label: "Body text",
+    description: "Rich-text overview of this service group.",
     type: "richtext",
     page: "homepage",
     group: "pollen-bloom.intro",
@@ -276,7 +301,7 @@ const pollenBloomFields: TemplateField[] = [
   },
   {
     key: "pollen-bloom.intro-image",
-    label: "Intro Accent Image",
+    label: "Accent image",
     description: "Optional supporting image shown below the intro text.",
     type: "image",
     page: "homepage",
@@ -285,9 +310,9 @@ const pollenBloomFields: TemplateField[] = [
   },
   {
     key: "pollen-bloom.intro-video",
-    label: "Intro Accent Video",
+    label: "Accent video",
     description:
-      "Optional video shown in the intro section; takes precedence over the intro image when set.",
+      "Optional video shown in the intro section; takes precedence over the accent image when set.",
     type: "video",
     page: "homepage",
     group: "pollen-bloom.intro",
@@ -297,8 +322,8 @@ const pollenBloomFields: TemplateField[] = [
   // Items heading
   {
     key: "pollen-bloom.items-heading",
-    label: "Services Heading",
-    description: "Heading above the individual service cards",
+    label: "Heading",
+    description: "Heading above the individual service cards.",
     type: "text",
     page: "homepage",
     group: "pollen-bloom.items",
@@ -306,12 +331,35 @@ const pollenBloomFields: TemplateField[] = [
     defaultValue: "Available Services",
     placeholder: "Available Services",
   },
+  {
+    key: "pollen-bloom.book-button-text",
+    label: "Book button text",
+    description: "Label on the booking button shown on each service card.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-bloom.items",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+    placeholder: "Book Now",
+  },
 
   // CTA
   {
+    key: "pollen-bloom.closing-heading",
+    label: "Closing heading",
+    description:
+      "Small line shown above the service name in the closing banner.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-bloom.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Ready to begin?",
+    placeholder: "Ready to begin?",
+  },
+  {
     key: "pollen-bloom.cta-text",
-    label: "CTA Button Text",
-    description: "Text for the call-to-action button",
+    label: "Button text",
+    description: "Label on the button below the intro.",
     type: "text",
     page: "homepage",
     group: "pollen-bloom.cta",
@@ -321,8 +369,8 @@ const pollenBloomFields: TemplateField[] = [
   },
   {
     key: "pollen-bloom.cta-link",
-    label: "CTA Button Link",
-    description: "URL the CTA button points to (leave blank to hide)",
+    label: "Button link",
+    description: "Where the button below the intro goes. Leave blank to hide the button.",
     type: "url",
     page: "homepage",
     group: "pollen-bloom.cta",
@@ -332,9 +380,9 @@ const pollenBloomFields: TemplateField[] = [
   },
   {
     key: "pollen-bloom.cta-embed",
-    label: "Booking Embed",
+    label: "Booking embed",
     description:
-      "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
+      "Optional iframe embed (e.g. a booking widget) shown in the closing banner.",
     type: "iframe",
     page: "homepage",
     group: "pollen-bloom.cta",
@@ -344,7 +392,7 @@ const pollenBloomFields: TemplateField[] = [
     key: "pollen-bloom.cta-embed-reveal",
     label: "Reveal booking behind a button",
     description:
-      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open. Only applies when a booking embed is set above.",
     type: "boolean",
     page: "homepage",
     group: "pollen-bloom.cta",
@@ -356,30 +404,30 @@ const pollenBloomFields: TemplateField[] = [
 const pollenBloomFieldGroups: TemplateFieldGroup[] = [
   {
     id: "pollen-bloom.gallery",
-    title: "Accent Gallery",
-    description: "2-4 images arranged in a mosaic at the top of the page",
+    title: "Accent gallery",
+    description: "2-4 images arranged in a mosaic at the top of the page.",
     icon: "🌸",
     columns: 1,
   },
   {
     id: "pollen-bloom.intro",
     title: "Introduction",
-    description: "Label, heading, and rich-text overview for the service group",
+    description: "Label, heading, and rich-text overview for the service group.",
     icon: "📝",
     columns: 1,
   },
   {
     id: "pollen-bloom.items",
-    title: "Services Section",
-    description: "Heading above the image-heavy service cards",
+    title: "Services section",
+    description: "Heading above the image-heavy service cards.",
     icon: "🌿",
     columns: 1,
   },
   {
     id: "pollen-bloom.cta",
-    title: "Call to Action",
-    description: "Optional CTA button shown below the intro",
-    icon: "👆",
+    title: "Closing banner",
+    description: "Optional button and booking embed shown below the intro.",
+    icon: "📣",
     columns: 2,
   },
 ];
@@ -390,9 +438,8 @@ const pollenListFields: TemplateField[] = [
   // Strip hero
   {
     key: "pollen-list.accent-color",
-    label: "Accent Stripe Color",
-    description:
-      "Color of the thin decorative stripe above the page title (hex)",
+    label: "Accent stripe color",
+    description: "Color of the thin decorative stripe above the page title.",
     type: "color",
     page: "homepage",
     group: "pollen-list.hero",
@@ -402,9 +449,9 @@ const pollenListFields: TemplateField[] = [
   },
   {
     key: "pollen-list.hero-video",
-    label: "Hero Background Video",
+    label: "Background video",
     description:
-      "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
+      "Optional background video shown near the top of the page. Use .mp4 or .webm.",
     type: "video",
     page: "homepage",
     group: "pollen-list.hero",
@@ -414,8 +461,8 @@ const pollenListFields: TemplateField[] = [
   // Intro
   {
     key: "pollen-list.intro-label",
-    label: "Intro Label",
-    description: "Small uppercase label above the intro heading",
+    label: "Small label",
+    description: "Short line above the intro heading.",
     type: "text",
     page: "homepage",
     group: "pollen-list.intro",
@@ -425,8 +472,8 @@ const pollenListFields: TemplateField[] = [
   },
   {
     key: "pollen-list.intro-heading",
-    label: "Intro Heading",
-    description: "Main heading for the intro block",
+    label: "Heading",
+    description: "Main heading for the intro block.",
     type: "text",
     page: "homepage",
     group: "pollen-list.intro",
@@ -436,9 +483,9 @@ const pollenListFields: TemplateField[] = [
   },
   {
     key: "pollen-list.intro-body",
-    label: "Intro Body",
+    label: "Body text",
     description:
-      "Rich-text description centred above the alternating item rows",
+      "Rich-text description centered above the alternating rows.",
     type: "richtext",
     page: "homepage",
     group: "pollen-list.intro",
@@ -448,7 +495,7 @@ const pollenListFields: TemplateField[] = [
   },
   {
     key: "pollen-list.intro-image",
-    label: "Intro Accent Image",
+    label: "Accent image",
     description:
       "Optional supporting image shown beside or below the intro text.",
     type: "image",
@@ -458,9 +505,9 @@ const pollenListFields: TemplateField[] = [
   },
   {
     key: "pollen-list.intro-video",
-    label: "Intro Accent Video",
+    label: "Accent video",
     description:
-      "Optional video for the intro section; takes precedence over the intro image when set.",
+      "Optional video for the intro section; takes precedence over the accent image when set.",
     type: "video",
     page: "homepage",
     group: "pollen-list.intro",
@@ -470,8 +517,8 @@ const pollenListFields: TemplateField[] = [
   // Items section heading
   {
     key: "pollen-list.items-heading",
-    label: "Services Section Heading",
-    description: "Heading above the alternating image/text rows",
+    label: "Heading",
+    description: "Heading above the alternating image/text rows.",
     type: "text",
     page: "homepage",
     group: "pollen-list.items",
@@ -479,12 +526,35 @@ const pollenListFields: TemplateField[] = [
     defaultValue: "Our Services",
     placeholder: "Our Services",
   },
+  {
+    key: "pollen-list.book-button-text",
+    label: "Book button text",
+    description: "Label on the booking button shown on each service row.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-list.items",
+    gridColumn: "col-span-1",
+    defaultValue: "Book This Service",
+    placeholder: "Book This Service",
+  },
 
   // CTA
   {
+    key: "pollen-list.closing-heading",
+    label: "Closing heading",
+    description:
+      "Small line shown above the service name in the closing banner.",
+    type: "text",
+    page: "homepage",
+    group: "pollen-list.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Ready to begin?",
+    placeholder: "Ready to begin?",
+  },
+  {
     key: "pollen-list.cta-text",
-    label: "CTA Button Text",
-    description: "Text for the footer call-to-action button",
+    label: "Button text",
+    description: "Label on the footer button.",
     type: "text",
     page: "homepage",
     group: "pollen-list.cta",
@@ -494,8 +564,8 @@ const pollenListFields: TemplateField[] = [
   },
   {
     key: "pollen-list.cta-link",
-    label: "CTA Button Link",
-    description: "URL the CTA button points to (leave blank to hide)",
+    label: "Button link",
+    description: "Where the footer button goes. Leave blank to hide the button.",
     type: "url",
     page: "homepage",
     group: "pollen-list.cta",
@@ -505,9 +575,9 @@ const pollenListFields: TemplateField[] = [
   },
   {
     key: "pollen-list.cta-embed",
-    label: "Booking Embed",
+    label: "Booking embed",
     description:
-      "Optional iframe embed (e.g. booking widget) shown in the closing CTA band.",
+      "Optional iframe embed (e.g. a booking widget) shown in the closing band.",
     type: "iframe",
     page: "homepage",
     group: "pollen-list.cta",
@@ -517,7 +587,7 @@ const pollenListFields: TemplateField[] = [
     key: "pollen-list.cta-embed-reveal",
     label: "Reveal booking behind a button",
     description:
-      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open. Only applies when a booking embed is set above.",
     type: "boolean",
     page: "homepage",
     group: "pollen-list.cta",
@@ -529,30 +599,30 @@ const pollenListFields: TemplateField[] = [
 const pollenListFieldGroups: TemplateFieldGroup[] = [
   {
     id: "pollen-list.hero",
-    title: "Hero Accent",
-    description: "Decorative color stripe above the page title",
+    title: "Hero accent",
+    description: "Decorative color stripe above the page title.",
     icon: "🎨",
     columns: 2,
   },
   {
     id: "pollen-list.intro",
     title: "Introduction",
-    description: "Label, heading, and rich-text body above the service rows",
+    description: "Label, heading, and rich-text body above the service rows.",
     icon: "📝",
     columns: 1,
   },
   {
     id: "pollen-list.items",
-    title: "Services Section",
-    description: "Heading for the alternating image/text service rows",
+    title: "Services section",
+    description: "Heading for the alternating image/text service rows.",
     icon: "🌿",
     columns: 1,
   },
   {
     id: "pollen-list.cta",
-    title: "Call to Action",
-    description: "Optional footer CTA button",
-    icon: "👆",
+    title: "Closing banner",
+    description: "Optional footer button.",
+    icon: "📣",
     columns: 2,
   },
 ];
@@ -599,7 +669,7 @@ export const pollenServiceTemplateDefs: ServiceTemplateDef[] = [
     id: "pollen-bloom",
     label: "Gallery Forward",
     description:
-      "Mosaic photo gallery at top + centered intro text + image-heavy service cards with soft green overlays.",
+      "Mosaic photo gallery at top + centered intro text + image-heavy service cards with a soft overlay on hover.",
     fields: pollenBloomFields,
     fieldGroups: pollenBloomFieldGroups,
   },

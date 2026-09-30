@@ -4,10 +4,13 @@ import { ArrowLeft } from "lucide-react";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { resolveFields } from "..";
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export function DarkTrendCollectionPage({
+  business,
   collection,
   additionalCollections,
 }: DefaultCollectionPageTemplateProps) {
@@ -19,34 +22,62 @@ export function DarkTrendCollectionPage({
     .filter((c) => c.slug !== collection.slug)
     .slice(0, 3);
 
+  const f = resolveFields(business.siteContent?.customFields, [
+    "dark-trend.collections.detail-back-label",
+    "dark-trend.collections.detail-empty",
+    "dark-trend.collections.detail-browse-label",
+    "dark-trend.collections.detail-more-heading",
+  ]);
+
+  const backLabel = f["dark-trend.collections.detail-back-label"] ?? "";
+  const emptyText = f["dark-trend.collections.detail-empty"] ?? "";
+  const browseLabel = (
+    f["dark-trend.collections.detail-browse-label"] ?? ""
+  ).trim();
+  const moreHeading = f["dark-trend.collections.detail-more-heading"] ?? "";
+
   return (
     <DarkTrendGeneralLayout
       title={collection.name}
       excerpt={collection.description ?? undefined}
       productsCount={products.length}
     >
-      <div className="mb-8">
+      <div {...sectionGroupAttr("collections", "detail")} className="mb-8">
         <Link
           href="/collections"
           className="inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
-          All Collections
+          <span {...fieldAttr("dark-trend.collections.detail-back-label")}>
+            {backLabel}
+          </span>
         </Link>
       </div>
 
       {/* Products */}
       {products.length === 0 ? (
-        <div className="py-20 text-center">
-          <p className="text-lg text-white/60">
-            No products in this collection yet.
-          </p>
-          <Link
-            href="/shop"
-            className="mt-4 inline-block text-sm text-purple-400 hover:underline"
+        <div
+          {...sectionGroupAttr("collections", "detail")}
+          className="py-20 text-center"
+        >
+          <p
+            {...fieldAttr("dark-trend.collections.detail-empty")}
+            className="text-lg text-white/60"
           >
-            Browse all products
-          </Link>
+            {emptyText}
+          </p>
+          {browseLabel ? (
+            <Link
+              href="/shop"
+              className="mt-4 inline-block text-sm text-purple-400 hover:underline"
+            >
+              <span
+                {...fieldAttr("dark-trend.collections.detail-browse-label")}
+              >
+                {browseLabel}
+              </span>
+            </Link>
+          ) : null}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -88,9 +119,15 @@ export function DarkTrendCollectionPage({
 
       {/* More collections */}
       {others.length > 0 && (
-        <div className="mt-24 border-t border-white/10 pt-16">
-          <h2 className="mb-8 text-center text-2xl font-bold text-white">
-            More Collections
+        <div
+          {...sectionGroupAttr("collections", "detail")}
+          className="mt-24 border-t border-white/10 pt-16"
+        >
+          <h2
+            {...fieldAttr("dark-trend.collections.detail-more-heading")}
+            className="mb-8 text-center text-2xl font-bold text-white"
+          >
+            {moreHeading}
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((col) => {

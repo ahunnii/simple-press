@@ -80,7 +80,7 @@ export function OliveTestimonialSection({
           ) : null}
         </blockquote>
 
-        {linkLabel ? (
+        {linkLabel && linkHref ? (
           <OliveButton
             variant="ghost"
             href={linkHref}

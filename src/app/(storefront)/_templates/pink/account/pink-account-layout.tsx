@@ -5,16 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 import { PinkPageHeader } from "../shared/pink-page-header";
-
-const NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders" },
-  { href: "/account/settings", label: "Settings" },
-  { href: "/account/security", label: "Security" },
-  { href: "/account/address-book", label: "Address Book" },
-  { href: "/account/preferences", label: "Preferences" },
-] as const;
 
 type PinkAccountLayoutProps = {
   children: ReactNode;
@@ -49,6 +43,9 @@ export function PinkAccountLayout({
   // the raw `authClient.useSession()` could resolve before hydration and
   // mismatch against the server's markup.
   const { data: session } = useHydratedSession();
+  const flags = useStorefrontFlags();
+
+  const NAV_ITEMS = getAccountNavLinks({ isEnabled: flags.isEnabled });
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -58,7 +55,7 @@ export function PinkAccountLayout({
       <PinkPageHeader
         breadcrumb={[
           { label: "Home", href: "/" },
-          { label: "Account", href: "/account/orders" },
+          { label: "Account", href: NAV_ITEMS[0]?.href ?? "/account/settings" },
           { label: title },
         ]}
         heading="Your account"

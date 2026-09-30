@@ -489,9 +489,14 @@ export function PinkHeroSection({
               {body}
             </p>
           )}
-          {(ctaPrimaryLabel || ctaSecondaryLabel) && (
+          {/* PF15 (B2.5): a CTA hides — rather than swapping its destination
+              — when the caller has blanked its link because the link's route
+              flag is off (`navHrefFlag` in pink-homepage.tsx). A label with
+              no link is exactly the "hidden" state, same as no label. */}
+          {((ctaPrimaryLabel && ctaPrimaryLink) ||
+            (ctaSecondaryLabel && ctaSecondaryLink)) && (
             <div className="flex shrink-0 flex-wrap gap-3">
-              {ctaPrimaryLabel && (
+              {ctaPrimaryLabel && ctaPrimaryLink && (
                 <Link
                   href={ctaPrimaryLink}
                   className="pink-btn pink-btn-lg pink-btn-solid"
@@ -500,7 +505,7 @@ export function PinkHeroSection({
                   {ctaPrimaryLabel}
                 </Link>
               )}
-              {ctaSecondaryLabel && (
+              {ctaSecondaryLabel && ctaSecondaryLink && (
                 <Link
                   href={ctaSecondaryLink}
                   className="pink-btn pink-btn-lg pink-btn-ghost"

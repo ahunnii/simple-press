@@ -3,7 +3,11 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -32,6 +36,7 @@ function MemberCard({
   return (
     <div
       className="vii-reveal-item"
+      {...listItemAttr("vii.about.team", index)}
       style={{ "--i": Math.min(index + 1, 7) } as React.CSSProperties}
     >
       {/* Portrait */}

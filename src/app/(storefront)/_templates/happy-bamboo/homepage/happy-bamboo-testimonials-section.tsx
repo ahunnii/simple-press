@@ -2,6 +2,7 @@
 
 import { Quote } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -32,7 +33,7 @@ function getInitials(name: string): string {
 }
 
 export function HappyBambooTestimonialsSection({
-  heading = "What Consumers Say",
+  heading,
   testimonials,
   sectionAttrs,
 }: Props) {
@@ -46,7 +47,12 @@ export function HappyBambooTestimonialsSection({
             Testimonial
           </span>
           <h2 className="mt-2 font-serif text-4xl font-bold md:text-5xl">
-            {heading}
+            <span
+              className="font-serif"
+              {...fieldAttr("happy-bamboo.homepage-testimonials-heading")}
+            >
+              {heading}
+            </span>
           </h2>
         </FadeIn>
 

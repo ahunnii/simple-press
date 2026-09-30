@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const aboutFeaturesData: TemplateField[] = [
   {
     key: "dark-trend.about.first-image",
-    label: "About First Image",
-    description: "Image for the first section of the about page",
+    label: "Image",
+    description: "Photo beside the story heading and cards.",
     type: "image",
     page: "about",
     defaultValue: "/placeholder.svg",
@@ -13,39 +13,40 @@ const aboutFeaturesData: TemplateField[] = [
 
   {
     key: "dark-trend.about.subheader",
-    label: "About Subheader",
-    description: "Subheader for the about page",
+    label: "Small label",
+    description: "Short text above the heading.",
     type: "text",
     page: "about",
     defaultValue: "Our Story",
     group: "about.features",
-    placeholder: "Our Story",
+    placeholder: "e.g. Who we are",
   },
   {
     key: "dark-trend.about.header",
-    label: "About Header",
-    description: "Header for the about page",
+    label: "Heading",
+    description: "Heading for the story section on the about page.",
     type: "text",
     page: "about",
     defaultValue: "About Us",
-    placeholder: "About Us",
+    placeholder: "e.g. Meet the makers",
     group: "about.features",
   },
 
   {
     key: "dark-trend.about.button",
-    label: "About Button",
-    description: "Button for the about page",
+    label: "Button text",
+    description:
+      "Label on the button under the cards. Leave blank, or clear the button link below, to hide the button.",
     type: "text",
     page: "about",
     defaultValue: "Learn More",
-    placeholder: "Learn More",
+    placeholder: "e.g. See our products",
     group: "about.features",
   },
   {
     key: "dark-trend.about.button-link",
-    label: "About Button Link",
-    description: "Button link for the about page",
+    label: "Button link",
+    description: "Where the button goes, e.g. /shop.",
     type: "url",
     page: "about",
     defaultValue: "/shop",
@@ -54,25 +55,29 @@ const aboutFeaturesData: TemplateField[] = [
   },
   {
     key: "dark-trend.about.features-list",
-    label: "Features List",
+    label: "Cards",
     description:
-      "Cards for the Features section (icon, title, and description per item).",
+      "Numbered cards under the heading, each with a title and a short description. Leave empty to show three built-in cards.",
     type: "list",
     page: "about",
     group: "about.features",
     gridColumn: "col-span-full",
+    itemLabel: "card",
+    defaultsWhenEmpty: true,
     itemSchema: [
       {
         key: "title",
         label: "Title",
         type: "text",
-        description: "Card heading",
+        description: "Card heading.",
+        placeholder: "e.g. What we make",
       },
       {
         key: "description",
         label: "Description",
         type: "textarea",
-        description: "Supporting text",
+        description: "One or two sentences under the card heading.",
+        placeholder: "A sentence or two about this point",
       },
     ],
     minItems: 0,
@@ -83,8 +88,8 @@ const aboutFeaturesData: TemplateField[] = [
 const aboutCTAData: TemplateField[] = [
   {
     key: "dark-trend.about.second-image",
-    label: "About Second Image",
-    description: "Image for the second section of the about page",
+    label: "Image",
+    description: "Photo beside the closing banner text on the about page.",
     type: "image",
     page: "about",
     defaultValue: "/placeholder.svg",
@@ -92,18 +97,18 @@ const aboutCTAData: TemplateField[] = [
   },
   {
     key: "dark-trend.about.cta-header",
-    label: "About CTA Header",
-    description: "CTA header for the about page",
+    label: "Heading",
+    description: "Heading in the closing banner at the bottom of the about page.",
     type: "text",
     page: "about",
     group: "about.cta",
     defaultValue: "Ready to Work Together?",
-    placeholder: "e.g. Ready to Work Together?",
+    placeholder: "e.g. Let's get started",
   },
   {
     key: "dark-trend.about.cta-description",
-    label: "About CTA Description",
-    description: "CTA description for the about page",
+    label: "Body text",
+    description: "Paragraph under the heading in the closing banner.",
     type: "textarea",
     page: "about",
     group: "about.cta",
@@ -113,18 +118,19 @@ const aboutCTAData: TemplateField[] = [
   },
   {
     key: "dark-trend.about.cta-button-text",
-    label: "About CTA Button Text",
-    description: "CTA button text for the about page",
+    label: "Button text",
+    description:
+      "Label on the button in the closing banner. Leave blank, or clear the button link below, to hide the button.",
     type: "text",
     page: "about",
     group: "about.cta",
     defaultValue: "Get Started",
-    placeholder: "Get Started",
+    placeholder: "e.g. Say hello",
   },
   {
     key: "dark-trend.about.cta-button-link",
-    label: "About CTA Button Link",
-    description: "CTA button link for the about page",
+    label: "Button link",
+    description: "Where the closing-banner button goes, e.g. /contact.",
     type: "url",
     page: "about",
     group: "about.cta",
@@ -141,37 +147,45 @@ export const aboutDarkTrendPageData: TemplateField[] = [
 export const aboutDarkTrendFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.features",
-    title: "Features Section",
-    description: "Features for the about page",
+    title: "Story",
+    description:
+      "Image, heading, numbered cards, and button at the top of the about page.",
     icon: "✨",
     columns: 2,
   },
   {
     id: "about.cta",
-    title: "CTA Section",
-    description: "CTA for the about page",
+    title: "Closing banner",
+    description:
+      "Banner at the bottom of the about page with heading, description, button, and image.",
     icon: "✨",
     columns: 2,
   },
 ];
 
+/**
+ * Built-in about-page cards, shown when the owner hasn't saved any cards
+ * (and has no legacy `feature-N-*` values — see `resolveDarkTrendAboutFeatures`
+ * in `./dark-trend-about-features.ts`). Deliberately neutral so they suit any
+ * small shop without the owner editing them first.
+ */
 export const DEFAULT_DARK_TREND_FEATURES: {
   title: string;
   description: string;
 }[] = [
   {
-    title: "Our Mission",
+    title: "What We Make",
     description:
-      "Creating alternative clothing that celebrates individuality and empowers Black, LGBTQ+, and POC communities to express their unique identities.",
+      "Products we're proud of, designed with care and made to be used and loved every day.",
   },
   {
-    title: "Our Values",
+    title: "How We Make It",
     description:
-      "We value diversity, creativity, and community, ensuring our designs resonate with underrepresented voices and foster a safe, inclusive shopping environment for everyone.",
+      "We sweat the details, from the materials we choose to the way each order is packed and sent out.",
   },
   {
-    title: "Why Us?",
+    title: "Why Shop With Us",
     description:
-      "We don't just make you look beautiful, handsome, and gear to show off, we'll make you feel like the coolest!",
+      "Real people behind every order, friendly help whenever you need it, and products that live up to their photos.",
   },
 ];

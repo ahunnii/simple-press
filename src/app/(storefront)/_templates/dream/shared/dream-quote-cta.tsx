@@ -1,4 +1,4 @@
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { DreamButton } from "./dream-button";
@@ -11,7 +11,10 @@ type DreamQuoteCtaProps = {
   lede: string;
   /** Checklist chips, e.g. "date + time", "location", "theme". */
   chips?: string[];
+  /** `list` field the chips come from — tags each chip for the editor preview. */
+  chipsFieldKey?: string;
   ctaLabel: string;
+  /** Empty hides the button (e.g. its route's feature flag is off, B2.5). */
   ctaUrl: string;
   headingFieldKey?: string;
   accentFieldKey?: string;
@@ -33,6 +36,7 @@ export function DreamQuoteCta({
   accent,
   lede,
   chips,
+  chipsFieldKey,
   ctaLabel,
   ctaUrl,
   headingFieldKey,
@@ -62,18 +66,24 @@ export function DreamQuoteCta({
         </p>
         {chips && chips.length > 0 ? (
           <ul className="dream-quote-band-chips">
-            {chips.map((chip) => (
-              <li key={chip} className="dream-quote-band-chip">
+            {chips.map((chip, i) => (
+              <li
+                key={`${chip}-${i}`}
+                className="dream-quote-band-chip"
+                {...(chipsFieldKey ? listItemAttr(chipsFieldKey, i) : {})}
+              >
                 {chip}
               </li>
             ))}
           </ul>
         ) : null}
-        <DreamButton href={ctaUrl} variant="primary">
-          <span {...(ctaLabelFieldKey ? fieldAttr(ctaLabelFieldKey) : {})}>
-            {ctaLabel}
-          </span>
-        </DreamButton>
+        {ctaUrl ? (
+          <DreamButton href={ctaUrl} variant="primary">
+            <span {...(ctaLabelFieldKey ? fieldAttr(ctaLabelFieldKey) : {})}>
+              {ctaLabel}
+            </span>
+          </DreamButton>
+        ) : null}
       </div>
     </section>
   );

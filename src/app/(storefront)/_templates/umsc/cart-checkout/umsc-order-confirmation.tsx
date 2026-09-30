@@ -4,28 +4,68 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
 
+import type { Session } from "~/server/better-auth/config";
+import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
+import { umscTelHref } from "../shared/umsc-contact-details";
 import { UmscButton } from "../shared/umsc-button";
+
+/** `session.metadata.deliveryMethod`, echoed back by `/api/stripe/session`. */
+type DeliveryMethod = "ship" | "pickup" | null;
 
 type OrderDetails = {
   customer_email: string;
   amount_total: number;
   currency: string;
   payment_status: string;
+  delivery_method?: DeliveryMethod;
 };
 
 type Props = {
   businessName: string;
   thankYouHeading: string;
+  nextStepsHeading: string;
   nextSteps: string;
+  /** PF18: shown instead of `nextSteps` when the order is for pickup. */
+  nextStepsPickup: string;
+  /** PF18: Settings → Business phone (via `resolveUmscContactDetails`); never a field. */
+  phone?: string;
   continueCta: string;
+  homeLinkLabel: string;
   loadingText: string;
   noOrderHeading: string;
   noOrderBody: string;
+  /**
+   * Session resolved server-side (`getSession()`), seeding the shared
+   * `useOrderAccountCta` hook so the account button (PF17) is right on the
+   * first paint. `undefined` falls back to the hook's unseeded mode, which
+   * suppresses the button until the client session resolves — never a
+   * flash of the wrong branch.
+   */
+  initialSession?: Session | null;
 };
+
+/**
+ * PF18: picks the pickup-specific next-steps copy when the order was placed
+ * for in-store pickup and the owner has written it; ship orders, and any
+ * order whose delivery method the Stripe session fetch couldn't resolve,
+ * fall back to the general list — exactly as they render today. An
+ * owner-saved value on either field renders unchanged either way; the
+ * pickup/ship split only decides WHICH field's text is shown.
+ */
+function resolveNextSteps(
+  deliveryMethod: DeliveryMethod | undefined,
+  nextSteps: string,
+  nextStepsPickup: string,
+): string {
+  if (deliveryMethod === "pickup" && nextStepsPickup.trim()) {
+    return nextStepsPickup;
+  }
+  return nextSteps;
+}
 
 function formatOrderTotal(amountCents: number, currency: string): string {
   try {
@@ -41,14 +81,20 @@ function formatOrderTotal(amountCents: number, currency: string): string {
 export function UmscOrderConfirmation({
   businessName,
   thankYouHeading,
+  nextStepsHeading,
   nextSteps,
+  nextStepsPickup,
+  phone,
   continueCta,
+  homeLinkLabel,
   loadingText,
   noOrderHeading,
   noOrderBody,
+  initialSession,
 }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
+  const accountCta = useOrderAccountCta(initialSession);
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -130,7 +176,11 @@ export function UmscOrderConfirmation({
   }
 
   // ── Success — black band ────────────────────────────────────────────────────
-  const nextStepsLines = nextSteps
+  // PF18 (B9.3): the general list is used for ship orders AND for any order
+  // whose delivery method the Stripe session fetch hasn't resolved yet (or
+  // couldn't) — never a pickup order left on ship-specific wording.
+  const deliveryMethod = orderDetails?.delivery_method ?? null;
+  const nextStepsLines = resolveNextSteps(deliveryMethod, nextSteps, nextStepsPickup)
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
@@ -150,7 +200,7 @@ export function UmscOrderConfirmation({
 
       <section
         aria-labelledby="umsc-order-heading"
-        {...sectionGroupAttr("order", "main")}
+        {...sectionGroupAttr("checkout", "success")}
         className="px-6 py-24 sm:px-8 sm:py-28"
       >
         <div className="mx-auto max-w-[640px] text-center">
@@ -199,9 +249,14 @@ export function UmscOrderConfirmation({
 
           {nextStepsLines.length > 0 && (
             <div className="mb-10 inline-block text-left">
-              <p className="umsc-sans mb-3.5 text-[11px] font-semibold tracking-[0.16em] text-[var(--umsc-gold-soft)] uppercase">
-                What happens next
-              </p>
+              {nextStepsHeading ? (
+                <p
+                  {...fieldAttr("umsc.order.next-steps-heading")}
+                  className="umsc-sans mb-3.5 text-[11px] font-semibold tracking-[0.16em] text-[var(--umsc-gold-soft)] uppercase"
+                >
+                  {nextStepsHeading}
+                </p>
+              ) : null}
               <ul role="list" className="m-0 flex flex-col gap-2.5 p-0">
                 {nextStepsLines.map((line, i) => (
                   <li
@@ -218,10 +273,29 @@ export function UmscOrderConfirmation({
                   </li>
                 ))}
               </ul>
+
+              {/* PF18: the customer-service phone always comes from
+                  Settings (`resolveUmscContactDetails`), never baked into
+                  the next-steps copy — it stays current when an owner
+                  updates their number, and it's never duplicated when an
+                  owner has written their own phone mention into either
+                  field above. */}
+              {phone ? (
+                <p className="umsc-sans mt-3.5 text-[14px] leading-[1.6] text-[var(--umsc-cream-on-black)]">
+                  Questions? Call or text{" "}
+                  <a
+                    href={umscTelHref(phone)}
+                    className="font-semibold text-[var(--umsc-gold-soft)] underline underline-offset-[3px] hover:text-[var(--umsc-gold)]"
+                  >
+                    {phone}
+                  </a>
+                  .
+                </p>
+              ) : null}
             </div>
           )}
 
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <UmscButton
               as="link"
               href="/shop"
@@ -231,14 +305,31 @@ export function UmscOrderConfirmation({
             >
               {continueCta || "Continue Shopping"}
             </UmscButton>
-            <UmscButton
-              as="link"
-              href="/"
-              variant="link"
-              className="!text-[var(--umsc-gold-soft)]"
-            >
-              Back to home
-            </UmscButton>
+            {/* PF17 / B9.4 (P-ORDER-CTA): signed in + orders on -> "View my
+                orders"; signed out + customerAccounts on -> "Create an
+                account"; neither -> no button. */}
+            {accountCta ? (
+              <UmscButton
+                as="link"
+                href={accountCta.href}
+                variant="ghost"
+                showArrow={false}
+                className="umsc-btn-ghost-onblack"
+              >
+                {accountCta.label}
+              </UmscButton>
+            ) : null}
+            {homeLinkLabel ? (
+              <UmscButton
+                as="link"
+                href="/"
+                variant="link"
+                fieldKey="umsc.order.home-link-label"
+                className="!text-[var(--umsc-gold-soft)]"
+              >
+                {homeLinkLabel}
+              </UmscButton>
+            ) : null}
           </div>
         </div>
       </section>

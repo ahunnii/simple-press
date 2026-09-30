@@ -9,6 +9,7 @@ import { PollenShopFilterClient } from "./pollen-shop-filter-client";
 
 export function PollenShopPage({ business }: DefaultProductsPageTemplateProps) {
   const f = resolveFields(business.siteContent?.customFields, [
+    "pollen.shop.listing-label",
     "pollen.shop.listing-title",
     "pollen.shop.listing-intro",
   ]);
@@ -21,9 +22,14 @@ export function PollenShopPage({ business }: DefaultProductsPageTemplateProps) {
       >
         <FadeIn direction="up">
           <div className="mb-12">
-            <p className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
-              Our Products
-            </p>
+            {f["pollen.shop.listing-label"] ? (
+              <p
+                className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase"
+                {...fieldAttr("pollen.shop.listing-label")}
+              >
+                {f["pollen.shop.listing-label"]}
+              </p>
+            ) : null}
             <h1
               className="text-4xl font-bold text-[#2a351f] md:text-5xl"
               {...fieldAttr("pollen.shop.listing-title")}

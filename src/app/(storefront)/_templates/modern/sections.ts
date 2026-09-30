@@ -8,16 +8,15 @@ export const modernSections: Record<string, TemplateSection[]> = {
       id: "homepage.hero",
       page: "homepage",
       title: "Hero",
-      description:
-        "Full-bleed banner image with headline at the top of the homepage.",
+      description: "Banner photo and heading at the top of the homepage.",
       groupIds: ["homepage.hero"],
       order: 0,
     },
     {
       id: "homepage.values",
       page: "homepage",
-      title: "Values Strip",
-      description: "Three-column strip of short value props under the hero.",
+      title: "Values",
+      description: "Short value statements shown under the hero.",
       groupIds: ["homepage.values"],
       order: 1,
       hideable: true,
@@ -25,36 +24,30 @@ export const modernSections: Record<string, TemplateSection[]> = {
     {
       id: "homepage.products",
       page: "homepage",
-      title: "Featured Products",
-      description: "Featured product grid pulled from your catalog.",
+      title: "Featured products",
+      description:
+        "Grid of featured products below the hero, pulled from your catalog.",
       groupIds: ["homepage.products"],
       order: 2,
+      hideable: true,
       links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.about",
       page: "homepage",
-      title: "About Teaser",
-      description: "Image + story teaser linking through to the About page.",
+      title: "About teaser",
+      description: "Photo and short story linking to the About page.",
       groupIds: ["homepage.about"],
       order: 3,
-    },
-    {
-      id: "homepage.services",
-      page: "homepage",
-      title: "Services",
-      description:
-        "Reserved for a services section — defined in the field panel but not currently rendered on the homepage.",
-      groupIds: ["homepage.services"],
-      order: 4,
+      hideable: true,
     },
 
     // About (src/app/(storefront)/_templates/modern/about/modern-about-page.tsx)
     {
       id: "about.main",
       page: "about",
-      title: "Header",
-      description: "Page title and tagline at the top of the About page.",
+      title: "Intro",
+      description: "Small label and heading at the top of the About page.",
       groupIds: ["about.main"],
       order: 0,
     },
@@ -62,14 +55,15 @@ export const modernSections: Record<string, TemplateSection[]> = {
       id: "about.mission",
       page: "about",
       title: "Mission",
-      description: "Mission statement with a supporting image.",
+      description: "Mission statement with a supporting photo.",
       groupIds: ["about.mission"],
       order: 1,
+      hideable: true,
     },
     {
       id: "about.values",
       page: "about",
-      title: "What We Stand For",
+      title: "What we stand for",
       description: "Grid of value cards describing what drives the business.",
       groupIds: ["about.values"],
       order: 2,
@@ -78,16 +72,18 @@ export const modernSections: Record<string, TemplateSection[]> = {
     {
       id: "about.story",
       page: "about",
-      title: "Our Story",
-      description: "Narrative story block with a supporting image.",
+      title: "Our story",
+      description: "Story section with a supporting photo.",
       groupIds: ["about.story"],
       order: 3,
+      hideable: true,
     },
     {
       id: "about.cta",
       page: "about",
-      title: "CTA Banner",
-      description: "Bottom call-to-action banner on the About page.",
+      title: "Closing banner",
+      description:
+        "Banner with a heading, text, and button at the bottom of the About page.",
       groupIds: ["about.cta"],
       order: 4,
       hideable: true,
@@ -97,24 +93,32 @@ export const modernSections: Record<string, TemplateSection[]> = {
     {
       id: "contact.main",
       page: "contact",
-      title: "Header",
-      description: "Page title and intro at the top of the Contact page.",
+      title: "Intro",
+      description:
+        "Small label, heading, and intro at the top of the Contact page.",
       groupIds: ["contact.main"],
       order: 0,
     },
     {
       id: "contact.info",
       page: "contact",
-      title: "Contact Info",
-      description: "Contact details column next to the contact form.",
+      title: "Contact info",
+      description:
+        "Heading and intro for the contact details column. Your email, phone, address, and hours come from Settings.",
       groupIds: ["contact.info"],
       order: 1,
+      links: [
+        SECTION_LINKS.businessContact,
+        SECTION_LINKS.businessLocation,
+        SECTION_LINKS.businessHours,
+      ],
     },
     {
       id: "contact.form",
       page: "contact",
-      title: "Contact Form",
-      description: "Form title/description shown above the contact form.",
+      title: "Contact form",
+      description:
+        "Heading and intro above the contact form, plus the message shown after it's sent.",
       groupIds: ["contact.form"],
       order: 2,
     },
@@ -134,8 +138,9 @@ export const modernSections: Record<string, TemplateSection[]> = {
     {
       id: "collections.main",
       page: "collections",
-      title: "Header",
-      description: "Page title and intro above the collections grid.",
+      title: "Intro",
+      description:
+        "Small label, heading, and intro above the collections grid.",
       groupIds: ["collections.main"],
       order: 0,
       links: [SECTION_LINKS.collections],
@@ -145,19 +150,62 @@ export const modernSections: Record<string, TemplateSection[]> = {
     {
       id: "products.main",
       page: "products",
-      title: "Header",
-      description: "Page title and intro above the shop's product grid.",
+      title: "Intro",
+      description:
+        "Small label, heading, and intro above the shop's product grid.",
       groupIds: ["products.main"],
       order: 0,
       links: [SECTION_LINKS.products],
+    },
+
+    // Product page (src/app/(storefront)/_templates/modern/products/modern-product-page.tsx)
+    {
+      id: "product.details",
+      page: "product",
+      title: "Product page",
+      description:
+        "Text shown on every product page, around the add to cart button.",
+      groupIds: ["product.details"],
+      order: 0,
+      links: [SECTION_LINKS.products],
+    },
+
+    // Checkout (src/app/(storefront)/_templates/modern/cart-checkout/)
+    {
+      id: "checkout.success",
+      page: "checkout",
+      title: "Order confirmation",
+      description: "Page shoppers see right after paying.",
+      groupIds: ["checkout.success"],
+      order: 0,
+    },
+    {
+      id: "checkout.unavailable",
+      page: "checkout",
+      title: "Checkout unavailable",
+      description:
+        "Shown on the checkout page when online payments aren't set up yet.",
+      groupIds: ["checkout.unavailable"],
+      order: 1,
+    },
+
+    // Cart (src/app/(storefront)/_templates/modern/cart-checkout/modern-cart-page.tsx)
+    {
+      id: "global.cart",
+      page: "global",
+      title: "Cart",
+      description: "Heading and empty-state wording on the cart page.",
+      groupIds: ["global.cart"],
+      order: 0,
     },
 
     // Testimonials (src/app/(storefront)/_templates/modern/testimonials/modern-testimonials-page.tsx)
     {
       id: "testimonials.page",
       page: "testimonials",
-      title: "Header",
-      description: "Page title and intro above the testimonial cards.",
+      title: "Intro",
+      description:
+        "Small label, heading, and intro above the testimonial cards.",
       groupIds: ["testimonials.page"],
       order: 0,
       links: [SECTION_LINKS.testimonials],
@@ -165,9 +213,8 @@ export const modernSections: Record<string, TemplateSection[]> = {
     {
       id: "testimonials.call-to-action",
       page: "testimonials",
-      title: "Share Your Experience CTA",
-      description:
-        "Call-to-action band inviting customers to leave a testimonial.",
+      title: "Share your experience",
+      description: "Band inviting customers to leave a testimonial.",
       groupIds: ["testimonials.call-to-action"],
       order: 1,
       hideable: true,
@@ -177,8 +224,8 @@ export const modernSections: Record<string, TemplateSection[]> = {
     {
       id: "blog.header",
       page: "blog",
-      title: "Header",
-      description: "Page title and intro above the blog listing.",
+      title: "Intro",
+      description: "Small label, heading, and intro above the blog listing.",
       groupIds: ["blog.header"],
       order: 0,
       links: [SECTION_LINKS.blog],

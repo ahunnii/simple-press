@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
@@ -25,6 +24,8 @@ import {
   applySavedAddressToForm,
   SavedAddressPicker,
 } from "~/app/(storefront)/_components/checkout/saved-address-picker";
+
+import { PollenCartEmptyState } from "./pollen-cart-empty-state";
 
 const inputClass =
   "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
@@ -56,16 +57,14 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
   };
 
   if (f.items.length === 0) {
+    // Same designed empty state as `/cart`. The page band above already owns
+    // the h1, and `PollenCheckoutPage`'s wrapper supplies the gutters.
     return (
-      <div className="py-16 text-center">
-        <p className="mb-6 text-gray-600">Your cart is empty</p>
-        <Link
-          href="/shop"
-          className="rounded-md bg-[#215935] px-6 py-2.5 font-semibold text-white hover:bg-[#1a4729]"
-        >
-          Continue Shopping
-        </Link>
-      </div>
+      <PollenCartEmptyState
+        customFields={business.siteContent?.customFields}
+        headingLevel="h2"
+        className="px-0 py-8 sm:px-0 md:py-16 lg:px-0"
+      />
     );
   }
 

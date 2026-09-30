@@ -57,10 +57,24 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
   const f = resolveFields(customFields, [
     "elegant.blog.listing-title",
     "elegant.blog.listing-intro",
+    "elegant.blog.listing-label",
+    "elegant.blog.empty-text",
+    "elegant.blog.featured-badge",
+    "elegant.blog.featured-cta",
+    "elegant.blog.grid-label",
+    "elegant.blog.no-results-heading",
+    "elegant.blog.no-results-body",
   ]);
   const listingTitle =
     (f["elegant.blog.listing-title"] ?? "").trim() || "Journal";
   const listingIntro = (f["elegant.blog.listing-intro"] ?? "").trim();
+  const listingLabel = f["elegant.blog.listing-label"] ?? "";
+  const emptyText = f["elegant.blog.empty-text"] ?? "";
+  const featuredBadge = f["elegant.blog.featured-badge"] ?? "";
+  const featuredCta = f["elegant.blog.featured-cta"] ?? "";
+  const gridLabel = f["elegant.blog.grid-label"] ?? "";
+  const noResultsHeading = f["elegant.blog.no-results-heading"] ?? "";
+  const noResultsBody = f["elegant.blog.no-results-body"] ?? "";
 
   const postsWithSearch = useMemo(
     () => pages.map((p) => ({ post: p, searchBlob: buildBlogSearchBlob(p) })),
@@ -106,19 +120,22 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
           style={{ padding: "48px 40px 80px" }}
         >
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-            <div style={fadeStyle(0)}>
-              <span
-                style={{
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  fontSize: 11,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--el-ink-soft, #6b6659)",
-                }}
-              >
-                Journal
-              </span>
-            </div>
+            {listingLabel && (
+              <div style={fadeStyle(0)}>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    fontSize: 11,
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "var(--el-ink-soft, #6b6659)",
+                  }}
+                  {...fieldAttr("elegant.blog.listing-label")}
+                >
+                  {listingLabel}
+                </span>
+              </div>
+            )}
             <h1
               style={{
                 fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
@@ -138,16 +155,19 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                 </span>
               </span>
             </h1>
-            <p
-              style={{
-                marginTop: 48,
-                fontFamily: "var(--font-serif, serif)",
-                fontSize: 22,
-                color: "var(--el-ink-soft, #6b6659)",
-              }}
-            >
-              No posts yet — check back soon.
-            </p>
+            {emptyText && (
+              <p
+                style={{
+                  marginTop: 48,
+                  fontFamily: "var(--font-serif, serif)",
+                  fontSize: 22,
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+                {...fieldAttr("elegant.blog.empty-text")}
+              >
+                {emptyText}
+              </p>
+            )}
           </div>
         </section>
       </div>
@@ -162,20 +182,24 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
         style={{ padding: "48px 40px 0" }}
       >
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-          <div style={fadeStyle(0)}>
-            <span
-              style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-              }}
-            >
-              Journal · {pages.length}{" "}
-              {pages.length === 1 ? "entry" : "entries"}
-            </span>
-          </div>
+          {listingLabel && (
+            <div style={fadeStyle(0)}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+              >
+                <span {...fieldAttr("elegant.blog.listing-label")}>
+                  {listingLabel}
+                </span>{" "}
+                · {pages.length} {pages.length === 1 ? "entry" : "entries"}
+              </span>
+            </div>
+          )}
           <h1
             style={{
               fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
@@ -326,23 +350,26 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                     style={{ transition: `transform 1.2s ${ease}` }}
                     sizes="(max-width: 800px) 100vw, 55vw"
                   />
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 12,
-                      left: 12,
-                      padding: "4px 10px",
-                      background: "var(--el-ink, #1c1a17)",
-                      color: "var(--el-paper, #fbf8f2)",
-                      borderRadius: 999,
-                      fontFamily: "var(--font-mono, ui-monospace)",
-                      fontSize: 9.5,
-                      letterSpacing: "0.16em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Latest
-                  </span>
+                  {featuredBadge && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 12,
+                        left: 12,
+                        padding: "4px 10px",
+                        background: "var(--el-ink, #1c1a17)",
+                        color: "var(--el-paper, #fbf8f2)",
+                        borderRadius: 999,
+                        fontFamily: "var(--font-mono, ui-monospace)",
+                        fontSize: 9.5,
+                        letterSpacing: "0.16em",
+                        textTransform: "uppercase",
+                      }}
+                      {...fieldAttr("elegant.blog.featured-badge")}
+                    >
+                      {featuredBadge}
+                    </span>
+                  )}
                 </div>
                 {/* Text */}
                 <div>
@@ -386,24 +413,28 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                       {featured.excerpt}
                     </p>
                   )}
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 10,
-                      fontSize: 13,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "var(--el-ink, #1c1a17)",
-                      fontFamily: "var(--font-sans, sans-serif)",
-                    }}
-                  >
-                    Read the piece
-                    <ArrowRight
-                      aria-hidden={true}
-                      style={{ width: 14, height: 14 }}
-                    />
-                  </span>
+                  {featuredCta && (
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 10,
+                        fontSize: 13,
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "var(--el-ink, #1c1a17)",
+                        fontFamily: "var(--font-sans, sans-serif)",
+                      }}
+                    >
+                      <span {...fieldAttr("elegant.blog.featured-cta")}>
+                        {featuredCta}
+                      </span>
+                      <ArrowRight
+                        aria-hidden={true}
+                        style={{ width: 14, height: 14 }}
+                      />
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>
@@ -439,17 +470,20 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                   marginBottom: 40,
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono, ui-monospace)",
-                    fontSize: 11,
-                    letterSpacing: "0.22em",
-                    textTransform: "uppercase",
-                    color: "var(--el-ink-soft, #6b6659)",
-                  }}
-                >
-                  More from the journal
-                </span>
+                {gridLabel && (
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono, ui-monospace)",
+                      fontSize: 11,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: "var(--el-ink-soft, #6b6659)",
+                    }}
+                    {...fieldAttr("elegant.blog.grid-label")}
+                  >
+                    {gridLabel}
+                  </span>
+                )}
               </div>
             )}
             <div
@@ -553,25 +587,31 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
           <div
             style={{ maxWidth: 1360, margin: "0 auto", textAlign: "center" }}
           >
-            <p
-              style={{
-                fontFamily: "var(--font-serif, serif)",
-                fontSize: 28,
-                color: "var(--el-ink, #1c1a17)",
-                marginBottom: 10,
-              }}
-            >
-              Nothing found.
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-sans, sans-serif)",
-                fontSize: 15,
-                color: "var(--el-ink-soft, #6b6659)",
-              }}
-            >
-              Try a different search term.
-            </p>
+            {noResultsHeading && (
+              <p
+                style={{
+                  fontFamily: "var(--font-serif, serif)",
+                  fontSize: 28,
+                  color: "var(--el-ink, #1c1a17)",
+                  marginBottom: 10,
+                }}
+                {...fieldAttr("elegant.blog.no-results-heading")}
+              >
+                {noResultsHeading}
+              </p>
+            )}
+            {noResultsBody && (
+              <p
+                style={{
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  fontSize: 15,
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+                {...fieldAttr("elegant.blog.no-results-body")}
+              >
+                {noResultsBody}
+              </p>
+            )}
           </div>
         </section>
       )}
@@ -579,6 +619,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
       {/* Newsletter strip — matches design */}
       {isSectionVisible(customFields, "elegant", "blog.newsletter") && (
         <ElegantNewsletter
+          customFields={customFields}
           sectionAttrs={sectionGroupAttr("blog", "newsletter")}
         />
       )}

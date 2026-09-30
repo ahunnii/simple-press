@@ -1,8 +1,15 @@
+import type * as MotionReact from "motion/react";
 import { useRef, useState } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type * as MotionReact from "motion/react";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 
 import {
   HappyBambooMenuToggle,
@@ -65,7 +72,7 @@ type FakeSession = Parameters<typeof HappyBambooMobileMenu>[0]["session"];
 
 function makeBusiness(
   overrides: {
-    navigationItems?: { label: string; href: string }[];
+    navigationItems?: NavItem[];
     socialLinks?: Record<string, string>;
   } = {},
 ): FakeBusiness {
@@ -99,7 +106,11 @@ function Harness({
   business = makeBusiness(),
   session = null,
   isPending = false,
-  isEnabled = () => false,
+  // Defaults to "everything on" so nav-filtering (P-NAV-FLAGS) doesn't gate
+  // routes the pre-existing structural tests don't care about; tests that
+  // exercise flags directly (account gating, the nav filter itself) pass a
+  // narrower function.
+  isEnabled = () => true,
 }: HarnessProps) {
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -229,6 +240,79 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows only the quick-access account links (Orders, Settings) plus a sign-out row, never the full list", () => {
+    const session = {
+      user: { id: "u1", name: "Test" },
+      session: { id: "s1" },
+    } as unknown as FakeSession;
+
+    // Every account-nav-producing flag is on, so the full 9-key list exists —
+    // this proves the panel narrows it to the quick subset (B4.3) rather than
+    // the flags themselves doing the narrowing.
+    const { unmount } = renderHarness({
+      session,
+      isEnabled: (key) =>
+        [
+          "customerAccounts",
+          "checkout",
+          "subscriptions",
+          "invoices",
+          "loyalty",
+        ].includes(key),
+    });
+    fireEvent.click(getToggle());
+
+    const account = screen.getByRole("navigation", { name: "Account" });
+    expect(
+      Array.from(account.querySelectorAll("a"), (a) => a.textContent?.trim()),
+    ).toEqual(["Settings", "Sign out"]);
+    expect(screen.getByRole("link", { name: "Settings" })).toHaveAttribute(
+      "href",
+      "/account/settings",
+    );
+    expect(screen.getByRole("link", { name: "Sign out" })).toHaveAttribute(
+      "href",
+      "/auth/sign-out",
+    );
+    // Address Book / Subscriptions / Invoices / Rewards live only in the
+    // account sidebar, even with their flags on.
+    expect(
+      screen.queryByRole("link", { name: "Address Book" }),
+    ).not.toBeInTheDocument();
+    unmount();
+
+    renderHarness({
+      session,
+      isEnabled: (key) => key === "customerAccounts" || key === "orders",
+    });
+    fireEvent.click(getToggle());
+    expect(screen.getByRole("link", { name: "Orders" })).toHaveAttribute(
+      "href",
+      "/account/orders",
+    );
+  });
+
+  it("adds Admin for a member, without Orders while the flag is off", () => {
+    const session = {
+      user: { id: "u1", name: "Owner" },
+      session: { id: "s1", membershipId: "m1" },
+    } as unknown as FakeSession;
+
+    renderHarness({
+      session,
+      isEnabled: (key) => key === "customerAccounts",
+    });
+    fireEvent.click(getToggle());
+
+    const account = screen.getByRole("navigation", { name: "Account" });
+    expect(
+      within(account).getByRole("link", { name: "Admin" }),
+    ).toHaveAttribute("href", "/admin");
+    expect(
+      within(account).queryByRole("link", { name: "Orders" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders only the social links the owner configured", () => {
     renderHarness({
       business: makeBusiness({
@@ -240,11 +324,23 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
     });
     fireEvent.click(getToggle());
 
-    expect(screen.getByLabelText("Instagram")).toBeInTheDocument();
-    expect(screen.getByLabelText("YouTube")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Facebook")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Twitter")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("TikTok")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Instagram \(opens in new tab\)/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /YouTube \(opens in new tab\)/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Facebook \(opens in new tab\)/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", {
+        name: /X \/ Twitter \(opens in new tab\)/,
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /TikTok \(opens in new tab\)/ }),
+    ).not.toBeInTheDocument();
   });
 
   it("inerts #main-content and locks page scroll while open, and restores both on close", async () => {
@@ -267,5 +363,132 @@ describe("HappyBambooMenuToggle + HappyBambooMobileMenu", () => {
     // from the panel's exit animation.
     await waitFor(() => expect(mainContent).not.toHaveAttribute("inert"));
     expect(html.style.overflow).toBe(originalOverflow);
+  });
+
+  describe("sub-navigation groups", () => {
+    const GROUPED_NAV: NavItem[] = [
+      { label: "Home", href: "/" },
+      {
+        label: "Services",
+        href: "/services",
+        children: [{ label: "Massages", href: "/services/massage" }],
+      },
+      {
+        label: "Misc",
+        href: "",
+        children: [
+          { label: "Testimonials", href: "/testimonials" },
+          { label: "Docs", href: "https://docs.example", external: true },
+        ],
+      },
+    ];
+
+    function openGrouped() {
+      renderHarness({
+        business: makeBusiness({ navigationItems: GROUPED_NAV }),
+      });
+      fireEvent.click(getToggle());
+    }
+
+    afterEach(() => {
+      pathname = "/";
+    });
+
+    it("renders a group as a collapsed disclosure button", () => {
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Services" });
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+      const controls = trigger.getAttribute("aria-controls")!;
+      expect(controls).toBeTruthy();
+      expect(document.getElementById(controls)).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Massages" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("expands on click and lists a non-empty parent href as the first entry", () => {
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Services" });
+      fireEvent.click(trigger);
+
+      expect(trigger).toHaveAttribute("aria-expanded", "true");
+      const sublist = document.getElementById(
+        trigger.getAttribute("aria-controls")!,
+      )!;
+      expect(sublist).toBeInTheDocument();
+      const links = sublist.querySelectorAll("a");
+      expect(Array.from(links, (a) => a.textContent)).toEqual([
+        "Services",
+        "Massages",
+      ]);
+      expect(links[0]).toHaveAttribute("href", "/services");
+
+      fireEvent.click(trigger);
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("gives an empty-href group no link of its own and honors external children", () => {
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Misc" });
+      fireEvent.click(trigger);
+      const sublist = document.getElementById(
+        trigger.getAttribute("aria-controls")!,
+      )!;
+      const links = Array.from(sublist.querySelectorAll("a"));
+      expect(links.map((a) => a.getAttribute("href"))).toEqual([
+        "/testimonials",
+        "https://docs.example",
+      ]);
+      expect(
+        screen.queryByRole("link", { name: /^Misc/ }),
+      ).not.toBeInTheDocument();
+
+      const docs = screen.getByRole("link", {
+        name: "Docs (opens in new tab)",
+      });
+      expect(docs).toHaveAttribute("target", "_blank");
+      expect(docs).toHaveAttribute("rel", "noopener noreferrer");
+    });
+
+    it("auto-expands the active group and marks only the active child", () => {
+      pathname = "/services/massage";
+      openGrouped();
+
+      const trigger = screen.getByRole("button", { name: "Services" });
+      expect(trigger).toHaveAttribute("aria-expanded", "true");
+      expect(trigger).not.toHaveAttribute("aria-current");
+
+      expect(screen.getByRole("link", { name: "Massages" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+      // The parent entry prefix-matches too, but only the most specific
+      // entry is current.
+      expect(
+        screen.getByRole("link", { name: "Services" }),
+      ).not.toHaveAttribute("aria-current");
+      expect(document.querySelectorAll('[aria-current="page"]')).toHaveLength(
+        1,
+      );
+      // Other groups stay collapsed.
+      expect(screen.getByRole("button", { name: "Misc" })).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
+    });
+
+    it("closes the menu when a child link is clicked", async () => {
+      openGrouped();
+      fireEvent.click(screen.getByRole("button", { name: "Services" }));
+      fireEvent.click(screen.getByRole("link", { name: "Massages" }));
+
+      expect(getToggle()).toHaveAttribute("aria-expanded", "false");
+      await waitFor(() =>
+        expect(document.getElementById(MENU_ID)).not.toBeInTheDocument(),
+      );
+    });
   });
 });

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -14,7 +15,12 @@ import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-export function ModernContactForm() {
+type Props = {
+  successHeading?: string;
+  successBody?: string;
+};
+
+export function ModernContactForm({ successHeading, successBody }: Props) {
   const {
     form,
     messageLength,
@@ -58,12 +64,15 @@ export function ModernContactForm() {
           ref={successHeadingRef}
           tabIndex={-1}
           className="text-foreground font-serif text-xl focus:outline-none"
+          {...fieldAttr("modern.contact.form-success-heading")}
         >
-          Message received
+          {successHeading}
         </h3>
-        <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
-          Thank you for reaching out. We&apos;ll get back to you within 24
-          hours.
+        <p
+          className="text-muted-foreground max-w-sm text-sm leading-relaxed"
+          {...fieldAttr("modern.contact.form-success-body")}
+        >
+          {successBody}
         </p>
         <button
           type="button"
@@ -92,7 +101,7 @@ export function ModernContactForm() {
         <InputFormField
           form={form}
           name="name"
-          label="First Name *"
+          label="Name *"
           className="flex flex-col gap-2"
           labelClassName={
             "text-foreground text-xs font-semibold tracking-widest uppercase"

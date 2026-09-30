@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Quote } from "lucide-react";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
@@ -14,6 +15,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { HappyBambooPageShelf } from "../shared/happy-bamboo-page-shelf";
 
 function getInitials(name: string): string {
   return name
@@ -30,27 +32,25 @@ export async function HappyBambooTestimonialsPage({
 
   const f = resolveFields(business?.siteContent?.customFields, [
     "happy-bamboo.homepage-testimonials-heading",
+    "happy-bamboo.testimonials-page-small-label",
+    "happy-bamboo.testimonials-page-intro",
   ]);
   const heading =
     f["happy-bamboo.homepage-testimonials-heading"] ?? "What Consumers Say";
+  const smallLabel = f["happy-bamboo.testimonials-page-small-label"] ?? "";
+  const intro = f["happy-bamboo.testimonials-page-intro"] ?? "";
 
   return (
     <PageTransition>
-      <section className="bg-secondary py-16 md:py-24">
-        <div className="container mx-auto px-4 text-center">
-          <FadeIn>
-            <span className="text-primary text-sm font-semibold tracking-wider uppercase">
-              Testimonials
-            </span>
-            <h1 className="mt-2 font-serif text-4xl font-bold md:text-5xl">
-              {heading}
-            </h1>
-            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed">
-              Kind words from people who shop with us
-            </p>
-          </FadeIn>
-        </div>
-      </section>
+      <HappyBambooPageShelf
+        title={heading}
+        titleFieldKey="happy-bamboo.homepage-testimonials-heading"
+        smallLabel={smallLabel}
+        smallLabelFieldKey="happy-bamboo.testimonials-page-small-label"
+        subtitle={intro}
+        subtitleFieldKey="happy-bamboo.testimonials-page-intro"
+        sectionAttrs={sectionGroupAttr("testimonials", "page")}
+      />
 
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">

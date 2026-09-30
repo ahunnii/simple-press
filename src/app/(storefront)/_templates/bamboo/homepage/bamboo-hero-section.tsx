@@ -3,7 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf } from "lucide-react";
 
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -13,9 +18,15 @@ import { FadeIn } from "~/components/page-animations";
 
 import { DEFAULT_BAMBOO_HERO_BADGES } from ".";
 import { resolveFields } from "..";
+import { BAMBOO_TOP_MARKER } from "../shared/bamboo-emblem-clearance";
 import { BambooLeafGlyph } from "../shared/bamboo-leaf-sprig";
 
-type Props = { customFields: unknown; hasValueBand: boolean };
+type Props = {
+  customFields: unknown;
+  hasValueBand: boolean;
+  /** B2.5: gates any field-driven CTA whose href names an off flag (P-NAV-FLAGS). */
+  isEnabled: (key: string) => boolean;
+};
 
 /**
  * Split editorial hero — copy left, photography right (stacked on mobile), in
@@ -51,7 +62,11 @@ type Props = { customFields: unknown; hasValueBand: boolean };
  * text-shadow halo (lg+ only) on the copy column, since a thin wash alone
  * doesn't guarantee gold-on-photo contrast.
  */
-export function BambooHeroSection({ customFields, hasValueBand }: Props) {
+export function BambooHeroSection({
+  customFields,
+  hasValueBand,
+  isEnabled,
+}: Props) {
   const f = resolveFields(customFields, [
     "bamboo.homepage.hero-bg-image",
     "bamboo.homepage.hero-bg-tint",
@@ -66,18 +81,45 @@ export function BambooHeroSection({ customFields, hasValueBand }: Props) {
     "bamboo.homepage.hero-primary-button-text",
     "bamboo.homepage.hero-secondary-button-link",
     "bamboo.homepage.hero-secondary-button-text",
+    "bamboo.homepage.hero-show-badges",
   ]);
 
-  const badges =
-    parseTemplateIconListRows(
-      getListFieldValue(customFields, "bamboo.homepage.hero-badges"),
-      DEFAULT_BAMBOO_HERO_BADGES,
-    ) ?? [];
+  // Same plain on/off reading as `showFullPhoto` below: an absent/blank
+  // saved value falls back to the literal default ("true") before the
+  // comparison, so only an explicit "false" hides the row.
+  const showBadges =
+    ((f["bamboo.homepage.hero-show-badges"] ?? "").trim() || "true") !==
+    "false";
+  const badges = showBadges
+    ? (parseTemplateIconListRows(
+        getListFieldValue(customFields, "bamboo.homepage.hero-badges"),
+        DEFAULT_BAMBOO_HERO_BADGES,
+      ) ?? [])
+    : [];
 
   const tagline = f["bamboo.homepage.hero-tagline"] ?? "";
   const description = f["bamboo.homepage.hero-description"] ?? "";
   const secondaryText = f["bamboo.homepage.hero-secondary-button-text"] ?? "";
   const bgImage = f["bamboo.homepage.hero-bg-image"] ?? "";
+
+  // B2.5: a CTA whose href resolves to a flag-gated route (default or
+  // merchant-set) must hide — never swap in another destination — when that
+  // flag is off. `f[key]` is never actually "" for these two keys (both have
+  // a non-empty `defaultValue` in the registry, so `resolveTemplateFields`
+  // never falls through to `""`), but `||` is used over `??` since that's
+  // the general-purpose pattern for a field read with an inline fallback.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+  const primaryHref = f["bamboo.homepage.hero-primary-button-link"] || "/shop";
+  const primaryFlag = navHrefFlag(primaryHref);
+  const showPrimary = primaryFlag === null || isEnabled(primaryFlag);
+
+  const secondaryHref =
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+    f["bamboo.homepage.hero-secondary-button-link"] || "/about";
+  const secondaryFlag = navHrefFlag(secondaryHref);
+  const showSecondary =
+    secondaryText !== "" &&
+    (secondaryFlag === null || isEnabled(secondaryFlag));
   const hasBg = bgImage.length > 0;
   // The hex test is doing two jobs: it is the tint's off-switch AND its
   // injection guard — `tint` lands in an inline `style`, so anything that
@@ -133,6 +175,7 @@ export function BambooHeroSection({ customFields, hasValueBand }: Props) {
       aria-label="Introduction"
       className={cn(
         "relative overflow-hidden bg-[var(--bam-cream)]",
+        BAMBOO_TOP_MARKER,
         // Sub-lg photo-box height (read by the img and the cap layer below;
         // unused at lg+, where the img goes back to full-bleed). It is
         // WIDTH-derived on purpose: it mirrors the right column's aspect
@@ -354,6 +397,7 @@ export function BambooHeroSection({ customFields, hasValueBand }: Props) {
               {badges.map((badge, index) => (
                 <li
                   key={`${badge.title}-${index}`}
+                  {...listItemAttr("bamboo.homepage.hero-badges", index)}
                   className={cn(
                     "flex w-1/3 min-w-0 flex-col items-center gap-2.5 px-2 py-3 text-center sm:w-auto sm:flex-1 sm:py-0",
                     index > 0 &&
@@ -389,39 +433,43 @@ export function BambooHeroSection({ customFields, hasValueBand }: Props) {
             </ul>
           )}
 
-          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <Link
-              href={f["bamboo.homepage.hero-primary-button-link"] ?? "/shop"}
-              className="group inline-flex items-center gap-2.5 rounded-full bg-[var(--bam-forest)] px-7 py-3.5 text-base font-semibold tracking-wider text-[var(--bam-cream)] uppercase shadow-lg ring-2 ring-[var(--bam-gold-bright)]/80 transition-colors hover:bg-[var(--bam-forest-deep)]"
-            >
-              <Leaf
-                className="size-4 shrink-0 text-[var(--bam-gold-soft)]"
-                aria-hidden="true"
-              />
-              <span {...fieldAttr("bamboo.homepage.hero-primary-button-text")}>
-                {f["bamboo.homepage.hero-primary-button-text"] ?? ""}
-              </span>
-              <ArrowRight
-                className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
-            </Link>
+          {showPrimary || showSecondary ? (
+            <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
+              {showPrimary ? (
+                <Link
+                  href={primaryHref}
+                  className="group inline-flex items-center gap-2.5 rounded-full bg-[var(--bam-forest)] px-7 py-3.5 text-base font-semibold tracking-wider text-[var(--bam-cream)] uppercase shadow-lg ring-2 ring-[var(--bam-gold-bright)]/80 transition-colors hover:bg-[var(--bam-forest-deep)]"
+                >
+                  <Leaf
+                    className="size-4 shrink-0 text-[var(--bam-gold-soft)]"
+                    aria-hidden="true"
+                  />
+                  <span
+                    {...fieldAttr("bamboo.homepage.hero-primary-button-text")}
+                  >
+                    {f["bamboo.homepage.hero-primary-button-text"] ?? ""}
+                  </span>
+                  <ArrowRight
+                    className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </Link>
+              ) : null}
 
-            {secondaryText ? (
-              <Link
-                href={
-                  f["bamboo.homepage.hero-secondary-button-link"] ?? "/about"
-                }
-                className={cn(
-                  "text-sm font-semibold tracking-widest text-[var(--bam-forest)] uppercase underline-offset-8 transition-colors hover:text-[var(--bam-forest-deep)] hover:underline",
-                  textHaloClassName,
-                )}
-                {...fieldAttr("bamboo.homepage.hero-secondary-button-text")}
-              >
-                {secondaryText}
-              </Link>
-            ) : null}
-          </div>
+              {showSecondary ? (
+                <Link
+                  href={secondaryHref}
+                  className={cn(
+                    "text-sm font-semibold tracking-widest text-[var(--bam-forest)] uppercase underline-offset-8 transition-colors hover:text-[var(--bam-forest-deep)] hover:underline",
+                    textHaloClassName,
+                  )}
+                  {...fieldAttr("bamboo.homepage.hero-secondary-button-text")}
+                >
+                  {secondaryText}
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
         </FadeIn>
 
         <FadeIn

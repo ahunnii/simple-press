@@ -3,12 +3,18 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { modernAboutData, modernAboutFieldGroups } from "./about";
 import { modernBlogData, modernBlogFieldGroups } from "./blog";
+import { modernCheckoutData, modernCheckoutFieldGroups } from "./cart-checkout";
+import {
+  modernCartData,
+  modernCartFieldGroups,
+} from "./cart-checkout/cart-fields";
 import {
   modernCollectionsData,
   modernCollectionsFieldGroups,
 } from "./collections";
 import { modernContactData, modernContactFieldGroups } from "./contact";
 import { modernHomepageData, modernHomepageFieldGroups } from "./homepage";
+import { modernProductData, modernProductFieldGroups } from "./products";
 import { modernProductsData, modernProductsFieldGroups } from "./shop";
 import {
   modernTestimonialsData,
@@ -23,6 +29,9 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...modernCollectionsFieldGroups,
   ...modernContactFieldGroups,
   ...modernBlogFieldGroups,
+  ...modernProductFieldGroups,
+  ...modernCheckoutFieldGroups,
+  ...modernCartFieldGroups,
 ];
 
 export const modernData = {
@@ -34,6 +43,9 @@ export const modernData = {
     ...modernBlogData,
     ...modernTestimonialsData,
     ...modernProductsData,
+    ...modernProductData,
+    ...modernCheckoutData,
+    ...modernCartData,
   ],
 };
 

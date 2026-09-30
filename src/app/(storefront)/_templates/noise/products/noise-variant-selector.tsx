@@ -181,7 +181,7 @@ export function NoiseVariantSelector({
                   Added
                 </>
               ) : (
-                `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
+                `Add ${quantity > 1 ? `${quantity} ` : ""}to bag`
               )}
             </Button>
           );

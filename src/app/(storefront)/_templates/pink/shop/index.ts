@@ -17,8 +17,8 @@ export const pinkShopData: TemplateField[] = [
   // ── shop.header ──────────────────────────────────────────────────────────
   {
     key: "pink.shop.header-heading",
-    label: "Header Heading",
-    description: "The main H1 on the shop page.",
+    label: "Heading",
+    description: "The page's main heading.",
     type: "text",
     page: "shop",
     group: "shop.header",
@@ -27,7 +27,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.header-intro",
-    label: "Header Intro",
+    label: "Intro text",
     description: "One or two sentences under the heading.",
     type: "textarea",
     page: "shop",
@@ -40,7 +40,7 @@ export const pinkShopData: TemplateField[] = [
   // ── shop.filters ─────────────────────────────────────────────────────────
   {
     key: "pink.shop.filters-cta-heading",
-    label: "Filters CTA Heading",
+    label: "Heading — sidebar callout",
     description: "Heading in the boxed callout under the filter sidebar.",
     type: "text",
     page: "shop",
@@ -50,7 +50,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.filters-cta-body",
-    label: "Filters CTA Body",
+    label: "Body text — sidebar callout",
     description: "One line under the callout heading.",
     type: "textarea",
     page: "shop",
@@ -60,7 +60,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.filters-cta-label",
-    label: "Filters CTA Button Text",
+    label: "Button text — sidebar callout",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "shop",
@@ -70,7 +70,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.filters-cta-href",
-    label: "Filters CTA Button Link",
+    label: "Button link — sidebar callout",
     description: "Where the callout button goes.",
     type: "url",
     page: "shop",
@@ -82,7 +82,7 @@ export const pinkShopData: TemplateField[] = [
   // ── shop.grid ────────────────────────────────────────────────────────────
   {
     key: "pink.shop.add-to-basket-label",
-    label: "Add to Basket Label",
+    label: "Add to basket label",
     description: "Button text on each product card for simple products.",
     type: "text",
     page: "shop",
@@ -92,7 +92,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.add-to-basket-added-label",
-    label: "Added Confirmation Label",
+    label: "Added confirmation label",
     description: "Button text shown briefly after adding to the basket.",
     type: "text",
     page: "shop",
@@ -102,7 +102,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.choose-options-label",
-    label: "Choose Options Label",
+    label: "Choose options label",
     description:
       "Button text on cards for products with multiple variants — opens the product page instead of adding directly.",
     type: "text",
@@ -113,7 +113,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.sold-out-label",
-    label: "Sold Out Label",
+    label: "Sold out label",
     description: "Button text on out-of-stock cards.",
     type: "text",
     page: "shop",
@@ -123,7 +123,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.load-more-label",
-    label: "Load More Label",
+    label: "Load more label",
     description:
       "Button text at the bottom of the grid when there are more pieces to show.",
     type: "text",
@@ -134,7 +134,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.empty-heading",
-    label: "Empty State Heading",
+    label: "Heading — nothing found",
     description:
       "Shown when no pieces match the current filters, or the shop is empty.",
     type: "text",
@@ -145,8 +145,8 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.empty-body",
-    label: "Empty State Body",
-    description: "One or two sentences under the empty-state heading.",
+    label: "Body text — nothing found",
+    description: "One or two sentences under the heading above.",
     type: "textarea",
     page: "shop",
     group: "shop.grid",
@@ -156,7 +156,7 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.empty-cta-label",
-    label: "Empty State Button Text",
+    label: "Button text — nothing found",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "shop",
@@ -166,8 +166,8 @@ export const pinkShopData: TemplateField[] = [
   },
   {
     key: "pink.shop.empty-cta-href",
-    label: "Empty State Button Link",
-    description: "Where the empty-state button goes.",
+    label: "Button link — nothing found",
+    description: "Where the button above goes.",
     type: "url",
     page: "shop",
     group: "shop.grid",
@@ -179,22 +179,22 @@ export const pinkShopData: TemplateField[] = [
 export const pinkShopFieldGroups: TemplateFieldGroup[] = [
   {
     id: "shop.header",
-    title: "Shop Header",
-    description: "Eyebrow, heading and intro at the top of the shop page",
+    title: "Shop header",
+    description: "Heading and intro at the top of the shop page.",
     icon: "🛍️",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "shop.filters",
-    title: "Shop Filters — Closing CTA",
-    description: "The boxed callout at the bottom of the filter sidebar",
+    title: "Filter sidebar",
+    description: "The boxed callout at the bottom of the filter sidebar.",
     icon: "🧵",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "shop.grid",
-    title: "Shop Grid & States",
-    description: "Add-to-basket labels, load-more, and the empty state",
+    title: "Product grid",
+    description: "Add-to-basket labels, load-more, and the empty state.",
     icon: "🧺",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -204,8 +204,8 @@ export const pinkShopSections: TemplateSection[] = [
   {
     id: "shop.header",
     page: "shop",
-    title: "Shop Header",
-    description: "Eyebrow, heading and intro at the top of the shop page",
+    title: "Shop header",
+    description: "Heading and intro at the top of the shop page",
     groupIds: ["shop.header"],
     order: 0,
     hideable: false,
@@ -213,9 +213,9 @@ export const pinkShopSections: TemplateSection[] = [
   {
     id: "shop.filters",
     page: "shop",
-    title: "Filter Sidebar",
+    title: "Filter sidebar",
     description:
-      "Category, price and availability filters, plus the closing CTA box",
+      "Category, price and availability filters, plus the closing callout box",
     groupIds: ["shop.filters"],
     order: 1,
     hideable: true,
@@ -223,7 +223,7 @@ export const pinkShopSections: TemplateSection[] = [
   {
     id: "shop.grid",
     page: "shop",
-    title: "Product Grid",
+    title: "Product grid",
     description: "Sort, product cards and the empty state",
     groupIds: ["shop.grid"],
     order: 2,

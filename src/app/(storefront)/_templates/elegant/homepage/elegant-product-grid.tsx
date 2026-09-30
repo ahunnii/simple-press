@@ -99,7 +99,7 @@ export function ElegantProductGrid({
                 }}
                 {...fieldAttr("elegant.homepage.products-tagline")}
               >
-                {productsTagline ?? "Our Products"}
+                {productsTagline}
               </span>
             </div>
             <div style={revealStyle(0.1)}>
@@ -113,9 +113,9 @@ export function ElegantProductGrid({
                   marginTop: 14,
                   color: "var(--el-ink, #1c1a17)",
                 }}
+                {...fieldAttr("elegant.homepage.products-title")}
               >
-                {productsTitle ?? "Featured"}{" "}
-                <em style={{ fontStyle: "italic" }}>for you</em>.
+                {productsTitle}
               </h2>
             </div>
             {productsDescription && (
@@ -153,7 +153,7 @@ export function ElegantProductGrid({
               }}
             >
               <span {...fieldAttr("elegant.homepage.products-button-text")}>
-                {productsButtonText ?? "View all"}
+                {productsButtonText}
               </span>
               <ArrowRight
                 aria-hidden={true}

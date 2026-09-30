@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -33,6 +34,7 @@ export function ViiBlogPostCta({
   return (
     <section
       aria-labelledby="blog-post-cta-heading"
+      {...sectionGroupAttr("blog", "cta")}
       style={{
         background: "var(--vii-cream)",
         padding: "clamp(56px,8vw,88px) clamp(24px,6vw,96px)",
@@ -48,7 +50,12 @@ export function ViiBlogPostCta({
         }}
       >
         {overline && (
-          <ViiOverline tone="light" align="center" style={{ marginBottom: 24 }}>
+          <ViiOverline
+            tone="light"
+            align="center"
+            fieldKey="vii.blog.cta-overline"
+            style={{ marginBottom: 24 }}
+          >
             {overline}
           </ViiOverline>
         )}
@@ -56,6 +63,7 @@ export function ViiBlogPostCta({
         {heading && (
           <h2
             id="blog-post-cta-heading"
+            {...fieldAttr("vii.blog.cta-heading")}
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
@@ -73,6 +81,7 @@ export function ViiBlogPostCta({
 
         {body && (
           <p
+            {...fieldAttr("vii.blog.cta-body")}
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px,1.3vw,16px)",
@@ -86,30 +95,33 @@ export function ViiBlogPostCta({
           </p>
         )}
 
-        <Link
-          href={buttonLink ?? "/contact"}
-          className="vii-cta-btn"
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "14px 32px",
-            background: "var(--vii-copper-deep)",
-            color: "var(--vii-paper)",
-            fontFamily: "var(--font-sans)",
-            fontSize: 12,
-            fontWeight: 500,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            textDecoration: "none",
-            borderRadius: "var(--radius)",
-            transition:
-              "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
-          }}
-        >
-          {buttonText ?? "Book a visit"}
-        </Link>
+        {buttonLink?.trim() && (
+          <Link
+            href={buttonLink}
+            className="vii-cta-btn"
+            {...fieldAttr("vii.blog.cta-button-text")}
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "14px 32px",
+              background: "var(--vii-copper-deep)",
+              color: "var(--vii-paper)",
+              fontFamily: "var(--font-sans)",
+              fontSize: 12,
+              fontWeight: 500,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              borderRadius: "var(--radius)",
+              transition:
+                "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
+            }}
+          >
+            {buttonText ?? "Book a visit"}
+          </Link>
+        )}
       </div>
     </section>
   );

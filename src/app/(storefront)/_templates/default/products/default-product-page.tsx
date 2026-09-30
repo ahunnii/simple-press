@@ -5,15 +5,22 @@ import Link from "next/link";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { GenericTrustBadgeRow } from "~/lib/template-fields";
 import type { Product } from "~/types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import {
   getListFieldValue,
   isContentEmpty,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
@@ -25,16 +32,57 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
-import { resolveFields } from "..";
+import {
+  DEFAULT_PRODUCT_TRUST_BADGES,
+  DEFAULT_PRODUCT_TRUST_BADGES_KEY,
+  defaultProductData,
+} from ".";
 import { DefaultProductCard } from "../shared/default-product-card";
 import { DefaultProductActions } from "./default-product-actions";
 
+/**
+ * Resolves this page's fields against its own field module rather than the
+ * template root's map, so every key resolves to its saved value or its
+ * declared default whether or not the root `index.ts` spreads
+ * `defaultProductData` yet (the root map would resolve an unknown key to "").
+ * Same `resolveTemplateFields` semantics the root `resolveFields` uses.
+ */
+const PRODUCT_FIELD_MAP = new Map(
+  defaultProductData.map((field) => [field.key, field]),
+);
+
+const FIELD_KEYS = [
+  "default.product.coming-soon-heading",
+  "default.product.coming-soon-body",
+  "default.product.details-label",
+  "default.product.details-empty-text",
+  "default.product.shipping-label",
+  "default.global.product-shipping-description",
+  "default.product.returns-note",
+  "default.product.question-label",
+  "default.global.product-question-description",
+  "default.product.question-link-text",
+  "default.product.shipping-note",
+  "default.product.reviews-label",
+  "default.product.reviews-heading",
+  "default.product.related-label",
+  "default.product.related-heading",
+  "default.product.related-link-text",
+];
+
+type StoreBadge = GenericTrustBadgeRow & {
+  /** Position in the saved (or built-in) list, for click-to-row targeting. */
+  index: number;
+};
+
 function AccordionItem({
   summary,
+  summaryFieldKey,
   children,
   defaultOpen,
 }: {
   summary: string;
+  summaryFieldKey: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }) {
@@ -44,7 +92,7 @@ function AccordionItem({
       className="group border-b border-[#e8e8e8] py-5 first:border-t"
     >
       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
-        {summary}
+        <span {...fieldAttr(summaryFieldKey)}>{summary}</span>
         <span
           aria-hidden="true"
           className="text-xl font-light transition-transform duration-200 group-open:rotate-45"
@@ -62,6 +110,7 @@ function AccordionItem({
 export function DefaultProductPage({
   product,
   business,
+  productPolicies,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
@@ -83,24 +132,47 @@ export function DefaultProductPage({
   const isAdditionalEmpty = isContentEmpty(
     additionalFields?.additionalInformation as TiptapJSON,
   );
-  const f = resolveFields(business?.siteContent?.customFields, [
-    "default.global.product-shipping-description",
-    "default.global.product-question-description",
-  ]);
-  const globalProductTrustBadges = parseTemplateTrustBadgesListRows(
-    getListFieldValue(
-      business?.siteContent?.customFields,
-      "default.global.product-trust-badges",
-    ),
-    [
-      {
-        label: "Ships in 1-2 business days",
-      },
-      {
-        label: "Free returns within 30 days",
-      },
-    ],
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveTemplateFields(customFields, FIELD_KEYS, PRODUCT_FIELD_MAP);
+  const detailsLabel = f["default.product.details-label"] ?? "";
+  const detailsEmptyText = f["default.product.details-empty-text"] ?? "";
+  const shippingLabel = f["default.product.shipping-label"] ?? "";
+  const shippingDescription =
+    f["default.global.product-shipping-description"] ?? "";
+  const returnsNote = f["default.product.returns-note"] ?? "";
+  const questionLabel = f["default.product.question-label"] ?? "";
+  const questionDescription =
+    f["default.global.product-question-description"] ?? "";
+  const questionLinkText = f["default.product.question-link-text"] ?? "";
+  const shippingNote = f["default.product.shipping-note"] ?? "";
+  const reviewsLabel = f["default.product.reviews-label"] ?? "";
+  const reviewsHeading = f["default.product.reviews-heading"] ?? "";
+  const relatedLabel = f["default.product.related-label"] ?? "";
+  const relatedHeading = f["default.product.related-heading"] ?? "";
+  const relatedLinkText = f["default.product.related-link-text"] ?? "";
+  const hasShippingPolicy = productPolicies?.hasShippingPolicy ?? false;
+  const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
+
+  // Store-wide badges come first, then the product's own features (both
+  // render). Rows are parsed one at a time so each keeps its position in the
+  // saved list for `listItemAttr`; when no saved row is usable the built-in
+  // rows show instead — the same fallback rule as
+  // `parseTemplateTrustBadgesListRows(raw, DEFAULT_PRODUCT_TRUST_BADGES)`.
+  const savedStoreBadges: StoreBadge[] = (
+    getListFieldValue(customFields, DEFAULT_PRODUCT_TRUST_BADGES_KEY) ?? []
+  ).flatMap((row, index) =>
+    (parseTemplateTrustBadgesListRows([row]) ?? []).map((badge) => ({
+      ...badge,
+      index,
+    })),
   );
+  const storeBadges: StoreBadge[] =
+    savedStoreBadges.length > 0
+      ? savedStoreBadges
+      : DEFAULT_PRODUCT_TRUST_BADGES.map((badge, index) => ({
+          ...badge,
+          index,
+        }));
 
   return (
     <PageTransition>
@@ -140,8 +212,14 @@ export function DefaultProductPage({
             }}
           />
 
-          {/* Info panel */}
-          <div className="flex flex-col gap-6">
+          {/* Info panel — everything the "Product page details" editor
+              section controls (coming-soon copy, badges, accordion, shipping
+              line) sits inside this wrapper so its hotspot covers it. Never
+              annotate the same group twice. */}
+          <div
+            className="flex flex-col gap-6"
+            {...sectionGroupAttr("product", "details")}
+          >
             {/* Name + price */}
             <div className="flex flex-col gap-4">
               <div className="flex items-start justify-between gap-4">
@@ -189,73 +267,161 @@ export function DefaultProductPage({
             )}
 
             {/* Actions (variant selector + qty + add to cart) */}
-            <DefaultProductActions product={product} business={business} />
+            <DefaultProductActions
+              product={product}
+              business={business}
+              comingSoonHeading={f["default.product.coming-soon-heading"] ?? ""}
+              comingSoonBody={f["default.product.coming-soon-body"] ?? ""}
+            />
 
             {/* Trust signals */}
             <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-[13px] text-[#6b6b6b]">
-              {globalProductTrustBadges?.map((badge) => (
-                <span key={badge.label}>
-                  <span aria-hidden="true">✓</span> {badge.label}
+              {storeBadges.map(({ icon: Icon, label, index }) => (
+                <span
+                  key={`store-${index}-${label}`}
+                  {...listItemAttr(DEFAULT_PRODUCT_TRUST_BADGES_KEY, index)}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  {Icon ? (
+                    <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <span aria-hidden="true">✓</span>
+                  )}
+                  {label}
                 </span>
               ))}
-              {displayTrustBadges.map((badge) => (
-                <span key={badge.label}>
-                  <span aria-hidden="true">✓</span> {badge.label}
+              {displayTrustBadges.map(({ Icon, label }, index) => (
+                <span
+                  key={`product-${index}-${label}`}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+                  {label}
                 </span>
               ))}
             </div>
 
-            {/* Accordion — the shipping/question copy inside comes from the
-                "Product page details" section, so the whole block is one
-                editor hotspot (never annotate the same group twice). */}
-            <div className="mt-2" {...sectionGroupAttr("product", "details")}>
-              <AccordionItem summary="Details" defaultOpen>
-                {!isAdditionalEmpty ? (
-                  <TiptapRenderer
-                    content={
-                      additionalFields?.additionalInformation as TiptapJSON
-                    }
-                    className="prose prose-sm max-w-none"
-                  />
-                ) : (
-                  <p>
-                    Materials, care instructions, and any other details about
-                    this product. Edit this from your product settings under
-                    &apos;Additional Information&apos; in the admin panel.
-                  </p>
-                )}
-              </AccordionItem>
-              {f["default.global.product-shipping-description"] && (
-                <AccordionItem summary="Shipping &amp; returns">
-                  <p>{f["default.global.product-shipping-description"]}</p>
+            {/* Accordion */}
+            <div className="mt-2">
+              {(!isAdditionalEmpty || detailsEmptyText) && (
+                <AccordionItem
+                  summary={detailsLabel}
+                  summaryFieldKey="default.product.details-label"
+                  defaultOpen
+                >
+                  {!isAdditionalEmpty ? (
+                    <TiptapRenderer
+                      content={
+                        additionalFields?.additionalInformation as TiptapJSON
+                      }
+                      className="prose prose-sm max-w-none"
+                    />
+                  ) : (
+                    <p {...fieldAttr("default.product.details-empty-text")}>
+                      {detailsEmptyText}
+                    </p>
+                  )}
                 </AccordionItem>
               )}
-
-              {f["default.global.product-question-description"] && (
-                <AccordionItem summary="Ask a question">
-                  <p>
-                    {f["default.global.product-question-description"]}{" "}
-                    <Link
-                      href="/contact"
-                      className="underline hover:no-underline"
+              {(shippingDescription || returnsNote) && (
+                <AccordionItem
+                  summary={shippingLabel}
+                  summaryFieldKey="default.product.shipping-label"
+                >
+                  {shippingDescription && (
+                    <p
+                      {...fieldAttr(
+                        "default.global.product-shipping-description",
+                      )}
                     >
-                      You can reach out to us here.
-                    </Link>
+                      {shippingDescription}
+                    </p>
+                  )}
+                  {returnsNote && (
+                    <p
+                      {...fieldAttr("default.product.returns-note")}
+                      className={cn(
+                        "whitespace-pre-line",
+                        shippingDescription && "mt-3",
+                      )}
+                    >
+                      {returnsNote}
+                    </p>
+                  )}
+                  {(hasShippingPolicy || hasRefundPolicy) && (
+                    <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                      {hasShippingPolicy && (
+                        <Link
+                          href="/shipping-policy"
+                          className="underline hover:no-underline"
+                        >
+                          Shipping policy
+                        </Link>
+                      )}
+                      {hasRefundPolicy && (
+                        <Link
+                          href="/refund-policy"
+                          className="underline hover:no-underline"
+                        >
+                          Returns &amp; refunds policy
+                        </Link>
+                      )}
+                    </p>
+                  )}
+                </AccordionItem>
+              )}
+
+              {questionDescription && (
+                <AccordionItem
+                  summary={questionLabel}
+                  summaryFieldKey="default.product.question-label"
+                >
+                  <p>
+                    <span
+                      {...fieldAttr(
+                        "default.global.product-question-description",
+                      )}
+                    >
+                      {questionDescription}
+                    </span>
+                    {questionLinkText && (
+                      <>
+                        {" "}
+                        <Link
+                          href="/contact"
+                          {...fieldAttr("default.product.question-link-text")}
+                          className="underline hover:no-underline"
+                        >
+                          {questionLinkText}
+                        </Link>
+                      </>
+                    )}
                   </p>
                 </AccordionItem>
               )}
             </div>
 
-            {/* Shipping link */}
-            <p className="text-xs text-[#6b6b6b]">
-              <Link
-                href="/shipping-policy"
-                className="underline hover:no-underline"
-              >
-                Shipping
-              </Link>{" "}
-              calculated at checkout
-            </p>
+            {/* Shipping line — links to the shipping policy only when that
+                page is published. */}
+            {shippingNote &&
+              (hasShippingPolicy ? (
+                <p className="text-xs text-[#6b6b6b]">
+                  <Link
+                    href="/shipping-policy"
+                    {...fieldAttr("default.product.shipping-note")}
+                    className="underline hover:no-underline"
+                  >
+                    {shippingNote}
+                  </Link>
+                </p>
+              ) : (
+                <p
+                  {...fieldAttr("default.product.shipping-note")}
+                  className="text-xs text-[#6b6b6b]"
+                >
+                  {shippingNote}
+                </p>
+              ))}
           </div>
         </div>
 
@@ -263,14 +429,26 @@ export function DefaultProductPage({
             reviews feature flag is enabled for this business. */}
         {reviewsEnabled && (
           <section className="border-t border-[#e8e8e8] pt-16 pb-24">
-            <div className="mb-10">
-              <p className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                Reviews
-              </p>
-              <h2 className="font-serif text-3xl font-semibold tracking-tight">
-                What customers are saying
-              </h2>
-            </div>
+            {(reviewsLabel || reviewsHeading) && (
+              <div className="mb-10">
+                {reviewsLabel && (
+                  <p
+                    {...fieldAttr("default.product.reviews-label")}
+                    className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                  >
+                    {reviewsLabel}
+                  </p>
+                )}
+                {reviewsHeading && (
+                  <h2
+                    {...fieldAttr("default.product.reviews-heading")}
+                    className="font-serif text-3xl font-semibold tracking-tight"
+                  >
+                    {reviewsHeading}
+                  </h2>
+                )}
+              </div>
+            )}
             <ProductReviews
               productId={product.id}
               onWriteReviewClick={() => setReviewDialogOpen(true)}
@@ -288,22 +466,39 @@ export function DefaultProductPage({
         {/* You may also like */}
         {(relatedProducts?.length ?? 0) > 0 && (
           <section className="border-t border-[#e8e8e8] pt-16 pb-24">
-            <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                  Pair it with
-                </p>
-                <h2 className="font-serif text-3xl font-semibold tracking-tight">
-                  You may also like
-                </h2>
+            {(relatedLabel || relatedHeading || relatedLinkText) && (
+              <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  {relatedLabel && (
+                    <p
+                      {...fieldAttr("default.product.related-label")}
+                      className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                    >
+                      {relatedLabel}
+                    </p>
+                  )}
+                  {relatedHeading && (
+                    <h2
+                      {...fieldAttr("default.product.related-heading")}
+                      className="font-serif text-3xl font-semibold tracking-tight"
+                    >
+                      {relatedHeading}
+                    </h2>
+                  )}
+                </div>
+                {relatedLinkText && (
+                  <Link
+                    href="/shop"
+                    className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
+                  >
+                    <span {...fieldAttr("default.product.related-link-text")}>
+                      {relatedLinkText}
+                    </span>{" "}
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
               </div>
-              <Link
-                href="/shop"
-                className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
-              >
-                All products <span aria-hidden="true">→</span>
-              </Link>
-            </div>
+            )}
             <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
               {relatedProducts?.map((p, index) => (
                 <DefaultProductCard

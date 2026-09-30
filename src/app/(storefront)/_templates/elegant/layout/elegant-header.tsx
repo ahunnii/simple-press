@@ -24,6 +24,7 @@ import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
+import { resolveFields } from "..";
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -114,6 +115,14 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
       | { label: string; href: string }[]
       | undefined) ?? DEFAULT_NAV_LINKS;
 
+  const cartFields = resolveFields(business?.siteContent?.customFields, [
+    "elegant.global.cart-title",
+    "elegant.global.cart-drawer-empty-heading",
+    "elegant.global.cart-empty-body",
+    "elegant.global.cart-browse-button",
+    "elegant.global.cart-drawer-note",
+  ]);
+
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
 
@@ -133,272 +142,329 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
 
   return (
     <>
-      {/* Fixed shell — full-width floating pill */}
+      {/* Sticky shell — zero-height and in normal flow, so it sits directly
+          below the announcement bar (when one renders) and pins to the top
+          of the viewport once scrolled. The floating pill hangs from it;
+          <main>'s top padding provides the clearance. */}
       <div
         style={{
-          position: "fixed",
-          top: 16,
-          left: 16,
-          right: 16,
+          position: "sticky",
+          top: 0,
+          height: 0,
           zIndex: 100,
-          pointerEvents: "none",
         }}
       >
-        {/* ── Pill nav ──
+        <div
+          style={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            right: 16,
+            pointerEvents: "none",
+          }}
+        >
+          {/* ── Pill nav ──
             Exactly 3 grid children: [left-col] [logo] [right-col]
             Left col contains both the desktop nav list and the mobile
             hamburger — only one is visible at a time via CSS, but they
             share the same grid cell so the logo always stays centred. */}
-        <nav
-          aria-label="Main navigation"
-          className="el-pill"
-          style={{
-            pointerEvents: "auto",
-            display: "grid",
-            gridTemplateColumns: "1fr auto 1fr",
-            alignItems: "center",
-            padding: "12px 24px",
-            background: scrolled
-              ? "rgba(251, 248, 242, 0.95)"
-              : "rgba(251, 248, 242, 0.80)",
-            backdropFilter: "blur(20px) saturate(1.4)",
-            WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-            border: "1px solid rgba(28, 26, 23, 0.08)",
-            borderRadius: 999,
-            boxShadow:
-              "0 1px 0 rgba(255,255,255,0.5) inset, 0 20px 40px -24px rgba(28,26,23,0.18)",
-            transition: `background 0.5s ${ease}`,
-          }}
-        >
-          {/* ── Column 1: nav links (desktop) OR hamburger (mobile) ── */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Desktop nav links */}
-            <div
-              className="el-desktop-nav"
-              style={{ display: "flex", alignItems: "center", gap: 24 }}
-            >
-              {links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="el-nav-link"
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                  style={{
-                    position: "relative",
-                    fontSize: 13.5,
-                    letterSpacing: "0.04em",
-                    color: isActive(link.href)
-                      ? "var(--el-ink, #1c1a17)"
-                      : "var(--el-ink-soft, #6b6659)",
-                    padding: "6px 2px",
-                    textDecoration: "none",
-                    fontFamily: "var(--font-sans, Manrope, sans-serif)",
-                    whiteSpace: "nowrap",
-                  }}
-                  data-active={isActive(link.href) ? "true" : undefined}
-                >
-                  {link.label}
-                  <span
-                    className="el-nav-underline"
+          <nav
+            aria-label="Main navigation"
+            className="el-pill"
+            style={{
+              pointerEvents: "auto",
+              display: "grid",
+              gridTemplateColumns: "1fr auto 1fr",
+              alignItems: "center",
+              padding: "12px 24px",
+              background: scrolled
+                ? "rgba(251, 248, 242, 0.95)"
+                : "rgba(251, 248, 242, 0.80)",
+              backdropFilter: "blur(20px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+              border: "1px solid rgba(28, 26, 23, 0.08)",
+              borderRadius: 999,
+              boxShadow:
+                "0 1px 0 rgba(255,255,255,0.5) inset, 0 20px 40px -24px rgba(28,26,23,0.18)",
+              transition: `background 0.5s ${ease}`,
+            }}
+          >
+            {/* ── Column 1: nav links (desktop) OR hamburger (mobile) ── */}
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {/* Desktop nav links */}
+              <div
+                className="el-desktop-nav"
+                style={{ display: "flex", alignItems: "center", gap: 24 }}
+              >
+                {links.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="el-nav-link"
+                    aria-current={isActive(link.href) ? "page" : undefined}
                     style={{
-                      position: "absolute",
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      height: 1,
-                      background: "var(--el-ink, #1c1a17)",
-                      display: "block",
-                      transform: isActive(link.href)
-                        ? "scaleX(1)"
-                        : "scaleX(0)",
-                      transformOrigin: "left",
-                      transition: `transform 0.4s ${ease}`,
+                      position: "relative",
+                      fontSize: 13.5,
+                      letterSpacing: "0.04em",
+                      color: isActive(link.href)
+                        ? "var(--el-ink, #1c1a17)"
+                        : "var(--el-ink-soft, #6b6659)",
+                      padding: "6px 2px",
+                      textDecoration: "none",
+                      fontFamily: "var(--font-sans, Manrope, sans-serif)",
+                      whiteSpace: "nowrap",
                     }}
-                  />
-                </Link>
-              ))}
+                    data-active={isActive(link.href) ? "true" : undefined}
+                  >
+                    {link.label}
+                    <span
+                      className="el-nav-underline"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: 1,
+                        background: "var(--el-ink, #1c1a17)",
+                        display: "block",
+                        transform: isActive(link.href)
+                          ? "scaleX(1)"
+                          : "scaleX(0)",
+                        transformOrigin: "left",
+                        transition: `transform 0.4s ${ease}`,
+                      }}
+                    />
+                  </Link>
+                ))}
+              </div>
+
+              {/* Mobile hamburger (hidden on desktop) */}
+              <button
+                ref={hamburgerRef}
+                type="button"
+                className="el-hamburger"
+                style={{ ...iconBtnStyle, display: "none" }}
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+                aria-controls="el-mobile-nav"
+              >
+                {menuOpen ? (
+                  <X aria-hidden={true} style={{ width: 18, height: 18 }} />
+                ) : (
+                  <Menu aria-hidden={true} style={{ width: 18, height: 18 }} />
+                )}
+              </button>
             </div>
 
-            {/* Mobile hamburger (hidden on desktop) */}
-            <button
-              ref={hamburgerRef}
-              type="button"
-              className="el-hamburger"
-              style={{ ...iconBtnStyle, display: "none" }}
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              aria-controls="el-mobile-nav"
+            {/* ── Column 2 (center): wordmark / logo ── */}
+            <Link
+              href="/"
+              style={{
+                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                fontSize: 26,
+                fontStyle: "italic",
+                fontWeight: 500,
+                letterSpacing: "0.01em",
+                lineHeight: 1,
+                textAlign: "center",
+                color: "var(--el-ink, #1c1a17)",
+                textDecoration: "none",
+                display: "block",
+                whiteSpace: "nowrap",
+              }}
             >
-              {menuOpen ? (
-                <X aria-hidden={true} style={{ width: 18, height: 18 }} />
-              ) : (
-                <Menu aria-hidden={true} style={{ width: 18, height: 18 }} />
-              )}
-            </button>
-          </div>
-
-          {/* ── Column 2 (center): wordmark / logo ── */}
-          <Link
-            href="/"
-            style={{
-              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-              fontSize: 26,
-              fontStyle: "italic",
-              fontWeight: 500,
-              letterSpacing: "0.01em",
-              lineHeight: 1,
-              textAlign: "center",
-              color: "var(--el-ink, #1c1a17)",
-              textDecoration: "none",
-              display: "block",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {business?.siteContent?.logoUrl ? (
-              <Image
-                src={business.siteContent.logoUrl}
-                alt={resolveLogoAlt(
-                  business.siteContent?.logoAltText,
-                  business.name,
-                )}
-                width={32}
-                height={32}
-                style={{ borderRadius: "50%", margin: "0 auto" }}
-              />
-            ) : (
-              <em>{business?.name}</em>
-            )}
-          </Link>
-
-          {/* ── Column 3 (right): icons ── */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: 2,
-            }}
-          >
-            {searchOpen ? (
-              <form
-                onSubmit={handleSearchSubmit}
-                style={{ display: "flex", alignItems: "center", gap: 4 }}
-              >
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onKeyDown={(e) => e.key === "Escape" && closeSearch()}
-                  aria-label="Search products"
-                  placeholder="Search…"
-                  style={{
-                    width: 140,
-                    height: 30,
-                    padding: "0 10px",
-                    fontSize: 13,
-                    fontFamily: "var(--font-sans, Manrope, sans-serif)",
-                    letterSpacing: "0.02em",
-                    color: "var(--el-ink, #1c1a17)",
-                    background: "transparent",
-                    border: "none",
-                    borderBottom: "1px solid var(--el-ink, #1c1a17)",
-                    outline: "none",
-                    borderRadius: 0,
-                  }}
+              {business?.siteContent?.logoUrl ? (
+                <Image
+                  src={business.siteContent.logoUrl}
+                  alt={resolveLogoAlt(
+                    business.siteContent?.logoAltText,
+                    business.name,
+                  )}
+                  width={32}
+                  height={32}
+                  style={{ borderRadius: "50%", margin: "0 auto" }}
                 />
+              ) : (
+                <em>{business?.name}</em>
+              )}
+            </Link>
+
+            {/* ── Column 3 (right): icons ── */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: 2,
+              }}
+            >
+              {searchOpen ? (
+                <form
+                  onSubmit={handleSearchSubmit}
+                  style={{ display: "flex", alignItems: "center", gap: 4 }}
+                >
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    onKeyDown={(e) => e.key === "Escape" && closeSearch()}
+                    aria-label="Search products"
+                    placeholder="Search…"
+                    style={{
+                      width: 140,
+                      height: 30,
+                      padding: "0 10px",
+                      fontSize: 13,
+                      fontFamily: "var(--font-sans, Manrope, sans-serif)",
+                      letterSpacing: "0.02em",
+                      color: "var(--el-ink, #1c1a17)",
+                      background: "transparent",
+                      border: "none",
+                      borderBottom: "1px solid var(--el-ink, #1c1a17)",
+                      outline: "none",
+                      borderRadius: 0,
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={closeSearch}
+                    aria-label="Close search"
+                    style={iconBtnStyle}
+                    className="el-icon-btn"
+                  >
+                    <X aria-hidden={true} style={{ width: 16, height: 16 }} />
+                  </button>
+                </form>
+              ) : (
                 <button
                   type="button"
-                  onClick={closeSearch}
-                  aria-label="Close search"
+                  onClick={openSearch}
+                  aria-label="Search products"
                   style={iconBtnStyle}
                   className="el-icon-btn"
                 >
-                  <X aria-hidden={true} style={{ width: 16, height: 16 }} />
+                  <Search
+                    aria-hidden={true}
+                    style={{ width: 17, height: 17 }}
+                  />
                 </button>
-              </form>
-            ) : (
+              )}
+
+              {isStorefrontEnabled("customerAccounts") && (
+                <>
+                  {isPending ? (
+                    <div
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        background: "rgba(28,26,23,0.06)",
+                      }}
+                    />
+                  ) : user ? (
+                    <UserButton
+                      size="icon"
+                      className="h-[34px] w-[34px] rounded-full"
+                      avatarClassName="w-[34px] h-[34px]"
+                      links={[
+                        // Business members reach /admin too, not just platform
+                        // admins — matches the gate the other templates use.
+                        ...(user.platformRole === "PLATFORM_ADMIN" ||
+                        session?.session?.membershipId
+                          ? [
+                              {
+                                icon: (
+                                  <LayoutDashboardIcon className="h-4 w-4" />
+                                ),
+                                label: "Admin",
+                                href: "/admin",
+                              },
+                            ]
+                          : []),
+                        // /account/orders 404s when the owner disables `orders`.
+                        ...(isStorefrontEnabled("orders")
+                          ? [
+                              {
+                                icon: <Package className="h-4 w-4" />,
+                                label: "Orders",
+                                href: "/account/orders",
+                              },
+                            ]
+                          : []),
+                      ]}
+                    />
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      style={iconBtnStyle}
+                      className="el-icon-btn"
+                      aria-label="Sign in"
+                    >
+                      <User
+                        aria-hidden={true}
+                        style={{ width: 17, height: 17 }}
+                      />
+                    </Link>
+                  )}
+                </>
+              )}
+
+              {isStorefrontEnabled("wishlist") && (
+                <Link
+                  href="/wishlist"
+                  aria-label={
+                    wishlistCount > 0
+                      ? `Wishlist (${wishlistCount} item${wishlistCount === 1 ? "" : "s"})`
+                      : "Wishlist"
+                  }
+                  style={{ ...iconBtnStyle, position: "relative" }}
+                  className="el-icon-btn"
+                >
+                  <Heart aria-hidden={true} style={{ width: 17, height: 17 }} />
+                  <span
+                    aria-hidden={true}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      minWidth: 16,
+                      height: 16,
+                      padding: "0 4px",
+                      background: "var(--el-sage, #4a5240)",
+                      color: "var(--el-paper, #fbf8f2)",
+                      borderRadius: 999,
+                      fontSize: 10,
+                      fontWeight: 600,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-sans, sans-serif)",
+                      transform: wishlistCount > 0 ? "scale(1)" : "scale(0)",
+                      transition: `transform 0.35s ${ease}`,
+                    }}
+                  >
+                    {wishlistCount}
+                  </span>
+                </Link>
+              )}
+
               <button
                 type="button"
-                onClick={openSearch}
-                aria-label="Search products"
-                style={iconBtnStyle}
-                className="el-icon-btn"
-              >
-                <Search aria-hidden={true} style={{ width: 17, height: 17 }} />
-              </button>
-            )}
-
-            {isStorefrontEnabled("customerAccounts") && (
-              <>
-                {isPending ? (
-                  <div
-                    style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 999,
-                      background: "rgba(28,26,23,0.06)",
-                    }}
-                  />
-                ) : user ? (
-                  <UserButton
-                    size="icon"
-                    className="h-[34px] w-[34px] rounded-full"
-                    avatarClassName="w-[34px] h-[34px]"
-                    links={[
-                      // Business members reach /admin too, not just platform
-                      // admins — matches the gate the other templates use.
-                      ...(user.platformRole === "PLATFORM_ADMIN" ||
-                      session?.session?.membershipId
-                        ? [
-                            {
-                              icon: <LayoutDashboardIcon className="h-4 w-4" />,
-                              label: "Admin",
-                              href: "/admin",
-                            },
-                          ]
-                        : []),
-                      // /account/orders 404s when the owner disables `orders`.
-                      ...(isStorefrontEnabled("orders")
-                        ? [
-                            {
-                              icon: <Package className="h-4 w-4" />,
-                              label: "Orders",
-                              href: "/account/orders",
-                            },
-                          ]
-                        : []),
-                    ]}
-                  />
-                ) : (
-                  <Link
-                    href="/auth/sign-in"
-                    style={iconBtnStyle}
-                    className="el-icon-btn"
-                    aria-label="Sign in"
-                  >
-                    <User
-                      aria-hidden={true}
-                      style={{ width: 17, height: 17 }}
-                    />
-                  </Link>
-                )}
-              </>
-            )}
-
-            {isStorefrontEnabled("wishlist") && (
-              <Link
-                href="/wishlist"
+                onClick={() => setIsOpen(true)}
                 aria-label={
-                  wishlistCount > 0
-                    ? `Wishlist (${wishlistCount} item${wishlistCount === 1 ? "" : "s"})`
-                    : "Wishlist"
+                  itemCount > 0
+                    ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})`
+                    : "Cart"
                 }
                 style={{ ...iconBtnStyle, position: "relative" }}
                 className="el-icon-btn"
               >
-                <Heart aria-hidden={true} style={{ width: 17, height: 17 }} />
+                <ShoppingBag
+                  aria-hidden={true}
+                  style={{ width: 17, height: 17 }}
+                />
                 <span
                   aria-hidden={true}
                   style={{
@@ -417,109 +483,76 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                     alignItems: "center",
                     justifyContent: "center",
                     fontFamily: "var(--font-sans, sans-serif)",
-                    transform: wishlistCount > 0 ? "scale(1)" : "scale(0)",
+                    transform: itemCount > 0 ? "scale(1)" : "scale(0)",
                     transition: `transform 0.35s ${ease}`,
                   }}
                 >
-                  {wishlistCount}
+                  {itemCount}
                 </span>
-              </Link>
-            )}
+              </button>
+            </div>
+          </nav>
 
-            <button
-              type="button"
-              onClick={() => setIsOpen(true)}
-              aria-label={
-                itemCount > 0
-                  ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})`
-                  : "Cart"
-              }
-              style={{ ...iconBtnStyle, position: "relative" }}
-              className="el-icon-btn"
-            >
-              <ShoppingBag
-                aria-hidden={true}
-                style={{ width: 17, height: 17 }}
-              />
-              <span
-                aria-hidden={true}
-                style={{
-                  position: "absolute",
-                  top: 4,
-                  right: 4,
-                  minWidth: 16,
-                  height: 16,
-                  padding: "0 4px",
-                  background: "var(--el-sage, #4a5240)",
-                  color: "var(--el-paper, #fbf8f2)",
-                  borderRadius: 999,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  transform: itemCount > 0 ? "scale(1)" : "scale(0)",
-                  transition: `transform 0.35s ${ease}`,
-                }}
-              >
-                {itemCount}
-              </span>
-            </button>
-          </div>
-        </nav>
-
-        {/* ── Mobile dropdown ── */}
-        <div
-          id="el-mobile-nav"
-          aria-hidden={!menuOpen}
-          style={{
-            pointerEvents: menuOpen ? "auto" : "none",
-            maxHeight: menuOpen ? 500 : 0,
-            overflow: "hidden",
-            transition: `max-height 0.4s ${ease}`,
-            marginTop: 8,
-          }}
-        >
+          {/* ── Mobile dropdown ── */}
           <div
+            id="el-mobile-nav"
+            aria-hidden={!menuOpen}
             style={{
-              background: "rgba(251, 248, 242, 0.97)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(28, 26, 23, 0.08)",
-              borderRadius: 20,
-              padding: "20px 28px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 18,
+              pointerEvents: menuOpen ? "auto" : "none",
+              maxHeight: menuOpen ? 500 : 0,
+              overflow: "hidden",
+              transition: `max-height 0.4s ${ease}`,
+              marginTop: 8,
             }}
           >
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                tabIndex={menuOpen ? undefined : -1}
-                aria-current={isActive(link.href) ? "page" : undefined}
-                onClick={() => setMenuOpen(false)}
-                style={{
-                  fontSize: 16,
-                  letterSpacing: "0.04em",
-                  color: isActive(link.href)
-                    ? "var(--el-ink, #1c1a17)"
-                    : "var(--el-ink-soft, #6b6659)",
-                  textDecoration: "none",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  fontWeight: isActive(link.href) ? 500 : 400,
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <div
+              style={{
+                background: "rgba(251, 248, 242, 0.97)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(28, 26, 23, 0.08)",
+                borderRadius: 20,
+                padding: "20px 28px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
+              }}
+            >
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  tabIndex={menuOpen ? undefined : -1}
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    fontSize: 16,
+                    letterSpacing: "0.04em",
+                    color: isActive(link.href)
+                      ? "var(--el-ink, #1c1a17)"
+                      : "var(--el-ink-soft, #6b6659)",
+                    textDecoration: "none",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    fontWeight: isActive(link.href) ? 500 : 400,
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Cart drawer */}
-      <ElegantCartDrawer />
+      <ElegantCartDrawer
+        cartTitle={cartFields["elegant.global.cart-title"] ?? ""}
+        emptyHeading={
+          cartFields["elegant.global.cart-drawer-empty-heading"] ?? ""
+        }
+        emptyBody={cartFields["elegant.global.cart-empty-body"] ?? ""}
+        browseButtonText={cartFields["elegant.global.cart-browse-button"] ?? ""}
+        checkoutNote={cartFields["elegant.global.cart-drawer-note"] ?? ""}
+      />
     </>
   );
 }

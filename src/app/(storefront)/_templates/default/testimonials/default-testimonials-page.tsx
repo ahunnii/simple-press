@@ -1,8 +1,19 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
+
+import { resolveFields } from "..";
+import {
+  TESTIMONIALS_LISTING_EMPTY_DEFAULT,
+  TESTIMONIALS_LISTING_HEADING_DEFAULT,
+  TESTIMONIALS_LISTING_INTRO_DEFAULT,
+  TESTIMONIALS_LISTING_LABEL_DEFAULT,
+  TESTIMONIALS_SHARE_HEADING_DEFAULT,
+  TESTIMONIALS_SHARE_LABEL_DEFAULT,
+} from "./index";
 
 function StarRow({ count = 5 }: { count?: number }) {
   return (
@@ -24,25 +35,70 @@ function formatDate(date: Date) {
   });
 }
 
-export async function DefaultTestimonialsPage(
-  _props: DefaultTestimonialsPageTemplateProps,
-) {
+export async function DefaultTestimonialsPage({
+  business,
+}: DefaultTestimonialsPageTemplateProps) {
   const testimonials = await api.testimonial.list({ publicOnly: true });
   const total = testimonials.length;
+
+  const f = resolveFields(business.siteContent?.customFields, [
+    "default.testimonials.listing-label",
+    "default.testimonials.listing-heading",
+    "default.testimonials.listing-intro",
+    "default.testimonials.listing-empty",
+    "default.testimonials.share-label",
+    "default.testimonials.share-heading",
+    "default.testimonials.share-body",
+    "default.testimonials.share-button",
+  ]);
+  const listingLabel =
+    (f["default.testimonials.listing-label"] ?? "").trim() ||
+    TESTIMONIALS_LISTING_LABEL_DEFAULT;
+  const listingHeading =
+    (f["default.testimonials.listing-heading"] ?? "").trim() ||
+    TESTIMONIALS_LISTING_HEADING_DEFAULT;
+  const listingIntro =
+    (f["default.testimonials.listing-intro"] ?? "").trim() ||
+    TESTIMONIALS_LISTING_INTRO_DEFAULT;
+  const listingEmpty =
+    (f["default.testimonials.listing-empty"] ?? "").trim() ||
+    TESTIMONIALS_LISTING_EMPTY_DEFAULT;
+  const shareLabel =
+    (f["default.testimonials.share-label"] ?? "").trim() ||
+    TESTIMONIALS_SHARE_LABEL_DEFAULT;
+  const shareHeading =
+    (f["default.testimonials.share-heading"] ?? "").trim() ||
+    TESTIMONIALS_SHARE_HEADING_DEFAULT;
+  // Both fields hide their element when blank — resolve the trimmed value
+  // as-is (no CONSTANT fallback) so an owner can actually clear them.
+  const shareBody = (f["default.testimonials.share-body"] ?? "").trim();
+  const shareButton = (f["default.testimonials.share-button"] ?? "").trim();
 
   return (
     <PageTransition>
       {/* ── Page hero ────────────────────────────────────────────────────── */}
-      <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
+      <section
+        {...sectionGroupAttr("testimonials", "listing")}
+        className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
-          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-            From customers
+          <span
+            {...fieldAttr("default.testimonials.listing-label")}
+            className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+          >
+            {listingLabel}
           </span>
-          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
-            What people say.
+          <h1
+            {...fieldAttr("default.testimonials.listing-heading")}
+            className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]"
+          >
+            {listingHeading}
           </h1>
-          <p className="mt-4 text-[17px] text-[#6b6b6b]">
-            Real reviews from real orders.
+          <p
+            {...fieldAttr("default.testimonials.listing-intro")}
+            className="mt-4 text-[17px] text-[#6b6b6b]"
+          >
+            {listingIntro}
           </p>
         </div>
       </section>
@@ -72,8 +128,11 @@ export async function DefaultTestimonialsPage(
         <div className="mx-auto max-w-[1440px]">
           {testimonials.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="text-[#6b6b6b]">
-                No reviews yet — check back soon!
+              <p
+                {...fieldAttr("default.testimonials.listing-empty")}
+                className="text-[#6b6b6b]"
+              >
+                {listingEmpty}
               </p>
               <Link
                 href="/"
@@ -128,26 +187,43 @@ export async function DefaultTestimonialsPage(
       </section>
 
       {/* ── Submit CTA ───────────────────────────────────────────────────── */}
-      <section className="bg-[#efece8] px-6 py-20 text-center lg:px-8">
+      <section
+        {...sectionGroupAttr("testimonials", "share")}
+        className="bg-[#efece8] px-6 py-20 text-center lg:px-8"
+      >
         <div className="mx-auto max-w-[640px]">
-          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-            Recent purchase?
+          <span
+            {...fieldAttr("default.testimonials.share-label")}
+            className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+          >
+            {shareLabel}
           </span>
-          <h2 className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
-            Tell us how it went.
+          <h2
+            {...fieldAttr("default.testimonials.share-heading")}
+            className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]"
+          >
+            {shareHeading}
           </h2>
-          <p className="mt-4 text-[15px] text-[#6b6b6b]">
-            Reviews help other shoppers find what they need — and tell us what
-            to make more of.
-          </p>
-          <div className="mt-8">
-            <Link
-              href="/testimonials/submit"
-              className="inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+          {shareBody ? (
+            <p
+              {...fieldAttr("default.testimonials.share-body")}
+              className="mt-4 text-[15px] text-[#6b6b6b]"
             >
-              Write a review
-            </Link>
-          </div>
+              {shareBody}
+            </p>
+          ) : null}
+          {shareButton ? (
+            <div className="mt-8">
+              <Link
+                href="/testimonials/submit"
+                className="inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+              >
+                <span {...fieldAttr("default.testimonials.share-button")}>
+                  {shareButton}
+                </span>
+              </Link>
+            </div>
+          ) : null}
         </div>
       </section>
     </PageTransition>

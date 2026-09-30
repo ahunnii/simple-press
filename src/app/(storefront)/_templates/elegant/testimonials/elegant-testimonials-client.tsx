@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+
+import { resolveFields } from "..";
 
 type Testimonial = RouterOutputs["testimonial"]["list"][number];
 
@@ -31,28 +34,6 @@ function useScrollReveal(threshold = 0.1) {
     return () => io.disconnect();
   }, [threshold]);
   return { ref, visible };
-}
-
-function Stars({ count = 5 }: { count?: number }) {
-  return (
-    <div
-      aria-label={`${count} out of 5 stars`}
-      style={{ display: "flex", gap: 3 }}
-    >
-      {Array.from({ length: count }).map((_, i) => (
-        <Star
-          key={i}
-          aria-hidden={true}
-          style={{
-            width: 13,
-            height: 13,
-            color: "var(--el-sage, #4a5240)",
-            fill: "var(--el-sage, #4a5240)",
-          }}
-        />
-      ))}
-    </div>
-  );
 }
 
 function TestimonialCard({
@@ -90,7 +71,6 @@ function TestimonialCard({
             }),
       }}
     >
-      <Stars />
       {testimonial.title && (
         <div
           style={{
@@ -216,14 +196,37 @@ function TestimonialCard({
 
 export function ElegantTestimonialsClient({
   testimonials,
+  customFields,
 }: {
   testimonials: Testimonial[];
+  customFields?: unknown;
 }) {
   const [shown, setShown] = useState(false);
   const featuredReveal = useScrollReveal(0.08);
   const gridReveal = useScrollReveal(0.06);
   const ctaReveal = useScrollReveal(0.1);
   const reducedMotion = useReducedMotion();
+
+  const f = resolveFields(customFields, [
+    "elegant.testimonials-page.label",
+    "elegant.testimonials-page.heading",
+    "elegant.testimonials-page.heading-accent",
+    "elegant.testimonials-page.empty-text",
+    "elegant.testimonials-page.closing-heading",
+    "elegant.testimonials-page.closing-heading-accent",
+    "elegant.testimonials-page.closing-button",
+    "elegant.testimonials-page.write-review-label",
+  ]);
+  const label = f["elegant.testimonials-page.label"] ?? "";
+  const heading = f["elegant.testimonials-page.heading"] ?? "";
+  const headingAccent = f["elegant.testimonials-page.heading-accent"] ?? "";
+  const emptyText = f["elegant.testimonials-page.empty-text"] ?? "";
+  const closingHeading = f["elegant.testimonials-page.closing-heading"] ?? "";
+  const closingHeadingAccent =
+    f["elegant.testimonials-page.closing-heading-accent"] ?? "";
+  const closingButton = f["elegant.testimonials-page.closing-button"] ?? "";
+  const writeReviewLabel =
+    f["elegant.testimonials-page.write-review-label"] ?? "";
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -254,6 +257,7 @@ export function ElegantTestimonialsClient({
   if (testimonials.length === 0) {
     return (
       <div
+        {...sectionGroupAttr("testimonials", "page")}
         style={{ background: "var(--el-cream, #f5f1ea)", minHeight: "60vh" }}
       >
         <section style={{ padding: "48px 40px 80px" }}>
@@ -267,8 +271,9 @@ export function ElegantTestimonialsClient({
                   textTransform: "uppercase",
                   color: "var(--el-ink-soft, #6b6659)",
                 }}
+                {...fieldAttr("elegant.testimonials-page.label")}
               >
-                Kind words
+                {label}
               </span>
             </div>
             <h1
@@ -283,7 +288,18 @@ export function ElegantTestimonialsClient({
             >
               <span style={{ display: "block", overflow: "hidden" }}>
                 <span style={maskStyle(0.08)}>
-                  In their <em style={{ fontStyle: "italic" }}>own</em> words.
+                  <span {...fieldAttr("elegant.testimonials-page.heading")}>
+                    {heading}
+                  </span>
+                  {heading && headingAccent ? " " : ""}
+                  {headingAccent && (
+                    <em
+                      style={{ fontStyle: "italic" }}
+                      {...fieldAttr("elegant.testimonials-page.heading-accent")}
+                    >
+                      {headingAccent}
+                    </em>
+                  )}
                 </span>
               </span>
             </h1>
@@ -294,8 +310,9 @@ export function ElegantTestimonialsClient({
                 fontSize: 22,
                 color: "var(--el-ink-soft, #6b6659)",
               }}
+              {...fieldAttr("elegant.testimonials-page.empty-text")}
             >
-              No testimonials yet — check back soon.
+              {emptyText}
             </p>
             <div style={{ marginTop: 32 }}>
               <Link
@@ -319,7 +336,10 @@ export function ElegantTestimonialsClient({
   }
 
   return (
-    <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
+    <div
+      {...sectionGroupAttr("testimonials", "page")}
+      style={{ background: "var(--el-cream, #f5f1ea)" }}
+    >
       {/* ── Hero ── */}
       <section style={{ padding: "48px 40px 40px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
@@ -333,7 +353,7 @@ export function ElegantTestimonialsClient({
                 color: "var(--el-ink-soft, #6b6659)",
               }}
             >
-              Reviews · {testimonials.length} verified
+              Reviews · {testimonials.length}
             </span>
           </div>
 
@@ -350,17 +370,25 @@ export function ElegantTestimonialsClient({
             }}
           >
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={maskStyle(0.08)}>In their</span>
+              <span
+                style={maskStyle(0.08)}
+                {...fieldAttr("elegant.testimonials-page.heading")}
+              >
+                {heading}
+              </span>
             </span>
-            <span style={{ display: "block", overflow: "hidden" }}>
-              <em style={{ ...maskStyle(0.2), fontStyle: "italic" }}>own</em>
-            </span>
-            <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={maskStyle(0.32)}>words.</span>
-            </span>
+            {headingAccent && (
+              <span style={{ display: "block", overflow: "hidden" }}>
+                <em
+                  style={{ ...maskStyle(0.2), fontStyle: "italic" }}
+                  {...fieldAttr("elegant.testimonials-page.heading-accent")}
+                >
+                  {headingAccent}
+                </em>
+              </span>
+            )}
           </h1>
 
-          {/* Stars row */}
           <div style={fadeStyle(0.5)}>
             <div
               style={{
@@ -371,7 +399,6 @@ export function ElegantTestimonialsClient({
                 flexWrap: "wrap",
               }}
             >
-              <Stars count={5} />
               <span
                 style={{
                   fontFamily: "var(--font-mono, ui-monospace)",
@@ -381,7 +408,7 @@ export function ElegantTestimonialsClient({
                   color: "var(--el-ink-soft, #6b6659)",
                 }}
               >
-                {testimonials.length} verified review
+                {testimonials.length} review
                 {testimonials.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -522,7 +549,20 @@ export function ElegantTestimonialsClient({
                   }),
             }}
           >
-            Want to see for <em style={{ fontStyle: "italic" }}>yourself</em>?
+            <span {...fieldAttr("elegant.testimonials-page.closing-heading")}>
+              {closingHeading}
+            </span>
+            {closingHeading && closingHeadingAccent ? " " : ""}
+            {closingHeadingAccent && (
+              <em
+                style={{ fontStyle: "italic" }}
+                {...fieldAttr(
+                  "elegant.testimonials-page.closing-heading-accent",
+                )}
+              >
+                {closingHeadingAccent}
+              </em>
+            )}
           </h2>
           <div
             style={{
@@ -561,7 +601,9 @@ export function ElegantTestimonialsClient({
               }}
               className="el-cta-primary"
             >
-              Shop the collection
+              <span {...fieldAttr("elegant.testimonials-page.closing-button")}>
+                {closingButton}
+              </span>
               <ArrowRight
                 aria-hidden={true}
                 style={{ width: 14, height: 14 }}
@@ -588,7 +630,11 @@ export function ElegantTestimonialsClient({
               }}
               className="el-cta-ghost"
             >
-              Write a review
+              <span
+                {...fieldAttr("elegant.testimonials-page.write-review-label")}
+              >
+                {writeReviewLabel}
+              </span>
             </Link>
           </div>
         </div>

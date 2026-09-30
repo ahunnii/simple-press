@@ -102,10 +102,6 @@ export function CheckoutForm({
     await handleSubmit(e);
   };
 
-  // primaryColor is used only for the delivery method toggle indicator and
-  // the submit button; falls back to the CSS --primary token when absent.
-  const primaryColor = business.siteContent?.primaryColor ?? undefined;
-
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">
@@ -258,11 +254,6 @@ export function CheckoutForm({
                 aria-pressed={deliveryMethod === "ship"}
                 onClick={() => setDeliveryMethod("ship")}
                 className="rounded-full"
-                style={
-                  deliveryMethod === "ship"
-                    ? { backgroundColor: primaryColor }
-                    : undefined
-                }
               >
                 Ship to address
               </Button>
@@ -272,11 +263,6 @@ export function CheckoutForm({
                 aria-pressed={deliveryMethod === "pickup"}
                 onClick={() => setDeliveryMethod("pickup")}
                 className="rounded-full"
-                style={
-                  deliveryMethod === "pickup"
-                    ? { backgroundColor: primaryColor }
-                    : undefined
-                }
               >
                 In-store pickup
               </Button>
@@ -567,7 +553,6 @@ export function CheckoutForm({
             aria-busy={isProcessing || shippingCalculating}
             className="w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
             size="lg"
-            style={primaryColor ? { backgroundColor: primaryColor } : undefined}
           >
             {isProcessing ? (
               <>

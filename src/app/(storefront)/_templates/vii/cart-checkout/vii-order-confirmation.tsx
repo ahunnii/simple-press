@@ -4,14 +4,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import type { Session } from "~/server/better-auth/config";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { cn } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+type DeliveryMethod = "ship" | "pickup" | null;
 
 type Business = {
   id: string;
@@ -19,6 +24,9 @@ type Business = {
   siteContent: {
     primaryColor: string | null;
   } | null;
+  /** Owner-set in Settings → Shipping; used for the PF22 pickup next-steps block. */
+  pickupLocation?: string | null;
+  pickupInstructions?: string | null;
 };
 
 type OrderDetails = {
@@ -26,6 +34,7 @@ type OrderDetails = {
   amount_total: number;
   currency: string;
   payment_status: string;
+  delivery_method?: DeliveryMethod;
 };
 
 type Props = {
@@ -33,12 +42,79 @@ type Props = {
   overline: string;
   thankYouHeading: string;
   thankYouAccent: string;
+  /** Fallback next-steps copy used when the order's delivery method is unknown. */
   nextSteps: string;
+  /** PF22: next-steps copy for orders shipped to the customer. */
+  nextStepsShip: string;
+  /** PF22: next-steps copy for in-store-pickup orders. */
+  nextStepsPickup: string;
   continueCta: string;
   loadingText: string;
   noOrderHeading: string;
   noOrderBody: string;
+  /**
+   * Session resolved server-side by `vii-order-success-page.tsx`
+   * (`getSession()`), seeding `useHydratedSession` so the PF23 account CTA
+   * is correct on first paint instead of popping in after the client
+   * session fetch settles. `undefined` (e.g. tests rendering this
+   * component directly) falls back to the hook's unseeded mode, which
+   * suppresses the CTA via `isPending` until the client session resolves —
+   * never a flash of the wrong state either way.
+   */
+  initialSession?: Session | null;
 };
+
+type AccountCta = { href: string; label: string };
+
+/**
+ * PF23 / B9.4: signed in + `orders` on -> "View my orders"
+ * (`/account/orders`); signed out + `customerAccounts` on -> "Create an
+ * account" (`/auth/sign-up`); neither -> no CTA. Inline per the parity plan
+ * (P-ORDER-CTA stays optional). See the `initialSession` doc above for why
+ * this never flashes the wrong state.
+ */
+function useOrderAccountCta(
+  initialSession: Session | null | undefined,
+): AccountCta | null {
+  const { data: session, isPending } = useHydratedSession(initialSession);
+  const { isEnabled } = useStorefrontFlags();
+
+  if (isPending) {
+    return null;
+  }
+
+  if (session?.user) {
+    return isEnabled("orders")
+      ? { href: "/account/orders", label: "View my orders" }
+      : null;
+  }
+
+  return isEnabled("customerAccounts")
+    ? { href: "/auth/sign-up", label: "Create an account" }
+    : null;
+}
+
+/**
+ * PF22: picks the owner-authored next-steps copy for the order's
+ * fulfilment method (`session.metadata.deliveryMethod` via
+ * `/api/stripe/session`, bamboo pattern). Falls back to the generic
+ * `nextSteps` copy when the method is unknown (no fresh Stripe session, or
+ * an order placed before this metadata existed).
+ */
+function resolveNextSteps(
+  deliveryMethod: DeliveryMethod | undefined,
+  nextSteps: string,
+  nextStepsShip: string,
+  nextStepsPickup: string,
+): string {
+  if (deliveryMethod === "pickup" && nextStepsPickup.trim()) {
+    return nextStepsPickup;
+  }
+  if (deliveryMethod === "ship" && nextStepsShip.trim()) {
+    return nextStepsShip;
+  }
+  return nextSteps;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -178,14 +254,18 @@ export function ViiOrderConfirmation({
   thankYouHeading,
   thankYouAccent,
   nextSteps,
+  nextStepsShip,
+  nextStepsPickup,
   continueCta,
   loadingText,
   noOrderHeading,
   noOrderBody,
+  initialSession,
 }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const { ref, visible } = useViiReveal(0.05);
+  const accountCta = useOrderAccountCta(initialSession);
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -307,14 +387,19 @@ export function ViiOrderConfirmation({
 
   // ── Success state — deep-navy "room" ──────────────────────────────────────
 
-  // Split next-steps into lines for the list
+  const deliveryMethod = orderDetails?.delivery_method ?? null;
+
+  // PF22 — split the delivery-method-specific next-steps copy into lines.
   const nextStepsLines = (
-    nextSteps ||
+    resolveNextSteps(deliveryMethod, nextSteps, nextStepsShip, nextStepsPickup) ||
     "You'll receive an email confirmation shortly.\nWe'll notify you as soon as your order ships.\nTrack your order status via your confirmation email."
   )
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
+
+  const showPickupLocation =
+    deliveryMethod === "pickup" && !!business.pickupLocation?.trim();
 
   const formattedTotal = orderDetails
     ? formatOrderTotal(orderDetails.amount_total, orderDetails.currency)
@@ -570,6 +655,54 @@ export function ViiOrderConfirmation({
                   </li>
                 ))}
               </ul>
+
+              {/* PF22 — pickup location/instructions, owner-set in Settings → Shipping */}
+              {showPickupLocation && (
+                <div style={{ marginTop: 20 }}>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: 12,
+                      fontWeight: 500,
+                      letterSpacing: "0.06em",
+                      color: "var(--vii-paper)",
+                      margin: "0 0 4px",
+                    }}
+                  >
+                    Pickup location
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: 14,
+                      lineHeight: 1.6,
+                      color: "var(--vii-paper)",
+                      opacity: 0.8,
+                      margin: 0,
+                      letterSpacing: "0.02em",
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {business.pickupLocation}
+                  </p>
+                  {business.pickupInstructions?.trim() && (
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 14,
+                        lineHeight: 1.6,
+                        color: "var(--vii-paper)",
+                        opacity: 0.8,
+                        margin: "4px 0 0",
+                        letterSpacing: "0.02em",
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      {business.pickupInstructions}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -590,6 +723,12 @@ export function ViiOrderConfirmation({
               {continueCta || "Continue Shopping"}
             </ViiCtaButton>
             <ViiNavyTextLink href="/">Back to home</ViiNavyTextLink>
+            {/* PF23 — account next step (View my orders / Create an account) */}
+            {accountCta && (
+              <ViiNavyTextLink href={accountCta.href}>
+                {accountCta.label}
+              </ViiNavyTextLink>
+            )}
           </div>
         </div>
       </section>

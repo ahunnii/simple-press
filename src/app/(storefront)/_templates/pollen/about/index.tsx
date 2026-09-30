@@ -1,21 +1,84 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
+const aboutHeroData: TemplateField[] = [
+  {
+    key: "pollen.about.page-title",
+    label: "Page title",
+    description: "Main heading shown at the top of the about page.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "About Us",
+    placeholder: "e.g. About Us",
+  },
+  {
+    key: "pollen.about.page-subtitle",
+    label: "Page subtitle",
+    description: "Small label shown above the page title.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Story",
+    placeholder: "e.g. Our Story",
+  },
+];
+
+const aboutTestimonialsData: TemplateField[] = [
+  {
+    key: "pollen.about.testimonials-label",
+    label: "Small label",
+    description:
+      "Short line above the testimonials heading on the about page. Leave blank to hide it.",
+    type: "text",
+    page: "about",
+    group: "about.testimonials",
+    gridColumn: "col-span-full",
+    defaultValue: "Kind Words",
+    placeholder: "One or two words",
+  },
+  {
+    key: "pollen.about.testimonials-heading",
+    label: "Heading",
+    description:
+      "Heading above the customer quotes on the about page. Quotes come from Admin → Testimonials.",
+    type: "text",
+    page: "about",
+    group: "about.testimonials",
+    gridColumn: "col-span-full",
+    defaultValue: "What Our Customers Say",
+    placeholder: "A short heading",
+  },
+  {
+    key: "pollen.about.testimonials-link-text",
+    label: "Link text",
+    description: "Text for the link below the testimonials.",
+    type: "text",
+    page: "about",
+    group: "about.testimonials",
+    gridColumn: "col-span-full",
+    defaultValue: "View all testimonials",
+    placeholder: "View all testimonials",
+  },
+];
+
 const aboutPageData: TemplateField[] = [
   {
     key: "pollen.about.title",
-    label: "About Heading",
-    description: "Heading for your top about section",
+    label: "Heading",
+    description: "Heading for the main story section on the about page.",
     type: "text",
     page: "about",
     group: "about.main",
     gridColumn: "col-span-full",
-    defaultValue: "Heya!",
-    placeholder: "Heya!",
+    defaultValue: "About us",
+    placeholder: "About us",
   },
   {
     key: "pollen.about.text",
-    label: "About Text",
-    description: "Text for the about page",
+    label: "Body text",
+    description: "Story text on the about page.",
     type: "textarea",
     page: "about",
     group: "about.main",
@@ -27,8 +90,8 @@ const aboutPageData: TemplateField[] = [
   },
   {
     key: "pollen.about.image",
-    label: "About Image",
-    description: "Image for the about page",
+    label: "Image",
+    description: "Photo beside the story text on the about page.",
     type: "image",
     group: "about.main",
     gridColumn: "col-span-full",
@@ -40,9 +103,9 @@ const aboutPageData: TemplateField[] = [
 const aboutOwnerData: TemplateField[] = [
   {
     key: "pollen.about.owner-subheader",
-    label: "Owner Section Subheader",
+    label: "Small label",
     description:
-      "Small label above the owner section (e.g. The Face Behind [Business])",
+      "Short line above the owner heading, e.g. The Face Behind [Business]. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.owner",
@@ -52,8 +115,8 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "pollen.about.owner-heading",
-    label: "Owner Section Heading",
-    description: "Heading for the owner section (e.g. Meet [Name])",
+    label: "Heading",
+    description: "Heading for the owner section, e.g. Meet [Name].",
     type: "text",
     page: "about",
     group: "about.owner",
@@ -63,19 +126,19 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "pollen.about.owner-name",
-    label: "Owner Name",
-    description: "Name of the featured owner",
+    label: "Name",
+    description: "Name of the featured owner. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.owner",
     gridColumn: "col-span-1",
-    defaultValue: "Jane Smith",
-    placeholder: "Jane Smith",
+    defaultValue: "",
+    placeholder: "e.g. Jane Smith",
   },
   {
     key: "pollen.about.owner-role",
-    label: "Owner Role",
-    description: "Title or role (e.g. Owner, Founder)",
+    label: "Role",
+    description: "Title or role, e.g. Owner or Founder. Leave blank to hide.",
     type: "text",
     page: "about",
     group: "about.owner",
@@ -85,8 +148,8 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "pollen.about.owner-image",
-    label: "Owner Image",
-    description: "Photo of the owner",
+    label: "Photo",
+    description: "Photo of the owner.",
     type: "image",
     page: "about",
     group: "about.owner",
@@ -95,32 +158,52 @@ const aboutOwnerData: TemplateField[] = [
   },
   {
     key: "pollen.about.owner-blurb",
-    label: "Owner Bio",
-    description: "Short bio or blurb about who they are",
+    label: "Bio",
+    description: "Short bio about the owner. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.owner",
     gridColumn: "col-span-full",
     defaultValue: "A few sentences about the owner and their story.",
-    placeholder: "A few sentences about the owner and their story.",
+    placeholder: "A couple of sentences about who they are...",
   },
 ];
 
-export const pollenAboutData = [...aboutPageData, ...aboutOwnerData];
+export const pollenAboutData = [
+  ...aboutHeroData,
+  ...aboutPageData,
+  ...aboutOwnerData,
+  ...aboutTestimonialsData,
+];
 
 export const pollenAboutFieldGroups: TemplateFieldGroup[] = [
   {
+    id: "about.hero",
+    title: "Page heading",
+    description: "Heading and small label at the top of the about page.",
+    icon: "🔖",
+    columns: 2,
+  },
+  {
     id: "about.main",
     title: "About Us",
-    description: "Flush out your about page",
+    description: "Heading, story text, and photo for the about page.",
     icon: "📖",
     columns: 2,
   },
   {
     id: "about.owner",
     title: "Owner",
-    description: "Featured owner section on the about page (image and bio)",
+    description: "Featured owner section on the about page, with photo and bio.",
     icon: "👤",
     columns: 2,
+  },
+  {
+    id: "about.testimonials",
+    title: "Testimonials band",
+    description:
+      "Small label and heading above the customer quotes on the about page. The quotes themselves come from Admin → Testimonials.",
+    icon: "⭐",
+    columns: 1,
   },
 ];

@@ -11,7 +11,7 @@ type Testimonial = RouterOutputs["testimonial"]["listRandom"][number];
 
 type NoiseTestimonialStripProps = {
   testimonials: Testimonial[];
-  heading?: string;
+  heading: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 };
@@ -55,7 +55,7 @@ export function NoiseTestimonialStrip({
           style={{ color: "var(--vn-steel)" }}
           {...fieldAttr("noise.homepage-testimonials-heading")}
         >
-          {heading ?? "Worn by"}
+          {heading}
         </p>
 
         {/* Quote carousel — stack all, fade active */}

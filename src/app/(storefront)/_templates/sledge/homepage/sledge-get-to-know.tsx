@@ -7,8 +7,10 @@ type SledgeGetToKnowProps = {
   heading?: string;
   body?: string;
   image?: string;
-  primary?: { text: string; href: string };
-  secondary?: { text: string; href: string };
+  button1Text?: string;
+  button1Href?: string;
+  button2Text?: string;
+  button2Href?: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 };
@@ -17,8 +19,10 @@ export function SledgeGetToKnow({
   heading,
   body,
   image,
-  primary,
-  secondary,
+  button1Text,
+  button1Href,
+  button2Text,
+  button2Href,
   sectionAttrs,
 }: SledgeGetToKnowProps) {
   return (
@@ -49,24 +53,49 @@ export function SledgeGetToKnow({
           </h2>
 
           {/* Red-bar body text */}
-          <div className="mb-10">
-            <p
-              className="sl-quote-body font-sans italic"
-              {...fieldAttr("sledge.homepage.get-to-know-quote")}
-            >
-              {body}
-            </p>
-          </div>
+          {body?.trim() ? (
+            <div className="mb-10">
+              <p
+                className="sl-quote-body font-sans italic"
+                {...fieldAttr("sledge.homepage.get-to-know-quote")}
+              >
+                {body}
+              </p>
+            </div>
+          ) : null}
 
           {/* Coral buttons */}
-          <div className="flex flex-wrap gap-4">
-            <Link href={primary?.href ?? "/about"} className="sl-btn">
-              {primary?.text ?? "Find Out More"}
-            </Link>
-            <Link href={secondary?.href ?? "/contact"} className="sl-btn">
-              {secondary?.text ?? "Contact Judy"}
-            </Link>
-          </div>
+          {
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- blank (not just nullish) text hides a button
+            (button1Text?.trim() || button2Text?.trim()) && (
+              <div className="flex flex-wrap gap-4">
+                {button1Text?.trim() ? (
+                  <Link
+                    href={
+                      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- url field: "" means unsafe/cleared, must still fall back
+                      button1Href || "/about"
+                    }
+                    className="sl-btn"
+                    {...fieldAttr("sledge.homepage.get-to-know-button-1-text")}
+                  >
+                    {button1Text}
+                  </Link>
+                ) : null}
+                {button2Text?.trim() ? (
+                  <Link
+                    href={
+                      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- url field: "" means unsafe/cleared, must still fall back
+                      button2Href || "/contact"
+                    }
+                    className="sl-btn"
+                    {...fieldAttr("sledge.homepage.get-to-know-button-2-text")}
+                  >
+                    {button2Text}
+                  </Link>
+                ) : null}
+              </div>
+            )
+          }
         </div>
       </div>
     </section>

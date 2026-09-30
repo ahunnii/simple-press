@@ -40,7 +40,7 @@ export const pinkCartCheckoutSections: TemplateSection[] = [
   {
     id: "cart.main",
     page: "cart",
-    title: "Cart Page",
+    title: "Cart page",
     description:
       "Heading, intro, basket summary panel, line items and empty state",
     groupIds: ["cart.main"],
@@ -50,7 +50,7 @@ export const pinkCartCheckoutSections: TemplateSection[] = [
   {
     id: "checkout.main",
     page: "checkout",
-    title: "Checkout Form",
+    title: "Checkout form",
     description: "Contact and shipping fieldsets, submit button, messaging",
     groupIds: ["checkout.main"],
     order: 0,
@@ -59,8 +59,8 @@ export const pinkCartCheckoutSections: TemplateSection[] = [
   {
     id: "checkout.summary",
     page: "checkout",
-    title: "Checkout Basket Panel",
-    description: "The sticky ink basket summary beside the checkout form",
+    title: "Order summary",
+    description: "The sticky order summary beside the checkout form",
     groupIds: ["checkout.summary"],
     order: 1,
     hideable: true,
@@ -68,17 +68,17 @@ export const pinkCartCheckoutSections: TemplateSection[] = [
   {
     id: "checkout.unavailable",
     page: "checkout",
-    title: "Checkout Unavailable",
+    title: "Checkout unavailable",
     description:
       "Shown instead of the checkout form when the store hasn't connected payments yet",
     groupIds: ["checkout.unavailable"],
     order: 2,
-    hideable: true,
+    hideable: false,
   },
   {
     id: "checkout.success",
     page: "checkout",
-    title: "Order Confirmation",
+    title: "Order confirmation",
     description: "The thank-you page shown after a successful Stripe checkout",
     groupIds: ["checkout.success"],
     order: 3,

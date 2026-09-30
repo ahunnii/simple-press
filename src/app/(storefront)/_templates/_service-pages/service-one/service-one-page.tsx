@@ -4,7 +4,10 @@ import Link from "next/link";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
 import type { RouterOutputs } from "~/trpc/react";
-import { parseTemplateIframeValue } from "~/lib/template-fields";
+import {
+  isContentEmpty,
+  parseTemplateIframeValue,
+} from "~/lib/template-fields";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -82,8 +85,11 @@ export async function ServiceTemplateOne({
   const ctaEmbedReveal = f["service-one.cta-embed-reveal"] === "true";
   const hasClosingCta = Boolean(ctaText && ctaLink) || ctaEmbed !== null;
   const hasIntroMedia = Boolean(introVideo) || Boolean(introImage);
-  const hasIntroSection =
-    Boolean(introHeading) || Boolean(introBodyJson) || hasIntroMedia;
+  const hasIntroBody = introBodyJson !== null && !isContentEmpty(introBodyJson);
+  // The heading has a default value, so on its own it would render an empty
+  // "About This Service" band for every service without intro copy — require
+  // real body content or media.
+  const hasIntroSection = hasIntroBody || hasIntroMedia;
 
   return (
     <div className="bg-background text-foreground min-h-screen">
@@ -129,7 +135,7 @@ export async function ServiceTemplateOne({
                     {introHeading}
                   </h2>
                 )}
-                {introBodyJson && (
+                {hasIntroBody && introBodyJson && (
                   <div className="prose prose-neutral max-w-none">
                     <TiptapRenderer content={introBodyJson} />
                   </div>

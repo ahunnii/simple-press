@@ -4,12 +4,29 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Minus, Plus, ShoppingBag } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-export function ElegantCartContent() {
+type Props = {
+  /** `elegant.global.cart-page-empty-heading`. */
+  emptyHeading: string;
+  /** `elegant.global.cart-empty-body` — blank hides the line. */
+  emptyBody: string;
+  /** `elegant.global.cart-browse-button`. */
+  browseButtonText: string;
+  /** `elegant.global.cart-page-note` — blank hides the line. */
+  checkoutNote: string;
+};
+
+export function ElegantCartContent({
+  emptyHeading,
+  emptyBody,
+  browseButtonText,
+  checkoutNote,
+}: Props) {
   const { items, updateQuantity, removeItem, subtotal } = useCart();
 
   if (items.length === 0) {
@@ -35,6 +52,7 @@ export function ElegantCartContent() {
           strokeWidth={1}
         />
         <p
+          {...fieldAttr("elegant.global.cart-page-empty-heading")}
           style={{
             fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
             fontSize: 28,
@@ -42,18 +60,21 @@ export function ElegantCartContent() {
             marginBottom: 10,
           }}
         >
-          Your bag is empty.
+          {emptyHeading}
         </p>
-        <p
-          style={{
-            fontSize: 15,
-            color: "var(--el-ink-soft, #6b6659)",
-            marginBottom: 32,
-            fontFamily: "var(--font-sans, sans-serif)",
-          }}
-        >
-          Find something to take home.
-        </p>
+        {emptyBody ? (
+          <p
+            {...fieldAttr("elegant.global.cart-empty-body")}
+            style={{
+              fontSize: 15,
+              color: "var(--el-ink-soft, #6b6659)",
+              marginBottom: 32,
+              fontFamily: "var(--font-sans, sans-serif)",
+            }}
+          >
+            {emptyBody}
+          </p>
+        ) : null}
         <Link
           href="/shop"
           style={{
@@ -72,7 +93,9 @@ export function ElegantCartContent() {
             fontFamily: "var(--font-sans, sans-serif)",
           }}
         >
-          Browse shop
+          <span {...fieldAttr("elegant.global.cart-browse-button")}>
+            {browseButtonText}
+          </span>
           <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
         </Link>
       </div>
@@ -450,18 +473,21 @@ export function ElegantCartContent() {
             Proceed to checkout
             <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
           </Link>
-          <p
-            style={{
-              marginTop: 12,
-              textAlign: "center",
-              fontSize: 11,
-              color: "var(--el-ink-soft, #6b6659)",
-              fontFamily: "var(--font-mono, ui-monospace)",
-              letterSpacing: "0.1em",
-            }}
-          >
-            Tax & shipping at checkout
-          </p>
+          {checkoutNote ? (
+            <p
+              {...fieldAttr("elegant.global.cart-page-note")}
+              style={{
+                marginTop: 12,
+                textAlign: "center",
+                fontSize: 11,
+                color: "var(--el-ink-soft, #6b6659)",
+                fontFamily: "var(--font-mono, ui-monospace)",
+                letterSpacing: "0.1em",
+              }}
+            >
+              {checkoutNote}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>

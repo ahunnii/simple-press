@@ -28,6 +28,9 @@ type OliveProductGridProps = {
   emptyHeading: string;
   emptyBody?: string;
   emptyCta?: { label: string; href: string };
+  /** Full template field keys, when `emptyHeading` / `emptyBody` are live-patchable fields. */
+  emptyHeadingFieldKey?: string;
+  emptyBodyFieldKey?: string;
   className?: string;
   /**
    * A signature for "the results changed for a reason other than first
@@ -66,6 +69,8 @@ export function OliveProductGrid({
   emptyHeading,
   emptyBody,
   emptyCta,
+  emptyHeadingFieldKey,
+  emptyBodyFieldKey,
   className,
   dealKey,
 }: OliveProductGridProps) {
@@ -75,6 +80,8 @@ export function OliveProductGrid({
         heading={emptyHeading}
         body={emptyBody}
         cta={emptyCta}
+        headingFieldKey={emptyHeadingFieldKey}
+        bodyFieldKey={emptyBodyFieldKey}
         className={className}
       />
     );

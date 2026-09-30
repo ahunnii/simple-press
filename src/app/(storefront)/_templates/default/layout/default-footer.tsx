@@ -5,31 +5,34 @@ import type { DefaultFooterTemplateProps } from "../../types";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
 import { EmailIcon } from "~/components/icons/email-icon";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { LinkedinIcon } from "~/components/icons/linkedin-icon";
-import { PinterestIcon } from "~/components/icons/pinterest-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { TwitterIcon } from "~/components/icons/twitter-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import {
+  externalLinkProps,
+  filterNavByFlags,
+  resolveFooterNav,
+} from "~/app/(storefront)/_components/nav";
+
+import { resolveFields } from "..";
+import {
+  DEFAULT_FOOTER_HELP_HEADING,
+  DEFAULT_FOOTER_QUICK_LINKS_HEADING,
+  DEFAULT_FOOTER_SHOP_HEADING,
+} from "./footer-fields";
 
 export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
   const year = new Date().getFullYear();
   const { isEnabled } = await getBusinessFlags();
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        pinterest?: string;
-        linkedin?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
+
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "default.global.footer-shop-heading",
+    "default.global.footer-help-heading",
+    "default.global.footer-quick-links-heading",
+  ]);
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -42,8 +45,41 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
 
   const blogEnabled = isEnabled("blog");
 
+  // Same gating as before, kept as the fallback so an unset footer list
+  // renders identically to today; `filterNavByFlags` below is then a no-op
+  // on this list and only matters for an owner-saved footer list.
+  const quickLinksFallback = [
+    { href: "/about", label: "About us" },
+    ...(isEnabled("testimonials")
+      ? [{ href: "/testimonials", label: "Reviews" }]
+      : []),
+    ...(blogEnabled ? [{ href: "/blog", label: "Blog" }] : []),
+    ...(isEnabled("services")
+      ? [{ href: "/services", label: "Services" }]
+      : []),
+    ...(isEnabled("donations") && business.donationShowInFooter
+      ? [
+          {
+            href: "/donate",
+            label: resolveDonationLabel(business.donationLabel).verb,
+          },
+        ]
+      : []),
+  ];
+
+  const quickLinks = filterNavByFlags(
+    resolveFooterNav(
+      business?.siteContent?.footerNavigationItems,
+      quickLinksFallback,
+    ),
+    isEnabled,
+  );
+
   return (
-    <footer className="mt-auto border-t border-[#e8e8e8]">
+    <footer
+      className="mt-auto border-t border-[#e8e8e8]"
+      {...sectionGroupAttr("global", "footer")}
+    >
       <div className="mx-auto max-w-[1440px] px-6 pt-20 pb-8">
         {/* Top grid */}
         <div className="grid grid-cols-1 gap-10 border-b border-[#e8e8e8] pb-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
@@ -75,85 +111,28 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
 
             {/* Social links */}
             <div className="mt-2 flex gap-2">
-              {[
-                ...(socialLinks?.instagram
-                  ? [
-                      {
-                        label: "Instagram",
-                        href: socialLinks.instagram,
-                        Icon: InstagramIcon,
-                      },
-                    ]
-                  : []),
-                ...(socialLinks?.facebook
-                  ? [
-                      {
-                        label: "Facebook",
-                        href: socialLinks.facebook,
-                        Icon: FacebookIcon,
-                      },
-                    ]
-                  : []),
-                ...(socialLinks?.twitter
-                  ? [
-                      {
-                        label: "Twitter",
-                        href: socialLinks.twitter,
-                        Icon: TwitterIcon,
-                      },
-                    ]
-                  : []),
-                ...(socialLinks?.tiktok
-                  ? [
-                      {
-                        label: "TikTok",
-                        href: socialLinks.tiktok,
-                        Icon: TikTokIcon,
-                      },
-                    ]
-                  : []),
-                ...(socialLinks?.pinterest
-                  ? [
-                      {
-                        label: "Pinterest",
-                        href: socialLinks.pinterest,
-                        Icon: PinterestIcon,
-                      },
-                    ]
-                  : []),
-                ...(socialLinks?.linkedin
-                  ? [
-                      {
-                        label: "LinkedIn",
-                        href: socialLinks.linkedin,
-                        Icon: LinkedinIcon,
-                      },
-                    ]
-                  : []),
-                ...(socialLinks?.youtube
-                  ? [
-                      {
-                        label: "YouTube",
-                        href: socialLinks.youtube,
-                        Icon: YouTubeIcon,
-                      },
-                    ]
-                  : []),
-                {
-                  label: "Email",
-                  href: `mailto:${business.supportEmail}`,
-                  Icon: EmailIcon,
-                },
-              ].map(({ label, href, Icon }) => (
+              {socialLinks.map(({ key, ariaLabel, url, Icon }) => (
                 <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
+                  key={key}
+                  href={url}
+                  aria-label={ariaLabel}
                   className="grid h-9 w-9 place-items-center rounded-full border border-[#e8e8e8] text-[#0a0a0a] transition-colors hover:border-[#0a0a0a] hover:bg-[#0a0a0a] hover:text-white"
                 >
                   <Icon />
                 </a>
               ))}
+              {/* Only rendered when an email is actually set — previously
+                  this rendered unconditionally and produced a dead
+                  `mailto:null` link when `supportEmail` was unset. */}
+              {business.supportEmail && (
+                <a
+                  href={`mailto:${business.supportEmail}`}
+                  aria-label="Email"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-[#e8e8e8] text-[#0a0a0a] transition-colors hover:border-[#0a0a0a] hover:bg-[#0a0a0a] hover:text-white"
+                >
+                  <EmailIcon />
+                </a>
+              )}
             </div>
           </div>
 
@@ -162,8 +141,10 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
             <p
               className="text-[11px] font-medium tracking-[0.18em] text-[#6b6b6b] uppercase"
               aria-hidden="true"
+              {...fieldAttr("default.global.footer-shop-heading")}
             >
-              Shop
+              {f["default.global.footer-shop-heading"] ??
+                DEFAULT_FOOTER_SHOP_HEADING}
             </p>
             <nav aria-label="Shop links" className="flex flex-col gap-2.5">
               {[
@@ -190,8 +171,10 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
             <p
               className="text-[11px] font-medium tracking-[0.18em] text-[#6b6b6b] uppercase"
               aria-hidden="true"
+              {...fieldAttr("default.global.footer-help-heading")}
             >
-              Help
+              {f["default.global.footer-help-heading"] ??
+                DEFAULT_FOOTER_HELP_HEADING}
             </p>
             <nav aria-label="Help links" className="flex flex-col gap-2.5">
               {[
@@ -229,44 +212,35 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
             )}
           </div>
 
-          {/* Quick Links */}
-          <div className="flex flex-col gap-4">
-            <p
-              className="text-[11px] font-medium tracking-[0.18em] text-[#6b6b6b] uppercase"
-              aria-hidden="true"
-            >
-              Quick Links
-            </p>
-            <nav aria-label="Quick links" className="flex flex-col gap-2.5">
-              {[
-                { href: "/about", label: "About us" },
-                ...(isEnabled("testimonials")
-                  ? [{ href: "/testimonials", label: "Reviews" }]
-                  : []),
-                ...(blogEnabled ? [{ href: "/blog", label: "Blog" }] : []),
-                ...(isEnabled("services")
-                  ? [{ href: "/services", label: "Services" }]
-                  : []),
-                ...(isEnabled("donations") && business.donationShowInFooter
-                  ? [
-                      {
-                        href: "/donate",
-                        label: resolveDonationLabel(business.donationLabel)
-                          .verb,
-                      },
-                    ]
-                  : []),
-              ].map(({ href, label }) => (
-                <Link
-                  key={`quick-links-${label}`}
-                  href={href}
-                  className="text-sm text-[#0a0a0a] hover:underline"
-                >
-                  {label}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          {/* Quick Links — hidden (heading included) when the resolved
+              list is empty */}
+          {quickLinks.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <p
+                className="text-[11px] font-medium tracking-[0.18em] text-[#6b6b6b] uppercase"
+                aria-hidden="true"
+                {...fieldAttr("default.global.footer-quick-links-heading")}
+              >
+                {f["default.global.footer-quick-links-heading"] ??
+                  DEFAULT_FOOTER_QUICK_LINKS_HEADING}
+              </p>
+              <nav aria-label="Quick links" className="flex flex-col gap-2.5">
+                {quickLinks.map((link) => (
+                  <Link
+                    key={link.href + link.label}
+                    href={link.href}
+                    {...externalLinkProps(link.external)}
+                    className="text-sm text-[#0a0a0a] hover:underline"
+                  >
+                    {link.label}
+                    {link.external && (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    )}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          )}
         </div>
 
         {/* Bottom bar */}

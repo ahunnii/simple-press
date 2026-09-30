@@ -1,22 +1,31 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { LogOut, Settings } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
-import {
-  AUTH_BASE_PATHS,
-  AUTH_VIEW_PATHS,
-  SETTINGS_VIEW_PATHS,
-} from "~/lib/auth-paths";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { UserAvatar } from "~/components/auth/user/user-avatar";
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
+
+import { UMSC_QUICK_ACCOUNT_KEYS } from "./umsc-nav";
 
 type UmscNavDialogAccountProps = {
   initialSession?: Session | null;
   accountsEnabled: boolean;
+  /** Business flag check — gates the account links (Orders needs `orders`). */
+  isEnabled: (flag: string) => boolean;
   onClose: () => void;
+};
+
+/** Leading icons, keyed by `getAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
+  orders: <IconPackage className="size-4" aria-hidden="true" />,
+  settings: <Settings className="size-4" aria-hidden="true" />,
+  admin: <IconLayoutDashboard className="size-4" aria-hidden="true" />,
 };
 
 /**
@@ -27,10 +36,15 @@ type UmscNavDialogAccountProps = {
  * the menu opened but was invisible. Everything here is a plain anchor, so
  * it is also reachable by the dialog's own Tab focus trap (which only walks
  * the dialog subtree).
+ *
+ * The links are the quick-access subset (`UMSC_QUICK_ACCOUNT_KEYS`: Orders,
+ * Settings, Admin) of the flag-gated `getAccountNavLinks` list — never a
+ * hand-written list — followed by the sign-out row (decision 2026-09-28).
  */
 export function UmscNavDialogAccount({
   initialSession,
   accountsEnabled,
+  isEnabled,
   onClose,
 }: UmscNavDialogAccountProps) {
   const { data: session, isPending } = useHydratedSession(
@@ -89,6 +103,11 @@ export function UmscNavDialogAccount({
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string must also count as "not set"
   const showSubtitle = Boolean(user.displayUsername || user.name);
 
+  const accountLinks = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  }).filter((link) => UMSC_QUICK_ACCOUNT_KEYS.has(link.key));
+
   return (
     <div className="umsc-nav-dialog-account">
       <div className="umsc-nav-dialog-account-user">
@@ -106,40 +125,18 @@ export function UmscNavDialogAccount({
       </div>
 
       <ul className="umsc-nav-dialog-account-list">
-        <li>
-          <Link
-            href="/account/orders"
-            onClick={onClose}
-            className="umsc-nav-dialog-account-link umsc-sans"
-          >
-            <IconPackage className="size-4" aria-hidden="true" />
-            Orders
-          </Link>
-        </li>
-
-        {showAdminLink ? (
-          <li>
+        {accountLinks.map((link) => (
+          <li key={link.key}>
             <Link
-              href="/admin"
+              href={link.href}
               onClick={onClose}
               className="umsc-nav-dialog-account-link umsc-sans"
             >
-              <IconLayoutDashboard className="size-4" aria-hidden="true" />
-              Admin
+              {ACCOUNT_LINK_ICONS[link.key]}
+              {link.label}
             </Link>
           </li>
-        ) : null}
-
-        <li>
-          <Link
-            href={`${AUTH_BASE_PATHS.settings}/${SETTINGS_VIEW_PATHS.account}`}
-            onClick={onClose}
-            className="umsc-nav-dialog-account-link umsc-sans"
-          >
-            <Settings className="size-4" aria-hidden="true" />
-            Account settings
-          </Link>
-        </li>
+        ))}
 
         <li>
           <Link

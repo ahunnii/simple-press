@@ -2,8 +2,14 @@ import Link from "next/link";
 import { Leaf } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
+import {
+  externalLinkProps,
+  resolveFooterQuickLinks,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { BambooWaveDivider } from "../shared/bamboo-wave-divider";
@@ -11,17 +17,21 @@ import {
   BambooWaveLeaves,
   BambooWaveSprig,
 } from "../shared/bamboo-wave-leaves";
+import { BambooFooterAccount } from "./bamboo-footer-account";
 import {
   BambooSocialIcons,
   readBambooSocialLinks,
 } from "./bamboo-social-icons";
 
-const NAV_LINKS = [
+/** Same shipped default as `bamboo-header.tsx`'s `BAMBOO_DEFAULT_NAV` — see
+ *  that file's comment for why the three chrome files each keep their own
+ *  copy instead of sharing a `lib/` module. */
+const BAMBOO_DEFAULT_NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
-] as const;
+];
 
 const columnHeadingClass =
   "mb-4 text-xs font-semibold tracking-widest text-[var(--bam-gold-soft)] uppercase";
@@ -60,13 +70,55 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
   const footerTagline = business?.siteContent?.footerText;
   const address = business?.businessAddress;
 
+  const { isEnabled } = await getBusinessFlags();
+
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
   });
 
-  const navigationItems = business?.siteContent?.navigationItems as
-    | { label: string; href: string }[]
-    | undefined;
+  // Owner's flat footer Quick Links (falls back to the main nav's top level
+  // when unset; an explicit `[]` means "no quick links"). The shared
+  // route→flag filter (P-NAV-FLAGS) drops anything the business has switched
+  // off, same as the header and mobile sheet.
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: BAMBOO_DEFAULT_NAV,
+    isEnabled,
+  });
+
+  // Mandatory, non-hideable policy row (B10.1, PF9) — published merchant
+  // Pages by slug; privacy/terms fall back to the platform's own policy
+  // since every store is covered by it regardless of what it has published.
+  // Shipping and refund have no platform equivalent, so they only appear
+  // once published. Only these four standard slugs plus Platform Policies —
+  // any other policy-type page (imports, seed data) is never auto-listed.
+  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
+  const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  const refundPolicy = policies.find((p) => p.slug === "refund-policy");
+
+  const policyLinks: { label: string; href: string }[] = [
+    {
+      label: "Privacy Policy",
+      href: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
+    },
+    {
+      label: "Terms of Service",
+      href: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+    },
+    ...(shippingPolicy
+      ? [{ label: "Shipping Policy", href: `/${shippingPolicy.slug}` }]
+      : []),
+    ...(refundPolicy
+      ? [{ label: "Refund Policy", href: `/${refundPolicy.slug}` }]
+      : []),
+    { label: "Platform Policies", href: "/platform/policies/" },
+  ];
 
   const socialLinks = readBambooSocialLinks(business?.siteContent?.socialLinks);
 
@@ -113,13 +165,53 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
               />
             </div>
 
-            {/* Quick links */}
+            {/* Quick links — hidden entirely when there's nothing to show
+                (no resolved links and accounts are off), rather than
+                rendering an empty heading. */}
+            {(quickLinks.length > 0 || isEnabled("customerAccounts")) && (
+              <div>
+                <h2 className={columnHeadingClass}>Quick Links</h2>
+                <nav
+                  className="flex flex-col gap-2.5"
+                  aria-label="Quick links"
+                >
+                  {quickLinks.map((link, i) => (
+                    <Link
+                      key={`${link.href}-${i}`}
+                      href={link.href}
+                      {...externalLinkProps(link.external)}
+                      className={columnLinkClass}
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </Link>
+                  ))}
+                  {/* Account entry, end of Quick Links (B10.3, PF10) — gated
+                      on customerAccounts, own client component since the
+                      footer itself is a server component. */}
+                  {isEnabled("customerAccounts") && (
+                    <BambooFooterAccount
+                      ordersEnabled={isEnabled("orders")}
+                      linkClassName={columnLinkClass}
+                    />
+                  )}
+                </nav>
+              </div>
+            )}
+
+            {/* Policies — always rendered (B10.1, PF9), exactly these five
+                slots. */}
             <div>
-              <h2 className={columnHeadingClass}>Quick Links</h2>
-              <nav className="flex flex-col gap-2.5" aria-label="Quick links">
-                {(navigationItems ?? NAV_LINKS).map((link) => (
+              <h2 className={columnHeadingClass}>Policies</h2>
+              <nav
+                className="flex flex-col gap-2.5"
+                aria-label="Customer care links"
+              >
+                {policyLinks.map((link) => (
                   <Link
-                    key={link.label}
+                    key={link.href}
                     href={link.href}
                     className={columnLinkClass}
                   >
@@ -127,31 +219,6 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
                   </Link>
                 ))}
               </nav>
-            </div>
-
-            {/* Policies */}
-            <div>
-              <h2 className={columnHeadingClass}>Policies</h2>
-              {policies.length > 0 ? (
-                <nav
-                  className="flex flex-col gap-2.5"
-                  aria-label="Customer care links"
-                >
-                  {policies.map((link) => (
-                    <Link
-                      key={link.id}
-                      href={`/${link.slug}`}
-                      className={columnLinkClass}
-                    >
-                      {link.title}
-                    </Link>
-                  ))}
-                </nav>
-              ) : (
-                <p className="text-sm text-[var(--bam-cream)]/60">
-                  Policies coming soon.
-                </p>
-              )}
             </div>
 
             {/* Connect */}

@@ -54,12 +54,15 @@ export function ElegantCTABanner({
   ]);
 
   const bgImage = f["elegant.cta.background"] ?? "";
-  const title = f["elegant.cta.title"] ?? "100% Natural";
+  const title = f["elegant.cta.title"] ?? "";
   const points = [
-    f["elegant.cta.pointone"] ?? "No Harsh Chemicals",
-    f["elegant.cta.pointtwo"] ?? "Plant-Based Goodness",
-    f["elegant.cta.pointthree"] ?? "Ethically Sourced",
-  ].filter(Boolean);
+    { key: "elegant.cta.pointone", value: f["elegant.cta.pointone"] ?? "" },
+    { key: "elegant.cta.pointtwo", value: f["elegant.cta.pointtwo"] ?? "" },
+    {
+      key: "elegant.cta.pointthree",
+      value: f["elegant.cta.pointthree"] ?? "",
+    },
+  ].filter((point) => point.value.length > 0);
 
   const hasBg = bgImage && bgImage !== "/placeholder.svg";
 
@@ -128,9 +131,9 @@ export function ElegantCTABanner({
             </h2>
 
             <ul style={{ listStyle: "none" }}>
-              {points.map((point, i) => (
+              {points.map((point) => (
                 <li
-                  key={i}
+                  key={point.key}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -150,7 +153,7 @@ export function ElegantCTABanner({
                       color: "var(--el-sage-soft, #8a9474)",
                     }}
                   />
-                  {point}
+                  <span {...fieldAttr(point.key)}>{point.value}</span>
                 </li>
               ))}
             </ul>

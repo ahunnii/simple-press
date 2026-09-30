@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
@@ -13,12 +14,16 @@ import { ViiVariantSelector } from "./vii-variant-selector";
 type ViiProductActionsProps = DefaultProductPageTemplateProps & {
   selectedVariantId: string | null;
   setSelectedVariantId: (variantId: string | null) => void;
+  comingSoonHeading: string;
+  comingSoonBody: string;
 };
 
 export function ViiProductActions({
   product,
   selectedVariantId,
   setSelectedVariantId,
+  comingSoonHeading,
+  comingSoonBody,
 }: ViiProductActionsProps) {
   const {
     inStock,
@@ -65,6 +70,7 @@ export function ViiProductActions({
           }}
         >
           <p
+            {...fieldAttr("vii.product.coming-soon-heading")}
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 500,
@@ -73,18 +79,21 @@ export function ViiProductActions({
               margin: 0,
             }}
           >
-            Coming Soon
+            {comingSoonHeading}
           </p>
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 14,
-              color: "var(--vii-ink-soft)",
-              margin: "4px 0 0",
-            }}
-          >
-            This product isn&apos;t available yet. Check back later!
-          </p>
+          {comingSoonBody ? (
+            <p
+              {...fieldAttr("vii.product.coming-soon-body")}
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 14,
+                color: "var(--vii-ink-soft)",
+                margin: "4px 0 0",
+              }}
+            >
+              {comingSoonBody}
+            </p>
+          ) : null}
         </div>
         {subscribePanel}
       </>

@@ -15,7 +15,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 export const oliveCartData: TemplateField[] = [
   {
     key: "olive.cart.heading",
-    label: "Cart Heading",
+    label: "Heading",
     description: "The page title at the top of the cart.",
     type: "text",
     page: "cart",
@@ -25,7 +25,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.intro",
-    label: "Cart Intro Line",
+    label: "Intro line",
     description:
       "One line under the cart heading. Leave blank to show the heading on its own.",
     type: "textarea",
@@ -37,7 +37,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.summary-heading",
-    label: "Summary Card Heading",
+    label: "Summary card heading",
     description: "Heading on the summary card beside the line items.",
     type: "text",
     page: "cart",
@@ -47,7 +47,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.summary-note",
-    label: "Summary Card Note",
+    label: "Summary card note",
     description:
       "Quiet line under the subtotal explaining what is still to come. Leave blank to hide.",
     type: "textarea",
@@ -58,7 +58,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.checkout-label",
-    label: "Checkout Button Label",
+    label: "Checkout button label",
     description: "Label on the primary button that starts checkout.",
     type: "text",
     page: "cart",
@@ -68,7 +68,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.continue-shopping",
-    label: "Keep Shopping Link Label",
+    label: "Keep shopping link label",
     description: "The quiet text link back to the shop, above the line items.",
     type: "text",
     page: "cart",
@@ -78,7 +78,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.empty-heading",
-    label: "Empty Bag Heading",
+    label: "Empty bag heading",
     description: "Heading on the card shown when the bag has nothing in it.",
     type: "text",
     page: "cart",
@@ -88,7 +88,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.empty-body",
-    label: "Empty Bag Body",
+    label: "Empty bag body",
     description: "One line under the empty-bag heading.",
     type: "textarea",
     page: "cart",
@@ -98,7 +98,7 @@ export const oliveCartData: TemplateField[] = [
   },
   {
     key: "olive.cart.empty-cta",
-    label: "Empty Bag Button Label",
+    label: "Empty bag button label",
     description: "Label on the button back to the shop from the empty bag.",
     type: "text",
     page: "cart",

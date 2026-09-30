@@ -5,9 +5,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 export const viiCartData: TemplateField[] = [
   {
     key: "vii.cart.overline",
-    label: "Cart Page Overline",
-    description:
-      "Small uppercase kicker label shown above the cart page heading.",
+    label: "Small label",
+    description: "Small label shown above the cart page heading.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -16,7 +15,7 @@ export const viiCartData: TemplateField[] = [
   },
   {
     key: "vii.cart.heading",
-    label: "Cart Page Heading",
+    label: "Heading",
     description: "The main heading on the cart page.",
     type: "text",
     page: "cart",
@@ -26,7 +25,7 @@ export const viiCartData: TemplateField[] = [
   },
   {
     key: "vii.cart.empty-heading",
-    label: "Empty Cart Heading",
+    label: "Empty cart heading",
     description: "Heading shown when the cart contains no items.",
     type: "text",
     page: "cart",
@@ -36,7 +35,7 @@ export const viiCartData: TemplateField[] = [
   },
   {
     key: "vii.cart.empty-body",
-    label: "Empty Cart Body",
+    label: "Empty cart message",
     description: "Short message shown below the empty cart heading.",
     type: "text",
     page: "cart",
@@ -47,8 +46,8 @@ export const viiCartData: TemplateField[] = [
   },
   {
     key: "vii.cart.empty-cta",
-    label: "Empty Cart CTA Label",
-    description: "Button label for the call-to-action on the empty cart state.",
+    label: "Empty cart button text",
+    description: "Button text shown on the empty cart state.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -57,9 +56,9 @@ export const viiCartData: TemplateField[] = [
   },
   {
     key: "vii.cart.continue-shopping",
-    label: "Continue Shopping Label",
+    label: "Continue shopping link text",
     description:
-      "Quiet link label shown below the checkout button in the order summary.",
+      "Quiet link text shown below the checkout button in the order summary.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -73,9 +72,9 @@ export const viiCartData: TemplateField[] = [
 export const viiCartFieldGroups: TemplateFieldGroup[] = [
   {
     id: "cart.main",
-    title: "Cart Page",
+    title: "Cart page",
     description:
-      "Overline, page heading, empty-state messaging, and the continue-shopping label.",
+      "Small label, page heading, empty-cart messaging, and the continue-shopping link.",
     icon: "🛍️",
     columns: 2,
   },

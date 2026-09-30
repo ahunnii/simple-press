@@ -1,0 +1,25 @@
+-- 2026-09-28-footer-navigation.sql — 2026-09-28
+--
+-- Adds optional footer navigation to SiteContent (owner-editable footer "Quick Links",
+-- independent from the main navigation). When NULL, the storefront falls back to the
+-- main navigation's top-level items.
+--
+-- Covers:
+--   * SiteContent."footerNavigationItems" — nullable JSONB.
+--     Stores an array of navigation items: [{ label, href, external? }].
+--     Unlike the main navigationItems, footer links are flat (no children).
+--     Referenced by storefronts when rendering the footer navigation, so
+--     the column MUST exist before code deploy.
+--
+-- No data backfill: existing rows land NULL for footerNavigationItems,
+-- which causes the storefront to fall back to the top level of navigationItems.
+--
+-- `pnpm db:push` produces the same column; this file is only needed where
+-- db:push isn't used. Either way, the column must exist BEFORE deploying
+-- the code — the generated client selects it on every storefront read.
+--
+--   psql "$DATABASE_URL" -f prisma/manual/2026-09-28-footer-navigation.sql
+--
+-- Idempotent: ADDs are guarded with IF NOT EXISTS.
+
+ALTER TABLE "SiteContent" ADD COLUMN IF NOT EXISTS "footerNavigationItems" JSONB;

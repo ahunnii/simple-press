@@ -43,22 +43,32 @@ import { BambooAboutPage } from "./bamboo/about/bamboo-about-page";
 import { BambooAccountSecurityPage } from "./bamboo/account/bamboo-account-security-page";
 import { BambooAccountSettingsPage } from "./bamboo/account/bamboo-account-settings-page";
 import { BambooAddressBookPage } from "./bamboo/account/bamboo-address-book-page";
+import { BambooInvoicesPage } from "./bamboo/account/bamboo-invoices-page";
 import { BambooOrderDetailPage } from "./bamboo/account/bamboo-order-detail-page";
 import { BambooOrdersPage } from "./bamboo/account/bamboo-orders-page";
 import { BambooPreferencesPage } from "./bamboo/account/bamboo-preferences-page";
+import { BambooRewardsPage } from "./bamboo/account/bamboo-rewards-page";
+import { BambooSubscriptionsPage } from "./bamboo/account/bamboo-subscriptions-page";
 import { BambooGenericPage } from "./bamboo/bamboo-generic-page";
 import { BambooBlogPage } from "./bamboo/blog/bamboo-blog-page";
 import { BambooBlogPostPage } from "./bamboo/blog/bamboo-blog-post-page";
 import { BambooCartPage } from "./bamboo/cart-checkout/bamboo-cart-page";
 import { BambooCheckoutPage } from "./bamboo/cart-checkout/bamboo-checkout-page";
+import { BambooCheckoutUnavailable } from "./bamboo/cart-checkout/bamboo-checkout-unavailable";
 import { BambooOrderSuccessPage } from "./bamboo/cart-checkout/bamboo-order-success-page";
 import { BambooCollectionPage } from "./bamboo/collections/bamboo-collection-page";
 import { BambooCollectionsPage } from "./bamboo/collections/bamboo-collections-page";
 import { BambooContactPage } from "./bamboo/contact/bamboo-contact-page";
+import { BambooDonatePage } from "./bamboo/donate/bamboo-donate-page";
+import { BambooEventPage } from "./bamboo/events/bamboo-event-page";
+import { BambooEventsPage } from "./bamboo/events/bamboo-events-page";
+import { BambooFaqPage } from "./bamboo/faq/bamboo-faq-page";
 import { BambooLayout } from "./bamboo/layout/bamboo-general-layout";
 import { BambooProductPage } from "./bamboo/products/bamboo-product-page";
+import { BambooServicesIndexPage } from "./bamboo/services/bamboo-services-index-page";
 import { BambooShopPage } from "./bamboo/shop/bamboo-shop-page";
 import { BambooTestimonialsPage } from "./bamboo/testimonials/bamboo-testimonials-page";
+import { BambooVideosPage } from "./bamboo/videos/bamboo-videos-page";
 import { BuildersAboutPage } from "./builders/about/builders-about-page";
 import { BuildersGenericPage } from "./builders/builders-generic-page";
 import { BuildersContactPage } from "./builders/contact/builders-contact-page";
@@ -82,13 +92,17 @@ import { DarkTrendAboutPage } from "./dark-trend/about/dark-trend-about-page";
 import { DarkTrendAccountSecurityPage } from "./dark-trend/account/dark-trend-account-security-page";
 import { DarkTrendAccountSettingsPage } from "./dark-trend/account/dark-trend-account-settings-page";
 import { DarkTrendAddressBookPage } from "./dark-trend/account/dark-trend-address-book-page";
+import { DarkTrendInvoicesPage } from "./dark-trend/account/dark-trend-invoices-page";
 import { DarkTrendOrderDetailPage } from "./dark-trend/account/dark-trend-order-detail-page";
 import { DarkTrendOrdersPage } from "./dark-trend/account/dark-trend-orders-page";
 import { DarkTrendPreferencesPage } from "./dark-trend/account/dark-trend-preferences-page";
+import { DarkTrendRewardsPage } from "./dark-trend/account/dark-trend-rewards-page";
+import { DarkTrendSubscriptionsPage } from "./dark-trend/account/dark-trend-subscriptions-page";
 import { DarkTrendBlogPage } from "./dark-trend/blog/dark-trend-blog-page";
 import { DarkTrendBlogPostPage } from "./dark-trend/blog/dark-trend-blog-post-page";
 import { DarkTrendCartPage } from "./dark-trend/cart-checkout/dark-trend-cart-page";
 import { DarkTrendCheckoutPage } from "./dark-trend/cart-checkout/dark-trend-checkout-page";
+import { DarkTrendCheckoutUnavailable } from "./dark-trend/cart-checkout/dark-trend-checkout-unavailable";
 import { DarkTrendOrderSuccessPage } from "./dark-trend/cart-checkout/dark-trend-order-success-page";
 import { DarkTrendCollectionPage } from "./dark-trend/collections/dark-trend-collection-page";
 import { DarkTrendCollectionsPage } from "./dark-trend/collections/dark-trend-collections-page";
@@ -131,6 +145,38 @@ import { DefaultServicesIndexPage } from "./default/services/default-services-in
 import { DefaultProductsPage } from "./default/shop/default-shop-page";
 import { DefaultTestimonialsPage } from "./default/testimonials/default-testimonials-page";
 import { DefaultVideosPage } from "./default/videos/default-videos-page";
+// Dream Your Theme
+import { DreamAboutPage } from "./dream/about/dream-about-page";
+import { DreamAccountSecurityPage } from "./dream/account/dream-account-security-page";
+import { DreamAccountSettingsPage } from "./dream/account/dream-account-settings-page";
+import { DreamAddressBookPage } from "./dream/account/dream-address-book-page";
+import { DreamInvoicesPage } from "./dream/account/dream-invoices-page";
+import { DreamOrderDetailPage } from "./dream/account/dream-order-detail-page";
+import { DreamOrdersPage } from "./dream/account/dream-orders-page";
+import { DreamPreferencesPage } from "./dream/account/dream-preferences-page";
+import { DreamRewardsPage } from "./dream/account/dream-rewards-page";
+import { DreamSubscriptionsPage } from "./dream/account/dream-subscriptions-page";
+import { DreamBlogPage } from "./dream/blog/dream-blog-page";
+import { DreamBlogPostPage } from "./dream/blog/dream-blog-post-page";
+import { DreamCartPage } from "./dream/cart-checkout/dream-cart-page";
+import { DreamCheckoutPage } from "./dream/cart-checkout/dream-checkout-page";
+import { DreamCheckoutUnavailable } from "./dream/cart-checkout/dream-checkout-unavailable";
+import { DreamOrderSuccessPage } from "./dream/cart-checkout/dream-order-success-page";
+import { DreamCollectionPage } from "./dream/collections/dream-collection-page";
+import { DreamCollectionsPage } from "./dream/collections/dream-collections-page";
+import { DreamContactPage } from "./dream/contact/dream-contact-page";
+import { DreamDonatePage } from "./dream/donate/dream-donate-page";
+import { DreamEventPage } from "./dream/events/dream-event-page";
+import { DreamEventsPage } from "./dream/events/dream-events-page";
+import { DreamFaqPage } from "./dream/faq/dream-faq-page";
+import { DreamGenericPage } from "./dream/generic/dream-generic-page";
+import { DreamLayout } from "./dream/layout/dream-layout";
+import { DreamMaintenancePage } from "./dream/maintenance/dream-maintenance-page";
+import { DreamProductPage } from "./dream/products/dream-product-page";
+import { DreamServicesIndexPage } from "./dream/services/dream-services-index-page";
+import { DreamShopPage } from "./dream/shop/dream-shop-page";
+import { DreamTestimonialsPage } from "./dream/testimonials/dream-testimonials-page";
+import { DreamVideosPage } from "./dream/videos/dream-videos-page";
 // ---------------------------------------------------------------------------
 // Elegant
 // ---------------------------------------------------------------------------
@@ -145,6 +191,7 @@ import { ElegantBlogPage } from "./elegant/blog/elegant-blog-page";
 import { ElegantBlogPostPage } from "./elegant/blog/elegant-blog-post-page";
 import { ElegantCartPage } from "./elegant/cart-checkout/elegant-cart-page";
 import { ElegantCheckoutPage } from "./elegant/cart-checkout/elegant-checkout-page";
+import { ElegantCheckoutUnavailable } from "./elegant/cart-checkout/elegant-checkout-unavailable";
 import { ElegantOrderSuccessPage } from "./elegant/cart-checkout/elegant-order-success-page";
 import { ElegantCollectionPage } from "./elegant/collections/elegant-collection-page";
 import { ElegantCollectionsPage } from "./elegant/collections/elegant-collections-page";
@@ -161,24 +208,32 @@ import { HappyBambooAboutPage } from "./happy-bamboo/about/happy-bamboo-about-pa
 import { HappyBambooAccountSecurityPage } from "./happy-bamboo/account/happy-bamboo-account-security-page";
 import { HappyBambooAccountSettingsPage } from "./happy-bamboo/account/happy-bamboo-account-settings-page";
 import { HappyBambooAddressBookPage } from "./happy-bamboo/account/happy-bamboo-address-book-page";
+import { HappyBambooInvoicesPage } from "./happy-bamboo/account/happy-bamboo-invoices-page";
 import { HappyBambooOrderDetailPage } from "./happy-bamboo/account/happy-bamboo-order-detail-page";
 import { HappyBambooOrdersPage } from "./happy-bamboo/account/happy-bamboo-orders-page";
 import { HappyBambooPreferencesPage } from "./happy-bamboo/account/happy-bamboo-preferences-page";
+import { HappyBambooRewardsPage } from "./happy-bamboo/account/happy-bamboo-rewards-page";
 import { HappyBambooSubscriptionsPage } from "./happy-bamboo/account/happy-bamboo-subscriptions-page";
-import { HappyBambooInvoicesPage } from "./happy-bamboo/account/happy-bamboo-invoices-page";
 import { HappyBambooBlogPage } from "./happy-bamboo/blog/happy-bamboo-blog-page";
 import { HappyBambooBlogPostPage } from "./happy-bamboo/blog/happy-bamboo-blog-post-page";
 import { HappyBambooCartPage } from "./happy-bamboo/cart-checkout/happy-bamboo-cart-page";
 import { HappyBambooCheckoutPage } from "./happy-bamboo/cart-checkout/happy-bamboo-checkout-page";
+import { HappyBambooCheckoutUnavailable } from "./happy-bamboo/cart-checkout/happy-bamboo-checkout-unavailable";
 import { HappyBambooOrderSuccessPage } from "./happy-bamboo/cart-checkout/happy-bamboo-order-success-page";
 import { HappyBambooCollectionPage } from "./happy-bamboo/collections/happy-bamboo-collection-page";
 import { HappyBambooCollectionsPage } from "./happy-bamboo/collections/happy-bamboo-collections-page";
 import { HappyBambooContactPage } from "./happy-bamboo/contact/happy-bamboo-contact-page";
+import { HappyBambooDonatePage } from "./happy-bamboo/donate/happy-bamboo-donate-page";
+import { HappyBambooEventPage } from "./happy-bamboo/events/happy-bamboo-event-page";
+import { HappyBambooEventsPage } from "./happy-bamboo/events/happy-bamboo-events-page";
+import { HappyBambooFaqPage } from "./happy-bamboo/faq/happy-bamboo-faq-page";
 import { HappyBambooGenericPage } from "./happy-bamboo/happy-bamboo-generic-page";
 import { HappyBambooLayout } from "./happy-bamboo/layout/happy-bamboo-layout";
 import { HappyBambooProductPage } from "./happy-bamboo/products/happy-bamboo-product-page";
+import { HappyBambooServicesIndexPage } from "./happy-bamboo/services/happy-bamboo-services-index-page";
 import { HappyBambooShopPage } from "./happy-bamboo/shop/happy-bamboo-shop-page";
 import { HappyBambooTestimonialsPage } from "./happy-bamboo/testimonials/happy-bamboo-testimonials-page";
+import { HappyBambooVideosPage } from "./happy-bamboo/videos/happy-bamboo-videos-page";
 // ---------------------------------------------------------------------------
 // Modern
 // ---------------------------------------------------------------------------
@@ -193,6 +248,7 @@ import { ModernBlogPage } from "./modern/blog/modern-blog-page";
 import { ModernBlogPostPage } from "./modern/blog/modern-blog-post-page";
 import ModernCartPage from "./modern/cart-checkout/modern-cart-page";
 import { ModernCheckoutPage } from "./modern/cart-checkout/modern-checkout-page";
+import { ModernCheckoutUnavailable } from "./modern/cart-checkout/modern-checkout-unavailable";
 import { ModernOrderSuccessPage } from "./modern/cart-checkout/modern-order-success-page";
 import { ModernCollectionPage } from "./modern/collections/modern-collection-page";
 import { ModernCollectionsPage } from "./modern/collections/modern-collections-page";
@@ -209,22 +265,32 @@ import { NoiseAboutPage } from "./noise/about/noise-about-page";
 import { NoiseAccountSecurityPage } from "./noise/account/noise-account-security-page";
 import { NoiseAccountSettingsPage } from "./noise/account/noise-account-settings-page";
 import { NoiseAddressBookPage } from "./noise/account/noise-address-book-page";
+import { NoiseInvoicesPage } from "./noise/account/noise-invoices-page";
 import { NoiseOrderDetailPage } from "./noise/account/noise-order-detail-page";
 import { NoiseOrdersPage } from "./noise/account/noise-orders-page";
 import { NoisePreferencesPage } from "./noise/account/noise-preferences-page";
+import { NoiseRewardsPage } from "./noise/account/noise-rewards-page";
+import { NoiseSubscriptionsPage } from "./noise/account/noise-subscriptions-page";
 import { NoiseBlogPage } from "./noise/blog/noise-blog-page";
 import { NoiseBlogPostPage } from "./noise/blog/noise-blog-post-page";
 import { NoiseCartPage } from "./noise/cart-checkout/noise-cart-page";
 import { NoiseCheckoutPage } from "./noise/cart-checkout/noise-checkout-page";
+import { NoiseCheckoutUnavailable } from "./noise/cart-checkout/noise-checkout-unavailable";
 import { NoiseOrderSuccessPage } from "./noise/cart-checkout/noise-order-success-page";
 import { NoiseCollectionPage } from "./noise/collections/noise-collection-page";
 import { NoiseCollectionsPage } from "./noise/collections/noise-collections-page";
 import { NoiseContactPage } from "./noise/contact/noise-contact-page";
+import { NoiseDonatePage } from "./noise/donate/noise-donate-page";
+import { NoiseEventPage } from "./noise/events/noise-event-page";
+import { NoiseEventsPage } from "./noise/events/noise-events-page";
+import { NoiseFaqPage } from "./noise/faq/noise-faq-page";
 import { NoiseLayout } from "./noise/layout/noise-layout";
 import { NoiseGenericPage } from "./noise/noise-generic-page";
 import { NoiseProductPage } from "./noise/products/noise-product-page";
+import { NoiseServicesIndexPage } from "./noise/services/noise-services-index-page";
 import { NoiseShopPage } from "./noise/shop/noise-shop-page";
 import { NoiseTestimonialsPage } from "./noise/testimonials/noise-testimonials-page";
+import { NoiseVideosPage } from "./noise/videos/noise-videos-page";
 // ---------------------------------------------------------------------------
 // Olive Mode
 // ---------------------------------------------------------------------------
@@ -232,12 +298,12 @@ import { OliveAboutPage } from "./olive/about/olive-about-page";
 import { OliveAccountSecurityPage } from "./olive/account/olive-account-security-page";
 import { OliveAccountSettingsPage } from "./olive/account/olive-account-settings-page";
 import { OliveAddressBookPage } from "./olive/account/olive-address-book-page";
+import { OliveInvoicesPage } from "./olive/account/olive-invoices-page";
 import { OliveOrderDetailPage } from "./olive/account/olive-order-detail-page";
 import { OliveOrdersPage } from "./olive/account/olive-orders-page";
 import { OlivePreferencesPage } from "./olive/account/olive-preferences-page";
 import { OliveRewardsPage } from "./olive/account/olive-rewards-page";
 import { OliveSubscriptionsPage } from "./olive/account/olive-subscriptions-page";
-import { OliveInvoicesPage } from "./olive/account/olive-invoices-page";
 import { OliveBlogPage } from "./olive/blog/olive-blog-page";
 import { OliveBlogPostPage } from "./olive/blog/olive-blog-post-page";
 import { OliveCartPage } from "./olive/cart-checkout/olive-cart-page";
@@ -247,19 +313,28 @@ import { OliveOrderSuccessPage } from "./olive/cart-checkout/olive-order-success
 import { OliveCollectionPage } from "./olive/collections/olive-collection-page";
 import { OliveCollectionsPage } from "./olive/collections/olive-collections-page";
 import { OliveContactPage } from "./olive/contact/olive-contact-page";
+import { OliveDonatePage } from "./olive/donate/olive-donate-page";
+import { OliveEventPage } from "./olive/events/olive-event-page";
+import { OliveEventsPage } from "./olive/events/olive-events-page";
+import { OliveFaqPage } from "./olive/faq/olive-faq-page";
 import { OliveGenericPage } from "./olive/generic/olive-generic-page";
 import { OliveLayout } from "./olive/layout/olive-layout";
 import { OliveMaintenancePage } from "./olive/maintenance/olive-maintenance-page";
 import { OliveProductPage } from "./olive/products/olive-product-page";
+import { OliveServicesIndexPage } from "./olive/services/olive-services-index-page";
 import { OliveShopPage } from "./olive/shop/olive-shop-page";
 import { OliveTestimonialsPage } from "./olive/testimonials/olive-testimonials-page";
+import { OliveVideosPage } from "./olive/videos/olive-videos-page";
 import { PinkAboutPage } from "./pink/about/pink-about-page";
 import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
 import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
 import { PinkAddressBookPage } from "./pink/account/pink-address-book-page";
+import { PinkInvoicesPage } from "./pink/account/pink-invoices-page";
 import { PinkOrderDetailPage } from "./pink/account/pink-order-detail-page";
 import { PinkOrdersPage } from "./pink/account/pink-orders-page";
 import { PinkPreferencesPage } from "./pink/account/pink-preferences-page";
+import { PinkRewardsPage } from "./pink/account/pink-rewards-page";
+import { PinkSubscriptionsPage } from "./pink/account/pink-subscriptions-page";
 import { PinkBlogPage } from "./pink/blog/pink-blog-page";
 import { PinkBlogPostPage } from "./pink/blog/pink-blog-post-page";
 import { PinkCartPage } from "./pink/cart-checkout/pink-cart-page";
@@ -270,6 +345,7 @@ import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
 import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
 import { PinkContactPage } from "./pink/contact/pink-contact-page";
 import { PinkDonatePage } from "./pink/donate/pink-donate-page";
+import { PinkFaqPage } from "./pink/faq/pink-faq-page";
 import { PinkEventPage } from "./pink/events/pink-event-page";
 import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
 import { PinkGenericPage } from "./pink/generic/pink-generic-page";
@@ -288,23 +364,33 @@ import { PollenAboutPage } from "./pollen/about/pollen-about-page";
 import { PollenAccountSecurityPage } from "./pollen/account/pollen-account-security-page";
 import { PollenAccountSettingsPage } from "./pollen/account/pollen-account-settings-page";
 import { PollenAddressBookPage } from "./pollen/account/pollen-address-book-page";
+import { PollenInvoicesPage } from "./pollen/account/pollen-invoices-page";
 import { PollenOrderDetailPage } from "./pollen/account/pollen-order-detail-page";
 import { PollenOrdersPage } from "./pollen/account/pollen-orders-page";
 import { PollenPreferencesPage } from "./pollen/account/pollen-preferences-page";
+import { PollenRewardsPage } from "./pollen/account/pollen-rewards-page";
+import { PollenSubscriptionsPage } from "./pollen/account/pollen-subscriptions-page";
 import { PollenBlogPage } from "./pollen/blog/pollen-blog-page";
 import { PollenBlogPostPage } from "./pollen/blog/pollen-blog-post-page";
 import { PollenCartPage } from "./pollen/cart-checkout/pollen-cart-page";
 import { PollenCheckoutPage } from "./pollen/cart-checkout/pollen-checkout-page";
+import { PollenCheckoutUnavailable } from "./pollen/cart-checkout/pollen-checkout-unavailable";
 import { PollenOrderSuccessPage } from "./pollen/cart-checkout/pollen-order-success-page";
 import { PollenCollectionPage } from "./pollen/collections/pollen-collection-page";
 import { PollenCollectionsPage } from "./pollen/collections/pollen-collections-page";
 import { PollenContactPage } from "./pollen/contact/pollen-contact-page";
+import { PollenDonatePage } from "./pollen/donate/pollen-donate-page";
+import { PollenEventPage } from "./pollen/events/pollen-event-page";
+import { PollenEventsPage } from "./pollen/events/pollen-events-page";
+import { PollenFaqPage } from "./pollen/faq/pollen-faq-page";
 import { PollenLayout } from "./pollen/layout/pollen-layout";
 import { PollenGenericPage } from "./pollen/pollen-generic-page";
 import { PollenProductPage } from "./pollen/products/pollen-product-page";
+import { PollenServicesIndexPage } from "./pollen/services/pollen-services-index-page";
 import { PollenServicesPage } from "./pollen/services/pollen-services-page";
 import { PollenShopPage } from "./pollen/shop/pollen-shop-page";
 import { PollenTestimonialsPage } from "./pollen/testimonials/pollen-testimonials-page";
+import { PollenVideosPage } from "./pollen/videos/pollen-videos-page";
 // ---------------------------------------------------------------------------
 // PinkArt
 // ---------------------------------------------------------------------------
@@ -322,13 +408,17 @@ import { SledgeAboutPage } from "./sledge/about/sledge-about-page";
 import { SledgeAccountSecurityPage } from "./sledge/account/sledge-account-security-page";
 import { SledgeAccountSettingsPage } from "./sledge/account/sledge-account-settings-page";
 import { SledgeAddressBookPage } from "./sledge/account/sledge-address-book-page";
+import { SledgeInvoicesPage } from "./sledge/account/sledge-invoices-page";
 import { SledgeOrderDetailPage } from "./sledge/account/sledge-order-detail-page";
 import { SledgeOrdersPage } from "./sledge/account/sledge-orders-page";
 import { SledgePreferencesPage } from "./sledge/account/sledge-preferences-page";
+import { SledgeRewardsPage } from "./sledge/account/sledge-rewards-page";
+import { SledgeSubscriptionsPage } from "./sledge/account/sledge-subscriptions-page";
 import { SledgeBlogPage } from "./sledge/blog/sledge-blog-page";
 import { SledgeBlogPostPage } from "./sledge/blog/sledge-blog-post-page";
 import { SledgeCartPage } from "./sledge/cart-checkout/sledge-cart-page";
 import { SledgeCheckoutPage } from "./sledge/cart-checkout/sledge-checkout-page";
+import { SledgeCheckoutUnavailable } from "./sledge/cart-checkout/sledge-checkout-unavailable";
 import { SledgeOrderSuccessPage } from "./sledge/cart-checkout/sledge-order-success-page";
 import { SledgeCollectionPage } from "./sledge/collections/sledge-collection-page";
 import { SledgeCollectionsPage } from "./sledge/collections/sledge-collections-page";
@@ -338,6 +428,38 @@ import { SledgeProductPage } from "./sledge/products/sledge-product-page";
 import { SledgeShopPage } from "./sledge/shop/sledge-shop-page";
 import { SledgeGenericPage } from "./sledge/sledge-generic-page";
 import { SledgeTestimonialsPage } from "./sledge/testimonials/sledge-testimonials-page";
+// Unique Monique
+import { UmscAboutPage } from "./umsc/about/umsc-about-page";
+import { UmscAccountSecurityPage } from "./umsc/account/umsc-account-security-page";
+import { UmscAccountSettingsPage } from "./umsc/account/umsc-account-settings-page";
+import { UmscAddressBookPage } from "./umsc/account/umsc-address-book-page";
+import { UmscInvoicesPage } from "./umsc/account/umsc-invoices-page";
+import { UmscOrderDetailPage } from "./umsc/account/umsc-order-detail-page";
+import { UmscOrdersPage } from "./umsc/account/umsc-orders-page";
+import { UmscPreferencesPage } from "./umsc/account/umsc-preferences-page";
+import { UmscRewardsPage } from "./umsc/account/umsc-rewards-page";
+import { UmscSubscriptionsPage } from "./umsc/account/umsc-subscriptions-page";
+import { UmscBlogPage } from "./umsc/blog/umsc-blog-page";
+import { UmscBlogPostPage } from "./umsc/blog/umsc-blog-post-page";
+import { UmscCartPage } from "./umsc/cart-checkout/umsc-cart-page";
+import { UmscCheckoutPage } from "./umsc/cart-checkout/umsc-checkout-page";
+import { UmscCheckoutUnavailable } from "./umsc/cart-checkout/umsc-checkout-unavailable";
+import { UmscOrderSuccessPage } from "./umsc/cart-checkout/umsc-order-success-page";
+import { UmscCollectionPage } from "./umsc/collections/umsc-collection-page";
+import { UmscCollectionsPage } from "./umsc/collections/umsc-collections-page";
+import { UmscContactPage } from "./umsc/contact/umsc-contact-page";
+import { UmscDonatePage } from "./umsc/donate/umsc-donate-page";
+import { UmscEventPage } from "./umsc/events/umsc-event-page";
+import { UmscEventsPage } from "./umsc/events/umsc-events-page";
+import { UmscFaqPage } from "./umsc/faq/umsc-faq-page";
+import { UmscGenericPage } from "./umsc/generic/umsc-generic-page";
+import { UmscLayout } from "./umsc/layout/umsc-layout";
+import { UmscMaintenancePage } from "./umsc/maintenance/umsc-maintenance-page";
+import { UmscProductPage } from "./umsc/products/umsc-product-page";
+import { UmscServicesIndexPage } from "./umsc/services/umsc-services-index-page";
+import { UmscShopPage } from "./umsc/shop/umsc-shop-page";
+import { UmscTestimonialsPage } from "./umsc/testimonials/umsc-testimonials-page";
+import { UmscVideosPage } from "./umsc/videos/umsc-videos-page";
 // ---------------------------------------------------------------------------
 // Vii (Skinbar VII)
 // ---------------------------------------------------------------------------
@@ -345,9 +467,12 @@ import { ViiAboutPage } from "./vii/about/vii-about-page";
 import { ViiAccountSecurityPage } from "./vii/account/vii-account-security-page";
 import { ViiAccountSettingsPage } from "./vii/account/vii-account-settings-page";
 import { ViiAddressBookPage } from "./vii/account/vii-address-book-page";
+import { ViiInvoicesPage } from "./vii/account/vii-invoices-page";
 import { ViiOrderDetailPage } from "./vii/account/vii-order-detail-page";
 import { ViiOrdersPage } from "./vii/account/vii-orders-page";
 import { ViiPreferencesPage } from "./vii/account/vii-preferences-page";
+import { ViiRewardsPage } from "./vii/account/vii-rewards-page";
+import { ViiSubscriptionsPage } from "./vii/account/vii-subscriptions-page";
 import { ViiBlogPage } from "./vii/blog/vii-blog-page";
 import { ViiBlogPostPage } from "./vii/blog/vii-blog-post-page";
 import { ViiCartPage } from "./vii/cart-checkout/vii-cart-page";
@@ -357,6 +482,10 @@ import { ViiOrderSuccessPage } from "./vii/cart-checkout/vii-order-success-page"
 import { ViiCollectionPage } from "./vii/collections/vii-collection-page";
 import { ViiCollectionsPage } from "./vii/collections/vii-collections-page";
 import { ViiContactPage } from "./vii/contact/vii-contact-page";
+import { ViiDonatePage } from "./vii/donate/vii-donate-page";
+import { ViiEventPage } from "./vii/events/vii-event-page";
+import { ViiEventsPage } from "./vii/events/vii-events-page";
+import { ViiFaqPage } from "./vii/faq/vii-faq-page";
 import { ViiGenericPage } from "./vii/generic/vii-generic-page";
 import { ViiLayout } from "./vii/layout/vii-layout";
 import { ViiMaintenancePage } from "./vii/maintenance/vii-maintenance-page";
@@ -364,6 +493,7 @@ import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
 import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
+import { ViiVideosPage } from "./vii/videos/vii-videos-page";
 // ---------------------------------------------------------------------------
 // Detroit Community Wealth Fund
 // ---------------------------------------------------------------------------
@@ -371,11 +501,11 @@ import { WealthAboutPage } from "./wealth/about/wealth-about-page";
 import { WealthAccountSecurityPage } from "./wealth/account/wealth-account-security-page";
 import { WealthAccountSettingsPage } from "./wealth/account/wealth-account-settings-page";
 import { WealthAddressBookPage } from "./wealth/account/wealth-address-book-page";
+import { WealthInvoicesPage } from "./wealth/account/wealth-invoices-page";
 import { WealthOrderDetailPage } from "./wealth/account/wealth-order-detail-page";
 import { WealthOrdersPage } from "./wealth/account/wealth-orders-page";
 import { WealthPreferencesPage } from "./wealth/account/wealth-preferences-page";
 import { WealthSubscriptionsPage } from "./wealth/account/wealth-subscriptions-page";
-import { WealthInvoicesPage } from "./wealth/account/wealth-invoices-page";
 import { WealthBlogPage } from "./wealth/blog/wealth-blog-page";
 import { WealthBlogPostPage } from "./wealth/blog/wealth-blog-post-page";
 import { WealthContactPage } from "./wealth/contact/wealth-contact-page";
@@ -385,48 +515,6 @@ import { WealthLayout } from "./wealth/layout/wealth-layout";
 import { WealthMaintenancePage } from "./wealth/maintenance/wealth-maintenance-page";
 import { WealthServicesIndexPage } from "./wealth/services/wealth-services-index-page";
 import { WealthTestimonialsPage } from "./wealth/testimonials/wealth-testimonials-page";
-
-// Dream Your Theme
-import { DreamAboutPage } from "./dream/about/dream-about-page";
-import { DreamAccountSecurityPage } from "./dream/account/dream-account-security-page";
-import { DreamAccountSettingsPage } from "./dream/account/dream-account-settings-page";
-import { DreamAddressBookPage } from "./dream/account/dream-address-book-page";
-import { DreamOrderDetailPage } from "./dream/account/dream-order-detail-page";
-import { DreamOrdersPage } from "./dream/account/dream-orders-page";
-import { DreamPreferencesPage } from "./dream/account/dream-preferences-page";
-import { DreamSubscriptionsPage } from "./dream/account/dream-subscriptions-page";
-import { DreamInvoicesPage } from "./dream/account/dream-invoices-page";
-import { DreamContactPage } from "./dream/contact/dream-contact-page";
-import { DreamGenericPage } from "./dream/generic/dream-generic-page";
-import { DreamMaintenancePage } from "./dream/maintenance/dream-maintenance-page";
-import { DreamServicesIndexPage } from "./dream/services/dream-services-index-page";
-import { DreamTestimonialsPage } from "./dream/testimonials/dream-testimonials-page";
-import { DreamLayout } from "./dream/layout/dream-layout";
-// Unique Monique
-import { UmscAboutPage } from "./umsc/about/umsc-about-page";
-import { UmscAccountSecurityPage } from "./umsc/account/umsc-account-security-page";
-import { UmscAccountSettingsPage } from "./umsc/account/umsc-account-settings-page";
-import { UmscAddressBookPage } from "./umsc/account/umsc-address-book-page";
-import { UmscOrderDetailPage } from "./umsc/account/umsc-order-detail-page";
-import { UmscOrdersPage } from "./umsc/account/umsc-orders-page";
-import { UmscPreferencesPage } from "./umsc/account/umsc-preferences-page";
-import { UmscRewardsPage } from "./umsc/account/umsc-rewards-page";
-import { UmscSubscriptionsPage } from "./umsc/account/umsc-subscriptions-page";
-import { UmscInvoicesPage } from "./umsc/account/umsc-invoices-page";
-import { UmscCartPage } from "./umsc/cart-checkout/umsc-cart-page";
-import { UmscCheckoutPage } from "./umsc/cart-checkout/umsc-checkout-page";
-import { UmscCheckoutUnavailable } from "./umsc/cart-checkout/umsc-checkout-unavailable";
-import { UmscOrderSuccessPage } from "./umsc/cart-checkout/umsc-order-success-page";
-import { UmscCollectionPage } from "./umsc/collections/umsc-collection-page";
-import { UmscCollectionsPage } from "./umsc/collections/umsc-collections-page";
-import { UmscContactPage } from "./umsc/contact/umsc-contact-page";
-import { UmscFaqPage } from "./umsc/faq/umsc-faq-page";
-import { UmscGenericPage } from "./umsc/generic/umsc-generic-page";
-import { UmscLayout } from "./umsc/layout/umsc-layout";
-import { UmscMaintenancePage } from "./umsc/maintenance/umsc-maintenance-page";
-import { UmscProductPage } from "./umsc/products/umsc-product-page";
-import { UmscShopPage } from "./umsc/shop/umsc-shop-page";
-import { UmscTestimonialsPage } from "./umsc/testimonials/umsc-testimonials-page";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -440,8 +528,9 @@ type AnyComponent = ComponentType<any>;
  * must satisfy all required slots; non-default templates provide a partial
  * override via `Partial<TemplateComponentSet>`.
  *
- * `ServicesPage` is optional — only pollen implements it. Routes check for its
- * presence and call `notFound()` when it is absent.
+ * `ServicesPage` is optional — the legacy services-flag-OFF page; only pollen
+ * implements it (pollen also ships `ServicesIndexPage` for flag ON). Routes
+ * check for its presence and call `notFound()` when it is absent.
  *
  * `EventsPage`, `EventPage`, `VideosPage` and `FaqPage` are optional in the
  * type but always present on `defaultEntry`, so their routes' presence checks
@@ -542,6 +631,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: BambooBlogPostPage,
     CartPage: BambooCartPage,
     CheckoutPage: BambooCheckoutPage,
+    CheckoutUnavailable: BambooCheckoutUnavailable,
     OrderSuccessPage: BambooOrderSuccessPage,
     CollectionPage: BambooCollectionPage,
     CollectionsPage: BambooCollectionsPage,
@@ -549,6 +639,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     GenericPage: BambooGenericPage,
     ProductPage: BambooProductPage,
     ShopPage: BambooShopPage,
+    ServicesIndexPage: BambooServicesIndexPage,
     TestimonialsPage: BambooTestimonialsPage,
     AccountSettingsPage: BambooAccountSettingsPage,
     AccountSecurityPage: BambooAccountSecurityPage,
@@ -556,6 +647,14 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: BambooOrderDetailPage,
     OrdersPage: BambooOrdersPage,
     PreferencesPage: BambooPreferencesPage,
+    SubscriptionsPage: BambooSubscriptionsPage,
+    InvoicesPage: BambooInvoicesPage,
+    RewardsPage: BambooRewardsPage,
+    EventsPage: BambooEventsPage,
+    EventPage: BambooEventPage,
+    DonatePage: BambooDonatePage,
+    VideosPage: BambooVideosPage,
+    FaqPage: BambooFaqPage,
   },
 
   "animated-bamboo": {
@@ -589,6 +688,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: DarkTrendBlogPostPage,
     CartPage: DarkTrendCartPage,
     CheckoutPage: DarkTrendCheckoutPage,
+    CheckoutUnavailable: DarkTrendCheckoutUnavailable,
     OrderSuccessPage: DarkTrendOrderSuccessPage,
     CollectionPage: DarkTrendCollectionPage,
     CollectionsPage: DarkTrendCollectionsPage,
@@ -603,6 +703,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: DarkTrendOrderDetailPage,
     OrdersPage: DarkTrendOrdersPage,
     PreferencesPage: DarkTrendPreferencesPage,
+    SubscriptionsPage: DarkTrendSubscriptionsPage,
+    InvoicesPage: DarkTrendInvoicesPage,
+    RewardsPage: DarkTrendRewardsPage,
   },
 
   elegant: {
@@ -612,6 +715,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: ElegantBlogPostPage,
     CartPage: ElegantCartPage,
     CheckoutPage: ElegantCheckoutPage,
+    CheckoutUnavailable: ElegantCheckoutUnavailable,
     OrderSuccessPage: ElegantOrderSuccessPage,
     CollectionPage: ElegantCollectionPage,
     CollectionsPage: ElegantCollectionsPage,
@@ -635,6 +739,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: HappyBambooBlogPostPage,
     CartPage: HappyBambooCartPage,
     CheckoutPage: HappyBambooCheckoutPage,
+    CheckoutUnavailable: HappyBambooCheckoutUnavailable,
     OrderSuccessPage: HappyBambooOrderSuccessPage,
     CollectionPage: HappyBambooCollectionPage,
     CollectionsPage: HappyBambooCollectionsPage,
@@ -642,6 +747,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     GenericPage: HappyBambooGenericPage,
     ProductPage: HappyBambooProductPage,
     ShopPage: HappyBambooShopPage,
+    ServicesIndexPage: HappyBambooServicesIndexPage,
     TestimonialsPage: HappyBambooTestimonialsPage,
     AccountSettingsPage: HappyBambooAccountSettingsPage,
     AccountSecurityPage: HappyBambooAccountSecurityPage,
@@ -651,6 +757,12 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: HappyBambooPreferencesPage,
     SubscriptionsPage: HappyBambooSubscriptionsPage,
     InvoicesPage: HappyBambooInvoicesPage,
+    RewardsPage: HappyBambooRewardsPage,
+    EventsPage: HappyBambooEventsPage,
+    EventPage: HappyBambooEventPage,
+    VideosPage: HappyBambooVideosPage,
+    DonatePage: HappyBambooDonatePage,
+    FaqPage: HappyBambooFaqPage,
   },
 
   modern: {
@@ -660,6 +772,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: ModernBlogPostPage,
     CartPage: ModernCartPage,
     CheckoutPage: ModernCheckoutPage,
+    CheckoutUnavailable: ModernCheckoutUnavailable,
     OrderSuccessPage: ModernOrderSuccessPage,
     CollectionPage: ModernCollectionPage,
     CollectionsPage: ModernCollectionsPage,
@@ -712,6 +825,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     CollectionsPage: PinkCollectionsPage,
     ContactPage: PinkContactPage,
     DonatePage: PinkDonatePage,
+    FaqPage: PinkFaqPage,
     EventsPage: PinkEventsIndexPage,
     EventPage: PinkEventPage,
     VideosPage: PinkVideosPage,
@@ -726,6 +840,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: PinkOrderDetailPage,
     OrdersPage: PinkOrdersPage,
     PreferencesPage: PinkPreferencesPage,
+    SubscriptionsPage: PinkSubscriptionsPage,
+    InvoicesPage: PinkInvoicesPage,
+    RewardsPage: PinkRewardsPage,
   },
 
   // Handy Relocations — service archetype (1:1 recreation of
@@ -768,9 +885,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     SubscriptionsPage: WealthSubscriptionsPage,
     InvoicesPage: WealthInvoicesPage,
   },
-  // Dream Your Theme — service archetype (event decor / rentals / draping):
-  // no commerce slots (Default fallback); blog/faq/events/videos/donate also
-  // fall back to Default by scope.
+  // Dream Your Theme — service-led (event decor / rentals / draping) but owns
+  // the full baseline since the 2026-09-28 parity run: purchase path, content
+  // (collections, blog) and optional pages (events, videos, donate, faq).
   dream: {
     Layout: DreamLayout,
     AboutPage: DreamAboutPage,
@@ -787,6 +904,22 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     PreferencesPage: DreamPreferencesPage,
     SubscriptionsPage: DreamSubscriptionsPage,
     InvoicesPage: DreamInvoicesPage,
+    RewardsPage: DreamRewardsPage,
+    ShopPage: DreamShopPage,
+    ProductPage: DreamProductPage,
+    CollectionsPage: DreamCollectionsPage,
+    CollectionPage: DreamCollectionPage,
+    CartPage: DreamCartPage,
+    CheckoutPage: DreamCheckoutPage,
+    CheckoutUnavailable: DreamCheckoutUnavailable,
+    OrderSuccessPage: DreamOrderSuccessPage,
+    BlogPage: DreamBlogPage,
+    BlogPostPage: DreamBlogPostPage,
+    EventsPage: DreamEventsPage,
+    EventPage: DreamEventPage,
+    VideosPage: DreamVideosPage,
+    DonatePage: DreamDonatePage,
+    FaqPage: DreamFaqPage,
   },
   // Unique Monique — retail archetype (candles / soaps / body care / home care).
   // Blog, events, videos, donate and services fall back to Default by scope.
@@ -804,6 +937,13 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderSuccessPage: UmscOrderSuccessPage,
     TestimonialsPage: UmscTestimonialsPage,
     FaqPage: UmscFaqPage,
+    BlogPage: UmscBlogPage,
+    BlogPostPage: UmscBlogPostPage,
+    ServicesIndexPage: UmscServicesIndexPage,
+    EventsPage: UmscEventsPage,
+    EventPage: UmscEventPage,
+    VideosPage: UmscVideosPage,
+    DonatePage: UmscDonatePage,
     GenericPage: UmscGenericPage,
     AccountSettingsPage: UmscAccountSettingsPage,
     AccountSecurityPage: UmscAccountSecurityPage,
@@ -824,6 +964,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: NoiseBlogPostPage,
     CartPage: NoiseCartPage,
     CheckoutPage: NoiseCheckoutPage,
+    CheckoutUnavailable: NoiseCheckoutUnavailable,
     OrderSuccessPage: NoiseOrderSuccessPage,
     CollectionPage: NoiseCollectionPage,
     CollectionsPage: NoiseCollectionsPage,
@@ -832,12 +973,21 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     ProductPage: NoiseProductPage,
     ShopPage: NoiseShopPage,
     TestimonialsPage: NoiseTestimonialsPage,
+    ServicesIndexPage: NoiseServicesIndexPage,
+    EventsPage: NoiseEventsPage,
+    EventPage: NoiseEventPage,
+    VideosPage: NoiseVideosPage,
+    DonatePage: NoiseDonatePage,
+    FaqPage: NoiseFaqPage,
     AccountSettingsPage: NoiseAccountSettingsPage,
     AccountSecurityPage: NoiseAccountSecurityPage,
     AddressBookPage: NoiseAddressBookPage,
     OrderDetailPage: NoiseOrderDetailPage,
     OrdersPage: NoiseOrdersPage,
     PreferencesPage: NoisePreferencesPage,
+    SubscriptionsPage: NoiseSubscriptionsPage,
+    InvoicesPage: NoiseInvoicesPage,
+    RewardsPage: NoiseRewardsPage,
   },
 
   olive: {
@@ -865,6 +1015,12 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     RewardsPage: OliveRewardsPage,
     SubscriptionsPage: OliveSubscriptionsPage,
     InvoicesPage: OliveInvoicesPage,
+    ServicesIndexPage: OliveServicesIndexPage,
+    EventsPage: OliveEventsPage,
+    EventPage: OliveEventPage,
+    VideosPage: OliveVideosPage,
+    DonatePage: OliveDonatePage,
+    FaqPage: OliveFaqPage,
     MaintenancePage: OliveMaintenancePage,
   },
   pollen: {
@@ -874,6 +1030,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: PollenBlogPostPage,
     CartPage: PollenCartPage,
     CheckoutPage: PollenCheckoutPage,
+    CheckoutUnavailable: PollenCheckoutUnavailable,
     OrderSuccessPage: PollenOrderSuccessPage,
     CollectionPage: PollenCollectionPage,
     CollectionsPage: PollenCollectionsPage,
@@ -888,7 +1045,18 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: PollenOrderDetailPage,
     OrdersPage: PollenOrdersPage,
     PreferencesPage: PollenPreferencesPage,
+    RewardsPage: PollenRewardsPage,
+    SubscriptionsPage: PollenSubscriptionsPage,
+    InvoicesPage: PollenInvoicesPage,
     ServicesPage: PollenServicesPage,
+    ServicesIndexPage: PollenServicesIndexPage,
+    // Optional pages built on pollen's generic base (PollenGeneralLayout),
+    // with Default's data logic and `default.*` copy fields (B1.2).
+    EventsPage: PollenEventsPage,
+    EventPage: PollenEventPage,
+    DonatePage: PollenDonatePage,
+    VideosPage: PollenVideosPage,
+    FaqPage: PollenFaqPage,
   },
 
   sledge: {
@@ -898,6 +1066,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     BlogPostPage: SledgeBlogPostPage,
     CartPage: SledgeCartPage,
     CheckoutPage: SledgeCheckoutPage,
+    CheckoutUnavailable: SledgeCheckoutUnavailable,
     OrderSuccessPage: SledgeOrderSuccessPage,
     CollectionPage: SledgeCollectionPage,
     CollectionsPage: SledgeCollectionsPage,
@@ -912,6 +1081,9 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: SledgeOrderDetailPage,
     OrdersPage: SledgeOrdersPage,
     PreferencesPage: SledgePreferencesPage,
+    SubscriptionsPage: SledgeSubscriptionsPage,
+    InvoicesPage: SledgeInvoicesPage,
+    RewardsPage: SledgeRewardsPage,
   },
   vii: {
     Layout: ViiLayout,
@@ -934,9 +1106,19 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: ViiOrderDetailPage,
     OrdersPage: ViiOrdersPage,
     PreferencesPage: ViiPreferencesPage,
+    RewardsPage: ViiRewardsPage,
+    SubscriptionsPage: ViiSubscriptionsPage,
+    InvoicesPage: ViiInvoicesPage,
     TestimonialsPage: ViiTestimonialsPage,
     ServicesIndexPage: ViiServicesIndexPage,
     MaintenancePage: ViiMaintenancePage,
+    // Optional pages built on vii's generic band (ViiPageBand), with
+    // Default's data logic and `default.*` copy fields (B1.2).
+    EventsPage: ViiEventsPage,
+    EventPage: ViiEventPage,
+    VideosPage: ViiVideosPage,
+    DonatePage: ViiDonatePage,
+    FaqPage: ViiFaqPage,
   },
 };
 

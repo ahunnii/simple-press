@@ -105,9 +105,12 @@ export type TemplatePage =
 export type TemplateListItemField = {
   key: string;
   label: string;
+  /** Helper text rendered BELOW the input in the editors. Never used as a placeholder. */
   description?: string;
   type: "text" | "textarea" | "image" | "video" | "url" | "icon" | "boolean";
   placeholder?: string;
+  /** Renders "(optional)" after the label. */
+  optional?: boolean;
 };
 
 type TemplateFieldCommon = {
@@ -119,6 +122,22 @@ type TemplateFieldCommon = {
   group?: string;
   gridColumn?: string;
   placeholder?: string;
+  /** Number fields only: minimum allowed value. */
+  min?: number;
+  /** Number fields only: maximum allowed value. */
+  max?: number;
+  /** Number fields only: increment step. */
+  step?: number;
+  /** Number fields only: unit label rendered alongside the value (e.g. "px", "%"). */
+  unit?: string;
+  /** Number fields only: renders a slider with a value readout instead of a bare number input. */
+  control?: "slider";
+  /**
+   * Editors hide this field unless another field's current value equals
+   * `equals`. "Current value" means the saved value for `key`, falling back
+   * to that field's own `defaultValue` when unset.
+   */
+  visibleWhen?: { key: string; equals: string };
 };
 
 export type TemplateFieldScalarType =
@@ -144,11 +163,49 @@ export type TemplateField =
       itemSchema: TemplateListItemField[];
       minItems?: number;
       maxItems?: number;
+      /**
+       * Sub-field key whose value titles a collapsed row in the editor.
+       * Defaults to the first `text` sub-field, then the first `textarea`
+       * sub-field, when omitted.
+       */
+      summaryKey?: string;
+      /** Singular noun used for "Add <itemLabel>" / "<itemLabel> 3" labels. Defaults to "item". */
+      itemLabel?: string;
+      /**
+       * When true, the storefront falls back to built-in rows if the saved
+       * list is empty. Purely descriptive for the editor, which shows a hint
+       * — the actual fallback behaviour lives in the template's own render code.
+       * When `defaultRows` is also set, the editor displays those rows as
+       * real, editable rows instead of just a hint.
+       */
+      defaultsWhenEmpty?: boolean;
+      /**
+       * Built-in rows the storefront shows while this list is unsaved or saved
+       * empty. Same shape the editor stores (icons by NAME, every sub-field key
+       * spelled out — e.g. `description: ""`, which `genericIconRowSchema`
+       * requires). The editor displays these as real rows and saves them all on
+       * the first edit (copy-on-write). Requires `defaultsWhenEmpty: true`.
+       */
+      defaultRows?: Record<string, string>[];
     })
   | (TemplateFieldCommon & {
       type: "faq";
       minItems?: number;
       maxItems?: number;
+      /**
+       * Editor hint shown while nothing is picked. Defaults to "Showing the
+       * first N published questions." — what `resolveFaqPickerItems` does.
+       * Set it when the template does something else with an empty picker
+       * (e.g. hides the section).
+       */
+      emptyHint?: string;
+      /**
+       * True when the template still renders a legacy `{question, answer}`
+       * list saved under this key (the field used to be a typed `list`).
+       * Only changes the editor's legacy notice copy — the fallback itself
+       * lives in the template's render code.
+       */
+      rendersLegacyRows?: boolean;
     });
 
 export type RichTextFieldValue = JSONContent & {
@@ -173,13 +230,6 @@ export function getRichTextFieldValue(
 
 /** One row in a template list field; `_id` is for admin/editor stable keys. */
 export type TemplateListRow = Record<string, unknown> & { _id?: string };
-
-function newListRowId(index: number): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `row-${index}-${Date.now()}`;
-}
 
 /**
  * Row keys the templates render as an `href`.
@@ -217,15 +267,42 @@ function scrubRowLinks(row: TemplateListRow): TemplateListRow {
   return row;
 }
 
+/**
+ * Parses a raw stored list value into rows with stable `_id`s.
+ *
+ * Rows already carrying a non-empty `_id` keep it unchanged. A row without
+ * one gets the deterministic id `row-${index}` (its position in the input
+ * array) — deliberately NOT `crypto.randomUUID()`, which used to change on
+ * every call and broke dnd-kit's sortable ids plus SSR/CSR row keys on
+ * storefront pages that key by `row._id`. If `row-${index}` collides with an
+ * `_id` already present elsewhere in the same list, a numeric suffix is
+ * appended (`row-${index}-1`, `row-${index}-2`, …) until it's unique.
+ */
 export function parseTemplateListRows(raw: unknown): TemplateListRow[] {
   if (!Array.isArray(raw)) return [];
-  return raw.map((item, index) => {
-    if (!isObjectRecord(item)) {
-      return { _id: newListRowId(index) };
+
+  const items = raw.map((item) =>
+    isObjectRecord(item) ? ({ ...item } as TemplateListRow) : null,
+  );
+
+  const usedIds = new Set<string>();
+  for (const item of items) {
+    if (item && typeof item._id === "string" && item._id) {
+      usedIds.add(item._id);
     }
-    const row = { ...item } as TemplateListRow;
+  }
+
+  return items.map((item, index) => {
+    const row: TemplateListRow = item ?? {};
     if (typeof row._id !== "string" || !row._id) {
-      row._id = newListRowId(index);
+      let candidate = `row-${index}`;
+      let suffix = 1;
+      while (usedIds.has(candidate)) {
+        candidate = `row-${index}-${suffix}`;
+        suffix += 1;
+      }
+      row._id = candidate;
+      usedIds.add(candidate);
     }
     return scrubRowLinks(row);
   });
@@ -262,6 +339,256 @@ export function getListFieldValue(
   return Array.isArray(value) ? value : null;
 }
 
+/**
+ * Returns the SAVED string value for `key` from a `customFields` object, with
+ * no default applied. Unlike `getThemeFields`/`resolveTemplateFields`, this
+ * never falls back to a field's `defaultValue` — callers that need the raw
+ * saved-or-absent distinction (e.g. deciding whether to show a "not set"
+ * state) should use this instead.
+ *
+ * `customFields` is `z.any()` on the wire, so non-objects, arrays, and
+ * non-string values at `key` all resolve to `undefined`.
+ */
+export function getRawCustomFieldString(
+  customFields: unknown,
+  key: string,
+): string | undefined {
+  if (!isObjectRecord(customFields)) return undefined;
+  const value = customFields[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Collapses a string's internal whitespace/newlines into single spaces and
+ * trims the ends. Used to render multi-line `textarea` sub-field values as a
+ * single-line row summary.
+ */
+function collapseWhitespace(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Derives the collapsed-row title shown for a `list` field's row in the
+ * editors.
+ *
+ * Priority: `summaryKey`'s value (if given and non-empty after trimming) →
+ * the first non-empty `text` sub-field (declaration order in `itemSchema`) →
+ * the first non-empty `textarea` sub-field (whitespace/newlines collapsed to
+ * single spaces) → `null` when nothing usable is found. Never truncates —
+ * truncation is a CSS concern for the caller.
+ */
+export function getListRowSummary(
+  row: Record<string, unknown>,
+  itemSchema: TemplateListItemField[],
+  summaryKey?: string,
+): string | null {
+  if (summaryKey) {
+    const value = row[summaryKey];
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) return trimmed;
+    }
+  }
+
+  for (const field of itemSchema) {
+    if (field.type !== "text") continue;
+    const value = row[field.key];
+    if (typeof value !== "string") continue;
+    const trimmed = value.trim();
+    if (trimmed) return trimmed;
+  }
+
+  for (const field of itemSchema) {
+    if (field.type !== "textarea") continue;
+    const value = row[field.key];
+    if (typeof value !== "string") continue;
+    const collapsed = collapseWhitespace(value);
+    if (collapsed) return collapsed;
+  }
+
+  return null;
+}
+
+/**
+ * Template field keys retired from the field registries — no template
+ * declares them anymore — but whose values, if a site saved one before the
+ * key was removed, must keep round-tripping: the admin "custom pairs" editor
+ * hides them (there's no schema left to render an input for) while save
+ * paths preserve them untouched, and any runtime code that still reads the
+ * saved value (e.g. via `getRawCustomFieldString`) treats it as a read-only
+ * fallback rather than dead data to discard.
+ */
+export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
+  "bamboo.global.map-lat",
+  "bamboo.global.map-lng",
+  "bamboo.contact.hours",
+  // vii, retired 2026-09-25 — the data now comes from Settings (map pin,
+  // phone/email, city), Content → Branding (footer tagline, Instagram link),
+  // or Admin → Testimonials. The Instagram feed/embed pair was already
+  // declaration-free (orphaned saved values).
+  "vii.contact.map-lat",
+  "vii.contact.map-lng",
+  "vii.about.cta-phone",
+  "vii.about.cta-email",
+  "vii.global.footer-tagline",
+  "vii.global.location-tag",
+  "vii.homepage.instagram-handle",
+  "vii.homepage.testimonial-quote",
+  "vii.homepage.testimonial-author",
+  "vii.homepage.instagram-feed-url",
+  "vii.homepage.instagram-embed",
+  // vii, retired 2026-09-28 — the PDP "Shipping & returns" row split into
+  // Shipping / Returns / Questions rows (vii.product.shipping-summary,
+  // returns-summary, question-text). The two global descriptions are still
+  // read as fallbacks via getRawCustomFieldString; the link text is gone
+  // (the question text is now the link).
+  "vii.global.product-shipping-description",
+  "vii.global.product-question-description",
+  "vii.product.question-link-text",
+  // noise, retired 2026-09-25 — the wordmark's small location label now comes
+  // from Settings → General (address city) via
+  // `_templates/noise/shared/noise-location-tag.ts`, and the footer tagline
+  // now comes from Content → Branding (`SiteContent.footerText`).
+  "noise.global.location-tag",
+  "noise.global.footer-tagline",
+  // happy-bamboo, retired 2026-09-26 — orphan saved keys that were never
+  // declared as fields; hidden from the admin's custom pairs and preserved
+  // on save.
+  "happy-bamboo.about.mission-rich-content",
+  "happy-bamboo.homepage.about-body",
+  // pollen, retired 2026-09-26 — orphan saved keys with no declaration and
+  // no runtime reader; the data now comes from Settings (address, phone),
+  // Content → FAQ (the services-page `type: "faq"` picker), or Admin →
+  // Testimonials. `image-overlay-color` was declared but never read by the
+  // auth shell. Hidden from the admin's custom pairs and preserved on save.
+  "pollen.contact.address",
+  "pollen.contact.phone",
+  "pollen.global.phone-number",
+  "pollen.services.faq-question-1",
+  "pollen.services.faq-question-2",
+  "pollen.services.faq-question-3",
+  "pollen.services.faq-answer-1",
+  "pollen.services.faq-answer-2",
+  "pollen.services.faq-answer-3",
+  "pollen.services.testimonial-quote-1",
+  "pollen.services.testimonial-quote-2",
+  "pollen.services.testimonial-quote-3",
+  "pollen.services.testimonial-author-1",
+  "pollen.services.testimonial-author-2",
+  "pollen.services.testimonial-author-3",
+  "pollen.services.testimonial-title",
+  "pollen.services.testimonial-subtitle",
+  "pollen.global.image-overlay-color",
+  // olive, retired 2026-09-26 — map pin / hours come from Settings (Business), footer tagline + social links from Content → Branding (SiteContent). Saved values are read as a silent fallback.
+  "olive.contact.map-lat",
+  "olive.contact.map-lng",
+  "olive.contact.info-hours-body",
+  "olive.global.footer-tagline",
+  "olive.global.social-instagram",
+  "olive.global.social-tiktok",
+  "olive.global.social-facebook",
+  "olive.global.social-pinterest",
+  // pink, retired 2026-09-26 — the footer tagline now comes from Content →
+  // Branding (`SiteContent.footerText`; a saved `footer-blurb` is still read
+  // as a silent fallback in `_templates/pink/layout/pink-footer.tsx`). Social
+  // links (Content → Branding) and the locality tag were dropped from pink's
+  // fields in Jul/Aug 2026 without being listed here; any saved values stay
+  // hidden from the admin's custom pairs and preserved on save.
+  "pink.global.footer-blurb",
+  "pink.global.social-links",
+  "pink.global.locality-tag",
+  // dream (2026-09-26) — email/phone/hours come from Settings (Business),
+  // the footer tagline from Content → Branding (`SiteContent.footerText`),
+  // and the announcement bar from Content → Announcements (platform banner).
+  // Saved values are read as a silent fallback in
+  // `_templates/dream/shared/dream-contact-details.ts` and
+  // `_templates/dream/layout/dream-layout.tsx`.
+  "dream.global.announcement-text",
+  "dream.global.announcement-link-label",
+  "dream.global.announcement-url",
+  "dream.global.footer-tagline",
+  "dream.global.contact-email",
+  "dream.global.contact-phone",
+  "dream.global.contact-hours",
+  // sledge, retired 2026-09-26 — the footer's location tag now comes from
+  // Settings → General (address city) via
+  // `_templates/sledge/shared/sledge-location-tag.ts`.
+  "sledge.global.location-tag",
+  // umsc, retired 2026-09-26 — phone and hours come from Settings
+  // (Business), the footer tagline and Instagram/Facebook/TikTok links from
+  // Content → Branding (`SiteContent.footerText` / `socialLinks`), the
+  // announcement bar from Content → Announcements (platform banner), and the
+  // homepage featured review from Admin → Testimonials. Saved values are read
+  // as a silent fallback in `_templates/umsc/shared/umsc-contact-details.ts`,
+  // `_templates/umsc/layout/umsc-layout.tsx` and
+  // `_templates/umsc/homepage/umsc-homepage.tsx`.
+  "umsc.global.announcement-text",
+  "umsc.global.announcement-link-label",
+  "umsc.global.announcement-link-url",
+  "umsc.global.footer-tagline",
+  "umsc.global.customer-service-phone",
+  "umsc.global.instagram-url",
+  "umsc.global.facebook-url",
+  "umsc.global.tiktok-url",
+  "umsc.contact.hours",
+  "umsc.homepage.reviews-override-quote",
+  "umsc.homepage.reviews-override-name",
+  // dark-trend, retired 2026-09-27.
+  // - `about.feature-N-header` / `-description`: the about page's numbered
+  //   cards from before the `dark-trend.about.features-list` list field.
+  //   Never declared, but a live store saved them; while no list is saved
+  //   they're read as a silent fallback in
+  //   `_templates/dark-trend/about/dark-trend-about-features.ts`.
+  // - `second-section-image`: declared on the homepage's featured-product
+  //   section but never rendered (the section shows the first product's
+  //   photo instead); declaration removed.
+  "dark-trend.about.feature-1-header",
+  "dark-trend.about.feature-1-description",
+  "dark-trend.about.feature-2-header",
+  "dark-trend.about.feature-2-description",
+  "dark-trend.about.feature-3-header",
+  "dark-trend.about.feature-3-description",
+  "dark-trend.about.feature-4-header",
+  "dark-trend.about.feature-4-description",
+  "dark-trend.second-section-image",
+  // elegant, retired 2026-09-27 — contact email/phone/address come from
+  // Settings (Business); saved overrides are read as a silent fallback in
+  // `_templates/elegant/contact/elegant-contact-page.tsx`. The tagline, the
+  // homepage feature-1..4 cards, and the contact info heading were declared
+  // but never rendered; `hero-use-video` was an orphan saved value.
+  "elegant.contact.email",
+  "elegant.contact.phone",
+  "elegant.contact.address",
+  "elegant.contact.info-title",
+  "elegant.tagline",
+  "elegant.homepage.feature-1-title",
+  "elegant.homepage.feature-1-description",
+  "elegant.homepage.feature-2-title",
+  "elegant.homepage.feature-2-description",
+  "elegant.homepage.feature-3-title",
+  "elegant.homepage.feature-3-description",
+  "elegant.homepage.feature-4-title",
+  "elegant.homepage.feature-4-description",
+  "elegant.homepage.hero-use-video",
+  // modern, retired 2026-09-27 — orphan saved keys with no declaration and
+  // no runtime reader; the announcement bar now comes from the platform
+  // banner and FAQ visibility from the contact.questions hide toggle.
+  // Hidden from the admin's custom pairs and preserved on save.
+  "modern.banner.text",
+  "modern.contact.faq-enabled",
+  // default, retired 2026-09-27 — the homepage testimonial now comes from
+  // Admin → Testimonials; a quote/author saved before then is still read as
+  // a silent fallback in `_templates/default/homepage/default-homepage.tsx`.
+  // `image-overlay-color` was declared but never read by the auth shell.
+  "default.homepage.testimonial-quote",
+  "default.homepage.testimonial-author",
+  "default.global.image-overlay-color",
+]);
+
+export function isRetiredTemplateKey(key: string): boolean {
+  return RETIRED_TEMPLATE_KEYS.has(key);
+}
+
 const genericIconRowSchema = z
   .object({
     icon: z.string(),
@@ -292,10 +619,17 @@ export const genericFAQRowSchema = z
   })
   .passthrough();
 
+/**
+ * Trust-badge rows store their text under `label` — except the `default`
+ * template, whose list has always saved it under `title`. Renaming that
+ * sub-field would orphan owners' saved rows, so the parser accepts either
+ * (`label` wins) and drops rows with no text.
+ */
 export const genericTrustBadgeRowSchema = z
   .object({
     icon: z.string().optional(),
-    label: z.string(),
+    label: z.string().optional(),
+    title: z.string().optional(),
   })
   .passthrough();
 
@@ -348,6 +682,18 @@ export function parseTemplateIconListRows(
   return out.length > 0 ? out : (defaultList ?? null);
 }
 
+/**
+ * Re-exported from `~/lib/lucide-template-icons`, where it actually lives.
+ * See that module for why: a template's field-definition module (e.g.
+ * `_templates/bamboo/about/index.tsx`) needs to call this while building its
+ * `defaultRows`, but importing it from *this* module would pull in every
+ * template's root `index.ts` (via `TEMPLATE_FIELDS`/`TEMPLATE_FIELD_GROUPS`
+ * below) — including the very module doing the importing, a circular import.
+ * Field-definition modules should import `iconRowsFromDefaults` directly from
+ * `~/lib/lucide-template-icons` instead of from here.
+ */
+export { iconRowsFromDefaults } from "~/lib/lucide-template-icons";
+
 export function parseTemplateTrustBadgesListRows(
   raw: unknown,
   defaultList?: GenericTrustBadgeRow[],
@@ -358,7 +704,9 @@ export function parseTemplateTrustBadgesListRows(
   for (const row of raw) {
     const parsed = genericTrustBadgeRowSchema.safeParse(row);
     if (!parsed.success) continue;
-    const { icon, label } = parsed.data;
+    const { icon, label: savedLabel, title } = parsed.data;
+    const label = savedLabel?.trim() ? savedLabel : (title ?? "");
+    if (!label.trim()) continue;
     const Icon = icon ? getLucideTemplateIcon(icon) : undefined;
     out.push({ icon: Icon ?? undefined, label });
   }
@@ -642,6 +990,47 @@ export function getGroupMetadata(
   groupId: string,
 ): TemplateFieldGroup | undefined {
   return TEMPLATE_FIELD_GROUPS[templateId]?.find((g) => g.id === groupId);
+}
+
+/**
+ * Indexes a flat field list by `key`. Used to resolve a `visibleWhen`
+ * condition's controlling field even when it lives in a different
+ * group/page grouping than the field being tested — e.g. `fields` passed to
+ * `isFieldVisible` may be scoped to one group, while `fieldsByKey` here
+ * should span the whole template (or at least the whole page).
+ */
+export function buildFieldsByKey(
+  fields: TemplateField[],
+): Record<string, TemplateField> {
+  const byKey: Record<string, TemplateField> = {};
+  for (const field of fields) byKey[field.key] = field;
+  return byKey;
+}
+
+/**
+ * Resolves whether `field` should be shown to the owner, given the current
+ * draft/saved values map and a `key`-indexed lookup of every field the
+ * template defines (see `buildFieldsByKey`).
+ *
+ * A field with no `visibleWhen` is always visible. Otherwise the controlling
+ * field's "current value" is its saved value in `values`, falling back to
+ * that field's own `defaultValue`, falling back to `""` — matching the
+ * contract documented on `TemplateFieldCommon.visibleWhen`.
+ */
+export function isFieldVisible(
+  field: TemplateField,
+  values: Record<string, unknown>,
+  fieldsByKey: Record<string, TemplateField>,
+): boolean {
+  const condition = field.visibleWhen;
+  if (!condition) return true;
+
+  const raw = values[condition.key];
+  const saved = typeof raw === "string" ? raw : undefined;
+  const controlling = fieldsByKey[condition.key];
+  const resolved = saved ?? controlling?.defaultValue ?? "";
+
+  return resolved === condition.equals;
 }
 
 // Helper to group fields by page

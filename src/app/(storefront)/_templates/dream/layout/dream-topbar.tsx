@@ -15,10 +15,10 @@ type DreamTopbarProps = {
 
 /**
  * 34px ink band, gold-soft text, dismissible (design.md "Chrome › Topbar").
- * Driven by the `dream.global.announcement-*` fields — `DreamLayout`
- * resolves them and passes the result in. This is the fallback path: when
- * the platform site-banner feature (`resolveBanner`) has a banner
- * configured, `DreamLayout` renders `DreamPlatformBanner` here instead.
+ * Legacy path only: `DreamLayout` renders this from an announcement an owner
+ * saved under the retired `dream.global.announcement-*` fields, and only
+ * when no platform banner (`resolveBanner`, rendered by
+ * `DreamPlatformBanner`) is configured.
  * Renders nothing when `text` is blank; dismissal persists per exact
  * text value (`DismissibleBanner`'s `version`), so an owner editing the
  * copy naturally re-shows it to viewers who dismissed the old text.

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import type { SledgeTextRow } from "./text-list";
 import { formatPrice } from "~/lib/prices";
 import {
   getAmountUntilFreeShipping,
@@ -31,9 +32,17 @@ type Props = {
     offersInStorePickup: boolean;
     siteContent: { primaryColor: string | null } | null;
   };
+  /** Resolved `sledge.cart.empty-text`. */
+  emptyText: string;
+  /** Resolved `sledge.cart.reassurance-lines` rows (plain data). */
+  reassuranceLines: SledgeTextRow[];
 };
 
-export function SledgeCartContents({ business }: Props) {
+export function SledgeCartContents({
+  business,
+  emptyText,
+  reassuranceLines,
+}: Props) {
   const { items, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
@@ -54,7 +63,8 @@ export function SledgeCartContents({ business }: Props) {
           <SledgeEmptyState
             bare
             className="py-20"
-            message="Your bag is empty. Browse the shop and add pieces you love."
+            message={emptyText}
+            messageFieldKey="sledge.cart.empty-text"
             action={
               <Link href="/shop" className="sl-btn text-xs">
                 Browse Shop →
@@ -147,7 +157,10 @@ export function SledgeCartContents({ business }: Props) {
 
           <aside className="min-w-0">
             <div className="lg:sticky lg:top-28">
-              <SledgeCartSummary shippingConfig={shippingConfig} />
+              <SledgeCartSummary
+                shippingConfig={shippingConfig}
+                reassuranceLines={reassuranceLines}
+              />
             </div>
           </aside>
         </div>

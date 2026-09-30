@@ -5,11 +5,14 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
+import { UMSC_CART_DEFAULT_DOORS } from "./cart-fields";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
 import {
@@ -17,16 +20,14 @@ import {
   UmscImageFallback,
 } from "../shared/umsc-image-fallback";
 
-const DEFAULT_DOORS: { title: string; link: string; image?: string }[] = [
-  { title: "Candles", link: "/collections/candles" },
-  { title: "Soaps", link: "/collections/soaps" },
-  { title: "Body Care", link: "/collections/body-care" },
-  { title: "Home Care", link: "/collections/home-care" },
-];
+// Re-exported so the pre-migration import path (and the snapshot test) keep
+// working — the rows themselves now live in `./cart-fields.ts`'s `defaultRows`.
+export { UMSC_CART_DEFAULT_DOORS };
 
 type Props = {
   emptyHeading: string;
   emptyBody: string;
+  emptyShopAllLabel: string;
   continueShoppingLabel: string;
   checkoutCta: string;
   /** Parsed `umsc.cart.empty-doors` list rows — empty when the owner hasn't saved rows. */
@@ -36,12 +37,20 @@ type Props = {
 export function UmscCartContents({
   emptyHeading,
   emptyBody,
+  emptyShopAllLabel,
   continueShoppingLabel,
   checkoutCta,
   doorRows,
 }: Props) {
   const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
     useCart();
+  // B2.1/B2.5 (PF15, PF16): the empty-bag doors, the "Shop all" way out, the
+  // populated bag's "Continue shopping" link, and the checkout CTA all point
+  // at routes that 404 when their feature is off — every one of them must be
+  // flag-checked, never just re-pointed.
+  const { isEnabled } = useStorefrontFlags();
+  const shopFlag = navHrefFlag("/shop");
+  const shopEnabled = shopFlag === null || isEnabled(shopFlag);
 
   // ── Hydration guard — neutral skeleton prevents empty→filled flash ──────────
   if (!isHydrated) {
@@ -59,20 +68,31 @@ export function UmscCartContents({
 
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (items.length === 0) {
-    const doors =
+    const rawDoors =
       doorRows.length > 0
         ? doorRows.slice(0, 4).map((row, i) => ({
             title:
               typeof row.title === "string" && row.title
                 ? row.title
-                : (DEFAULT_DOORS[i]?.title ?? ""),
+                : (UMSC_CART_DEFAULT_DOORS[i]?.title ?? ""),
             link:
               typeof row.link === "string" && row.link
                 ? row.link
-                : (DEFAULT_DOORS[i]?.link ?? "/shop"),
+                : (UMSC_CART_DEFAULT_DOORS[i]?.link ?? "/shop"),
             image: typeof row.image === "string" ? row.image : undefined,
           }))
-        : DEFAULT_DOORS;
+        : UMSC_CART_DEFAULT_DOORS;
+
+    // PF15 / B2.5: a door whose link is gated off 404s on the demo (and on
+    // any store without that collection) — hide it, never swap the
+    // destination. `rowIndex` keeps `listItemAttr` pointed at the door's
+    // real position in the saved list after filtering.
+    const doors = rawDoors
+      .map((door, rowIndex) => ({ ...door, rowIndex }))
+      .filter((door) => {
+        const flag = navHrefFlag(door.link);
+        return flag === null || isEnabled(flag);
+      });
 
     return (
       <div className="flex flex-col items-center py-16 text-center">
@@ -94,17 +114,36 @@ export function UmscCartContents({
           </p>
         )}
 
-        <div className="mt-10 grid w-full max-w-[880px] grid-cols-2 gap-5 text-left sm:grid-cols-4">
-          {doors.map((door) => (
-            <UmscCollectionDoor
-              key={door.title}
-              href={door.link}
-              title={door.title}
-              image={door.image}
-              aspect="3 / 2"
-            />
-          ))}
-        </div>
+        {shopEnabled && emptyShopAllLabel && (
+          <UmscButton
+            as="link"
+            href="/shop"
+            variant="gold"
+            showArrow={false}
+            fieldKey="umsc.cart.empty-shop-all-label"
+            className="mt-8"
+          >
+            {emptyShopAllLabel}
+          </UmscButton>
+        )}
+
+        {doors.length > 0 && (
+          <div className="mt-10 grid w-full max-w-[880px] grid-cols-2 gap-5 text-left sm:grid-cols-4">
+            {doors.map((door) => (
+              <div
+                key={door.title}
+                {...listItemAttr("umsc.cart.empty-doors", door.rowIndex)}
+              >
+                <UmscCollectionDoor
+                  href={door.link}
+                  title={door.title}
+                  image={door.image}
+                  aspect="3 / 2"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -255,25 +294,32 @@ export function UmscCartContents({
             </span>
           </div>
 
-          <UmscButton
-            as="link"
-            href="/checkout"
-            variant="gold"
-            showArrow={false}
-            fieldKey="umsc.cart.checkout-cta"
-            className="w-full justify-center"
-          >
-            {checkoutCta}
-          </UmscButton>
+          {/* PF16 / B7.4: hidden (not disabled) when checkout is off — the
+              route 404s either way, so there is no destination to send the
+              shopper to. */}
+          {isEnabled("checkout") && (
+            <UmscButton
+              as="link"
+              href="/checkout"
+              variant="gold"
+              showArrow={false}
+              fieldKey="umsc.cart.checkout-cta"
+              className="w-full justify-center"
+            >
+              {checkoutCta}
+            </UmscButton>
+          )}
 
-          <Link
-            href="/shop"
-            className="umsc-sans mt-4 block text-center text-[13px] text-[var(--umsc-muted)] underline underline-offset-[3px] hover:text-[var(--umsc-ink)]"
-          >
-            <span {...fieldAttr("umsc.cart.continue-shopping")}>
-              {continueShoppingLabel}
-            </span>
-          </Link>
+          {shopEnabled && (
+            <Link
+              href="/shop"
+              className="umsc-sans mt-4 block text-center text-[13px] text-[var(--umsc-muted)] underline underline-offset-[3px] hover:text-[var(--umsc-ink)]"
+            >
+              <span {...fieldAttr("umsc.cart.continue-shopping")}>
+                {continueShoppingLabel}
+              </span>
+            </Link>
+          )}
         </div>
       </aside>
     </div>

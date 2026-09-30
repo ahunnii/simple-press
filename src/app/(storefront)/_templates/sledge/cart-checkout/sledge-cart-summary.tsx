@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 
+import type { SledgeTextRow } from "./text-list";
 import type { ShippingConfig } from "~/lib/shipping-utils";
+import { listItemAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
   calculateShipping,
@@ -12,17 +14,18 @@ import {
 } from "~/lib/shipping-utils";
 import { useCart } from "~/providers/cart-context";
 
-const REASSURANCE = [
-  { icon: "✓", text: "Free shipping on qualifying orders" },
-  { icon: "✱", text: "Each piece handcrafted with care" },
-  { icon: "↺", text: "All sales final — order what you love" },
-] as const;
+import {
+  SLEDGE_CART_REASSURANCE_KEY,
+  sledgeReassuranceGlyph,
+} from "./cart-fields";
 
 type Props = {
   shippingConfig: ShippingConfig;
+  /** Resolved `sledge.cart.reassurance-lines` rows (plain data). */
+  reassuranceLines: SledgeTextRow[];
 };
 
-export function SledgeCartSummary({ shippingConfig }: Props) {
+export function SledgeCartSummary({ shippingConfig, reassuranceLines }: Props) {
   const { subtotal, itemCount } = useCart();
   // Zone+weight rates depend on the destination address, which isn't known in
   // the cart — defer to checkout rather than showing a misleading "Free".
@@ -125,22 +128,28 @@ export function SledgeCartSummary({ shippingConfig }: Props) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 px-6 pb-6">
-        {REASSURANCE.map((note) => (
-          <div key={note.icon} className="flex items-start gap-2.5">
-            {/* N-1: decorative glyph */}
-            <span
-              aria-hidden="true"
-              className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
+      {reassuranceLines.length > 0 ? (
+        <div className="grid grid-cols-1 gap-3 px-6 pb-6">
+          {reassuranceLines.map((note, position) => (
+            <div
+              key={note.index}
+              {...listItemAttr(SLEDGE_CART_REASSURANCE_KEY, note.index)}
+              className="flex items-start gap-2.5"
             >
-              {note.icon}
-            </span>
-            <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">
-              {note.text}
-            </p>
-          </div>
-        ))}
-      </div>
+              {/* N-1: decorative glyph */}
+              <span
+                aria-hidden="true"
+                className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
+              >
+                {sledgeReassuranceGlyph(position)}
+              </span>
+              <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">
+                {note.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

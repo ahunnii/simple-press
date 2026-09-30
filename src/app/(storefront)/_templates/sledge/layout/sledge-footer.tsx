@@ -3,12 +3,10 @@ import Link from "next/link";
 import type { DefaultFooterTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 import { resolveFields } from "../index";
+import { resolveSledgeLocationTag } from "../shared/sledge-location-tag";
+import { SledgeSocialLinks } from "../shared/sledge-social-links";
 
 export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
   const name = business?.name ?? "";
@@ -18,30 +16,15 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
     | undefined;
   const g = resolveFields(customFields, [
     "sledge.global.footer-tagline",
-    "sledge.global.location-tag",
+    "sledge.global.footer-notice-heading",
   ]);
 
-  // Default notice for "all sales final" — sourced from the editable footer-tagline field
-  const noticeText =
-    g["sledge.global.footer-tagline"] ??
-    "All sales are final. Each piece is made with love and care — please review sizing and details before purchasing. Questions? Reach out before you buy!";
-  const locationTag = g["sledge.global.location-tag"] ?? "";
+  const noticeHeading = g["sledge.global.footer-notice-heading"] ?? "";
+  const noticeText = g["sledge.global.footer-tagline"] ?? "";
+  const hasNotice = noticeHeading.trim() || noticeText.trim();
+  const locationTag = resolveSledgeLocationTag(business, customFields);
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-      }
-    | undefined;
-
-  const hasSocial =
-    socialLinks?.instagram ??
-    socialLinks?.facebook ??
-    socialLinks?.tiktok ??
-    socialLinks?.youtube;
+  const socialLinks = business?.siteContent?.socialLinks;
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
@@ -53,63 +36,34 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
       {/* ── Main block ── */}
       <div className="sl-container-wide mx-auto px-7 pt-16 pb-10">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:items-center">
-          {/* ── Left: Heads Up heading + notice ── */}
-          <div className="col-span-2">
-            <h2 className="sl-footer-heading font-heading mb-4 leading-tight">
-              Heads Up!
-            </h2>
+          {/* ── Left: notice heading + notice text ── */}
+          {hasNotice ? (
+            <div className="col-span-2">
+              {noticeHeading.trim() ? (
+                <h2
+                  className="sl-footer-heading font-heading mb-4 leading-tight"
+                  {...fieldAttr("sledge.global.footer-notice-heading")}
+                >
+                  {noticeHeading}
+                </h2>
+              ) : null}
 
-            <div>
-              <p
-                className="font-sans text-lg leading-[1.75] whitespace-pre-wrap text-white/80"
-                {...fieldAttr("sledge.global.footer-tagline")}
-              >
-                {noticeText}
-              </p>
+              {noticeText.trim() ? (
+                <p
+                  className="font-sans text-lg leading-[1.75] whitespace-pre-wrap text-white/80"
+                  {...fieldAttr("sledge.global.footer-tagline")}
+                >
+                  {noticeText}
+                </p>
+              ) : null}
             </div>
-          </div>
+          ) : null}
 
           {/* ── Right: social icons ── */}
-          {hasSocial && (
-            <div className="flex flex-wrap items-start gap-3 md:justify-end">
-              {socialLinks?.instagram && (
-                <a
-                  href={socialLinks.instagram}
-                  aria-label="Instagram"
-                  className="sl-social-btn transition-opacity hover:opacity-70"
-                >
-                  <InstagramIcon className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.facebook && (
-                <a
-                  href={socialLinks.facebook}
-                  aria-label="Facebook"
-                  className="sl-social-btn transition-opacity hover:opacity-70"
-                >
-                  <FacebookIcon className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.tiktok && (
-                <a
-                  href={socialLinks.tiktok}
-                  aria-label="TikTok"
-                  className="sl-social-btn transition-opacity hover:opacity-70"
-                >
-                  <TikTokIcon className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.youtube && (
-                <a
-                  href={socialLinks.youtube}
-                  aria-label="YouTube"
-                  className="sl-social-btn transition-opacity hover:opacity-70"
-                >
-                  <YouTubeIcon className="h-5 w-5" />
-                </a>
-              )}
-            </div>
-          )}
+          <SledgeSocialLinks
+            socialLinks={socialLinks}
+            className="md:justify-end"
+          />
         </div>
       </div>
 

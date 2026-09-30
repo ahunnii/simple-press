@@ -2,17 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { isSectionVisible } from "~/lib/sp-meta";
 import {
-  getListFieldValue,
-  parseTemplateTextListRows,
-} from "~/lib/template-fields";
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { Button } from "~/components/ui/button";
 
-import { DEFAULT_DARK_TREND_FEATURES } from ".";
 import { resolveFields } from "..";
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
+import {
+  DARK_TREND_ABOUT_FEATURES_KEY,
+  resolveDarkTrendAboutFeatures,
+} from "./dark-trend-about-features";
 
 export function DarkTrendAboutPage({
   business,
@@ -31,13 +34,22 @@ export function DarkTrendAboutPage({
     "dark-trend.about.cta-button-link",
   ]);
 
-  const featuresList = parseTemplateTextListRows(
-    getListFieldValue(
-      business?.siteContent?.customFields,
-      "dark-trend.about.features-list",
-    ),
-    DEFAULT_DARK_TREND_FEATURES,
+  const featuresList = resolveDarkTrendAboutFeatures(
+    business?.siteContent?.customFields,
   );
+
+  const firstImageRaw = f["dark-trend.about.first-image"] ?? "";
+  const firstImage = firstImageRaw.trim() ? firstImageRaw : "/placeholder.svg";
+  const secondImageRaw = f["dark-trend.about.second-image"] ?? "";
+  const secondImage = secondImageRaw.trim()
+    ? secondImageRaw
+    : "/placeholder.svg";
+  const buttonText = f["dark-trend.about.button"] ?? "";
+  const buttonLink = f["dark-trend.about.button-link"] ?? "";
+  const showButton = !!buttonText.trim() && !!buttonLink.trim();
+  const ctaButtonText = f["dark-trend.about.cta-button-text"] ?? "";
+  const ctaButtonLink = f["dark-trend.about.cta-button-link"] ?? "";
+  const showCtaButton = !!ctaButtonText.trim() && !!ctaButtonLink.trim();
 
   return (
     <DarkTrendGeneralLayout title="About Us">
@@ -50,7 +62,7 @@ export function DarkTrendAboutPage({
           {/* N-2: decorative owner-configurable image → alt="" */}
           <div className="relative aspect-square overflow-hidden rounded-sm bg-linear-to-br from-purple-600 to-blue-500">
             <Image
-              src={f["dark-trend.about.first-image"]!}
+              src={firstImage}
               alt=""
               fill
               className="object-cover"
@@ -78,8 +90,12 @@ export function DarkTrendAboutPage({
 
             {/* Feature List */}
             <div className="space-y-6">
-              {featuresList?.map((feature, index) => (
-                <div className="flex gap-4" key={index}>
+              {featuresList.map((feature, index) => (
+                <div
+                  className="flex gap-4"
+                  key={index}
+                  {...listItemAttr(DARK_TREND_ABOUT_FEATURES_KEY, index)}
+                >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
                     {/* S-11: text-purple-500 → text-purple-400 for small text */}
                     <span className="text-xl font-bold text-purple-400">
@@ -88,7 +104,7 @@ export function DarkTrendAboutPage({
                   </div>
                   <div>
                     <h3 className="mb-2 text-xl font-semibold text-white">
-                      {feature?.title}
+                      {feature.title}
                     </h3>
                     <p className="text-white/70">{feature.description}</p>
                   </div>
@@ -97,17 +113,19 @@ export function DarkTrendAboutPage({
             </div>
 
             {/* S-11: violet-600 */}
-            <Button
-              asChild
-              className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
-            >
-              <Link
-                href={f["dark-trend.about.button-link"]!}
-                {...fieldAttr("dark-trend.about.button")}
+            {showButton && (
+              <Button
+                asChild
+                className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
               >
-                {f["dark-trend.about.button"]}
-              </Link>
-            </Button>
+                <Link
+                  href={buttonLink}
+                  {...fieldAttr("dark-trend.about.button")}
+                >
+                  {buttonText}
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -135,23 +153,25 @@ export function DarkTrendAboutPage({
                 {f["dark-trend.about.cta-description"]}
               </p>
               {/* S-11: violet-600 */}
-              <Button
-                asChild
-                className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
-              >
-                <Link
-                  href={f["dark-trend.about.cta-button-link"]!}
-                  {...fieldAttr("dark-trend.about.cta-button-text")}
+              {showCtaButton && (
+                <Button
+                  asChild
+                  className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
                 >
-                  {f["dark-trend.about.cta-button-text"]}
-                </Link>
-              </Button>
+                  <Link
+                    href={ctaButtonLink}
+                    {...fieldAttr("dark-trend.about.cta-button-text")}
+                  >
+                    {ctaButtonText}
+                  </Link>
+                </Button>
+              )}
             </div>
 
             {/* N-2: decorative owner-configurable image → alt="" */}
             <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-zinc-900">
               <Image
-                src={f["dark-trend.about.second-image"]!}
+                src={secondImage}
                 alt=""
                 fill
                 className="object-cover"

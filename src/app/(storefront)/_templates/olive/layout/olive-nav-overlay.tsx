@@ -4,10 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, Search, X } from "lucide-react";
+import { ChevronDown, Heart, Search, X } from "lucide-react";
 
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
+import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
 import { oliveChipToken } from "../shared/olive-color";
 import { OliveCartButton } from "./olive-cart-button";
@@ -19,11 +26,6 @@ export type OliveNavCollection = {
   slug: string;
 };
 
-export type OliveNavLink = {
-  label: string;
-  href: string;
-};
-
 type OliveNavOverlayProps = {
   /** DOM id — the header's hamburger points `aria-controls` at it. */
   id: string;
@@ -31,7 +33,12 @@ type OliveNavOverlayProps = {
   onClose: () => void;
   /** The hamburger that opened it, so focus goes home on close. */
   triggerRef: React.RefObject<HTMLButtonElement | null>;
-  links: OliveNavLink[];
+  /** The header's nav — the same resolved, flag-filtered array. */
+  navItems: NavItem[];
+  /** Index of the `/shop` item that owns the collections block (-1: none). */
+  shopIndex: number;
+  /** Index of the current top-level item (-1: none), from the header. */
+  activeIndex: number;
   collections: OliveNavCollection[];
   businessName: string;
   logoUrl?: string | null;
@@ -41,6 +48,10 @@ type OliveNavOverlayProps = {
   wishlistEnabled: boolean;
   productsEnabled: boolean;
   collectionsEnabled: boolean;
+  /** `cart` flag — the bag link 404s without it. */
+  cartEnabled: boolean;
+  /** Business flag check, for the account block's flag-gated links. */
+  isEnabled: (flag: string) => boolean;
 };
 
 /** Exit duration; must match the closing transition on `.olive-nav-overlay`. */
@@ -52,6 +63,12 @@ const EXIT_MS = 240;
  * category chips, an Account section underneath, and the utilities (search,
  * wishlist, bag) kept along the bottom edge.
  *
+ * Nav parents open as an accordion (their children indented underneath, never
+ * flattened into siblings). The trigger is a button, so a group with an empty
+ * href is a label rather than a dead link; a parent's own href is the first
+ * entry in its list (`navGroupEntries`). The collections block belongs to the
+ * `/shop` item, the same way the desktop Shop panel does.
+ *
  * Focus trap, inert siblings, scroll lock and escape are structurally the
  * same mechanics as `vii/layout/vii-header.tsx`'s dialog and
  * `wealth/layout/wealth-nav-overlay.tsx`. Under reduced motion the card is
@@ -62,7 +79,9 @@ export function OliveNavOverlay({
   open,
   onClose,
   triggerRef,
-  links,
+  navItems,
+  shopIndex,
+  activeIndex,
   collections,
   businessName,
   logoUrl,
@@ -72,6 +91,8 @@ export function OliveNavOverlay({
   wishlistEnabled,
   productsEnabled,
   collectionsEnabled,
+  cartEnabled,
+  isEnabled,
 }: OliveNavOverlayProps) {
   const pathname = usePathname();
   const reduced = useReducedMotion();
@@ -80,12 +101,8 @@ export function OliveNavOverlay({
   const dialogRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
 
-  const isActive = (href: string) => {
-    if (!href || href === "#") return false;
-    return href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
-  };
+  /** The one expanded accordion group, if any. */
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   // ── Presence + entrance/exit phases ─────────────────────────────────────
   const [present, setPresent] = useState(open);
@@ -95,6 +112,12 @@ export function OliveNavOverlay({
     if (open) {
       setPresent(true);
       setState("enter");
+      // Open on the current page's group, so it is visible without a tap.
+      setExpanded(
+        activeIndex !== -1 && navItems[activeIndex]?.children?.length
+          ? activeIndex
+          : null,
+      );
       return;
     }
     if (wasOpenRef.current) {
@@ -103,6 +126,8 @@ export function OliveNavOverlay({
       return () => clearTimeout(timer);
     }
     setPresent(false);
+    // Only the open/close transition re-seeds the accordion.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, reduced]);
 
   // Arm the entrance one painted frame after the hidden state lands, so the
@@ -205,7 +230,13 @@ export function OliveNavOverlay({
 
   if (!present) return null;
 
-  const showCollections = collectionsEnabled && collections.length > 0;
+  const showCollections =
+    shopIndex !== -1 && collectionsEnabled && collections.length > 0;
+  const collectionHrefs = collections.map((collection) => ({
+    label: collection.name,
+    href: `/collections/${collection.slug}`,
+  }));
+  const activeCollection = activeEntryIndex(pathname, collectionHrefs);
 
   return (
     <div
@@ -264,18 +295,102 @@ export function OliveNavOverlay({
         aria-label="Mobile navigation"
       >
         <ul className="m-0 flex list-none flex-col p-0">
-          {links.map((link) => {
-            const active = isActive(link.href);
+          {navItems.map((item, index) => {
+            const current = index === activeIndex;
+
+            if (item.children?.length) {
+              const isExpanded = expanded === index;
+              const listId = `${id}-group-${index}`;
+              const entries = navGroupEntries(item);
+              const activeEntry = current
+                ? activeEntryIndex(pathname, entries)
+                : -1;
+              return (
+                <li key={`${index}-${item.label}`}>
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={listId}
+                    onClick={() => setExpanded(isExpanded ? null : index)}
+                    data-current={current ? "true" : undefined}
+                    className="olive-nav-overlay-link"
+                    style={{
+                      display: "flex",
+                      width: "100%",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "1rem",
+                      textAlign: "left",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {item.label}
+                    <ChevronDown
+                      className={cn(
+                        "h-5 w-5 shrink-0",
+                        !reduced && "transition-transform duration-200",
+                        isExpanded && "rotate-180",
+                      )}
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  {isExpanded ? (
+                    <ul
+                      id={listId}
+                      className="m-0 mb-3 flex list-none flex-col p-0 pl-4"
+                      style={{ borderLeft: "1px solid var(--olive-hairline)" }}
+                    >
+                      {entries.map((entry, j) => {
+                        const active = j === activeEntry;
+                        return (
+                          <li key={`${j}-${entry.href}-${entry.label}`}>
+                            <Link
+                              href={entry.href}
+                              {...externalLinkProps(entry.external)}
+                              onClick={onClose}
+                              aria-current={active ? "page" : undefined}
+                              className="olive-nav-overlay-sublink"
+                              style={
+                                active
+                                  ? {
+                                      color: "var(--olive-leaf)",
+                                      fontWeight: 500,
+                                    }
+                                  : undefined
+                              }
+                            >
+                              {entry.label}
+                              {entry.external ? (
+                                <span className="sr-only">
+                                  {" "}
+                                  (opens in new tab)
+                                </span>
+                              ) : null}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            }
+
             return (
-              <li key={link.href + link.label}>
+              <li key={`${index}-${item.label}`}>
                 <Link
-                  href={link.href}
+                  href={item.href}
+                  {...externalLinkProps(item.external)}
                   onClick={onClose}
-                  aria-current={active ? "page" : undefined}
-                  data-current={active ? "true" : undefined}
+                  aria-current={current ? "page" : undefined}
+                  data-current={current ? "true" : undefined}
                   className="olive-nav-overlay-link"
                 >
-                  {link.label}
+                  {item.label}
+                  {item.external ? (
+                    <span className="sr-only"> (opens in new tab)</span>
+                  ) : null}
                 </Link>
               </li>
             );
@@ -291,7 +406,7 @@ export function OliveNavOverlay({
             <ul className="m-0 mt-3 grid list-none grid-cols-1 gap-x-6 p-0 sm:grid-cols-2">
               {collections.map((collection, index) => {
                 const href = `/collections/${collection.slug}`;
-                const active = isActive(href);
+                const active = index === activeCollection;
                 return (
                   <li key={collection.id}>
                     <Link
@@ -346,6 +461,7 @@ export function OliveNavOverlay({
               <OliveNavOverlayAccount
                 initialSession={initialSession}
                 accountsEnabled={accountsEnabled}
+                isEnabled={isEnabled}
                 onClose={onClose}
               />
             </div>
@@ -387,7 +503,7 @@ export function OliveNavOverlay({
               />
             </Link>
           ) : null}
-          {productsEnabled ? <OliveCartButton onNavigate={onClose} /> : null}
+          {cartEnabled ? <OliveCartButton onNavigate={onClose} /> : null}
         </div>
       </div>
     </div>

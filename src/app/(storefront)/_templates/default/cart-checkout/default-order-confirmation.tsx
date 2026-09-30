@@ -5,9 +5,23 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package } from "lucide-react";
 
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+
+import {
+  CHECKOUT_CONFIRMATION_CONTINUE_BUTTON_DEFAULT,
+  CHECKOUT_CONFIRMATION_HEADING_DEFAULT,
+  CHECKOUT_CONFIRMATION_NEXT_HEADING_DEFAULT,
+  CHECKOUT_CONFIRMATION_STEPS_DEFAULTS,
+  CHECKOUT_CONFIRMATION_STEPS_KEY,
+  CHECKOUT_CONFIRMATION_THANKS_PREFIX_DEFAULT,
+} from "./order-fields";
 
 type Business = {
   id: string;
@@ -17,11 +31,37 @@ type Business = {
   } | null;
 };
 
+/** One rendered row of the next-steps list, keeping its saved-list position. */
+export type OrderConfirmationStep = { text: string; index: number };
+
+const DEFAULT_STEPS: OrderConfirmationStep[] =
+  CHECKOUT_CONFIRMATION_STEPS_DEFAULTS.map((text, index) => ({ text, index }));
+
+/**
+ * `heading`/`thanksPrefix`/`nextHeading`/`steps`/`continueLabel` are resolved
+ * server-side in `DefaultOrderSuccessPage` from `checkout.confirmation`
+ * fields. Every one is optional with the original hardcoded copy as its
+ * fallback — `ModernOrderSuccessPage` imports this component directly and
+ * doesn't pass any of them, so that template must keep rendering
+ * byte-identical output.
+ */
 type OrderConfirmationProps = {
   business: Business;
+  heading?: string;
+  thanksPrefix?: string;
+  nextHeading?: string;
+  steps?: OrderConfirmationStep[];
+  continueLabel?: string;
 };
 
-export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
+export function DefaultOrderConfirmation({
+  business,
+  heading = CHECKOUT_CONFIRMATION_HEADING_DEFAULT,
+  thanksPrefix = CHECKOUT_CONFIRMATION_THANKS_PREFIX_DEFAULT,
+  nextHeading = CHECKOUT_CONFIRMATION_NEXT_HEADING_DEFAULT,
+  steps = DEFAULT_STEPS,
+  continueLabel = CHECKOUT_CONFIRMATION_CONTINUE_BUTTON_DEFAULT,
+}: OrderConfirmationProps) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [orderDetails, setOrderDetails] = useState<{
@@ -95,7 +135,10 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div
+      {...sectionGroupAttr("checkout", "confirmation")}
+      className="mx-auto max-w-2xl"
+    >
       {/* Fire purchase analytics event once — idempotent via sessionStorage */}
       {orderDetails && (
         <TrackPurchase
@@ -114,11 +157,17 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
             aria-hidden="true"
           />
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-[#0a0a0a]">
-          Order Confirmed!
+        <h1
+          {...fieldAttr("default.checkout.confirmation-heading")}
+          className="mb-2 text-3xl font-bold text-[#0a0a0a]"
+        >
+          {heading}
         </h1>
         <p className="text-lg text-[#6b6b6b]">
-          Thank you for your purchase from {business.name}
+          <span {...fieldAttr("default.checkout.confirmation-thanks-prefix")}>
+            {thanksPrefix}
+          </span>{" "}
+          {business.name}
         </p>
       </div>
 
@@ -129,13 +178,21 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
             aria-hidden="true"
           />
           <div>
-            <h2 className="mb-1 font-semibold text-[#0a0a0a]">
-              What happens next?
+            <h2
+              {...fieldAttr("default.checkout.confirmation-next-heading")}
+              className="mb-1 font-semibold text-[#0a0a0a]"
+            >
+              {nextHeading}
             </h2>
             <ul className="space-y-1 text-sm text-[#6b6b6b]">
-              <li>• You&apos;ll receive an email confirmation shortly</li>
-              <li>• We&apos;ll notify you when your order ships</li>
-              <li>• Track your order status via email</li>
+              {steps.map((step) => (
+                <li
+                  key={step.index}
+                  {...listItemAttr(CHECKOUT_CONFIRMATION_STEPS_KEY, step.index)}
+                >
+                  • {step.text}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -151,9 +208,17 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
       </div>
 
       <div className="flex gap-4">
-        <Button asChild variant="outline" className="flex-1">
-          <Link href="/shop">Continue Shopping</Link>
-        </Button>
+        {continueLabel ? (
+          <Button asChild variant="outline" className="flex-1">
+            <Link href="/shop">
+              <span
+                {...fieldAttr("default.checkout.confirmation-continue-button")}
+              >
+                {continueLabel}
+              </span>
+            </Link>
+          </Button>
+        ) : null}
         <Button
           asChild
           className="flex-1 text-white"

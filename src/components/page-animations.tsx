@@ -124,13 +124,17 @@ export function StaggerContainer({
 export function StaggerItem({
   children,
   className,
+  ...dataAttrs
 }: {
   children: ReactNode;
   className?: string;
+  /** Passthrough `data-*` attributes (e.g. the editor's `listItemAttr`). */
+  [dataAttr: `data-${string}`]: string | undefined;
 }) {
   const shouldReduce = usePrefersReducedMotion();
   return (
     <motion.div
+      {...dataAttrs}
       variants={{
         hidden: shouldReduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
         visible: {

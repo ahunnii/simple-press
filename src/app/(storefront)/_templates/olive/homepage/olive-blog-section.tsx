@@ -60,7 +60,11 @@ export function OliveBlogSection({
       <OliveSectionHeading
         heading={heading}
         id="olive-blog-heading"
-        link={linkLabel ? { label: linkLabel, href: linkHref } : undefined}
+        link={
+          linkLabel && linkHref
+            ? { label: linkLabel, href: linkHref }
+            : undefined
+        }
         headingFieldKey={headingFieldKey}
         linkFieldKey={linkLabelFieldKey}
         className="mb-8"

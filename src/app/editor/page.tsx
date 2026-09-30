@@ -1,3 +1,6 @@
+import { headers } from "next/headers";
+import { userAgent } from "next/server";
+
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getSectionsForTemplate } from "~/lib/template-sections";
 import { getSession } from "~/server/better-auth/server";
@@ -49,6 +52,13 @@ export default async function EditorPage({
     : rawPage;
   const initialSection = typeof sp.section === "string" ? sp.section : null;
 
+  // First-paint guess for the compact (phone / portrait tablet) layout. The
+  // client re-checks with a `(max-width: 1023px)` media query right after
+  // hydration; this only keeps phones from flashing the desktop 3-column
+  // shell (and desktops from flashing the compact one) on load.
+  const device = userAgent({ headers: await headers() }).device;
+  const initialCompact = device.type === "mobile" || device.type === "tablet";
+
   return (
     <VisualEditor
       businessId={business.id}
@@ -66,6 +76,7 @@ export default async function EditorPage({
       initialPage={initialPage}
       initialSection={initialSection}
       isPlatformAdmin={isPlatformAdmin}
+      initialCompact={initialCompact}
     />
   );
 }

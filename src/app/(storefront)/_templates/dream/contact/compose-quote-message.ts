@@ -42,6 +42,27 @@ export const EMPTY_QUOTE_EXTRAS: QuoteExtras = {
   photoLink: "",
 };
 
+/**
+ * Owner-editable labels for the three yes/no decor questions
+ * (`dream.contact.form-draping-label` / `form-throne-label` /
+ * `form-full-decor-label`). A blank label means the question and its answer
+ * are hidden from both the form and the composed message, even when the
+ * shopper already answered it (e.g. it was answered before the owner hid the
+ * question) — the label is the single on/off switch for the whole question.
+ */
+export type QuoteLabels = {
+  draping: string;
+  throneChair: string;
+  fullDecor: string;
+};
+
+/** The current hardcoded copy, kept as the fields' shipped defaults. */
+export const DEFAULT_QUOTE_LABELS: QuoteLabels = {
+  draping: "Draping",
+  throneChair: "Throne chair",
+  fullDecor: "Full decor by Dream Your Theme",
+};
+
 const SETTING_LABELS: Record<Exclude<QuoteSetting, "">, string> = {
   indoor: "Indoor",
   outdoor: "Outdoor",
@@ -72,8 +93,17 @@ function isYesNo(value: QuoteYesNo): value is Exclude<QuoteYesNo, ""> {
  * Exported on its own (not just via `composeQuoteMessage`) because the form
  * also uses its `.length` to size the live character budget for the
  * free-text theme description before any theme text is typed.
+ *
+ * `labels` supplies the owner-editable wording for the three decor questions
+ * (`dream.contact.form-draping-label` / `form-throne-label` /
+ * `form-full-decor-label`) so the merchant's message uses the exact same
+ * words the shopper saw on the form. A blank label omits that segment
+ * entirely, matching the question being hidden on the form itself.
  */
-export function composeQuotePrefix(extras: QuoteExtras): string {
+export function composeQuotePrefix(
+  extras: QuoteExtras,
+  labels: QuoteLabels = DEFAULT_QUOTE_LABELS,
+): string {
   const lines: string[] = ["Estimate Quote request"];
 
   const dateSegments = [`Event date: ${extras.eventDate}`];
@@ -93,15 +123,17 @@ export function composeQuotePrefix(extras: QuoteExtras): string {
   }
 
   const decorSegments: string[] = [];
-  if (isYesNo(extras.draping)) {
-    decorSegments.push(`Draping: ${YES_NO_LABELS[extras.draping]}`);
+  if (labels.draping.trim() && isYesNo(extras.draping)) {
+    decorSegments.push(`${labels.draping}: ${YES_NO_LABELS[extras.draping]}`);
   }
-  if (isYesNo(extras.throneChair)) {
-    decorSegments.push(`Throne chair: ${YES_NO_LABELS[extras.throneChair]}`);
-  }
-  if (isYesNo(extras.fullDecor)) {
+  if (labels.throneChair.trim() && isYesNo(extras.throneChair)) {
     decorSegments.push(
-      `Full decor by Dream Your Theme: ${YES_NO_LABELS[extras.fullDecor]}`,
+      `${labels.throneChair}: ${YES_NO_LABELS[extras.throneChair]}`,
+    );
+  }
+  if (labels.fullDecor.trim() && isYesNo(extras.fullDecor)) {
+    decorSegments.push(
+      `${labels.fullDecor}: ${YES_NO_LABELS[extras.fullDecor]}`,
     );
   }
   if (decorSegments.length > 0) {
@@ -122,6 +154,7 @@ export function composeQuotePrefix(extras: QuoteExtras): string {
 export function composeQuoteMessage(
   extras: QuoteExtras,
   theme: string,
+  labels: QuoteLabels = DEFAULT_QUOTE_LABELS,
 ): string {
-  return `${composeQuotePrefix(extras)}\n\nTheme: ${theme.trim()}`;
+  return `${composeQuotePrefix(extras, labels)}\n\nTheme: ${theme.trim()}`;
 }

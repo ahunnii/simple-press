@@ -5,7 +5,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const homepageIntroData: TemplateField[] = [
   {
     key: "noise.homepage.intro-gallery",
-    label: "Intro Overlay Gallery",
+    label: "Gallery",
     description:
       "Gallery images shown as tiles in the intro animation. Leave unset to use the default color palette. Images are distributed evenly — a mix of photos and colors when you have fewer than 12.",
     type: "gallery",
@@ -20,9 +20,9 @@ const homepageIntroData: TemplateField[] = [
 const homepageHeroData: TemplateField[] = [
   {
     key: "noise.homepage.hero-image",
-    label: "Hero Background Image",
+    label: "Background image",
     description:
-      "Full-viewport background image for the hero section. Use a striking editorial fashion photo. Ignored when a hero video is set.",
+      "Full-viewport background image for the hero section at the top of the homepage. Ignored when a background video is set.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -30,7 +30,7 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "noise.homepage.hero-video",
-    label: "Hero Background Video",
+    label: "Background video",
     description:
       "Optional video for the hero section. When set, plays instead of the background image. Use .mp4 or .webm, max 20 MB.",
     type: "video",
@@ -40,9 +40,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "noise.homepage.hero-overline",
-    label: "Hero Overline",
-    description:
-      "Small caps label above the main title (e.g. 'New Collection')",
+    label: "Small label",
+    description: "Small label above the main heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -51,8 +50,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "noise.homepage.hero-title",
-    label: "Hero Title",
-    description: "Large display headline",
+    label: "Heading",
+    description: "Large heading in the hero section.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -61,8 +60,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "noise.homepage.hero-tagline",
-    label: "Hero Tagline",
-    description: "Italic serif line below the title",
+    label: "Tagline",
+    description: "Line below the heading in the hero section.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -71,8 +70,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "noise.homepage.hero-primary-button-text",
-    label: "Hero CTA Button Text",
-    description: "Primary call-to-action button text",
+    label: "Button text",
+    description: "Text for the main button in the hero section.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -81,8 +80,8 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "noise.homepage.hero-primary-button-link",
-    label: "Hero CTA Button Link",
-    description: "Primary CTA button URL",
+    label: "Button link",
+    description: "Link for the main button in the hero section.",
     type: "url",
     page: "homepage",
     group: "homepage.hero",
@@ -96,8 +95,8 @@ const homepageHeroData: TemplateField[] = [
 const homepagePhilosophyData: TemplateField[] = [
   {
     key: "noise.homepage.philosophy-overline",
-    label: "Philosophy Overline",
-    description: "Small caps label above the philosophy section",
+    label: "Small label",
+    description: "Small label above the philosophy quote.",
     type: "text",
     page: "homepage",
     group: "homepage.philosophy",
@@ -106,8 +105,8 @@ const homepagePhilosophyData: TemplateField[] = [
   },
   {
     key: "noise.homepage.philosophy-quote",
-    label: "Philosophy Quote",
-    description: "Quote for the philosophy section",
+    label: "Quote",
+    description: "Quote shown in the homepage philosophy section.",
     type: "textarea",
     page: "homepage",
     group: "homepage.philosophy",
@@ -122,9 +121,9 @@ const homepagePhilosophyData: TemplateField[] = [
 const homepageEditorialData: TemplateField[] = [
   {
     key: "noise.homepage.editorial-marquee-text",
-    label: "Marquee Text",
+    label: "Scrolling text",
     description:
-      "Repeating text in the scrolling editorial band. Use · as separator.",
+      "Repeating text in the scrolling band beneath the hero. Separate phrases with ·.",
     type: "text",
     page: "homepage",
     group: "homepage.editorial",
@@ -138,9 +137,19 @@ const homepageEditorialData: TemplateField[] = [
 
 const homepageAboutTeaserData: TemplateField[] = [
   {
+    key: "noise.homepage-about-overline",
+    label: "Small label",
+    description: "Small label above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    gridColumn: "col-span-full",
+    defaultValue: "Our Story",
+  },
+  {
     key: "noise.homepage-about-image",
-    label: "About Section Image",
-    description: "Portrait/editorial image for the brand story teaser",
+    label: "Image",
+    description: "Portrait image for the brand story section.",
     type: "image",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -148,19 +157,18 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "noise.homepage-about-heading",
-    label: "About Section Heading",
-    description: "Large serif heading for the brand story teaser",
+    label: "Heading",
+    description: "Heading for the brand story section.",
     type: "text",
     page: "homepage",
     group: "homepage.aboutTeaser",
     gridColumn: "col-span-full",
     defaultValue: "The Art of Noise",
-    placeholder: "The Art of Noise",
   },
   {
     key: "noise.homepage-about-body",
-    label: "About Teaser Body",
-    description: "Body text for the brand story teaser (richtext)",
+    label: "Story text",
+    description: "Story text for the brand story section.",
     type: "richtext",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -168,8 +176,8 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "noise.homepage-about-button-text",
-    label: "About Button Text",
-    description: "Link text for the 'Our Story' button",
+    label: "Button text",
+    description: "Text for the button linking to the about page.",
     type: "text",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -178,8 +186,8 @@ const homepageAboutTeaserData: TemplateField[] = [
   },
   {
     key: "noise.homepage-about-button-link",
-    label: "About Button Link",
-    description: "URL for the 'Our Story' button",
+    label: "Button link",
+    description: "Link for the button linking to the about page.",
     type: "url",
     page: "homepage",
     group: "homepage.aboutTeaser",
@@ -195,9 +203,8 @@ const homepageAboutTeaserData: TemplateField[] = [
 const homepageCollectionsData: TemplateField[] = [
   {
     key: "noise.homepage.rail-one-overline",
-    label: "Collections Overline",
-    description:
-      "Small caps label above the collections heading (e.g. 'Collections'). Leave blank to hide.",
+    label: "Small label",
+    description: "Small label above the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.collections",
@@ -206,20 +213,23 @@ const homepageCollectionsData: TemplateField[] = [
   },
   {
     key: "noise.homepage.collections-count",
-    label: "Collections Shown",
+    label: "Collections shown",
     description:
-      "How many collections to show, in the order set on the Collections admin page (2–6). Collections with no published products are skipped.",
+      "How many collections to show (2–6), in the order set on the Collections admin page. Collections with no published products are skipped.",
     type: "number",
     page: "homepage",
     group: "homepage.collections",
     gridColumn: "col-span-1",
     defaultValue: "3",
     placeholder: "3",
+    min: 2,
+    max: 6,
+    step: 1,
   },
   {
     key: "noise.homepage-featured-title",
-    label: "Collections Heading",
-    description: "Heading for the collections showcase",
+    label: "Heading",
+    description: "Heading above the collections showcase. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.collections",
@@ -228,8 +238,8 @@ const homepageCollectionsData: TemplateField[] = [
   },
   {
     key: "noise.homepage-featured-description",
-    label: "Collections Description",
-    description: "Optional intro text below the collections heading",
+    label: "Intro text",
+    description: "Optional text below the heading. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
     group: "homepage.collections",
@@ -238,8 +248,9 @@ const homepageCollectionsData: TemplateField[] = [
   },
   {
     key: "noise.homepage-featured-button-text",
-    label: "Collections Button Text",
-    description: "CTA button text for the collections showcase",
+    label: "Button text",
+    description:
+      "Text for the button below the collections showcase. Leave blank to hide the button.",
     type: "text",
     page: "homepage",
     group: "homepage.collections",
@@ -248,8 +259,8 @@ const homepageCollectionsData: TemplateField[] = [
   },
   {
     key: "noise.homepage-featured-button-link",
-    label: "Collections Button Link",
-    description: "CTA button URL for the collections showcase",
+    label: "Button link",
+    description: "Link for the button below the collections showcase.",
     type: "url",
     page: "homepage",
     group: "homepage.collections",
@@ -265,9 +276,8 @@ const homepageCollectionsData: TemplateField[] = [
 const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage.rail-two-overline",
-    label: "Latest Overline",
-    description:
-      "Small caps label above the latest arrivals rail (e.g. 'New Arrivals'). Leave blank to hide.",
+    label: "Small label",
+    description: "Small label above the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -276,9 +286,9 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "noise.homepage.rail-two-title",
-    label: "Latest Title",
+    label: "Heading",
     description:
-      "Heading for the latest arrivals rail — your newest published products, newest first.",
+      "Heading above your newest published products, newest first. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -287,8 +297,9 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "noise.homepage.latest-button-text",
-    label: "Latest Button Text",
-    description: "CTA button text for the latest arrivals rail",
+    label: "Button text",
+    description:
+      "Text for the button below the latest arrivals. Leave blank to hide the button.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -297,8 +308,8 @@ const homepageFeaturedData: TemplateField[] = [
   },
   {
     key: "noise.homepage.latest-button-link",
-    label: "Latest Button Link",
-    description: "CTA button URL for the latest arrivals rail",
+    label: "Button link",
+    description: "Link for the button below the latest arrivals.",
     type: "url",
     page: "homepage",
     group: "homepage.featured",
@@ -312,8 +323,9 @@ const homepageFeaturedData: TemplateField[] = [
 const homepageTestimonialsData: TemplateField[] = [
   {
     key: "noise.homepage-testimonials-heading",
-    label: "Testimonials Heading",
-    description: "Section heading for customer testimonials",
+    label: "Heading",
+    description:
+      "Heading above the customer testimonial strip on the homepage. Also used as the heading at the top of the testimonials page.",
     type: "text",
     page: "homepage",
     group: "homepage.testimonials",
@@ -326,41 +338,49 @@ const homepageTestimonialsData: TemplateField[] = [
 
 const homepageGuaranteeData: TemplateField[] = [
   {
+    key: "noise.homepage-guarantee-overline",
+    label: "Small label",
+    description: "Small label above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.guarantee",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Guarantee",
+  },
+  {
     key: "noise.homepage-guarantee-heading",
-    label: "Guarantee Heading",
-    description: "Heading for the guarantee section",
+    label: "Heading",
+    description: "Heading for the guarantee section.",
     type: "text",
     page: "homepage",
     group: "homepage.guarantee",
     gridColumn: "col-span-full",
     defaultValue: "Thoughtfully made.",
-    placeholder: "Thoughtfully made.",
   },
   {
     key: "noise.homepage-guarantee-headingAccent",
-    label: "Guarantee Heading Accent",
-    description: "Accent text for the guarantee section heading",
+    label: "Heading accent",
+    description: "Accent text for the guarantee section heading.",
     type: "text",
     page: "homepage",
     group: "homepage.guarantee",
     gridColumn: "col-span-1",
     defaultValue: "Responsibly backed.",
-    placeholder: "Responsibly backed.",
   },
   {
     key: "noise.homepage-guarantee-quote",
-    label: "Guarantee Quote",
-    description: "Quote for the guarantee section",
+    label: "Quote",
+    description:
+      "Quote below the heading in the guarantee section. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
     group: "homepage.guarantee",
     gridColumn: "col-span-full",
-    defaultValue:
-      "If a piece doesn't fit, doesn't last, or doesn't feel right — we'll make it right. Free returns within 60 days, and a lifetime repair program for every garment we make.",
+    defaultValue: "",
   },
   {
     key: "noise.homepage-guarantee-stamp",
-    label: "Guarantee Corner Stamp",
+    label: "Corner stamp",
     description:
       "Short label shown on the image in the guarantee section. Leave blank to hide.",
     type: "text",
@@ -372,13 +392,84 @@ const homepageGuaranteeData: TemplateField[] = [
   },
   {
     key: "noise.homepage-guarantee-image",
-    label: "Guarantee Image",
-    description: "Image for the guarantee section",
+    label: "Image",
+    description: "Image for the guarantee section.",
     type: "image",
     page: "homepage",
     group: "homepage.guarantee",
     defaultValue: "/placeholder.svg",
     gridColumn: "col-span-full",
+  },
+];
+
+// ─── Homepage: Blog Teaser ─────────────────────────────────────────────────────
+// Two-panel band linking to the blog. Only rendered while the Blog feature is
+// on (same gate as before these fields existed).
+
+const homepageBlogTeaserData: TemplateField[] = [
+  {
+    key: "noise.homepage.blog-teaser-overline",
+    label: "Small label",
+    description: "Small label above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.blogTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "Blog",
+  },
+  {
+    key: "noise.homepage.blog-teaser-heading",
+    label: "Heading",
+    description: "Heading in the blog section. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.blogTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "The latest and greatest from the shop.",
+  },
+  {
+    key: "noise.homepage.blog-teaser-body",
+    label: "Body text",
+    description: "Short paragraph below the heading. Leave blank to hide.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.blogTeaser",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Discover the latest arrivals, seasonal collections, and behind-the-scenes insights from the studio.",
+    placeholder: "One or two sentences about what you write about.",
+  },
+  {
+    key: "noise.homepage.blog-teaser-button-text",
+    label: "Button text",
+    description:
+      "Text for the link to your blog. Leave blank to hide the link.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.blogTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "Read the blog",
+  },
+  {
+    key: "noise.homepage.blog-teaser-button-link",
+    label: "Button link",
+    description: "Where the blog section link sends visitors.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.blogTeaser",
+    gridColumn: "col-span-1",
+    defaultValue: "/blog",
+  },
+  {
+    key: "noise.homepage.blog-teaser-image",
+    label: "Image",
+    description:
+      "Photo beside the blog text. Leave blank to show a striped panel with a large B instead.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.blogTeaser",
+    gridColumn: "col-span-full",
+    defaultValue: "",
   },
 ];
 
@@ -389,6 +480,7 @@ export const noiseHomepageData = [
   ...homepageGuaranteeData,
   ...homepageAboutTeaserData,
   ...homepageCollectionsData,
+  ...homepageBlogTeaserData,
   ...homepageFeaturedData,
   ...homepagePhilosophyData,
   ...homepageTestimonialsData,
@@ -399,14 +491,14 @@ export const noiseHomepageData = [
 export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.intro",
-    title: "Intro Overlay",
+    title: "Intro animation",
     description: "Optional gallery to display as tiles in the intro animation",
     icon: "✦",
     columns: 1,
   },
   {
     id: "homepage.hero",
-    title: "Hero Section",
+    title: "Hero",
     description:
       "Full-viewport hero with background image or video and headline",
     icon: "🎭",
@@ -414,22 +506,23 @@ export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.philosophy",
-    title: "Philosophy Section",
-    description: "Philosophy section for the homepage",
+    title: "Our philosophy",
+    description: "Short brand philosophy quote shown on the homepage",
     icon: "💡",
     columns: 1,
   },
   {
     id: "homepage.editorial",
-    title: "Editorial Marquee Strip",
-    description: "Scrolling tagline band beneath the hero",
+    title: "Scrolling text",
+    description: "Scrolling text band beneath the hero",
     icon: "📜",
     columns: 1,
   },
   {
     id: "homepage.aboutTeaser",
-    title: "Brand Story Teaser",
-    description: "Portrait image + brand story excerpt section",
+    title: "Brand story",
+    description:
+      "Image, heading, and brand story excerpt shown on the homepage",
     icon: "✦",
     columns: 2,
   },
@@ -442,8 +535,16 @@ export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
+    id: "homepage.blogTeaser",
+    title: "Blog",
+    description:
+      "Two-panel band linking to your blog, shown while the Blog feature is on",
+    icon: "📰",
+    columns: 2,
+  },
+  {
     id: "homepage.featured",
-    title: "Latest Arrivals",
+    title: "Latest arrivals",
     description: "Your newest published products, newest first",
     icon: "👗",
     columns: 2,
@@ -457,7 +558,7 @@ export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.guarantee",
-    title: "Guarantee Section",
+    title: "Guarantee",
     description: "Guarantee section for the homepage",
     icon: "🔒",
     columns: 1,

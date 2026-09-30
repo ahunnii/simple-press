@@ -96,10 +96,11 @@ export async function DefaultServicesIndexPage({ business, services }: Props) {
         )}
 
       {/* ── Service grid ─────────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("services", "list")}
-        className="px-6 py-16 lg:px-8"
-      >
+      {/* No sectionGroupAttr here — "services.list" isn't a declared field
+          group or section (this grid renders products from Admin, not
+          template fields), so the attribute was a stray hotspot that
+          pointed at nothing. Removed 2026-09-27. */}
+      <section className="px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           {services.length === 0 ? (
             <div className="rounded-(--radius) border border-[#e8e8e8] py-24 text-center">

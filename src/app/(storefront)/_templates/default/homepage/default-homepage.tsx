@@ -6,6 +6,7 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
@@ -64,8 +65,6 @@ export async function DefaultHomePage({
     "default.homepage.cta-image",
     "default.homepage.cta-button-text",
     "default.homepage.cta-button-link",
-    "default.homepage.testimonial-quote",
-    "default.homepage.testimonial-author",
     "default.homepage.testimonial-cta-text",
     "default.homepage.testimonial-cta-link",
     "default.homepage.promise-1-title",
@@ -81,19 +80,28 @@ export async function DefaultHomePage({
   const rail1Id = f["default.homepage.rail-one-collection"] ?? "";
   const rail2Id = f["default.homepage.rail-two-collection"] ?? "";
 
-  const [rail1Data, rail2Data, collectionsData] = await Promise.all([
-    rail1Id
-      ? api.collections.getProductsByCollectionId(rail1Id)
-      : Promise.resolve(null),
-    rail2Id
-      ? api.collections.getProductsByCollectionId(rail2Id)
-      : Promise.resolve(null),
-    api.collections
-      .getAllPublic()
-      .catch(
-        () => [] as Awaited<ReturnType<typeof api.collections.getAllPublic>>,
-      ),
-  ]);
+  const [rail1Data, rail2Data, collectionsData, testimonials] =
+    await Promise.all([
+      rail1Id
+        ? api.collections.getProductsByCollectionId(rail1Id)
+        : Promise.resolve(null),
+      rail2Id
+        ? api.collections.getProductsByCollectionId(rail2Id)
+        : Promise.resolve(null),
+      api.collections
+        .getAllPublic()
+        .catch(
+          () =>
+            [] as Awaited<ReturnType<typeof api.collections.getAllPublic>>,
+        ),
+      isEnabled("testimonials")
+        ? api.testimonial
+            .list({ publicOnly: true })
+            .catch(() => [] as Awaited<ReturnType<typeof api.testimonial.list>>)
+        : Promise.resolve(
+            [] as Awaited<ReturnType<typeof api.testimonial.list>>,
+          ),
+    ]);
 
   const railOneProducts = rail1Data?.products ?? products.slice(0, 4);
   const railTwoProducts = rail2Data?.products ?? products.slice(4, 8);
@@ -111,6 +119,31 @@ export async function DefaultHomePage({
   const storyHeading = f["default.homepage.cta-heading"];
   const storyDescription = f["default.homepage.cta-description"];
   const storyImage = f["default.homepage.cta-image"] ?? "/placeholder.svg";
+
+  // ── Testimonial: latest Admin → Testimonials entry, falling back to a
+  // legacy saved quote/author (the `testimonial-quote`/`testimonial-author`
+  // fields were retired 2026-09-27 — see homepage/index.ts). Never a
+  // template-owned quote per field-conventions.md "Never duplicate Settings
+  // data" — testimonials are owned by Admin → Testimonials.
+  const featuredTestimonial = testimonials[0];
+  const legacyTestimonialQuote = getRawCustomFieldString(
+    customFields,
+    "default.homepage.testimonial-quote",
+  )?.trim();
+  const legacyTestimonialAuthor = getRawCustomFieldString(
+    customFields,
+    "default.homepage.testimonial-author",
+  )?.trim();
+  const testimonialQuote =
+    featuredTestimonial?.text ??
+    (legacyTestimonialQuote && legacyTestimonialQuote.length > 0
+      ? legacyTestimonialQuote
+      : undefined);
+  const testimonialAuthor = featuredTestimonial
+    ? featuredTestimonial.customerName
+    : legacyTestimonialAuthor && legacyTestimonialAuthor.length > 0
+      ? legacyTestimonialAuthor
+      : undefined;
 
   return (
     <HydrateClient>
@@ -168,8 +201,12 @@ export async function DefaultHomePage({
                     }
                     className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
                   >
-                    {f["default.homepage.collections-cta-text"] ??
-                      "View everything"}{" "}
+                    <span
+                      {...fieldAttr("default.homepage.collections-cta-text")}
+                    >
+                      {f["default.homepage.collections-cta-text"] ??
+                        "View everything"}
+                    </span>{" "}
                     <span aria-hidden="true">→</span>
                   </Link>
                 </div>
@@ -221,15 +258,24 @@ export async function DefaultHomePage({
           )}
 
         {/* ── Rail 1 — Featured Products ────────────────────────────────── */}
+        {/* Carries the "homepage.rails" group hotspot — rail 2 below shares
+            the same group (a group is annotated once) and is gated behind
+            `railTwoProducts.length > 0`, so this always-attempted rail is the
+            more reliable target for the editor. */}
         <DefaultProductRail
           eyebrow={f["default.homepage.rail-one-eyebrow"] ?? "Featured"}
+          eyebrowAttrs={fieldAttr("default.homepage.rail-one-eyebrow")}
           title={
             rail1Data?.collection.name ??
             f["default.homepage.rail-one-title"] ??
             "This week's picks."
           }
+          titleAttrs={
+            rail1Data ? undefined : fieldAttr("default.homepage.rail-one-title")
+          }
           description={rail1Data?.collection.description ?? undefined}
           ctaText={f["default.homepage.rail-one-button-text"] ?? "All products"}
+          ctaTextAttrs={fieldAttr("default.homepage.rail-one-button-text")}
           ctaHref={railOneCtaHref}
           products={railOneProducts}
           sectionAttrs={sectionGroupAttr("homepage", "rails")}
@@ -284,7 +330,9 @@ export async function DefaultHomePage({
                       href={f["default.homepage.cta-button-link"] ?? "/about"}
                       className="inline-flex items-center gap-2 self-start border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
                     >
-                      {f["default.homepage.cta-button-text"] ?? "Read more"}{" "}
+                      <span {...fieldAttr("default.homepage.cta-button-text")}>
+                        {f["default.homepage.cta-button-text"] ?? "Read more"}
+                      </span>{" "}
                       <span aria-hidden="true">→</span>
                     </Link>
                   </div>
@@ -294,29 +342,42 @@ export async function DefaultHomePage({
           )}
 
         {/* ── Rail 2 — Customer favorites ───────────────────────────────── */}
+        {/* No sectionAttrs — shares the "homepage.rails" group with rail 1
+            above, which carries the hotspot (see its comment). */}
         {railTwoProducts.length > 0 && (
           <DefaultProductRail
             eyebrow={
               f["default.homepage.rail-two-eyebrow"] ?? "Customer favorites"
             }
+            eyebrowAttrs={fieldAttr("default.homepage.rail-two-eyebrow")}
             title={
               rail2Data?.collection.name ??
               f["default.homepage.rail-two-title"] ??
               "What people keep reaching for."
             }
+            titleAttrs={
+              rail2Data
+                ? undefined
+                : fieldAttr("default.homepage.rail-two-title")
+            }
             description={rail2Data?.collection.description ?? undefined}
             ctaText={
               f["default.homepage.rail-two-button-text"] ?? "Shop bestsellers"
             }
+            ctaTextAttrs={fieldAttr("default.homepage.rail-two-button-text")}
             ctaHref={railTwoCtaHref}
             products={railTwoProducts}
-            sectionAttrs={sectionGroupAttr("homepage", "rails")}
           />
         )}
 
-        {/* ── Testimonial preview ───────────────────────────────────────── */}
+        {/* ── Testimonial preview ─────────────────────────────────────────
+            Shows the latest Admin → Testimonials entry when the flag is on;
+            falls back silently to a legacy saved quote/author, else hides.
+            The quote/author never carry fieldAttr when sourced from Admin
+            (they aren't fields); the legacy-fallback author still does,
+            since that text IS still a saved field value. ── */}
         {isEnabled("testimonials") &&
-          f["default.homepage.testimonial-quote"] &&
+          testimonialQuote &&
           isSectionVisible(customFields, "default", "homepage.testimonial") && (
             <section
               aria-label="Customer testimonial"
@@ -325,14 +386,16 @@ export async function DefaultHomePage({
             >
               <div className="mx-auto max-w-[880px] text-center">
                 <p className="text-[clamp(22px,2.8vw,34px)] leading-[1.28] tracking-[-0.015em] text-balance">
-                  &ldquo;{f["default.homepage.testimonial-quote"]}&rdquo;
+                  &ldquo;{testimonialQuote}&rdquo;
                 </p>
-                {f["default.homepage.testimonial-author"] && (
+                {testimonialAuthor && (
                   <p
                     className="mt-6 text-[13px] text-[#6b6b6b]"
-                    {...fieldAttr("default.homepage.testimonial-author")}
+                    {...(featuredTestimonial
+                      ? {}
+                      : fieldAttr("default.homepage.testimonial-author"))}
                   >
-                    {f["default.homepage.testimonial-author"]}
+                    {testimonialAuthor}
                   </p>
                 )}
                 {f["default.homepage.testimonial-cta-text"] && (
@@ -344,7 +407,11 @@ export async function DefaultHomePage({
                       }
                       className="inline-flex items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
                     >
-                      {f["default.homepage.testimonial-cta-text"]}{" "}
+                      <span
+                        {...fieldAttr("default.homepage.testimonial-cta-text")}
+                      >
+                        {f["default.homepage.testimonial-cta-text"]}
+                      </span>{" "}
                       <span aria-hidden="true">→</span>
                     </Link>
                   </div>
@@ -363,28 +430,28 @@ export async function DefaultHomePage({
               {[
                 {
                   title:
-                    f["default.homepage.promise-1-title"] ?? "Free shipping",
+                    f["default.homepage.promise-1-title"] ?? "Secure checkout",
                   titleField: "default.homepage.promise-1-title",
                   desc:
                     f["default.homepage.promise-1-desc"] ??
-                    "On orders over $75 within the US.",
+                    "Payments are encrypted and processed securely.",
                   descField: "default.homepage.promise-1-desc",
                 },
                 {
                   title:
-                    f["default.homepage.promise-2-title"] ?? "Easy returns",
+                    f["default.homepage.promise-2-title"] ?? "Delivery options",
                   titleField: "default.homepage.promise-2-title",
                   desc:
                     f["default.homepage.promise-2-desc"] ??
-                    "30 days, no questions asked.",
+                    "See shipping costs and options at checkout.",
                   descField: "default.homepage.promise-2-desc",
                 },
                 {
-                  title: f["default.homepage.promise-3-title"] ?? "Handmade",
+                  title: f["default.homepage.promise-3-title"] ?? "Made with care",
                   titleField: "default.homepage.promise-3-title",
                   desc:
                     f["default.homepage.promise-3-desc"] ??
-                    "Every item made with care.",
+                    "Every order is packed with care.",
                   descField: "default.homepage.promise-3-desc",
                 },
                 {

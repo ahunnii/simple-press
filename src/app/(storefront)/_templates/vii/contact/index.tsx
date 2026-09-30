@@ -5,9 +5,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const contactHeroData: TemplateField[] = [
   {
     key: "vii.contact.hero-image",
-    label: "Hero Background Image",
+    label: "Background photo",
     description:
-      "Full-width banner image at the top of the Contact page. Use a high-quality landscape photo.",
+      "Full-width banner photo at the top of the contact page. Use a high-quality landscape photo.",
     type: "image",
     page: "contact",
     group: "contact.hero",
@@ -15,8 +15,8 @@ const contactHeroData: TemplateField[] = [
   },
   {
     key: "vii.contact.hero-overline",
-    label: "Hero Overline",
-    description: "Small uppercase label shown above the page title.",
+    label: "Small label",
+    description: "Small label shown above the page title. Leave blank to hide.",
     type: "text",
     page: "contact",
     group: "contact.hero",
@@ -25,8 +25,8 @@ const contactHeroData: TemplateField[] = [
   },
   {
     key: "vii.contact.hero-heading",
-    label: "Hero Heading",
-    description: "The main page title overlaid on the hero image.",
+    label: "Heading",
+    description: "The main page title overlaid on the banner photo.",
     type: "text",
     page: "contact",
     group: "contact.hero",
@@ -35,13 +35,13 @@ const contactHeroData: TemplateField[] = [
   },
 ];
 
-// ─── Main (intro + form) ──────────────────────────────────────────────────────
+// ─── Intro and contact details ────────────────────────────────────────────────
 
 const contactMainData: TemplateField[] = [
   {
     key: "vii.contact.intro-overline",
-    label: "Intro Overline",
-    description: "Small uppercase label above the intro heading.",
+    label: "Small label",
+    description: "Small label above the intro heading. Leave blank to hide.",
     type: "text",
     page: "contact",
     group: "contact.main",
@@ -50,9 +50,9 @@ const contactMainData: TemplateField[] = [
   },
   {
     key: "vii.contact.intro-heading",
-    label: "Intro Heading",
+    label: "Heading",
     description:
-      "The plain part of the two-part intro heading (e.g. 'We'd love to hear').",
+      "The plain part of the intro heading (e.g. 'We'd love to hear').",
     type: "text",
     page: "contact",
     group: "contact.main",
@@ -61,9 +61,8 @@ const contactMainData: TemplateField[] = [
   },
   {
     key: "vii.contact.intro-heading-accent",
-    label: "Intro Heading Accent Word",
-    description:
-      "The italic copper accent words completing the intro heading (e.g. 'from you').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "contact",
     group: "contact.main",
@@ -72,9 +71,9 @@ const contactMainData: TemplateField[] = [
   },
   {
     key: "vii.contact.intro-body",
-    label: "Intro Body Text",
+    label: "Body text",
     description:
-      "Short paragraph inviting visitors to reach out, ask a question, or book a treatment.",
+      "Short paragraph inviting visitors to reach out, ask a question, or book. Leave blank to hide.",
     type: "textarea",
     page: "contact",
     group: "contact.main",
@@ -84,7 +83,7 @@ const contactMainData: TemplateField[] = [
   },
   {
     key: "vii.contact.form-heading",
-    label: "Form Heading",
+    label: "Form heading",
     description: "Heading shown above the contact form.",
     type: "text",
     page: "contact",
@@ -94,51 +93,56 @@ const contactMainData: TemplateField[] = [
   },
 ];
 
+// ─── Contact form ─────────────────────────────────────────────────────────────
+
+const contactFormData: TemplateField[] = [
+  {
+    key: "vii.contact.form-success-heading",
+    label: "Success heading",
+    description:
+      "Heading shown after someone sends the contact form, in place of the form.",
+    type: "text",
+    page: "contact",
+    group: "contact.form",
+    gridColumn: "col-span-1",
+    defaultValue: "Message sent",
+    placeholder: "Message sent",
+  },
+  {
+    key: "vii.contact.form-success-body",
+    label: "Success message",
+    description:
+      "Line shown under the success heading after someone sends the contact form.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.form",
+    gridColumn: "col-span-full",
+    defaultValue: "We'll be in touch shortly.",
+    placeholder: "We'll be in touch shortly.",
+  },
+];
+
 // ─── Map ──────────────────────────────────────────────────────────────────────
 
 const contactMapData: TemplateField[] = [
   {
     key: "vii.contact.map-heading",
-    label: "Map Heading",
-    description: "Small heading shown above the location map.",
+    label: "Heading",
+    description: "Small heading shown above the map.",
     type: "text",
     page: "contact",
     group: "contact.map",
     gridColumn: "col-span-1",
     defaultValue: "Find us in Detroit",
   },
-  {
-    key: "vii.contact.map-lat",
-    label: "Map Latitude",
-    description:
-      "Latitude of your location pin. In Google Maps, right-click your spot → click the coordinates to copy them (the first number).",
-    type: "number",
-    page: "contact",
-    group: "contact.map",
-    gridColumn: "col-span-1",
-    defaultValue: "42.4305",
-    placeholder: "42.4305",
-  },
-  {
-    key: "vii.contact.map-lng",
-    label: "Map Longitude",
-    description:
-      "Longitude of your location pin (the second number from the copied Google Maps coordinates).",
-    type: "number",
-    page: "contact",
-    group: "contact.map",
-    gridColumn: "col-span-1",
-    defaultValue: "-83.1419",
-    placeholder: "-83.1419",
-  },
 ];
 
-// ─── Leave a Review ───────────────────────────────────────────────────────────
+// ─── Leave a review ───────────────────────────────────────────────────────────
 
 const contactReviewData: TemplateField[] = [
   {
     key: "vii.contact.review-heading",
-    label: "Review Heading",
+    label: "Heading",
     description:
       "The plain part of the review-prompt heading (e.g. 'Loved your visit?').",
     type: "text",
@@ -149,9 +153,8 @@ const contactReviewData: TemplateField[] = [
   },
   {
     key: "vii.contact.review-heading-accent",
-    label: "Review Heading Accent Word",
-    description:
-      "The italic accent words completing the review heading (e.g. 'Tell the world').",
+    label: "Heading, highlighted words",
+    description: "Shown in italics after the heading.",
     type: "text",
     page: "contact",
     group: "contact.review",
@@ -160,7 +163,7 @@ const contactReviewData: TemplateField[] = [
   },
   {
     key: "vii.contact.review-body",
-    label: "Review Body Text",
+    label: "Body text",
     description: "Short note asking happy clients to leave a review.",
     type: "textarea",
     page: "contact",
@@ -171,9 +174,9 @@ const contactReviewData: TemplateField[] = [
   },
   {
     key: "vii.contact.review-google-url",
-    label: "Google Reviews URL",
+    label: "Google reviews link",
     description:
-      "Link to your Google reviews page. Leave empty to hide the Google button.",
+      "Link to your Google reviews page. Leave blank to hide the Google button.",
     type: "url",
     page: "contact",
     group: "contact.review",
@@ -182,9 +185,9 @@ const contactReviewData: TemplateField[] = [
   },
   {
     key: "vii.contact.review-facebook-url",
-    label: "Facebook Reviews URL",
+    label: "Facebook reviews link",
     description:
-      "Link to your Facebook reviews page. Leave empty to hide the Facebook button.",
+      "Link to your Facebook reviews page. Leave blank to hide the Facebook button.",
     type: "url",
     page: "contact",
     group: "contact.review",
@@ -198,6 +201,7 @@ const contactReviewData: TemplateField[] = [
 export const viiContactData: TemplateField[] = [
   ...contactHeroData,
   ...contactMainData,
+  ...contactFormData,
   ...contactMapData,
   ...contactReviewData,
 ];
@@ -207,32 +211,39 @@ export const viiContactData: TemplateField[] = [
 export const viiContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.hero",
-    title: "Contact Hero",
-    description: "Full-width banner image with overline and page title",
+    title: "Page header",
+    description: "Full-width banner photo with a small label and page title",
     icon: "✉️",
     columns: 2,
   },
   {
     id: "contact.main",
-    title: "Intro & Form",
+    title: "Intro and contact details",
     description:
       "Two-part heading, invitation text, and the contact form heading",
     icon: "💬",
     columns: 2,
   },
   {
+    id: "contact.form",
+    title: "Contact form",
+    description: "Message shown after someone sends the contact form.",
+    icon: "📨",
+    columns: 2,
+  },
+  {
     id: "contact.map",
-    title: "Location Map",
+    title: "Map",
     description:
-      "An interactive map of your location, driven by latitude/longitude coordinates, with links to open it in Google Maps.",
+      "An interactive map of your location, with links to open it in Google Maps. The pin comes from Settings → General.",
     icon: "📍",
     columns: 2,
   },
   {
     id: "contact.review",
-    title: "Leave a Review",
+    title: "Leave a review",
     description:
-      "Dark section inviting happy clients to leave a Google or Facebook review",
+      "Section inviting happy clients to leave a Google or Facebook review",
     icon: "⭐",
     columns: 2,
   },

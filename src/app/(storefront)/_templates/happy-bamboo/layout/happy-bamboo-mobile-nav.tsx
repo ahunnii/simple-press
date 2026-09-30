@@ -5,30 +5,32 @@ import type { Ref, RefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TwitterLogoIcon } from "@radix-ui/react-icons";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown, LogOut } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { isActiveNavLink } from "~/lib/nav-utils";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { cn } from "~/lib/utils";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
-/** Fallback nav when the owner hasn't configured `navigationItems` — shared
- *  with the header's desktop nav so the two lists can't drift apart. */
-export const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-] as const;
+import { HB_QUICK_ACCOUNT_KEYS } from "../lib/account-link-icons";
+import { resolveHappyBambooNav } from "../lib/nav";
+import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
+
+/** Same route the header's `UserButton` menu (and pollen's overlay) navigate
+ *  to for sign-out — a real page that invalidates the session server-side. */
+const SIGN_OUT_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signOut}`;
 
 const MENU_ID = "hb-mobile-menu";
-const DEFAULT_TAGLINE = "Tree-free products · Crafted with care";
 /** Matches Tailwind's `md` breakpoint — the menu has no business being open
  *  once the desktop nav is showing. */
 const DESKTOP_QUERY = "(min-width: 768px)";
@@ -41,14 +43,6 @@ const ROW_MAX_STEPS = 8;
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
-
-type SocialLinks = {
-  instagram?: string;
-  facebook?: string;
-  twitter?: string;
-  tiktok?: string;
-  youtube?: string;
-};
 
 // ─── Toggle ────────────────────────────────────────────────────────────────
 
@@ -261,54 +255,30 @@ function MobileMenuPanel({
     return () => window.removeEventListener("resize", measure);
   }, [headerRef]);
 
-  const links =
-    (business?.siteContent?.navigationItems as
-      | { label: string; href: string }[]
-      | undefined) ?? NAV_LINKS;
-  const socialLinks = business?.siteContent?.socialLinks as
-    | SocialLinks
-    | undefined;
-  // Blank owner text falls back too, not just a missing field.
+  // Shared resolver (lib/nav.ts, over `resolveNav` + `filterNavByFlags`) — the
+  // header's desktop nav and the footer read the same list, so the three
+  // can't drift apart or link to a flag-disabled route.
+  const links = resolveHappyBambooNav(
+    business?.siteContent?.navigationItems,
+    isEnabled,
+  );
+  // One group open at a time. The panel mounts fresh on every open, so the
+  // initializer auto-expands the group holding the current route.
+  const [expanded, setExpanded] = useState<number | null>(() => {
+    const idx = links.findIndex(
+      (item) => !!item.children?.length && isNavItemActive(pathname, item),
+    );
+    return idx === -1 ? null : idx;
+  });
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
+  // A blank owner tagline renders nothing — no hardcoded copy stand-in.
   const footerText = business?.siteContent?.footerText;
-  const tagline = footerText?.trim() ? footerText : DEFAULT_TAGLINE;
+  const tagline = footerText?.trim() ? footerText.trim() : "";
 
   const showAccount = isEnabled("customerAccounts") && !isPending;
   const isAdmin =
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
-
-  const socials = [
-    {
-      key: "facebook",
-      label: "Facebook",
-      href: socialLinks?.facebook,
-      Icon: FacebookIcon,
-    },
-    {
-      key: "instagram",
-      label: "Instagram",
-      href: socialLinks?.instagram,
-      Icon: InstagramIcon,
-    },
-    {
-      key: "twitter",
-      label: "Twitter",
-      href: socialLinks?.twitter,
-      Icon: TwitterLogoIcon,
-    },
-    {
-      key: "tiktok",
-      label: "TikTok",
-      href: socialLinks?.tiktok,
-      Icon: TikTokIcon,
-    },
-    {
-      key: "youtube",
-      label: "YouTube",
-      href: socialLinks?.youtube,
-      Icon: YouTubeIcon,
-    },
-  ].filter((social) => !!social.href);
 
   // Clip-path unfold from the bar's edge; rows inherit the open/closed
   // labels and fade up on a capped stagger. Reduced motion → every
@@ -361,16 +331,102 @@ function MobileMenuPanel({
         <nav aria-label="Mobile navigation">
           <ul className="flex flex-col">
             {links.map((link, i) => {
+              if (link.children?.length) {
+                const active = isNavItemActive(pathname, link);
+                const isOpen = expanded === i;
+                const sublistId = `${MENU_ID}-group-${i}`;
+                const entries = navGroupEntries(link);
+                const activeEntry = activeEntryIndex(pathname, entries);
+                return (
+                  <motion.li
+                    key={i}
+                    custom={i}
+                    variants={rowVariants}
+                    className="border-b border-[var(--hb-brand)]/10"
+                  >
+                    {/* Group trigger — never navigates; a non-empty parent
+                        href is listed as the first entry below. Active
+                        styling, but no aria-current (it isn't a page). */}
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      aria-controls={sublistId}
+                      onClick={() => setExpanded(isOpen ? null : i)}
+                      className={cn(
+                        "group flex min-h-16 w-full items-center justify-between gap-4 py-4 text-left font-serif text-3xl leading-tight transition-colors",
+                        focusRing,
+                        active
+                          ? "text-[var(--hb-brand-deep)]"
+                          : "text-foreground hover:text-[var(--hb-brand-deep)]",
+                      )}
+                    >
+                      <span className="flex flex-col items-start">
+                        <span className="font-serif">{link.label}</span>
+                        {active && (
+                          <span
+                            aria-hidden="true"
+                            className="mt-2 block h-0.5 w-10 rounded-full bg-[var(--hb-brand)]"
+                          />
+                        )}
+                      </span>
+                      <ChevronDown
+                        aria-hidden="true"
+                        className={cn(
+                          "size-5 shrink-0 text-[var(--hb-brand)] transition-transform duration-300",
+                          isOpen && "rotate-180",
+                        )}
+                      />
+                    </button>
+                    {isOpen && (
+                      <ul
+                        id={sublistId}
+                        className="mb-4 ml-1 flex flex-col border-l-2 border-[var(--hb-brand)]/15 pl-4"
+                      >
+                        {entries.map((child, j) => {
+                          const childActive = j === activeEntry;
+                          return (
+                            <li key={j}>
+                              <Link
+                                href={child.href}
+                                {...externalLinkProps(child.external)}
+                                onClick={onClose}
+                                aria-current={childActive ? "page" : undefined}
+                                className={cn(
+                                  "flex min-h-12 items-center py-2 text-lg transition-colors",
+                                  focusRing,
+                                  childActive
+                                    ? "font-medium text-[var(--hb-brand-deep)]"
+                                    : "text-foreground/80 hover:text-[var(--hb-brand-deep)]",
+                                )}
+                              >
+                                {child.label}
+                                {child.external && (
+                                  <span className="sr-only">
+                                    {" "}
+                                    (opens in new tab)
+                                  </span>
+                                )}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </motion.li>
+                );
+              }
+
               const active = isActiveNavLink(pathname, link.href);
               return (
                 <motion.li
-                  key={`${link.href}-${link.label}`}
+                  key={i}
                   custom={i}
                   variants={rowVariants}
                   className="border-b border-[var(--hb-brand)]/10"
                 >
                   <Link
                     href={link.href}
+                    {...externalLinkProps(link.external)}
                     onClick={onClose}
                     aria-current={active ? "page" : undefined}
                     className={cn(
@@ -386,6 +442,9 @@ function MobileMenuPanel({
                           globals.css forces `.happy-bamboo *` to font-sans,
                           which beats the family inherited from the <a>. */}
                       <span className="font-serif">{link.label}</span>
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
                       {active && (
                         <span
                           aria-hidden="true"
@@ -419,35 +478,58 @@ function MobileMenuPanel({
                 <p className="mb-1 text-xs font-medium tracking-[0.18em] text-[var(--hb-brand-muted)] uppercase">
                   Your account
                 </p>
-                <ul className="flex flex-col">
-                  {[
-                    { href: "/account", label: "My account" },
-                    { href: "/account/orders", label: "Orders" },
-                    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
-                  ].map((item) => (
-                    <li
-                      key={item.href}
-                      className="border-b border-[var(--hb-brand)]/10"
-                    >
+                {/* Quick-access subset (B4.3 decision) — Orders (if on),
+                    Settings, Admin (if a member). The full list lives in the
+                    account sidebar, one tap away via Settings. */}
+                <nav aria-label="Account">
+                  <ul className="flex flex-col">
+                    {getAccountNavLinks({
+                      isEnabled,
+                      includeAdmin: isAdmin,
+                    })
+                      .filter((item) => HB_QUICK_ACCOUNT_KEYS.has(item.key))
+                      .map((item) => (
+                        <li
+                          key={item.key}
+                          className="border-b border-[var(--hb-brand)]/10"
+                        >
+                          <Link
+                            href={item.href}
+                            onClick={onClose}
+                            aria-current={
+                              pathname === item.href ? "page" : undefined
+                            }
+                            className={cn(
+                              "flex min-h-12 items-center py-3 text-base transition-colors",
+                              focusRing,
+                              pathname === item.href
+                                ? "font-medium text-[var(--hb-brand-deep)]"
+                                : "text-foreground/80 hover:text-[var(--hb-brand-deep)]",
+                            )}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    {/* Quiet sign-out row — the bar's avatar menu is the
+                        desktop equivalent; this is the only sign-out reachable
+                        below md (B4.4). Navigates to the same better-auth-ui
+                        sign-out view the header's `UserButton` uses. */}
+                    <li>
                       <Link
-                        href={item.href}
+                        href={SIGN_OUT_HREF}
                         onClick={onClose}
-                        aria-current={
-                          pathname === item.href ? "page" : undefined
-                        }
                         className={cn(
-                          "flex min-h-12 items-center py-3 text-base transition-colors",
+                          "flex min-h-12 items-center gap-2 py-3 text-sm text-[var(--hb-brand-muted)] transition-colors hover:text-[var(--hb-brand-deep)]",
                           focusRing,
-                          pathname === item.href
-                            ? "font-medium text-[var(--hb-brand-deep)]"
-                            : "text-foreground/80 hover:text-[var(--hb-brand-deep)]",
                         )}
                       >
-                        {item.label}
+                        <LogOut aria-hidden="true" className="size-4" />
+                        Sign out
                       </Link>
                     </li>
-                  ))}
-                </ul>
+                  </ul>
+                </nav>
               </>
             ) : (
               <div className="flex flex-col gap-3 min-[420px]:flex-row">
@@ -485,30 +567,26 @@ function MobileMenuPanel({
           variants={rowVariants}
           className="mt-auto pt-12"
         >
-          {socials.length > 0 && (
-            <div className="mb-5 flex flex-wrap gap-3">
-              {socials.map(({ key, label, href, Icon }) => (
-                <a
-                  key={key}
-                  href={href}
-                  aria-label={label}
-                  className={cn(
-                    "inline-flex size-11 items-center justify-center rounded-full border border-[var(--hb-brand)]/60 text-[var(--hb-brand)] transition-colors hover:border-[var(--hb-brand)] hover:bg-[var(--hb-brand)]/8",
-                    focusRing,
-                  )}
-                >
-                  <Icon className="size-5" aria-hidden="true" />
-                </a>
-              ))}
-            </div>
-          )}
+          <HappyBambooSocialIcons
+            socialLinks={socialLinks}
+            label="Follow us on social media"
+            className="mb-5 flex-wrap gap-3"
+            linkClassName={cn(
+              "size-11 rounded-full border border-[var(--hb-brand)]/60 text-[var(--hb-brand)] hover:border-[var(--hb-brand)] hover:bg-[var(--hb-brand)]/8",
+              focusRing,
+            )}
+            iconClassName="size-5"
+            onLinkClick={onClose}
+          />
           <span
             aria-hidden="true"
             className="mb-3 block h-px w-10 bg-[var(--hb-gold)]"
           />
-          <p className="text-sm leading-relaxed text-[var(--hb-brand-muted)]">
-            {tagline}
-          </p>
+          {tagline && (
+            <p className="text-sm leading-relaxed text-[var(--hb-brand-muted)]">
+              {tagline}
+            </p>
+          )}
         </motion.div>
       </div>
     </motion.div>

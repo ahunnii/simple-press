@@ -16,7 +16,7 @@ type Props = {
 export function OliveAboutHero({ image, heading }: Props) {
   return (
     <section
-      aria-label="About Olive Mode"
+      aria-label={heading}
       {...sectionGroupAttr("about", "hero")}
       className="relative aspect-[4/5] w-full overflow-hidden sm:aspect-[16/9]"
     >

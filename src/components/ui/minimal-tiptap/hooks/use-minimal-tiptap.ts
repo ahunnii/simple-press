@@ -71,7 +71,8 @@ async function fakeuploader(file: File): Promise<string> {
   return src;
 }
 
-const IMAGE_MAX_FILE_SIZE = 5 * 1024 * 1024;
+const IMAGE_MAX_FILE_SIZE_FAKE = 5 * 1024 * 1024;
+const IMAGE_MAX_FILE_SIZE_REAL = 25 * 1024 * 1024;
 
 const isVideoFile = (file: File) => file.type.startsWith("video/");
 
@@ -132,205 +133,213 @@ const createExtensions = ({
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
-}) => [
-  StarterKit.configure({
-    blockquote: { HTMLAttributes: { class: "block-node" } },
-    // bold
-    bulletList: { HTMLAttributes: { class: "list-node" } },
-    code: { HTMLAttributes: { class: "inline", spellcheck: "false" } },
-    codeBlock: false,
-    // document
-    dropcursor: { width: 2, class: "ProseMirror-dropcursor border" },
-    // gapcursor
-    // hardBreak
-    heading: { HTMLAttributes: { class: "heading-node" } },
-    // undoRedo
-    horizontalRule: false,
-    // italic
-    // listItem
-    // listKeymap
-    link: {
-      enableClickSelection: true,
-      openOnClick: false,
-      HTMLAttributes: {
-        class: "link",
-      },
-    },
-    orderedList: { HTMLAttributes: { class: "list-node" } },
-    paragraph: { HTMLAttributes: { class: "text-node" } },
-    // strike
-    // text
-    // underline
-    // trailingNode
-  }),
-  Image.configure({
-    allowedMimeTypes: ["image/*"],
-    maxFileSize: 5 * 1024 * 1024,
-    allowBase64: true,
-    uploadFn: async (file) => {
-      return uploader ? await uploader(file) : await fakeuploader(file);
-    },
-    onToggle(editor, files, pos) {
-      editor.commands.insertContentAt(
-        pos,
-        files.map((image) => {
-          const blobUrl = URL.createObjectURL(image);
-          const id = randomId();
+}) => {
+  // When a real uploader is provided (e.g., S3), allow larger files since they'll
+  // be compressed. Fall back to 5MB when using the fake base64 uploader.
+  const imageMaxFileSize = uploader
+    ? IMAGE_MAX_FILE_SIZE_REAL
+    : IMAGE_MAX_FILE_SIZE_FAKE;
 
-          return {
-            type: "image",
-            attrs: {
-              id,
-              src: blobUrl,
-              alt: image.name,
-              title: image.name,
-              fileName: image.name,
-            },
-          };
-        }),
-      );
-    },
-    onValidationError(errors) {
-      errors.forEach((error) => {
-        toast.error("Image validation error", {
-          position: "bottom-right",
-          description: error.reason,
-        });
-      });
-    },
-    onActionSuccess({ action }) {
-      const mapping = {
-        copyImage: "Copy Image",
-        copyLink: "Copy Link",
-        download: "Download",
-      };
-      toast.success(mapping[action], {
-        position: "bottom-right",
-        description: "Image action success",
-      });
-    },
-    onActionError(error, { action }) {
-      const mapping = {
-        copyImage: "Copy Image",
-        copyLink: "Copy Link",
-        download: "Download",
-      };
-      toast.error(`Failed to ${mapping[action]}`, {
-        position: "bottom-right",
-        description: error.message,
-      });
-    },
-  }),
-  FileHandler.configure({
-    allowBase64: true,
-    // Videos are only accepted when a videoUploader is configured; otherwise
-    // they fail the type check exactly as before.
-    allowedMimeTypes: videoUploader
-      ? ["image/*", ...VIDEO_ACCEPTED_MIME_TYPES]
-      : ["image/*"],
-    maxFileSize: IMAGE_MAX_FILE_SIZE,
-    maxFileSizeByType: { video: VIDEO_MAX_FILE_SIZE },
-    onDrop: (editor, files, pos) => {
-      if (videoUploader) {
-        files
-          .filter(isVideoFile)
-          .forEach(
-            (file) =>
-              void uploadAndInsertVideo(editor, file, videoUploader, pos),
-          );
-      }
-      void Promise.all(
-        files
-          .filter((file) => !isVideoFile(file))
-          .map(async (file) => {
-            // Prefer the configured uploader (S3) so dropped images don't end
-            // up base64-encoded in the document. Base64 is a last-resort
-            // fallback for when no uploader is configured at all.
-            const src = uploader
-              ? await uploader(file)
-              : await fileToBase64(file);
-            editor.commands.insertContentAt(pos, {
+  return [
+    StarterKit.configure({
+      blockquote: { HTMLAttributes: { class: "block-node" } },
+      // bold
+      bulletList: { HTMLAttributes: { class: "list-node" } },
+      code: { HTMLAttributes: { class: "inline", spellcheck: "false" } },
+      codeBlock: false,
+      // document
+      dropcursor: { width: 2, class: "ProseMirror-dropcursor border" },
+      // gapcursor
+      // hardBreak
+      heading: { HTMLAttributes: { class: "heading-node" } },
+      // undoRedo
+      horizontalRule: false,
+      // italic
+      // listItem
+      // listKeymap
+      link: {
+        enableClickSelection: true,
+        openOnClick: false,
+        HTMLAttributes: {
+          class: "link",
+        },
+      },
+      orderedList: { HTMLAttributes: { class: "list-node" } },
+      paragraph: { HTMLAttributes: { class: "text-node" } },
+      // strike
+      // text
+      // underline
+      // trailingNode
+    }),
+    Image.configure({
+      allowedMimeTypes: ["image/*"],
+      maxFileSize: imageMaxFileSize,
+      allowBase64: true,
+      uploadFn: async (file) => {
+        return uploader ? await uploader(file) : await fakeuploader(file);
+      },
+      onToggle(editor, files, pos) {
+        editor.commands.insertContentAt(
+          pos,
+          files.map((image) => {
+            const blobUrl = URL.createObjectURL(image);
+            const id = randomId();
+
+            return {
               type: "image",
-              attrs: { src },
-            });
+              attrs: {
+                id,
+                src: blobUrl,
+                alt: image.name,
+                title: image.name,
+                fileName: image.name,
+              },
+            };
           }),
-      );
-    },
-    onPaste: (editor, files) => {
-      if (videoUploader) {
-        files
-          .filter(isVideoFile)
-          .forEach(
-            (file) => void uploadAndInsertVideo(editor, file, videoUploader),
-          );
-      }
-      void Promise.all(
-        files
-          .filter((file) => !isVideoFile(file))
-          .map(async (file) => {
-            // Same rationale as onDrop above — use the real uploader when set.
-            const src = uploader
-              ? await uploader(file)
-              : await fileToBase64(file);
-            editor.commands.insertContent({
-              type: "image",
-              attrs: { src },
-            });
-          }),
-      );
-    },
-    onValidationError: (errors) => {
-      errors.forEach((error) => {
-        if (
-          videoUploader &&
-          error.file instanceof File &&
-          isVideoFile(error.file)
-        ) {
-          toast.error("Video not added", {
+        );
+      },
+      onValidationError(errors) {
+        errors.forEach((error) => {
+          toast.error("Image validation error", {
             position: "bottom-right",
-            description:
-              error.reason === "size"
-                ? `${error.file.name} is over 50MB. Trim or compress it and try again.`
-                : `${error.file.name} isn't a supported video. Use MP4, WebM or MOV.`,
+            description: error.reason,
           });
-          return;
-        }
-        toast.error("Image validation error", {
-          position: "bottom-right",
-          description: error.reason,
         });
-      });
-    },
-  }),
-  ...(videoUploader
-    ? [
-        Video.configure({
-          uploadFn: videoUploader,
-          mediaEnabled: !!mediaEnabled,
-        }),
-      ]
-    : []),
-  Color,
-  TextStyle,
-  Selection,
-  Typography,
-  UnsetAllMarks,
-  HorizontalRule,
-  ResetMarksOnEnter,
-  CodeBlockLowlight,
-  Placeholder.configure({ placeholder: () => placeholder }),
-  Gallery.configure({
-    businessId,
-    galleriesEnabled: galleriesEnabled !== false,
-  }),
-  Embed.configure({ embedsEnabled: embedsEnabled !== false }),
-  QuoteCalculator.configure({
-    businessId,
-    quotesEnabled: quotesEnabled !== false,
-  }),
-  Form.configure({ formsEnabled: formsEnabled !== false }),
-  TableKit.configure({}),
-];
+      },
+      onActionSuccess({ action }) {
+        const mapping = {
+          copyImage: "Copy Image",
+          copyLink: "Copy Link",
+          download: "Download",
+        };
+        toast.success(mapping[action], {
+          position: "bottom-right",
+          description: "Image action success",
+        });
+      },
+      onActionError(error, { action }) {
+        const mapping = {
+          copyImage: "Copy Image",
+          copyLink: "Copy Link",
+          download: "Download",
+        };
+        toast.error(`Failed to ${mapping[action]}`, {
+          position: "bottom-right",
+          description: error.message,
+        });
+      },
+    }),
+    FileHandler.configure({
+      allowBase64: true,
+      // Videos are only accepted when a videoUploader is configured; otherwise
+      // they fail the type check exactly as before.
+      allowedMimeTypes: videoUploader
+        ? ["image/*", ...VIDEO_ACCEPTED_MIME_TYPES]
+        : ["image/*"],
+      maxFileSize: imageMaxFileSize,
+      maxFileSizeByType: { video: VIDEO_MAX_FILE_SIZE },
+      onDrop: (editor, files, pos) => {
+        if (videoUploader) {
+          files
+            .filter(isVideoFile)
+            .forEach(
+              (file) =>
+                void uploadAndInsertVideo(editor, file, videoUploader, pos),
+            );
+        }
+        void Promise.all(
+          files
+            .filter((file) => !isVideoFile(file))
+            .map(async (file) => {
+              // Prefer the configured uploader (S3) so dropped images don't end
+              // up base64-encoded in the document. Base64 is a last-resort
+              // fallback for when no uploader is configured at all.
+              const src = uploader
+                ? await uploader(file)
+                : await fileToBase64(file);
+              editor.commands.insertContentAt(pos, {
+                type: "image",
+                attrs: { src },
+              });
+            }),
+        );
+      },
+      onPaste: (editor, files) => {
+        if (videoUploader) {
+          files
+            .filter(isVideoFile)
+            .forEach(
+              (file) => void uploadAndInsertVideo(editor, file, videoUploader),
+            );
+        }
+        void Promise.all(
+          files
+            .filter((file) => !isVideoFile(file))
+            .map(async (file) => {
+              // Same rationale as onDrop above — use the real uploader when set.
+              const src = uploader
+                ? await uploader(file)
+                : await fileToBase64(file);
+              editor.commands.insertContent({
+                type: "image",
+                attrs: { src },
+              });
+            }),
+        );
+      },
+      onValidationError: (errors) => {
+        errors.forEach((error) => {
+          if (
+            videoUploader &&
+            error.file instanceof File &&
+            isVideoFile(error.file)
+          ) {
+            toast.error("Video not added", {
+              position: "bottom-right",
+              description:
+                error.reason === "size"
+                  ? `${error.file.name} is over 50MB. Trim or compress it and try again.`
+                  : `${error.file.name} isn't a supported video. Use MP4, WebM or MOV.`,
+            });
+            return;
+          }
+          toast.error("Image validation error", {
+            position: "bottom-right",
+            description: error.reason,
+          });
+        });
+      },
+    }),
+    ...(videoUploader
+      ? [
+          Video.configure({
+            uploadFn: videoUploader,
+            mediaEnabled: !!mediaEnabled,
+          }),
+        ]
+      : []),
+    Color,
+    TextStyle,
+    Selection,
+    Typography,
+    UnsetAllMarks,
+    HorizontalRule,
+    ResetMarksOnEnter,
+    CodeBlockLowlight,
+    Placeholder.configure({ placeholder: () => placeholder }),
+    Gallery.configure({
+      businessId,
+      galleriesEnabled: galleriesEnabled !== false,
+    }),
+    Embed.configure({ embedsEnabled: embedsEnabled !== false }),
+    QuoteCalculator.configure({
+      businessId,
+      quotesEnabled: quotesEnabled !== false,
+    }),
+    Form.configure({ formsEnabled: formsEnabled !== false }),
+    TableKit.configure({}),
+  ];
+};
 
 export const useMinimalTiptapEditor = ({
   value,

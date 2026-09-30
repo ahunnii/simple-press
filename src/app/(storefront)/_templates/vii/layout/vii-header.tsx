@@ -16,29 +16,51 @@ import {
 } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  filterNavByFlags,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+  resolveNav,
+  type NavItem,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "../index";
+import { resolveViiLocationTag } from "../shared/vii-location-tag";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
-
-type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = {
-  label: string;
-  href: string;
-  external?: boolean;
-  children?: NavChild[];
-};
+import { ViiNavOverlayAccount } from "./vii-nav-overlay-account";
 
 const ease = "var(--vii-ease-strong)";
+
+/** Shipped default — no per-flag filtering here (PF1): `filterNavByFlags`
+ *  below drops anything the business has switched off, whether it came from
+ *  this list or an owner-saved one. Mirrored by `vii-footer.tsx`'s own
+ *  default (same shape, its own comment). */
+const DEFAULT_NAV_LINKS: NavItem[] = [
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About" },
+  { href: "/blog", label: "Blog" },
+  { href: "/contact", label: "Contact" },
+];
+
+/** Desktop avatar menu + mobile overlay quick-access subset (B4.3 decision) —
+ *  Orders and Admin. Settings is dropped from the desktop set because
+ *  `UserButton` renders its own built-in Settings item (happy-bamboo
+ *  pattern); the mobile overlay has no such built-in, so its own subset
+ *  (`vii-nav-overlay-account.tsx`) keeps Settings. */
+const VII_QUICK_ACCOUNT_KEYS = new Set(["orders", "admin"]);
 
 export function ViiHeader({
   business,
@@ -49,8 +71,11 @@ export function ViiHeader({
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = useHydratedSession(initialSession);
   const pathname = usePathname();
+  const { isEnabled } = useStorefrontFlags();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileMounted, setMobileMounted] = useState(false);
+  const [mobileVisible, setMobileVisible] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
   const [cartBump, setCartBump] = useState(false);
@@ -62,6 +87,23 @@ export function ViiHeader({
   const mobileMenuId = useId();
   const mobileSubmenuId = useId();
   const reduced = useReducedMotion();
+  // Desktop dropdown triggers (the chevron toggle button of each group), so
+  // Esc can hand focus back to the control that opened the panel (PF2).
+  const triggerRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  // Set while Esc hands focus back to a trigger, so the group's
+  // open-on-focus handler doesn't immediately reopen the panel.
+  const suppressFocusOpenRef = useRef(false);
+  // Group opened by mouse hover: the click that usually follows the hover
+  // should keep the panel open, not toggle it shut.
+  const hoverOpenedRef = useRef<string | null>(null);
+  const onTriggerClick = (key: string, isOpen: boolean) => {
+    if (isOpen && hoverOpenedRef.current === key) {
+      hoverOpenedRef.current = null;
+      return;
+    }
+    hoverOpenedRef.current = null;
+    setOpenDropdown(isOpen ? null : key);
+  };
 
   // CIVANA-style: the transparent→solid header animation is homepage-only.
   // Every other route renders the header in its solid state from the start, so
@@ -95,11 +137,17 @@ export function ViiHeader({
     setExpandedMobile(new Set());
   }, [pathname]);
 
-  // ── Escape key closes any open desktop dropdown ───────────────────────────
+  // ── Escape key closes any open desktop dropdown, focus back to its trigger ─
   useEffect(() => {
     if (openDropdown === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenDropdown(null);
+      if (e.key === "Escape") {
+        const trigger = triggerRefs.current.get(openDropdown);
+        setOpenDropdown(null);
+        suppressFocusOpenRef.current = true;
+        trigger?.focus();
+        suppressFocusOpenRef.current = false;
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -129,15 +177,39 @@ export function ViiHeader({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [mobileOpen]);
 
-  // ── Body scroll lock while mobile menu is open ────────────────────────────
+  // ── Open/close transition (PF4): mounted while opening AND while the close
+  // animation plays; visible flips a frame after mount (enter) or right away
+  // on close (exit), so opacity/translate can actually transition. Reduced
+  // motion collapses both to an instant mount/unmount. ──────────────────────
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (mobileOpen) {
+      setMobileMounted(true);
+      if (reduced) {
+        setMobileVisible(true);
+        return;
+      }
+      const raf = requestAnimationFrame(() => setMobileVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setMobileVisible(false);
+    if (reduced) {
+      setMobileMounted(false);
+      return;
+    }
+    const t = setTimeout(() => setMobileMounted(false), 280);
+    return () => clearTimeout(t);
+  }, [mobileOpen, reduced]);
+
+  // ── Body scroll lock while the mobile menu is mounted (kept through the
+  // close animation, not just the logically-open window) ────────────────────
+  useEffect(() => {
+    if (!mobileMounted) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [mobileOpen]);
+  }, [mobileMounted]);
 
   // ── Focus management ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -152,7 +224,7 @@ export function ViiHeader({
     }
   }, [mobileOpen]);
 
-  // ── Inert siblings while mobile menu is open ──────────────────────────────
+  // ── Inert siblings while the mobile menu is mounted ───────────────────────
   useEffect(() => {
     const siblings: Element[] = [];
     const header = document.querySelector("header");
@@ -162,7 +234,7 @@ export function ViiHeader({
     if (main) siblings.push(main);
     if (footer) siblings.push(footer);
 
-    if (mobileOpen) {
+    if (mobileMounted) {
       siblings.forEach((el) => el.setAttribute("inert", ""));
     } else {
       siblings.forEach((el) => el.removeAttribute("inert"));
@@ -170,11 +242,11 @@ export function ViiHeader({
     return () => {
       siblings.forEach((el) => el.removeAttribute("inert"));
     };
-  }, [mobileOpen]);
+  }, [mobileMounted]);
 
   // ── Tab focus trap ────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileMounted) return;
     const handleTab = (e: KeyboardEvent) => {
       if (e.key !== "Tab") return;
       const dialog = mobileDialogRef.current;
@@ -201,29 +273,15 @@ export function ViiHeader({
     };
     document.addEventListener("keydown", handleTab);
     return () => document.removeEventListener("keydown", handleTab);
-  }, [mobileOpen]);
+  }, [mobileMounted]);
 
-  const { isEnabled } = useFeatureFlags({
-    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
-  });
-
-  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
-
-  // ── Nav links ──────────────────────────────────────────────────────────────
-  const DEFAULT_NAV_LINKS: NavLink[] = [
-    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
-    { href: "/about", label: "About" },
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
-    { href: "/contact", label: "Contact" },
-  ];
-
-  // `??`, never `||`: an owner who saves an empty item list in the Navigation
-  // builder means "no nav links", which `||` would silently overwrite with the
-  // shipped default.
-  const customNav = business?.siteContent?.navigationItems as
-    | NavLink[]
-    | undefined;
-  const links = customNav ?? DEFAULT_NAV_LINKS;
+  // ── Nav links: owner-saved (`??`, never `||` — an empty saved list means
+  // "no nav links") or the shipped default, then the shared route→flag filter
+  // (P-NAV-FLAGS) so a flag-disabled route never renders, from either source ─
+  const links = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
+    isEnabled,
+  );
 
   // ── Resolve global fields ──────────────────────────────────────────────────
   const customFields = business?.siteContent?.customFields as
@@ -232,11 +290,10 @@ export function ViiHeader({
   const g = resolveFields(customFields, [
     "vii.global.book-cta-text",
     "vii.global.book-cta-link",
-    "vii.global.location-tag",
   ]);
   const bookCtaText = g["vii.global.book-cta-text"] ?? "Book Now";
   const bookCtaLink = g["vii.global.book-cta-link"] ?? "/contact";
-  const locationTag = g["vii.global.location-tag"] ?? "";
+  const locationTag = resolveViiLocationTag(business, customFields);
   const phone = business?.phoneNumber ?? "";
 
   const businessName = business?.name ?? "";
@@ -246,16 +303,28 @@ export function ViiHeader({
     businessName,
   );
 
-  const isActive = (href: string) => {
-    if (!href || href === "#") return false;
-    return href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
-  };
-
   const showAdminLink =
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
+
+  // Desktop avatar menu: quick-access subset (B4.3) of the same flag-gated
+  // account links the mobile overlay and the account sidebar use — never a
+  // hand-written list, so `orders` off correctly drops "Orders" (PF5).
+  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  })
+    .filter((link) => VII_QUICK_ACCOUNT_KEYS.has(link.key))
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon:
+        link.key === "orders" ? (
+          <IconPackage className="h-4 w-4" />
+        ) : (
+          <IconLayoutDashboard className="h-4 w-4" />
+        ),
+    }));
 
   // ── Wordmark/logo ──────────────────────────────────────────────────────────
   const renderWordmark = (dark: boolean) =>
@@ -288,7 +357,6 @@ export function ViiHeader({
         <em>{businessName}</em>
         {locationTag ? (
           <span
-            {...fieldAttr("vii.global.location-tag")}
             style={{
               fontFamily: "var(--font-sans)",
               fontStyle: "normal",
@@ -336,10 +404,6 @@ export function ViiHeader({
     ? "var(--vii-ink-soft)"
     : "color-mix(in srgb, var(--vii-paper) 85%, transparent)";
 
-  // ── Dropdown helpers ────────────────────────────────────────────────────────
-  const dropdownKey = (side: "left" | "right", index: number) =>
-    `${side}-${index}`;
-
   const toggleMobileExpanded = (i: number) =>
     setExpandedMobile((prev) => {
       const next = new Set(prev);
@@ -349,24 +413,39 @@ export function ViiHeader({
     });
 
   // ── Desktop nav link (handles flat links + dropdowns) ───────────────────────
-  const renderDesktopNavLink = (
-    link: NavLink,
-    index: number,
-    side: "left" | "right",
-  ) => {
+  const renderDesktopNavLink = (link: NavItem, index: number) => {
     if (link.children?.length) {
-      const key = dropdownKey(side, index);
+      const key = `nav-${index}`;
       const isOpen = openDropdown === key;
-      const childActive = !!link.children?.some((c) => isActive(c.href));
       const hasParentLink = !!link.href && link.href !== "#";
+      // Single source of truth for "which one entry is current" across the
+      // parent + its children (B3.4) — avoids the old startsWith bug where a
+      // parent AND a child could both look active.
+      const entries = navGroupEntries(link);
+      const activeIdx = activeEntryIndex(pathname, entries);
+      const parentActive = hasParentLink && activeIdx === 0;
+      const groupActive = activeIdx !== -1;
+      const childOffset = hasParentLink ? 1 : 0;
 
       return (
         <div
           key={link.href + link.label}
           className="relative flex items-center"
           data-vii-dropdown
-          onMouseEnter={() => setOpenDropdown(key)}
-          onMouseLeave={() => setOpenDropdown(null)}
+          onMouseEnter={() => {
+            hoverOpenedRef.current = key;
+            setOpenDropdown(key);
+          }}
+          onMouseLeave={() => {
+            hoverOpenedRef.current = null;
+            setOpenDropdown(null);
+          }}
+          onFocus={(e) => {
+            // Open only when focus enters the group from outside it.
+            if (suppressFocusOpenRef.current) return;
+            if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+            setOpenDropdown(key);
+          }}
           onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
               setOpenDropdown(null);
@@ -377,12 +456,11 @@ export function ViiHeader({
             <>
               <Link
                 href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
+                {...externalLinkProps(link.external)}
                 className="vii-nav-link"
-                data-current={childActive ? "true" : undefined}
-                aria-current={childActive ? "page" : undefined}
-                style={navLinkStyle(childActive)}
+                data-current={groupActive ? "true" : undefined}
+                aria-current={parentActive ? "page" : undefined}
+                style={navLinkStyle(groupActive)}
               >
                 {link.label}
                 {link.external ? (
@@ -391,10 +469,14 @@ export function ViiHeader({
               </Link>
               <button
                 type="button"
+                ref={(el) => {
+                  if (el) triggerRefs.current.set(key, el);
+                  else triggerRefs.current.delete(key);
+                }}
                 aria-haspopup="true"
                 aria-expanded={isOpen}
                 aria-label={`Toggle ${link.label} menu`}
-                onClick={() => setOpenDropdown(isOpen ? null : key)}
+                onClick={() => onTriggerClick(key, isOpen)}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -402,7 +484,7 @@ export function ViiHeader({
                   border: "none",
                   cursor: "pointer",
                   padding: "4px 2px",
-                  color: navLinkStyle(childActive).color,
+                  color: navLinkStyle(groupActive).color,
                   transition: `color 0.4s ${ease}`,
                 }}
               >
@@ -419,13 +501,17 @@ export function ViiHeader({
           ) : (
             <button
               type="button"
+              ref={(el) => {
+                if (el) triggerRefs.current.set(key, el);
+                else triggerRefs.current.delete(key);
+              }}
               aria-haspopup="true"
               aria-expanded={isOpen}
-              onClick={() => setOpenDropdown(key)}
+              onClick={() => onTriggerClick(key, isOpen)}
               className="vii-nav-link"
-              data-current={childActive ? "true" : undefined}
+              data-current={groupActive ? "true" : undefined}
               style={{
-                ...navLinkStyle(childActive),
+                ...navLinkStyle(groupActive),
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "4px",
@@ -460,14 +546,13 @@ export function ViiHeader({
                   padding: "6px 0",
                 }}
               >
-                {link.children.map((child) => {
-                  const childActive = isActive(child.href);
+                {link.children.map((child, ci) => {
+                  const childActive = activeIdx === ci + childOffset;
                   return (
                     <Link
                       key={child.href + child.label}
                       href={child.href}
-                      target={child.external ? "_blank" : undefined}
-                      rel={child.external ? "noopener noreferrer" : undefined}
+                      {...externalLinkProps(child.external)}
                       aria-current={childActive ? "page" : undefined}
                       onClick={() => setOpenDropdown(null)}
                       style={{
@@ -499,13 +584,12 @@ export function ViiHeader({
       );
     }
 
-    const active = isActive(link.href);
+    const active = isNavItemActive(pathname, link);
     return (
       <Link
         key={link.href + link.label}
         href={link.href}
-        target={link.external ? "_blank" : undefined}
-        rel={link.external ? "noopener noreferrer" : undefined}
+        {...externalLinkProps(link.external)}
         aria-current={active ? "page" : undefined}
         className="vii-nav-link"
         data-current={active ? "true" : undefined}
@@ -535,12 +619,15 @@ export function ViiHeader({
       : "1px solid transparent",
   });
 
-  const renderMobileNavLink = (link: NavLink, i: number) => {
+  const renderMobileNavLink = (link: NavItem, i: number) => {
     if (link.children?.length) {
       const submenuId = `${mobileSubmenuId}-${i}`;
       const expanded = expandedMobile.has(i);
-      const childActive = !!link.children?.some((c) => isActive(c.href));
       const hasParentLink = !!link.href && link.href !== "#";
+      const entries = navGroupEntries(link);
+      const activeIdx = activeEntryIndex(pathname, entries);
+      const groupActive = activeIdx !== -1;
+      const childOffset = hasParentLink ? 1 : 0;
 
       return (
         <li key={link.href + link.label}>
@@ -550,19 +637,18 @@ export function ViiHeader({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                borderBottom: childActive
+                borderBottom: groupActive
                   ? "1px solid var(--vii-copper)"
                   : "1px solid transparent",
               }}
             >
               <Link
                 href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
+                {...externalLinkProps(link.external)}
                 onClick={() => setMobileOpen(false)}
-                aria-current={childActive ? "page" : undefined}
+                aria-current={activeIdx === 0 ? "page" : undefined}
                 style={{
-                  ...mobileLinkStyle(childActive),
+                  ...mobileLinkStyle(groupActive),
                   borderBottom: "none",
                   flex: 1,
                 }}
@@ -608,14 +694,14 @@ export function ViiHeader({
               aria-expanded={expanded}
               aria-controls={submenuId}
               style={{
-                ...mobileLinkStyle(childActive),
+                ...mobileLinkStyle(groupActive),
                 display: "flex",
                 width: "100%",
                 alignItems: "center",
                 justifyContent: "space-between",
                 background: "transparent",
                 border: "none",
-                borderBottom: childActive
+                borderBottom: groupActive
                   ? "1px solid var(--vii-copper)"
                   : "1px solid transparent",
                 cursor: "pointer",
@@ -634,14 +720,13 @@ export function ViiHeader({
           )}
           {expanded ? (
             <ul id={submenuId} className="flex flex-col pb-2 pl-4">
-              {link.children.map((child) => {
-                const childActive = isActive(child.href);
+              {link.children.map((child, ci) => {
+                const childActive = activeIdx === ci + childOffset;
                 return (
                   <li key={child.href + child.label}>
                     <Link
                       href={child.href}
-                      target={child.external ? "_blank" : undefined}
-                      rel={child.external ? "noopener noreferrer" : undefined}
+                      {...externalLinkProps(child.external)}
                       onClick={() => setMobileOpen(false)}
                       aria-current={childActive ? "page" : undefined}
                       style={{
@@ -672,13 +757,12 @@ export function ViiHeader({
       );
     }
 
-    const active = isActive(link.href);
+    const active = isNavItemActive(pathname, link);
     return (
       <li key={link.href + link.label}>
         <Link
           href={link.href}
-          target={link.external ? "_blank" : undefined}
-          rel={link.external ? "noopener noreferrer" : undefined}
+          {...externalLinkProps(link.external)}
           onClick={() => setMobileOpen(false)}
           aria-current={active ? "page" : undefined}
           style={mobileLinkStyle(active)}
@@ -776,12 +860,10 @@ export function ViiHeader({
                 className="mr-2 hidden items-center gap-7 md:flex"
                 aria-label="Primary navigation"
               >
-                {links.map((link, index) =>
-                  renderDesktopNavLink(link, index, "left"),
-                )}
+                {links.map((link, index) => renderDesktopNavLink(link, index))}
               </nav>
 
-              {isStorefrontEnabled("customerAccounts") && (
+              {isEnabled("customerAccounts") && (
                 <div className="hidden md:block">
                   {isPending ? (
                     <div
@@ -797,24 +879,7 @@ export function ViiHeader({
                       size="icon"
                       className="h-auto w-auto rounded-full p-0"
                       avatarClassName="size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent"
-                      links={[
-                        {
-                          icon: <IconPackage className="h-4 w-4" />,
-                          label: "Orders",
-                          href: "/account/orders",
-                        },
-                        ...(showAdminLink
-                          ? [
-                              {
-                                icon: (
-                                  <IconLayoutDashboard className="h-4 w-4" />
-                                ),
-                                label: "Admin",
-                                href: "/admin",
-                              },
-                            ]
-                          : []),
-                      ]}
+                      links={userButtonLinks}
                     />
                   ) : (
                     <Link
@@ -837,7 +902,7 @@ export function ViiHeader({
               )}
 
               {/* Wishlist — static badge (no bump animation) */}
-              {isStorefrontEnabled("wishlist") && (
+              {isEnabled("wishlist") && (
                 <Link
                   href="/wishlist"
                   aria-label={
@@ -870,7 +935,7 @@ export function ViiHeader({
               )}
 
               {/* Cart — link to /cart (no vii-specific drawer in this pass) */}
-              {isEnabled("products") && (
+              {isEnabled("cart") && (
                 <Link
                   href="/cart"
                   aria-label={
@@ -934,7 +999,7 @@ export function ViiHeader({
       </header>
 
       {/* ── Mobile navigation menu (CIVANA-style) ───────────────────────────── */}
-      {mobileOpen ? (
+      {mobileMounted ? (
         <div
           ref={mobileDialogRef}
           id={mobileMenuId}
@@ -942,7 +1007,14 @@ export function ViiHeader({
           aria-modal="true"
           aria-label="Navigation menu"
           className="fixed inset-0 z-[60] flex flex-col md:hidden"
-          style={{ background: "var(--vii-paper)" }}
+          style={{
+            background: "var(--vii-paper)",
+            opacity: mobileVisible ? 1 : 0,
+            transform: mobileVisible ? "translateY(0)" : "translateY(-12px)",
+            transition: reduced
+              ? "none"
+              : `opacity 0.28s ${ease}, transform 0.28s ${ease}`,
+          }}
         >
           {/* Top: logo + close */}
           <div className="flex shrink-0 items-center justify-between px-6 py-4">
@@ -976,32 +1048,6 @@ export function ViiHeader({
             </button>
           </div>
 
-          {/* Book CTA — prominent, near top */}
-          <div className="shrink-0 px-6 pb-4">
-            <Link
-              href={bookCtaLink}
-              onClick={() => setMobileOpen(false)}
-              {...fieldAttr("vii.global.book-cta-text")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "var(--font-sans)",
-                fontSize: "12px",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                padding: "14px",
-                background: "var(--vii-copper-deep)",
-                color: "var(--vii-paper)",
-                textDecoration: "none",
-                borderRadius: "var(--radius)",
-              }}
-            >
-              {bookCtaText}
-            </Link>
-          </div>
-
           {/* Nav links */}
           <nav
             className="flex-1 overflow-y-auto px-6 py-4"
@@ -1012,7 +1058,9 @@ export function ViiHeader({
             </ul>
           </nav>
 
-          {/* Bottom: phone + Book CTA + account */}
+          {/* Bottom: phone + Book CTA + account. The single "Book Now" CTA in
+              the open menu lives here (PF25 — the full-width one that used to
+              sit above the nav links was dropped). */}
           <div
             className="shrink-0 px-6 py-6"
             style={{
@@ -1062,34 +1110,19 @@ export function ViiHeader({
               </Link>
             </div>
 
-            {/* Same `customerAccounts` gate the desktop cluster uses, plus a
-                pending guard: this row is a single link whose destination IS
-                the session state, so rendering it early points a signed-in
-                shopper at the sign-in page. A row that appears a beat late
-                beats a row that goes to the wrong place. */}
-            {isStorefrontEnabled("customerAccounts") && !isPending && (
-              <Link
-                href={session?.user ? "/account/orders" : "/auth/sign-in"}
-                onClick={() => setMobileOpen(false)}
-                className="mt-4 flex items-center justify-center gap-2"
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "12px",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  fontWeight: 400,
-                  padding: "14px",
-                  background: "transparent",
-                  border:
-                    "1px solid color-mix(in srgb, var(--vii-navy) 20%, transparent)",
-                  color: "var(--vii-navy)",
-                  textDecoration: "none",
-                  borderRadius: "var(--radius)",
-                }}
-              >
-                <User className="h-4 w-4" aria-hidden="true" />
-                {session?.user ? "My Account" : "Sign In"}
-              </Link>
+            {/* Account block (PF6) — full link list + sign-out, never
+                `UserButton` (its Radix portal would render under this
+                overlay and outside its focus trap). Handles its own pending
+                state, so it never flashes "Sign In" for a signed-in shopper. */}
+            {isEnabled("customerAccounts") && (
+              <div className="mt-5">
+                <ViiNavOverlayAccount
+                  session={session}
+                  isPending={isPending}
+                  isEnabled={isEnabled}
+                  onClose={() => setMobileOpen(false)}
+                />
+              </div>
             )}
           </div>
         </div>

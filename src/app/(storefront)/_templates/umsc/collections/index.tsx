@@ -9,9 +9,9 @@ import type { TemplateSection } from "~/lib/template-sections";
 const collectionsHeroData: TemplateField[] = [
   {
     key: "umsc.collections.hero-heading",
-    label: "Collections Heading",
+    label: "Heading",
     description:
-      "Headline in the black page-hero band at the top of the collections page.",
+      "Headline in the dark page-hero band at the top of the collections page.",
     type: "text",
     page: "collections",
     group: "collections.hero",
@@ -20,8 +20,8 @@ const collectionsHeroData: TemplateField[] = [
   },
   {
     key: "umsc.collections.hero-lede",
-    label: "Collections Lede",
-    description: "One sentence beneath the collections heading.",
+    label: "Intro text",
+    description: "One sentence beneath the heading.",
     type: "textarea",
     page: "collections",
     group: "collections.hero",
@@ -31,7 +31,7 @@ const collectionsHeroData: TemplateField[] = [
   },
   {
     key: "umsc.collections.empty-body",
-    label: "Empty State Text",
+    label: "Empty state text",
     description:
       "Shown when there are no published collections to list, and when a single collection has no products in it yet.",
     type: "textarea",
@@ -47,9 +47,9 @@ export const umscCollectionsData: TemplateField[] = [...collectionsHeroData];
 export const umscCollectionsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.hero",
-    title: "Collections Page",
+    title: "Collections page",
     description:
-      "Heading, lede, and the shared empty-state line used by both the collections index and a single collection page",
+      "Heading, intro text, and the shared empty-state line used by both the collections index and a single collection page",
     icon: "🗂️",
     columns: 2,
   },
@@ -59,9 +59,9 @@ export const umscCollectionsSections: TemplateSection[] = [
   {
     id: "collections.hero",
     page: "collections",
-    title: "Hero",
+    title: "Collections page",
     description:
-      "Black page-hero band with heading and lede, above the collections grid",
+      "Dark page-hero band with heading and intro text, above the collections grid",
     groupIds: ["collections.hero"],
     order: 0,
     hideable: false,

@@ -597,8 +597,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
           />
 
           <p className="text-muted-foreground mt-3 text-center text-xs">
-            All transactions are secure and encrypted via Stripe. 100% Secure
-            and Encrypted Payments.
+            Payments are processed securely by Stripe.
           </p>
         </div>
       </div>

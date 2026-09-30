@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { ContactFormValues } from "~/lib/validators/contact";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -20,6 +24,7 @@ import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
+import { DEFAULT_PINK_CONTACT_TOPICS } from "./index";
 
 export type PinkContactTopic = {
   name?: string;
@@ -38,27 +43,6 @@ function trimmedOrFallback(raw: string | undefined, fallback: string): string {
   return fallback;
 }
 
-const DEFAULT_TOPICS: PinkContactTopic[] = [
-  {
-    name: "Custom orders",
-    blurb: "A doll, a piece of jewelry, or something else made just for you.",
-    messageLabel: "Tell me what you have in mind",
-    messagePlaceholder: "Sizes, colors, timeline — whatever you've got.",
-  },
-  {
-    name: "Make & takes",
-    blurb: "Bringing a workshop to your group.",
-    messageLabel: "Tell me about your group",
-    messagePlaceholder: "Group size, dates that work, and where.",
-  },
-  {
-    name: "Something else",
-    blurb: "Questions, press, or anything else.",
-    messageLabel: "What's on your mind",
-    messagePlaceholder: "Ask away.",
-  },
-];
-
 type Props = {
   topicsVisible: boolean;
   topicsHeading: string;
@@ -71,6 +55,9 @@ type Props = {
   defaultMessagePlaceholder: string;
   submitLabel: string;
   emailNotePrefix: string;
+  successHeading: string;
+  successBody: string;
+  successAgainLabel: string;
   supportEmail?: string | null;
 };
 
@@ -99,6 +86,9 @@ export function PinkContactForm({
   defaultMessagePlaceholder,
   submitLabel,
   emailNotePrefix,
+  successHeading,
+  successBody,
+  successAgainLabel,
   supportEmail,
 }: Props) {
   const {
@@ -134,7 +124,8 @@ export function PinkContactForm({
     }
   }, [isSuccess]);
 
-  const items = topics.length > 0 ? topics : DEFAULT_TOPICS;
+  const items: PinkContactTopic[] =
+    topics.length > 0 ? topics : DEFAULT_PINK_CONTACT_TOPICS;
   const selectedTopic =
     selectedIndex != null ? items[selectedIndex] : undefined;
   const messageLabel = trimmedOrFallback(
@@ -163,7 +154,7 @@ export function PinkContactForm({
   if (isSuccess) {
     return (
       <section
-        className="px-5 py-16 md:px-10 md:py-24"
+        className="py-16 md:py-24"
         {...sectionGroupAttr("contact", "form")}
       >
         <div
@@ -182,22 +173,29 @@ export function PinkContactForm({
               fontWeight: 600,
               letterSpacing: "-0.015em",
             }}
+            {...fieldAttr("pink.contact.form-success-heading")}
           >
-            Got it — thank you.
+            {successHeading}
           </h2>
-          <p
-            className="max-w-[42ch] text-[15px] leading-[1.7]"
-            style={{ color: "var(--pink-muted)" }}
-          >
-            We read every note and reply as soon as we can.
-          </p>
-          <button
-            type="button"
-            onClick={resetSuccess}
-            className="pink-btn pink-btn-ghost mt-2"
-          >
-            Send another
-          </button>
+          {successBody && (
+            <p
+              className="max-w-[42ch] text-[15px] leading-[1.7]"
+              style={{ color: "var(--pink-muted)" }}
+              {...fieldAttr("pink.contact.form-success-body")}
+            >
+              {successBody}
+            </p>
+          )}
+          {successAgainLabel && (
+            <button
+              type="button"
+              onClick={resetSuccess}
+              className="pink-btn pink-btn-ghost mt-2"
+              {...fieldAttr("pink.contact.form-success-again-label")}
+            >
+              {successAgainLabel}
+            </button>
+          )}
         </div>
       </section>
     );
@@ -208,7 +206,7 @@ export function PinkContactForm({
       {/* ── contact.topics ─────────────────────────────────────────────── */}
       {topicsVisible && (
         <section
-          className="px-5 pt-16 md:px-10 md:pt-24"
+          className="pt-16 md:pt-24"
           {...sectionGroupAttr("contact", "topics")}
         >
           <div className="mx-auto max-w-[1400px]">
@@ -239,6 +237,7 @@ export function PinkContactForm({
                         : "var(--pink-paper)",
                       color: selected ? "var(--pink-paper)" : "var(--pink-ink)",
                     }}
+                    {...listItemAttr("pink.contact.topics-items", i)}
                   >
                     <span className="pink-display text-[17px] font-semibold">
                       {topic.name ?? ""}
@@ -263,7 +262,7 @@ export function PinkContactForm({
 
       {/* ── contact.form ───────────────────────────────────────────────── */}
       <section
-        className="px-5 py-16 md:px-10 md:py-24"
+        className="py-16 md:py-24"
         {...sectionGroupAttr("contact", "form")}
       >
         <div className="mx-auto max-w-[1400px]">

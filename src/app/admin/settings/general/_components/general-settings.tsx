@@ -10,6 +10,13 @@ import { toast } from "sonner";
 
 import type { GeneralBusinessFormSchema } from "~/lib/validators/general-business";
 import type { RouterOutputs } from "~/trpc/react";
+import {
+  googleMapsUrls,
+  isValidLatitude,
+  isValidLongitude,
+  parseCoordinate,
+  parseCoordinatePair,
+} from "~/lib/address/coordinates";
 import { formatBusinessAddress } from "~/lib/address/format";
 import { COMMON_TIME_ZONES } from "~/lib/time-zones";
 import { cn } from "~/lib/utils";
@@ -41,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Input } from "~/components/ui/input";
 import { InputFormField } from "~/components/inputs/input-form-field";
 
 type Props = {
@@ -78,6 +86,18 @@ function addressDefaults(source: AddressSource) {
   };
 }
 
+type MapPinSource = {
+  latitude: number | null;
+  longitude: number | null;
+};
+
+function mapPinDefaults(source: MapPinSource) {
+  return {
+    latitude: source.latitude != null ? String(source.latitude) : "",
+    longitude: source.longitude != null ? String(source.longitude) : "",
+  };
+}
+
 export function GeneralSettings({ business }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -96,6 +116,7 @@ export function GeneralSettings({ business }: Props) {
       phoneNumber: business.phoneNumber ?? "",
       supportEmail: business.supportEmail ?? "",
       ...addressDefaults(business),
+      ...mapPinDefaults(business),
       slug: business.slug ?? "",
       sendAbandonedCheckoutEmails:
         business.sendAbandonedCheckoutEmails ?? false,
@@ -103,22 +124,55 @@ export function GeneralSettings({ business }: Props) {
     },
   });
 
-  const [watchedStreet, watchedCity, watchedState, watchedPostalCode] =
-    useWatch({
-      control: form.control,
-      name: [
-        "addressStreet",
-        "addressCity",
-        "addressState",
-        "addressPostalCode",
-      ],
-    });
+  const [
+    watchedStreet,
+    watchedCity,
+    watchedState,
+    watchedPostalCode,
+    watchedLatitude,
+    watchedLongitude,
+  ] = useWatch({
+    control: form.control,
+    name: [
+      "addressStreet",
+      "addressCity",
+      "addressState",
+      "addressPostalCode",
+      "latitude",
+      "longitude",
+    ],
+  });
   const addressPreview = formatBusinessAddress({
     street: watchedStreet,
     city: watchedCity,
     state: watchedState,
     postalCode: watchedPostalCode,
   });
+
+  const parsedLatitude = parseCoordinate(watchedLatitude);
+  const parsedLongitude = parseCoordinate(watchedLongitude);
+  const mapPinUrl =
+    isValidLatitude(parsedLatitude) && isValidLongitude(parsedLongitude)
+      ? googleMapsUrls({
+          latitude: parsedLatitude,
+          longitude: parsedLongitude,
+        }).viewUrl
+      : null;
+
+  const handleCoordinatePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData("text");
+    const pair = parseCoordinatePair(pasted);
+    if (!pair) return;
+    e.preventDefault();
+    form.setValue("latitude", String(pair.latitude), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("longitude", String(pair.longitude), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   //Mutations
   const updateGeneralMutation = api.business.updateGeneral.useMutation({
@@ -131,6 +185,7 @@ export function GeneralSettings({ business }: Props) {
         supportEmail: data.business.supportEmail ?? "",
         phoneNumber: data.business.phoneNumber ?? "",
         ...addressDefaults(data.business),
+        ...mapPinDefaults(data.business),
         slug: data.business.slug,
         sendAbandonedCheckoutEmails:
           data.business.sendAbandonedCheckoutEmails ?? false,
@@ -156,6 +211,11 @@ export function GeneralSettings({ business }: Props) {
       addressCity: data.addressCity?.trim() ?? "",
       addressState: data.addressState?.trim() ?? "",
       addressPostalCode: data.addressPostalCode?.trim() ?? "",
+      // Always send both keys — even when unchanged — so clearing one via
+      // the "both or neither" rule actually clears the pair rather than
+      // silently no-op'ing on the untouched field.
+      latitude: data.latitude?.trim() ? Number(data.latitude.trim()) : null,
+      longitude: data.longitude?.trim() ? Number(data.longitude.trim()) : null,
       phoneNumber: data.phoneNumber ?? undefined,
       sendAbandonedCheckoutEmails: data.sendAbandonedCheckoutEmails,
       timeZone: data.timeZone,
@@ -170,6 +230,7 @@ export function GeneralSettings({ business }: Props) {
         supportEmail: business.supportEmail ?? undefined,
         phoneNumber: business.phoneNumber ?? undefined,
         ...addressDefaults(business),
+        ...mapPinDefaults(business),
         sendAbandonedCheckoutEmails:
           business.sendAbandonedCheckoutEmails ?? false,
         timeZone: business.timeZone ?? "America/Detroit",
@@ -313,7 +374,7 @@ export function GeneralSettings({ business }: Props) {
             </Card>
 
             {/* Contact Details */}
-            <Card>
+            <Card id="contact" className="scroll-mt-24">
               <CardHeader>
                 <CardTitle>Contact Details</CardTitle>
                 <CardDescription>
@@ -349,16 +410,16 @@ export function GeneralSettings({ business }: Props) {
               </CardContent>
             </Card>
 
-            {/* Business Address */}
-            <Card>
+            {/* Business address + optional map pin */}
+            <Card id="location" className="scroll-mt-24">
               <CardHeader>
-                <CardTitle>Business Address</CardTitle>
+                <CardTitle>Business address</CardTitle>
                 <CardDescription>
                   Split out so search engines can show your location. Your
                   storefront displays it as one line.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <InputFormField
                     form={form}
@@ -394,6 +455,78 @@ export function GeneralSettings({ business }: Props) {
                     {addressPreview || "—"}
                   </span>
                 </p>
+
+                <div className="space-y-3 border-t pt-4">
+                  <div>
+                    <h3 className="text-sm font-medium">
+                      Map pin{" "}
+                      <span className="text-muted-foreground font-normal">
+                        (optional)
+                      </span>
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      Only needed if your site&apos;s design shows a map — not
+                      every design does, so it&apos;s fine to leave this blank.
+                      When set, it also helps search engines place your
+                      storefront.
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      To fill it in, right-click your spot in Google Maps and
+                      click the numbers at the top of the menu to copy them,
+                      then paste into either box.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="latitude"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Latitude</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              inputMode="decimal"
+                              placeholder="42.4305"
+                              onPaste={handleCoordinatePaste}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="longitude"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Longitude</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              inputMode="decimal"
+                              placeholder="-83.1419"
+                              onPaste={handleCoordinatePaste}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {mapPinUrl && (
+                    <a
+                      href={mapPinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary inline-block text-sm underline underline-offset-2"
+                    >
+                      Check the pin on Google Maps ↗
+                    </a>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

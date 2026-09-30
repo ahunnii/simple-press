@@ -39,15 +39,17 @@ export function SledgeProductRail({
     <section className="bg-white px-7 py-16 md:py-20" {...sectionAttrs}>
       <div className="mx-auto max-w-7xl">
         <FadeIn className="mb-12 flex items-end justify-between gap-6">
-          <h2
-            className="sl-rail-heading font-heading font-bold uppercase"
-            {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
-          >
-            {heading}
-          </h2>
+          {heading.trim() ? (
+            <h2
+              className="sl-rail-heading font-heading font-bold uppercase"
+              {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
+            >
+              {heading}
+            </h2>
+          ) : null}
           <Link
             href={ctaHref}
-            className="sl-cta-pill flex shrink-0 items-center gap-2 px-4 py-2.5 font-sans text-[14px] font-medium tracking-[.18em] uppercase transition-opacity hover:opacity-70"
+            className="sl-cta-pill ml-auto flex shrink-0 items-center gap-2 px-4 py-2.5 font-sans text-[14px] font-medium tracking-[.18em] uppercase transition-opacity hover:opacity-70"
           >
             {ctaText} →
           </Link>

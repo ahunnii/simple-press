@@ -7,65 +7,36 @@ import { formatPrice } from "~/lib/prices";
 import { Card, CardContent } from "~/components/ui/card";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
-function statusClass(status: string) {
-  switch (status) {
-    case "open":
-      return "bg-blue-100 text-blue-800";
-    case "completed":
-      return "bg-green-100 text-green-800";
-    case "cancelled":
-      return "bg-red-100 text-red-800";
-    case "refunded":
-      return "bg-gray-100 text-gray-800";
-    default:
-      return "bg-yellow-100 text-yellow-800";
-  }
-}
+import { bambooOrderStatusClass } from "../shared/bamboo-status";
+import { BambooAccountLayout } from "./bamboo-account-layout";
 
 export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
   const addr = order.shippingAddress;
 
   return (
     <PageTransition>
-      <section className="bg-secondary py-16">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <FadeIn direction="up">
-            <p className="mb-2 text-xs font-semibold tracking-widest text-[var(--bam-gold)] uppercase">
-              Account
-            </p>
-            <h1 className="font-heading text-foreground text-4xl font-bold">
-              Order #{order.orderNumber}
-            </h1>
-            <div className="text-muted-foreground mt-2 flex items-center text-sm">
-              <Link href="/" className="hover:text-primary">
-                Home
-              </Link>
-              <span className="mx-2">/</span>
-              <Link href="/account/settings" className="hover:text-primary">
-                Account
-              </Link>
-              <span className="mx-2">/</span>
-              <Link href="/account/orders" className="hover:text-primary">
-                Orders
-              </Link>
-              <span className="mx-2">/</span>
-              <span>#{order.orderNumber}</span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusClass(order.status)}`}
-              >
-                {order.status}
-              </span>
-              <span className="bg-secondary text-secondary-foreground rounded-full px-3 py-1 text-xs font-medium">
-                {formatDate(order.createdAt)}
-              </span>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+      <BambooAccountLayout
+        heading={`Order #${order.orderNumber}`}
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account/settings" },
+          { label: "Orders", href: "/account/orders" },
+          { label: `#${order.orderNumber}` },
+        ]}
+      >
+        <FadeIn direction="up">
+          <div className="mb-6 flex flex-wrap gap-2">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${bambooOrderStatusClass(order.status)}`}
+            >
+              {order.status}
+            </span>
+            <span className="bg-secondary text-secondary-foreground rounded-full px-3 py-1 text-xs font-medium">
+              {formatDate(order.createdAt)}
+            </span>
+          </div>
+        </FadeIn>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <FadeIn direction="up">
@@ -249,7 +220,7 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
             </Link>
           </div>
         </div>
-      </section>
+      </BambooAccountLayout>
     </PageTransition>
   );
 }

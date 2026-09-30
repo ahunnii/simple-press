@@ -135,239 +135,244 @@ export function PinkEventPage({
   return (
     <div className="flex flex-col">
       {/* ── The event ─────────────────────────────────────────────────── */}
+      {/* Shell: gutter on the band, width on an unpadded wrapper — pink's
+          one convention, so the h1 sits on the same left edge as every
+          `PinkPageHeader` title band. */}
       <section
-        className="mx-auto w-full max-w-[1400px] px-5 pt-8 pb-16 md:px-10 md:pt-12 md:pb-24"
+        className="px-5 pt-8 pb-16 md:px-10 md:pt-12 md:pb-24"
         aria-labelledby="pink-event-title"
         {...sectionGroupAttr("events", "detail")}
       >
-        {/* `flex-nowrap` + `min-w-0` on the last crumb: a long event name
+        <div className="mx-auto w-full max-w-[1400px]">
+          {/* `flex-nowrap` + `min-w-0` on the last crumb: a long event name
             truncates on one line instead of wrapping a lone "/ Name" under
             the trail on a phone. The H1 below carries the full name. */}
-        <nav
-          aria-label="Breadcrumb"
-          className="flex min-w-0 items-center gap-1.5"
-        >
-          {[
-            { label: "Home", href: "/" },
-            { label: "Events", href: "/events" },
-            { label: event.name },
-          ].map((crumb, i) => (
-            <span
-              key={crumb.label + i}
-              className={cn(
-                "flex items-center gap-1.5",
-                crumb.href ? "shrink-0" : "min-w-0",
-              )}
-            >
-              {i > 0 && (
-                <span
-                  aria-hidden="true"
-                  style={{ color: "var(--pink-subtle)" }}
-                >
-                  /
-                </span>
-              )}
-              {crumb.href ? (
-                <Link
-                  href={crumb.href}
-                  className="text-[13px] transition-colors hover:opacity-80"
-                  style={{ color: "var(--pink-subtle)" }}
-                >
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span
-                  className="min-w-0 truncate text-[13px]"
-                  style={{ color: "var(--pink-subtle)" }}
-                  aria-current="page"
-                >
-                  {crumb.label}
-                </span>
-              )}
-            </span>
-          ))}
-        </nav>
+          <nav
+            aria-label="Breadcrumb"
+            className="flex min-w-0 items-center gap-1.5"
+          >
+            {[
+              { label: "Home", href: "/" },
+              { label: "Events", href: "/events" },
+              { label: event.name },
+            ].map((crumb, i) => (
+              <span
+                key={crumb.label + i}
+                className={cn(
+                  "flex items-center gap-1.5",
+                  crumb.href ? "shrink-0" : "min-w-0",
+                )}
+              >
+                {i > 0 && (
+                  <span
+                    aria-hidden="true"
+                    style={{ color: "var(--pink-subtle)" }}
+                  >
+                    /
+                  </span>
+                )}
+                {crumb.href ? (
+                  <Link
+                    href={crumb.href}
+                    className="text-[13px] transition-colors hover:opacity-80"
+                    style={{ color: "var(--pink-subtle)" }}
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span
+                    className="min-w-0 truncate text-[13px]"
+                    style={{ color: "var(--pink-subtle)" }}
+                    aria-current="page"
+                  >
+                    {crumb.label}
+                  </span>
+                )}
+              </span>
+            ))}
+          </nav>
 
-        {/* Two columns from `lg`: leaf / name / blurb / stub stacked on the
+          {/* Two columns from `lg`: leaf / name / blurb / stub stacked on the
             left, the flier spanning every row on the right. Below `lg` the
             same children run in one column in their `order-*` sequence:
             leaf → flier → name → blurb → stub — the flier stays high on a
             phone instead of trailing after the stub. */}
-        <div className="mt-8 grid grid-cols-1 gap-x-16 gap-y-8 md:mt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:grid-rows-[auto_auto_auto_auto] lg:items-start">
-          {/* `pt-2` on top of the row gap: more air above the heading than
+          <div className="mt-8 grid grid-cols-1 gap-x-16 gap-y-8 md:mt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:grid-rows-[auto_auto_auto_auto] lg:items-start">
+            {/* `pt-2` on top of the row gap: more air above the heading than
               below it, so the name reads as the start of the copy, not a
               caption on the leaf. */}
-          <h1
-            id="pink-event-title"
-            className="pink-display order-3 max-w-[18ch] pt-2 lg:order-none lg:col-start-1 lg:row-start-2"
-            style={{
-              fontSize: "clamp(2.125rem, 4.6vw, 3.875rem)",
-              fontWeight: 600,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.02,
-              color: "var(--pink-ink)",
-              textWrap: "balance",
-            }}
-          >
-            {event.name}
-          </h1>
-
-          {/* ── Calendar leaf ───────────────────────────────────────────── */}
-          <PinkReveal
-            className="order-1 lg:order-none lg:col-start-1 lg:row-start-1"
-            index={0}
-          >
-            <div
-              className="relative flex flex-col gap-6 pt-5"
-              style={{ borderTop: "1px solid var(--pink-ink)" }}
+            <h1
+              id="pink-event-title"
+              className="pink-display order-3 max-w-[18ch] pt-2 lg:order-none lg:col-start-1 lg:row-start-2"
+              style={{
+                fontSize: "clamp(2.125rem, 4.6vw, 3.875rem)",
+                fontWeight: 600,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.02,
+                color: "var(--pink-ink)",
+                textWrap: "balance",
+              }}
             >
-              {isPast && pastBadge && (
-                <PinkBadge tone="ink" className="absolute top-5 right-0">
-                  {pastBadge}
-                </PinkBadge>
-              )}
+              {event.name}
+            </h1>
 
-              <time
-                dateTime={eventDateTimeAttr(event, timeZone)}
-                className="flex flex-col"
+            {/* ── Calendar leaf ───────────────────────────────────────────── */}
+            <PinkReveal
+              className="order-1 lg:order-none lg:col-start-1 lg:row-start-1"
+              index={0}
+            >
+              <div
+                className="relative flex flex-col gap-6 pt-5"
+                style={{ borderTop: "1px solid var(--pink-ink)" }}
               >
-                <span className="pink-eyebrow">
-                  {leaf.weekday}
-                  <span aria-hidden="true"> · </span>
-                  <span className="sr-only">, </span>
-                  {leaf.month}
-                </span>
-                {/* The numeral is the page's one display object. Syne 600 at
+                {isPast && pastBadge && (
+                  <PinkBadge tone="ink" className="absolute top-5 right-0">
+                    {pastBadge}
+                  </PinkBadge>
+                )}
+
+                <time
+                  dateTime={eventDateTimeAttr(event, timeZone)}
+                  className="flex flex-col"
+                >
+                  <span className="pink-eyebrow">
+                    {leaf.weekday}
+                    <span aria-hidden="true"> · </span>
+                    <span className="sr-only">, </span>
+                    {leaf.month}
+                  </span>
+                  {/* The numeral is the page's one display object. Syne 600 at
                     up to 10rem, tightened past the H1's tracking so the two
                     digits read as one shape; `lineHeight: .9` keeps the leaf
                     from opening a gap above the time line. */}
-                <span
-                  className="pink-display tabular-nums"
-                  style={{
-                    fontSize: "clamp(5.5rem, 12vw, 10rem)",
-                    fontWeight: 600,
-                    letterSpacing: "-0.05em",
-                    lineHeight: 0.9,
-                    marginTop: "0.35rem",
-                    color: isPast ? "var(--pink-subtle)" : "var(--pink-ink)",
-                  }}
-                >
-                  {leaf.day}
-                </span>
-                {when.time && (
                   <span
-                    className="mt-3 text-[1.0625rem] leading-[1.5]"
-                    style={{ color: "var(--pink-muted)" }}
+                    className="pink-display tabular-nums"
+                    style={{
+                      fontSize: "clamp(5.5rem, 12vw, 10rem)",
+                      fontWeight: 600,
+                      letterSpacing: "-0.05em",
+                      lineHeight: 0.9,
+                      marginTop: "0.35rem",
+                      color: isPast ? "var(--pink-subtle)" : "var(--pink-ink)",
+                    }}
                   >
-                    {when.time}
+                    {leaf.day}
                   </span>
-                )}
-              </time>
+                  {when.time && (
+                    <span
+                      className="mt-3 text-[1.0625rem] leading-[1.5]"
+                      style={{ color: "var(--pink-muted)" }}
+                    >
+                      {when.time}
+                    </span>
+                  )}
+                </time>
 
-              <PinkFactRows rows={factRows} surface="paper" />
-            </div>
-          </PinkReveal>
+                <PinkFactRows rows={factRows} surface="paper" />
+              </div>
+            </PinkReveal>
 
-          {/* ── Flier ───────────────────────────────────────────────────── */}
-          <PinkReveal
-            className="order-2 lg:order-none lg:col-start-2 lg:row-span-4 lg:row-start-1"
-            index={1}
-          >
-            <figure className="flex flex-col gap-3">
-              <PinkEventFlier
-                src={event.coverImage}
-                videoSrc={event.coverVideo}
-                name={event.name}
-                sizes="(max-width: 1024px) 100vw, 520px"
-                priority
-                className={cn(hasFlier && "pink-lift")}
-              />
-              {hasFlier && flierHint && (
-                <figcaption className="pink-label">{flierHint}</figcaption>
-              )}
-            </figure>
-          </PinkReveal>
-
-          {/* ── Blurb ───────────────────────────────────────────────────── */}
-          {event.blurb?.trim() && (
-            <p
-              className="order-4 max-w-[64ch] text-[1.0625rem] leading-[1.8] whitespace-pre-line lg:order-none lg:col-start-1 lg:row-start-3"
-              style={{ color: "var(--pink-body)", textWrap: "pretty" }}
+            {/* ── Flier ───────────────────────────────────────────────────── */}
+            <PinkReveal
+              className="order-2 lg:order-none lg:col-start-2 lg:row-span-4 lg:row-start-1"
+              index={1}
             >
-              {event.blurb}
-            </p>
-          )}
+              <figure className="flex flex-col gap-3">
+                <PinkEventFlier
+                  src={event.coverImage}
+                  videoSrc={event.coverVideo}
+                  name={event.name}
+                  sizes="(max-width: 1024px) 100vw, 520px"
+                  priority
+                  className={cn(hasFlier && "pink-lift")}
+                />
+                {hasFlier && flierHint && (
+                  <figcaption className="pink-label">{flierHint}</figcaption>
+                )}
+              </figure>
+            </PinkReveal>
 
-          {/* ── Ticket stub: outbound link + optional QR, then the way back.
+            {/* ── Blurb ───────────────────────────────────────────────────── */}
+            {event.blurb?.trim() && (
+              <p
+                className="order-4 max-w-[64ch] text-[1.0625rem] leading-[1.8] whitespace-pre-line lg:order-none lg:col-start-1 lg:row-start-3"
+                style={{ color: "var(--pink-body)", textWrap: "pretty" }}
+              >
+                {event.blurb}
+              </p>
+            )}
+
+            {/* ── Ticket stub: outbound link + optional QR, then the way back.
               Hung under its own ink rule so it reads as the leaf's stub. ── */}
-          <div
-            className="order-5 flex flex-col gap-6 pt-6 lg:order-none lg:col-start-1 lg:row-start-4"
-            style={{ borderTop: "1px solid var(--pink-ink)" }}
-          >
-            {event.externalUrl && (
-              <div className="flex flex-wrap items-center gap-x-10 gap-y-6">
-                {/* Solid rose is the page's one primary action — while the
+            <div
+              className="order-5 flex flex-col gap-6 pt-6 lg:order-none lg:col-start-1 lg:row-start-4"
+              style={{ borderTop: "1px solid var(--pink-ink)" }}
+            >
+              {event.externalUrl && (
+                <div className="flex flex-wrap items-center gap-x-10 gap-y-6">
+                  {/* Solid rose is the page's one primary action — while the
                     event is still coming. Once it's over the link stays
                     (recaps, photos, the organiser's page) but steps back to
                     the ghost so the badge, not a call to buy, leads. */}
-                <a
-                  href={event.externalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "pink-btn",
-                    isPast ? "pink-btn-ghost" : "pink-btn-solid",
-                  )}
+                  <a
+                    href={event.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "pink-btn",
+                      isPast ? "pink-btn-ghost" : "pink-btn-solid",
+                    )}
+                  >
+                    {linkLabel}
+                    <span className="sr-only"> (opens in new tab)</span>
+                  </a>
+
+                  <EventLinkQr
+                    event={event}
+                    logoUrl={business.siteContent?.logoUrl}
+                    size="lg"
+                    tileStyle={{
+                      background: "var(--pink-white)",
+                      border: "1px solid var(--pink-line)",
+                    }}
+                    captionClassName="flex flex-col gap-1"
+                    caption={
+                      <>
+                        {scanLabel && (
+                          <span className="pink-label">{scanLabel}</span>
+                        )}
+                        <span
+                          className="text-[0.8125rem] leading-[1.5]"
+                          style={{ color: "var(--pink-muted)" }}
+                        >
+                          {linkLabel}
+                        </span>
+                      </>
+                    }
+                  />
+                </div>
+              )}
+
+              {backLabel && (
+                <Link
+                  href="/events"
+                  className="w-fit text-[14px] font-medium transition-colors hover:opacity-80"
+                  style={{ color: "var(--pink-rose)" }}
+                  {...fieldAttr("pink.events.detail-back-label")}
                 >
-                  {linkLabel}
-                  <span className="sr-only"> (opens in new tab)</span>
-                </a>
-
-                <EventLinkQr
-                  event={event}
-                  logoUrl={business.siteContent?.logoUrl}
-                  size="lg"
-                  tileStyle={{
-                    background: "var(--pink-white)",
-                    border: "1px solid var(--pink-line)",
-                  }}
-                  captionClassName="flex flex-col gap-1"
-                  caption={
-                    <>
-                      {scanLabel && (
-                        <span className="pink-label">{scanLabel}</span>
-                      )}
-                      <span
-                        className="text-[0.8125rem] leading-[1.5]"
-                        style={{ color: "var(--pink-muted)" }}
-                      >
-                        {linkLabel}
-                      </span>
-                    </>
-                  }
-                />
-              </div>
-            )}
-
-            {backLabel && (
-              <Link
-                href="/events"
-                className="w-fit text-[14px] font-medium transition-colors hover:opacity-80"
-                style={{ color: "var(--pink-rose)" }}
-                {...fieldAttr("pink.events.detail-back-label")}
-              >
-                <span aria-hidden="true">← </span>
-                {backLabel}
-              </Link>
-            )}
+                  <span aria-hidden="true">← </span>
+                  {backLabel}
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── Closing CTA — the events index's own panel and fields ─────── */}
       {isSectionVisible(customFields, "pink", "events.cta") && (
-        <div className="mx-auto w-full max-w-[1400px] px-5 pb-16 md:px-10 md:pb-20">
-          <PinkReveal>
+        <div className="px-5 pb-16 md:px-10 md:pb-20">
+          <PinkReveal className="mx-auto w-full max-w-[1400px]">
             <PinkCtaPanel
               sectionAttrs={sectionGroupAttr("events", "cta")}
               heading={f["pink.events.cta-heading"] ?? ""}

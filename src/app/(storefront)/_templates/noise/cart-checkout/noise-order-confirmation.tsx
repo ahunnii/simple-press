@@ -4,43 +4,136 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import type { Session } from "~/server/better-auth/config";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-const NEXT_STEPS = [
-  {
+/** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
+type DeliveryMethod = "ship" | "pickup" | null;
+
+type OrderDetails = {
+  customer_email: string;
+  amount_total: number;
+  currency: string;
+  payment_status: string;
+  delivery_method: DeliveryMethod;
+};
+
+/**
+ * Neutral, structural copy that holds for every store — no shipping-speed,
+ * packing, or tracking promises (those belong in the owner's
+ * `noise.checkout.success-note`). Keyed by the Stripe session's delivery
+ * method; unknown (older sessions, or no pickup offered) stays generic.
+ */
+function confirmationCopy(deliveryMethod: DeliveryMethod): {
+  lead: string;
+  steps: { icon: string; text: string }[];
+} {
+  const email = {
     icon: "✉",
     text: "You'll receive an email confirmation at the address provided.",
-  },
-  { icon: "✦", text: "Each piece is carefully prepared before it ships." },
-  {
-    icon: "↗",
-    text: "We'll notify you with a tracking number when your order ships.",
-  },
-  {
-    icon: "✓",
-    text: "Your order will be packed and shipped within five working days.",
-  },
-] as const;
+  };
+  if (deliveryMethod === "pickup") {
+    return {
+      lead: "Your order is queued for preparation. We'll let you know when it's ready for pickup.",
+      steps: [
+        email,
+        {
+          icon: "↗",
+          text: "We'll let you know when your order is ready for pickup.",
+        },
+      ],
+    };
+  }
+  if (deliveryMethod === "ship") {
+    return {
+      lead: "Your order is queued for preparation. We'll email you when it ships.",
+      steps: [
+        email,
+        { icon: "↗", text: "We'll email you when your order ships." },
+      ],
+    };
+  }
+  return {
+    lead: "Your order is queued for preparation. We'll email you with updates.",
+    steps: [
+      email,
+      { icon: "↗", text: "We'll email you with updates about your order." },
+    ],
+  };
+}
 
 type Props = {
   business: {
     id: string;
     name: string;
     siteContent: { primaryColor: string | null } | null;
+    pickupLocation?: string | null;
+    pickupInstructions?: string | null;
   };
+  /** Owner-authored note (`noise.checkout.success-note`); blank hides it. */
+  note?: string;
+  /**
+   * Session resolved server-side by `noise-order-success-page.tsx`
+   * (`getSession()`), seeding `useHydratedSession` so the PF20 account CTA
+   * is correct on first paint instead of popping in after the client
+   * session fetch settles. `undefined` (e.g. tests rendering this
+   * component directly) falls back to the hook's unseeded mode, which
+   * suppresses the CTA via `isPending` until the client session resolves —
+   * never a flash of the wrong state either way.
+   */
+  initialSession?: Session | null;
 };
 
-export function NoiseOrderConfirmation({ business }: Props) {
+type AccountCta = { href: string; label: string };
+
+/**
+ * PF20 / B9.4: signed in + `orders` on -> "View my orders"
+ * (`/account/orders`); signed out + `customerAccounts` on -> "Create an
+ * account" (`/auth/sign-up`); neither -> no CTA. Copied locally per the
+ * parity plan (P-ORDER-CTA stays optional; pollen/happy-bamboo/bamboo/vii/
+ * olive each carry their own copy too).
+ */
+function useOrderAccountCta(
+  initialSession: Session | null | undefined,
+): AccountCta | null {
+  const { data: session, isPending } = useHydratedSession(initialSession);
+  const { isEnabled } = useStorefrontFlags();
+
+  if (isPending) {
+    return null;
+  }
+
+  if (session?.user) {
+    return isEnabled("orders")
+      ? { href: "/account/orders", label: "View my orders" }
+      : null;
+  }
+
+  return isEnabled("customerAccounts")
+    ? { href: "/auth/sign-up", label: "Create an account" }
+    : null;
+}
+
+export function NoiseOrderConfirmation({
+  business,
+  note = "",
+  initialSession,
+}: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
-  const [orderDetails, setOrderDetails] = useState<{
-    customer_email: string;
-    amount_total: number;
-    currency: string;
-    payment_status: string;
-  } | null>(null);
+  const accountCta = useOrderAccountCta(initialSession);
+  // PF21 / B9.5, B2.5: the shop link on this page 404s when `products` is
+  // off, so it must not render in that case.
+  const { isEnabled } = useStorefrontFlags();
+  const shopFlag = navHrefFlag("/shop");
+  const shopEnabled = shopFlag === null || isEnabled(shopFlag);
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const confirmationH1Ref = useRef<HTMLHeadingElement>(null);
 
@@ -58,12 +151,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
           `/api/stripe/session?session_id=${sessionId}`,
         );
         if (response.ok) {
-          const data = (await response.json()) as {
-            customer_email: string;
-            amount_total: number;
-            currency: string;
-            payment_status: string;
-          };
+          const data = (await response.json()) as OrderDetails;
           setOrderDetails(data);
         }
       } catch (error) {
@@ -112,15 +200,26 @@ export function NoiseOrderConfirmation({ business }: Props) {
         >
           No order found.
         </p>
-        <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
-          Shop the Collection →
-        </Link>
+        {shopEnabled ? (
+          <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
+            Shop the Collection →
+          </Link>
+        ) : null}
       </div>
     );
   }
 
+  const deliveryMethod = orderDetails?.delivery_method ?? null;
+  const { lead, steps } = confirmationCopy(deliveryMethod);
+  const pickupLocation =
+    deliveryMethod === "pickup" ? (business.pickupLocation?.trim() ?? "") : "";
+  const pickupInstructions = pickupLocation
+    ? (business.pickupInstructions?.trim() ?? "")
+    : "";
+  const trimmedNote = note.trim();
+
   return (
-    <>
+    <div {...sectionGroupAttr("checkout", "success")}>
       {/* Fire purchase analytics event once — idempotent via sessionStorage */}
       {orderDetails && (
         <TrackPurchase
@@ -160,8 +259,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
               className="max-w-[40ch] font-sans text-[15px] leading-relaxed"
               style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              Your order is queued for preparation. We&apos;ll have everything
-              packed and shipped within five working days.
+              {lead}
             </p>
           </div>
 
@@ -214,7 +312,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
               What happens next
             </h2>
             <div className="flex flex-col gap-3.5">
-              {NEXT_STEPS.map((step) => (
+              {steps.map((step) => (
                 <div key={step.icon} className="flex items-start gap-3">
                   <span
                     aria-hidden="true"
@@ -238,6 +336,41 @@ export function NoiseOrderConfirmation({ business }: Props) {
                 </div>
               ))}
             </div>
+
+            {pickupLocation ? (
+              <div className="mt-6">
+                <h3
+                  className="mb-2 font-mono text-[9px] tracking-[0.22em] uppercase"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                >
+                  Pickup location
+                </h3>
+                <p
+                  className="font-sans text-[14px] leading-relaxed whitespace-pre-line"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  {pickupLocation}
+                </p>
+                {pickupInstructions ? (
+                  <p
+                    className="mt-1 font-sans text-[13px] leading-relaxed whitespace-pre-line"
+                    style={{ color: "rgba(255,255,255,0.6)" }}
+                  >
+                    {pickupInstructions}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
+            {trimmedNote ? (
+              <p
+                className="mt-6 font-sans text-[14px] leading-relaxed whitespace-pre-line"
+                style={{ color: "rgba(255,255,255,0.75)" }}
+                {...fieldAttr("noise.checkout.success-note")}
+              >
+                {trimmedNote}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -247,20 +380,26 @@ export function NoiseOrderConfirmation({ business }: Props) {
         className="border-foreground/15 flex flex-col gap-3 border-b px-7 py-8 sm:flex-row"
         style={{ background: "var(--vn-bone)" }}
       >
-        <Link
-          href="/shop"
-          className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"
-          style={{ padding: "12px 20px" }}
-        >
-          Continue Shopping
-        </Link>
-        <Link
-          href="/account/orders"
-          className="vn-stamp vn-stamp-solid flex-1 justify-center text-[10.5px] transition-all hover:opacity-80"
-          style={{ padding: "12px 20px" }}
-        >
-          View My Orders →
-        </Link>
+        {/* PF21 — hidden when `products` is off */}
+        {shopEnabled ? (
+          <Link
+            href="/shop"
+            className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"
+            style={{ padding: "12px 20px" }}
+          >
+            Continue Shopping
+          </Link>
+        ) : null}
+        {/* PF20 — account next step (View my orders / Create an account) */}
+        {accountCta ? (
+          <Link
+            href={accountCta.href}
+            className="vn-stamp vn-stamp-solid flex-1 justify-center text-[10.5px] transition-all hover:opacity-80"
+            style={{ padding: "12px 20px" }}
+          >
+            {accountCta.label} →
+          </Link>
+        ) : null}
         <Link
           href="/"
           className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"
@@ -269,6 +408,6 @@ export function NoiseOrderConfirmation({ business }: Props) {
           Back to Home
         </Link>
       </div>
-    </>
+    </div>
   );
 }

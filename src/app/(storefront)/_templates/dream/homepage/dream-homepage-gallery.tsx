@@ -31,6 +31,10 @@ type DreamHomepageGalleryProps = {
   gallery: GalleryData | null;
   emptyMessage: string;
   emptyLinkLabel: string;
+  /** Fixed destination for the empty-state link (the Estimate Quote page). */
+  emptyLinkUrl: string;
+  /** B2.5: false when `emptyLinkUrl` points at a flag-disabled route — hide the link, never swap its destination. */
+  emptyLinkVisible: boolean;
 };
 
 /** Aspect ratios cycled across the six empty-state tiles for a masonry-ish rhythm. */
@@ -55,6 +59,8 @@ export function DreamHomepageGallery({
   gallery,
   emptyMessage,
   emptyLinkLabel,
+  emptyLinkUrl,
+  emptyLinkVisible,
 }: DreamHomepageGalleryProps) {
   const hasImages = (gallery?.images.length ?? 0) > 0;
 
@@ -105,11 +111,15 @@ export function DreamHomepageGallery({
             >
               {emptyMessage}
             </p>
-            <DreamLink href="/contact">
-              <span {...fieldAttr("dream.homepage.gallery-empty-link-label")}>
-                {emptyLinkLabel}
-              </span>
-            </DreamLink>
+            {emptyLinkVisible && (
+              <DreamLink href={emptyLinkUrl}>
+                <span
+                  {...fieldAttr("dream.homepage.gallery-empty-link-label")}
+                >
+                  {emptyLinkLabel}
+                </span>
+              </DreamLink>
+            )}
           </div>
         )}
       </div>

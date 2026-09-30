@@ -1,5 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 
@@ -17,8 +19,12 @@ import { OliveShopClient } from "./olive-shop-client";
  * straight off each product's `collectionProducts`, so the chip tabs cost no
  * second query.
  */
-export function OliveShopPage({ business }: DefaultProductsPageTemplateProps) {
+export async function OliveShopPage({
+  business,
+}: DefaultProductsPageTemplateProps) {
   const customFields = business.siteContent?.customFields;
+
+  const { isEnabled } = await getBusinessFlags();
 
   const f = resolveFields(customFields, [
     "olive.shop.intro-heading",
@@ -36,6 +42,15 @@ export function OliveShopPage({ business }: DefaultProductsPageTemplateProps) {
   ]);
 
   const products: Product[] = business.products ?? [];
+
+  // B2.5: hide the promo button (never swap in another destination) when its
+  // href names a flag that's off.
+  const promoButtonRaw = f["olive.shop.promo-button-link"] ?? "";
+  const promoButtonFlag = navHrefFlag(promoButtonRaw);
+  const promoButtonHref =
+    promoButtonFlag === null || isEnabled(promoButtonFlag)
+      ? promoButtonRaw
+      : "";
 
   return (
     <>
@@ -59,7 +74,7 @@ export function OliveShopPage({ business }: DefaultProductsPageTemplateProps) {
           heading={f["olive.shop.promo-heading"] ?? ""}
           body={f["olive.shop.promo-body"] ?? ""}
           buttonLabel={f["olive.shop.promo-button-label"] ?? ""}
-          buttonLink={f["olive.shop.promo-button-link"] ?? ""}
+          buttonLink={promoButtonHref}
           tone="sage-tint"
           id="olive-shop-promo-heading"
           sectionAttrs={sectionGroupAttr("shop", "promo")}

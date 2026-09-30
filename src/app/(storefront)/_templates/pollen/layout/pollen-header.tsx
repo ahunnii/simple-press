@@ -1,30 +1,74 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Heart, MessageSquare, ShoppingBag, X } from "lucide-react";
+import {
+  ChevronDown,
+  Heart,
+  LayoutDashboard,
+  MessageSquare,
+  Package,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
+import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
-import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  filterNavByFlags,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
-const NAV_LINKS = [
+import { PollenAnnouncementBar } from "./pollen-announcement-bar";
+import {
+  POLLEN_QUICK_ACCOUNT_KEYS,
+  PollenNavOverlayAccount,
+} from "./pollen-nav-overlay-account";
+
+/** Shipped nav when the owner hasn't saved one (Admin → Content → Navigation). */
+const POLLEN_DEFAULT_NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
+
+/**
+ * Stable id for the mobile overlay. A constant (not `useId`) so server and
+ * client can never disagree, and the hamburger only references it while the
+ * overlay is actually mounted.
+ */
+const MOBILE_MENU_ID = "pollen-mobile-menu";
+
+/** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
+  orders: <Package className="h-4 w-4" />,
+  admin: <LayoutDashboard className="h-4 w-4" />,
+};
+
+const externalHint = <span className="sr-only"> (opens in new tab)</span>;
 
 /** Returns all keyboard-focusable elements inside `container`. */
 function getFocusables(container: HTMLElement): HTMLElement[] {
@@ -35,8 +79,23 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
   ).filter((el) => !el.closest("[inert]"));
 }
 
-export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
+type PollenHeaderProps = DefaultHeaderTemplateProps & {
+  /** Resolved platform announcement bar, or null when off/empty. */
+  banner?: BannerConfig | null;
+  /** `pollen.global.header-button-text` — blank hides the button. */
+  buttonText?: string;
+  /** `pollen.global.header-button-link`, already defaulted to /contact. */
+  buttonLink?: string;
+};
+
+export function PollenHeader({
+  business,
+  banner = null,
+  buttonText = "",
+  buttonLink = "/contact",
+}: PollenHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession();
   const { isEnabled } = useFeatureFlags({
@@ -52,14 +111,74 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const overlayCloseRef = useRef<HTMLButtonElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const mobileMenuId = useId();
 
-  const links =
-    (business?.siteContent?.navigationItems as {
-      label: string;
-      href: string;
-    }[]) ??
-    NAV_LINKS.filter((l) => l.href !== "/services" || isEnabled("services"));
+  // Desktop sub-nav: index of the open dropdown group (one at a time). A
+  // custom disclosure, not Radix — a portaled menu would escape the `.pollen`
+  // scope (and its focus-visible styling). Ported from happy-bamboo-header.
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const triggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+  const desktopNavRef = useRef<HTMLElement>(null);
+  // Set when hover (or a touch tap's emulated mouseenter) opened the group,
+  // so the click that usually follows doesn't immediately toggle it shut.
+  const openedByHover = useRef(false);
+
+  // Close the dropdown on route change (back/forward, programmatic pushes).
+  // Adjusting state during render on a changed input, per the React docs.
+  const [dropdownPath, setDropdownPath] = useState(pathname);
+  if (dropdownPath !== pathname) {
+    setDropdownPath(pathname);
+    setOpenDropdown(null);
+  }
+
+  // Escape closes the open dropdown and returns focus to its trigger; a
+  // pointer-down outside the desktop nav closes it too.
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      const trigger = triggerRefs.current.get(openDropdown);
+      setOpenDropdown(null);
+      trigger?.focus();
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (desktopNavRef.current?.contains(event.target as Node)) return;
+      setOpenDropdown(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [openDropdown]);
+
+  // Header button: hidden when its text is blank or the contact form is off.
+  const showHeaderButton =
+    buttonText.trim().length > 0 && isStorefrontEnabled("contactForm");
+
+  // Owner nav (children + external preserved) or the shipped default, then
+  // the shared route→flag filter (P-NAV-FLAGS) drops anything the business
+  // has switched off — e.g. /services while `services` is off, or /shop
+  // while `products` is off (cascades: collections/cart depend on products).
+  // Consumed by both the desktop nav and the mobile overlay below.
+  const links = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, POLLEN_DEFAULT_NAV),
+    isStorefrontEnabled,
+  );
+
+  const accountsEnabled = isStorefrontEnabled("customerAccounts");
+  const isAdmin =
+    session?.user?.platformRole === "PLATFORM_ADMIN" ||
+    !!session?.session?.membershipId;
+
+  // --- Announcement bar collapses once the page scrolls (mirrors vii) ---
+  useEffect(() => {
+    if (!banner) return;
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [banner]);
 
   // --- Lock body scroll when menu is open ---
   useEffect(() => {
@@ -90,19 +209,25 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
     }
   }, [mobileMenuOpen]);
 
-  // --- Inert background elements while mobile overlay is open ---
+  // --- Inert background while the mobile overlay is open ---
+  // Scoped to this template's `.pollen` wrapper (like happy-bamboo) so a
+  // stray `main`/`footer` elsewhere (editor chrome, previews) is untouched.
+  // Uses the attribute so it round-trips cleanly and never clobbers an
+  // element that was already inert.
   useEffect(() => {
     if (!mobileMenuOpen) return;
-    const selectors = ["main#main-content", "footer", "header.pollen-header"];
-    const els = selectors.flatMap((s) =>
-      Array.from(document.querySelectorAll<HTMLElement>(s)),
-    );
-    els.forEach((el) => {
-      el.inert = true;
-    });
+    const scope: ParentNode =
+      hamburgerRef.current?.closest(".pollen") ?? document;
+    const targets = [
+      scope.querySelector<HTMLElement>("header.pollen-header"),
+      scope.querySelector<HTMLElement>("#main-content"),
+      scope.querySelector<HTMLElement>("#main-content ~ footer"),
+    ].filter((el): el is HTMLElement => !!el);
+    const hadInert = targets.map((el) => el.hasAttribute("inert"));
+    targets.forEach((el) => el.setAttribute("inert", ""));
     return () => {
-      els.forEach((el) => {
-        el.inert = false;
+      targets.forEach((el, i) => {
+        if (!hadInert[i]) el.removeAttribute("inert");
       });
     };
   }, [mobileMenuOpen]);
@@ -146,57 +271,192 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
 
   const closeMenu = useCallback(() => setMobileMenuOpen(false), []);
 
+  // Close the mobile overlay on any route change (back/forward, programmatic
+  // pushes) — link taps close themselves via `closeMenu`, but not every
+  // navigation starts inside the overlay (e.g. browser Back). Compare
+  // pollen-header.test.tsx and happy-bamboo-mobile-nav.tsx:126-135. Releasing
+  // `mobileMenuOpen` here also unwinds the scroll-lock and inert effects
+  // above, since both are keyed off that same state.
+  const lastMobilePathname = useRef(pathname);
+  useEffect(() => {
+    if (lastMobilePathname.current === pathname) return;
+    lastMobilePathname.current = pathname;
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   // --- Reduced-motion variants for overlay and per-link stagger ---
   const overlayTransitionDuration = shouldReduceMotion ? 0 : 0.2;
   const linkVariants = shouldReduceMotion
     ? { hidden: { opacity: 1, y: 0 }, visible: { opacity: 1, y: 0 } }
     : { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
+  const staggerTransition = (i: number) =>
+    shouldReduceMotion
+      ? { duration: 0 }
+      : { delay: 0.05 + Math.min(i, 8) * 0.05, duration: 0.25 };
 
-  const authActions = (
-    <>
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/auth/sign-in">Log in</Link>
-      </Button>
-      <Button size="sm" asChild>
-        <Link href="/auth/sign-up">Sign Up</Link>
-      </Button>
-    </>
-  );
+  // Desktop avatar menu: the same short quick-access set as the mobile
+  // overlay (Orders, Admin) — everything else is in the account area's own
+  // nav. Settings is dropped because `UserButton` renders its own built-in
+  // Settings item.
+  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+    isEnabled: isStorefrontEnabled,
+    includeAdmin: isAdmin,
+  })
+    .filter(
+      (link) =>
+        POLLEN_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
+    )
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
 
   const userMenu = user && (
     <UserButton
       size="icon"
       className="border-primary border"
       avatarClassName="size-10"
-      links={[
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        !!session?.session?.membershipId
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-        // /account/orders 404s when the owner disables the `orders` feature.
-        ...(isStorefrontEnabled("orders")
-          ? [
-              {
-                icon: <IconPackage className="h-4 w-4" />,
-                label: "Orders",
-                href: "/account/orders",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 
+  const navLinkClass = (active: boolean) =>
+    cn(
+      "group relative px-1 text-sm font-semibold tracking-wide uppercase transition-colors",
+      active ? "text-[#5e7747]" : "text-[#4c566a] hover:text-[#5e7747]",
+    );
+
+  const navUnderline = (active: boolean) => (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "absolute right-[-2px] -bottom-1 left-[-2px] h-0.5 bg-[#5e7747]",
+        !active &&
+          "scale-x-0 transition-transform duration-300 group-hover:scale-x-100",
+      )}
+    />
+  );
+
+  const renderDesktopItem = (item: NavItem, i: number) => {
+    if (item.children?.length) {
+      const isOpen = openDropdown === i;
+      const panelId = `pollen-nav-dropdown-${i}`;
+      const entries = navGroupEntries(item);
+      const activeEntry = activeEntryIndex(pathname, entries);
+      const groupActive = isNavItemActive(pathname, item);
+      return (
+        <div
+          key={i}
+          // Full bar height so the pointer never leaves this wrapper on its
+          // way to the panel (the hover bridge). The panel itself hangs just
+          // under the trigger's underline, not off the bar's bottom edge —
+          // the 112px bar would otherwise leave a ~40px gap.
+          className="relative flex h-28 items-center"
+          onMouseEnter={() => {
+            if (openDropdown !== i) openedByHover.current = true;
+            setOpenDropdown(i);
+          }}
+          onMouseLeave={() => {
+            openedByHover.current = false;
+            setOpenDropdown(null);
+          }}
+          onBlur={(event) => {
+            // Close once focus leaves the trigger + panel entirely.
+            if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+              setOpenDropdown((current) => (current === i ? null : current));
+            }
+          }}
+        >
+          {/* The trigger never navigates — a non-empty parent href is the
+              panel's first entry. Active styling, but no aria-current. */}
+          <button
+            type="button"
+            ref={(el) => {
+              if (el) triggerRefs.current.set(i, el);
+              else triggerRefs.current.delete(i);
+            }}
+            aria-haspopup="true"
+            aria-expanded={isOpen}
+            aria-controls={panelId}
+            onClick={() => {
+              const keepOpen = openedByHover.current;
+              openedByHover.current = false;
+              setOpenDropdown(isOpen && !keepOpen ? null : i);
+            }}
+            className={cn(
+              navLinkClass(groupActive),
+              "inline-flex cursor-pointer items-center gap-1",
+            )}
+          >
+            {item.label}
+            <ChevronDown
+              aria-hidden="true"
+              className={cn(
+                "size-3.5 transition-transform duration-200",
+                isOpen && "rotate-180",
+              )}
+            />
+            {navUnderline(groupActive)}
+          </button>
+
+          {isOpen && (
+            <div
+              id={panelId}
+              className="absolute top-[calc(50%+1.5rem)] left-1/2 z-20 -translate-x-1/2"
+            >
+              <ul className="min-w-52 rounded-xl border border-[#E5E8E0] bg-white py-2 shadow-[0_16px_32px_-12px_rgba(26,30,26,0.25)]">
+                {entries.map((child, j) => {
+                  const childActive = j === activeEntry;
+                  return (
+                    <li key={j}>
+                      <Link
+                        href={child.href}
+                        {...externalLinkProps(child.external)}
+                        aria-current={childActive ? "page" : undefined}
+                        onClick={() => setOpenDropdown(null)}
+                        className={cn(
+                          "block px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-[#F7F9F4] hover:text-[#5E7747]",
+                          childActive
+                            ? "bg-[#F7F9F4] text-[#5E7747]"
+                            : "text-[#374151]",
+                        )}
+                      >
+                        {child.label}
+                        {child.external && externalHint}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const active = isNavItemActive(pathname, item);
+    return (
+      <Link
+        key={i}
+        href={item.href}
+        {...externalLinkProps(item.external)}
+        aria-current={active ? "page" : undefined}
+        className={navLinkClass(active)}
+      >
+        {item.label}
+        {item.external && externalHint}
+        {navUnderline(active)}
+      </Link>
+    );
+  };
+
   return (
     <>
-      {/* C-1: add class so inert targeting works */}
+      {/* `pollen-header` class: the overlay's inert lookup targets it. */}
       <header className="pollen-header bg-background border-border fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-md">
+        {/* Platform announcement bar — top row, hides once the page scrolls */}
+        {banner && !scrolled && <PollenAnnouncementBar banner={banner} />}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-28 items-center justify-between">
             <Link
@@ -219,40 +479,16 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
               )}
             </Link>
 
-            <nav className="hidden items-center justify-center gap-12 md:flex">
-              {links.map(({ href, label }) => {
-                const isActive =
-                  href === "/" ? pathname === "/" : pathname.startsWith(href);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`group relative px-1 text-sm font-semibold tracking-wide uppercase transition-colors ${
-                      isActive
-                        ? "text-[#5e7747]"
-                        : "text-[#4c566a] hover:text-[#5e7747]"
-                    }`}
-                  >
-                    {label}
-                    {isActive ? (
-                      <span
-                        className="absolute right-[-2px] -bottom-1 left-[-2px] h-0.5 bg-[#5e7747]"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <span
-                        className="absolute right-[-2px] -bottom-1 left-[-2px] h-0.5 scale-x-0 bg-[#5e7747] transition-transform duration-300 group-hover:scale-x-100"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </Link>
-                );
-              })}
+            <nav
+              ref={desktopNavRef}
+              aria-label="Main navigation"
+              className="hidden items-center justify-center gap-12 md:flex"
+            >
+              {links.map(renderDesktopItem)}
             </nav>
 
             <div className="flex items-center gap-3">
-              {/* Wishlist icon — no dedicated feature flag; unconditional like product-card hearts */}
+              {/* Wishlist icon — gated on the storefront `wishlist` flag. */}
               {isStorefrontEnabled("wishlist") && (
                 <Link
                   href="/wishlist"
@@ -269,7 +505,6 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
               )}
 
               {/* Cart icon */}
-
               {isEnabled("cart") && (
                 <Link
                   href="/cart"
@@ -285,40 +520,49 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                 </Link>
               )}
 
-              <div className="hidden items-center gap-3 md:flex">
-                {/* C-2 item 4: changed text-green-600 → text-green-700 hover:text-green-800 */}
-                <Button
-                  size="sm"
-                  asChild
-                  className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 dark:border-green-400/30 dark:bg-green-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 dark:hover:text-rose-300"
-                  variant="outline"
-                >
-                  <Link href="/contact">
-                    <MessageSquare className="mr-1.5 h-4 w-4" />
-                    Get in Touch
+              <div className="hidden items-center gap-5 md:flex">
+                {/* #215935 on #F1F5EC = 7.47:1 (hover #1A4529 on #E3EBD8 =
+                    8.89:1). Was green-700 on a 10% green wash. */}
+                {showHeaderButton && (
+                  <Link
+                    href={buttonLink}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#5E7747]/40 bg-[#F1F5EC] px-4 text-sm font-medium text-[#215935] transition-colors hover:bg-[#E3EBD8] hover:text-[#1A4529]"
+                  >
+                    <MessageSquare className="h-4 w-4" aria-hidden="true" />
+                    <span {...fieldAttr("pollen.global.header-button-text")}>
+                      {buttonText}
+                    </span>
                   </Link>
-                </Button>
-
-                {isStorefrontEnabled("customerAccounts") && (
-                  <>
-                    {isPending ? (
-                      <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-                    ) : user ? (
-                      userMenu
-                    ) : (
-                      <></>
-                    )}
-                  </>
                 )}
+
+                {accountsEnabled &&
+                  (isPending ? (
+                    <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+                  ) : user ? (
+                    userMenu
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      className={cn(
+                        navLinkClass(false),
+                        "inline-flex items-center gap-1.5",
+                      )}
+                    >
+                      <User className="size-4" aria-hidden="true" />
+                      Sign in
+                      {navUnderline(false)}
+                    </Link>
+                  ))}
               </div>
 
-              {/* C-1: hamburger gets aria-expanded + aria-controls */}
+              {/* aria-controls only while the overlay is mounted, so it never
+                  points at a missing id. */}
               <button
                 ref={hamburgerRef}
                 type="button"
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileMenuOpen}
-                aria-controls={mobileMenuId}
+                aria-controls={mobileMenuOpen ? MOBILE_MENU_ID : undefined}
                 className="flex touch-manipulation items-center justify-center p-2 md:hidden"
                 onClick={() => setMobileMenuOpen((o) => !o)}
               >
@@ -329,138 +573,258 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
         </div>
       </header>
 
-      {/* C-1: Mobile Menu Overlay — rendered only when open via AnimatePresence */}
+      {/* Mobile Menu Overlay — rendered only when open via AnimatePresence */}
       <AnimatePresence>
         {mobileMenuOpen ? (
           <motion.div
             ref={overlayRef}
-            id={mobileMenuId}
+            id={MOBILE_MENU_ID}
             key="pollen-mobile-menu"
             role="dialog"
             aria-modal="true"
             aria-label="Menu"
-            className="fixed inset-0 z-60 flex flex-col bg-[#1A1E1A] md:hidden"
+            // One-screen layout: top bar / link list / pinned actions. Only
+            // the middle list scrolls, and only for unusually long navs.
+            className="fixed inset-0 z-60 flex h-dvh flex-col bg-[#1A1E1A] md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: overlayTransitionDuration }}
           >
-            {/* C-1: close button receives focus on open via overlayCloseRef */}
-            <button
-              ref={overlayCloseRef}
-              type="button"
-              onClick={closeMenu}
-              aria-label="Close menu"
-              className="text-primary-foreground absolute top-4 right-4 z-10 rounded-full p-2 transition-colors hover:bg-white/10"
-            >
-              <X className="h-6 w-6" />
-            </button>
-
-            {/* Logo + nav links centered */}
-            <div className="flex flex-1 flex-col items-center justify-center px-4 pt-16 pb-8">
-              {/* M-12: use business.name instead of hardcoded alt */}
+            {/* Top bar — mirrors the header: logo left, close right. Owner
+                logo sits unfiltered on a light chip (a CSS invert turned
+                colour logos purple/blue); no logo → the business name. */}
+            <div className="flex h-20 shrink-0 items-center justify-between border-b border-white/10 px-5">
               <Link
                 href="/"
                 onClick={closeMenu}
-                className="mb-12 flex shrink-0 items-center justify-center"
+                className="flex min-w-0 items-center"
               >
-                <Image
-                  src={business.siteContent?.logoUrl ?? "/placeholder.svg"}
-                  alt={resolveLogoAlt(
-                    business.siteContent?.logoAltText,
-                    business.name,
-                  )}
-                  width={140}
-                  height={140}
-                  className="h-28 w-28 object-contain invert md:h-32 md:w-32"
-                />
+                {business.siteContent?.logoUrl ? (
+                  <span className="flex items-center justify-center rounded-xl bg-[#F7F9F4] p-1.5">
+                    <Image
+                      src={business.siteContent.logoUrl}
+                      alt={resolveLogoAlt(
+                        business.siteContent?.logoAltText,
+                        business.name,
+                      )}
+                      width={96}
+                      height={96}
+                      className="h-11 w-auto max-w-[8rem] object-contain"
+                    />
+                  </span>
+                ) : (
+                  <span className="truncate text-xl font-semibold text-white">
+                    {business.name}
+                  </span>
+                )}
               </Link>
 
-              <nav className="flex flex-col items-center gap-8">
-                {links.map(({ href, label }, i) => {
-                  const isActive =
-                    href === "/" ? pathname === "/" : pathname.startsWith(href);
-                  return (
-                    <motion.div
-                      key={href}
-                      variants={linkVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                      transition={
-                        shouldReduceMotion
-                          ? { duration: 0 }
-                          : {
-                              delay: 0.05 + i * 0.05,
-                              duration: 0.25,
-                            }
-                      }
-                    >
-                      {/* M-2: aria-current in mobile nav */}
-                      <Link
-                        href={href}
-                        onClick={closeMenu}
-                        aria-current={isActive ? "page" : undefined}
-                        className={`block rounded-lg px-4 py-2 text-2xl font-light tracking-wide uppercase transition-colors active:bg-white/10 ${
-                          isActive
-                            ? "text-[#5e7747]"
-                            : "text-white hover:text-[#5e7747] active:text-[#5e7747]"
-                        }`}
-                      >
-                        {label}
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </nav>
-
-              {/* Mobile Auth/Actions - below links */}
-              <motion.div
-                variants={linkVariants}
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : {
-                        delay: 0.05 + links.length * 0.05,
-                        duration: 0.25,
-                      }
-                }
-                className="mt-12 flex flex-col items-center gap-4"
+              {/* Receives focus on open via overlayCloseRef */}
+              <button
+                ref={overlayCloseRef}
+                type="button"
+                onClick={closeMenu}
+                aria-label="Close menu"
+                className="-mr-2 rounded-full p-2 text-white transition-colors hover:bg-white/10"
               >
-                {/* C-2 item 4: changed text-green-600 → text-green-700 hover:text-green-800 */}
-                <Button
-                  size="sm"
-                  asChild
-                  className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800"
-                  variant="outline"
-                >
-                  <Link href="/contact" onClick={closeMenu}>
-                    <MessageSquare className="mr-1.5 h-4 w-4" />
-                    Get in Touch
-                  </Link>
-                </Button>
-
-                {/* Same `customerAccounts` gate the desktop cluster uses — the
-                    drawer was offering sign-in links on stores that have
-                    accounts turned off. */}
-                {isStorefrontEnabled("customerAccounts") &&
-                  (isPending ? (
-                    <div className="bg-muted h-9 w-24 animate-pulse rounded" />
-                  ) : user ? (
-                    <div className="flex items-center gap-2">
-                      <UserButton />
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">{authActions}</div>
-                  ))}
-              </motion.div>
+                <X className="h-6 w-6" />
+              </button>
             </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5">
+              <PollenOverlayNav
+                links={links}
+                pathname={pathname}
+                onClose={closeMenu}
+                linkVariants={linkVariants}
+                staggerTransition={staggerTransition}
+              />
+            </div>
+
+            {/* Pinned actions — account + contact always in thumb reach. */}
+            <motion.div
+              variants={linkVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              transition={staggerTransition(links.length)}
+              className="flex shrink-0 flex-col gap-3 border-t border-white/10 px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+            >
+              {/* Same `customerAccounts` gate the desktop cluster uses. */}
+              {accountsEnabled && (
+                <PollenNavOverlayAccount
+                  session={session}
+                  isPending={isPending}
+                  isEnabled={isStorefrontEnabled}
+                  onClose={closeMenu}
+                />
+              )}
+
+              {/* White on #1A1E1A = 16.87:1; #A8D081 border = 9.65:1. */}
+              {showHeaderButton && (
+                <Link
+                  href={buttonLink}
+                  onClick={closeMenu}
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#A8D081] px-6 text-sm font-medium text-white transition-colors hover:bg-[#A8D081]/15"
+                >
+                  <MessageSquare
+                    className="h-4 w-4 text-[#A8D081]"
+                    aria-hidden="true"
+                  />
+                  <span {...fieldAttr("pollen.global.header-button-text")}>
+                    {buttonText}
+                  </span>
+                </Link>
+              )}
+            </motion.div>
           </motion.div>
         ) : null}
       </AnimatePresence>
     </>
+  );
+}
+
+type LinkVariants = {
+  hidden: { opacity: number; y: number };
+  visible: { opacity: number; y: number };
+};
+
+type PollenOverlayNavProps = {
+  links: NavItem[];
+  pathname: string;
+  onClose: () => void;
+  linkVariants: LinkVariants;
+  staggerTransition: (
+    i: number,
+  ) => { duration: number } | { delay: number; duration: number };
+};
+
+/**
+ * The overlay's link list. Its own component so it mounts fresh with the
+ * overlay: the `expanded` initializer auto-expands the group holding the
+ * current route on every open. One group open at a time.
+ */
+function PollenOverlayNav({
+  links,
+  pathname,
+  onClose,
+  linkVariants,
+  staggerTransition,
+}: PollenOverlayNavProps) {
+  const [expanded, setExpanded] = useState<number | null>(() => {
+    const idx = links.findIndex(
+      (item) => !!item.children?.length && isNavItemActive(pathname, item),
+    );
+    return idx === -1 ? null : idx;
+  });
+
+  // Active = #A8D081 on #1A1E1A (9.65:1); the desktop #5E7747 is only
+  // 3.38:1 on this surface.
+  const rowClass = (active: boolean) =>
+    cn(
+      "flex min-h-12 w-full items-center justify-between py-2 text-lg font-medium tracking-wider uppercase transition-colors",
+      active
+        ? "text-[#A8D081]"
+        : "text-white hover:text-[#A8D081] active:text-[#A8D081]",
+    );
+
+  return (
+    <nav aria-label="Mobile navigation">
+      <ul className="flex flex-col divide-y divide-white/10">
+        {links.map((item, i) => {
+          if (item.children?.length) {
+            const isOpen = expanded === i;
+            const sublistId = `${MOBILE_MENU_ID}-group-${i}`;
+            const entries = navGroupEntries(item);
+            const activeEntry = activeEntryIndex(pathname, entries);
+            return (
+              <motion.li
+                key={i}
+                variants={linkVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                transition={staggerTransition(i)}
+              >
+                {/* Group trigger — never navigates; a non-empty parent href
+                    is the sublist's first entry. No aria-current. */}
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={sublistId}
+                  onClick={() => setExpanded(isOpen ? null : i)}
+                  className={cn(
+                    rowClass(isNavItemActive(pathname, item)),
+                    "cursor-pointer text-left",
+                  )}
+                >
+                  {item.label}
+                  <ChevronDown
+                    aria-hidden="true"
+                    className={cn(
+                      "size-5 shrink-0 transition-transform duration-300",
+                      isOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+                {isOpen && (
+                  <ul
+                    id={sublistId}
+                    className="-mt-1 mb-2 flex flex-col border-l border-[#A8D081]/40 pl-4"
+                  >
+                    {entries.map((child, j) => {
+                      const childActive = j === activeEntry;
+                      return (
+                        <li key={j}>
+                          <Link
+                            href={child.href}
+                            {...externalLinkProps(child.external)}
+                            onClick={onClose}
+                            aria-current={childActive ? "page" : undefined}
+                            className={cn(
+                              "flex min-h-11 items-center text-base transition-colors hover:text-[#A8D081]",
+                              childActive
+                                ? "font-medium text-[#A8D081]"
+                                : "text-white/80",
+                            )}
+                          >
+                            {child.label}
+                            {child.external && externalHint}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </motion.li>
+            );
+          }
+
+          const active = isNavItemActive(pathname, item);
+          return (
+            <motion.li
+              key={i}
+              variants={linkVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              transition={staggerTransition(i)}
+            >
+              <Link
+                href={item.href}
+                {...externalLinkProps(item.external)}
+                onClick={onClose}
+                aria-current={active ? "page" : undefined}
+                className={rowClass(active)}
+              >
+                {item.label}
+                {item.external && externalHint}
+              </Link>
+            </motion.li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }

@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const blogPageData: TemplateField[] = [
   {
     key: "pollen.blog.listing-title",
-    label: "Blog listing title",
-    description: "Heading shown at the top of the blog index",
+    label: "Heading",
+    description: "Heading shown at the top of the blog page.",
     type: "text",
     page: "blog",
     group: "blog.header",
@@ -14,8 +14,8 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "pollen.blog.listing-intro",
-    label: "Blog listing intro",
-    description: "Short text below the blog hero (optional)",
+    label: "Intro text",
+    description: "Short line below the blog heading. Leave blank to hide.",
     type: "textarea",
     page: "blog",
     group: "blog.header",
@@ -26,9 +26,9 @@ const blogPageData: TemplateField[] = [
   },
   {
     key: "pollen.blog.listing-hero-image",
-    label: "Blog listing hero image",
+    label: "Background image",
     description:
-      "Optional background image for the blog index hero. If empty, the site header background or default image is used.",
+      "Background image behind the blog heading. Leave blank to use the page hero background set under Global → Site header.",
     type: "image",
     page: "blog",
     group: "blog.header",
@@ -43,7 +43,7 @@ export const pollenBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.header",
     title: "Blog",
-    description: "Heading, intro, and optional hero image on the blog index",
+    description: "Heading, intro text, and background image at the top of the blog page.",
     icon: "📝",
     columns: 1,
   },

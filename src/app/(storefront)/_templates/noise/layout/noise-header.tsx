@@ -1,5 +1,12 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
+import type {
+  ComponentType,
+  FocusEvent as ReactFocusEvent,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+} from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,10 +21,13 @@ import {
   BookUser,
   ChevronDown,
   ChevronUp,
+  FileText,
+  Gift,
   Heart,
   Lock,
   Menu,
   Package,
+  Repeat,
   Settings,
   ShoppingBag,
   User,
@@ -26,9 +36,12 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
@@ -38,25 +51,64 @@ import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  externalLinkProps,
+  getAccountNavLinks,
+  navGroupEntries,
+} from "~/app/(storefront)/_components/nav";
 
+import { resolveNoiseCartCopy } from "../cart-checkout/noise-cart-copy";
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
-import { resolveFields } from "../index";
+import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
+import { NOISE_QUICK_ACCOUNT_KEYS, noiseActiveItemIndex } from "./noise-nav";
 
-type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = {
-  label: string;
-  href: string;
-  external?: boolean;
-  children?: NavChild[];
+type NoiseHeaderProps = DefaultHeaderTemplateProps & {
+  /** Owner nav (or `NOISE_DEFAULT_NAV`), resolved and flag-filtered ONCE by
+   *  the layout. The desktop bar splits it around the wordmark; the mobile
+   *  menu lists it top to bottom. */
+  navItems: NavItem[];
+  /** How many of `navItems` sit left of the wordmark (`noiseNavLeftCount`). */
+  navLeftCount: number;
 };
 
-const MOBILE_ACCOUNT_LINKS = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
-] as const;
+const SIGN_IN_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signIn}`;
+const SIGN_OUT_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signOut}`;
+
+/** Desktop `UserButton` menu icons, keyed by `getAccountNavLinks` key. */
+const QUICK_ACCOUNT_ICONS: Record<string, ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <IconLayoutDashboard className="h-4 w-4" />,
+};
+
+/** Mobile account-panel icons, keyed by `getAccountNavLinks` key (same set
+ *  as the account sidebar). Unknown future keys fall back to `Settings`. */
+const MOBILE_ACCOUNT_ICONS: Record<
+  string,
+  LucideIcon | ComponentType<{ className?: string; "aria-hidden"?: boolean }>
+> = {
+  orders: Package,
+  "address-book": BookUser,
+  subscriptions: Repeat,
+  invoices: FileText,
+  rewards: Gift,
+  settings: Settings,
+  security: Lock,
+  preferences: Bell,
+  admin: IconLayoutDashboard,
+};
+
+/** Mobile tile grid, by how many tiles survive their flag gates. */
+const TILE_GRID_COLS: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+};
+
+/** Screen-reader hint on links that open in a new tab. */
+function externalHint(external?: boolean) {
+  return external ? <span className="sr-only"> (opens in new tab)</span> : null;
+}
 
 // Mobile nav animation variants are computed inside the component
 // to respond to the user's reduced-motion preference.
@@ -64,14 +116,17 @@ const MOBILE_ACCOUNT_LINKS = [
 export function NoiseHeader({
   business,
   initialSession,
-}: DefaultHeaderTemplateProps) {
+  navItems,
+  navLeftCount,
+}: NoiseHeaderProps) {
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const { data: session, isPending } = useHydratedSession(initialSession);
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  /** Index (into `navItems`) of the open desktop dropdown, if any. */
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const accountMenuId = useId();
@@ -79,6 +134,16 @@ export function NoiseHeader({
   const mobileDialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null);
+  const triggerRefs = useRef(new Map<number, HTMLButtonElement>());
+  /** Set when hover/focus opened a dropdown, so the click that follows
+   *  (mouse press, or Enter/Space right after tabbing in) keeps it open
+   *  instead of toggling it straight shut. */
+  const passiveOpenRef = useRef<number | null>(null);
+  /** Set while focus is handed back to a trigger, so that focus doesn't
+   *  immediately re-open the dropdown that just closed. */
+  const suppressFocusOpenRef = useRef(false);
+  const dropdownBaseId = useId();
+  const panelIdFor = (index: number) => `${dropdownBaseId}-panel-${index}`;
   const reduce = useReducedMotion();
 
   // S-4: Reduced-motion-aware variants for mobile nav stagger
@@ -93,14 +158,42 @@ export function NoiseHeader({
     },
   };
 
+  /** Move focus back to a dropdown's trigger without re-opening it. */
+  const focusTrigger = (index: number) => {
+    const trigger = triggerRefs.current.get(index);
+    if (!trigger) return;
+    suppressFocusOpenRef.current = true;
+    trigger.focus();
+    suppressFocusOpenRef.current = false;
+  };
+
+  // Esc closes the open desktop dropdown and returns focus to its trigger
+  // (B3.2), wherever focus was inside the group.
   useEffect(() => {
-    if (openDropdown === null) return;
+    if (openIndex === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenDropdown(null);
+      if (e.key !== "Escape") return;
+      passiveOpenRef.current = null;
+      setOpenIndex(null);
+      focusTrigger(openIndex);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [openDropdown]);
+  }, [openIndex]);
+
+  // A pointer press outside closes it (hover-out alone misses tap-to-open).
+  useEffect(() => {
+    if (openIndex === null) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Element | null;
+      if (!target?.closest("[data-vn-dropdown]")) {
+        passiveOpenRef.current = null;
+        setOpenIndex(null);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [openIndex]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -206,7 +299,7 @@ export function NoiseHeader({
   useEffect(() => {
     setMobileOpen(false);
     setAccountMenuOpen(false);
-    setOpenDropdown(null);
+    setOpenIndex(null);
     setExpandedMobile(new Set());
   }, [pathname]);
 
@@ -220,31 +313,15 @@ export function NoiseHeader({
 
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
-  const LEFT_NAV: NavLink[] = [
-    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
-    ...(isEnabled("collections")
-      ? [{ href: "/collections", label: "Collections" }]
-      : []),
-  ];
+  // `cart` depends on `products`, so this is off whenever products is.
+  const cartEnabled = isEnabled("cart");
+  const wishlistEnabled = isStorefrontEnabled("wishlist");
+  const accountsEnabled = isStorefrontEnabled("customerAccounts");
 
-  const RIGHT_NAV: NavLink[] = [
-    { href: "/about", label: "About" },
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
-    ...(isEnabled("testimonials")
-      ? [{ href: "/testimonials", label: "Reviews" }]
-      : []),
-    { href: "/contact", label: "Contact" },
-  ];
-
-  // `??`, never `||`: an owner who saves an empty item list in the Navigation
-  // builder means "no nav links", which `||` would silently overwrite with the
-  // shipped default.
-  const customNav = business?.siteContent?.navigationItems as
-    | NavLink[]
-    | undefined;
-
-  const links = customNav ?? RIGHT_NAV;
-  const mobileNavItems: NavLink[] = customNav ?? [...LEFT_NAV, ...RIGHT_NAV];
+  // One current item across the whole bar (longest match wins), shared by
+  // the desktop split and the mobile list — never two underlines.
+  const activeIndex = noiseActiveItemIndex(pathname, navItems);
+  const leftCount = Math.min(Math.max(navLeftCount, 0), navItems.length);
 
   const toggleMobileExpanded = (index: number) => {
     setExpandedMobile((prev) => {
@@ -277,52 +354,52 @@ export function NoiseHeader({
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const g = resolveFields(customFields, ["noise.global.location-tag"]);
-  const locationTag = g["noise.global.location-tag"] ?? "";
-
-  const isLinkActive = (href: string) =>
-    href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
-
-  const isParentActive = (link: NavLink) =>
-    link.children?.some((c) => isLinkActive(c.href)) ?? false;
+  const locationTag = resolveNoiseLocationTag(business, customFields);
 
   const showAdminLink =
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
+
+  // Every account link, flag-gated (B4.3/B4.4): Orders needs `orders`,
+  // Subscriptions/Invoices/Rewards their own flags, Admin only for staff.
+  const accountLinks = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  });
+
+  // Desktop avatar: the quick-access subset, filtered by key. Settings is
+  // dropped because `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = accountLinks
+    .filter(
+      (link) =>
+        NOISE_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
+    )
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: QUICK_ACCOUNT_ICONS[link.key],
+    }));
+
+  // Mobile account panel: the FULL list; one `aria-current` (longest match).
+  const activeAccountIndex = activeEntryIndex(pathname, accountLinks);
 
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       className="border-foreground/30 h-auto w-auto rounded-full border p-0"
       avatarClassName="size-7"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(showAdminLink
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 
   const authLink = !session?.user && (
-    <Link href="/auth/sign-in" aria-label="Account">
-      <User
-        className="h-[18px] w-[18px] transition-opacity hover:opacity-60"
-        style={{ color: "var(--vn-ink-soft)" }}
-        strokeWidth={1.4}
-      />
+    <Link
+      href={SIGN_IN_HREF}
+      aria-label="Sign in"
+      className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
+      style={{ color: "var(--vn-ink-soft)" }}
+    >
+      <User className="h-[18px] w-[18px]" strokeWidth={1.4} aria-hidden />
     </Link>
   );
 
@@ -340,12 +417,7 @@ export function NoiseHeader({
     <>
       <span>{businessName.toUpperCase()}</span>
       {locationTag ? (
-        <span
-          className="vn-wordmark-sub"
-          {...fieldAttr("noise.global.location-tag")}
-        >
-          {locationTag}
-        </span>
+        <span className="vn-wordmark-sub">{locationTag}</span>
       ) : null}
     </>
   );
@@ -364,54 +436,121 @@ export function NoiseHeader({
     <span>{businessName.toUpperCase()}</span>
   );
 
-  const dropdownKey = (side: "left" | "right", index: number) =>
-    `${side}-${index}`;
+  const inactiveColor = "var(--vn-ink-soft)";
+  const activeColor = "var(--vn-ink)";
+
+  const closeDropdown = () => {
+    passiveOpenRef.current = null;
+    setOpenIndex(null);
+  };
+
+  /** Open a dropdown and move focus to its first entry (ArrowDown). */
+  const openWithFocus = (index: number) => {
+    passiveOpenRef.current = null;
+    setOpenIndex(index);
+    requestAnimationFrame(() => {
+      document
+        .getElementById(panelIdFor(index))
+        ?.querySelector<HTMLAnchorElement>("a[href]")
+        ?.focus();
+    });
+  };
+
+  const onTriggerClick = (index: number, isOpen: boolean) => {
+    if (isOpen && passiveOpenRef.current === index) {
+      passiveOpenRef.current = null;
+      return;
+    }
+    passiveOpenRef.current = null;
+    setOpenIndex(isOpen ? null : index);
+  };
+
+  /** Hover + focus handling for a desktop dropdown group (B3.2). */
+  const dropdownWrapperProps = (index: number) => ({
+    "data-vn-dropdown": true,
+    onMouseEnter: () => {
+      if (openIndex === index) return;
+      passiveOpenRef.current = index;
+      setOpenIndex(index);
+    },
+    onMouseLeave: (e: ReactMouseEvent<HTMLDivElement>) => {
+      passiveOpenRef.current = null;
+      if (openIndex !== index) return;
+      // Hover-out while keyboard focus sits on an entry inside the panel:
+      // the panel unmounts, so hand focus back to the trigger instead of
+      // dropping it on <body>.
+      const active = document.activeElement;
+      const trigger = triggerRefs.current.get(index);
+      if (active && active !== trigger && e.currentTarget.contains(active)) {
+        focusTrigger(index);
+      }
+      setOpenIndex(null);
+    },
+    onFocus: (e: ReactFocusEvent<HTMLDivElement>) => {
+      // Only when focus arrives from outside the group.
+      if (suppressFocusOpenRef.current) return;
+      if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+      if (openIndex === index) return;
+      passiveOpenRef.current = index;
+      setOpenIndex(index);
+    },
+    onBlur: (e: ReactFocusEvent<HTMLDivElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+        passiveOpenRef.current = null;
+        setOpenIndex((current) => (current === index ? null : current));
+      }
+    },
+  });
 
   const renderDesktopNavLink = (
-    link: NavLink,
+    link: NavItem,
     index: number,
     side: "left" | "right",
   ) => {
-    const key = dropdownKey(side, index);
-    const active = isLinkActive(link.href);
-    const parentActive = isParentActive(link);
-    const inactiveColor = "var(--vn-ink-soft)";
-    const activeColor = "var(--vn-ink)";
+    const current = index === activeIndex;
 
     if (link.children?.length) {
-      const isOpen = openDropdown === key;
+      const isOpen = openIndex === index;
+      // The trigger never navigates: a parent's own href is the panel's
+      // first entry (B3.2/B3.3).
+      const entries = navGroupEntries(link);
+      const activeEntry = current ? activeEntryIndex(pathname, entries) : -1;
 
       return (
         <div
-          key={link.href + link.label}
+          key={`${index}-${link.label}`}
           className="relative"
-          onMouseEnter={() => setOpenDropdown(key)}
-          onMouseLeave={() => setOpenDropdown(null)}
-          onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-              setOpenDropdown(null);
-            }
-          }}
+          {...dropdownWrapperProps(index)}
         >
           <button
             type="button"
+            ref={(el) => {
+              if (el) triggerRefs.current.set(index, el);
+              else triggerRefs.current.delete(index);
+            }}
             aria-haspopup="true"
             aria-expanded={isOpen}
-            onClick={() => setOpenDropdown(isOpen ? null : key)}
+            aria-controls={isOpen ? panelIdFor(index) : undefined}
+            onClick={() => onTriggerClick(index, isOpen)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                openWithFocus(index);
+              }
+            }}
             className={cn(
               "vn-nav-link flex cursor-pointer items-center gap-1 border-none bg-transparent font-mono text-[10.5px] tracking-[0.22em] uppercase transition-colors",
-              parentActive
-                ? "text-foreground vn-active"
-                : "hover:text-foreground",
+              current ? "text-foreground vn-active" : "hover:text-foreground",
             )}
             style={{
-              color: parentActive ? activeColor : inactiveColor,
+              color: current ? activeColor : inactiveColor,
             }}
           >
             {link.label}
             <ChevronDown
               className={cn(
-                "h-3 w-3 transition-transform duration-200",
+                "h-3 w-3",
+                !reduce && "transition-transform duration-200",
                 isOpen ? "rotate-180" : "",
               )}
               aria-hidden="true"
@@ -419,28 +558,34 @@ export function NoiseHeader({
           </button>
 
           {isOpen ? (
-            <div className="absolute top-full left-0 z-10 pt-2">
-              <div className="vn-dropdown-panel min-w-[180px] overflow-hidden rounded-none py-1">
-                {link.children.map((child) => (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    target={child.external ? "_blank" : undefined}
-                    rel={child.external ? "noopener noreferrer" : undefined}
-                    aria-current={isLinkActive(child.href) ? "page" : undefined}
-                    onClick={() => setOpenDropdown(null)}
-                    className={cn(
-                      "vn-nav-dropdown-link",
-                      isLinkActive(child.href) ? "vn-active" : "",
-                    )}
-                  >
-                    {child.label}
-                    {child.external && (
-                      <span className="sr-only">(opens in new tab)</span>
-                    )}
-                  </Link>
+            <div
+              id={panelIdFor(index)}
+              className={cn(
+                "absolute top-full z-10 pt-2",
+                // Right-hand groups open leftward so the panel never runs
+                // off the viewport edge.
+                side === "right" ? "right-0" : "left-0",
+              )}
+            >
+              <ul className="vn-dropdown-panel m-0 min-w-[180px] list-none overflow-hidden rounded-none p-0 py-1">
+                {entries.map((entry, j) => (
+                  <li key={`${j}-${entry.href}-${entry.label}`}>
+                    <Link
+                      href={entry.href}
+                      {...externalLinkProps(entry.external)}
+                      aria-current={j === activeEntry ? "page" : undefined}
+                      onClick={closeDropdown}
+                      className={cn(
+                        "vn-nav-dropdown-link",
+                        j === activeEntry ? "vn-active" : "",
+                      )}
+                    >
+                      {entry.label}
+                      {externalHint(entry.external)}
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           ) : null}
         </div>
@@ -449,32 +594,37 @@ export function NoiseHeader({
 
     return (
       <Link
-        key={link.href + link.label}
+        key={`${index}-${link.label}`}
         href={link.href}
-        target={link.external ? "_blank" : undefined}
-        rel={link.external ? "noopener noreferrer" : undefined}
-        aria-current={active ? "page" : undefined}
+        {...externalLinkProps(link.external)}
+        aria-current={current ? "page" : undefined}
         className={cn(
           "vn-nav-link font-mono text-[10.5px] tracking-[0.22em] uppercase transition-colors",
-          active ? "text-foreground vn-active" : "hover:text-foreground",
+          current ? "text-foreground vn-active" : "hover:text-foreground",
         )}
         style={{
-          color: active ? activeColor : inactiveColor,
+          color: current ? activeColor : inactiveColor,
         }}
       >
         {link.label}
-        {link.external && <span className="sr-only">(opens in new tab)</span>}
+        {externalHint(link.external)}
       </Link>
     );
   };
 
-  const renderMobileNavLink = (link: NavLink, i: number) => {
+  const renderMobileNavLink = (link: NavItem, i: number) => {
     const submenuId = `${mobileSubmenuId}-${i}`;
+    const current = i === activeIndex;
 
     if (link.children?.length) {
+      // The accordion button never navigates: a parent's own href is the
+      // first entry of its sub-list (B3.3).
+      const entries = navGroupEntries(link);
+      const activeEntry = current ? activeEntryIndex(pathname, entries) : -1;
+
       return (
         <motion.li
-          key={link.href + link.label}
+          key={`${i}-${link.label}`}
           variants={mobileNavItemVariants}
           className="border-b"
           style={{ borderColor: "var(--vn-line-soft)" }}
@@ -486,15 +636,14 @@ export function NoiseHeader({
             aria-controls={submenuId}
             className={cn(
               "vn-mobile-nav-link justify-between transition-colors",
-              isParentActive(link)
-                ? "vn-mobile-nav-active"
-                : "vn-mobile-nav-inactive",
+              current ? "vn-mobile-nav-active" : "vn-mobile-nav-inactive",
             )}
           >
             {link.label}
             <ChevronDown
               className={cn(
-                "h-5 w-5 shrink-0 transition-transform duration-200",
+                "h-5 w-5 shrink-0",
+                !reduce && "transition-transform duration-200",
                 expandedMobile.has(i) ? "rotate-180" : "",
               )}
               aria-hidden="true"
@@ -507,31 +656,26 @@ export function NoiseHeader({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: reduce ? 0 : 0.2 }}
                 className="overflow-hidden"
               >
                 <ul className="vn-mobile-nav-list pb-2">
-                  {link.children.map((child) => (
-                    <li key={child.href}>
+                  {entries.map((entry, j) => (
+                    <li key={`${j}-${entry.href}-${entry.label}`}>
                       <Link
-                        href={child.href}
-                        target={child.external ? "_blank" : undefined}
-                        rel={child.external ? "noopener noreferrer" : undefined}
+                        href={entry.href}
+                        {...externalLinkProps(entry.external)}
                         onClick={closeMobileMenu}
-                        aria-current={
-                          isLinkActive(child.href) ? "page" : undefined
-                        }
+                        aria-current={j === activeEntry ? "page" : undefined}
                         className={cn(
                           "vn-mobile-nav-link vn-mobile-nav-link-child transition-colors",
-                          isLinkActive(child.href)
+                          j === activeEntry
                             ? "vn-mobile-nav-active"
                             : "vn-mobile-nav-inactive",
                         )}
                       >
-                        {child.label}
-                        {child.external && (
-                          <span className="sr-only">(opens in new tab)</span>
-                        )}
+                        {entry.label}
+                        {externalHint(entry.external)}
                       </Link>
                     </li>
                   ))}
@@ -545,30 +689,39 @@ export function NoiseHeader({
 
     return (
       <motion.li
-        key={link.href + link.label}
+        key={`${i}-${link.label}`}
         variants={mobileNavItemVariants}
         className="border-b"
         style={{ borderColor: "var(--vn-line-soft)" }}
       >
         <Link
           href={link.href}
-          target={link.external ? "_blank" : undefined}
-          rel={link.external ? "noopener noreferrer" : undefined}
+          {...externalLinkProps(link.external)}
           onClick={closeMobileMenu}
-          aria-current={isLinkActive(link.href) ? "page" : undefined}
+          aria-current={current ? "page" : undefined}
           className={cn(
             "vn-mobile-nav-link transition-colors",
-            isLinkActive(link.href)
-              ? "vn-mobile-nav-active"
-              : "vn-mobile-nav-inactive",
+            current ? "vn-mobile-nav-active" : "vn-mobile-nav-inactive",
           )}
         >
           {link.label}
-          {link.external && <span className="sr-only">(opens in new tab)</span>}
+          {externalHint(link.external)}
         </Link>
       </motion.li>
     );
   };
+
+  const leftNav = navItems.slice(0, leftCount);
+  const rightNav = navItems.slice(leftCount);
+
+  // Mobile tiles, each behind its own gate (B2.1/B7.4); the grid adapts to
+  // however many survive. The account tile waits for the session so a
+  // signed-in shopper never sees "Login" first.
+  const showCartTile = cartEnabled;
+  const showWishlistTile = wishlistEnabled;
+  const showAccountTile = accountsEnabled && !isPending;
+  const tileCount =
+    Number(showCartTile) + Number(showWishlistTile) + Number(showAccountTile);
 
   return (
     <>
@@ -581,7 +734,7 @@ export function NoiseHeader({
           className="mx-auto grid w-full max-w-[1440px] items-center gap-6 px-4 py-4 sm:px-6 sm:py-[18px]"
           style={{ gridTemplateColumns: "1fr auto 1fr" }}
         >
-          {/* ── Left: mobile menu + shop/collection links ── */}
+          {/* ── Left: mobile menu + the first half of the nav ── */}
           <div className="flex items-center gap-6">
             <Button
               ref={hamburgerButtonRef}
@@ -604,12 +757,16 @@ export function NoiseHeader({
               )}
             </Button>
 
-            <nav
-              className="hidden items-center gap-6 md:flex"
-              aria-label="Shop navigation"
-            >
-              {LEFT_NAV.map((link, i) => renderDesktopNavLink(link, i, "left"))}
-            </nav>
+            {leftNav.length > 0 ? (
+              <nav
+                className="hidden items-center gap-6 md:flex"
+                aria-label="Primary navigation"
+              >
+                {leftNav.map((link, i) =>
+                  renderDesktopNavLink(link, i, "left"),
+                )}
+              </nav>
+            ) : null}
           </div>
 
           {/* ── Center: wordmark ── */}
@@ -617,16 +774,24 @@ export function NoiseHeader({
             {brand}
           </Link>
 
-          {/* ── Right: editorial links + account + bag ── */}
+          {/* ── Right: the rest of the nav + account + wishlist + bag ── */}
           <div className="flex items-center justify-end gap-6">
-            <nav
-              className="hidden items-center gap-6 md:flex"
-              aria-label="Primary navigation"
-            >
-              {links.map((link, i) => renderDesktopNavLink(link, i, "right"))}
-            </nav>
+            {rightNav.length > 0 ? (
+              <nav
+                className="hidden items-center gap-6 md:flex"
+                aria-label={
+                  leftNav.length > 0
+                    ? "Secondary navigation"
+                    : "Primary navigation"
+                }
+              >
+                {rightNav.map((link, i) =>
+                  renderDesktopNavLink(link, leftCount + i, "right"),
+                )}
+              </nav>
+            ) : null}
 
-            {isStorefrontEnabled("customerAccounts") && (
+            {accountsEnabled && (
               <div className="hidden md:block">
                 {isPending ? (
                   <div className="bg-foreground/10 h-7 w-7 animate-pulse rounded-full" />
@@ -638,14 +803,18 @@ export function NoiseHeader({
               </div>
             )}
 
-            {isStorefrontEnabled("wishlist") && (
+            {wishlistEnabled && (
               <Link
                 href="/wishlist"
                 aria-label="Open wishlist"
                 className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
                 style={{ color: "var(--vn-ink-soft)" }}
               >
-                <Heart className="h-[18px] w-[18px]" strokeWidth={1.4} />
+                <Heart
+                  className="h-[18px] w-[18px]"
+                  strokeWidth={1.4}
+                  aria-hidden
+                />
                 {wishlistHydrated && wishlistCount > 0 && (
                   <motion.span
                     aria-hidden="true"
@@ -665,34 +834,42 @@ export function NoiseHeader({
               </Link>
             )}
 
-            <button
-              onClick={() => setIsOpen(true)}
-              aria-label={
-                itemCount > 0
-                  ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                  : "Open cart"
-              }
-              className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.4} />
-              {itemCount > 0 && (
-                <motion.span
-                  aria-hidden="true"
-                  initial={{ scale: reduce ? 1 : 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: reduce ? 0 : 0.2 }}
-                  className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
-                  style={{
-                    background: "var(--vn-accent)",
-                    color: "#fff",
-                    minWidth: "16px",
-                  }}
-                >
-                  {itemCount}
-                </motion.span>
-              )}
-            </button>
+            {/* `cart` cascades off with `products` (B2.1/B7.4). */}
+            {cartEnabled && (
+              <button
+                type="button"
+                onClick={() => setIsOpen(true)}
+                aria-label={
+                  itemCount > 0
+                    ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "Open cart"
+                }
+                className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-ink-soft)" }}
+              >
+                <ShoppingBag
+                  className="h-[18px] w-[18px]"
+                  strokeWidth={1.4}
+                  aria-hidden
+                />
+                {itemCount > 0 && (
+                  <motion.span
+                    aria-hidden="true"
+                    initial={{ scale: reduce ? 1 : 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: reduce ? 0 : 0.2 }}
+                    className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
+                    style={{
+                      background: "var(--vn-accent)",
+                      color: "#fff",
+                      minWidth: "16px",
+                    }}
+                  >
+                    {itemCount}
+                  </motion.span>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -763,220 +940,224 @@ export function NoiseHeader({
                   exit="closed"
                   variants={mobileNavListVariants}
                 >
-                  {mobileNavItems.map((link, i) =>
-                    renderMobileNavLink(link, i),
-                  )}
+                  {navItems.map((link, i) => renderMobileNavLink(link, i))}
                 </motion.ul>
               </nav>
 
-              <div
-                className="relative shrink-0 border-t px-5 py-4 sm:px-6"
-                style={{ borderColor: "var(--vn-rule)" }}
-              >
-                <AnimatePresence>
-                  {accountMenuOpen && session?.user ? (
-                    <motion.nav
-                      ref={accountMenuRef}
-                      id={accountMenuId}
-                      aria-label="Account menu"
-                      initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 }}
-                      transition={{ duration: reduce ? 0 : 0.2 }}
-                      className="vn-mobile-account-panel absolute right-5 bottom-full left-5 mb-2 overflow-hidden rounded-none shadow-lg sm:right-6 sm:left-6"
-                    >
-                      <div
-                        className="border-b px-4 py-3"
-                        style={{ borderColor: "var(--vn-line-soft)" }}
+              {tileCount > 0 ? (
+                <div
+                  className="relative shrink-0 border-t px-5 py-4 sm:px-6"
+                  style={{ borderColor: "var(--vn-rule)" }}
+                >
+                  <AnimatePresence>
+                    {accountMenuOpen && session?.user ? (
+                      <motion.nav
+                        ref={accountMenuRef}
+                        id={accountMenuId}
+                        aria-label="Account menu"
+                        initial={{
+                          opacity: reduce ? 1 : 0,
+                          y: reduce ? 0 : 12,
+                        }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 }}
+                        transition={{ duration: reduce ? 0 : 0.2 }}
+                        className="vn-mobile-account-panel absolute right-5 bottom-full left-5 mb-2 max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain rounded-none shadow-lg sm:right-6 sm:left-6"
                       >
-                        <p className="font-mono text-[9px] tracking-[0.3em] text-[var(--vn-steel-mist)] uppercase">
-                          Signed in as
-                        </p>
-                        <p
-                          className="mt-1 truncate font-sans text-sm"
-                          style={{ color: "var(--vn-ink-soft)" }}
+                        <div
+                          className="border-b px-4 py-3"
+                          style={{ borderColor: "var(--vn-line-soft)" }}
                         >
-                          {session.user.name ?? session.user.email}
-                        </p>
-                      </div>
-                      <ul className="py-1">
-                        {MOBILE_ACCOUNT_LINKS.map(
-                          ({ href, label, icon: Icon }) => (
-                            <li key={href}>
-                              <Link
-                                href={href}
-                                onClick={closeMobileMenu}
-                                className={cn(
-                                  "vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 transition-colors",
-                                  isLinkActive(href)
-                                    ? "text-[var(--vn-accent)]"
-                                    : "text-[var(--vn-ink-soft)] hover:text-[var(--vn-ink)]",
-                                )}
-                                style={{
-                                  background: isLinkActive(href)
-                                    ? "var(--vn-line-soft)"
-                                    : undefined,
-                                }}
-                              >
-                                <Icon
-                                  className="h-4 w-4 shrink-0"
-                                  aria-hidden
-                                />
-                                {label}
-                              </Link>
-                            </li>
-                          ),
-                        )}
-                        {showAdminLink ? (
-                          <li>
+                          <p className="font-mono text-[9px] tracking-[0.3em] text-[var(--vn-steel-mist)] uppercase">
+                            Signed in as
+                          </p>
+                          <p
+                            className="mt-1 truncate font-sans text-sm"
+                            style={{ color: "var(--vn-ink-soft)" }}
+                          >
+                            {session.user.name ?? session.user.email}
+                          </p>
+                        </div>
+                        <ul className="py-1">
+                          {/* The FULL flag-gated list (B4.4), Admin last when
+                            the shopper is staff, then Sign out. */}
+                          {accountLinks.map((link, j) => {
+                            const Icon =
+                              MOBILE_ACCOUNT_ICONS[link.key] ?? Settings;
+                            const active = j === activeAccountIndex;
+                            return (
+                              <li key={link.key}>
+                                <Link
+                                  href={link.href}
+                                  onClick={closeMobileMenu}
+                                  aria-current={active ? "page" : undefined}
+                                  className={cn(
+                                    "vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 transition-colors",
+                                    active
+                                      ? "text-[var(--vn-accent)]"
+                                      : "text-[var(--vn-ink-soft)] hover:text-[var(--vn-ink)]",
+                                  )}
+                                  style={{
+                                    background: active
+                                      ? "var(--vn-line-soft)"
+                                      : undefined,
+                                  }}
+                                >
+                                  <Icon
+                                    className="h-4 w-4 shrink-0"
+                                    aria-hidden
+                                  />
+                                  {link.label}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                          <li
+                            className="border-t"
+                            style={{ borderColor: "var(--vn-line-soft)" }}
+                          >
                             <Link
-                              href="/admin"
+                              href={SIGN_OUT_HREF}
                               onClick={closeMobileMenu}
                               className="vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 text-[var(--vn-ink-soft)] transition-colors hover:text-[var(--vn-ink)]"
                             >
-                              <IconLayoutDashboard
+                              <IconLogout
                                 className="h-4 w-4 shrink-0"
                                 aria-hidden
                               />
-                              Admin
+                              Sign out
                             </Link>
                           </li>
-                        ) : null}
-                        <li
-                          className="border-t"
-                          style={{ borderColor: "var(--vn-line-soft)" }}
-                        >
-                          <Link
-                            href="/auth/sign-out"
-                            onClick={closeMobileMenu}
-                            className="vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 text-[var(--vn-ink-soft)] transition-colors hover:text-[var(--vn-ink)]"
-                          >
-                            <IconLogout
-                              className="h-4 w-4 shrink-0"
-                              aria-hidden
-                            />
-                            Sign out
-                          </Link>
-                        </li>
-                      </ul>
-                    </motion.nav>
-                  ) : null}
-                </AnimatePresence>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={openCart}
-                    aria-label={
-                      itemCount > 0
-                        ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                        : "Open cart"
-                    }
-                    className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
-                    style={{
-                      border: "1px solid var(--vn-rule)",
-                      color: "var(--vn-ink-soft)",
-                    }}
-                  >
-                    <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                    <span aria-hidden="true">Cart</span>
-                    {itemCount > 0 ? (
-                      <span
-                        aria-hidden="true"
-                        className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
-                        style={{
-                          background: "var(--vn-accent)",
-                          color: "#fff",
-                        }}
-                      >
-                        {itemCount}
-                      </span>
+                        </ul>
+                      </motion.nav>
                     ) : null}
-                  </button>
+                  </AnimatePresence>
 
-                  {isStorefrontEnabled("wishlist") && (
-                    <Link
-                      href="/wishlist"
-                      onClick={closeMobileMenu}
-                      aria-label="Open wishlist"
-                      className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
-                      style={{
-                        border: "1px solid var(--vn-rule)",
-                        color: "var(--vn-ink-soft)",
-                      }}
-                    >
-                      <Heart className="h-4 w-4" aria-hidden="true" />
-                      <span aria-hidden="true">Wishlist</span>
-                      {wishlistHydrated && wishlistCount > 0 ? (
-                        <span
-                          aria-hidden="true"
-                          className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
-                          style={{
-                            background: "var(--vn-accent)",
-                            color: "#fff",
-                          }}
-                        >
-                          {wishlistCount}
-                        </span>
-                      ) : null}
-                    </Link>
-                  )}
-
-                  {/* Same `customerAccounts` gate as the desktop cluster, plus
-                      a pending guard — this row is either the account menu or
-                      a "Login" link, so rendering it before the session lands
-                      shows a signed-in shopper the wrong one. */}
-                  {isStorefrontEnabled("customerAccounts") &&
-                    !isPending &&
-                    (session?.user ? (
+                  <div
+                    className={cn(
+                      "grid gap-3",
+                      TILE_GRID_COLS[tileCount] ?? "grid-cols-3",
+                    )}
+                  >
+                    {showCartTile && (
                       <button
                         type="button"
-                        id={`${accountMenuId}-trigger`}
-                        aria-haspopup="true"
-                        aria-expanded={accountMenuOpen}
-                        aria-controls={
-                          accountMenuOpen ? accountMenuId : undefined
+                        onClick={openCart}
+                        aria-label={
+                          itemCount > 0
+                            ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                            : "Open cart"
                         }
-                        onClick={() => setAccountMenuOpen((open) => !open)}
-                        className={cn(
-                          "vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80",
-                          accountMenuOpen
-                            ? "border-[var(--vn-accent)] text-[var(--vn-accent)]"
-                            : "border-[var(--vn-rule)] text-[var(--vn-ink-soft)]",
-                        )}
-                      >
-                        <User className="h-4 w-4" aria-hidden="true" />
-                        Account
-                        <ChevronUp
-                          className={cn(
-                            "h-3.5 w-3.5 transition-transform duration-200",
-                            accountMenuOpen ? "rotate-180" : "",
-                          )}
-                          aria-hidden="true"
-                        />
-                      </button>
-                    ) : (
-                      <Link
-                        href="/auth/sign-in"
-                        onClick={closeMobileMenu}
-                        className="vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80"
+                        className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
                         style={{
-                          borderColor: "var(--vn-rule)",
+                          border: "1px solid var(--vn-rule)",
                           color: "var(--vn-ink-soft)",
                         }}
                       >
-                        <User className="h-4 w-4" aria-hidden="true" />
-                        Login
+                        <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                        <span aria-hidden="true">Cart</span>
+                        {itemCount > 0 ? (
+                          <span
+                            aria-hidden="true"
+                            className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
+                            style={{
+                              background: "var(--vn-accent)",
+                              color: "#fff",
+                            }}
+                          >
+                            {itemCount}
+                          </span>
+                        ) : null}
+                      </button>
+                    )}
+
+                    {showWishlistTile && (
+                      <Link
+                        href="/wishlist"
+                        onClick={closeMobileMenu}
+                        aria-label="Open wishlist"
+                        className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
+                        style={{
+                          border: "1px solid var(--vn-rule)",
+                          color: "var(--vn-ink-soft)",
+                        }}
+                      >
+                        <Heart className="h-4 w-4" aria-hidden="true" />
+                        <span aria-hidden="true">Wishlist</span>
+                        {wishlistHydrated && wishlistCount > 0 ? (
+                          <span
+                            aria-hidden="true"
+                            className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
+                            style={{
+                              background: "var(--vn-accent)",
+                              color: "#fff",
+                            }}
+                          >
+                            {wishlistCount}
+                          </span>
+                        ) : null}
                       </Link>
-                    ))}
+                    )}
+
+                    {/* Same `customerAccounts` gate as the desktop cluster, plus
+                      a pending guard — this row is either the account menu or
+                      a "Login" link, so rendering it before the session lands
+                      shows a signed-in shopper the wrong one. */}
+                    {showAccountTile &&
+                      (session?.user ? (
+                        <button
+                          type="button"
+                          id={`${accountMenuId}-trigger`}
+                          aria-haspopup="true"
+                          aria-expanded={accountMenuOpen}
+                          aria-controls={
+                            accountMenuOpen ? accountMenuId : undefined
+                          }
+                          onClick={() => setAccountMenuOpen((open) => !open)}
+                          className={cn(
+                            "vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80",
+                            accountMenuOpen
+                              ? "border-[var(--vn-accent)] text-[var(--vn-accent)]"
+                              : "border-[var(--vn-rule)] text-[var(--vn-ink-soft)]",
+                          )}
+                        >
+                          <User className="h-4 w-4" aria-hidden="true" />
+                          Account
+                          <ChevronUp
+                            className={cn(
+                              "h-3.5 w-3.5",
+                              !reduce && "transition-transform duration-200",
+                              accountMenuOpen ? "rotate-180" : "",
+                            )}
+                            aria-hidden="true"
+                          />
+                        </button>
+                      ) : (
+                        <Link
+                          href={SIGN_IN_HREF}
+                          onClick={closeMobileMenu}
+                          className="vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80"
+                          style={{
+                            borderColor: "var(--vn-rule)",
+                            color: "var(--vn-ink-soft)",
+                          }}
+                        >
+                          <User className="h-4 w-4" aria-hidden="true" />
+                          Login
+                        </Link>
+                      ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </motion.div>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
-      <NoiseCartDrawer shippingConfig={shippingConfigFromBusiness(business)} />
+      <NoiseCartDrawer
+        shippingConfig={shippingConfigFromBusiness(business)}
+        copy={resolveNoiseCartCopy(customFields)}
+      />
     </>
   );
 }

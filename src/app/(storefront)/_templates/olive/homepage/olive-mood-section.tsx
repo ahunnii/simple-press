@@ -27,7 +27,12 @@ type Props = {
  * read as a third content section instead.
  */
 export function OliveMoodSection({ first, second, sectionAttrs }: Props) {
-  const tiles = [first, second].filter((tile) => tile.label.trim().length > 0);
+  // The whole tile is the link (`OliveImageTile` always renders as an
+  // anchor), so a B2.5-gated href (blank) drops the tile entirely rather
+  // than leaving a link that goes nowhere.
+  const tiles = [first, second].filter(
+    (tile) => tile.label.trim().length > 0 && tile.href.trim().length > 0,
+  );
   if (tiles.length === 0) return null;
 
   return (

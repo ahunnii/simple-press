@@ -14,8 +14,8 @@ import type { TemplateSection } from "~/lib/template-sections";
 const aboutHeroData: TemplateField[] = [
   {
     key: "dream.about.hero-heading",
-    label: "Page Heading",
-    description: "The page's H1, before the script accent word.",
+    label: "Heading",
+    description: "The page's H1, before the highlighted word.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -24,9 +24,8 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "dream.about.hero-accent",
-    label: "Page Heading Accent Word",
-    description:
-      'Script word rendered in rose after the heading (design.md: h1 "Meet Selest").',
+    label: "Highlighted word",
+    description: 'Script-styled word after the heading (e.g. "Meet Selest").',
     type: "text",
     page: "about",
     group: "about.hero",
@@ -35,7 +34,7 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "dream.about.hero-lede",
-    label: "Page Lede",
+    label: "Intro",
     description: "Short line under the page heading.",
     type: "textarea",
     page: "about",
@@ -48,10 +47,22 @@ const aboutHeroData: TemplateField[] = [
 
 // ─── Story — portrait + pull-quote + rich-text story + CTA — NOT hideable ──
 
+/**
+ * Fallback shown by `DreamAboutStory` while the `dream.about.story-body`
+ * richtext field is empty (a fresh store has no saved story). `getRichTextFieldValue`
+ * only reads a saved Tiptap doc from `customFields` — it does not know about
+ * a field's `defaultValue` — so this HTML string IS that field's
+ * `defaultValue` below, exported for the page/component to render directly
+ * (as static markup, not through the Tiptap renderer) once the saved value
+ * is empty. Text verbatim from the shipped copy this replaces.
+ */
+export const DREAM_ABOUT_STORY_BODY_DEFAULT_HTML =
+  "<p>Selest is an event designer, not a planner. Give her the shape of your day and she'll build a world around it — drape by drape, chair by chair, until the space matches what you imagined.</p><p>The best part of the job, she says, is watching guests walk in and see their theme for the first time. That's the smile she's designing for.</p>";
+
 const aboutStoryData: TemplateField[] = [
   {
     key: "dream.about.story-portrait",
-    label: "Portrait Photo",
+    label: "Portrait photo",
     description: "Portrait of Selest, shown at a 4:5 crop.",
     type: "image",
     page: "about",
@@ -61,7 +72,7 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "dream.about.story-portrait-alt",
-    label: "Portrait Alt Text",
+    label: "Portrait alt text",
     description: "Alt text for the portrait photo, for screen readers.",
     type: "text",
     page: "about",
@@ -71,9 +82,9 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "dream.about.story-quote-lead",
-    label: "Pull-quote — Lead Text",
+    label: "Pull-quote text",
     description:
-      'Plain part of the pull-quote heading, before the script accent (must-keep copy: "Your dreams become a theme.").',
+      'Plain part of the pull-quote, before the highlighted words (e.g. "Your dreams become a theme.").',
     type: "text",
     page: "about",
     group: "about.story",
@@ -82,8 +93,8 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "dream.about.story-quote-accent",
-    label: "Pull-quote — Script Accent",
-    description: "Script word(s) rendered in rose after the lead text.",
+    label: "Pull-quote highlighted words",
+    description: "Script-styled words that follow the pull-quote text.",
     type: "text",
     page: "about",
     group: "about.story",
@@ -92,18 +103,29 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "dream.about.story-body",
-    label: "Selest's Story (rich text)",
+    label: "Story (rich text)",
     description:
       "The story itself — as many paragraphs as you like. Bold, links and lists all render.",
     type: "richtext",
     page: "about",
     group: "about.story",
     gridColumn: "col-span-full",
-    defaultValue: "",
+    defaultValue: DREAM_ABOUT_STORY_BODY_DEFAULT_HTML,
+  },
+  {
+    key: "dream.about.story-portrait-empty",
+    label: "Portrait empty message",
+    description:
+      "Message shown in place of the portrait photo when none is set.",
+    type: "text",
+    page: "about",
+    group: "about.story",
+    gridColumn: "col-span-full",
+    defaultValue: "Selest's portrait is on its way",
   },
   {
     key: "dream.about.story-cta-label",
-    label: "Story CTA Label",
+    label: "Button label",
     description: "Label for the button under the story.",
     type: "text",
     page: "about",
@@ -113,8 +135,8 @@ const aboutStoryData: TemplateField[] = [
   },
   {
     key: "dream.about.story-cta-url",
-    label: "Story CTA Link",
-    description: "Where the story button links to.",
+    label: "Button link",
+    description: "Where the button under the story links to.",
     type: "url",
     page: "about",
     group: "about.story",
@@ -128,7 +150,7 @@ const aboutStoryData: TemplateField[] = [
 const aboutConsultationData: TemplateField[] = [
   {
     key: "dream.about.consultation-heading",
-    label: "Consultation Heading",
+    label: "Heading",
     description: "Heading above the consultation steps.",
     type: "text",
     page: "about",
@@ -138,7 +160,7 @@ const aboutConsultationData: TemplateField[] = [
   },
   {
     key: "dream.about.consultation-lede",
-    label: "Consultation Lede",
+    label: "Intro",
     description: "Short line under the consultation heading.",
     type: "textarea",
     page: "about",
@@ -149,7 +171,7 @@ const aboutConsultationData: TemplateField[] = [
   },
   {
     key: "dream.about.consultation-step-1-heading",
-    label: "Step 1 Heading",
+    label: "Step 1 heading",
     description: "First consultation step's heading.",
     type: "text",
     page: "about",
@@ -159,7 +181,7 @@ const aboutConsultationData: TemplateField[] = [
   },
   {
     key: "dream.about.consultation-step-1-body",
-    label: "Step 1 Body",
+    label: "Step 1 body",
     description: "First consultation step's body.",
     type: "textarea",
     page: "about",
@@ -170,7 +192,7 @@ const aboutConsultationData: TemplateField[] = [
   },
   {
     key: "dream.about.consultation-step-2-heading",
-    label: "Step 2 Heading",
+    label: "Step 2 heading",
     description: "Second consultation step's heading.",
     type: "text",
     page: "about",
@@ -180,7 +202,7 @@ const aboutConsultationData: TemplateField[] = [
   },
   {
     key: "dream.about.consultation-step-2-body",
-    label: "Step 2 Body",
+    label: "Step 2 body",
     description: "Second consultation step's body.",
     type: "textarea",
     page: "about",
@@ -191,7 +213,7 @@ const aboutConsultationData: TemplateField[] = [
   },
   {
     key: "dream.about.consultation-step-3-heading",
-    label: "Step 3 Heading",
+    label: "Step 3 heading",
     description: "Third consultation step's heading.",
     type: "text",
     page: "about",
@@ -201,7 +223,7 @@ const aboutConsultationData: TemplateField[] = [
   },
   {
     key: "dream.about.consultation-step-3-body",
-    label: "Step 3 Body",
+    label: "Step 3 body",
     description: "Third consultation step's body.",
     type: "textarea",
     page: "about",
@@ -217,8 +239,8 @@ const aboutConsultationData: TemplateField[] = [
 const aboutQuoteData: TemplateField[] = [
   {
     key: "dream.about.quote-heading",
-    label: "Quote Band Heading",
-    description: "Plain part of the closing quote-band heading.",
+    label: "Heading",
+    description: "Plain part of this section's heading, before the highlighted words.",
     type: "text",
     page: "about",
     group: "about.quote",
@@ -227,8 +249,8 @@ const aboutQuoteData: TemplateField[] = [
   },
   {
     key: "dream.about.quote-accent",
-    label: "Quote Band Heading Accent",
-    description: "Script accent phrase rendered in rose after the heading.",
+    label: "Highlighted words",
+    description: 'Script-styled words that follow the heading (e.g. "Estimate Quote").',
     type: "text",
     page: "about",
     group: "about.quote",
@@ -237,8 +259,8 @@ const aboutQuoteData: TemplateField[] = [
   },
   {
     key: "dream.about.quote-lede",
-    label: "Quote Band Lede",
-    description: "Short line under the quote-band heading.",
+    label: "Intro",
+    description: "Short line under this section's heading.",
     type: "textarea",
     page: "about",
     group: "about.quote",
@@ -248,8 +270,8 @@ const aboutQuoteData: TemplateField[] = [
   },
   {
     key: "dream.about.quote-cta-label",
-    label: "Quote Band Button Label",
-    description: "Label for the quote-band button.",
+    label: "Button label",
+    description: "Label for this section's button.",
     type: "text",
     page: "about",
     group: "about.quote",
@@ -258,8 +280,8 @@ const aboutQuoteData: TemplateField[] = [
   },
   {
     key: "dream.about.quote-cta-url",
-    label: "Quote Band Button Link",
-    description: "Where the quote-band button links to.",
+    label: "Button link",
+    description: "Where this section's button links to.",
     type: "url",
     page: "about",
     group: "about.quote",
@@ -280,29 +302,29 @@ export const dreamAboutData: TemplateField[] = [
 export const dreamAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "Page Hero",
-    description: "Heading, script accent, and lede",
+    title: "Page header",
+    description: "Heading, highlighted word, and intro",
     icon: "☁️",
     columns: 2,
   },
   {
     id: "about.story",
-    title: "Selest's Story",
-    description: "Portrait, pull-quote, story, and a closing CTA",
+    title: "Story",
+    description: "Portrait, pull-quote, story, and a closing button",
     icon: "🌸",
     columns: 2,
   },
   {
     id: "about.consultation",
-    title: "How the Consultation Works",
-    description: "Heading, lede, and the three consultation steps",
+    title: "How the consultation works",
+    description: "Heading, intro, and the three consultation steps",
     icon: "📋",
     columns: 2,
   },
   {
     id: "about.quote",
-    title: "Estimate Quote Band",
-    description: "Closing call-to-action band",
+    title: "Quote request",
+    description: "Closing section with a heading and a button",
     icon: "✉️",
     columns: 2,
   },
@@ -312,8 +334,8 @@ export const dreamAboutSections: TemplateSection[] = [
   {
     id: "about.hero",
     page: "about",
-    title: "Page Hero",
-    description: "Logo, heading, and lede",
+    title: "Page header",
+    description: "Logo, heading, and intro",
     groupIds: ["about.hero"],
     order: 0,
     hideable: false,
@@ -321,8 +343,8 @@ export const dreamAboutSections: TemplateSection[] = [
   {
     id: "about.story",
     page: "about",
-    title: "Selest's Story",
-    description: "Portrait, pull-quote, story, and CTA",
+    title: "Story",
+    description: "Portrait, pull-quote, story, and button",
     groupIds: ["about.story"],
     order: 1,
     hideable: false,
@@ -330,8 +352,8 @@ export const dreamAboutSections: TemplateSection[] = [
   {
     id: "about.consultation",
     page: "about",
-    title: "How the Consultation Works",
-    description: "Heading, lede, and three-step process",
+    title: "How the consultation works",
+    description: "Heading, intro, and three-step process",
     groupIds: ["about.consultation"],
     order: 2,
     hideable: true,
@@ -339,8 +361,8 @@ export const dreamAboutSections: TemplateSection[] = [
   {
     id: "about.quote",
     page: "about",
-    title: "Estimate Quote Band",
-    description: "Closing call-to-action band",
+    title: "Quote request",
+    description: "Closing section with a heading and a button",
     groupIds: ["about.quote"],
     order: 3,
     hideable: true,

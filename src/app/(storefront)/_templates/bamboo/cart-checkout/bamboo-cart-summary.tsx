@@ -14,6 +14,7 @@ import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { Separator } from "~/components/ui/separator";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type CartSummaryProps = {
   shippingConfig: ShippingConfig;
@@ -21,6 +22,7 @@ type CartSummaryProps = {
 
 export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
   const { subtotal, itemCount } = useCart();
+  const { isEnabled } = useStorefrontFlags();
   // Zone+weight rates depend on the destination address, which isn't known in
   // the cart — defer to checkout rather than showing a misleading "Free".
   const isZoneWeight =
@@ -87,13 +89,15 @@ export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
           </span>
         </div>
       </div>
-      <Button
-        className="mt-6 w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
-        size="lg"
-        asChild
-      >
-        <Link href="/checkout">Proceed to Checkout</Link>
-      </Button>
+      {isEnabled("checkout") && (
+        <Button
+          className="mt-6 w-full rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
+          size="lg"
+          asChild
+        >
+          <Link href="/checkout">Proceed to Checkout</Link>
+        </Button>
+      )}
     </div>
   );
 }

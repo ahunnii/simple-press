@@ -6,6 +6,7 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { resolveUmscContactDetails } from "../shared/umsc-contact-details";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscContactForm, UmscContactFormFallback } from "./umsc-contact-form";
 import { UmscContactVisit } from "./umsc-contact-visit";
@@ -25,18 +26,13 @@ const FIELD_KEYS = [
   "umsc.contact.expect-line-1",
   "umsc.contact.expect-line-2",
   "umsc.contact.expect-line-3",
-  "umsc.contact.hours",
   // Visit
   "umsc.contact.visit-heading",
   "umsc.contact.visit-body",
   "umsc.contact.visit-link-label",
   "umsc.contact.visit-link-url",
-  // Global — business-first, template-override-second (mirrors umsc-footer.tsx)
-  "umsc.global.customer-service-phone",
+  // Global
   "umsc.global.google-review-url",
-  "umsc.global.instagram-url",
-  "umsc.global.facebook-url",
-  "umsc.global.tiktok-url",
 ];
 
 export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
@@ -45,24 +41,12 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
     | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
 
-  // Business-record-first, field-as-override — same source and rule as
-  // `layout/umsc-footer.tsx`: a non-empty template field overrides the
-  // business record; `||` (not `??`) so an owner-cleared field ("") falls
-  // through to the business record.
-  const socialLinks = business.siteContent?.socialLinks as
-    | { instagram?: string; facebook?: string; tiktok?: string }
-    | undefined;
-  const phone =
-    (f["umsc.global.customer-service-phone"] ?? "").trim() ||
-    (business.phoneNumber ?? "");
-  const instagramUrl =
-    (f["umsc.global.instagram-url"] ?? "").trim() ||
-    (socialLinks?.instagram ?? "");
-  const facebookUrl =
-    (f["umsc.global.facebook-url"] ?? "").trim() ||
-    (socialLinks?.facebook ?? "");
-  const tiktokUrl =
-    (f["umsc.global.tiktok-url"] ?? "").trim() || (socialLinks?.tiktok ?? "");
+  // Settings (phone, hours) and Content → Branding (social links) own this
+  // data; saved values from the retired `umsc.global.*` / `umsc.contact.hours`
+  // fields are read only as a silent fallback — see
+  // `resolveUmscContactDetails`.
+  const { phone, hoursRows, legacyHours, socials } =
+    resolveUmscContactDetails(business);
 
   return (
     <PageTransition>
@@ -99,10 +83,9 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
               },
             ],
             phone,
-            hours: f["umsc.contact.hours"] ?? "",
-            instagramUrl,
-            facebookUrl,
-            tiktokUrl,
+            hoursRows,
+            legacyHours,
+            socials,
             googleReviewUrl: f["umsc.global.google-review-url"] ?? "",
           }}
         />

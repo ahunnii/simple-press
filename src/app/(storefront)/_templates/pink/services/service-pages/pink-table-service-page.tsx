@@ -1,29 +1,66 @@
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-import type { TemplateListRow } from "~/lib/template-fields";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   getRichTextFieldValue,
   isContentEmpty,
+  parseFaqPickerIds,
   parseTemplateListRows,
+  resolveFaqPickerItems,
 } from "~/lib/template-fields";
+import { api } from "~/trpc/server";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 
 import { PinkFactRows } from "../../shared/pink-fact-rows";
 import { PinkPhotoHeader } from "../../shared/pink-photo-header";
-import { resolvePinkTableFields } from "./fields";
+import { DEFAULT_PINK_TABLE_FACT_ROWS, resolvePinkTableFields } from "./fields";
 import { PinkTableBody } from "./pink-table-body";
 
-// `parseTemplateListRows` reads `customFields` directly and ignores a list
-// field's `defaultValue` (list fields bypass `resolveFields` entirely — see
-// field-conventions.md), so the hero fact rows — not hideable — need a real
-// hardcoded fallback or a fresh Service renders an empty panel.
-const DEFAULT_FACT_ROWS: TemplateListRow[] = [
-  {
-    label: "Where",
-    value: "Your space — school, church, library or workplace",
-  },
-  { label: "Group size", value: "10 to 12 at a table" },
-  { label: "Materials", value: "Everything included" },
-  { label: "Notice", value: "Book at least 2 weeks out" },
-];
+/** Matches `maxItems` on the `pink-table.faq` picker field. */
+const FAQ_MAX_ITEMS = 8;
+
+type PinkTableFaqRow = { question: string; answer: string; _id?: string };
+
+/**
+ * The service page's FAQ rows, in priority order:
+ *
+ *   1. questions picked in the `pink-table.faq` Content → FAQ picker,
+ *      resolved against the published FAQ corpus (only fetched when something
+ *      is picked, so a service without FAQs costs no query);
+ *   2. otherwise, `{question, answer}` rows saved before the field became a
+ *      picker (2026-09-26), parsed exactly as before so they keep rendering;
+ *   3. otherwise, nothing — the section hides. Unlike the contact-page
+ *      pickers there is deliberately no "first N published" fallback here.
+ *
+ * Picked ids that no longer resolve (unpublished or deleted) hide the
+ * section rather than falling through to step 2.
+ */
+async function resolvePinkTableFaq(raw: unknown): Promise<PinkTableFaqRow[]> {
+  const pickedIds = parseFaqPickerIds(raw);
+  if (pickedIds) {
+    const published = await api.faq.list().catch(() => []);
+    return resolveFaqPickerItems(pickedIds, published, FAQ_MAX_ITEMS).map(
+      (item) => ({
+        question: item.question,
+        answer: item.answer,
+        _id: item.id,
+      }),
+    );
+  }
+
+  // Legacy rows are objects; a picker value (string ids, possibly all blank)
+  // never is, so blank picker slots can't surface as empty accordion rows.
+  const legacyRows = Array.isArray(raw)
+    ? raw.filter(
+        (row): row is Record<string, unknown> =>
+          row !== null && typeof row === "object" && !Array.isArray(row),
+      )
+    : [];
+  return parseTemplateListRows(legacyRows).map((row) => ({
+    question: typeof row.question === "string" ? row.question : "",
+    answer: typeof row.answer === "string" ? row.answer : "",
+    _id: row._id,
+  }));
+}
 
 /**
  * `pink-table` — the PinkArt service detail template (design.md → "Service
@@ -31,7 +68,7 @@ const DEFAULT_FACT_ROWS: TemplateListRow[] = [
  * `Service.customFields`, edited at `/admin/services/[id]`, so there are no
  * `sectionGroupAttr`/`fieldAttr`/`isSectionVisible` calls in this file.
  */
-export function PinkTableServicePage({
+export async function PinkTableServicePage({
   service,
   items,
   embedsEnabled,
@@ -68,6 +105,18 @@ export function PinkTableServicePage({
     "pink-table.request-fallback-label",
   ]);
 
+  // B2.5: the second quick link hides (never swaps destination) when its
+  // feature is off — the default `/shop` with products off. A blank saved
+  // link still means the field's `/shop` default, as it did before.
+  const { isEnabled } = await getBusinessFlags();
+  const quicklink2Target =
+    (f["pink-table.quicklink-2-href"] ?? "").trim() || "/shop";
+  const quicklink2Flag = navHrefFlag(quicklink2Target);
+  const quicklink2Href =
+    quicklink2Flag === null || isEnabled(quicklink2Flag)
+      ? quicklink2Target
+      : "";
+
   const richTextRaw = getRichTextFieldValue(
     customFields,
     "pink-table.body-richtext",
@@ -77,7 +126,7 @@ export function PinkTableServicePage({
 
   const parsedFactRows = parseTemplateListRows(raw?.["pink-table.fact-rows"]);
   const factRows = (
-    parsedFactRows.length > 0 ? parsedFactRows : DEFAULT_FACT_ROWS
+    parsedFactRows.length > 0 ? parsedFactRows : DEFAULT_PINK_TABLE_FACT_ROWS
   ).map((row) => ({
     label: typeof row.label === "string" ? row.label : "",
     value: typeof row.value === "string" ? row.value : "",
@@ -115,11 +164,7 @@ export function PinkTableServicePage({
     }),
   );
 
-  const faq = parseTemplateListRows(raw?.["pink-table.faq"]).map((row) => ({
-    question: typeof row.question === "string" ? row.question : "",
-    answer: typeof row.answer === "string" ? row.answer : "",
-    _id: row._id,
-  }));
+  const faq = await resolvePinkTableFaq(raw?.["pink-table.faq"]);
 
   return (
     <div className="flex flex-col">
@@ -168,7 +213,7 @@ export function PinkTableServicePage({
         priceCtaLabel={f["pink-table.price-cta-label"] ?? ""}
         quicklink1Label={f["pink-table.quicklink-1-label"] ?? ""}
         quicklink2Label={f["pink-table.quicklink-2-label"] ?? ""}
-        quicklink2Href={f["pink-table.quicklink-2-href"] ?? ""}
+        quicklink2Href={quicklink2Href}
         requestHeading={f["pink-table.request-heading"] ?? ""}
         requestIntro={f["pink-table.request-intro"] ?? ""}
         requestSubmitLabel={f["pink-table.request-submit-label"] ?? ""}

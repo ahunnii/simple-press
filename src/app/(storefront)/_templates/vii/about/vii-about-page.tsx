@@ -1,12 +1,18 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import type { TemplateListRow } from "~/lib/template-fields";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import {
+  getRawCustomFieldString,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
+import { nonBlank } from "../shared/vii-non-blank";
+import { DEFAULT_VII_ABOUT_STEPS, DEFAULT_VII_ABOUT_TEAM } from "./index";
 import { ViiAboutBand } from "./vii-about-band";
 import { ViiAboutHero } from "./vii-about-hero";
 import { ViiAboutMission } from "./vii-about-mission";
@@ -14,75 +20,14 @@ import { ViiAboutSteps } from "./vii-about-steps";
 import { ViiAboutTeam } from "./vii-about-team";
 import { ViiAboutTeamOwner } from "./vii-about-team-owner";
 
-// Built-in example facial steps, used when the owner hasn't configured any.
-const DEFAULT_STEPS: TemplateListRow[] = [
-  {
-    _id: "default-step-1",
-    image: "",
-    title: "Consultation",
-    body: "We begin with a one-on-one skin analysis to understand your goals, concerns, and skin type — so every step that follows is tailored to you.",
-  },
-  {
-    _id: "default-step-2",
-    image: "",
-    title: "Cleanse",
-    body: "A deep double-cleanse lifts away makeup, sunscreen, and the day's buildup, leaving a fresh canvas ready to receive treatment.",
-  },
-  {
-    _id: "default-step-3",
-    image: "",
-    title: "Exfoliate",
-    body: "Gentle enzymatic and physical exfoliation sloughs away dull, dead cells to reveal the brighter, smoother skin underneath.",
-  },
-  {
-    _id: "default-step-4",
-    image: "",
-    title: "Steam & Extract",
-    body: "Warm steam softens the skin and opens the pores for careful, hygienic extractions that clear congestion without trauma.",
-  },
-  {
-    _id: "default-step-5",
-    image: "",
-    title: "Mask & Massage",
-    body: "A targeted treatment mask paired with a relaxing facial massage drives nutrients deep while easing tension and boosting circulation.",
-  },
-  {
-    _id: "default-step-6",
-    image: "",
-    title: "Hydrate & Protect",
-    body: "We seal everything in with serums, moisturizer, and SPF — locking in hydration and protecting your renewed glow.",
-  },
-];
-
-// Built-in example team, used when the owner hasn't configured any members.
-const DEFAULT_TEAM: TemplateListRow[] = [
-  {
-    _id: "default-member-1",
-    image: "",
-    name: "Maya Brooks",
-    role: "Licensed Esthetician",
-    bio: "A corrective-skincare specialist with a gentle touch and a love for teaching clients the why behind every product.",
-  },
-  {
-    _id: "default-member-2",
-    image: "",
-    name: "Devon Carter",
-    role: "Esthetician & Waxing Specialist",
-    bio: "Known for fast, painless service and a calm, easygoing chair-side manner that puts first-timers at ease.",
-  },
-  {
-    _id: "default-member-3",
-    image: "",
-    name: "Priya Nair",
-    role: "Skin Therapist",
-    bio: "Brings a holistic, results-driven approach and a deep knowledge of ingredients to every custom facial.",
-  },
-];
-
-export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
+export async function ViiAboutPage({
+  business,
+}: DefaultAboutPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
+
+  const { isEnabled } = await getBusinessFlags();
 
   const f = resolveFields(customFields, [
     // Hero
@@ -121,17 +66,34 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
     "vii.about.cta-body",
     "vii.about.cta-button-label",
     "vii.about.cta-button-link",
-    "vii.about.cta-phone",
-    "vii.about.cta-email",
     "vii.about.cta-show-phone",
     "vii.about.cta-show-email",
   ]);
 
   const parsedSteps = parseTemplateListRows(customFields?.["vii.about.steps"]);
-  const steps = parsedSteps.length > 0 ? parsedSteps : DEFAULT_STEPS;
+  const steps = parsedSteps.length > 0 ? parsedSteps : DEFAULT_VII_ABOUT_STEPS;
 
   const parsedTeam = parseTemplateListRows(customFields?.["vii.about.team"]);
-  const team = parsedTeam.length > 0 ? parsedTeam : DEFAULT_TEAM;
+  const team = parsedTeam.length > 0 ? parsedTeam : DEFAULT_VII_ABOUT_TEAM;
+
+  // CTA phone/email: Settings → General wins; else the legacy per-template
+  // fields (retired 2026-09-25, a read-only fallback — never written or
+  // cleared from here). The show-phone/show-email toggles still apply.
+  const ctaPhone =
+    nonBlank(business.phoneNumber) ??
+    nonBlank(getRawCustomFieldString(customFields, "vii.about.cta-phone")) ??
+    "";
+  const ctaEmail =
+    nonBlank(business.supportEmail) ??
+    nonBlank(getRawCustomFieldString(customFields, "vii.about.cta-email")) ??
+    "";
+
+  // B2.5: hide the closing CTA button when its href names a flag that's
+  // off — never swap in another destination.
+  const ctaButtonLink = f["vii.about.cta-button-link"] ?? "";
+  const ctaButtonLinkFlag = navHrefFlag(ctaButtonLink);
+  const ctaButtonAllowed =
+    ctaButtonLinkFlag === null || isEnabled(ctaButtonLinkFlag);
 
   return (
     <PageTransition>
@@ -143,46 +105,56 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
       />
 
       {/* 2. Mission */}
-      <ViiAboutMission
-        overline={f["vii.about.mission-overline"] ?? ""}
-        heading={f["vii.about.mission-heading"] ?? ""}
-        headingAccent={f["vii.about.mission-heading-accent"] ?? ""}
-        body={f["vii.about.mission-body"] ?? ""}
-      />
+      {isSectionVisible(customFields, "vii", "about.mission") && (
+        <ViiAboutMission
+          overline={f["vii.about.mission-overline"] ?? ""}
+          heading={f["vii.about.mission-heading"] ?? ""}
+          headingAccent={f["vii.about.mission-heading-accent"] ?? ""}
+          body={f["vii.about.mission-body"] ?? ""}
+        />
+      )}
 
       {/* 3. Six-step facial ritual */}
-      <ViiAboutSteps
-        overline={f["vii.about.steps-overline"] ?? ""}
-        heading={f["vii.about.steps-heading"] ?? ""}
-        headingAccent={f["vii.about.steps-heading-accent"] ?? ""}
-        intro={f["vii.about.steps-intro"] ?? ""}
-        steps={steps}
-      />
+      {isSectionVisible(customFields, "vii", "about.steps") && (
+        <ViiAboutSteps
+          overline={f["vii.about.steps-overline"] ?? ""}
+          heading={f["vii.about.steps-heading"] ?? ""}
+          headingAccent={f["vii.about.steps-heading-accent"] ?? ""}
+          intro={f["vii.about.steps-intro"] ?? ""}
+          steps={steps}
+        />
+      )}
 
       {/* 4. Atmospheric brand-statement band */}
-      <ViiAboutBand
-        bandImage={f["vii.about.band-image"] ?? undefined}
-        label={f["vii.about.band-label"] ?? ""}
-        statement={f["vii.about.band-statement"] ?? ""}
-      />
+      {isSectionVisible(customFields, "vii", "about.band") && (
+        <ViiAboutBand
+          bandImage={f["vii.about.band-image"] ?? undefined}
+          label={f["vii.about.band-label"] ?? ""}
+          statement={f["vii.about.band-statement"] ?? ""}
+        />
+      )}
 
       {/* 5. Meet the team — owner spotlight */}
-      <ViiAboutTeamOwner
-        overline={f["vii.about.owner-overline"] ?? ""}
-        heading={f["vii.about.owner-heading"] ?? ""}
-        headingAccent={f["vii.about.owner-heading-accent"] ?? ""}
-        role={f["vii.about.owner-role"] ?? ""}
-        body={f["vii.about.owner-body"] ?? ""}
-        ownerImage={f["vii.about.owner-image"] ?? undefined}
-      />
+      {isSectionVisible(customFields, "vii", "about.owner") && (
+        <ViiAboutTeamOwner
+          overline={f["vii.about.owner-overline"] ?? ""}
+          heading={f["vii.about.owner-heading"] ?? ""}
+          headingAccent={f["vii.about.owner-heading-accent"] ?? ""}
+          role={f["vii.about.owner-role"] ?? ""}
+          body={f["vii.about.owner-body"] ?? ""}
+          ownerImage={f["vii.about.owner-image"] ?? undefined}
+        />
+      )}
 
       {/* 6. Meet the team — grid */}
-      <ViiAboutTeam
-        overline={f["vii.about.team-overline"] ?? ""}
-        heading={f["vii.about.team-heading"] ?? ""}
-        intro={f["vii.about.team-intro"] ?? ""}
-        members={team}
-      />
+      {isSectionVisible(customFields, "vii", "about.team") && (
+        <ViiAboutTeam
+          overline={f["vii.about.team-overline"] ?? ""}
+          heading={f["vii.about.team-heading"] ?? ""}
+          intro={f["vii.about.team-intro"] ?? ""}
+          members={team}
+        />
+      )}
 
       {/* 7. Closing contact CTA */}
       {isSectionVisible(customFields, "vii", "about.cta") && (
@@ -191,10 +163,12 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
           heading={f["vii.about.cta-heading"] ?? ""}
           subheading={f["vii.about.cta-subheading"] ?? ""}
           body={f["vii.about.cta-body"] ?? ""}
-          buttonLabel={f["vii.about.cta-button-label"] ?? ""}
-          buttonHref={f["vii.about.cta-button-link"] ?? ""}
-          phone={f["vii.about.cta-phone"] ?? ""}
-          email={f["vii.about.cta-email"] ?? ""}
+          buttonLabel={
+            ctaButtonAllowed ? f["vii.about.cta-button-label"] ?? "" : ""
+          }
+          buttonHref={ctaButtonLink}
+          phone={ctaPhone}
+          email={ctaEmail}
           showPhone={f["vii.about.cta-show-phone"] !== "false"}
           showEmail={f["vii.about.cta-show-email"] !== "false"}
           sectionAttrs={sectionGroupAttr("about", "cta")}

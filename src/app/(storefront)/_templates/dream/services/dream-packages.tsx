@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamRevealGroup } from "../shared/dream-reveal";
@@ -34,11 +34,20 @@ export function toPackageRow(row: TemplateListRow): DreamPackageRow {
   };
 }
 
-function PackageCard({ pkg, index }: { pkg: DreamPackageRow; index: number }) {
+function PackageCard({
+  pkg,
+  index,
+  fieldKey,
+}: {
+  pkg: DreamPackageRow;
+  index: number;
+  fieldKey?: string;
+}) {
   return (
     <div
       className="dream-card dream-reveal-item flex h-full flex-col gap-4"
       style={{ "--i": Math.min(index, 7) } as CSSProperties}
+      {...(fieldKey ? listItemAttr(fieldKey, index) : {})}
     >
       <div className="flex flex-col gap-1.5">
         <DreamHeading as="h3">{pkg.name}</DreamHeading>
@@ -76,6 +85,8 @@ type DreamPackagesProps = {
   heading: string;
   lede: string;
   packages: DreamPackageRow[];
+  /** `list` field the cards come from — tags each card for the editor preview. */
+  packagesFieldKey?: string;
   headingFieldKey?: string;
   ledeFieldKey?: string;
 };
@@ -91,6 +102,7 @@ export function DreamPackages({
   heading,
   lede,
   packages,
+  packagesFieldKey,
   headingFieldKey,
   ledeFieldKey,
 }: DreamPackagesProps) {
@@ -126,7 +138,12 @@ export function DreamPackages({
 
       <DreamRevealGroup className="dream-packages-grid" threshold={0.05}>
         {packages.map((pkg, i) => (
-          <PackageCard key={pkg._id ?? pkg.name} pkg={pkg} index={i} />
+          <PackageCard
+            key={pkg._id ?? `${pkg.name}-${i}`}
+            pkg={pkg}
+            index={i}
+            fieldKey={packagesFieldKey}
+          />
         ))}
       </DreamRevealGroup>
     </div>

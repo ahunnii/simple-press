@@ -3,14 +3,40 @@ import Link from "next/link";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+
+import { resolveFields } from "..";
+import {
+  BLOG_POST_EYEBROW_DEFAULT,
+  BLOG_POST_MORE_HEADING_DEFAULT,
+} from "./index";
+
+// `blog/[slug]/page.tsx` already passes `customFields` to every template's
+// `BlogPostPage` (alongside `page`/`relatedPosts`) — it's just not on
+// `DefaultBlogPostPageTemplateProps`. Accept it as an additional optional
+// prop, matching `DefaultBlogPage`'s own `Props` intersection.
+type Props = DefaultBlogPostPageTemplateProps & {
+  customFields?: Record<string, string>;
+};
 
 export function DefaultBlogPostPage({
   page,
   relatedPosts,
-}: DefaultBlogPostPageTemplateProps) {
+  customFields,
+}: Props) {
   const others = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
+
+  const f = resolveFields(customFields, [
+    "default.blog.post-eyebrow",
+    "default.blog.post-more-heading",
+  ]);
+  const postEyebrow =
+    (f["default.blog.post-eyebrow"] ?? "").trim() || BLOG_POST_EYEBROW_DEFAULT;
+  const postMoreHeading =
+    (f["default.blog.post-more-heading"] ?? "").trim() ||
+    BLOG_POST_MORE_HEADING_DEFAULT;
 
   return (
     <div>
@@ -83,15 +109,24 @@ export function DefaultBlogPostPage({
       </article>
 
       {/* Back link + related posts */}
-      <div className="border-t border-[#e8e8e8] px-6 pt-16 pb-24 lg:px-8">
+      <div
+        {...sectionGroupAttr("blog", "post")}
+        className="border-t border-[#e8e8e8] px-6 pt-16 pb-24 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                Continue reading
+              <p
+                {...fieldAttr("default.blog.post-eyebrow")}
+                className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+              >
+                {postEyebrow}
               </p>
-              <h2 className="font-serif text-3xl font-medium tracking-tight">
-                More articles
+              <h2
+                {...fieldAttr("default.blog.post-more-heading")}
+                className="font-serif text-3xl font-medium tracking-tight"
+              >
+                {postMoreHeading}
               </h2>
             </div>
             <Link

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -14,7 +15,17 @@ import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-export function NoiseContactForm() {
+type NoiseContactFormProps = {
+  /** `noise.contact.form-success-heading`. */
+  successHeading: string;
+  /** `noise.contact.form-success-body`; blank hides the line. */
+  successBody: string;
+};
+
+export function NoiseContactForm({
+  successHeading,
+  successBody,
+}: NoiseContactFormProps) {
   const {
     form,
     messageLength,
@@ -51,6 +62,7 @@ export function NoiseContactForm() {
         role="status"
         className="border-foreground flex flex-col items-center justify-center gap-6 border py-16 text-center"
         style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
+        {...sectionGroupAttr("contact", "form")}
       >
         <div
           aria-hidden="true"
@@ -65,15 +77,19 @@ export function NoiseContactForm() {
             tabIndex={-1}
             className="font-serif leading-none italic"
             style={{ fontSize: "28px", letterSpacing: "-0.01em" }}
+            {...fieldAttr("noise.contact.form-success-heading")}
           >
-            Message sent!
+            {successHeading}
           </h2>
-          <p
-            className="mt-2 font-mono text-[10px] tracking-[0.2em] uppercase"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            We&apos;ll reply, usually same day.
-          </p>
+          {successBody ? (
+            <p
+              className="mt-2 font-mono text-[10px] tracking-[0.2em] uppercase"
+              style={{ color: "var(--vn-steel-mist)" }}
+              {...fieldAttr("noise.contact.form-success-body")}
+            >
+              {successBody}
+            </p>
+          ) : null}
         </div>
         <button
           type="button"
@@ -88,7 +104,7 @@ export function NoiseContactForm() {
   }
 
   return (
-    <div className="vn-contact-form">
+    <div className="vn-contact-form" {...sectionGroupAttr("contact", "form")}>
       {/* Form header */}
       <div className="border-foreground mb-8 flex items-end justify-between border-b pb-5">
         <h2
@@ -136,7 +152,7 @@ export function NoiseContactForm() {
               label="Email"
               labelClassName="vn-field-label"
               type="email"
-              placeholder="frequency@email.com"
+              placeholder="you@example.com"
               required
               className="flex flex-col gap-0"
             />

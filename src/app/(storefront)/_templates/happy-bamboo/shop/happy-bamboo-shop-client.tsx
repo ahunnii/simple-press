@@ -8,7 +8,6 @@ import type { RouterOutputs } from "~/trpc/react";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getEffectivePrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -20,6 +19,7 @@ import {
 } from "~/components/ui/select";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
+import { HappyBambooPageShelf } from "../shared/happy-bamboo-page-shelf";
 import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
 
 type Product = NonNullable<
@@ -31,6 +31,7 @@ type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc";
 interface Props {
   products: Product[];
   saleBadgeFormat: string;
+  shopSmallLabel: string;
   shopHeading: string;
   shopIntro: string;
 }
@@ -38,6 +39,7 @@ interface Props {
 export function HappyBambooShopClient({
   products,
   saleBadgeFormat,
+  shopSmallLabel,
   shopHeading,
   shopIntro,
 }: Props) {
@@ -107,24 +109,21 @@ export function HappyBambooShopClient({
 
   return (
     <PageTransition>
-      <section
-        className="mx-auto max-w-7xl py-16 md:py-24"
-        {...sectionGroupAttr("shop", "listing")}
-      >
-        <FadeIn className="mx-auto max-w-3xl text-center">
-          <Badge className="mb-4">Eco-Friendly Products</Badge>
-          <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
-            {shopHeading}
-          </h1>
-          {shopIntro && (
-            <p className="text-muted-foreground text-lg">{shopIntro}</p>
-          )}
-        </FadeIn>
+      <HappyBambooPageShelf
+        title={shopHeading}
+        titleFieldKey="happy-bamboo.shop-listing-heading"
+        smallLabel={shopSmallLabel}
+        smallLabelFieldKey="happy-bamboo.shop-listing-small-label"
+        subtitle={shopIntro}
+        subtitleFieldKey="happy-bamboo.shop-listing-intro"
+        sectionAttrs={sectionGroupAttr("shop", "listing")}
+      />
 
+      <section className="container mx-auto px-4 py-16 md:py-24">
         {products.length > 0 && (
           <>
             {/* Controls */}
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative w-full sm:max-w-xs">
                 <Search
                   aria-hidden="true"

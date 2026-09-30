@@ -18,7 +18,9 @@ import { describe, expect, it } from "vitest";
  * per-file module isolation keeps other test files from pre-evaluating the
  * registry and masking the bug.
  */
-describe("section-links module graph", () => {
+// Each test cold-imports every template's module graph, which can exceed
+// vitest's 5s default when the full suite runs on a loaded machine.
+describe("section-links module graph", { timeout: 30_000 }, () => {
   it("evaluates the registry after a template module without a TDZ crash", async () => {
     await import("~/app/(storefront)/_templates/default/sections");
     const { TEMPLATE_SECTIONS } = await import("~/lib/template-sections");

@@ -1,22 +1,33 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { LogOut, Settings } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
-import {
-  AUTH_BASE_PATHS,
-  AUTH_VIEW_PATHS,
-  SETTINGS_VIEW_PATHS,
-} from "~/lib/auth-paths";
+import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { UserView } from "~/components/auth/user/user-view";
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
+
+import { OLIVE_QUICK_ACCOUNT_KEYS } from "./olive-nav";
 
 type OliveNavOverlayAccountProps = {
   initialSession?: Session | null;
   accountsEnabled: boolean;
+  /** Business flag check — gates the account links (Orders needs `orders`). */
+  isEnabled: (flag: string) => boolean;
   onClose: () => void;
+};
+
+/** Leading icons, keyed by `getAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" aria-hidden="true" />,
+  settings: (
+    <Settings className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+  ),
+  admin: <IconLayoutDashboard className="h-4 w-4" aria-hidden="true" />,
 };
 
 /**
@@ -26,10 +37,15 @@ type OliveNavOverlayAccountProps = {
  * at z-50, which lands underneath the opaque z-60 overlay — the menu opened but
  * was invisible. Everything here is a plain anchor, so it is also reachable by
  * the overlay's own Tab focus trap (which only walks the dialog subtree).
+ *
+ * The links are the quick-access subset (`OLIVE_QUICK_ACCOUNT_KEYS`: Orders,
+ * Settings, Admin) of the flag-gated `getAccountNavLinks` list — never a
+ * hand-written list — followed by the sign-out row.
  */
 export function OliveNavOverlayAccount({
   initialSession,
   accountsEnabled,
+  isEnabled,
   onClose,
 }: OliveNavOverlayAccountProps) {
   const { data: session, isPending } = useHydratedSession(
@@ -77,46 +93,29 @@ export function OliveNavOverlayAccount({
     );
   }
 
+  const accountLinks = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  }).filter((link) => OLIVE_QUICK_ACCOUNT_KEYS.has(link.key));
+
   return (
     <div className="olive-nav-overlay-account">
       {/* UserView renders its own avatar — don't add a second one. */}
       <UserView className="olive-nav-overlay-account-user" />
 
       <ul className="olive-nav-overlay-account-list">
-        <li>
-          <Link
-            href="/account/orders"
-            onClick={onClose}
-            className="olive-nav-overlay-account-link"
-          >
-            <IconPackage className="h-4 w-4" aria-hidden="true" />
-            Orders
-          </Link>
-        </li>
-
-        {showAdminLink ? (
-          <li>
+        {accountLinks.map((link) => (
+          <li key={link.key}>
             <Link
-              href="/admin"
+              href={link.href}
               onClick={onClose}
               className="olive-nav-overlay-account-link"
             >
-              <IconLayoutDashboard className="h-4 w-4" aria-hidden="true" />
-              Admin
+              {ACCOUNT_LINK_ICONS[link.key]}
+              {link.label}
             </Link>
           </li>
-        ) : null}
-
-        <li>
-          <Link
-            href={`${AUTH_BASE_PATHS.settings}/${SETTINGS_VIEW_PATHS.account}`}
-            onClick={onClose}
-            className="olive-nav-overlay-account-link"
-          >
-            <Settings className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-            Account settings
-          </Link>
-        </li>
+        ))}
 
         <li>
           <Link

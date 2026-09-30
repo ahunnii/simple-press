@@ -22,6 +22,7 @@ export async function UmscCartPage({ business }: DefaultCartPageTemplateProps) {
     "umsc.cart.heading",
     "umsc.cart.empty-heading",
     "umsc.cart.empty-body",
+    "umsc.cart.empty-shop-all-label",
     "umsc.cart.continue-shopping",
     "umsc.cart.checkout-cta",
   ]);
@@ -55,6 +56,7 @@ export async function UmscCartPage({ business }: DefaultCartPageTemplateProps) {
           <UmscCartContents
             emptyHeading={f["umsc.cart.empty-heading"] ?? ""}
             emptyBody={f["umsc.cart.empty-body"] ?? ""}
+            emptyShopAllLabel={f["umsc.cart.empty-shop-all-label"] ?? ""}
             continueShoppingLabel={f["umsc.cart.continue-shopping"] ?? ""}
             checkoutCta={f["umsc.cart.checkout-cta"] ?? ""}
             doorRows={doorRows}

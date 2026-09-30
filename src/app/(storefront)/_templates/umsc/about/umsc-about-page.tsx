@@ -1,5 +1,5 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import type { TemplateListRow } from "~/lib/template-fields";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -9,31 +9,16 @@ import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { UmscPageHero } from "../shared/umsc-page-hero";
+import { UMSC_ABOUT_DEFAULT_VALUES } from ".";
 import { UmscAboutCommunity } from "./umsc-about-community";
 import { UmscAboutCta } from "./umsc-about-cta";
 import { UmscAboutMaker } from "./umsc-about-maker";
 import { UmscAboutMission } from "./umsc-about-mission";
 import { UmscAboutValues } from "./umsc-about-values";
 
-// Built-in example values, used when the owner hasn't configured any —
-// her verbatim values from the current site (design.md "must-keep phrases").
-const DEFAULT_VALUES: TemplateListRow[] = [
-  {
-    _id: "default-value-1",
-    title: "Wellness & Relief",
-    body: "Unique Monique prioritizes self-care by fostering a healthier and cleaner environment. Our products are specifically designed to soothe common respiratory issues, such as asthma and allergies, through the use of natural, pollution-free ingredients. Our triple-scented candles, wax melts, and laundry pods create soothing spaces that enhance both physical comfort and mental wellness.",
-  },
-  {
-    _id: "default-value-2",
-    title: "Eco-Conscious & Everyday",
-    body: "Our commitment to sustainability ensures that our products benefit not only your health but also the environment. Unique Monique uses naturally sourced ingredients and sustainable packaging, allowing you to enjoy effective home-care solutions without environmental guilt. Our antibacterial laundry pods and bleach tablets are user-friendly and eco-friendly, offering busy families a cleaner, greener way to manage household needs without compromise.",
-  },
-  {
-    _id: "default-value-3",
-    title: "Community-Driven & Family-Focused",
-    body: "As a proud Black woman-owned business, Unique Monique is deeply rooted in community support. Our product range caters to diverse needs — from calming candles for relaxation to convenient, chemical-free cleaning solutions that are gentle on your skin and safe for your airways. We promise quality you can trust for yourself and your family.",
-  },
-];
+// Re-exported so the pre-migration import path (and the snapshot test) keep
+// working — the rows themselves now live in `./index.tsx`'s `defaultRows`.
+export { UMSC_ABOUT_DEFAULT_VALUES };
 
 const FIELD_KEYS = [
   "umsc.about.hero-heading",
@@ -71,7 +56,7 @@ export async function UmscAboutPage({
   const parsedValues = parseTemplateListRows(
     customFields?.["umsc.about.values"],
   );
-  const values = parsedValues.length > 0 ? parsedValues : DEFAULT_VALUES;
+  const values = parsedValues.length > 0 ? parsedValues : UMSC_ABOUT_DEFAULT_VALUES;
 
   const galleryId = f["umsc.about.community-gallery"]?.trim() ?? "";
   // GalleryFieldSelect stores the literal string "none" when the owner
@@ -85,6 +70,17 @@ export async function UmscAboutPage({
           include: { images: { orderBy: { sortOrder: "asc" } } },
         })
       : null;
+
+  // B2.5: a field-driven CTA whose destination is a feature that is off
+  // (e.g. /shop with products off) hides — never swaps destinations. The
+  // fallbacks mirror the render components' `url || "/shop"` defaults.
+  const ctaAllowed = (url: string, fallback: string) => {
+    const flag = navHrefFlag(url || fallback);
+    return flag === null || isEnabled(flag);
+  };
+  const makerPrimaryUrl = f["umsc.about.maker-primary-url"] ?? "";
+  const makerSecondaryUrl = f["umsc.about.maker-secondary-url"] ?? "";
+  const ctaUrl = f["umsc.about.cta-button-url"] ?? "";
 
   return (
     <PageTransition>
@@ -105,10 +101,18 @@ export async function UmscAboutPage({
         body3={f["umsc.about.maker-body-3"] ?? ""}
         image={f["umsc.about.maker-image"] ?? undefined}
         imageAlt={f["umsc.about.maker-image-alt"] ?? ""}
-        primaryLabel={f["umsc.about.maker-primary-label"] ?? ""}
-        primaryUrl={f["umsc.about.maker-primary-url"] ?? ""}
-        secondaryLabel={f["umsc.about.maker-secondary-label"] ?? ""}
-        secondaryUrl={f["umsc.about.maker-secondary-url"] ?? ""}
+        primaryLabel={
+          ctaAllowed(makerPrimaryUrl, "/shop")
+            ? (f["umsc.about.maker-primary-label"] ?? "")
+            : ""
+        }
+        primaryUrl={makerPrimaryUrl}
+        secondaryLabel={
+          ctaAllowed(makerSecondaryUrl, "/contact")
+            ? (f["umsc.about.maker-secondary-label"] ?? "")
+            : ""
+        }
+        secondaryUrl={makerSecondaryUrl}
       />
 
       <UmscAboutMission quote={f["umsc.about.mission-quote"] ?? ""} />
@@ -130,8 +134,13 @@ export async function UmscAboutPage({
       {isSectionVisible(customFields, "umsc", "about.cta") && (
         <UmscAboutCta
           heading={f["umsc.about.cta-heading"] ?? ""}
-          buttonLabel={f["umsc.about.cta-button-label"] ?? ""}
-          buttonUrl={f["umsc.about.cta-button-url"] ?? ""}
+          buttonLabel={
+            ctaAllowed(ctaUrl, "/shop")
+              ? (f["umsc.about.cta-button-label"] ?? "")
+              : ""
+          }
+          buttonUrl={ctaUrl}
+          businessName={business.name ?? ""}
         />
       )}
     </PageTransition>

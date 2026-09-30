@@ -27,18 +27,31 @@ type Props = {
   formHeadingFieldKey: string;
   formBody: string;
   formBodyFieldKey: string;
+  successHeading: string;
+  successHeadingFieldKey: string;
+  successBody: string;
+  successBodyFieldKey: string;
   visitHeading: string;
   visitHeadingFieldKey: string;
-  visitBody: string;
-  visitBodyFieldKey: string;
+  /** Settings → General → Business address (display line). */
+  address: string;
+  visitNotes: string;
+  visitNotesFieldKey: string;
+  /** Settings → General → Contact Details. */
+  phone: string;
+  email: string;
   hoursHeading: string;
   hoursHeadingFieldKey: string;
-  hoursBody: string;
-  hoursBodyFieldKey: string;
+  /** Formatted Settings → Business Hours rows. */
+  hoursRows: { label: string; value: string }[];
+  /** Legacy free-text hours, used only when `hoursRows` is empty. */
+  legacyHours: string;
 };
 
 /**
- * contact.main — the form card (left) and the visit/hours info card (right).
+ * contact.main — the form card (left) and the info card (right). The info
+ * card's address, phone, email and hours all come from Settings; only the
+ * small headings and the optional visiting notes are template fields.
  * Both live in one client component because the form's success state and the
  * two-column grid need to be decided together at render time.
  *
@@ -52,14 +65,21 @@ export function OliveContactMain({
   formHeadingFieldKey,
   formBody,
   formBodyFieldKey,
+  successHeading,
+  successHeadingFieldKey,
+  successBody,
+  successBodyFieldKey,
   visitHeading,
   visitHeadingFieldKey,
-  visitBody,
-  visitBodyFieldKey,
+  address,
+  visitNotes,
+  visitNotesFieldKey,
+  phone,
+  email,
   hoursHeading,
   hoursHeadingFieldKey,
-  hoursBody,
-  hoursBodyFieldKey,
+  hoursRows,
+  legacyHours,
 }: Props) {
   const {
     form,
@@ -89,9 +109,11 @@ export function OliveContactMain({
   const { isEnabled } = useStorefrontFlags();
   const contactEnabled = isEnabled("contactForm");
 
-  const showVisit = visitBody.trim().length > 0;
-  const showHours = hoursBody.trim().length > 0;
-  const showInfo = showVisit || showHours;
+  const notes = visitNotes.trim();
+  const showVisit = address.length > 0 || notes.length > 0;
+  const showHours = hoursRows.length > 0 || legacyHours.length > 0;
+  const showInfo =
+    showVisit || phone.length > 0 || email.length > 0 || showHours;
 
   if (!contactEnabled && !showInfo) return null;
 
@@ -126,12 +148,22 @@ export function OliveContactMain({
                 <span aria-hidden="true" style={{ color: "var(--olive-leaf)" }}>
                   <OliveLeafMark size={28} />
                 </span>
-                <h2 ref={successHeadingRef} tabIndex={-1} className="olive-h2">
-                  Message sent
+                <h2
+                  ref={successHeadingRef}
+                  tabIndex={-1}
+                  className="olive-h2"
+                  {...fieldAttr(successHeadingFieldKey)}
+                >
+                  {successHeading}
                 </h2>
-                <p className="olive-caption max-w-[40ch]">
-                  We read every note and write back within a day or two.
-                </p>
+                {successBody ? (
+                  <p
+                    className="olive-caption max-w-[40ch]"
+                    {...fieldAttr(successBodyFieldKey)}
+                  >
+                    {successBody}
+                  </p>
+                ) : null}
                 <OliveButton variant="secondary" onClick={resetSuccess}>
                   Send another
                 </OliveButton>
@@ -262,13 +294,54 @@ export function OliveContactMain({
                 <p className="olive-label" {...fieldAttr(visitHeadingFieldKey)}>
                   {visitHeading}
                 </p>
-                <p
-                  className="mt-2 text-[0.9375rem] leading-relaxed whitespace-pre-line"
+                {address ? (
+                  <p
+                    className="mt-2 text-[0.9375rem] leading-relaxed"
+                    style={{ color: "var(--olive-ink)" }}
+                  >
+                    {address}
+                  </p>
+                ) : null}
+                {notes ? (
+                  <p
+                    className={cn(
+                      "text-[0.9375rem] leading-relaxed whitespace-pre-line",
+                      address ? "mt-1" : "mt-2",
+                    )}
+                    style={{
+                      color: address
+                        ? "var(--olive-ink-soft)"
+                        : "var(--olive-ink)",
+                    }}
+                    {...fieldAttr(visitNotesFieldKey)}
+                  >
+                    {notes}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            {phone ? (
+              <div>
+                <p className="olive-label">Phone</p>
+                <a
+                  href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+                  className="mt-2 inline-block text-[0.9375rem] leading-relaxed underline-offset-4 hover:underline"
                   style={{ color: "var(--olive-ink)" }}
-                  {...fieldAttr(visitBodyFieldKey)}
                 >
-                  {visitBody}
-                </p>
+                  {phone}
+                </a>
+              </div>
+            ) : null}
+            {email ? (
+              <div>
+                <p className="olive-label">Email</p>
+                <a
+                  href={`mailto:${email}`}
+                  className="mt-2 inline-block text-[0.9375rem] leading-relaxed break-all underline-offset-4 hover:underline"
+                  style={{ color: "var(--olive-ink)" }}
+                >
+                  {email}
+                </a>
               </div>
             ) : null}
             {showHours ? (
@@ -276,13 +349,31 @@ export function OliveContactMain({
                 <p className="olive-label" {...fieldAttr(hoursHeadingFieldKey)}>
                   {hoursHeading}
                 </p>
-                <p
-                  className="mt-2 text-[0.9375rem] leading-relaxed whitespace-pre-line"
-                  style={{ color: "var(--olive-ink)" }}
-                  {...fieldAttr(hoursBodyFieldKey)}
-                >
-                  {hoursBody}
-                </p>
+                {hoursRows.length > 0 ? (
+                  <dl
+                    className="mt-2 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-[0.9375rem] leading-relaxed"
+                    style={{ color: "var(--olive-ink)" }}
+                  >
+                    {hoursRows.map((row) => (
+                      <div key={row.label} className="contents">
+                        <dt>{row.label}</dt>
+                        <dd
+                          className="m-0"
+                          style={{ color: "var(--olive-ink-soft)" }}
+                        >
+                          {row.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p
+                    className="mt-2 text-[0.9375rem] leading-relaxed whitespace-pre-line"
+                    style={{ color: "var(--olive-ink)" }}
+                  >
+                    {legacyHours}
+                  </p>
+                )}
               </div>
             ) : null}
           </OliveReveal>

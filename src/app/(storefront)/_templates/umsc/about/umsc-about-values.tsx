@@ -1,5 +1,5 @@
 import type { TemplateListRow } from "~/lib/template-fields";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { UmscHeading } from "../shared/umsc-heading";
 import { UmscRevealGroup } from "../shared/umsc-reveal";
@@ -41,6 +41,7 @@ export function UmscAboutValues({ heading, values }: Props) {
               key={value._id ?? `${title}-${i}`}
               className="umsc-reveal-item flex flex-col gap-3 px-0 py-8 sm:px-10 sm:py-0 first:sm:pl-0 last:sm:pr-0"
               style={{ "--i": Math.min(i, 6) } as React.CSSProperties}
+              {...listItemAttr("umsc.about.values", i)}
             >
               <h3 className="umsc-serif m-0 text-[22px] leading-[1.15] text-[var(--umsc-ink)]">
                 {title}

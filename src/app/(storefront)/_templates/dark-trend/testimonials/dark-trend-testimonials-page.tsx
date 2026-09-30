@@ -1,30 +1,67 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { api } from "~/trpc/server";
 
+import { resolveFields } from "..";
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export async function DarkTrendTestimonialsPage({
-  business: _business,
+  business,
 }: DefaultTestimonialsPageTemplateProps) {
   const testimonials = await api.testimonial.list({ publicOnly: true });
 
+  const customFields = business.siteContent?.customFields;
+
+  const f = resolveFields(customFields, [
+    "dark-trend.testimonials.listing-heading",
+    "dark-trend.testimonials.listing-intro",
+    "dark-trend.testimonials.listing-empty",
+    "dark-trend.testimonials.listing-back-label",
+    "dark-trend.testimonials.share-heading",
+    "dark-trend.testimonials.share-body",
+    "dark-trend.testimonials.share-button",
+  ]);
+
+  const heading = f["dark-trend.testimonials.listing-heading"] ?? "";
+  const intro = f["dark-trend.testimonials.listing-intro"] ?? "";
+  const emptyText = f["dark-trend.testimonials.listing-empty"] ?? "";
+  const backLabel = f["dark-trend.testimonials.listing-back-label"] ?? "";
+  const shareHeading = f["dark-trend.testimonials.share-heading"] ?? "";
+  const shareBody = (f["dark-trend.testimonials.share-body"] ?? "").trim();
+  const shareButton = (f["dark-trend.testimonials.share-button"] ?? "").trim();
+
+  const shareVisible = isSectionVisible(
+    customFields,
+    "dark-trend",
+    "testimonials.share",
+  );
+
   return (
     <DarkTrendGeneralLayout
-      title="Testimonials"
-      excerpt="What our customers say"
+      title={heading}
+      titleFieldKey="dark-trend.testimonials.listing-heading"
+      excerpt={intro || undefined}
+      excerptFieldKey="dark-trend.testimonials.listing-intro"
+      sectionAttrs={sectionGroupAttr("testimonials", "listing")}
     >
       {testimonials.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-lg text-white/60">
-            No testimonials yet. Check back soon!
+          <p
+            {...fieldAttr("dark-trend.testimonials.listing-empty")}
+            className="text-lg text-white/60"
+          >
+            {emptyText}
           </p>
           <Link
             href="/"
             className="mt-6 inline-block font-semibold text-purple-400 hover:text-purple-300"
           >
-            Back to home
+            <span {...fieldAttr("dark-trend.testimonials.listing-back-label")}>
+              {backLabel}
+            </span>
           </Link>
         </div>
       ) : (
@@ -72,20 +109,39 @@ export async function DarkTrendTestimonialsPage({
               </article>
             ))}
           </div>
-          <div className="mt-12 rounded-xl border border-white/10 bg-[#1F1F1F] px-8 py-12 text-center">
-            <h2 className="text-xl font-bold text-white">
-              Share Your Experience
-            </h2>
-            <p className="mt-2 text-white/60">
-              Loved shopping with us? We&apos;d love to hear from you.
-            </p>
-            <Link
-              href="/testimonials/submit"
-              className="mt-6 inline-block rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          {shareVisible ? (
+            <div
+              {...sectionGroupAttr("testimonials", "share")}
+              className="mt-12 rounded-xl border border-white/10 bg-[#1F1F1F] px-8 py-12 text-center"
             >
-              Write a Testimonial
-            </Link>
-          </div>
+              <h2
+                {...fieldAttr("dark-trend.testimonials.share-heading")}
+                className="text-xl font-bold text-white"
+              >
+                {shareHeading}
+              </h2>
+              {shareBody ? (
+                <p
+                  {...fieldAttr("dark-trend.testimonials.share-body")}
+                  className="mt-2 text-white/60"
+                >
+                  {shareBody}
+                </p>
+              ) : null}
+              {shareButton ? (
+                <Link
+                  href="/testimonials/submit"
+                  className="mt-6 inline-block rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  <span
+                    {...fieldAttr("dark-trend.testimonials.share-button")}
+                  >
+                    {shareButton}
+                  </span>
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
           <div className="mt-8 text-center">
             <Link
               href="/about"

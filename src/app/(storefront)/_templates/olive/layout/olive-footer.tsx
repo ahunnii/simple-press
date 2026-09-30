@@ -2,34 +2,62 @@ import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import type { OliveNavCollection } from "./olive-nav-overlay";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { Session } from "~/server/better-auth/config";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
+import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { PinterestIcon } from "~/components/icons/pinterest-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import {
+  externalLinkProps,
+  filterNavByFlags,
+  getAccountNavLinks,
+  navHrefFlag,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { OliveLeafMark } from "../shared/olive-leaf-mark";
+import { OliveFooterAccount } from "./olive-footer-account";
+import { OLIVE_DEFAULT_NAV } from "./olive-nav";
 
-type FooterLink = { href: string; label: string };
-
-type SocialLink = {
-  href: string;
-  label: string;
-  Icon: React.ComponentType<{ className?: string }>;
-};
+type FooterLink = { href: string; label: string; external?: boolean };
 
 type OliveFooterProps = DefaultFooterTemplateProps & {
   /** Published collections, resolved once by the layout. */
   collections?: OliveNavCollection[];
+  /** The header's nav, resolved + flag-filtered once by the layout. When
+   *  omitted the footer resolves the same list itself. */
+  navItems?: NavItem[];
+  /** The layout's server-side session, seeding the account rows. */
+  initialSession?: Session | null;
 };
 
 /** How many collections the Shop column will list before it stops. */
 const MAX_COLLECTION_LINKS = 5;
-/** How many policy pages the Help column will list before it stops. */
-const MAX_POLICY_LINKS = 4;
+
+/** Drop repeat hrefs, keeping the first occurrence. */
+function uniqueByHref(links: FooterLink[], taken = new Set<string>()) {
+  return links.filter((link) => {
+    if (taken.has(link.href)) return false;
+    taken.add(link.href);
+    return true;
+  });
+}
+
+/** Retired per-template social URL keys, read only as a legacy fallback. */
+const LEGACY_SOCIAL_KEYS = [
+  "instagram",
+  "tiktok",
+  "facebook",
+  "pinterest",
+] as const;
+
+function nonBlank(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed?.length ? trimmed : undefined;
+}
 
 /**
  * The book cover. A sage field carrying the call-to-action card and three
@@ -38,15 +66,19 @@ const MAX_POLICY_LINKS = 4;
  *
  * Density courage on purpose: the link columns are tight (0.8125rem, 0.5rem
  * row gap), not airy — this is the index of the book, not another section.
+ *
+ * Columns: Shop (collections), Policies (the four standard policies + the
+ * platform index, B10.1) and About (the owner's nav, flag-filtered and
+ * flattened, B10.2/B10.4, then the session-aware account rows, B10.3).
  */
 export async function OliveFooter({
   business,
   collections = [],
+  navItems,
+  initialSession,
 }: OliveFooterProps) {
   const { isEnabled } = await getBusinessFlags();
 
-  // Policy pages are the owner's own; fall back to the platform's when a store
-  // has not written any yet, so the Help column is never a dead stub.
   const policies = await api.content
     .getSimplifiedPages({ type: "policy" })
     .catch(() => [] as { id: string; title: string; slug: string }[]);
@@ -56,19 +88,21 @@ export async function OliveFooter({
     | undefined;
 
   const f = resolveFields(customFields, [
-    "olive.global.footer-tagline",
     "olive.global.footer-cta-heading",
     "olive.global.footer-cta-body",
     "olive.global.footer-cta-label",
     "olive.global.footer-cta-link",
     "olive.global.wordmark-tagline",
-    "olive.global.social-instagram",
-    "olive.global.social-tiktok",
-    "olive.global.social-facebook",
-    "olive.global.social-pinterest",
   ]);
 
-  const footerTagline = f["olive.global.footer-tagline"] ?? "";
+  // Tagline: Content → Branding → Footer tagline wins; else the legacy
+  // `olive.global.footer-tagline` field (retired 2026-09-26, a read-only
+  // fallback — never written or cleared from here); else hidden.
+  const footerTagline =
+    nonBlank(business?.siteContent?.footerText) ??
+    nonBlank(
+      getRawCustomFieldString(customFields, "olive.global.footer-tagline"),
+    );
   const ctaHeading = f["olive.global.footer-cta-heading"] ?? "";
   const ctaBody = f["olive.global.footer-cta-body"] ?? "";
   const ctaLabel = f["olive.global.footer-cta-label"] ?? "";
@@ -80,8 +114,6 @@ export async function OliveFooter({
 
   const productsEnabled = isEnabled("products");
   const collectionsEnabled = isEnabled("collections");
-  const blogEnabled = isEnabled("blog");
-  const testimonialsEnabled = isEnabled("testimonials");
   const accountsEnabled = isEnabled("customerAccounts");
 
   const listedCollections = collectionsEnabled
@@ -114,61 +146,103 @@ export async function OliveFooter({
             : []),
         ];
 
-  const policyLinks: FooterLink[] =
-    policies.length > 0
-      ? policies
-          .slice(0, MAX_POLICY_LINKS)
-          .map((page) => ({ href: `/${page.slug}`, label: page.title }))
-      : [
-          {
-            href: "/platform/policies/terms-of-service",
-            label: "Terms of service",
-          },
-          {
-            href: "/platform/policies/privacy-policy",
-            label: "Privacy policy",
-          },
-        ];
+  // About column: the header's nav (owner-saved or OLIVE_DEFAULT_NAV, flag
+  // filtered), flattened — each link, then its children as plain links; a
+  // group with an empty href contributes only its children. Anything the Shop
+  // column already lists (/shop, /collections…) is not repeated here.
+  const nav =
+    navItems ??
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, OLIVE_DEFAULT_NAV),
+      isEnabled,
+    );
+  const aboutLinks = uniqueByHref(
+    nav.flatMap((item) => [
+      ...(item.href.trim()
+        ? [{ href: item.href, label: item.label, external: item.external }]
+        : []),
+      ...(item.children ?? []),
+    ]),
+    new Set(shopLinks.map((link) => link.href)),
+  );
 
-  const helpLinks: FooterLink[] = [
-    ...policyLinks,
-    { href: "/contact", label: "Contact" },
+  // Signed-in account rows from the flag-gated account links: "My account"
+  // (settings) and "Orders" only while `orders` is on.
+  const accountLinks = getAccountNavLinks({ isEnabled });
+  const settingsLink = accountLinks.find((link) => link.key === "settings");
+  const ordersLink = accountLinks.find((link) => link.key === "orders");
+  const signedInLinks = [
+    ...(settingsLink ? [{ label: "My account", href: settingsLink.href }] : []),
+    ...(ordersLink ? [{ label: "Orders", href: ordersLink.href }] : []),
   ];
 
-  const aboutLinks: FooterLink[] = [
-    { href: "/about", label: "About" },
-    ...(blogEnabled ? [{ href: "/blog", label: "Journal" }] : []),
-    ...(testimonialsEnabled
-      ? [{ href: "/testimonials", label: "Testimonials" }]
+  // Policies column (B10.1): exactly the four standard slugs Admin → Policies
+  // creates, never any other policy-type page (imports, QA data). Privacy and
+  // terms fall back to the platform's own policy when unpublished; shipping
+  // and returns have no platform equivalent, so they show once published.
+  // The platform policies index is always last.
+  const bySlug = (slug: string) => policies.find((page) => page.slug === slug);
+  const shippingPolicy = bySlug("shipping-policy");
+  const refundPolicy = bySlug("refund-policy");
+  const privacyPolicy = bySlug("privacy-policy");
+  const termsOfService = bySlug("terms-of-service");
+
+  const policyLinks: FooterLink[] = [
+    // Contact is kept here unless the About column (the nav) already has it.
+    ...(aboutLinks.some((link) => link.href === "/contact")
+      ? []
+      : [{ href: "/contact", label: "Contact" }]),
+    ...(shippingPolicy
+      ? [{ href: `/${shippingPolicy.slug}`, label: "Shipping policy" }]
       : []),
-    ...(accountsEnabled ? [{ href: "/account/orders", label: "Account" }] : []),
+    ...(refundPolicy
+      ? [{ href: `/${refundPolicy.slug}`, label: "Returns & refunds" }]
+      : []),
+    {
+      href: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
+      label: "Privacy policy",
+    },
+    {
+      href: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+      label: "Terms of service",
+    },
+    { href: "/platform/policies", label: "Platform policies" },
   ];
 
-  const socials: SocialLink[] = [
-    {
-      href: (f["olive.global.social-instagram"] ?? "").trim(),
-      label: "Instagram",
-      Icon: InstagramIcon,
-    },
-    {
-      href: (f["olive.global.social-tiktok"] ?? "").trim(),
-      label: "TikTok",
-      Icon: TikTokIcon,
-    },
-    {
-      href: (f["olive.global.social-facebook"] ?? "").trim(),
-      label: "Facebook",
-      Icon: FacebookIcon,
-    },
-    {
-      href: (f["olive.global.social-pinterest"] ?? "").trim(),
-      label: "Pinterest",
-      Icon: PinterestIcon,
-    },
-  ].filter((social) => social.href.length > 0);
+  // Social links: Content → Branding (`SiteContent.socialLinks`) wins; if it
+  // resolves nothing, the legacy `olive.global.social-*` URLs (retired
+  // 2026-09-26, read-only fallback) are run through the same resolver so they
+  // get the same `safeHref` scheme allowlist and canonical icon/order.
+  const brandingSocials = resolveSocialLinks(
+    business?.siteContent?.socialLinks,
+  );
+  const socials =
+    brandingSocials.length > 0
+      ? brandingSocials
+      : resolveSocialLinks(
+          Object.fromEntries(
+            LEGACY_SOCIAL_KEYS.map((network) => [
+              network,
+              getRawCustomFieldString(
+                customFields,
+                `olive.global.social-${network}`,
+              ),
+            ]),
+          ),
+        );
 
   const ctaIsExternal = /^https?:\/\//i.test(ctaLink);
-  const showCta = ctaLink.length > 0 && ctaLabel.length > 0;
+  // B2.5: a CTA pointing at a flag-disabled route (e.g. /shop with products
+  // off) is hidden, never re-pointed; the tagline shows in its place.
+  const ctaFlag = navHrefFlag(ctaLink);
+  const showCta =
+    ctaLink.length > 0 &&
+    ctaLabel.length > 0 &&
+    (ctaFlag === null || isEnabled(ctaFlag));
 
   return (
     <footer {...sectionGroupAttr("global", "branding")}>
@@ -221,7 +295,6 @@ export async function OliveFooter({
             <p
               className="max-w-[34ch] text-[1.0625rem] leading-relaxed"
               style={{ color: "var(--olive-white)" }}
-              {...fieldAttr("olive.global.footer-tagline")}
             >
               {footerTagline}
             </p>
@@ -229,8 +302,19 @@ export async function OliveFooter({
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3">
             <OliveFooterColumn title="Shop" links={shopLinks} />
-            <OliveFooterColumn title="Help" links={helpLinks} />
-            <OliveFooterColumn title="About" links={aboutLinks} />
+            <OliveFooterColumn title="Policies" links={policyLinks} />
+            <OliveFooterColumn
+              title="About"
+              links={aboutLinks}
+              extra={
+                accountsEnabled ? (
+                  <OliveFooterAccount
+                    initialSession={initialSession}
+                    signedInLinks={signedInLinks}
+                  />
+                ) : null
+              }
+            />
           </div>
         </div>
       </div>
@@ -255,13 +339,13 @@ export async function OliveFooter({
 
           {socials.length > 0 ? (
             <ul className="m-0 flex list-none items-center gap-1 p-0">
-              {socials.map(({ href, label, Icon }) => (
-                <li key={label}>
+              {socials.map(({ key, url, ariaLabel, Icon }) => (
+                <li key={key}>
                   <a
-                    href={href}
+                    href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`${label} (opens in new tab)`}
+                    aria-label={`${ariaLabel} (opens in new tab)`}
                     className="olive-icon-btn olive-icon-btn-invert"
                   >
                     <Icon className="h-[18px] w-[18px]" />
@@ -292,22 +376,33 @@ export async function OliveFooter({
 function OliveFooterColumn({
   title,
   links,
+  extra,
 }: {
   title: string;
   links: FooterLink[];
+  /** Extra `<li>` rows after the links (the About column's account rows). */
+  extra?: React.ReactNode;
 }) {
-  if (links.length === 0) return null;
+  if (links.length === 0 && !extra) return null;
   return (
     <div>
       <h2 className="olive-footer-col-title">{title}</h2>
       <ul className="m-0 mt-3.5 flex list-none flex-col gap-2 p-0">
         {links.map((link) => (
           <li key={link.href + link.label}>
-            <Link href={link.href} className="olive-footer-link">
+            <Link
+              href={link.href}
+              {...externalLinkProps(link.external)}
+              className="olive-footer-link"
+            >
               {link.label}
+              {link.external ? (
+                <span className="sr-only"> (opens in new tab)</span>
+              ) : null}
             </Link>
           </li>
         ))}
+        {extra}
       </ul>
     </div>
   );

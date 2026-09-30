@@ -1,5 +1,7 @@
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
@@ -19,7 +21,7 @@ type Props = DefaultBlogPostPageTemplateProps & {
   customFields?: Record<string, string>;
 };
 
-export function ViiBlogPostPage({
+export async function ViiBlogPostPage({
   page,
   relatedPosts,
   business,
@@ -39,6 +41,8 @@ export function ViiBlogPostPage({
     "vii.blog.cta-button-link",
   ]);
 
+  const { isEnabled } = await getBusinessFlags();
+
   // Lead paragraph: only when the author wrote an excerpt. Deriving from the
   // body here would just duplicate the article's opening paragraph.
   const lead = page.excerpt?.trim() ?? "";
@@ -52,8 +56,14 @@ export function ViiBlogPostPage({
     "Book a facial or reach out — we'd love to help you find your glow.";
   const ctaButtonText =
     (f["vii.blog.cta-button-text"] ?? "").trim() || "Book a visit";
+  // B2.5: hide the button (never swap in another destination) when its href
+  // names a flag that's off.
+  const ctaButtonLinkRaw = f["vii.blog.cta-button-link"] ?? "";
+  const ctaButtonLinkFlag = navHrefFlag(ctaButtonLinkRaw);
   const ctaButtonLink =
-    (f["vii.blog.cta-button-link"] ?? "").trim() || "/contact";
+    ctaButtonLinkFlag === null || isEnabled(ctaButtonLinkFlag)
+      ? ctaButtonLinkRaw
+      : "";
 
   // Branch: image hero vs. cream type-led masthead.
   const hasCover = !!page.image?.trim();
@@ -116,8 +126,12 @@ export function ViiBlogPostPage({
         }}
       >
         <div
-          className="vii-prose max-w-7xl"
+          className="vii-prose"
           style={{
+            // B1.7: same 720px measure as the lead excerpt above, centered
+            // together with it (previously an oversized Tailwind class that
+            // read as ~150+ch at 1440).
+            maxWidth: 720,
             margin: "0 auto",
           }}
         >

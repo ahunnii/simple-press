@@ -9,10 +9,15 @@ import { resolveBanner } from "~/lib/site-banner/resolve";
 import { cn } from "~/lib/utils";
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
+import {
+  filterNavByFlags,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
 
 import { OliveAnnouncementBar } from "./olive-announcement-bar";
 import { OliveFooter } from "./olive-footer";
 import { OliveHeader } from "./olive-header";
+import { OLIVE_DEFAULT_NAV } from "./olive-nav";
 import { OliveToast } from "./olive-toast";
 
 // Two faces only, per design.md § Typography. Josefin Sans is the wordmark,
@@ -41,6 +46,11 @@ const fontBody = Figtree({
  * and the footer's Shop column, so the nav never costs a second query. The
  * `.catch` is mandatory: `collections.getAllPublic` is feature-gated and
  * throws FORBIDDEN on a store that has the feature off.
+ *
+ * The nav is resolved once here too: the owner's saved nav (`??` semantics —
+ * a saved empty list means no links) or `OLIVE_DEFAULT_NAV`, then the shared
+ * route→flag filter (P-NAV-FLAGS). The header, its mobile overlay and the
+ * footer's About column all render this same array.
  */
 export async function OliveLayout({
   children,
@@ -57,6 +67,11 @@ export async function OliveLayout({
   ]);
 
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+
+  const navItems = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, OLIVE_DEFAULT_NAV),
+    isEnabled,
+  );
 
   const navCollections: OliveNavCollection[] = collections.map(
     (collection) => ({
@@ -95,13 +110,19 @@ export async function OliveLayout({
         business={business}
         initialSession={session ?? null}
         collections={navCollections}
+        navItems={navItems}
       />
 
       <main id="main-content" className="flex-1">
         {children}
       </main>
 
-      <OliveFooter business={business} collections={navCollections} />
+      <OliveFooter
+        business={business}
+        collections={navCollections}
+        navItems={navItems}
+        initialSession={session ?? null}
+      />
 
       <OliveToast />
     </div>

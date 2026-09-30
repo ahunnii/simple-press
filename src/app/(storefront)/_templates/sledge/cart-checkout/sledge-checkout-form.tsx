@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SledgeTextRow } from "./text-list";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
+import { listItemAttr } from "~/lib/preview/section-attrs";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
@@ -26,12 +28,25 @@ import {
   SavedAddressPicker,
 } from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
+import {
+  SLEDGE_CHECKOUT_REASSURANCE_DEFAULTS,
+  SLEDGE_CHECKOUT_REASSURANCE_KEY,
+  sledgeReassuranceGlyph,
+} from "./cart-fields";
 import { SledgeOrderSummary } from "./sledge-order-summary";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
   merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
+  /**
+   * Resolved `sledge.checkout.reassurance-lines` rows (plain data), threaded
+   * from `SledgeCheckoutPage`. Falls back to the built-in lines.
+   */
+  reassuranceLines?: SledgeTextRow[];
 };
+
+const BUILT_IN_REASSURANCE: SledgeTextRow[] =
+  SLEDGE_CHECKOUT_REASSURANCE_DEFAULTS.map((text, index) => ({ text, index }));
 
 const LBL =
   "text-xs font-medium uppercase tracking-[0.2em] text-[var(--sl-ink)]";
@@ -50,6 +65,7 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 export function SledgeCheckoutForm({
   business,
   merchantPolicies,
+  reassuranceLines = BUILT_IN_REASSURANCE,
 }: CheckoutFormProps) {
   const {
     email,
@@ -495,18 +511,34 @@ export function SledgeCheckoutForm({
           />
 
           <div className="flex flex-col gap-2.5">
-            {[
-              { ic: "🔒", text: "Encrypted with TLS · Powered by Stripe" },
-              { ic: "✱", text: "Each piece handcrafted with care" },
-              { ic: "↺", text: "All sales final — order what you love" },
-            ].map((note) => (
-              <div key={note.ic} className="flex items-start gap-2.5">
+            {/* Platform fact — always shown, not owner copy. */}
+            <div className="flex items-start gap-2.5">
+              {/* N-1: decorative glyph */}
+              <span
+                aria-hidden="true"
+                className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
+              >
+                🔒
+              </span>
+              <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">
+                Encrypted with TLS · Powered by Stripe
+              </p>
+            </div>
+            {/* Owner reassurance lines shown at checkout. */}
+            {reassuranceLines.map((note, position) => (
+              <div
+                key={note.index}
+                {...listItemAttr(SLEDGE_CHECKOUT_REASSURANCE_KEY, note.index)}
+                className="flex items-start gap-2.5"
+              >
                 {/* N-1: decorative glyph */}
                 <span
                   aria-hidden="true"
                   className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
                 >
-                  {note.ic}
+                  {/* +1: keeps checkout's original ✱/↺ symbols (the ✓ slot
+                      is the cart's free-shipping line). */}
+                  {sledgeReassuranceGlyph(position + 1)}
                 </span>
                 <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">
                   {note.text}

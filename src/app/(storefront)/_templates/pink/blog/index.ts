@@ -18,10 +18,10 @@ import { SECTION_LINKS } from "~/lib/section-links";
  *
  * DEVIATIONS from the literal design.md text (see build report for the full
  * reasoning):
- *  - The blog header's right-column CTA is split into its own group
+ *  - The blog header's right-column button block is split into its own group
  *    (`blog.subscribe-cta`) rather than folded into `blog.header`, per this
  *    agent's assignment brief — `blog.header` itself (breadcrumb/H1/intro)
- *    is NOT hideable, only the CTA block is.
+ *    is NOT hideable, only the button block is.
  *  - `blog.grid`'s "categories derived from the posts" chip row is not
  *    implemented — `Page` has no category/taxonomy column. The hairline chip
  *    row is repurposed as a real Newest/Oldest sort control instead of a
@@ -36,7 +36,7 @@ export const pinkBlogData: TemplateField[] = [
   // ── blog.header (not hideable) ───────────────────────────────────────────
   {
     key: "pink.blog.header-heading",
-    label: "Blog Header Heading",
+    label: "Heading",
     description: "Main heading on the blog index page.",
     type: "text",
     page: "blog",
@@ -46,7 +46,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.header-intro",
-    label: "Blog Header Intro",
+    label: "Intro text",
     description: "One or two lines under the blog heading.",
     type: "textarea",
     page: "blog",
@@ -59,7 +59,7 @@ export const pinkBlogData: TemplateField[] = [
   // ── blog.subscribe-cta (hideable) ────────────────────────────────────────
   {
     key: "pink.blog.subscribe-heading",
-    label: "Follow CTA Heading",
+    label: "Heading",
     description:
       "Heading in the right column of the blog header. Leave blank to hide the whole block.",
     type: "text",
@@ -70,7 +70,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.subscribe-body",
-    label: "Follow CTA Supporting Line",
+    label: "Supporting text",
     description: "One short line under the heading. Leave blank to hide.",
     type: "text",
     page: "blog",
@@ -80,7 +80,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.subscribe-button",
-    label: "Follow CTA Button Text",
+    label: "Button text",
     description: "Leave blank to hide the whole block.",
     type: "text",
     page: "blog",
@@ -90,7 +90,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.subscribe-link",
-    label: "Follow CTA Button Link",
+    label: "Button link",
     description:
       "Where the button goes — a mailing-list signup page, a social profile, or /contact. Never a built-in email signup.",
     type: "url",
@@ -103,7 +103,7 @@ export const pinkBlogData: TemplateField[] = [
   // ── blog.featured (hideable) ─────────────────────────────────────────────
   {
     key: "pink.blog.featured-badge",
-    label: "Featured Post Badge",
+    label: "Badge text",
     description: "Corner badge on the latest-post spotlight card.",
     type: "text",
     page: "blog",
@@ -115,7 +115,7 @@ export const pinkBlogData: TemplateField[] = [
   // ── blog.grid (not hideable — empty state only) ──────────────────────────
   {
     key: "pink.blog.grid-empty-heading",
-    label: "Empty Blog Heading",
+    label: "Empty list heading",
     description: "Shown when there are no published posts yet.",
     type: "text",
     page: "blog",
@@ -125,8 +125,8 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.grid-empty-body",
-    label: "Empty Blog Body",
-    description: "One line under the empty-blog heading.",
+    label: "Empty list body",
+    description: "One line under the empty-list heading.",
     type: "textarea",
     page: "blog",
     group: "blog.grid",
@@ -135,7 +135,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.grid-empty-cta-label",
-    label: "Empty Blog Button Text",
+    label: "Empty list button text",
     description: "Leave blank to hide the button.",
     type: "text",
     page: "blog",
@@ -145,8 +145,8 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.grid-empty-cta-link",
-    label: "Empty Blog Button Link",
-    description: "Where the empty-state button goes.",
+    label: "Empty list button link",
+    description: "Where the empty-list button goes.",
     type: "url",
     page: "blog",
     group: "blog.grid",
@@ -155,7 +155,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.search-empty-state",
-    label: "Search — No Results Message",
+    label: "No search results message",
     description:
       "Shown in the post grid when a visitor's search doesn't match any post.",
     type: "text",
@@ -168,7 +168,7 @@ export const pinkBlogData: TemplateField[] = [
   // ── blog.ask (hideable) ──────────────────────────────────────────────────
   {
     key: "pink.blog.ask-heading",
-    label: "Ask Band Heading",
+    label: "Heading",
     description: "Heading in the closing band. Leave blank to hide the band.",
     type: "text",
     page: "blog",
@@ -178,7 +178,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.ask-body",
-    label: "Ask Band Body",
+    label: "Body text",
     description: "One or two lines under the heading.",
     type: "textarea",
     page: "blog",
@@ -188,7 +188,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.ask-button",
-    label: "Ask Band Button Text",
+    label: "Button text",
     description: "Leave blank to hide the band.",
     type: "text",
     page: "blog",
@@ -198,7 +198,7 @@ export const pinkBlogData: TemplateField[] = [
   },
   {
     key: "pink.blog.ask-link",
-    label: "Ask Band Button Link",
+    label: "Button link",
     description: "Where the button goes.",
     type: "url",
     page: "blog",
@@ -210,7 +210,7 @@ export const pinkBlogData: TemplateField[] = [
   // ── blog.post-related (hideable, renderContext: blog-post) ──────────────
   {
     key: "pink.blog.post-related-heading",
-    label: "Related Posts Heading",
+    label: "Heading",
     description:
       "Heading over the related-posts band at the end of every post.",
     type: "text",
@@ -224,14 +224,14 @@ export const pinkBlogData: TemplateField[] = [
 export const pinkBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.header",
-    title: "Blog Header",
-    description: "Eyebrow, heading and intro on the blog index.",
+    title: "Header",
+    description: "Heading and intro text on the blog index.",
     icon: "📰",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "blog.subscribe-cta",
-    title: "Blog Header — Follow CTA",
+    title: "Follow link",
     description:
       "The right column of the blog header. Points at a mailing-list page, social profile, or contact page — never a built-in email signup.",
     icon: "✉️",
@@ -239,28 +239,28 @@ export const pinkBlogFieldGroups: TemplateFieldGroup[] = [
   } satisfies TemplateFieldGroup,
   {
     id: "blog.featured",
-    title: "Featured Post",
+    title: "Featured post",
     description: "Badge on the latest-post spotlight card.",
     icon: "⭐",
     columns: 1,
   } satisfies TemplateFieldGroup,
   {
     id: "blog.grid",
-    title: "Blog Grid — Empty State",
+    title: "Blog grid",
     description: "Shown only when there are no published posts yet.",
     icon: "🗂️",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "blog.ask",
-    title: "Ask a Question Band",
+    title: "Ask a question",
     description: "Closing band pointing readers to your contact page.",
     icon: "💬",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
     id: "blog.post-related",
-    title: "Blog Post — Keep Reading",
+    title: "Keep reading",
     description:
       "Heading over the related-posts band at the end of every post.",
     icon: "📚",
@@ -272,8 +272,8 @@ export const pinkBlogSections: TemplateSection[] = [
   {
     id: "blog.header",
     page: "blog",
-    title: "Blog Header",
-    description: "Eyebrow, heading and intro on the blog index.",
+    title: "Header",
+    description: "Heading and intro text on the blog index.",
     groupIds: ["blog.header"],
     order: 0,
     hideable: false,
@@ -281,7 +281,7 @@ export const pinkBlogSections: TemplateSection[] = [
   {
     id: "blog.subscribe-cta",
     page: "blog",
-    title: "Follow CTA",
+    title: "Follow link",
     description: "Right column of the blog header.",
     groupIds: ["blog.subscribe-cta"],
     order: 1,
@@ -290,7 +290,7 @@ export const pinkBlogSections: TemplateSection[] = [
   {
     id: "blog.featured",
     page: "blog",
-    title: "Featured Post",
+    title: "Featured post",
     description: "Latest-post spotlight card.",
     groupIds: ["blog.featured"],
     order: 2,
@@ -300,7 +300,7 @@ export const pinkBlogSections: TemplateSection[] = [
   {
     id: "blog.grid",
     page: "blog",
-    title: "Blog Grid",
+    title: "Blog grid",
     description: "The post grid and its empty state.",
     groupIds: ["blog.grid"],
     order: 3,
@@ -310,7 +310,7 @@ export const pinkBlogSections: TemplateSection[] = [
   {
     id: "blog.ask",
     page: "blog",
-    title: "Ask a Question",
+    title: "Ask a question",
     description: "Closing band pointing readers to your contact page.",
     groupIds: ["blog.ask"],
     order: 4,
@@ -325,7 +325,7 @@ export const pinkBlogSections: TemplateSection[] = [
     id: "blog.post",
     page: "blog",
     renderContext: "blog-post",
-    title: "Blog Post — Keep Reading",
+    title: "Keep reading",
     description: "The related-posts band at the end of every post.",
     groupIds: ["blog.post-related"],
     order: 5,

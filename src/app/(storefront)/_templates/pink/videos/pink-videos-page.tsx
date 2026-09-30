@@ -1,6 +1,8 @@
 import type { DefaultVideosPageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
@@ -61,6 +63,17 @@ export async function PinkVideosPage({
   // `boolean` fields come back from `resolveFields` as strings.
   const showChannel = f["pink.videos.list-show-channel"] === "true";
 
+  // B2.5: a field-driven CTA hides (never swaps destination) when its link's
+  // feature is off — e.g. the empty state's default `/shop` with products off.
+  const { isEnabled } = await getBusinessFlags();
+  const ctaHref = (link: string | undefined): string | undefined => {
+    const href = link?.trim();
+    if (!href) return undefined;
+    const flag = navHrefFlag(href);
+    return flag === null || isEnabled(flag) ? href : undefined;
+  };
+  const primaryHref = ctaHref(f["pink.videos.cta-primary-link"]);
+
   return (
     <div className="flex flex-col">
       {/* ── 1. Header ─────────────────────────────────────────────────────── */}
@@ -74,41 +87,44 @@ export async function PinkVideosPage({
       />
 
       {/* ── 2. List ───────────────────────────────────────────────────────── */}
+      {/* Shell: gutter on the band, width on an unpadded wrapper — the same
+          left edge as `PinkPageHeader` at every width. */}
       <section
-        className="mx-auto w-full max-w-[1400px] px-5 py-16 md:px-10 md:py-20"
+        className="px-5 py-16 md:px-10 md:py-20"
         aria-label="Videos"
         {...sectionGroupAttr("videos", "list")}
       >
-        {videos.length === 0 ? (
-          <PinkEmptyState
-            heading={
-              firstNonBlank(
-                f["pink.videos.list-empty-heading"],
-                "Nothing up yet",
-              ) ?? "Nothing up yet"
-            }
-            body={f["pink.videos.list-empty-body"] ?? ""}
-            ctaLabel={firstNonBlank(f["pink.videos.list-empty-cta-label"])}
-            ctaHref={firstNonBlank(
-              f["pink.videos.list-empty-cta-link"],
-              "/shop",
-            )}
-          />
-        ) : (
-          <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {videos.map((video, i) => (
-              <PinkReveal key={video.id} index={i}>
-                <PinkVideoCard video={video} showChannel={showChannel} />
-              </PinkReveal>
-            ))}
-          </div>
-        )}
+        <div className="mx-auto w-full max-w-[1400px]">
+          {videos.length === 0 ? (
+            <PinkEmptyState
+              heading={
+                firstNonBlank(
+                  f["pink.videos.list-empty-heading"],
+                  "Nothing up yet",
+                ) ?? "Nothing up yet"
+              }
+              body={f["pink.videos.list-empty-body"] ?? ""}
+              ctaLabel={firstNonBlank(f["pink.videos.list-empty-cta-label"])}
+              ctaHref={ctaHref(
+                firstNonBlank(f["pink.videos.list-empty-cta-link"], "/shop"),
+              )}
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {videos.map((video, i) => (
+                <PinkReveal key={video.id} index={i}>
+                  <PinkVideoCard video={video} showChannel={showChannel} />
+                </PinkReveal>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ── 3. Closing CTA ────────────────────────────────────────────────── */}
       {isSectionVisible(customFields, "pink", "videos.cta") && (
-        <div className="mx-auto w-full max-w-[1400px] px-5 pb-16 md:px-10 md:pb-20">
-          <PinkReveal>
+        <div className="px-5 pb-16 md:px-10 md:pb-20">
+          <PinkReveal className="mx-auto w-full max-w-[1400px]">
             <PinkCtaPanel
               sectionAttrs={sectionGroupAttr("videos", "cta")}
               heading={f["pink.videos.cta-heading"] ?? ""}
@@ -116,10 +132,10 @@ export async function PinkVideosPage({
               body={f["pink.videos.cta-body"] ?? ""}
               bodyFieldKey="pink.videos.cta-body"
               primaryCta={
-                f["pink.videos.cta-primary-label"]
+                f["pink.videos.cta-primary-label"] && primaryHref
                   ? {
-                      label: f["pink.videos.cta-primary-label"] ?? "",
-                      href: f["pink.videos.cta-primary-link"] ?? "/contact",
+                      label: f["pink.videos.cta-primary-label"],
+                      href: primaryHref,
                     }
                   : undefined
               }

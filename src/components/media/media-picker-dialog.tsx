@@ -16,6 +16,7 @@ import { Search, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import type { MediaItem } from "~/components/media/media-grid";
+import { prepareImageForUpload } from "~/lib/image-prep";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -62,7 +63,7 @@ function fileMatchesKind(file: File, kind: MediaKind): boolean {
   if (kind === "image") {
     return (
       file.type.startsWith("image/") ||
-      /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(file.name)
+      /\.(jpg|jpeg|png|webp|gif|bmp|heic|heif)$/i.test(file.name)
     );
   }
   return (
@@ -76,19 +77,22 @@ function fileMatchesKind(file: File, kind: MediaKind): boolean {
 function UploadDropzone({
   kind,
   isUploading,
+  isPreparing,
   onFileSelect,
 }: {
   kind: MediaKind;
   isUploading: boolean;
+  isPreparing?: boolean;
   onFileSelect: (file: File) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const label = kind === "image" ? "image" : "video";
+  const isBusy = isUploading || Boolean(isPreparing);
 
   const triggerFileInput = useCallback(() => {
-    if (isUploading) return;
+    if (isBusy) return;
     fileInputRef.current?.click();
-  }, [isUploading]);
+  }, [isBusy]);
 
   return (
     <div className="space-y-3 py-2">
@@ -97,7 +101,7 @@ function UploadDropzone({
         type="file"
         accept={kind === "image" ? "image/*" : "video/*"}
         className="hidden"
-        disabled={isUploading}
+        disabled={isBusy}
         aria-label={`Choose ${label} file`}
         onChange={(e) => {
           const file = e.target.files?.[0];
@@ -117,7 +121,7 @@ function UploadDropzone({
         }}
         onDrop={(e) => {
           e.preventDefault();
-          if (isUploading) return;
+          if (isBusy) return;
           const file = e.dataTransfer.files?.[0];
           if (file && fileMatchesKind(file, kind)) onFileSelect(file);
         }}
@@ -126,7 +130,7 @@ function UploadDropzone({
         className={cn(
           "border-muted-foreground/25 rounded-lg border-2 border-dashed p-10 text-center text-sm transition-colors",
           "hover:border-muted-foreground/50 hover:bg-muted/50",
-          isUploading && "pointer-events-none opacity-50",
+          isBusy && "pointer-events-none opacity-50",
         )}
       >
         <Upload
@@ -144,11 +148,19 @@ function UploadDropzone({
         type="button"
         variant="outline"
         size="sm"
-        disabled={isUploading}
+        disabled={isBusy}
         onClick={triggerFileInput}
         className="w-full"
       >
-        {isUploading ? (
+        {isPreparing ? (
+          <>
+            <span
+              className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+              aria-hidden="true"
+            />
+            Preparing photo…
+          </>
+        ) : isUploading ? (
           <>
             <span
               className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
@@ -184,6 +196,7 @@ export function MediaPickerDialog({
 }: MediaPickerDialogProps) {
   const [tab, setTab] = useState<"library" | "upload">("library");
   const [q, setQ] = useState("");
+  const [isPreparing, setIsPreparing] = useState(false);
   const utils = api.useUtils();
 
   // Only fetch while the dialog is open — media.list is gated behind the
@@ -231,15 +244,24 @@ export function MediaPickerDialog({
         toast.error(`Please select a valid ${kind} file`);
         return;
       }
-      if (file.size > MAX_UPLOAD_SIZE[kind]) {
-        toast.error(
-          `${kind === "image" ? "Image" : "Video"} must be less than ${MAX_UPLOAD_LABEL[kind]}`,
-        );
-        return;
-      }
       void (async () => {
+        let prepared = file;
+        if (kind === "image") {
+          setIsPreparing(true);
+          try {
+            prepared = await prepareImageForUpload(file);
+          } finally {
+            setIsPreparing(false);
+          }
+        }
+        if (prepared.size > MAX_UPLOAD_SIZE[kind]) {
+          toast.error(
+            `${kind === "image" ? "Image" : "Video"} must be less than ${MAX_UPLOAD_LABEL[kind]}`,
+          );
+          return;
+        }
         try {
-          const response = await uploader.upload(file);
+          const response = await uploader.upload(prepared);
           const fileLocation =
             (response.file.objectInfo.metadata?.pathname as
               | string
@@ -340,6 +362,7 @@ export function MediaPickerDialog({
             <UploadDropzone
               kind={kind}
               isUploading={uploader.isPending}
+              isPreparing={isPreparing}
               onFileSelect={handleFileSelect}
             />
           </TabsContent>

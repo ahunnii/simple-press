@@ -10,7 +10,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 const shopIntroData: TemplateField[] = [
   {
     key: "olive.shop.intro-heading",
-    label: "Shop Heading",
+    label: "Heading",
     description: "The page title above the product grid.",
     type: "text",
     page: "shop",
@@ -20,7 +20,7 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "olive.shop.intro-body",
-    label: "Shop Intro Line",
+    label: "Intro line",
     description:
       "One line under the shop heading. Leave blank to show the heading on its own.",
     type: "textarea",
@@ -32,7 +32,7 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "olive.shop.empty-heading",
-    label: "Empty Shop Heading",
+    label: "Empty shop heading",
     description:
       "Shown on the ghost card when the shop has no published products at all.",
     type: "text",
@@ -43,7 +43,7 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "olive.shop.empty-body",
-    label: "Empty Shop Text",
+    label: "Empty shop text",
     description: "One line under the empty-shop heading.",
     type: "textarea",
     page: "shop",
@@ -54,7 +54,7 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "olive.shop.no-results-heading",
-    label: "No Matches Heading",
+    label: "No matches heading",
     description:
       "Shown on the ghost card when the shopper's filters match nothing.",
     type: "text",
@@ -65,7 +65,7 @@ const shopIntroData: TemplateField[] = [
   },
   {
     key: "olive.shop.no-results-body",
-    label: "No Matches Text",
+    label: "No matches text",
     description: "One line under the no-matches heading.",
     type: "textarea",
     page: "shop",
@@ -77,15 +77,15 @@ const shopIntroData: TemplateField[] = [
 ];
 
 // ─── Shop: Promo band ────────────────────────────────────────────────────────
-// Two tiles on the sage wash below the grid — a photograph and a short pitch —
-// or, with the takeover switch on and a real photo uploaded, the photograph
-// running the full width of the page with the copy on a card in its corner.
+// Two tiles below the grid — a photograph and a short pitch — or, with the
+// takeover switch on and a real photo uploaded, the photograph running the
+// full width of the page with the copy on a card in its corner.
 // Hideable: a store that has nothing to cross-sell should not invent one.
 
 const shopPromoData: TemplateField[] = [
   {
     key: "olive.shop.promo-takeover",
-    label: "Full-Photo Takeover",
+    label: "Full-photo takeover",
     description:
       "On: the promo photo fills the width of the page with the copy on a card in its corner. Off: a photo-and-text band. Needs a photo to take effect.",
     type: "boolean",
@@ -96,7 +96,7 @@ const shopPromoData: TemplateField[] = [
   },
   {
     key: "olive.shop.promo-image",
-    label: "Promo Photo",
+    label: "Photo",
     description:
       "The photograph in the promo band — the left tile, or the whole band with the takeover switch on.",
     type: "image",
@@ -107,7 +107,7 @@ const shopPromoData: TemplateField[] = [
   },
   {
     key: "olive.shop.promo-heading",
-    label: "Promo Heading",
+    label: "Heading",
     description: "Heading of the promo band below the product grid.",
     type: "text",
     page: "shop",
@@ -117,7 +117,7 @@ const shopPromoData: TemplateField[] = [
   },
   {
     key: "olive.shop.promo-body",
-    label: "Promo Text",
+    label: "Text",
     description: "A line or two under the promo heading.",
     type: "textarea",
     page: "shop",
@@ -128,7 +128,7 @@ const shopPromoData: TemplateField[] = [
   },
   {
     key: "olive.shop.promo-button-label",
-    label: "Promo Button Label",
+    label: "Button label",
     description: "Label of the promo button. Leave blank to hide the button.",
     type: "text",
     page: "shop",
@@ -138,7 +138,7 @@ const shopPromoData: TemplateField[] = [
   },
   {
     key: "olive.shop.promo-button-link",
-    label: "Promo Button Link",
+    label: "Button link",
     description: "Where the promo button goes.",
     type: "url",
     page: "shop",
@@ -158,7 +158,7 @@ export const oliveShopData: TemplateField[] = [
 export const oliveShopFieldGroups: TemplateFieldGroup[] = [
   {
     id: "shop.intro",
-    title: "Shop Header",
+    title: "Shop header",
     description:
       "Page title, the line under it, and the copy shown when the grid comes back empty",
     icon: "🛍️",
@@ -166,9 +166,9 @@ export const oliveShopFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "shop.promo",
-    title: "Promo Band",
+    title: "Promo",
     description:
-      "Photo-and-text band on the sage wash below the product grid, or a full-photo takeover with the copy on a card in its corner — the button can point anywhere: rewards, a collection, an event",
+      "Photo-and-text band below the product grid, or a full-photo takeover with the copy on a card in its corner — the button can point anywhere: rewards, a collection, an event",
     icon: "🌿",
     columns: 2,
   },
@@ -178,7 +178,7 @@ export const oliveShopSections: TemplateSection[] = [
   {
     id: "shop.intro",
     page: "shop",
-    title: "Header & Grid",
+    title: "Shop header",
     description:
       "Shop title, the filter toolbar (collections, stock, sort) and the product grid",
     groupIds: ["shop.intro"],
@@ -188,7 +188,7 @@ export const oliveShopSections: TemplateSection[] = [
   {
     id: "shop.promo",
     page: "shop",
-    title: "Promo Band",
+    title: "Promo",
     description:
       "Photo-and-text band below the product grid, or an optional full-photo takeover — the button can point anywhere: rewards, a collection, an event",
     groupIds: ["shop.promo"],

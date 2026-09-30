@@ -5,10 +5,17 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Package } from "lucide-react";
 
+import type { Session } from "~/server/better-auth/config";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { formatCurrency } from "~/lib/utils";
+
+type DeliveryMethod = "ship" | "pickup" | null;
 
 type Props = {
   business: {
@@ -17,8 +24,52 @@ type Props = {
     siteContent: {
       primaryColor: string | null;
     } | null;
+    pickupLocation?: string | null;
+    pickupInstructions?: string | null;
   };
+  /** Owner-authored note (`bamboo.checkout.success-note`); blank hides it. */
+  note?: string;
+  /**
+   * Session resolved server-side by `bamboo-order-success-page.tsx`
+   * (`getSession()`), seeding `useHydratedSession` so the account CTA below
+   * is correct on the very first paint instead of popping in after the
+   * client session fetch settles. `undefined` (e.g. in tests that render
+   * this component directly) falls back to the hook's unseeded mode, which
+   * suppresses the CTA via `isPending` until the client session resolves —
+   * never a flash of the wrong state either way.
+   */
+  initialSession?: Session | null;
 };
+
+type AccountCta = { href: string; label: string };
+
+/**
+ * B9.4 / PF25 (P-ORDER-CTA stays unbuilt this run — bamboo is the only
+ * consumer): signed in + `orders` on -> "View my orders"
+ * (`/account/orders`); signed out + `customerAccounts` on -> "Create an
+ * account" (`/auth/sign-up`); neither -> no CTA. See the `initialSession`
+ * doc above for why this never flashes the wrong state.
+ */
+function useOrderAccountCta(
+  initialSession: Session | null | undefined,
+): AccountCta | null {
+  const { data: session, isPending } = useHydratedSession(initialSession);
+  const { isEnabled } = useStorefrontFlags();
+
+  if (isPending) {
+    return null;
+  }
+
+  if (session?.user) {
+    return isEnabled("orders")
+      ? { href: "/account/orders", label: "View my orders" }
+      : null;
+  }
+
+  return isEnabled("customerAccounts")
+    ? { href: "/auth/sign-up", label: "Create an account" }
+    : null;
+}
 
 // Order-details fetch is best-effort only — it must never block the
 // "Order Confirmed!" heading. If it hangs or fails, the customer still
@@ -27,14 +78,46 @@ type Props = {
 // error state.
 const DETAILS_FETCH_TIMEOUT_MS = 10_000;
 
-export function BambooOrderConfirmation({ business }: Props) {
+/**
+ * "What happens next?" bullets, keyed by the Stripe session's delivery
+ * method (`session.metadata.deliveryMethod`, "ship" | "pickup" | unset).
+ * Pickup adds an owner-authored location/instructions line beneath the
+ * bullets instead of a third generic bullet — see the render below.
+ */
+function nextStepsBullets(deliveryMethod: DeliveryMethod): string[] {
+  if (deliveryMethod === "pickup") {
+    return [
+      "You'll receive an email confirmation shortly",
+      "We'll let you know when your order is ready for pickup",
+    ];
+  }
+  if (deliveryMethod === "ship") {
+    return [
+      "You'll receive an email confirmation shortly",
+      "We'll notify you when your order ships",
+      "Track your order status via email",
+    ];
+  }
+  return [
+    "You'll receive an email confirmation shortly",
+    "We'll email you with updates about your order",
+  ];
+}
+
+export function BambooOrderConfirmation({
+  business,
+  note = "",
+  initialSession,
+}: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
+  const accountCta = useOrderAccountCta(initialSession);
   const [orderDetails, setOrderDetails] = useState<{
     customer_email: string;
     amount_total: number;
     currency: string;
     payment_status: string;
+    delivery_method: DeliveryMethod;
   } | null>(null);
   // Gates only the order-details card (email/amount), never the
   // confirmation heading itself.
@@ -71,6 +154,7 @@ export function BambooOrderConfirmation({ business }: Props) {
             amount_total: number;
             currency: string;
             payment_status: string;
+            delivery_method: DeliveryMethod;
           };
 
           setOrderDetails(data);
@@ -103,7 +187,13 @@ export function BambooOrderConfirmation({ business }: Props) {
   if (!sessionId) {
     return (
       <div className="mx-auto max-w-2xl text-center">
-        <p className="text-muted-foreground mb-4">No order found</p>
+        <h1 className="font-serif text-foreground mb-3 text-3xl font-bold tracking-tight md:text-4xl">
+          We couldn&apos;t find that order
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          This page needs an order to show. If you just checked out, check
+          your email for a receipt.
+        </p>
         <Button
           asChild
           className="rounded-full bg-[var(--bam-forest)] text-[var(--bam-cream)] hover:bg-[var(--bam-forest-deep)]"
@@ -114,8 +204,16 @@ export function BambooOrderConfirmation({ business }: Props) {
     );
   }
 
+  const bullets = nextStepsBullets(orderDetails?.delivery_method ?? null);
+  const showPickupLocation =
+    orderDetails?.delivery_method === "pickup" &&
+    !!business.pickupLocation?.trim();
+
   return (
-    <div className="mx-auto max-w-3xl">
+    <div
+      className="mx-auto max-w-3xl"
+      {...sectionGroupAttr("checkout", "success")}
+    >
       {/* Fire purchase analytics event once — idempotent via sessionStorage */}
       {orderDetails && (
         <TrackPurchase
@@ -158,19 +256,38 @@ export function BambooOrderConfirmation({ business }: Props) {
                 What happens next?
               </h2>
               <ul className="text-muted-foreground space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
-                  <span>You&apos;ll receive an email confirmation shortly</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
-                  <span>We&apos;ll notify you when your order ships</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
-                  <span>Track your order status via email</span>
-                </li>
+                {bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    <span>{bullet}</span>
+                  </li>
+                ))}
               </ul>
+
+              {showPickupLocation && (
+                <div className="mt-4 text-sm">
+                  <p className="text-foreground font-semibold">
+                    Pickup location
+                  </p>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {business.pickupLocation}
+                  </p>
+                  {business.pickupInstructions?.trim() && (
+                    <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                      {business.pickupInstructions}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {note.trim() && (
+                <p
+                  className="text-muted-foreground mt-4 text-sm whitespace-pre-line"
+                  {...fieldAttr("bamboo.checkout.success-note")}
+                >
+                  {note}
+                </p>
+              )}
             </div>
           </div>
 
@@ -184,14 +301,29 @@ export function BambooOrderConfirmation({ business }: Props) {
               </p>
             </div>
           ) : (
-            orderDetails?.customer_email && (
-              <div className="border-border mt-6 border-t pt-6 text-sm">
-                <p className="text-muted-foreground">
-                  Confirmation sent to:{" "}
-                  <span className="text-foreground font-semibold">
-                    {orderDetails.customer_email}
-                  </span>
-                </p>
+            orderDetails &&
+            (orderDetails.customer_email ||
+              typeof orderDetails.amount_total === "number") && (
+              <div className="border-border mt-6 space-y-2 border-t pt-6 text-sm">
+                {typeof orderDetails.amount_total === "number" && (
+                  <p className="text-muted-foreground">
+                    Order total:{" "}
+                    <span className="text-foreground font-semibold">
+                      {formatCurrency(
+                        orderDetails.amount_total,
+                        (orderDetails.currency || "usd").toUpperCase(),
+                      )}
+                    </span>
+                  </p>
+                )}
+                {orderDetails.customer_email && (
+                  <p className="text-muted-foreground">
+                    Confirmation sent to:{" "}
+                    <span className="text-foreground font-semibold">
+                      {orderDetails.customer_email}
+                    </span>
+                  </p>
+                )}
               </div>
             )
           )}
@@ -213,6 +345,15 @@ export function BambooOrderConfirmation({ business }: Props) {
         >
           <Link href="/">Back to Home</Link>
         </Button>
+        {accountCta && (
+          <Button
+            asChild
+            variant="outline"
+            className="flex-1 rounded-full border-[var(--bam-forest)] text-[var(--bam-forest)] hover:bg-[var(--bam-cream-deep)] hover:text-[var(--bam-forest-deep)]"
+          >
+            <Link href={accountCta.href}>{accountCta.label}</Link>
+          </Button>
+        )}
       </div>
     </div>
   );

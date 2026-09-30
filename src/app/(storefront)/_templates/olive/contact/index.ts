@@ -7,8 +7,8 @@ import { SECTION_LINKS } from "~/lib/section-links";
 const contactHeroData: TemplateField[] = [
   {
     key: "olive.contact.hero-heading",
-    label: "Hero Heading",
-    description: "The page title on the contact page's slate band.",
+    label: "Heading",
+    description: "The page title on the contact page's banner.",
     type: "text",
     page: "contact",
     group: "contact.hero",
@@ -17,7 +17,7 @@ const contactHeroData: TemplateField[] = [
   },
   {
     key: "olive.contact.hero-body",
-    label: "Hero Body",
+    label: "Body",
     description: "One line under the heading.",
     type: "textarea",
     page: "contact",
@@ -33,7 +33,7 @@ const contactHeroData: TemplateField[] = [
 const contactMainData: TemplateField[] = [
   {
     key: "olive.contact.form-heading",
-    label: "Form Heading",
+    label: "Form heading",
     description: "Heading above the contact form.",
     type: "text",
     page: "contact",
@@ -43,7 +43,7 @@ const contactMainData: TemplateField[] = [
   },
   {
     key: "olive.contact.form-body",
-    label: "Form Intro",
+    label: "Form intro",
     description: "One line above the contact form. Leave blank to hide.",
     type: "textarea",
     page: "contact",
@@ -53,10 +53,31 @@ const contactMainData: TemplateField[] = [
       "Tell us what's on your mind. We read every message and write back within a day or two.",
   },
   {
-    key: "olive.contact.info-visit-heading",
-    label: "Visit Heading",
+    key: "olive.contact.form-success-heading",
+    label: "Form success heading",
     description:
-      "Small label above the visit details. Shown only when Visit Details below is filled in.",
+      "Shown in place of the contact form after a message is sent.",
+    type: "text",
+    page: "contact",
+    group: "contact.main",
+    gridColumn: "col-span-1",
+    defaultValue: "Message sent",
+  },
+  {
+    key: "olive.contact.form-success-body",
+    label: "Form success body",
+    description: "One line under the success heading. Leave blank to hide.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.main",
+    gridColumn: "col-span-1",
+    defaultValue: "We read every note and write back within a day or two.",
+  },
+  {
+    key: "olive.contact.info-visit-heading",
+    label: "Visit heading",
+    description:
+      "Small label above your address from Settings and the visiting notes. Hidden when neither is set.",
     type: "text",
     page: "contact",
     group: "contact.main",
@@ -65,9 +86,9 @@ const contactMainData: TemplateField[] = [
   },
   {
     key: "olive.contact.info-visit-body",
-    label: "Visit Details",
+    label: "Visiting notes",
     description:
-      "Your address or visiting notes, shown in the contact page's info card. Leave blank to hide.",
+      "Optional note shown under your address on the contact page (e.g. parking or which door to use). Leave blank to hide.",
     type: "textarea",
     page: "contact",
     group: "contact.main",
@@ -76,25 +97,14 @@ const contactMainData: TemplateField[] = [
   },
   {
     key: "olive.contact.info-hours-heading",
-    label: "Hours Heading",
+    label: "Hours heading",
     description:
-      "Small label above your hours. Shown only when Hours below is filled in.",
+      "Small label above your opening hours from Settings → Business hours. Hidden when no hours are set.",
     type: "text",
     page: "contact",
     group: "contact.main",
     gridColumn: "col-span-1",
     defaultValue: "Hours",
-  },
-  {
-    key: "olive.contact.info-hours-body",
-    label: "Hours",
-    description:
-      "Your open hours, shown in the contact page's info card. Leave blank to hide.",
-    type: "textarea",
-    page: "contact",
-    group: "contact.main",
-    gridColumn: "col-span-1",
-    defaultValue: "",
   },
 ];
 
@@ -103,7 +113,7 @@ const contactMainData: TemplateField[] = [
 const contactFaqData: TemplateField[] = [
   {
     key: "olive.contact.faq-heading",
-    label: "FAQ Heading",
+    label: "Heading",
     description: "Heading above the frequently-asked-questions accordion.",
     type: "text",
     page: "contact",
@@ -130,7 +140,7 @@ const contactFaqData: TemplateField[] = [
 const contactPromoData: TemplateField[] = [
   {
     key: "olive.contact.promo-takeover",
-    label: "Full-Photo Takeover",
+    label: "Full-photo takeover",
     description:
       "On: the promo photo fills the width of the page with the copy on a card in its corner. Off: a photo-and-text band. Needs a photo to take effect.",
     type: "boolean",
@@ -141,7 +151,7 @@ const contactPromoData: TemplateField[] = [
   },
   {
     key: "olive.contact.promo-image",
-    label: "Promo Photo",
+    label: "Photo",
     description:
       "The photograph for the promo. Leave blank for a copy-only band.",
     type: "image",
@@ -152,7 +162,7 @@ const contactPromoData: TemplateField[] = [
   },
   {
     key: "olive.contact.promo-heading",
-    label: "Promo Heading",
+    label: "Heading",
     description:
       "Heading of the promo. Leave heading and text blank to hide the whole section.",
     type: "text",
@@ -163,7 +173,7 @@ const contactPromoData: TemplateField[] = [
   },
   {
     key: "olive.contact.promo-body",
-    label: "Promo Text",
+    label: "Text",
     description: "A line or two under the promo heading.",
     type: "textarea",
     page: "contact",
@@ -174,7 +184,7 @@ const contactPromoData: TemplateField[] = [
   },
   {
     key: "olive.contact.promo-button-label",
-    label: "Promo Button Label",
+    label: "Button label",
     description: "Label of the promo button. Leave blank to hide the button.",
     type: "text",
     page: "contact",
@@ -184,7 +194,7 @@ const contactPromoData: TemplateField[] = [
   },
   {
     key: "olive.contact.promo-button-link",
-    label: "Promo Button Link",
+    label: "Button link",
     description:
       "Where the promo button goes — the rewards page by default, but it can point anywhere.",
     type: "url",
@@ -200,36 +210,14 @@ const contactPromoData: TemplateField[] = [
 const contactMapData: TemplateField[] = [
   {
     key: "olive.contact.map-heading",
-    label: "Map Heading",
+    label: "Heading",
     description:
-      "Heading above the map. The map only shows once both coordinates below are set.",
+      "Heading above the map. The map shows once a map pin is set in Settings → General → Business address.",
     type: "text",
     page: "contact",
     group: "contact.map",
     gridColumn: "col-span-full",
     defaultValue: "Find us",
-  },
-  {
-    key: "olive.contact.map-lat",
-    label: "Latitude",
-    description:
-      "Your shop's latitude (e.g. 42.3314). Leave blank to hide the map.",
-    type: "number",
-    page: "contact",
-    group: "contact.map",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "olive.contact.map-lng",
-    label: "Longitude",
-    description:
-      "Your shop's longitude (e.g. -83.0458). Leave blank to hide the map.",
-    type: "number",
-    page: "contact",
-    group: "contact.map",
-    gridColumn: "col-span-1",
-    defaultValue: "",
   },
 ];
 
@@ -246,22 +234,22 @@ export const oliveContactData: TemplateField[] = [
 export const oliveContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.hero",
-    title: "Contact Hero",
-    description: "Page heading and intro line on the slate band",
+    title: "Hero",
+    description: "Page heading and intro line on the banner",
     icon: "👋",
     columns: 2,
   },
   {
     id: "contact.main",
-    title: "Form & Info",
+    title: "Form & info",
     description:
-      "Contact form heading/intro plus the visit and hours info card",
+      "Contact form heading/intro plus the headings of the info card (address, phone, email and hours come from Settings)",
     icon: "✉️",
     columns: 2,
   },
   {
     id: "contact.faq",
-    title: "Frequently Asked Questions",
+    title: "FAQ",
     description: "Heading and a question/answer accordion",
     icon: "❓",
     columns: 1,
@@ -277,7 +265,8 @@ export const oliveContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.map",
     title: "Map",
-    description: "Heading and coordinates for the location map",
+    description:
+      "Heading for the location map (the map pin is set in Settings)",
     icon: "📍",
     columns: 2,
   },
@@ -288,7 +277,7 @@ export const oliveContactSections: TemplateSection[] = [
     id: "contact.hero",
     page: "contact",
     title: "Hero",
-    description: "Page heading and intro line on the slate band",
+    description: "Page heading and intro line on the banner",
     groupIds: ["contact.hero"],
     order: 0,
     hideable: false,
@@ -296,11 +285,17 @@ export const oliveContactSections: TemplateSection[] = [
   {
     id: "contact.main",
     page: "contact",
-    title: "Form & Info",
-    description: "Contact form and the visit/hours info card",
+    title: "Form & info",
+    description:
+      "Contact form and the info card with your address, phone, email and hours",
     groupIds: ["contact.main"],
     order: 1,
     hideable: false,
+    links: [
+      SECTION_LINKS.businessContact,
+      SECTION_LINKS.businessLocation,
+      SECTION_LINKS.businessHours,
+    ],
   },
   {
     id: "contact.faq",
@@ -330,5 +325,6 @@ export const oliveContactSections: TemplateSection[] = [
     groupIds: ["contact.map"],
     order: 4,
     hideable: true,
+    links: [SECTION_LINKS.businessLocation],
   },
 ];

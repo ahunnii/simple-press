@@ -1,20 +1,49 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { Session } from "~/server/better-auth/config";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getRawCustomFieldString } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import {
+  externalLinkProps,
+  filterNavByFlags,
+  getAccountNavLinks,
+  resolveFooterNav,
+} from "~/app/(storefront)/_components/nav";
 
-import { resolveFields } from "../index";
+import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
+import { nonBlank } from "../shared/noise-non-blank";
+import {
+  hasNoiseSocialLinks,
+  NoiseSocialLinks,
+} from "../shared/noise-social-links";
+import { NoiseFooterAccount } from "./noise-footer-account";
 
-export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
+type FooterLink = { href: string; label: string; external?: boolean };
+
+type NoiseFooterProps = DefaultFooterTemplateProps & {
+  /** The layout's server-side session, seeding the account rows. */
+  initialSession?: Session | null;
+};
+
+/** Desktop column template by how many link columns survive (brand and
+ *  contact always render), so a hidden column never leaves an empty track. */
+const LG_GRID_COLS: Record<number, string> = {
+  0: "lg:grid-cols-[1.4fr_1.2fr]",
+  1: "lg:grid-cols-[1.4fr_1fr_1.2fr]",
+  2: "lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]",
+};
+
+export async function NoiseFooter({
+  business,
+  initialSession,
+}: NoiseFooterProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
   const address = business?.businessAddress;
@@ -27,42 +56,103 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const g = resolveFields(customFields, [
-    "noise.global.location-tag",
-    "noise.global.footer-tagline",
-  ]);
-  const locationTag = g["noise.global.location-tag"] ?? "";
-  const footerTagline =
-    g["noise.global.footer-tagline"] ?? "Independent goods, made with care.";
 
-  const QUICK_LINKS = [
+  const locationTag = resolveNoiseLocationTag(business, customFields);
+
+  // Tagline: Content → Branding → Footer tagline wins; else the legacy
+  // `noise.global.footer-tagline` field (retired 2026-09-25, a read-only
+  // fallback — never written or cleared from here); else hidden.
+  const footerTagline =
+    nonBlank(business?.siteContent?.footerText) ??
+    nonBlank(
+      getRawCustomFieldString(customFields, "noise.global.footer-tagline"),
+    );
+
+  const socialLinks = business?.siteContent?.socialLinks;
+
+  // Same gating as before, kept as the fallback so an unset footer list
+  // renders identically to today; `filterNavByFlags` below is then a no-op
+  // on this list and only matters for an owner-saved footer list. No
+  // "Shop All" here: the Shop column already carries it (B10.4, no dupes).
+  const quickLinksFallback = [
     { href: "/about", label: "About Us" },
     ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
     ...(isEnabled("testimonials")
       ? [{ href: "/testimonials", label: "Testimonials" }]
       : []),
     { href: "/contact", label: "Contact" },
-    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop All" }] : []),
-  ] as const;
+  ];
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        tiktok?: string;
-        youtube?: string;
-      }
-    | undefined;
+  const quickLinks = filterNavByFlags(
+    resolveFooterNav(
+      business?.siteContent?.footerNavigationItems,
+      quickLinksFallback,
+    ),
+    isEnabled,
+  );
+
+  // Shop column: the whole column rides on `products` (its links all point
+  // into the shop), and hides, heading included, when it ends up empty.
+  const shopLinks: FooterLink[] = isEnabled("products")
+    ? [
+        { href: "/shop", label: "Shop All" },
+        ...(isEnabled("collections")
+          ? [{ href: "/collections", label: "Collections" }]
+          : []),
+        { href: "/shop?sort_by=newest", label: "New arrivals" },
+      ]
+    : [];
+
+  // Account rows at the foot of Quick Links (B10.3), gated on
+  // `customerAccounts`. Signed in: "My account" (settings) and "Orders" only
+  // while `orders` is on, both from the flag-gated account links.
+  const accountsEnabled = isEnabled("customerAccounts");
+  const accountLinks = getAccountNavLinks({ isEnabled });
+  const settingsLink = accountLinks.find((link) => link.key === "settings");
+  const ordersLink = accountLinks.find((link) => link.key === "orders");
+  const signedInLinks = [
+    ...(settingsLink ? [{ label: "My account", href: settingsLink.href }] : []),
+    ...(ordersLink ? [{ label: "Orders", href: ordersLink.href }] : []),
+  ];
+
+  const showShopCol = shopLinks.length > 0;
+  const showQuickCol = quickLinks.length > 0 || accountsEnabled;
+  const linkColCount = Number(showShopCol) + Number(showQuickCol);
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
-  // const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
-  // const returnPolicy = policies.find((p) => p.slug === "refund-policy");
-  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
-  const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  // Legal strip (B10.1): exactly the four standard slugs Admin → Policies
+  // creates, never any other policy-type page (imports, QA data). Privacy
+  // and terms fall back to the platform's own policy when unpublished;
+  // shipping and returns have no platform equivalent, so they show once
+  // published. The platform policies index is always last.
+  const bySlug = (slug: string) => policies.find((p) => p.slug === slug);
+  const privacyPolicy = bySlug("privacy-policy");
+  const termsOfService = bySlug("terms-of-service");
+  const shippingPolicy = bySlug("shipping-policy");
+  const refundPolicy = bySlug("refund-policy");
 
-  // const blogEnabled = isEnabled("blog");
+  const legalLinks: FooterLink[] = [
+    {
+      href: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
+      label: "Privacy Policy",
+    },
+    {
+      href: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+      label: "Terms of Service",
+    },
+    ...(shippingPolicy
+      ? [{ href: `/${shippingPolicy.slug}`, label: "Shipping Policy" }]
+      : []),
+    ...(refundPolicy
+      ? [{ href: `/${refundPolicy.slug}`, label: "Returns & Refunds" }]
+      : []),
+    { href: "/platform/policies", label: "Platform Policies" },
+  ];
 
   return (
     <footer
@@ -89,7 +179,12 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
           }}
         >
           {/* Small-screen: single column; md: 2 cols; lg: 4 cols */}
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-12 md:grid-cols-2",
+              LG_GRID_COLS[linkColCount],
+            )}
+          >
             {/* ── Col 1: Wordmark + tagline + newsletter ── */}
             <div className="flex flex-col gap-5">
               {/* Wordmark */}
@@ -126,7 +221,6 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                           color: "var(--vn-steel-mist)",
                           fontWeight: 500,
                         }}
-                        {...fieldAttr("noise.global.location-tag")}
                       >
                         {locationTag}
                       </div>
@@ -144,108 +238,41 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     color: "var(--vn-steel-mist)",
                     maxWidth: "280px",
                   }}
-                  {...fieldAttr("noise.global.footer-tagline")}
                 >
                   {footerTagline}
                 </p>
               )}
 
               {/* Social icons */}
-              {(socialLinks?.instagram ??
-                socialLinks?.facebook ??
-                socialLinks?.twitter ??
-                socialLinks?.tiktok ??
-                socialLinks?.youtube) && (
-                <div className="flex gap-4">
-                  {socialLinks?.instagram && (
-                    <a
-                      href={socialLinks.instagram}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="Instagram"
-                    >
-                      <InstagramIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.facebook && (
-                    <a
-                      href={socialLinks.facebook}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="Facebook"
-                    >
-                      <FacebookIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.twitter && (
-                    <a
-                      href={socialLinks.twitter}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="X / Twitter"
-                    >
-                      <TwitterLogoIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.tiktok && (
-                    <a
-                      href={socialLinks.tiktok}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="TikTok"
-                    >
-                      <TikTokIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {socialLinks?.youtube && (
-                    <a
-                      href={socialLinks.youtube}
-                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                      aria-label="YouTube"
-                    >
-                      <YouTubeIcon className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                </div>
+              {hasNoiseSocialLinks(socialLinks) && (
+                <NoiseSocialLinks socialLinks={socialLinks} />
               )}
             </div>
 
-            {/* ── Col 2: Policies ── */}
-            {/* {policies.length > 0 && (
+            {/* ── Col 2: Shop — gated on `products`, hidden when empty ── */}
+            {showShopCol && <FooterCol title="Shop" links={shopLinks} />}
+
+            {/* ── Col 3: Quick links + account rows — hidden (heading
+                included) when the resolved list is empty and accounts are
+                off ── */}
+            {showQuickCol && (
               <FooterCol
-                title="Policies"
-                links={
-                  policies.length > 0
-                    ? policies.map((p) => ({
-                        href: `/${p.slug}`,
-                        label: p.title,
-                      }))
-                    : []
+                title="Quick Links"
+                links={quickLinks}
+                extra={
+                  accountsEnabled ? (
+                    <NoiseFooterAccount
+                      initialSession={initialSession}
+                      signedInLinks={signedInLinks}
+                    />
+                  ) : null
                 }
               />
-            )} */}
-
-            <FooterCol
-              title="Shop"
-              links={[
-                { href: "/shop", label: "Shop All" },
-                ...(isEnabled("collections")
-                  ? [{ href: "/collections", label: "Collections" }]
-                  : []),
-                { href: "/shop?sort_by=new", label: "New arrivals" },
-              ]}
-            />
-
-            {/* ── Col 3: Quick links ── */}
-            <FooterCol
-              title="Quick Links"
-              links={QUICK_LINKS.map((l) => ({ href: l.href, label: l.label }))}
-            />
+            )}
 
             {/* ── Col 4: Contact info ── */}
             <div>
-              {(address ?? email ?? phone) && (
+              {(!!address || !!email || !!phone) && (
                 <>
                   <h2
                     className="mb-5 font-mono"
@@ -278,7 +305,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 </div>
               )}
 
-              {(email ?? phone) && (
+              {(!!email || !!phone) && (
                 <div>
                   <p
                     className="mb-0.5 font-sans font-semibold"
@@ -327,54 +354,28 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
           © {new Date().getFullYear()} {name}
         </span>
 
-        {/* Payment icons */}
-        <div
-          className="flex flex-wrap gap-3 font-mono"
-          style={{
-            padding: "4px 8px",
-            fontSize: "9px",
-            letterSpacing: "0.18em",
-            color: "var(--vn-steel-mist)",
-          }}
-        >
-          {privacyPolicy ? (
-            <Link
-              href={`/${privacyPolicy.slug}`}
-              className="transition-colors hover:text-[#0a0a0a]"
-            >
-              Privacy Policy{" "}
-            </Link>
-          ) : (
-            <Link
-              href="/platform/policies/privacy-policy"
-              className="transition-colors hover:text-[#0a0a0a]"
-            >
-              Privacy Policy
-            </Link>
-          )}
-
-          {termsOfService ? (
-            <Link
-              href={`/${termsOfService.slug}`}
-              className="transition-colors hover:text-[#0a0a0a]"
-            >
-              Terms of Service
-            </Link>
-          ) : (
-            <Link
-              href="/platform/policies/terms-of-service"
-              className="transition-colors hover:text-[#0a0a0a]"
-            >
-              Terms of Service
-            </Link>
-          )}
-          <Link
-            href="/platform/policies/"
-            className="transition-colors hover:text-[#0a0a0a]"
+        {/* Legal strip (B10.1): mandatory, never hidden */}
+        <nav aria-label="Policies">
+          <ul
+            className="m-0 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 font-mono"
+            style={{
+              fontSize: "11px",
+              letterSpacing: "0.1em",
+              color: "var(--vn-steel-mist)",
+            }}
           >
-            Platform Policies
-          </Link>
-        </div>
+            {legalLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="transition-colors hover:text-[var(--vn-ink)]"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </footer>
   );
@@ -383,10 +384,13 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 function FooterCol({
   title,
   links,
+  extra,
   className,
 }: {
   title: string;
-  links: { href: string; label: string }[];
+  links: FooterLink[];
+  /** Extra `<li>` rows after the links (Quick Links' account rows). */
+  extra?: ReactNode;
   className?: string;
 }) {
   return (
@@ -404,16 +408,21 @@ function FooterCol({
       </h2>
       <ul className="flex flex-col gap-3">
         {links.map((link) => (
-          <li key={link.href}>
+          <li key={link.href + link.label}>
             <Link
               href={link.href}
+              {...externalLinkProps(link.external)}
               className="vn-footer-link font-sans"
               style={{ fontSize: "13px" }}
             >
               {link.label}
+              {link.external && (
+                <span className="sr-only"> (opens in new tab)</span>
+              )}
             </Link>
           </li>
         ))}
+        {extra}
       </ul>
     </div>
   );

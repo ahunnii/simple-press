@@ -3,8 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const productsData: TemplateField[] = [
   {
     key: "modern.products.tagline",
-    label: "Tagline",
-    description: "Tagline for the products page",
+    label: "Small label",
+    description: "Short label above the heading at the top of the Shop page.",
     type: "text",
     page: "products",
     group: "products.main",
@@ -14,8 +14,8 @@ const productsData: TemplateField[] = [
   },
   {
     key: "modern.products.title",
-    label: "Title",
-    description: "Title for the products page",
+    label: "Heading",
+    description: "Main heading at the top of the Shop page.",
     type: "text",
     page: "products",
     group: "products.main",
@@ -25,16 +25,15 @@ const productsData: TemplateField[] = [
   },
   {
     key: "modern.products.description",
-    label: "Description",
-    description: "Description for the products page",
+    label: "Intro text",
+    description: "Short paragraph below the heading.",
     type: "textarea",
     page: "products",
     group: "products.main",
     gridColumn: "col-span-full",
     defaultValue:
       "Browse our curated products, each assembled with care around a distinct theme or purpose.",
-    placeholder:
-      "e.g. Browse our curated products, each assembled with care around a distinct theme or purpose.",
+    placeholder: "A sentence or two describing what shoppers will find here.",
   },
 ];
 
@@ -43,8 +42,9 @@ export const modernProductsData = [...productsData];
 export const modernProductsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "products.main",
-    title: "Products Main",
-    description: "Main section for the products page",
+    title: "Intro",
+    description:
+      "Small label, heading, and intro above the shop's product grid.",
     icon: "🛍️",
     columns: 2,
   },

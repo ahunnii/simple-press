@@ -7,6 +7,7 @@ import { CartProvider } from "~/providers/cart-context";
 import { CheckoutForm as BambooCheckoutForm } from "~/app/(storefront)/_templates/bamboo/cart-checkout/bamboo-checkout-form";
 import { DarkTrendCheckoutForm } from "~/app/(storefront)/_templates/dark-trend/cart-checkout/dark-trend-checkout-form";
 import { DefaultCheckoutForm } from "~/app/(storefront)/_templates/default/cart-checkout/default-checkout-form";
+import { DreamCheckoutForm } from "~/app/(storefront)/_templates/dream/cart-checkout/dream-checkout-form";
 import { ElegantCheckoutForm } from "~/app/(storefront)/_templates/elegant/cart-checkout/elegant-checkout-form";
 import { HappyBambooCheckoutForm } from "~/app/(storefront)/_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-form";
 import { ModernCheckoutForm } from "~/app/(storefront)/_templates/modern/cart-checkout/modern-checkout-form";
@@ -15,6 +16,7 @@ import { OliveCheckoutForm } from "~/app/(storefront)/_templates/olive/cart-chec
 import { PinkCheckoutForm } from "~/app/(storefront)/_templates/pink/cart-checkout/pink-checkout-form";
 import { PollenCheckoutForm } from "~/app/(storefront)/_templates/pollen/cart-checkout/pollen-checkout-form";
 import { SledgeCheckoutForm } from "~/app/(storefront)/_templates/sledge/cart-checkout/sledge-checkout-form";
+import { UmscCheckoutForm } from "~/app/(storefront)/_templates/umsc/cart-checkout/umsc-checkout-form";
 
 // --- Shared mocks: every template form imports the same externals, so mocking
 // them here covers all ten. ---
@@ -134,6 +136,21 @@ type FormComponent = ComponentType<{
   merchantPolicies: MerchantPoliciesProp;
 }>;
 
+// umsc's form takes its field-driven headings as props (resolved by the page).
+const UmscForm: FormComponent = (props) => (
+  <UmscCheckoutForm
+    {...props}
+    contactHeading="Contact"
+    deliveryHeading="Delivery"
+    shippingHeading="Shipping"
+    summaryHeading="Summary"
+    discountLabel="Discount code"
+    submitLabel="Pay"
+    emptyHeading="Your bag is empty"
+    emptyCta="Shop"
+  />
+);
+
 const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["default", DefaultCheckoutForm],
   ["modern", ModernCheckoutForm],
@@ -146,6 +163,8 @@ const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["dark-trend", DarkTrendCheckoutForm],
   ["sledge", SledgeCheckoutForm],
   ["pink", PinkCheckoutForm],
+  ["dream", DreamCheckoutForm],
+  ["umsc", UmscForm],
 ];
 
 describe("checkout form renders for every template", () => {

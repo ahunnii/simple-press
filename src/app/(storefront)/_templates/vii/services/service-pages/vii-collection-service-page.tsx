@@ -40,6 +40,7 @@ import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-page
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { VII_EDGE_CONTAINER } from "../../shared/vii-page-edge";
 import {
   LedgerHero,
   LedgerIntro,
@@ -370,8 +371,7 @@ function SignatureFeature({
         visible && "is-visible",
       )}
       style={{
-        maxWidth: 1100,
-        margin: "0 auto",
+        ...VII_EDGE_CONTAINER,
         background: "var(--vii-cream)",
         border: "1px solid var(--vii-tan)",
         borderRadius: "0.35rem",
@@ -795,7 +795,7 @@ function SlateRoom({
           "calc(var(--vii-collection-header-h, var(--vii-header-offset)) + var(--vii-collection-nav-h, 45px) + 8px)",
       }}
     >
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div style={VII_EDGE_CONTAINER}>
         {/* Chapter header */}
         <div
           ref={headRef}
@@ -974,7 +974,7 @@ function LightRoom({
         padding: `${padTop} clamp(24px, 6vw, 96px) clamp(72px, 10vw, 120px)`,
       }}
     >
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div style={VII_EDGE_CONTAINER}>
         {chapters.map((ch, i) => (
           <Chapter
             key={ch.id}
@@ -1113,7 +1113,7 @@ function CollectionList({
             padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
           }}
         >
-          <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={VII_EDGE_CONTAINER}>
             <CollectionListHeader
               listHeading={listHeading}
               listIntro={listIntro}
@@ -1246,7 +1246,7 @@ function CollectionList({
                       "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px) 0",
                   }}
                 >
-                  <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+                  <div style={VII_EDGE_CONTAINER}>
                     <CollectionListHeader
                       listHeading={listHeading}
                       listIntro={listIntro}

@@ -7,6 +7,7 @@ import { Minus, Plus, X } from "lucide-react";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkEmptyState } from "../shared/pink-empty-state";
 
@@ -45,6 +46,7 @@ export function PinkCartContents({
     subtotal,
     isHydrated,
   } = useCart();
+  const { isEnabled } = useStorefrontFlags();
 
   // Hydration guard — neutral skeleton prevents an empty→filled flash.
   if (!isHydrated) {
@@ -67,7 +69,7 @@ export function PinkCartContents({
         heading={emptyHeading}
         body={emptyBody}
         ctaLabel={emptyCta}
-        ctaHref="/shop"
+        ctaHref={isEnabled("products") ? "/shop" : undefined}
       />
     );
   }
@@ -98,7 +100,7 @@ export function PinkCartContents({
               {heading}
             </span>
             <span className="pink-label-dark">
-              {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+              {itemCount} {itemCount === 1 ? "item" : "items"}
             </span>
           </div>
 
@@ -122,22 +124,26 @@ export function PinkCartContents({
             </p>
           )}
 
-          <Link
-            href="/checkout"
-            className="pink-btn pink-btn-solid w-full justify-center"
-            {...fieldAttr("pink.cart.checkout-label")}
-          >
-            {checkoutLabel}
-          </Link>
+          {isEnabled("checkout") && (
+            <Link
+              href="/checkout"
+              className="pink-btn pink-btn-solid w-full justify-center"
+              {...fieldAttr("pink.cart.checkout-label")}
+            >
+              {checkoutLabel}
+            </Link>
+          )}
 
-          <Link
-            href="/shop"
-            className="text-center text-[13px] underline underline-offset-2 transition-opacity hover:opacity-70"
-            style={{ color: "var(--pink-ink-muted)" }}
-            {...fieldAttr("pink.cart.continue-shopping-label")}
-          >
-            {continueShoppingLabel}
-          </Link>
+          {isEnabled("products") && (
+            <Link
+              href="/shop"
+              className="text-center text-[13px] underline underline-offset-2 transition-opacity hover:opacity-70"
+              style={{ color: "var(--pink-ink-muted)" }}
+              {...fieldAttr("pink.cart.continue-shopping-label")}
+            >
+              {continueShoppingLabel}
+            </Link>
+          )}
         </div>
       </aside>
 

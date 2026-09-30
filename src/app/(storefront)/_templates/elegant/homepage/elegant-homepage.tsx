@@ -31,6 +31,8 @@ export async function ElegantHomePage() {
     "elegant.homepage.hero-description",
     "elegant.homepage.hero-button-text",
     "elegant.homepage.hero-button-link",
+    "elegant.homepage.hero-secondary-button-text",
+    "elegant.homepage.hero-secondary-button-link",
     "elegant.homepage.hero-video",
     "elegant.homepage.hero-tagline",
     "elegant.homepage.products-tagline",
@@ -43,11 +45,8 @@ export async function ElegantHomePage() {
     "elegant.homepage.about.text",
     "elegant.homepage.about.image",
     "elegant.homepage.about.video",
-    "elegant.cta.background",
-    "elegant.cta.title",
-    "elegant.cta.pointone",
-    "elegant.cta.pointtwo",
-    "elegant.cta.pointthree",
+    "elegant.homepage.about.button-text",
+    "elegant.homepage.about.button-link",
   ]);
 
   return (
@@ -62,6 +61,12 @@ export async function ElegantHomePage() {
         heroDescription={f["elegant.homepage.hero-description"]}
         heroButtonText={f["elegant.homepage.hero-button-text"]}
         heroButtonLink={f["elegant.homepage.hero-button-link"]}
+        heroSecondaryButtonText={
+          f["elegant.homepage.hero-secondary-button-text"]
+        }
+        heroSecondaryButtonLink={
+          f["elegant.homepage.hero-secondary-button-link"]
+        }
         sectionAttrs={sectionGroupAttr("homepage", "hero")}
       />
 
@@ -72,34 +77,41 @@ export async function ElegantHomePage() {
         />
       )}
 
-      <ElegantProductGrid
-        homepage={homepage}
-        productsTagline={f["elegant.homepage.products-tagline"]}
-        productsTitle={f["elegant.homepage.products-title"]}
-        productsDescription={f["elegant.homepage.products-description"]}
-        productsButtonText={f["elegant.homepage.products-button-text"]}
-        productsButtonLink={f["elegant.homepage.products-button-link"]}
-        sectionAttrs={sectionGroupAttr("homepage", "products")}
-      />
+      {isSectionVisible(customFields, "elegant", "homepage.products") && (
+        <ElegantProductGrid
+          homepage={homepage}
+          productsTagline={f["elegant.homepage.products-tagline"]}
+          productsTitle={f["elegant.homepage.products-title"]}
+          productsDescription={f["elegant.homepage.products-description"]}
+          productsButtonText={f["elegant.homepage.products-button-text"]}
+          productsButtonLink={f["elegant.homepage.products-button-link"]}
+          sectionAttrs={sectionGroupAttr("homepage", "products")}
+        />
+      )}
 
-      <ElegantFeatureSection
-        homepage={homepage}
-        aboutTagline={f["elegant.homepage.about.tagline"]}
-        aboutImage={f["elegant.homepage.about.image"]}
-        aboutVideo={f["elegant.homepage.about.video"]}
-        aboutTitle={f["elegant.homepage.about.title"]}
-        aboutText={f["elegant.homepage.about.text"]}
-        sectionAttrs={sectionGroupAttr("homepage", "about")}
-        featuresVisible={isSectionVisible(
-          customFields,
-          "elegant",
-          "homepage.features",
-        )}
-      />
+      {isSectionVisible(customFields, "elegant", "homepage.about") && (
+        <ElegantFeatureSection
+          homepage={homepage}
+          aboutTagline={f["elegant.homepage.about.tagline"]}
+          aboutImage={f["elegant.homepage.about.image"]}
+          aboutVideo={f["elegant.homepage.about.video"]}
+          aboutTitle={f["elegant.homepage.about.title"]}
+          aboutText={f["elegant.homepage.about.text"]}
+          aboutButtonText={f["elegant.homepage.about.button-text"]}
+          aboutButtonLink={f["elegant.homepage.about.button-link"]}
+          sectionAttrs={sectionGroupAttr("homepage", "about")}
+          featuresVisible={isSectionVisible(
+            customFields,
+            "elegant",
+            "homepage.features",
+          )}
+        />
+      )}
 
       {isSectionVisible(customFields, "elegant", "homepage.testimonials") && (
         <ElegantTestimonials
           testimonials={testimonials}
+          customFields={customFields}
           sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
         />
       )}
@@ -113,6 +125,7 @@ export async function ElegantHomePage() {
 
       {isSectionVisible(customFields, "elegant", "homepage.newsletter") && (
         <ElegantNewsletter
+          customFields={customFields}
           sectionAttrs={sectionGroupAttr("homepage", "newsletter")}
         />
       )}

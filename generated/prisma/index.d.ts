@@ -13423,6 +13423,8 @@ export namespace Prisma {
   }
 
   export type BusinessAvgAggregateOutputType = {
+    latitude: number | null
+    longitude: number | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
     shippingFallbackRate: number | null
@@ -13430,6 +13432,8 @@ export namespace Prisma {
   }
 
   export type BusinessSumAggregateOutputType = {
+    latitude: number | null
+    longitude: number | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
     shippingFallbackRate: number | null
@@ -13456,6 +13460,8 @@ export namespace Prisma {
     addressCity: string | null
     addressState: string | null
     addressPostalCode: string | null
+    latitude: number | null
+    longitude: number | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
     stripeChargesEnabled: boolean | null
@@ -13514,6 +13520,8 @@ export namespace Prisma {
     addressCity: string | null
     addressState: string | null
     addressPostalCode: string | null
+    latitude: number | null
+    longitude: number | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
     stripeChargesEnabled: boolean | null
@@ -13572,6 +13580,8 @@ export namespace Prisma {
     addressCity: number
     addressState: number
     addressPostalCode: number
+    latitude: number
+    longitude: number
     stripeAccountId: number
     stripeAutoTaxEnabled: number
     stripeChargesEnabled: number
@@ -13621,6 +13631,8 @@ export namespace Prisma {
 
 
   export type BusinessAvgAggregateInputType = {
+    latitude?: true
+    longitude?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
     shippingFallbackRate?: true
@@ -13628,6 +13640,8 @@ export namespace Prisma {
   }
 
   export type BusinessSumAggregateInputType = {
+    latitude?: true
+    longitude?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
     shippingFallbackRate?: true
@@ -13654,6 +13668,8 @@ export namespace Prisma {
     addressCity?: true
     addressState?: true
     addressPostalCode?: true
+    latitude?: true
+    longitude?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     stripeChargesEnabled?: true
@@ -13712,6 +13728,8 @@ export namespace Prisma {
     addressCity?: true
     addressState?: true
     addressPostalCode?: true
+    latitude?: true
+    longitude?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     stripeChargesEnabled?: true
@@ -13770,6 +13788,8 @@ export namespace Prisma {
     addressCity?: true
     addressState?: true
     addressPostalCode?: true
+    latitude?: true
+    longitude?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     stripeChargesEnabled?: true
@@ -13923,6 +13943,8 @@ export namespace Prisma {
     addressCity: string | null
     addressState: string | null
     addressPostalCode: string | null
+    latitude: number | null
+    longitude: number | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean
     stripeChargesEnabled: boolean
@@ -14008,6 +14030,8 @@ export namespace Prisma {
     addressCity?: boolean
     addressState?: boolean
     addressPostalCode?: boolean
+    latitude?: boolean
+    longitude?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -14116,6 +14140,8 @@ export namespace Prisma {
     addressCity?: boolean
     addressState?: boolean
     addressPostalCode?: boolean
+    latitude?: boolean
+    longitude?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -14182,6 +14208,8 @@ export namespace Prisma {
     addressCity?: boolean
     addressState?: boolean
     addressPostalCode?: boolean
+    latitude?: boolean
+    longitude?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -14248,6 +14276,8 @@ export namespace Prisma {
     addressCity?: boolean
     addressState?: boolean
     addressPostalCode?: boolean
+    latitude?: boolean
+    longitude?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -14294,7 +14324,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -14407,6 +14437,8 @@ export namespace Prisma {
       addressCity: string | null
       addressState: string | null
       addressPostalCode: string | null
+      latitude: number | null
+      longitude: number | null
       stripeAccountId: string | null
       stripeAutoTaxEnabled: boolean
       stripeChargesEnabled: boolean
@@ -14934,6 +14966,8 @@ export namespace Prisma {
     readonly addressCity: FieldRef<"Business", 'String'>
     readonly addressState: FieldRef<"Business", 'String'>
     readonly addressPostalCode: FieldRef<"Business", 'String'>
+    readonly latitude: FieldRef<"Business", 'Float'>
+    readonly longitude: FieldRef<"Business", 'Float'>
     readonly stripeAccountId: FieldRef<"Business", 'String'>
     readonly stripeAutoTaxEnabled: FieldRef<"Business", 'Boolean'>
     readonly stripeChargesEnabled: FieldRef<"Business", 'Boolean'>
@@ -16440,6 +16474,7 @@ export namespace Prisma {
     secondaryColor: number
     accentColor: number
     navigationItems: number
+    footerNavigationItems: number
     customFields: number
     bannerConfig: number
     popupConfig: number
@@ -16533,6 +16568,7 @@ export namespace Prisma {
     secondaryColor?: true
     accentColor?: true
     navigationItems?: true
+    footerNavigationItems?: true
     customFields?: true
     bannerConfig?: true
     popupConfig?: true
@@ -16643,6 +16679,7 @@ export namespace Prisma {
     secondaryColor: string | null
     accentColor: string | null
     navigationItems: JsonValue | null
+    footerNavigationItems: JsonValue | null
     customFields: JsonValue | null
     bannerConfig: JsonValue | null
     popupConfig: JsonValue | null
@@ -16697,6 +16734,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16735,6 +16773,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16773,6 +16812,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16811,6 +16851,7 @@ export namespace Prisma {
     secondaryColor?: boolean
     accentColor?: boolean
     navigationItems?: boolean
+    footerNavigationItems?: boolean
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
@@ -16820,7 +16861,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "seoBrandName" | "pageMeta" | "siteVerification" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
+  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "seoBrandName" | "pageMeta" | "siteVerification" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "footerNavigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
   export type SiteContentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -16864,6 +16905,7 @@ export namespace Prisma {
       secondaryColor: string | null
       accentColor: string | null
       navigationItems: Prisma.JsonValue | null
+      footerNavigationItems: Prisma.JsonValue | null
       customFields: Prisma.JsonValue | null
       bannerConfig: Prisma.JsonValue | null
       popupConfig: Prisma.JsonValue | null
@@ -17322,6 +17364,7 @@ export namespace Prisma {
     readonly secondaryColor: FieldRef<"SiteContent", 'String'>
     readonly accentColor: FieldRef<"SiteContent", 'String'>
     readonly navigationItems: FieldRef<"SiteContent", 'Json'>
+    readonly footerNavigationItems: FieldRef<"SiteContent", 'Json'>
     readonly customFields: FieldRef<"SiteContent", 'Json'>
     readonly bannerConfig: FieldRef<"SiteContent", 'Json'>
     readonly popupConfig: FieldRef<"SiteContent", 'Json'>
@@ -84353,6 +84396,8 @@ export namespace Prisma {
     addressCity: 'addressCity',
     addressState: 'addressState',
     addressPostalCode: 'addressPostalCode',
+    latitude: 'latitude',
+    longitude: 'longitude',
     stripeAccountId: 'stripeAccountId',
     stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
     stripeChargesEnabled: 'stripeChargesEnabled',
@@ -84430,6 +84475,7 @@ export namespace Prisma {
     secondaryColor: 'secondaryColor',
     accentColor: 'accentColor',
     navigationItems: 'navigationItems',
+    footerNavigationItems: 'footerNavigationItems',
     customFields: 'customFields',
     bannerConfig: 'bannerConfig',
     popupConfig: 'popupConfig',
@@ -85664,6 +85710,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -85688,20 +85748,6 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
   /**
    * Deep Input Types
@@ -86143,6 +86189,8 @@ export namespace Prisma {
     addressCity?: StringNullableFilter<"Business"> | string | null
     addressState?: StringNullableFilter<"Business"> | string | null
     addressPostalCode?: StringNullableFilter<"Business"> | string | null
+    latitude?: FloatNullableFilter<"Business"> | number | null
+    longitude?: FloatNullableFilter<"Business"> | number | null
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     stripeChargesEnabled?: BoolFilter<"Business"> | boolean
@@ -86250,6 +86298,8 @@ export namespace Prisma {
     addressCity?: SortOrderInput | SortOrder
     addressState?: SortOrderInput | SortOrder
     addressPostalCode?: SortOrderInput | SortOrder
+    latitude?: SortOrderInput | SortOrder
+    longitude?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
@@ -86361,6 +86411,8 @@ export namespace Prisma {
     addressCity?: StringNullableFilter<"Business"> | string | null
     addressState?: StringNullableFilter<"Business"> | string | null
     addressPostalCode?: StringNullableFilter<"Business"> | string | null
+    latitude?: FloatNullableFilter<"Business"> | number | null
+    longitude?: FloatNullableFilter<"Business"> | number | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     stripeChargesEnabled?: BoolFilter<"Business"> | boolean
     stripePayoutsEnabled?: BoolFilter<"Business"> | boolean
@@ -86467,6 +86519,8 @@ export namespace Prisma {
     addressCity?: SortOrderInput | SortOrder
     addressState?: SortOrderInput | SortOrder
     addressPostalCode?: SortOrderInput | SortOrder
+    latitude?: SortOrderInput | SortOrder
+    longitude?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
@@ -86541,6 +86595,8 @@ export namespace Prisma {
     addressCity?: StringNullableWithAggregatesFilter<"Business"> | string | null
     addressState?: StringNullableWithAggregatesFilter<"Business"> | string | null
     addressPostalCode?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    latitude?: FloatNullableWithAggregatesFilter<"Business"> | number | null
+    longitude?: FloatNullableWithAggregatesFilter<"Business"> | number | null
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     stripeChargesEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
@@ -86618,6 +86674,7 @@ export namespace Prisma {
     secondaryColor?: StringNullableFilter<"SiteContent"> | string | null
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableFilter<"SiteContent">
+    footerNavigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
     bannerConfig?: JsonNullableFilter<"SiteContent">
     popupConfig?: JsonNullableFilter<"SiteContent">
@@ -86656,6 +86713,7 @@ export namespace Prisma {
     secondaryColor?: SortOrderInput | SortOrder
     accentColor?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
+    footerNavigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
     bannerConfig?: SortOrderInput | SortOrder
     popupConfig?: SortOrderInput | SortOrder
@@ -86698,6 +86756,7 @@ export namespace Prisma {
     secondaryColor?: StringNullableFilter<"SiteContent"> | string | null
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableFilter<"SiteContent">
+    footerNavigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
     bannerConfig?: JsonNullableFilter<"SiteContent">
     popupConfig?: JsonNullableFilter<"SiteContent">
@@ -86735,6 +86794,7 @@ export namespace Prisma {
     secondaryColor?: SortOrderInput | SortOrder
     accentColor?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
+    footerNavigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
     bannerConfig?: SortOrderInput | SortOrder
     popupConfig?: SortOrderInput | SortOrder
@@ -86778,6 +86838,7 @@ export namespace Prisma {
     secondaryColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     accentColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableWithAggregatesFilter<"SiteContent">
+    footerNavigationItems?: JsonNullableWithAggregatesFilter<"SiteContent">
     customFields?: JsonNullableWithAggregatesFilter<"SiteContent">
     bannerConfig?: JsonNullableWithAggregatesFilter<"SiteContent">
     popupConfig?: JsonNullableWithAggregatesFilter<"SiteContent">
@@ -93073,6 +93134,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -93180,6 +93243,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -93287,6 +93352,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -93394,6 +93461,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -93501,6 +93570,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -93567,6 +93638,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -93633,6 +93706,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -93707,6 +93782,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93744,6 +93820,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93781,6 +93858,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93818,6 +93896,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93855,6 +93934,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93892,6 +93972,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -93928,6 +94009,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -101013,6 +101095,17 @@ export namespace Prisma {
     notIn?: $Enums.BusinessDomainStatus[] | ListEnumBusinessDomainStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumBusinessDomainStatusFilter<$PrismaModel> | $Enums.BusinessDomainStatus
   }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -101077,17 +101170,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type ProductListRelationFilter = {
@@ -101440,6 +101522,8 @@ export namespace Prisma {
     addressCity?: SortOrder
     addressState?: SortOrder
     addressPostalCode?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
@@ -101487,6 +101571,8 @@ export namespace Prisma {
   }
 
   export type BusinessAvgOrderByAggregateInput = {
+    latitude?: SortOrder
+    longitude?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
     shippingFallbackRate?: SortOrder
@@ -101513,6 +101599,8 @@ export namespace Prisma {
     addressCity?: SortOrder
     addressState?: SortOrder
     addressPostalCode?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
@@ -101571,6 +101659,8 @@ export namespace Prisma {
     addressCity?: SortOrder
     addressState?: SortOrder
     addressPostalCode?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     stripeChargesEnabled?: SortOrder
@@ -101610,6 +101700,8 @@ export namespace Prisma {
   }
 
   export type BusinessSumOrderByAggregateInput = {
+    latitude?: SortOrder
+    longitude?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
     shippingFallbackRate?: SortOrder
@@ -101624,6 +101716,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
     _max?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -101694,22 +101802,6 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
   export type SiteContentCountOrderByAggregateInput = {
     id?: SortOrder
     updatedAt?: SortOrder
@@ -101738,6 +101830,7 @@ export namespace Prisma {
     secondaryColor?: SortOrder
     accentColor?: SortOrder
     navigationItems?: SortOrder
+    footerNavigationItems?: SortOrder
     customFields?: SortOrder
     bannerConfig?: SortOrder
     popupConfig?: SortOrder
@@ -106406,12 +106499,7 @@ export namespace Prisma {
     set?: $Enums.BusinessDomainStatus
   }
 
-  export type BusinessUpdateareaServedInput = {
-    set?: string[]
-    push?: string | string[]
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
+  export type NullableFloatFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
     decrement?: number
@@ -106419,7 +106507,12 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type NullableFloatFieldUpdateOperationsInput = {
+  export type BusinessUpdateareaServedInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
     decrement?: number
@@ -111083,6 +111176,22 @@ export namespace Prisma {
     _min?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
     _max?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
   }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -111144,22 +111253,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -111878,6 +111971,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -111984,6 +112079,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -112157,6 +112254,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -112263,6 +112362,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -112929,6 +113030,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -112965,6 +113067,7 @@ export namespace Prisma {
     secondaryColor?: string | null
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -114768,6 +114871,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -114804,6 +114908,7 @@ export namespace Prisma {
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
+    footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
@@ -116073,6 +116178,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -116179,6 +116286,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -116301,6 +116410,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -116407,6 +116518,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -116513,6 +116626,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -116619,6 +116734,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -116741,6 +116858,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -116847,6 +116966,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -117002,6 +117123,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -117108,6 +117231,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -117659,6 +117784,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -117765,6 +117892,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -118516,6 +118645,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -118622,6 +118753,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -118766,6 +118899,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -118872,6 +119007,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -119286,6 +119423,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -119392,6 +119531,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -119566,6 +119707,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -119672,6 +119815,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -119911,6 +120056,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -120017,6 +120164,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -120139,6 +120288,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -120245,6 +120396,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -120351,6 +120504,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -120457,6 +120612,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -120627,6 +120784,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -120733,6 +120892,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -120890,6 +121051,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -120996,6 +121159,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -121159,6 +121324,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -121265,6 +121432,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -121472,6 +121641,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -121578,6 +121749,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -121807,6 +121980,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -121913,6 +122088,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -122064,6 +122241,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -122170,6 +122349,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -122871,6 +123052,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -122977,6 +123160,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -123707,6 +123892,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -123813,6 +124000,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -124405,6 +124594,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -124511,6 +124702,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -125538,6 +125731,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -125644,6 +125839,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -125893,6 +126090,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -125999,6 +126198,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -126353,6 +126554,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -126459,6 +126662,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -126959,6 +127164,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -127065,6 +127272,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -127358,6 +127567,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -127464,6 +127675,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -127770,6 +127983,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -127876,6 +128091,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -128030,6 +128247,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -128136,6 +128355,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -128381,6 +128602,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -128487,6 +128710,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -128713,6 +128938,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -128819,6 +129046,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -129033,6 +129262,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -129139,6 +129370,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -129300,6 +129533,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -129406,6 +129641,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -129528,6 +129765,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -129634,6 +129873,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -129740,6 +129981,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -129846,6 +130089,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -129968,6 +130213,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -130074,6 +130321,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -130180,6 +130429,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -130286,6 +130537,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -130453,6 +130706,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -130559,6 +130814,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -130716,6 +130973,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -130822,6 +131081,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -130944,6 +131205,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -131050,6 +131313,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -131156,6 +131421,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -131262,6 +131529,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -131416,6 +131685,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -131522,6 +131793,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -131743,6 +132016,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -131849,6 +132124,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -132036,6 +132313,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -132142,6 +132421,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -132319,6 +132600,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -132425,6 +132708,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -132612,6 +132897,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -132718,6 +133005,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -133585,6 +133874,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -133691,6 +133982,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -133858,6 +134151,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -133964,6 +134259,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -134121,6 +134418,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -134227,6 +134526,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -134349,6 +134650,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -134455,6 +134758,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -134561,6 +134866,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -134667,6 +134974,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -134811,6 +135120,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -134917,6 +135228,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -135198,6 +135511,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -135304,6 +135619,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -135533,6 +135850,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -135639,6 +135958,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -135745,6 +136066,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -135851,6 +136174,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -136025,6 +136350,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -136131,6 +136458,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -136342,6 +136671,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -136448,6 +136779,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -136617,6 +136950,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -136723,6 +137058,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -136829,6 +137166,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -136935,6 +137274,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -137095,6 +137436,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -137201,6 +137544,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -137348,6 +137693,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -137454,6 +137801,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -137607,6 +137956,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -137713,6 +138064,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -137819,6 +138172,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -137925,6 +138280,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -138047,6 +138404,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -138153,6 +138512,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -138259,6 +138620,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -138365,6 +138728,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -138534,6 +138899,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -138640,6 +139007,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -138799,6 +139168,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -138905,6 +139276,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -139027,6 +139400,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -139133,6 +139508,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -139239,6 +139616,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -139345,6 +139724,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -139596,6 +139977,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -139702,6 +140085,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -140019,6 +140404,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -140125,6 +140512,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -140348,6 +140737,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -140454,6 +140845,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -140756,6 +141149,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -140862,6 +141257,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -141326,6 +141723,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -141432,6 +141831,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -141828,6 +142229,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -141934,6 +142337,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -142056,6 +142461,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -142162,6 +142569,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -142268,6 +142677,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -142374,6 +142785,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -142534,6 +142947,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -142640,6 +143055,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -142868,6 +143285,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -142974,6 +143393,8 @@ export namespace Prisma {
     addressCity?: string | null
     addressState?: string | null
     addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     stripeChargesEnabled?: boolean
@@ -143293,6 +143714,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
@@ -143399,6 +143822,8 @@ export namespace Prisma {
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
     addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean

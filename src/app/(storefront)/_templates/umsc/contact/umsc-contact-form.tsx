@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -57,16 +58,7 @@ const PRODUCT_TYPE_OPTIONS: {
 
 type Mode = "general" | "custom";
 
-type AsideProps = {
-  heading: string;
-  lines: { value: string; fieldKey: string }[];
-  phone: string;
-  hours: string;
-  instagramUrl: string;
-  facebookUrl: string;
-  tiktokUrl: string;
-  googleReviewUrl: string;
-};
+type AsideProps = ComponentProps<typeof UmscContactAside>;
 
 type Props = {
   heading: string;

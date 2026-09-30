@@ -2,20 +2,29 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { resolveFields } from "..";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiReveal, ViiRevealGroup } from "../shared/vii-reveal";
 
 export function ViiCollectionsPage({
   collections,
+  business,
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
+  const f = resolveFields(business.siteContent?.customFields, [
+    "vii.collections.overline",
+    "vii.collections.heading",
+    "vii.collections.heading-accent",
+  ]);
 
   return (
     <div>
       {/* Editorial hero */}
       <section
         aria-labelledby="vii-collections-heading"
+        {...sectionGroupAttr("collections", "listing")}
         style={{
           background: "var(--vii-cream)",
           // Clear the fixed header (≈106px) plus generous editorial breathing room.
@@ -26,8 +35,12 @@ export function ViiCollectionsPage({
         <ViiReveal
           style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}
         >
-          <ViiOverline align="center" style={{ marginBottom: 14 }}>
-            Shop by collection
+          <ViiOverline
+            align="center"
+            style={{ marginBottom: 14 }}
+            fieldKey="vii.collections.overline"
+          >
+            {f["vii.collections.overline"] ?? ""}
           </ViiOverline>
           <h1
             id="vii-collections-heading"
@@ -40,9 +53,12 @@ export function ViiCollectionsPage({
               margin: 0,
             }}
           >
-            Our{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
-              collections
+            {f["vii.collections.heading"] ?? ""}{" "}
+            <em
+              {...fieldAttr("vii.collections.heading-accent")}
+              style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+            >
+              {f["vii.collections.heading-accent"] ?? ""}
             </em>
           </h1>
           {list.length > 0 && (

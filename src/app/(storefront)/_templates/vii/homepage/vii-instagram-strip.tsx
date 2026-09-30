@@ -8,15 +8,18 @@ type GalleryImage = {
 };
 
 type Props = {
+  /** "@handle" shown above the strip; blank hides the label. */
   handle: string;
+  /** Instagram profile URL for the follow button; unset hides the button. */
+  href?: string;
   images: GalleryImage[];
   ctaText?: string;
 };
 
-export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
+export function ViiInstagramStrip({ handle, href, images, ctaText }: Props) {
   const displayed = images.slice(0, 5);
 
-  if (displayed.length === 0 && !handle) {
+  if (displayed.length === 0 && !href) {
     return null;
   }
 
@@ -33,7 +36,6 @@ export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
         {/* Handle */}
         {handle && (
           <p
-            {...fieldAttr("vii.homepage.instagram-handle")}
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: 12,
@@ -75,7 +77,7 @@ export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
             ))}
           </ul>
         ) : (
-          // Placeholder row when handle is set but no images yet
+          // Placeholder row when the profile link is set but no images yet
           <div
             style={{
               display: "grid",
@@ -98,12 +100,12 @@ export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
         )}
 
         {/* Follow button */}
-        {handle && (
+        {href && (
           <div
             style={{ textAlign: "center", marginTop: "clamp(24px, 4vw, 40px)" }}
           >
             <a
-              href={`https://instagram.com/${handle.replace(/^@/, "")}`}
+              href={href}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${ctaText ?? "Follow on Instagram"} (opens in new tab)`}

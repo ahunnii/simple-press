@@ -1,4 +1,5 @@
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import type { SectionTone } from "../shared/preceding-tone";
+import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -28,6 +29,21 @@ type Props = {
    * the bottom wave is skipped (see the note on the bottom wave below).
    */
   hasFollowingSection: boolean;
+  /**
+   * What actually renders directly above this band, computed by the
+   * homepage orchestrator (`bamboo-homepage.tsx`) via
+   * `shared/preceding-tone.ts`, since a hidden Featured/aboutTeaser/value
+   * band can promote a different-toned section into this seam. "cream" is
+   * the default (no backing needed, the page's own cream shows through the
+   * wave's transparent-above area); "cream-deep" backs the wave with a
+   * matching strip so the seam doesn't show a sliver of the wrong cream;
+   * "forest" (the value band, when both Featured and aboutTeaser are
+   * hidden) means forest sits directly above forest, so there's no seam to
+   * mark — the top wave (and its wave-sprig leaves, which are rooted on the
+   * wave's line) are skipped entirely and the band just continues flat, the
+   * same "same-color runs merge, no wave" rule the About page uses.
+   */
+  precedingTone: SectionTone;
 };
 
 /**
@@ -41,17 +57,26 @@ type Props = {
  * vivid metallic `hairline` line, like the value band.
  *
  * Leaves grow on the TOP wave only (the value band's wave-sprig treatment,
- * via `shared/bamboo-wave-leaves.tsx`), rising over the bottom padding of the
- * cream Featured band above. The bottom edge stays plain: the footer, which
- * carries its own sprig, can follow it directly (and when it does, the bottom
- * wave is skipped entirely, see `hasFollowingSection`). The section is `relative`
- * so the leaf layer's `top-*` is measured from the top wave's top edge, and
- * `overflow-x-clip` (clip, not hidden, so the upward overflow still paints)
- * keeps horizontal scroll at zero.
+ * via `shared/bamboo-wave-leaves.tsx`), rising over the bottom padding of
+ * whatever cream/cream-deep band precedes (see `precedingTone` below). The
+ * bottom edge stays plain: the footer, which carries its own sprig, can
+ * follow it directly (and when it does, the bottom wave is skipped entirely,
+ * see `hasFollowingSection`). The section is `relative` so the leaf layer's
+ * `top-*` is measured from the top wave's top edge, and `overflow-x-clip`
+ * (clip, not hidden, so the upward overflow still paints) keeps horizontal
+ * scroll at zero.
+ *
+ * `precedingTone` (added so hiding Featured/aboutTeaser/the value band never
+ * strands this seam): the top wave's transparent-above area shows whatever
+ * paints behind it, so it needs a backing strip whenever the actual
+ * preceding section isn't the page's own flat cream, and needs to be
+ * skipped entirely when forest is promoted directly above (no seam to
+ * mark — the band just continues flat into the value band above it).
  */
 export function BambooSustainabilitySection({
   customFields,
   hasFollowingSection,
+  precedingTone,
 }: Props) {
   const f = resolveFields(customFields, [
     "bamboo.homepage.sustainability-eyebrow",
@@ -64,13 +89,31 @@ export function BambooSustainabilitySection({
       DEFAULT_BAMBOO_FEATURES,
     ) ?? [];
 
+  // Forest directly above means there's no seam to mark: omit the top wave
+  // (and its wave-sprig leaves, which are rooted on the wave's line) and let
+  // the band continue flat, same as the About page's same-color-run rule.
+  const showTopWave = precedingTone !== "forest";
+
   return (
     <section
       {...sectionGroupAttr("homepage", "sustainability")}
       aria-label="Sustainability"
       className="relative overflow-x-clip"
     >
-      <BambooWaveDivider variant="hairline" className="-mb-px h-14 md:h-24" />
+      {showTopWave && (
+        <div
+          className={
+            precedingTone === "cream-deep"
+              ? "bg-[var(--bam-cream-deep)]"
+              : undefined
+          }
+        >
+          <BambooWaveDivider
+            variant="hairline"
+            className="-mb-px h-14 md:h-24"
+          />
+        </div>
+      )}
 
       <div className="bg-[var(--bam-forest)]">
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-32 lg:px-8">
@@ -97,6 +140,7 @@ export function BambooSustainabilitySection({
             {features.map((feature, index) => (
               <StaggerItem
                 key={`${feature.title}-${index}`}
+                {...listItemAttr("bamboo.homepage.sustainability-list", index)}
                 className="flex flex-col items-center gap-4 text-center"
               >
                 <span
@@ -137,16 +181,18 @@ export function BambooSustainabilitySection({
         />
       )}
 
-      <BambooWaveLeaves className="z-[2]">
-        <BambooWaveSprig
-          side="left"
-          className={`${BAND_WAVE_SPRIG_ROOT.left} ${BAND_WAVE_SPRIG_SIZE}`}
-        />
-        <BambooWaveSprig
-          side="right"
-          className={`${BAND_WAVE_SPRIG_ROOT.right} ${BAND_WAVE_SPRIG_SIZE}`}
-        />
-      </BambooWaveLeaves>
+      {showTopWave && (
+        <BambooWaveLeaves className="z-[2]">
+          <BambooWaveSprig
+            side="left"
+            className={`${BAND_WAVE_SPRIG_ROOT.left} ${BAND_WAVE_SPRIG_SIZE}`}
+          />
+          <BambooWaveSprig
+            side="right"
+            className={`${BAND_WAVE_SPRIG_ROOT.right} ${BAND_WAVE_SPRIG_SIZE}`}
+          />
+        </BambooWaveLeaves>
+      )}
     </section>
   );
 }

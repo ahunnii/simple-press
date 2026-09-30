@@ -229,9 +229,13 @@
 
 /* ─── Bamboo template — accessibility enhancements ──────────────────────────
    Focus-visible outlines for every interactive element (WCAG 2.4.7 / 2.4.11).
+   `tabindex="-1"` elements are skipped: they aren't reachable by Tab and only
+   take focus programmatically (e.g. the order-confirmation heading, focused
+   so screen readers announce it), where Chrome's focus-visible heuristic
+   would otherwise draw a stray box on page load.
    prefers-reduced-motion support (WCAG 2.3.3 / best practice at AA).         */
 
-.bamboo *:focus-visible {
+.bamboo *:focus-visible:not([tabindex="-1"]) {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
@@ -244,6 +248,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Routes that fall back to Default pages (wishlist, FAQ, order status, ...)
+   know nothing about the hanging emblem; bamboo pages mark their first
+   section with .bam-top (shared/bamboo-emblem-clearance.ts). */
+@media (min-width: 64rem) {
+  .bamboo #bamboo-main-content:not(:has(.bam-top)) {
+    padding-top: 4.5rem;
   }
 }
 
@@ -2936,13 +2949,27 @@
 }
 
 /* ─── Pollen template — accessibility enhancements ──────────────────────────
-   Pollen uses Tailwind utilities exclusively (no CSS vars for theme tokens).
+   Pollen styles its own UI with Tailwind hex utilities; the only CSS vars it
+   sets are the shared shadcn primary/ring tokens (below).
    This section adds a scoped focus-visible indicator that reads clearly on
    BOTH the light body (white) AND the dark hero/footer surfaces
    (#2a351f / #1A1E1A):
      - #215935 deep green outline (8.25:1 on white ✓)
      - white box-shadow halo (provides contrast on dark surfaces ✓)
    Also adds a scoped prefers-reduced-motion block per repo convention.     */
+
+/* Brand the shared shadcn tokens so platform components rendered inside
+   pollen (account pages, address book, reviews, checkout) use pollen's deep
+   green instead of the stock near-black primary. #215935 + white = 8.25:1.
+   `body:has(.pollen)` also covers Radix sheets/dialogs/menus, which portal to
+   <body> outside the .pollen wrapper (e.g. the address-book "Add address"
+   sheet). */
+.pollen,
+body:has(.pollen) {
+  --primary: #215935;
+  --primary-foreground: #ffffff;
+  --ring: #5e7747;
+}
 
 .pollen *:focus-visible {
   outline: 2px solid #215935;
@@ -11798,6 +11825,47 @@
   cursor: pointer;
 }
 
+.dream .dream-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dream .dream-header-cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: var(--dream-soft);
+  text-decoration: none;
+  transition: color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-header-cart:hover,
+.dream .dream-header-cart[aria-current="page"] {
+  color: var(--dream-ink);
+}
+
+.dream .dream-header-cart-count {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-family: var(--font-dream-body);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--dream-paper);
+  background: var(--dream-rose);
+  border-radius: 999px;
+}
+
 @media (min-width: 960px) {
   /* Single row: logo + nav left, account slot + CTA pushed right by the
      right cell's `margin-left:auto`. */
@@ -12676,7 +12744,7 @@
   animation: umsc-pulse 0.32s var(--umsc-ease);
 }
 
-/* Mobile nav dialog — slides in from the left; links stagger via nth-child. */
+/* Mobile nav dialog — slides in from the left (exit slide lives in umsc-nav-dialog.tsx). */
 @keyframes umsc-nav-dialog-in {
   from {
     transform: translateX(-100%);
@@ -13319,7 +13387,7 @@
     transform: none;
   }
 
-  .umsc-nav-dialog {
+  .umsc .umsc-nav-dialog {
     animation: none;
   }
 

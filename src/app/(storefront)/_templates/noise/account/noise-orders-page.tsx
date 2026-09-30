@@ -3,9 +3,11 @@ import { Package } from "lucide-react";
 
 import type { OrdersPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { PageTransition } from "~/components/page-animations";
 
+import { resolveNoiseCartCopy } from "../cart-checkout/noise-cart-copy";
 import { NoiseAccountLayout } from "./noise-account-layout";
 
 function statusStyle(status: string): React.CSSProperties {
@@ -21,7 +23,10 @@ function statusStyle(status: string): React.CSSProperties {
   }
 }
 
-export function NoiseOrdersPage({ orders }: OrdersPageTemplateProps) {
+export function NoiseOrdersPage({ business, orders }: OrdersPageTemplateProps) {
+  // The empty-orders button shares the cart's empty-state button fields.
+  const copy = resolveNoiseCartCopy(business.siteContent?.customFields);
+
   return (
     <PageTransition>
       <NoiseAccountLayout heading="My Orders">
@@ -50,9 +55,17 @@ export function NoiseOrdersPage({ orders }: OrdersPageTemplateProps) {
                 When you place an order, it will appear here.
               </p>
             </div>
-            <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
-              Shop the Collection →
-            </Link>
+            {copy.emptyButtonText ? (
+              <Link
+                href={copy.emptyButtonLink}
+                className="vn-stamp vn-stamp-solid text-[10px]"
+              >
+                <span {...fieldAttr("noise.global.cart-empty-button-text")}>
+                  {copy.emptyButtonText}
+                </span>{" "}
+                →
+              </Link>
+            ) : null}
           </div>
         ) : (
           <div className="flex flex-col">
@@ -61,7 +74,7 @@ export function NoiseOrdersPage({ orders }: OrdersPageTemplateProps) {
               className="border-foreground hidden items-center gap-4 border-b-2 pb-3 md:grid"
               style={{ gridTemplateColumns: "auto 1fr auto auto auto" }}
             >
-              {["Order", "Garments", "Date", "Status", "Total"].map((h) => (
+              {["Order", "Items", "Date", "Status", "Total"].map((h) => (
                 <span
                   key={h}
                   className="font-mono text-[9.5px] tracking-[0.22em] uppercase"

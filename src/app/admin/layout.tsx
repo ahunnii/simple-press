@@ -11,6 +11,7 @@ import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { NavigationGuardProvider } from "~/providers/navigation-guard-context";
 import { AdminCommandPalette } from "~/app/admin/_components/admin-command-palette";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
+import { CloseMobileSidebarOnNavigate } from "~/app/admin/_components/close-mobile-sidebar-on-navigate";
 import { PaymentsDisabledBanner } from "~/app/admin/_components/payments-disabled-banner";
 
 type Props = {
@@ -106,6 +107,7 @@ export default async function AdminLayout({ children }: Props) {
             } as React.CSSProperties
           }
         >
+          <CloseMobileSidebarOnNavigate />
           <AppSidebar
             variant="inset"
             session={session}

@@ -11,8 +11,18 @@ import { DreamRevealGroup } from "../shared/dream-reveal";
 import { DreamAccountEmptyState } from "./dream-account-empty-state";
 import { DreamAccountLayout } from "./dream-account-layout";
 import { DreamOrderStatusBadge } from "./dream-order-status-badge";
+import { resolveDreamAccountFields } from "./fields";
 
-export function DreamOrdersPage({ orders }: OrdersPageTemplateProps) {
+const FIELD_KEYS = [
+  "dream.global.orders-empty-heading",
+  "dream.global.orders-empty-body",
+  "dream.global.orders-empty-button",
+];
+
+export function DreamOrdersPage({ business, orders }: OrdersPageTemplateProps) {
+  const customFields = business.siteContent?.customFields;
+  const f = resolveDreamAccountFields(customFields, FIELD_KEYS);
+
   return (
     <DreamAccountLayout
       heading="My Orders"
@@ -24,9 +34,9 @@ export function DreamOrdersPage({ orders }: OrdersPageTemplateProps) {
     >
       {orders.length === 0 ? (
         <DreamAccountEmptyState
-          heading="No orders yet"
-          body="When Selest sends you an estimate and it's confirmed, it will appear here."
-          ctaLabel="Request an estimate"
+          heading={f["dream.global.orders-empty-heading"] ?? ""}
+          body={f["dream.global.orders-empty-body"] ?? ""}
+          ctaLabel={f["dream.global.orders-empty-button"] ?? ""}
           ctaHref="/contact"
         />
       ) : (

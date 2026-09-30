@@ -17,37 +17,28 @@ import {
 
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  activeEntryIndex,
+  getAccountNavLinks,
+} from "~/app/(storefront)/_components/nav";
 
 export type UmscAccountBreadcrumbItem = { label: string; href?: string };
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: typeof Package;
-  /** Gates the item behind a storefront feature flag. Omit for always-on items. */
-  flag?: string;
+/**
+ * `getAccountNavLinks` returns bare `{key, label, href}` entries — icons are
+ * mapped locally by key (noise/dream precedent). Any key the mapping doesn't
+ * recognize (there shouldn't be one) falls back to `Settings`.
+ */
+const UMSC_ACCOUNT_LINK_ICONS: Record<string, typeof Package> = {
+  orders: Package,
+  "address-book": BookUser,
+  subscriptions: Repeat,
+  invoices: FileText,
+  rewards: Award,
+  settings: Settings,
+  security: Lock,
+  preferences: Bell,
 };
-
-const NAV_ITEMS: NavItem[] = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
-  {
-    href: "/account/subscriptions",
-    label: "Subscriptions",
-    icon: Repeat,
-    flag: "subscriptions",
-  },
-  {
-    href: "/account/invoices",
-    label: "Invoices",
-    icon: FileText,
-    flag: "invoices",
-  },
-  { href: "/account/rewards", label: "Rewards", icon: Award, flag: "loyalty" },
-];
 
 type Props = {
   children: ReactNode;
@@ -110,20 +101,20 @@ function UmscAccountBandBreadcrumb({
  * `PreferencesContent`. Operate mode: no `UmscReveal` here (design.md: "Cart
  * / checkout / account: no reveals").
  *
- * `UmscOrderDetailPage` does NOT use this layout — it renders its own hero
- * with a dynamic "Order #N" heading, matching vii's precedent.
+ * Nav entries come from `getAccountNavLinks` (never a hand-written list), so
+ * flag gating (Orders/Address Book/Subscriptions/Invoices/Rewards) always
+ * matches the platform baseline; icons are mapped locally by key.
+ *
+ * `UmscOrderDetailPage` renders inside this layout too (heading = "Order
+ * #N", breadcrumb ending on the order number) — Orders stays active via
+ * `activeEntryIndex`'s prefix match on `/account/orders`.
  */
 export function UmscAccountLayout({ children, heading, breadcrumb }: Props) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
 
-  const navItems = NAV_ITEMS.filter(
-    (item) => !item.flag || isEnabled(item.flag),
-  );
-
-  function isActive(href: string): boolean {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  }
+  const navItems = getAccountNavLinks({ isEnabled });
+  const activeIndex = activeEntryIndex(pathname, navItems);
 
   return (
     <div className="umsc-account">
@@ -146,10 +137,11 @@ export function UmscAccountLayout({ children, heading, breadcrumb }: Props) {
               role="list"
               className="m-0 flex list-none gap-2 overflow-x-auto p-0 pb-2"
             >
-              {navItems.map((item) => {
-                const active = isActive(item.href);
+              {navItems.map((item, i) => {
+                const active = i === activeIndex;
+                const Icon = UMSC_ACCOUNT_LINK_ICONS[item.key] ?? Settings;
                 return (
-                  <li key={item.href} className="shrink-0">
+                  <li key={item.key} className="shrink-0">
                     <Link
                       href={item.href}
                       aria-current={active ? "page" : undefined}
@@ -160,7 +152,7 @@ export function UmscAccountLayout({ children, heading, breadcrumb }: Props) {
                           : "border-[var(--umsc-line)] bg-[var(--umsc-white)] text-[var(--umsc-ink)]",
                       )}
                     >
-                      <item.icon
+                      <Icon
                         aria-hidden="true"
                         className="size-3.5 shrink-0"
                         strokeWidth={1.5}
@@ -177,10 +169,11 @@ export function UmscAccountLayout({ children, heading, breadcrumb }: Props) {
           <div className="grid grid-cols-1 gap-10 md:grid-cols-[220px_1fr]">
             <nav aria-label="Account navigation" className="hidden md:block">
               <ul role="list" className="m-0 flex list-none flex-col gap-1 p-0">
-                {navItems.map((item) => {
-                  const active = isActive(item.href);
+                {navItems.map((item, i) => {
+                  const active = i === activeIndex;
+                  const Icon = UMSC_ACCOUNT_LINK_ICONS[item.key] ?? Settings;
                   return (
-                    <li key={item.href}>
+                    <li key={item.key}>
                       <Link
                         href={item.href}
                         aria-current={active ? "page" : undefined}
@@ -191,7 +184,7 @@ export function UmscAccountLayout({ children, heading, breadcrumb }: Props) {
                             : "font-normal text-[var(--umsc-muted)] hover:text-[var(--umsc-ink)]",
                         )}
                       >
-                        <item.icon
+                        <Icon
                           aria-hidden="true"
                           className="size-4 shrink-0"
                           strokeWidth={1.5}

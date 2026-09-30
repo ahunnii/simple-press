@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -11,9 +12,18 @@ import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe
 
 import { SledgeVariantSelector } from "./sledge-variant-selector";
 
+type SledgeProductActionsProps = DefaultProductPageTemplateProps & {
+  /** Resolved `sledge.product.coming-soon-heading` (plain string). */
+  comingSoonHeading: string;
+  /** Resolved `sledge.product.coming-soon-body`; blank hides the line. */
+  comingSoonBody: string;
+};
+
 export function SledgeProductActions({
   product,
-}: DefaultProductPageTemplateProps) {
+  comingSoonHeading,
+  comingSoonBody,
+}: SledgeProductActionsProps) {
   const {
     inStock,
     variantOptions,
@@ -59,12 +69,25 @@ export function SledgeProductActions({
   if (additionalFields?.comingSoon) {
     return (
       <div className="rounded-sm border border-[var(--sl-border)] bg-[var(--sl-cream)] px-5 py-4">
-        <p className="font-sans text-xs font-semibold tracking-[0.18em] text-[var(--sl-ink)] uppercase">
-          Coming Soon
-        </p>
-        <p className="sl-eyebrow mt-1.5 font-sans text-sm">
-          This item isn&apos;t available yet. Check back soon.
-        </p>
+        {comingSoonHeading.trim() ? (
+          <p
+            className="font-sans text-xs font-semibold tracking-[0.18em] text-[var(--sl-ink)] uppercase"
+            {...fieldAttr("sledge.product.coming-soon-heading")}
+          >
+            {comingSoonHeading}
+          </p>
+        ) : null}
+        {comingSoonBody.trim() ? (
+          <p
+            className={cn(
+              "sl-eyebrow font-sans text-sm",
+              comingSoonHeading.trim() && "mt-1.5",
+            )}
+            {...fieldAttr("sledge.product.coming-soon-body")}
+          >
+            {comingSoonBody}
+          </p>
+        ) : null}
       </div>
     );
   }

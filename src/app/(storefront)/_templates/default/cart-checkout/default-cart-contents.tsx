@@ -4,11 +4,36 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, X } from "lucide-react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useCart } from "~/providers/cart-context";
+
+import {
+  CART_EMPTY_BODY_DEFAULT,
+  CART_EMPTY_BUTTON_DEFAULT,
+  CART_EMPTY_HEADING_DEFAULT,
+  CART_SUMMARY_CHECKOUT_BUTTON_DEFAULT,
+  CART_SUMMARY_HEADING_DEFAULT,
+} from "./cart-fields";
 
 type Business = {
   id: string;
   siteContent: { primaryColor: string | null } | null;
+};
+
+/**
+ * Resolved `cart.empty` / `cart.summary` copy, resolved server-side in
+ * `DefaultCartPage` and passed down as plain strings (never a function
+ * across the server/client boundary). Every prop is optional with the
+ * original hardcoded copy as its fallback, since this component has no other
+ * callers today but shouldn't break if one appears without these props.
+ */
+type Props = {
+  business: Business;
+  emptyHeading?: string;
+  emptyBody?: string;
+  emptyButton?: string;
+  summaryHeading?: string;
+  summaryCheckoutButton?: string;
 };
 
 const fmt = (cents: number) =>
@@ -16,7 +41,14 @@ const fmt = (cents: number) =>
     cents / 100,
   );
 
-export function DefaultCartContents({ business: _ }: { business: Business }) {
+export function DefaultCartContents({
+  business: _,
+  emptyHeading = CART_EMPTY_HEADING_DEFAULT,
+  emptyBody = CART_EMPTY_BODY_DEFAULT,
+  emptyButton = CART_EMPTY_BUTTON_DEFAULT,
+  summaryHeading = CART_SUMMARY_HEADING_DEFAULT,
+  summaryCheckoutButton = CART_SUMMARY_CHECKOUT_BUTTON_DEFAULT,
+}: Props) {
   const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
     useCart();
 
@@ -27,21 +59,35 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
 
   if (items.length === 0) {
     return (
-      <div className="py-24 text-center">
+      <div {...sectionGroupAttr("cart", "empty")} className="py-24 text-center">
         <ShoppingBag
           className="mx-auto mb-5 h-12 w-12 text-[#6b6b6b]"
           aria-hidden="true"
         />
-        <h2 className="font-serif text-2xl font-medium">Your cart is empty</h2>
-        <p className="mt-2 text-sm text-[#6b6b6b]">
-          Add some products to get started.
-        </p>
-        <Link
-          href="/shop"
-          className="mt-8 inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+        <h2
+          {...fieldAttr("default.cart.empty-heading")}
+          className="font-serif text-2xl font-medium"
         >
-          Shop products
-        </Link>
+          {emptyHeading}
+        </h2>
+        {emptyBody ? (
+          <p
+            {...fieldAttr("default.cart.empty-body")}
+            className="mt-2 text-sm text-[#6b6b6b]"
+          >
+            {emptyBody}
+          </p>
+        ) : null}
+        {emptyButton ? (
+          <Link
+            href="/shop"
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+          >
+            <span {...fieldAttr("default.cart.empty-button")}>
+              {emptyButton}
+            </span>
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -149,9 +195,14 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
       </div>
 
       {/* Order summary */}
-      <div>
+      <div {...sectionGroupAttr("cart", "summary")}>
         <div className="sticky top-[calc(72px+24px)] rounded-[var(--radius)] border border-[#e8e8e8] p-6">
-          <h2 className="mb-5 font-serif text-xl font-medium">Order summary</h2>
+          <h2
+            {...fieldAttr("default.cart.summary-heading")}
+            className="mb-5 font-serif text-xl font-medium"
+          >
+            {summaryHeading}
+          </h2>
 
           <div className="flex flex-col gap-3 text-sm">
             <div className="flex justify-between">
@@ -175,7 +226,9 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
             href="/checkout"
             className="flex h-12 w-full items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
           >
-            Continue to checkout
+            <span {...fieldAttr("default.cart.summary-checkout-button")}>
+              {summaryCheckoutButton}
+            </span>
           </Link>
 
           <Link

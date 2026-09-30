@@ -9,7 +9,8 @@ export function VenmoIcon({ className }: { className?: string }) {
       fill="currentColor"
       stroke="none"
     >
-      <path d="M7 3L3 18c-.2.8.2 1.6 1 1.8.3.1.6.1.9 0l3.5-11.5L16 20c.7.4 1.6.1 2-. 6c.4-.7.1-1.6-.6-2L7 3Z" />
+      {/* The "v" from Simple Icons' venmo.svg wordmark, scaled to fill the viewBox */}
+      <path d="M20.51 1.74c.78 1.24 1.1 2.48 1.1 4.09 0 5.11-4.37 11.73-7.91 16.42H5.65L2.39 2.85l7.08-.69 1.7 13.8c1.61-2.58 3.59-6.67 3.59-9.48 0-1.52-.28-2.58-.69-3.45l6.44-1.29z" />
     </svg>
   );
 }

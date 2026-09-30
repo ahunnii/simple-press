@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
+import { productDescriptionToPlainText } from "~/lib/product-description";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
@@ -14,6 +15,7 @@ import { resolveFields } from "..";
 import { DarkTrendFeaturedProductsGrid } from "./dark-trend-featured-products-grid";
 import { DarkTrendHeroContent } from "./dark-trend-hero-content";
 import { DarkTrendMotionSection } from "./dark-trend-motion-section";
+import { numberVisibleSections } from "./section-numbers";
 
 export async function DarkTrendHomepage() {
   const homepage = await api.business.getHomepage();
@@ -32,6 +34,10 @@ export async function DarkTrendHomepage() {
     "dark-trend.first-section-button-link",
     "dark-trend.second-section-title",
     "dark-trend.second-section-description",
+    "dark-trend.second-section-button-text",
+    "dark-trend.homepage.products-heading",
+    "dark-trend.homepage.products-button-text",
+    "dark-trend.homepage.products-button-link",
     "dark-trend.cta-header",
     "dark-trend.cta-description",
     "dark-trend.cta-button-text",
@@ -41,6 +47,66 @@ export async function DarkTrendHomepage() {
 
   const customFields = homepage?.siteContent?.customFields;
   const firstProduct = homepage?.products?.[0];
+  const firstProductBlurb = productDescriptionToPlainText(
+    firstProduct?.description,
+  );
+
+  const heroImage = imageOrPlaceholder(f["dark-trend.homepage.hero-image"]);
+  const heroButtonText = f["dark-trend.homepage.hero-button-text"] ?? "";
+  const heroButtonLink = f["dark-trend.homepage.hero-button-link"] ?? "";
+
+  const firstSectionImage = imageOrPlaceholder(
+    f["dark-trend.first-section-image"],
+  );
+  const firstSectionButtonText =
+    f["dark-trend.first-section-button-text"] ?? "";
+  const firstSectionButtonLink =
+    f["dark-trend.first-section-button-link"] ?? "";
+  const showFirstSectionButton =
+    !!firstSectionButtonText.trim() && !!firstSectionButtonLink.trim();
+
+  const secondSectionButtonText =
+    f["dark-trend.second-section-button-text"] ?? "";
+  const showSecondSectionButton = !!secondSectionButtonText.trim();
+
+  const productsHeading = f["dark-trend.homepage.products-heading"] ?? "";
+  const productsButtonText =
+    f["dark-trend.homepage.products-button-text"] ?? "";
+  const productsButtonLink =
+    f["dark-trend.homepage.products-button-link"] ?? "";
+  const showProductsButton =
+    !!productsButtonText.trim() && !!productsButtonLink.trim();
+
+  const ctaImage = imageOrPlaceholder(f["dark-trend.cta-image"]);
+  const ctaButtonText = f["dark-trend.cta-button-text"] ?? "";
+  const ctaButtonLink = f["dark-trend.cta-button-link"] ?? "";
+  const showCtaButton = !!ctaButtonText.trim() && !!ctaButtonLink.trim();
+
+  const showFirstSection = isSectionVisible(
+    customFields,
+    "dark-trend",
+    "homepage.first-section",
+  );
+  const showSecondSection = isSectionVisible(
+    customFields,
+    "dark-trend",
+    "homepage.second-section",
+  );
+  const showProducts = isSectionVisible(
+    customFields,
+    "dark-trend",
+    "homepage.products",
+  );
+  const showCta = isSectionVisible(customFields, "dark-trend", "homepage.cta");
+
+  // "01." … "04." follow the visible numbered sections, so hiding one never
+  // leaves a gap in the sequence.
+  const sectionNumbers = numberVisibleSections([
+    ["first-section", showFirstSection],
+    ["second-section", showSecondSection],
+    ["products", showProducts],
+    ["cta", showCta],
+  ]);
 
   // Get gallery ID from template field
   const portfolioGalleryId = f["dark-trend.homepage.gallery"];
@@ -62,7 +128,7 @@ export async function DarkTrendHomepage() {
       >
         <div className="relative h-[85vh] min-h-[560px]">
           <Image
-            src={f["dark-trend.homepage.hero-image"] ?? "/placeholder.svg"}
+            src={heroImage}
             alt=""
             fill
             className="object-cover"
@@ -75,11 +141,9 @@ export async function DarkTrendHomepage() {
               <DarkTrendHeroContent
                 title={f["dark-trend.homepage.hero-title"] ?? ""}
                 titleFieldKey="dark-trend.homepage.hero-title"
-                buttonText={f["dark-trend.homepage.hero-button-text"] ?? ""}
+                buttonText={heroButtonText}
                 buttonTextFieldKey="dark-trend.homepage.hero-button-text"
-                buttonLink={
-                  f["dark-trend.homepage.hero-button-link"] ?? "/shop"
-                }
+                buttonLink={heroButtonLink}
               />
             </div>
           </div>
@@ -94,11 +158,7 @@ export async function DarkTrendHomepage() {
         )}
 
       {/* Custom Embroidery Section */}
-      {isSectionVisible(
-        customFields,
-        "dark-trend",
-        "homepage.first-section",
-      ) && (
+      {showFirstSection && (
         <section
           className="bg-zinc-900/80 py-20"
           {...sectionGroupAttr("homepage", "first-section")}
@@ -107,7 +167,7 @@ export async function DarkTrendHomepage() {
             <div className="flex items-end justify-between">
               <div className="relative">
                 <span className="text-sm font-semibold text-purple-400">
-                  01.
+                  {sectionNumbers["first-section"]}
                 </span>
                 <span
                   className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
@@ -123,20 +183,20 @@ export async function DarkTrendHomepage() {
                   {f["dark-trend.first-section-title"]}
                 </h2>
               </div>
-              <Link
-                href={f["dark-trend.first-section-button-link"] ?? "/about"}
-                className="rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
-                {...fieldAttr("dark-trend.first-section-button-text")}
-              >
-                {f["dark-trend.first-section-button-text"]}
-              </Link>
+              {showFirstSectionButton && (
+                <Link
+                  href={firstSectionButtonLink}
+                  className="rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
+                  {...fieldAttr("dark-trend.first-section-button-text")}
+                >
+                  {firstSectionButtonText}
+                </Link>
+              )}
             </div>
             <div className="mt-12 grid grid-cols-1 items-stretch gap-12 lg:grid-cols-2">
               <div className="relative aspect-4/3 overflow-hidden rounded-sm bg-zinc-800">
                 <Image
-                  src={
-                    f["dark-trend.first-section-image"] ?? "/placeholder.svg"
-                  }
+                  src={firstSectionImage}
                   alt=""
                   fill
                   className="object-cover"
@@ -189,11 +249,7 @@ export async function DarkTrendHomepage() {
       )}
 
       {/* Brand New / Featured Product Section */}
-      {isSectionVisible(
-        customFields,
-        "dark-trend",
-        "homepage.second-section",
-      ) && (
+      {showSecondSection && (
         <section
           className="relative overflow-hidden bg-[#232323] py-20 antialiased"
           {...sectionGroupAttr("homepage", "second-section")}
@@ -203,7 +259,7 @@ export async function DarkTrendHomepage() {
             <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
               <div className="relative">
                 <span className="text-sm font-semibold text-purple-400">
-                  02.
+                  {sectionNumbers["second-section"]}
                 </span>
                 {/* <span
                 className="absolute -top-4 -left-2 text-5xl leading-none font-bold text-white/10 uppercase md:text-7xl"
@@ -245,34 +301,39 @@ export async function DarkTrendHomepage() {
                       <p className="text-lg text-white/90">
                         {formatPrice(firstProduct.price)} USD
                       </p>
-                      {firstProduct.description && (
+                      {firstProductBlurb && (
                         <p className="line-clamp-3 max-w-sm text-sm leading-relaxed text-white/70">
-                          {firstProduct.description}
+                          {firstProductBlurb}
                         </p>
                       )}
 
-                      <Button
-                        asChild
-                        className="mt-2 inline-flex items-center rounded-md bg-violet-600 px-6 py-2.5 text-center text-sm font-bold text-white transition-opacity hover:bg-violet-700"
-                      >
-                        <Link
-                          href={`/shop/${firstProduct.slug}`}
-                          aria-label={`Shop ${firstProduct.name}`}
+                      {showSecondSectionButton && (
+                        <Button
+                          asChild
+                          className="mt-2 inline-flex items-center rounded-md bg-violet-600 px-6 py-2.5 text-center text-sm font-bold text-white transition-opacity hover:bg-violet-700"
                         >
-                          Shop Now
-                        </Link>
-                      </Button>
+                          <Link
+                            href={`/shop/${firstProduct.slug}`}
+                            aria-label={`${secondSectionButtonText}: ${firstProduct.name}`}
+                          >
+                            {secondSectionButtonText}
+                          </Link>
+                        </Button>
+                      )}
                     </div>
                   </>
                 ) : (
                   <div className="flex w-full flex-col items-center gap-4 rounded-sm bg-zinc-800/50 py-12 text-center">
                     <p className="text-white/60">No featured product yet.</p>
-                    <Link
-                      href="/shop"
-                      className="inline-flex rounded-md bg-violet-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-700"
-                    >
-                      Shop Now
-                    </Link>
+                    {showSecondSectionButton && (
+                      <Link
+                        href="/shop"
+                        className="inline-flex rounded-md bg-violet-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-700"
+                        {...fieldAttr("dark-trend.second-section-button-text")}
+                      >
+                        {secondSectionButtonText}
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
@@ -282,35 +343,49 @@ export async function DarkTrendHomepage() {
       )}
 
       {/* Products Section */}
-      <section className="bg-[#1A1A1A] py-20">
-        <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div className="relative">
-              <span className="text-sm font-semibold text-purple-400">03.</span>
-              <span
-                className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
-                aria-hidden
-              >
-                Products
-              </span>
-              <h2 className="relative text-3xl font-bold tracking-tight md:text-6xl">
-                Products
-              </h2>
+      {showProducts && (
+        <section
+          className="bg-[#1A1A1A] py-20"
+          {...sectionGroupAttr("homepage", "products")}
+        >
+          <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex items-end justify-between">
+              <div className="relative">
+                <span className="text-sm font-semibold text-purple-400">
+                  {sectionNumbers.products}
+                </span>
+                <span
+                  className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
+                  aria-hidden
+                  {...fieldAttr("dark-trend.homepage.products-heading")}
+                >
+                  {productsHeading}
+                </span>
+                <h2
+                  className="relative text-3xl font-bold tracking-tight md:text-6xl"
+                  {...fieldAttr("dark-trend.homepage.products-heading")}
+                >
+                  {productsHeading}
+                </h2>
+              </div>
+              {showProductsButton && (
+                <Link
+                  href={productsButtonLink}
+                  className="rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
+                  {...fieldAttr("dark-trend.homepage.products-button-text")}
+                >
+                  {productsButtonText}
+                </Link>
+              )}
             </div>
-            <Link
-              href="/shop"
-              className="rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
-            >
-              SHOP ALL PRODUCTS
-            </Link>
-          </div>
-          <div className="mt-12">
-            <DarkTrendFeaturedProductsGrid />
-          </div>
-        </DarkTrendMotionSection>
-      </section>
+            <div className="mt-12">
+              <DarkTrendFeaturedProductsGrid />
+            </div>
+          </DarkTrendMotionSection>
+        </section>
+      )}
 
-      {isSectionVisible(customFields, "dark-trend", "homepage.cta") && (
+      {showCta && (
         <section
           className="mx-auto mb-20 max-w-7xl rounded-md bg-[#1F1F1F]"
           {...sectionGroupAttr("homepage", "cta")}
@@ -320,7 +395,7 @@ export async function DarkTrendHomepage() {
               <div className="col-span-2 flex flex-col justify-center space-y-4">
                 <div className="relative">
                   <span className="text-sm font-semibold text-purple-400">
-                    04.
+                    {sectionNumbers.cta}
                   </span>
 
                   <h2
@@ -337,21 +412,23 @@ export async function DarkTrendHomepage() {
                   {f["dark-trend.cta-description"]}
                 </p>
 
-                <Button
-                  className="w-fit rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
-                  asChild
-                >
-                  <Link
-                    href={f["dark-trend.cta-button-link"] ?? "/contact"}
-                    {...fieldAttr("dark-trend.cta-button-text")}
+                {showCtaButton && (
+                  <Button
+                    className="w-fit rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
+                    asChild
                   >
-                    {f["dark-trend.cta-button-text"]}
-                  </Link>
-                </Button>
+                    <Link
+                      href={ctaButtonLink}
+                      {...fieldAttr("dark-trend.cta-button-text")}
+                    >
+                      {ctaButtonText}
+                    </Link>
+                  </Button>
+                )}
               </div>
               <div className="relative aspect-4/5 overflow-hidden rounded-sm">
                 <Image
-                  src={f["dark-trend.cta-image"] ?? "/placeholder.svg"}
+                  src={ctaImage}
                   alt=""
                   fill
                   className="object-cover"
@@ -364,4 +441,9 @@ export async function DarkTrendHomepage() {
       )}
     </div>
   );
+}
+
+function imageOrPlaceholder(value: string | undefined): string {
+  const src = value ?? "";
+  return src.trim() ? src : "/placeholder.svg";
 }

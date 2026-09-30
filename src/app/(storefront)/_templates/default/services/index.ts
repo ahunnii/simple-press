@@ -3,8 +3,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 const servicesHeroData: TemplateField[] = [
   {
     key: "default.services.hero-eyebrow",
-    label: "Hero Eyebrow",
-    description: "Small label above the page heading",
+    label: "Small label",
+    description:
+      "Short text above the page heading on the Services page. Leave blank to hide.",
     type: "text",
     page: "services",
     group: "services.hero",
@@ -13,8 +14,8 @@ const servicesHeroData: TemplateField[] = [
   },
   {
     key: "default.services.hero-heading",
-    label: "Page Heading",
-    description: "Main heading for the Services page",
+    label: "Heading",
+    description: "Main heading at the top of the Services page.",
     type: "text",
     page: "services",
     group: "services.hero",
@@ -24,8 +25,8 @@ const servicesHeroData: TemplateField[] = [
   },
   {
     key: "default.services.hero-tagline",
-    label: "Hero Tagline",
-    description: "Short line below the heading",
+    label: "Intro text",
+    description: "Short line below the heading. Leave blank to hide.",
     type: "textarea",
     page: "services",
     group: "services.hero",
@@ -33,8 +34,9 @@ const servicesHeroData: TemplateField[] = [
   },
   {
     key: "default.services.hero-image",
-    label: "Hero Image",
-    description: "Optional wide image shown below the heading",
+    label: "Photo",
+    description:
+      "Optional wide photo shown below the heading. Leave blank to hide.",
     type: "image",
     page: "services",
     group: "services.hero",
@@ -45,8 +47,9 @@ const servicesHeroData: TemplateField[] = [
 const servicesIntroData: TemplateField[] = [
   {
     key: "default.services.intro-heading",
-    label: "Intro Heading",
-    description: "Optional heading for the editorial intro band",
+    label: "Heading",
+    description:
+      "Optional heading for the intro band above the service grid. Leave blank to hide.",
     type: "text",
     page: "services",
     group: "services.intro",
@@ -54,8 +57,9 @@ const servicesIntroData: TemplateField[] = [
   },
   {
     key: "default.services.intro-body",
-    label: "Intro Body",
-    description: "Optional supporting copy shown below the intro heading",
+    label: "Body text",
+    description:
+      "Optional supporting copy below the intro heading. Leave blank to hide.",
     type: "textarea",
     page: "services",
     group: "services.intro",
@@ -66,16 +70,17 @@ const servicesIntroData: TemplateField[] = [
 const servicesCtaData: TemplateField[] = [
   {
     key: "default.services.cta-eyebrow",
-    label: "CTA Eyebrow",
-    description: "Small label above the CTA heading",
+    label: "Small label",
+    description:
+      "Short text above the heading in the bottom call-to-action strip. Leave blank to hide.",
     type: "text",
     page: "services",
     group: "services.cta",
   },
   {
     key: "default.services.cta-heading",
-    label: "CTA Heading",
-    description: "Heading for the bottom call-to-action strip",
+    label: "Heading",
+    description: "Heading for the bottom call-to-action strip.",
     type: "text",
     page: "services",
     group: "services.cta",
@@ -85,8 +90,8 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "default.services.cta-button-text",
-    label: "CTA Button Text",
-    description: "Label for the CTA button",
+    label: "Button text",
+    description: "Label on the bottom call-to-action button.",
     type: "text",
     page: "services",
     group: "services.cta",
@@ -95,8 +100,8 @@ const servicesCtaData: TemplateField[] = [
   },
   {
     key: "default.services.cta-button-link",
-    label: "CTA Button Link",
-    description: "Where the CTA button points",
+    label: "Button link",
+    description: "Where the bottom button goes, e.g. /contact.",
     type: "url",
     page: "services",
     group: "services.cta",
@@ -114,22 +119,22 @@ export const defaultServicesData: TemplateField[] = [
 export const defaultServicesFieldGroups: TemplateFieldGroup[] = [
   {
     id: "services.hero",
-    title: "Services — Hero",
-    description: "Page heading, tagline, and optional wide hero image",
+    title: "Hero",
+    description: "Page heading, intro text, and optional wide photo.",
     icon: "🛠️",
     columns: 2,
   },
   {
     id: "services.intro",
-    title: "Services — Intro",
-    description: "Optional editorial intro band shown above the service grid",
+    title: "Intro",
+    description: "Optional editorial intro band shown above the service grid.",
     icon: "📝",
     columns: 1,
   },
   {
     id: "services.cta",
-    title: "Services — CTA",
-    description: "Bottom call-to-action strip",
+    title: "Closing banner",
+    description: "Bottom banner inviting visitors to get in touch.",
     icon: "👆",
     columns: 2,
   },
