@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Edit2 } from "lucide-react";
+import { Edit2, MessageSquarePlus } from "lucide-react";
 
 import type { PreviewEditTarget } from "~/lib/preview/preview-target";
+import type { PreviewOverlayMode } from "~/lib/preview/use-preview-bridge";
 import {
   resolvePreviewTarget,
   resolvePreviewTargetFromStack,
@@ -58,7 +59,8 @@ function findGroup(target: EventTarget | null): HTMLElement | null {
  *
  * Behaviour (mouse / hover-capable devices):
  * - Delegated mouseover/mouseout find the nearest [data-sp-group] ancestor.
- * - Hovering draws a fixed-position highlight + "Edit" pill.
+ * - Hovering draws a fixed-position highlight + "Edit" pill ("Pick for note"
+ *   while the parent's Notes panel is open — see `sp:overlay-mode`).
  * - Clicking anywhere inside the highlight box posts `sp:edit-group` to the parent.
  *   Pointer clicks also resolve the page element under the pointer (through
  *   the highlight button, via `elementsFromPoint`) and, when it sits in a
@@ -99,6 +101,11 @@ export function PreviewOverlay() {
   const [pulsing, setPulsing] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
   const [selected, setSelected] = useState<Selection | null>(null);
+  // "note" while the editor's Notes panel is open — a click then picks the
+  // section for the note, so the labels say so. Set by `sp:overlay-mode`; the
+  // ref mirror is for the long-lived document listeners below.
+  const [mode, setMode] = useState<PreviewOverlayMode>("edit");
+  const modeRef = useRef<PreviewOverlayMode>("edit");
   const raftRef = useRef<number | null>(null);
   const selectedRaftRef = useRef<number | null>(null);
   const prefersReducedRef = useRef(false);
@@ -169,6 +176,11 @@ export function PreviewOverlay() {
       if (event.origin !== window.location.origin) return;
       if (!isPreviewMessage(event.data)) return;
       const msg = event.data;
+      if (msg.type === "sp:overlay-mode") {
+        modeRef.current = msg.mode;
+        setMode(msg.mode);
+        return;
+      }
       if (msg.type !== "sp:focus-group") return;
 
       const groupId = `${msg.page}.${msg.group}`;
@@ -373,7 +385,9 @@ export function PreviewOverlay() {
       if (window.getSelection()?.toString()) return;
 
       showHint(
-        "This part of the page isn't editable here. Want it changed? Leave a note for your site team.",
+        modeRef.current === "note"
+          ? "This part of the page isn't a section you can pick — set your note to this page or the whole site instead."
+          : "This part of the page isn't editable here. Want it changed? Leave a note for your site team.",
       );
     }
 
@@ -433,12 +447,18 @@ export function PreviewOverlay() {
   // After all hooks are declared: render nothing when not inside an iframe.
   if (!inIframe) return null;
 
+  const picking = mode === "note";
+
   return (
     <>
       {/* Fixed highlight overlay — the whole box is an interactive button */}
       {hovered && (
         <button
-          aria-label={`Edit ${hovered.label} section`}
+          aria-label={
+            picking
+              ? `Pick ${hovered.label} section for your note`
+              : `Edit ${hovered.label} section`
+          }
           data-sp-overlay=""
           style={{
             position: "fixed",
@@ -480,14 +500,23 @@ export function PreviewOverlay() {
           // Visible focus ring (supplement the outline already present on hover)
           className="focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:outline-none"
         >
-          {/* Edit pill — visual affordance only, not separately interactive */}
+          {/* Edit / pick pill — visual affordance only, not separately interactive */}
           <span
             aria-hidden="true"
             style={{ pointerEvents: "none" }}
             className="absolute top-2 right-2 flex items-center gap-1 rounded-sm bg-blue-600 px-2 py-1 text-xs font-medium text-white shadow-md"
           >
-            <Edit2 className="h-3 w-3" />
-            Edit
+            {picking ? (
+              <>
+                <MessageSquarePlus className="h-3 w-3" />
+                Pick for note
+              </>
+            ) : (
+              <>
+                <Edit2 className="h-3 w-3" />
+                Edit
+              </>
+            )}
           </span>
         </button>
       )}
@@ -556,9 +585,13 @@ export function PreviewOverlay() {
                 sendEditGroup(id);
               }
             }}
-            aria-label={`Edit ${label} section in template editor`}
+            aria-label={
+              picking
+                ? `Pick ${label} section for your note`
+                : `Edit ${label} section in template editor`
+            }
           >
-            Edit {label}
+            {picking ? `Pick ${label}` : `Edit ${label}`}
           </button>
         ))}
       </div>

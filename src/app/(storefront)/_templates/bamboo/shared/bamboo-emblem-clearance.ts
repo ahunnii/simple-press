@@ -8,6 +8,16 @@
  * 72px at every lg+ width (8 + 144 - 80). It's horizontally centered, so it
  * sits directly over whatever the first section renders.
  *
+ * Below lg the bar shrinks to a mini version of the same seal: `size-20`
+ * (80px) at the same `top-2`, against a 64px `h-16` bar — an overhang of
+ * 24px (8 + 80 - 64). That's small enough that globals.css's base (below
+ * lg) fallback rule for `#bamboo-main-content:not(:has(.bam-top))` just pads
+ * 1.5rem (24px) rather than needing a per-page `BAMBOO_EMBLEM_CLEAR`-style
+ * constant; bamboo pages' own first sections were checked per-page in QA and
+ * already carry ≥48px of top padding at sub-lg, which clears it with room to
+ * spare. Once compact (scrolled), the disc docks fully inside the bar
+ * (`size-12`, 8 + 48 = 56 within 64) and there's no overhang to clear at all.
+ *
  * If the emblem's size or `top` offset in `bamboo-header.tsx` ever changes,
  * these values must be recomputed to match.
  */

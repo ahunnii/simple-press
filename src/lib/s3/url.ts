@@ -9,6 +9,7 @@
  */
 
 import { env } from "~/env";
+import { EDITOR_NOTE_KEY_SEGMENT } from "~/lib/editor-notes";
 
 export const STORAGE_BUCKET = env.NEXT_PUBLIC_STORAGE_BUCKET_NAME;
 
@@ -39,4 +40,13 @@ export function publicUrlToKey(url: string): string | null {
  */
 export function isStorageUrl(url: string): boolean {
   return url.startsWith(STORAGE_BASE);
+}
+
+/**
+ * Public URL prefix every editor-note attachment for `businessId` must start
+ * with. Derived from `keyToPublicUrl` so it cannot drift from the upload route's
+ * key shape (`{businessId}/editor-notes/{hex}{ext}`).
+ */
+export function editorNoteAttachmentPrefix(businessId: string): string {
+  return keyToPublicUrl(`${businessId}/${EDITOR_NOTE_KEY_SEGMENT}`);
 }

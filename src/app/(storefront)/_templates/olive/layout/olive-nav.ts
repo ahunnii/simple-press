@@ -1,12 +1,15 @@
 /**
- * Olive's nav model, shared by the header, the mobile overlay and the footer.
- * Pure module (no React, no hooks) so the server layout/footer and the client
- * header/overlay can all import it.
+ * Olive's nav model, shared by the header and the mobile overlay. Pure module
+ * (no React, no hooks) so the server layout and the client header/overlay can
+ * all import it.
  *
  * The layout resolves ONE list — `filterNavByFlags(resolveNav(navigationItems,
- * OLIVE_DEFAULT_NAV), isEnabled)` — and hands the same array to the header
- * (which passes it to the overlay) and to the footer's About column, so the
- * three can never disagree about which links exist.
+ * OLIVE_DEFAULT_NAV), isEnabled)` — and hands the same array to the header,
+ * which passes it to the overlay, so the two can never disagree about which
+ * links exist. The footer no longer reuses this array: it resolves its own
+ * owner-editable Quick links via `resolveFooterQuickLinks` (B10.4), which
+ * falls back to `OLIVE_DEFAULT_NAV` directly rather than to this resolved
+ * list.
  */
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";

@@ -20,6 +20,7 @@ import {
   OlivePromoSection,
   OliveReveal,
   OliveSection,
+  OliveSectionHeading,
 } from "../shared";
 import { OliveContactMain } from "./olive-contact-main";
 import { OliveContactMap } from "./olive-contact-map";
@@ -104,20 +105,16 @@ export async function OliveContactPage({
         aria-label="Say hello"
         tone="slate"
         {...sectionGroupAttr("contact", "hero")}
-        className="flex flex-col items-center gap-3 text-center"
       >
-        <OliveReveal className="flex flex-col items-center gap-3">
-          <h1 className="olive-h1" {...fieldAttr("olive.contact.hero-heading")}>
-            {f["olive.contact.hero-heading"] ?? "Say hello"}
-          </h1>
-          {f["olive.contact.hero-body"] ? (
-            <p
-              className="max-w-[52ch] text-[0.9375rem] leading-relaxed"
-              {...fieldAttr("olive.contact.hero-body")}
-            >
-              {f["olive.contact.hero-body"]}
-            </p>
-          ) : null}
+        <OliveReveal>
+          <OliveSectionHeading
+            tone="slate"
+            as="h1"
+            heading={f["olive.contact.hero-heading"] ?? "Say hello"}
+            body={f["olive.contact.hero-body"] ?? undefined}
+            headingFieldKey="olive.contact.hero-heading"
+            bodyFieldKey="olive.contact.hero-body"
+          />
         </OliveReveal>
       </OliveSection>
 

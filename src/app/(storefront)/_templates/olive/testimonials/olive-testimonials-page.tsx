@@ -12,6 +12,7 @@ import {
   OliveReveal,
   OliveRevealGroup,
   OliveSection,
+  OliveSectionHeading,
 } from "../shared";
 
 type Testimonial = RouterOutputs["testimonial"]["list"][number];
@@ -105,23 +106,14 @@ export async function OliveTestimonialsPage({
         aria-label="Kind words"
         tone="white"
         {...sectionGroupAttr("testimonials", "hero")}
-        className="flex flex-col items-center gap-3 text-center"
       >
-        <h1
-          className="olive-h1"
-          {...fieldAttr("olive.testimonials.hero-heading")}
-        >
-          {f["olive.testimonials.hero-heading"] ?? "Kind words"}
-        </h1>
-        {f["olive.testimonials.hero-body"] ? (
-          <p
-            className="max-w-[52ch] text-[0.9375rem] leading-relaxed"
-            style={{ color: "var(--olive-ink-soft)" }}
-            {...fieldAttr("olive.testimonials.hero-body")}
-          >
-            {f["olive.testimonials.hero-body"]}
-          </p>
-        ) : null}
+        <OliveSectionHeading
+          as="h1"
+          heading={f["olive.testimonials.hero-heading"] ?? "Kind words"}
+          body={f["olive.testimonials.hero-body"] ?? undefined}
+          headingFieldKey="olive.testimonials.hero-heading"
+          bodyFieldKey="olive.testimonials.hero-body"
+        />
       </OliveSection>
 
       {featured ? (

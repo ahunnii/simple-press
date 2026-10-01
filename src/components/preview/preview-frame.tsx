@@ -10,7 +10,10 @@ import {
 import { Loader2 } from "lucide-react";
 
 import type { PreviewEditTarget } from "~/lib/preview/preview-target";
-import type { PreviewMessage } from "~/lib/preview/use-preview-bridge";
+import type {
+  PreviewMessage,
+  PreviewOverlayMode,
+} from "~/lib/preview/use-preview-bridge";
 import { sanitizeEditTarget } from "~/lib/preview/preview-target";
 import {
   postToIframe,
@@ -54,6 +57,12 @@ type Props = {
    * the space it is given instead of forcing a nested scroll.
    */
   minHeight?: string | number;
+  /**
+   * What hotspot clicks mean right now — relabels the in-iframe overlay
+   * ("Edit" vs "Pick for note"). Re-sent on every `sp:ready`, so it survives
+   * iframe reloads. Defaults to "edit".
+   */
+  overlayMode?: PreviewOverlayMode;
 };
 
 /**
@@ -71,6 +80,7 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
       width = "100%",
       className,
       minHeight = "600px",
+      overlayMode = "edit",
     },
     ref,
   ) {
@@ -177,10 +187,29 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
       null,
     );
 
+    // Mirror of `overlayMode` for the sp:ready handler, which must re-send it
+    // to a freshly (re)loaded overlay even when readiness didn't flip.
+    const overlayModeRef = useRef(overlayMode);
+    overlayModeRef.current = overlayMode;
+
+    useEffect(() => {
+      if (!isReady) return;
+      postToIframe(iframeRef, {
+        source: PREVIEW_SOURCE,
+        type: "sp:overlay-mode",
+        mode: overlayMode,
+      });
+    }, [isReady, overlayMode]);
+
     // Listen for messages from the iframe.
     useIframeMessages((msg) => {
       if (msg.type === "sp:ready") {
         setIsReady(true);
+        postToIframe(iframeRef, {
+          source: PREVIEW_SOURCE,
+          type: "sp:overlay-mode",
+          mode: overlayModeRef.current,
+        });
         // Flush any queued focus.
         if (pendingFocusRef.current) {
           const { page, group } = pendingFocusRef.current;

@@ -288,8 +288,10 @@ export function OliveContactMain({
         ) : null}
 
         {showInfo ? (
-          <OliveReveal className="olive-card olive-card-paper flex flex-col gap-6 p-6 sm:p-8">
-            {showVisit ? (
+          <div className="lg:sticky lg:top-[calc(var(--olive-header-h)+1.5rem)] lg:self-start">
+            {/* The card sizes to its own content and pins under the header while the (taller) form scrolls; wrapper keeps the reveal transform off the sticky element. */}
+            <OliveReveal className="olive-card olive-card-paper flex flex-col gap-6 p-6 sm:p-8">
+              {showVisit ? (
               <div>
                 <p className="olive-label" {...fieldAttr(visitHeadingFieldKey)}>
                   {visitHeading}
@@ -376,7 +378,8 @@ export function OliveContactMain({
                 )}
               </div>
             ) : null}
-          </OliveReveal>
+            </OliveReveal>
+          </div>
         ) : null}
       </div>
     </section>

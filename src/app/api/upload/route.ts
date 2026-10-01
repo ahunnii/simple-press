@@ -292,6 +292,32 @@ const router: Router = {
         };
       },
     }),
+    // Editor-note attachments (screenshots / phone photos sent to the platform
+    // operator). Kept under the business prefix so `upload.discardUploads` can
+    // clean up failed sends; the `editor-notes/` segment hides them from the
+    // Media Library (see `src/lib/s3/list.ts`).
+    editorNoteImages: route({
+      fileTypes: ["image/*"],
+      multipleFiles: true,
+      // Keep in sync with ROUTE_MAX_FILES.editorNoteImages (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.editorNoteImages,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
+
+      onBeforeUpload: async ({ req }) => {
+        const { business } = await requireBusinessManager(req);
+
+        return {
+          generateObjectInfo: ({ file }) => {
+            const ext = safeRasterImageExt(file.name);
+            const key = `${business.id}/editor-notes/${crypto.randomBytes(8).toString("hex")}${ext}`;
+            return {
+              key,
+              metadata: { pathname: keyToPublicUrl(key) },
+            };
+          },
+        };
+      },
+    }),
     // Reachable by non-members (invite code or any logged-in shopper), so the
     // size cap matters here more than anywhere else.
     testimonials: route({

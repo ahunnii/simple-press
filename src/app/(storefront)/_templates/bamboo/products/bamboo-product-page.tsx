@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RotateCcw, Truck } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
@@ -40,10 +40,6 @@ import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "..";
-import {
-  BambooAccordion,
-  BambooAccordionItem,
-} from "../shared/bamboo-accordion";
 import { BambooHorizontalProductCard } from "../shared/bamboo-product-card";
 import { BambooPageShelf } from "../shared/bamboo-page-shelf";
 import { BambooProductActions } from "./bamboo-product-actions";
@@ -285,64 +281,40 @@ export function BambooProductPage({
               {/* Shipping / Returns — each row is its own hideable section
                   (product.shipping / product.returns), rendering when its
                   note is set OR its policy is published, and independently
-                  toggleable in the editor. The extra wrapping div carries the
-                  section attrs since BambooAccordionItem's root isn't ours to
-                  extend (shared/bamboo-accordion.tsx is chrome-owned). */}
+                  toggleable in the editor. Always-open info cards (not an
+                  accordion) — sectionAttrs spread directly onto each
+                  BambooPolicyNote's root. */}
               {showShippingRow || showReturnsRow ? (
                 <div>
                   <h2 className="sr-only">Shipping and returns</h2>
-                  <BambooAccordion className="space-y-3">
+                  <div className="divide-y divide-[var(--bam-hairline)] rounded-(--radius) border border-[var(--bam-hairline)]">
                     {showShippingRow ? (
-                      <div {...sectionGroupAttr("product", "shipping")}>
-                        <BambooAccordionItem id="shipping" title="Shipping">
-                          {shippingSummary ? (
-                            <p
-                              {...fieldAttr("bamboo.product.shipping-summary")}
-                              className="text-sm leading-relaxed whitespace-pre-line"
-                            >
-                              {shippingSummary}
-                            </p>
-                          ) : null}
-                          {hasShippingPolicy ? (
-                            <Link
-                              href="/shipping-policy"
-                              className={cn(
-                                "inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]",
-                                shippingSummary && "mt-3",
-                              )}
-                            >
-                              Read the full shipping policy
-                            </Link>
-                          ) : null}
-                        </BambooAccordionItem>
-                      </div>
+                      <BambooPolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "shipping")}
+                        Icon={Truck}
+                        title="Shipping"
+                        fieldKey="bamboo.product.shipping-summary"
+                        note={shippingSummary}
+                        policyHref={
+                          hasShippingPolicy ? "/shipping-policy" : undefined
+                        }
+                        policyLabel="Read the full shipping policy"
+                      />
                     ) : null}
                     {showReturnsRow ? (
-                      <div {...sectionGroupAttr("product", "returns")}>
-                        <BambooAccordionItem id="returns" title="Returns">
-                          {returnsSummary ? (
-                            <p
-                              {...fieldAttr("bamboo.product.returns-summary")}
-                              className="text-sm leading-relaxed whitespace-pre-line"
-                            >
-                              {returnsSummary}
-                            </p>
-                          ) : null}
-                          {hasRefundPolicy ? (
-                            <Link
-                              href="/refund-policy"
-                              className={cn(
-                                "inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]",
-                                returnsSummary && "mt-3",
-                              )}
-                            >
-                              Read the full returns policy
-                            </Link>
-                          ) : null}
-                        </BambooAccordionItem>
-                      </div>
+                      <BambooPolicyNote
+                        sectionAttrs={sectionGroupAttr("product", "returns")}
+                        Icon={RotateCcw}
+                        title="Returns"
+                        fieldKey="bamboo.product.returns-summary"
+                        note={returnsSummary}
+                        policyHref={
+                          hasRefundPolicy ? "/refund-policy" : undefined
+                        }
+                        policyLabel="Read the full returns policy"
+                      />
                     ) : null}
-                  </BambooAccordion>
+                  </div>
                 </div>
               ) : null}
 
@@ -442,5 +414,56 @@ export function BambooProductPage({
         ) : null}
       </section>
     </PageTransition>
+  );
+}
+
+function BambooPolicyNote({
+  Icon,
+  title,
+  fieldKey,
+  note,
+  policyHref,
+  policyLabel,
+  sectionAttrs,
+}: {
+  Icon: LucideIcon;
+  title: string;
+  fieldKey: string;
+  note?: string;
+  /** Only set when the matching policy page is published. */
+  policyHref: string | undefined;
+  policyLabel: string;
+  /** `sectionGroupAttr("product", "shipping" | "returns")` — makes this row its own editor hotspot. */
+  sectionAttrs?: Record<string, string>;
+}) {
+  return (
+    <div {...sectionAttrs} className="flex gap-3 px-4 py-3">
+      <Icon
+        className="mt-0.5 size-4 shrink-0 text-[var(--bam-forest)]"
+        aria-hidden="true"
+      />
+      <div className="min-w-0">
+        <h3 className="text-foreground text-sm font-semibold">{title}</h3>
+        {note ? (
+          <p
+            {...fieldAttr(fieldKey)}
+            className="text-muted-foreground mt-1 text-sm leading-relaxed whitespace-pre-line"
+          >
+            {note}
+          </p>
+        ) : null}
+        {policyHref ? (
+          <Link
+            href={policyHref}
+            className={cn(
+              "inline-block text-sm font-medium text-[var(--bam-forest)] underline underline-offset-4 hover:text-[var(--bam-forest-deep)]",
+              note && "mt-2",
+            )}
+          >
+            {policyLabel}
+          </Link>
+        ) : null}
+      </div>
+    </div>
   );
 }

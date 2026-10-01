@@ -51,9 +51,11 @@ type ServiceItem = ServiceTemplateProps["items"][number];
  * page is data-driven exactly like the product page (arbitrary
  * merchant-authored name/image/video), so it follows that same precedent:
  * `BambooPageShelf` (the product page's own back-link shelf component,
- * `variant="compact"`) for emblem clearance, then Outfit for the h1
- * (`service.name` is merchant/data-driven — same reasoning design.md gives
- * for keeping the product-page title off the fixed serif sizes).
+ * `variant="compact"`) for emblem clearance, then the h1 uses serif
+ * (Spectral, `font-serif font-bold tracking-tight`) like every other bamboo
+ * page header, at the blog-post h1's responsive sizes (3xl/4xl/lg:5xl) since
+ * the name is merchant-authored; the product title remains the one Outfit
+ * exception.
  *
  * Layout:
  * 1. Compact shelf: "All Services" back-link (clears the header emblem)
@@ -160,7 +162,7 @@ export async function BambooServicePage({
               <Badge className="mb-4 w-fit rounded-full">{smallLabel}</Badge>
             )}
 
-            <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
+            <h1 className="text-foreground font-serif text-3xl leading-tight font-bold tracking-tight md:text-4xl lg:text-5xl">
               <span className="text-balance">{service.name}</span>
             </h1>
 

@@ -9,6 +9,13 @@ export const PREVIEW_SOURCE = "simplepress-preview";
 // Message type definitions
 // ---------------------------------------------------------------------------
 
+/**
+ * What a hotspot click means right now: open the section's fields ("edit",
+ * the default) or pick the section for the note being composed ("note").
+ * Only changes the overlay's labels — the click still posts `sp:edit-group`.
+ */
+export type PreviewOverlayMode = "edit" | "note";
+
 export type PreviewMessage =
   | { source: typeof PREVIEW_SOURCE; type: "sp:ready" }
   | { source: typeof PREVIEW_SOURCE; type: "sp:refresh" }
@@ -32,6 +39,11 @@ export type PreviewMessage =
       type: "sp:focus-group";
       page: string;
       group: string;
+    }
+  | {
+      source: typeof PREVIEW_SOURCE;
+      type: "sp:overlay-mode";
+      mode: PreviewOverlayMode;
     }
   | {
       source: typeof PREVIEW_SOURCE;

@@ -120,6 +120,23 @@ function getNav() {
 }
 
 /**
+ * The desktop emblem slot inside `nav` and the sub-lg centre brand cell both
+ * render a `<Link href="/" aria-label={`${businessName} — home`}>` — CSS
+ * (`lg:hidden` / `hidden lg:grid`) decides which one is visible at a given
+ * width, but jsdom renders both, so `getByRole` alone would find two matches.
+ * This picks the one that lives OUTSIDE the "Main navigation" landmark, i.e.
+ * the sub-lg brand cell.
+ */
+function getSubLgBrandLink(name = "Test Shop — home") {
+  const links = screen.getAllByRole("link", { name });
+  const link = links.find(
+    (el) => !el.closest('nav[aria-label="Main navigation"]'),
+  );
+  if (!link) throw new Error(`No sub-lg brand link found for "${name}"`);
+  return link;
+}
+
+/**
  * The nav's `[1fr_auto_1fr]` grid always carries a middle "home" emblem link
  * (the hanging-emblem signature moment) that isn't part of the resolved
  * `links` list — so link/button counts and aria-current queries have to
@@ -331,5 +348,31 @@ describe("BambooHeader signed-in avatar menu (PF7)", () => {
 
     const userButton = screen.getByTestId("user-button");
     expect(userButton.querySelectorAll("a")).toHaveLength(0);
+  });
+});
+
+describe("BambooHeader sub-lg brand cell", () => {
+  it("shows a disc image with no visible business name when a logo is set", () => {
+    const business = {
+      name: "Test Shop",
+      siteContent: {
+        customFields: {},
+        navigationItems: NAV,
+        logoUrl: "https://example.com/logo.png",
+      },
+    } as unknown as DefaultHeaderTemplateProps["business"];
+    render(<BambooHeader business={business} />);
+
+    const brandLink = getSubLgBrandLink();
+    expect(brandLink.querySelector("img")).not.toBeNull();
+    expect(brandLink).not.toHaveTextContent("Test Shop");
+  });
+
+  it("shows the business name when neither a logo nor a wordmark is set", () => {
+    renderHeader();
+
+    const brandLink = getSubLgBrandLink();
+    expect(brandLink.querySelector("img")).toBeNull();
+    expect(brandLink).toHaveTextContent("Test Shop");
   });
 });

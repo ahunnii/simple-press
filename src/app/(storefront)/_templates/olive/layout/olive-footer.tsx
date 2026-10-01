@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import type { OliveNavCollection } from "./olive-nav-overlay";
-import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
+import { googleMapsUrls } from "~/lib/address/coordinates";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
@@ -11,10 +11,9 @@ import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import {
   externalLinkProps,
-  filterNavByFlags,
   getAccountNavLinks,
   navHrefFlag,
-  resolveNav,
+  resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
@@ -27,9 +26,6 @@ type FooterLink = { href: string; label: string; external?: boolean };
 type OliveFooterProps = DefaultFooterTemplateProps & {
   /** Published collections, resolved once by the layout. */
   collections?: OliveNavCollection[];
-  /** The header's nav, resolved + flag-filtered once by the layout. When
-   *  omitted the footer resolves the same list itself. */
-  navItems?: NavItem[];
   /** The layout's server-side session, seeding the account rows. */
   initialSession?: Session | null;
 };
@@ -68,13 +64,16 @@ function nonBlank(value: string | null | undefined): string | undefined {
  * row gap), not airy — this is the index of the book, not another section.
  *
  * Columns: Shop (collections), Policies (the four standard policies + the
- * platform index, B10.1) and About (the owner's nav, flag-filtered and
- * flattened, B10.2/B10.4, then the session-aware account rows, B10.3).
+ * platform index, B10.1) and the owner's Quick links (`footerNavigationItems`,
+ * falling back to the header's nav, flag-filtered — B10.4), then the
+ * session-aware account rows, B10.3. When the owner has no quick links (an
+ * empty list is a valid, deliberate choice) the account rows still need
+ * somewhere to live, so that column's title becomes "Account" instead of
+ * disappearing.
  */
 export async function OliveFooter({
   business,
   collections = [],
-  navItems,
   initialSession,
 }: OliveFooterProps) {
   const { isEnabled } = await getBusinessFlags();
@@ -109,6 +108,16 @@ export async function OliveFooter({
   const ctaLink = (f["olive.global.footer-cta-link"] ?? "").trim();
   const wordmarkTagline = f["olive.global.wordmark-tagline"] ?? "";
 
+  // The business's own contact details, shown in the sage field next to the
+  // CTA/tagline (B10 doesn't mandate this, but every other adopted template
+  // surfaces it in the footer — olive had nowhere for it before). Each line
+  // is independently optional.
+  const address = nonBlank(business?.businessAddress);
+  const phone = nonBlank(business?.phoneNumber);
+  const email = nonBlank(business?.supportEmail);
+  const addressMapUrl = address ? googleMapsUrls(address).viewUrl : null;
+  const hasContact = Boolean(address ?? phone ?? email);
+
   const name = business?.name ?? "";
   const year = new Date().getFullYear();
 
@@ -116,11 +125,29 @@ export async function OliveFooter({
   const collectionsEnabled = isEnabled("collections");
   const accountsEnabled = isEnabled("customerAccounts");
 
+  // Owner's flat footer Quick Links (B10.4): `SiteContent.footerNavigationItems`,
+  // falling back to the header's own nav (owner-saved or OLIVE_DEFAULT_NAV) when
+  // unset; an explicit `[]` means "no quick links". Already flat (no children)
+  // and flag-filtered, so it's rendered verbatim — the Shop and Policies
+  // columns below dedupe against it instead of the other way around.
+  const quickLinks = resolveFooterQuickLinks({
+    footerItems: business?.siteContent?.footerNavigationItems,
+    navigationItems: business?.siteContent?.navigationItems,
+    navDefaults: OLIVE_DEFAULT_NAV,
+    isEnabled,
+  });
+  const quickLinkHrefs = new Set(quickLinks.map((link) => link.href));
+
   const listedCollections = collectionsEnabled
     ? collections.slice(0, MAX_COLLECTION_LINKS)
     : [];
 
-  const shopLinks: FooterLink[] =
+  // Shop column: collections (or the flag-gated defaults), deduped against
+  // whatever the owner's Quick links already list — `uniqueByHref` also
+  // dedupes within this column itself, which matters when there are no
+  // collections: "All products" and "New arrivals" are both `/shop`, so only
+  // the first survives.
+  const shopLinks: FooterLink[] = uniqueByHref(
     listedCollections.length > 0
       ? [
           ...listedCollections.map((collection) => ({
@@ -144,26 +171,8 @@ export async function OliveFooter({
           ...(collectionsEnabled
             ? [{ href: "/collections", label: "Collections" }]
             : []),
-        ];
-
-  // About column: the header's nav (owner-saved or OLIVE_DEFAULT_NAV, flag
-  // filtered), flattened — each link, then its children as plain links; a
-  // group with an empty href contributes only its children. Anything the Shop
-  // column already lists (/shop, /collections…) is not repeated here.
-  const nav =
-    navItems ??
-    filterNavByFlags(
-      resolveNav(business?.siteContent?.navigationItems, OLIVE_DEFAULT_NAV),
-      isEnabled,
-    );
-  const aboutLinks = uniqueByHref(
-    nav.flatMap((item) => [
-      ...(item.href.trim()
-        ? [{ href: item.href, label: item.label, external: item.external }]
-        : []),
-      ...(item.children ?? []),
-    ]),
-    new Set(shopLinks.map((link) => link.href)),
+        ],
+    new Set(quickLinkHrefs),
   );
 
   // Signed-in account rows from the flag-gated account links: "My account"
@@ -188,8 +197,8 @@ export async function OliveFooter({
   const termsOfService = bySlug("terms-of-service");
 
   const policyLinks: FooterLink[] = [
-    // Contact is kept here unless the About column (the nav) already has it.
-    ...(aboutLinks.some((link) => link.href === "/contact")
+    // Contact is kept here unless the owner's Quick links already have it.
+    ...(quickLinkHrefs.has("/contact")
       ? []
       : [{ href: "/contact", label: "Contact" }]),
     ...(shippingPolicy
@@ -244,6 +253,11 @@ export async function OliveFooter({
     ctaLabel.length > 0 &&
     (ctaFlag === null || isEnabled(ctaFlag));
 
+  // The sage field's left column (CTA/tagline, contact block, socials) is
+  // only worth a grid cell when at least one of the three has content —
+  // otherwise the link columns alone should fill the row, as before.
+  const hasLeftColumn = showCta || Boolean(footerTagline) || hasContact || socials.length > 0;
+
   return (
     <footer {...sectionGroupAttr("global", "branding")}>
       {/* ── The cover: sage field ─────────────────────────────────────── */}
@@ -252,60 +266,115 @@ export async function OliveFooter({
           className="mx-auto grid gap-10 px-[var(--olive-section-pad-x)] py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-16 lg:py-16"
           style={{ maxWidth: "var(--olive-container)" }}
         >
-          {showCta ? (
-            <div className="olive-card max-w-md p-7 sm:p-8">
-              <h2
-                className="olive-h3"
-                {...fieldAttr("olive.global.footer-cta-heading")}
-              >
-                {ctaHeading}
-              </h2>
-              {ctaBody ? (
+          {hasLeftColumn ? (
+            <div className="flex flex-col gap-8">
+              {showCta ? (
+                <div className="olive-card max-w-md p-7 sm:p-8">
+                  <h2
+                    className="olive-h3"
+                    {...fieldAttr("olive.global.footer-cta-heading")}
+                  >
+                    {ctaHeading}
+                  </h2>
+                  {ctaBody ? (
+                    <p
+                      className="mt-2 text-[0.9375rem] leading-relaxed"
+                      style={{ color: "var(--olive-ink-soft)" }}
+                      {...fieldAttr("olive.global.footer-cta-body")}
+                    >
+                      {ctaBody}
+                    </p>
+                  ) : null}
+                  {ctaIsExternal ? (
+                    <a
+                      href={ctaLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="olive-btn olive-btn-primary mt-6"
+                    >
+                      <span {...fieldAttr("olive.global.footer-cta-label")}>
+                        {ctaLabel}
+                      </span>
+                      <span className="sr-only"> (opens in new tab)</span>
+                    </a>
+                  ) : (
+                    <Link
+                      href={ctaLink}
+                      className="olive-btn olive-btn-primary mt-6"
+                      {...fieldAttr("olive.global.footer-cta-label")}
+                    >
+                      {ctaLabel}
+                    </Link>
+                  )}
+                </div>
+              ) : footerTagline ? (
                 <p
-                  className="mt-2 text-[0.9375rem] leading-relaxed"
-                  style={{ color: "var(--olive-ink-soft)" }}
-                  {...fieldAttr("olive.global.footer-cta-body")}
+                  className="max-w-[34ch] text-[1.0625rem] leading-relaxed"
+                  style={{ color: "var(--olive-white)" }}
                 >
-                  {ctaBody}
+                  {footerTagline}
                 </p>
               ) : null}
-              {ctaIsExternal ? (
-                <a
-                  href={ctaLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="olive-btn olive-btn-primary mt-6"
-                >
-                  <span {...fieldAttr("olive.global.footer-cta-label")}>
-                    {ctaLabel}
-                  </span>
-                  <span className="sr-only"> (opens in new tab)</span>
-                </a>
-              ) : (
-                <Link
-                  href={ctaLink}
-                  className="olive-btn olive-btn-primary mt-6"
-                  {...fieldAttr("olive.global.footer-cta-label")}
-                >
-                  {ctaLabel}
-                </Link>
-              )}
+
+              {hasContact ? (
+                <address className="not-italic flex flex-col gap-1.5 text-[0.875rem] leading-relaxed">
+                  {address ? (
+                    <a
+                      href={addressMapUrl ?? undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="olive-footer-link"
+                    >
+                      {address}
+                      <span className="sr-only"> (opens in new tab)</span>
+                    </a>
+                  ) : null}
+                  {phone ? (
+                    <a
+                      href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+                      className="olive-footer-link"
+                    >
+                      {phone}
+                    </a>
+                  ) : null}
+                  {email ? (
+                    <a
+                      href={`mailto:${email}`}
+                      className="olive-footer-link break-all"
+                      style={{ overflowWrap: "anywhere" }}
+                    >
+                      {email}
+                    </a>
+                  ) : null}
+                </address>
+              ) : null}
+
+              {socials.length > 0 ? (
+                <ul className="-ml-[13px] m-0 flex list-none items-center gap-1 p-0">
+                  {socials.map(({ key, url, ariaLabel, Icon }) => (
+                    <li key={key}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${ariaLabel} (opens in new tab)`}
+                        className="olive-icon-btn olive-icon-btn-invert"
+                      >
+                        <Icon className="h-[18px] w-[18px]" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
-          ) : footerTagline ? (
-            <p
-              className="max-w-[34ch] text-[1.0625rem] leading-relaxed"
-              style={{ color: "var(--olive-white)" }}
-            >
-              {footerTagline}
-            </p>
           ) : null}
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3">
             <OliveFooterColumn title="Shop" links={shopLinks} />
             <OliveFooterColumn title="Policies" links={policyLinks} />
             <OliveFooterColumn
-              title="About"
-              links={aboutLinks}
+              title={quickLinks.length > 0 ? "Quick links" : "Account"}
+              links={quickLinks}
               extra={
                 accountsEnabled ? (
                   <OliveFooterAccount
@@ -322,7 +391,7 @@ export async function OliveFooter({
       {/* ── The spine: deep leaf strip with the clipped wordmark ──────── */}
       <div className="olive-footer-strip">
         <div
-          className="mx-auto flex flex-col gap-5 px-[var(--olive-section-pad-x)] pt-9 sm:flex-row sm:items-center sm:justify-between sm:gap-8"
+          className="mx-auto flex flex-wrap items-center justify-between gap-x-8 gap-y-3 px-[var(--olive-section-pad-x)] pt-9"
           style={{ maxWidth: "var(--olive-container)" }}
         >
           <div className="flex items-center gap-2.5">
@@ -336,24 +405,6 @@ export async function OliveFooter({
               </span>
             ) : null}
           </div>
-
-          {socials.length > 0 ? (
-            <ul className="m-0 flex list-none items-center gap-1 p-0">
-              {socials.map(({ key, url, ariaLabel, Icon }) => (
-                <li key={key}>
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${ariaLabel} (opens in new tab)`}
-                    className="olive-icon-btn olive-icon-btn-invert"
-                  >
-                    <Icon className="h-[18px] w-[18px]" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
 
           <p
             className="text-[0.6875rem] tracking-[0.06em]"
@@ -380,7 +431,8 @@ function OliveFooterColumn({
 }: {
   title: string;
   links: FooterLink[];
-  /** Extra `<li>` rows after the links (the About column's account rows). */
+  /** Extra `<li>` rows after the links (the Quick links/Account column's
+   *  account rows). */
   extra?: React.ReactNode;
 }) {
   if (links.length === 0 && !extra) return null;

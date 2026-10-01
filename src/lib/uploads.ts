@@ -12,6 +12,7 @@ export const ROUTE_MAX_FILES: Record<string, number> = {
   images: 10,
   galleryImages: 10,
   testimonials: 5,
+  editorNoteImages: 3,
 };
 
 export function getStoredPath(file: {

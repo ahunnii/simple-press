@@ -1,4 +1,5 @@
 import { env } from "~/env";
+import { formatNoteScope } from "~/lib/editor-notes";
 
 /**
  * Throws if the webhook responds with a non-2xx status (e.g. a revoked or
@@ -139,12 +140,16 @@ export async function notifyDiscordEditorNote({
   subdomain,
   authorEmail,
   pageLabel,
+  sectionLabel,
+  attachmentUrls = [],
   body,
 }: {
   businessName: string;
   subdomain: string;
   authorEmail: string;
-  pageLabel: string;
+  pageLabel: string | null;
+  sectionLabel?: string | null;
+  attachmentUrls?: string[];
   body: string;
 }) {
   const webhookUrl = env.DISCORD_WEBHOOK_URL;
@@ -184,8 +189,8 @@ export async function notifyDiscordEditorNote({
               inline: true,
             },
             {
-              name: "Page",
-              value: pageLabel,
+              name: "Where",
+              value: formatNoteScope({ pageLabel, sectionLabel }),
               inline: false,
             },
             {
@@ -193,7 +198,19 @@ export async function notifyDiscordEditorNote({
               value: truncatedBody,
               inline: false,
             },
+            ...(attachmentUrls.length > 0
+              ? [
+                  {
+                    name: "Attachments",
+                    value: attachmentUrls
+                      .map((url, i) => `[Photo ${i + 1}](${url})`)
+                      .join("\n"),
+                    inline: false,
+                  },
+                ]
+              : []),
           ],
+          ...(attachmentUrls[0] ? { image: { url: attachmentUrls[0] } } : {}),
           footer: {
             text: `Review notes → ${adminUrl}`,
           },

@@ -3,6 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { notifyDiscordEditorNote } from "~/lib/discord/notification";
+import { MAX_NOTE_ATTACHMENTS } from "~/lib/editor-notes";
+import { editorNoteAttachmentPrefix } from "~/lib/s3/url";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -16,10 +18,43 @@ export const editorNoteRouter = createTRPCRouter({
         body: z.string().trim().min(1).max(2000),
         pageKey: z.string().max(160).nullable(),
         pageLabel: z.string().max(200).nullable(),
+        sectionKey: z.string().max(160).nullable().default(null),
+        sectionLabel: z.string().max(200).nullable().default(null),
+        attachmentUrls: z
+          .array(z.string().url())
+          .max(MAX_NOTE_ATTACHMENTS)
+          .default([]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
+
+      // A section is always "a section on a page" (site-wide chrome carries the
+      // page the owner was on), so a section without a page is malformed.
+      if (input.sectionKey && !input.pageKey) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A section note must also specify its page.",
+        });
+      }
+
+      // Attachments must be objects the editorNoteImages route stored under
+      // THIS business — never arbitrary or cross-tenant URLs.
+      // The remainder must be exactly the route's `{16 hex}{ext}` filename, which
+      // also rules out `..` / query / fragment tricks riding on the prefix.
+      const attachmentPrefix = editorNoteAttachmentPrefix(businessId);
+      const isOwnAttachment = (url: string) =>
+        url.startsWith(attachmentPrefix) &&
+        /^[0-9a-f]{16}\.[a-z0-9]{2,5}$/i.test(
+          url.slice(attachmentPrefix.length),
+        );
+      if (!input.attachmentUrls.every(isOwnAttachment)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid attachment.",
+        });
+      }
+      const attachmentUrls = [...new Set(input.attachmentUrls)];
 
       // Abuse guard: cap notes to 10/hour per business.
       const recentCount = await ctx.db.editorNote.count({
@@ -42,6 +77,9 @@ export const editorNoteRouter = createTRPCRouter({
           businessId,
           pageKey: input.pageKey,
           pageLabel: input.pageLabel,
+          sectionKey: input.sectionKey,
+          sectionLabel: input.sectionLabel,
+          attachmentUrls,
           body: input.body,
           createdByUserId: ctx.session.user.id,
         },
@@ -58,7 +96,9 @@ export const editorNoteRouter = createTRPCRouter({
             businessName: business.name,
             subdomain: business.subdomain,
             authorEmail: ctx.session.user.email,
-            pageLabel: input.pageLabel ?? "Whole site",
+            pageLabel: input.pageLabel,
+            sectionLabel: input.sectionLabel,
+            attachmentUrls,
             body: input.body,
           });
         } catch (err) {
@@ -78,6 +118,9 @@ export const editorNoteRouter = createTRPCRouter({
         id: true,
         pageKey: true,
         pageLabel: true,
+        sectionKey: true,
+        sectionLabel: true,
+        attachmentUrls: true,
         body: true,
         status: true,
         response: true,

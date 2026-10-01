@@ -707,3 +707,32 @@ export function createLoyaltyTier(
     },
   });
 }
+
+/** An editor note (visual editor -> platform operator inbox). */
+export function createEditorNote(
+  businessId: string,
+  opts: {
+    body?: string;
+    pageKey?: string | null;
+    pageLabel?: string | null;
+    sectionKey?: string | null;
+    sectionLabel?: string | null;
+    attachmentUrls?: string[];
+    status?: "open" | "resolved";
+    createdByUserId?: string | null;
+  } = {},
+) {
+  return db.editorNote.create({
+    data: {
+      businessId,
+      body: opts.body ?? "Please change this.",
+      pageKey: opts.pageKey ?? null,
+      pageLabel: opts.pageLabel ?? null,
+      sectionKey: opts.sectionKey ?? null,
+      sectionLabel: opts.sectionLabel ?? null,
+      attachmentUrls: opts.attachmentUrls ?? [],
+      status: opts.status ?? "open",
+      createdByUserId: opts.createdByUserId ?? null,
+    },
+  });
+}

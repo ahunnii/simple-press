@@ -8,6 +8,7 @@ import type { CmsPageDraftValues } from "./cms-page-panel";
 import type { DeviceKind } from "./editor-preview";
 import type { EditorTopBarCmsPage, EditorTopBarPage } from "./editor-top-bar";
 import type { FieldFocusRequest } from "./field-panel";
+import type { NoteSectionPick } from "./notes-panel";
 import type { PanelVariant } from "./panel-variant";
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { PreviewEditTarget } from "~/lib/preview/preview-target";
@@ -422,6 +423,14 @@ export function VisualEditor({
     isCmsPage(clampedInitialPage),
   );
   const [notesOpen, setNotesOpen] = useState(false);
+  /**
+   * Section the owner clicked in the preview while Notes was open — the
+   * NotesPanel scopes its composer to it. Nonce'd so re-clicking the same
+   * section still registers.
+   */
+  const [notePickRequest, setNotePickRequest] =
+    useState<NoteSectionPick | null>(null);
+  const notePickNonceRef = useRef(0);
 
   // ── Compact layout state ──
   /** Sections drawer (compact only — the rail is always visible on desktop). */
@@ -1061,6 +1070,23 @@ export function VisualEditor({
         : [],
     [sections, activeCmsPage],
   );
+  // Sections a note can be scoped to on the page being previewed: the same
+  // set the rail offers (hidden sections included — an owner may be asking
+  // about exactly those), then site-wide chrome. Generic CMS pages render no
+  // template sections of their own, so only the site-wide ones apply.
+  const noteSections = useMemo(() => {
+    const own = activeCmsPage
+      ? activeCmsPage.type === "blog"
+        ? blogPostSections
+        : []
+      : sectionsForPage;
+    const seen = new Set<string>();
+    return [...own, ...globalSections].filter((s) => {
+      if (seen.has(s.id)) return false;
+      seen.add(s.id);
+      return true;
+    });
+  }, [activeCmsPage, blogPostSections, sectionsForPage, globalSections]);
   // The rail/panel/label all read the DRAFT title so renames reflect live.
   const activeCmsTitle =
     activeCmsId !== null
@@ -1298,6 +1324,22 @@ export function VisualEditor({
   // Hotspot click inside the iframe (sp:edit-group).
   const handleEditGroup = useCallback(
     (page: string, group: string, target?: PreviewEditTarget) => {
+      // Notes open: a click on a section of this page (or site-wide chrome)
+      // scopes the note to it instead of opening the field editor. Pulse it
+      // so the owner sees what was picked. Anything else (e.g. a section of
+      // another page) falls through to the normal edit behavior below.
+      if (notesOpen) {
+        const picked = noteSections.find((s) => s.id === group);
+        if (picked) {
+          notePickNonceRef.current += 1;
+          setNotePickRequest({
+            id: picked.id,
+            nonce: notePickNonceRef.current,
+          });
+          focusSection(picked);
+          return;
+        }
+      }
       // Narrow to the clicked field / list row when the overlay resolved
       // one; a plain section click (or keyboard) clears any earlier request.
       const requestFocus = () => {
@@ -1349,6 +1391,8 @@ export function VisualEditor({
       }
     },
     [
+      notesOpen,
+      noteSections,
       activePage,
       activeCmsPage,
       sections,
@@ -1409,6 +1453,8 @@ export function VisualEditor({
       <NotesPanel
         activePageKey={activePage}
         activePageLabel={activePageLabel}
+        sections={noteSections}
+        pickedSection={notePickRequest}
         onClose={() => setNotesOpen(false)}
         variant={variant}
       />
@@ -1590,6 +1636,7 @@ export function VisualEditor({
             notice={previewNotice}
             onEditGroup={handleEditGroup}
             onPatched={handlePatched}
+            overlayMode={notesOpen ? "note" : "edit"}
             frameRef={previewRef}
           />
         </div>
@@ -1657,6 +1704,7 @@ export function VisualEditor({
           notice={previewNotice}
           onEditGroup={handleEditGroup}
           onPatched={handlePatched}
+          overlayMode={notesOpen ? "note" : "edit"}
           frameRef={previewRef}
         />
 

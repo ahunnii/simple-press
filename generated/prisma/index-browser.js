@@ -733,10 +733,13 @@ exports.Prisma.EditorNoteScalarFieldEnum = {
   businessId: 'businessId',
   pageKey: 'pageKey',
   pageLabel: 'pageLabel',
+  sectionKey: 'sectionKey',
+  sectionLabel: 'sectionLabel',
   body: 'body',
   status: 'status',
   response: 'response',
   resolvedAt: 'resolvedAt',
+  attachmentUrls: 'attachmentUrls',
   createdByUserId: 'createdByUserId'
 };
 
