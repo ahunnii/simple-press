@@ -1,9 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { formatNoteScope } from "~/lib/editor-notes";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -50,7 +52,7 @@ export function NotesTable({ notes }: Props) {
                   scope="col"
                   className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
                 >
-                  Page
+                  Where
                 </th>
                 <th
                   scope="col"
@@ -111,7 +113,10 @@ export function NotesTable({ notes }: Props) {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge variant="outline">
-                          {note.pageLabel ?? "Whole site"}
+                          {formatNoteScope({
+                            pageLabel: note.pageLabel,
+                            sectionLabel: note.sectionLabel,
+                          })}
                         </Badge>
                       </td>
                       <td className="max-w-md px-6 py-4">
@@ -127,6 +132,25 @@ export function NotesTable({ notes }: Props) {
                         >
                           {note.body}
                         </button>
+                        {note.attachmentUrls &&
+                          note.attachmentUrls.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {note.attachmentUrls.map((url, i) => (
+                                <a
+                                  key={url}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <img
+                                    src={url}
+                                    alt={`Attachment ${i + 1}`}
+                                    className="h-10 w-10 rounded border object-cover"
+                                  />
+                                </a>
+                              ))}
+                            </div>
+                          )}
                       </td>
                       <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
                         {note.createdBy?.email ?? "—"}

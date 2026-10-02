@@ -8,6 +8,7 @@
  * formats change.
  */
 
+import { EDITOR_NOTE_KEY_SEGMENT } from "~/lib/editor-notes";
 import { s3Client } from "~/lib/s3/client";
 import { keyToPublicUrl, STORAGE_BUCKET } from "~/lib/s3/url";
 
@@ -41,6 +42,7 @@ const MAX_PAGES = 50;
  *   favicon.…        → "favicon"
  *   video-…          → "video"
  *   image-…          → "image"
+ *   library-…        → "image" (Media Library bulk uploads)
  *   anything else    → "other"
  */
 function classifyKind(suffix: string): MediaKind {
@@ -50,6 +52,7 @@ function classifyKind(suffix: string): MediaKind {
   if (suffix.startsWith("favicon.")) return "favicon";
   if (suffix.startsWith("video-")) return "video";
   if (suffix.startsWith("image-")) return "image";
+  if (suffix.startsWith("library-")) return "image";
   return "other";
 }
 
@@ -61,7 +64,7 @@ function extractXmlTag(xml: string, tag: string): string | null {
 }
 
 /** Parse all `<Contents>…</Contents>` blocks out of an XML response. */
-function parseContents(xml: string): ListedObject[] {
+export function parseContents(xml: string): ListedObject[] {
   const objects: ListedObject[] = [];
   const contentsRe = /<Contents>([\s\S]*?)<\/Contents>/g;
   let match: RegExpExecArray | null;
@@ -79,6 +82,10 @@ function parseContents(xml: string): ListedObject[] {
     // The prefix is `{businessId}/`; everything after the first slash is the suffix
     const slashIdx = key.indexOf("/");
     const suffix = slashIdx >= 0 ? key.slice(slashIdx + 1) : key;
+
+    // Editor-note attachments are platform-support artifacts, not site media —
+    // keep them out of the owner's Media Library and the store-transfer export.
+    if (suffix.startsWith(EDITOR_NOTE_KEY_SEGMENT)) continue;
 
     objects.push({
       key,

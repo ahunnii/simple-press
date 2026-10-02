@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { formatNoteScope } from "~/lib/editor-notes";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -71,10 +73,33 @@ export function ResolveNoteDialog({ note, open, onOpenChange }: Props) {
         {note && (
           <div className="space-y-4 py-2">
             <div>
-              <Badge variant="outline">{note.pageLabel ?? "Whole site"}</Badge>
+              <Badge variant="outline">
+                {formatNoteScope({
+                  pageLabel: note.pageLabel,
+                  sectionLabel: note.sectionLabel,
+                })}
+              </Badge>
               <p className="text-foreground mt-2 text-sm whitespace-pre-wrap">
                 {note.body}
               </p>
+              {note.attachmentUrls && note.attachmentUrls.length > 0 && (
+                <div className="mt-3 grid grid-cols-3 gap-3">
+                  {note.attachmentUrls.map((url, i) => (
+                    <a
+                      key={url}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={url}
+                        alt={`Attachment ${i + 1}`}
+                        className="h-24 w-24 rounded border object-cover"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

@@ -102,15 +102,21 @@ export function ListItemSubFieldInput({
   value,
   onChange,
   mediaLibraryEnabled,
+  rowTitle,
 }: {
   subField: TemplateListItemField;
   value: string;
   onChange: (v: string) => void;
   mediaLibraryEnabled?: boolean;
+  /** The row's display title, so media controls say which row they edit. */
+  rowTitle?: string;
 }) {
   const baseId = useId();
   const fieldId = `${baseId}-${subField.key}`;
   const descId = subField.description ? `${fieldId}-desc` : undefined;
+  const mediaName = rowTitle
+    ? `${subField.label} for ${rowTitle}`
+    : subField.label;
 
   const labelNode = (
     <Label htmlFor={fieldId} className="text-muted-foreground text-xs">
@@ -150,6 +156,7 @@ export function ListItemSubFieldInput({
         {labelNode}
         <TemplateImageUploadField
           value={value}
+          accessibleName={mediaName}
           onChange={onChange}
           mediaLibraryEnabled={mediaLibraryEnabled}
         />
@@ -164,6 +171,7 @@ export function ListItemSubFieldInput({
         {labelNode}
         <TemplateVideoUploadField
           value={value}
+          accessibleName={mediaName}
           onChange={onChange}
           mediaLibraryEnabled={mediaLibraryEnabled}
         />
@@ -496,6 +504,7 @@ function SortableListRow({
             value={cellString(row[sf.key])}
             onChange={(v) => onCellChange(sf.key, v)}
             mediaLibraryEnabled={mediaLibraryEnabled}
+            rowTitle={title}
           />
         ))}
       </CollapsibleContent>

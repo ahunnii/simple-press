@@ -20,6 +20,7 @@ import {
   pickParam,
 } from "../_lib/table-query";
 import { MediaLibraryClient } from "./_components/media-library-client";
+import { MediaUploadButton } from "./_components/media-upload-button";
 
 type Props = {
   searchParams: Promise<{
@@ -96,6 +97,17 @@ export default async function MediaLibraryPage({ searchParams }: Props) {
 
   const params = await searchParams;
 
+  // Mirrors `requireBusinessManager` in src/app/api/upload/route.ts (platform
+  // admin, OWNER or MANAGER). The cross-business platform-admin view
+  // (`?businessId`) is excluded: /api/upload always writes to the HOST's
+  // business, not `?businessId`, so an upload there would land in the wrong
+  // library.
+  const canUpload =
+    (session.user.platformRole === "PLATFORM_ADMIN" ||
+      membershipRole === "OWNER" ||
+      membershipRole === "MANAGER") &&
+    !params.businessId;
+
   const search = params.search?.trim() ?? "";
   const type = pickParam(params.type, MEDIA_TYPE_VALUES, MEDIA_TYPE_DEFAULT);
   const used = pickParam(params.used, MEDIA_USAGE_VALUES, MEDIA_USAGE_DEFAULT);
@@ -166,8 +178,9 @@ export default async function MediaLibraryPage({ searchParams }: Props) {
         <div className="admin-header">
           <div>
             <h1>Media Library</h1>
-            <p>Browse, download, and manage your uploaded media files</p>
+            <p>Upload, browse, download, and manage your media files</p>
           </div>
+          {canUpload && <MediaUploadButton />}
         </div>
 
         {params.businessId && (
@@ -183,6 +196,7 @@ export default async function MediaLibraryPage({ searchParams }: Props) {
           items={pageItems}
           businessId={data.businessId}
           canBulkDelete={canBulkDelete}
+          canUpload={canUpload}
           matchingIds={matchingIds}
           totalCount={totalCount}
           totalPages={totalPages}

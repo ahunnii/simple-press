@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Heart, Leaf } from "lucide-react";
+import { ChevronDown, Heart } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
@@ -58,6 +58,10 @@ type MobileNavProps = {
   isPending: boolean;
   /** Short line at the bottom of the sheet, below socials. Blank hides it. */
   menuTagline: string;
+  /** Optional horizontal wordmark, already resolved by the header from
+   *  `bamboo.global.nav-wordmark`. When set it replaces the round logo in
+   *  the top brand block, same priority order as the header's own brand. */
+  wordmarkUrl?: string;
 } & DefaultHeaderTemplateProps;
 
 /** The stagger keyframe's own timing — kept in one place so the class and
@@ -110,6 +114,7 @@ export function BambooMobileNav({
   session,
   isPending,
   menuTagline,
+  wordmarkUrl,
 }: MobileNavProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
@@ -204,30 +209,51 @@ export function BambooMobileNav({
           className="absolute right-0 bottom-0 -z-[1] w-24 opacity-80 min-[375px]:w-36 sm:w-48"
         />
 
-        {/* Top row — brand cluster, pinned */}
-        <div className="shrink-0 px-6 pt-12 pr-14 pb-6 sm:px-8 sm:pr-16">
-          <SheetTitle className="flex items-center gap-3 text-left text-lg font-normal text-[var(--bam-cream)]">
-            <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--bam-cream)] ring-1 ring-[var(--bam-gold-soft)]/60">
-              {logoUrl ? (
-                /* Decorative: the business name is visible text right beside
-                   the disc inside the same SheetTitle. */
+        {/* Top row — brand cluster, pinned and centred (the mini-emblem
+            treatment from the header, scaled up to the sheet's full-width
+            surface). Symmetric `px-14` keeps it clear of the close button on
+            both sides, rather than the old left-aligned row's one-sided
+            `pr-14`. `SheetTitle` stays the dialog's actual accessible name:
+            with a logo or wordmark the business name rides along as
+            `sr-only` text inside it (still part of the computed name), and
+            with neither it's the only, visible content. */}
+        <div className="shrink-0 px-14 pt-12 pb-6 sm:px-16">
+          <SheetTitle className="flex flex-col items-center gap-2 text-center text-lg font-normal text-[var(--bam-cream)]">
+            {wordmarkUrl ? (
+              <>
+                {/* Decorative: the business name travels with it as sr-only
+                    text below, so the image itself carries no alt text. */}
                 <Image
-                  src={logoUrl}
+                  src={wordmarkUrl}
                   alt=""
-                  fill
-                  sizes="40px"
-                  className="object-contain p-0.5"
+                  width={352}
+                  height={80}
+                  sizes="176px"
+                  className="h-10 w-auto max-w-[12rem] object-contain"
                 />
-              ) : (
-                <Leaf
-                  className="size-5 text-[var(--bam-forest)]"
-                  aria-hidden="true"
-                />
-              )}
-            </span>
-            <span className="font-heading min-w-0 truncate text-[var(--bam-cream)]">
-              {businessName}
-            </span>
+                <span className="sr-only">{businessName}</span>
+              </>
+            ) : logoUrl ? (
+              <>
+                {/* Same visual language as the header's mini hanging seal
+                    (cream disc, gold ring-[3px], shadow-lg), full-size here
+                    since the sheet has no bar to hang it from. */}
+                <span className="relative block size-20 shrink-0 rounded-full bg-[var(--bam-cream)] shadow-lg ring-[3px] ring-[var(--bam-gold-soft)]">
+                  <Image
+                    src={logoUrl}
+                    alt=""
+                    fill
+                    sizes="80px"
+                    className="object-contain p-1.5"
+                  />
+                </span>
+                <span className="sr-only">{businessName}</span>
+              </>
+            ) : (
+              <span className="font-heading uppercase tracking-[0.18em]">
+                {businessName}
+              </span>
+            )}
           </SheetTitle>
           <SheetDescription className="sr-only">
             Primary site navigation for {business.name ?? "this store"}. Choose

@@ -91,4 +91,5 @@ export const FOOTER_QUICK_LINKS_TEMPLATES: readonly string[] = [
   "noise",
   "umsc",
   "pink",
+  "olive",
 ];

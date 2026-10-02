@@ -43,6 +43,7 @@ export async function HappyBambooTestimonialsPage({
   return (
     <PageTransition>
       <HappyBambooPageShelf
+        align="center"
         title={heading}
         titleFieldKey="happy-bamboo.homepage-testimonials-heading"
         smallLabel={smallLabel}

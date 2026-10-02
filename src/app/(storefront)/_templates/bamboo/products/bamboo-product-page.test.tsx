@@ -126,8 +126,8 @@ describe("BambooProductPage", () => {
     renderPage({
       productPolicies: { hasShippingPolicy: false, hasRefundPolicy: false },
     });
-    expect(screen.queryByRole("button", { name: "Shipping" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Returns" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Shipping" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Returns" })).toBeNull();
     expect(screen.queryByText(/full shipping policy/i)).toBeNull();
     expect(screen.queryByText(/full returns policy/i)).toBeNull();
   });
@@ -137,16 +137,10 @@ describe("BambooProductPage", () => {
       productPolicies: { hasShippingPolicy: true, hasRefundPolicy: true },
     });
     expect(
-      screen.getByRole("button", { name: "Shipping" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Returns" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Read the full shipping policy").closest("a"),
+      screen.getByRole("link", { name: "Read the full shipping policy" }),
     ).toHaveAttribute("href", "/shipping-policy");
     expect(
-      screen.getByText("Read the full returns policy").closest("a"),
+      screen.getByRole("link", { name: "Read the full returns policy" }),
     ).toHaveAttribute("href", "/refund-policy");
   });
 
@@ -160,10 +154,10 @@ describe("BambooProductPage", () => {
       productPolicies: { hasShippingPolicy: false, hasRefundPolicy: false },
     });
     expect(
-      screen.getByRole("button", { name: "Shipping" }),
+      screen.getByRole("heading", { name: "Shipping" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Returns" }),
+      screen.getByRole("heading", { name: "Returns" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("Read the full shipping policy")).toBeNull();
     expect(screen.queryByText("Read the full returns policy")).toBeNull();
@@ -171,12 +165,14 @@ describe("BambooProductPage", () => {
 
     renderPage({
       customFields,
-      productPolicies: { hasShippingPolicy: true, hasRefundPolicy: false },
+      productPolicies: { hasShippingPolicy: true, hasRefundPolicy: true },
     });
-    // Panels use the `hidden` attribute, so query including hidden nodes.
-    const link = screen.getByText("Read the full shipping policy");
-    expect(link.closest("a")).toHaveAttribute("href", "/shipping-policy");
-    expect(screen.queryByText("Read the full returns policy")).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "Read the full shipping policy" }),
+    ).toHaveAttribute("href", "/shipping-policy");
+    expect(
+      screen.getByRole("link", { name: "Read the full returns policy" }),
+    ).toHaveAttribute("href", "/refund-policy");
   });
 
   it("shows no badges by default, store badges when saved, and product features over store badges", () => {

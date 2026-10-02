@@ -8,7 +8,10 @@ import type {
 } from "react-hook-form";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, Images, Trash, Upload } from "lucide-react";
+import { useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
+import { prepareImageForUpload } from "~/lib/image-prep";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -33,6 +36,14 @@ import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
  * `/placeholder.svg` doubles as a "no image set" sentinel that hides sections.
  */
 const BROKEN_IMAGE_SRC = "/placeholder.svg";
+
+/**
+ * Matches the image routes' `maxFileSize` in `src/app/api/upload/route.ts`.
+ * Checked after `prepareImageForUpload` (which only shrinks raster photos —
+ * GIF/SVG/ICO come back unchanged) so an oversized file is rejected on select
+ * instead of failing the whole save with a bare upload error.
+ */
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
@@ -61,9 +72,14 @@ type Props<CurrentForm extends FieldValues> = {
 function isImageFile(file: File): boolean {
   return (
     file.type.startsWith("image/") ||
-    /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(file.name)
+    // Some browsers (notably Android Chrome) leave `file.type` empty for
+    // HEIC/HEIF, so fall back to the extension for those.
+    /\.(jpg|jpeg|png|webp|gif|bmp|avif|heic|heif)$/i.test(file.name)
   );
 }
+
+const SPINNER_CLASS =
+  "border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2";
 
 function useObjectUrl(file: File | null): string | null {
   const [url, setUrl] = useState<string | null>(null);
@@ -92,6 +108,8 @@ type InnerProps = {
   onLibrarySelect?: (url: string) => void;
   /** Set whenever a companion URL field exists, picker or not. */
   onClearUrl?: () => void;
+  /** Live value of the companion URL field (undefined when there is none). */
+  urlValue?: unknown;
 };
 
 function ImageUploadFormFieldInner({
@@ -105,6 +123,7 @@ function ImageUploadFormFieldInner({
   mediaLibraryEnabled,
   onLibrarySelect,
   onClearUrl,
+  urlValue,
 }: InnerProps) {
   const value = field.value as File | null | undefined;
   const hasFile = value instanceof File;
@@ -126,6 +145,14 @@ function ImageUploadFormFieldInner({
     if (value === undefined) setRemovedExisting(false);
   }, [value]);
 
+  // The companion URL moved away from the picked library image (form Reset, or
+  // Remove) — drop the stale preview.
+  useEffect(() => {
+    setLibraryUrl((current) =>
+      current !== null && urlValue !== current ? null : current,
+    );
+  }, [urlValue]);
+
   const objectUrl = useObjectUrl(hasFile ? value : null);
   const showExisting =
     Boolean(existingPreviewUrl) && !hasFile && !removedExisting;
@@ -134,10 +161,17 @@ function ImageUploadFormFieldInner({
     (hasFile ? null : libraryUrl) ??
     (showExisting ? (existingPreviewUrl ?? null) : null);
 
+  const [isPreparing, setIsPreparing] = useState(false);
+
+  const busy = disabled === true || isPreparing;
+  /** Hidden ": <field>" appended to the generic button text so several
+   *  media fields on one page don't announce identically. */
+  const nameSuffix = label ? <span className="sr-only">: {label}</span> : null;
+
   const triggerFileInput = useCallback(() => {
-    if (disabled) return;
+    if (busy) return;
     fileInputRef.current?.click();
-  }, [disabled, fileInputRef]);
+  }, [busy, fileInputRef]);
 
   // A device file always wins over a previously picked library image, so the
   // stale library preview has to go with it.
@@ -149,6 +183,38 @@ function ImageUploadFormFieldInner({
     },
     [field],
   );
+
+  // HEIC -> web-safe, oversized photos downscaled. Runs before the file reaches
+  // the form so any downstream size validation sees the prepared file.
+  const isPreparingRef = useRef(false);
+  const prepareAndSelect = useCallback(
+    async (file: File) => {
+      if (isPreparingRef.current) return;
+      isPreparingRef.current = true;
+      setIsPreparing(true);
+      try {
+        const prepared = await prepareImageForUpload(file);
+        if (prepared.size > MAX_IMAGE_BYTES) {
+          toast.error(`Skipped "${file.name}": must be less than 5MB`);
+          return;
+        }
+        handleFileSelected(prepared);
+      } catch {
+        toast.error(`Couldn't process "${file.name}". Try a different image.`);
+      } finally {
+        isPreparingRef.current = false;
+        setIsPreparing(false);
+      }
+    },
+    [handleFileSelected],
+  );
+
+  // Drag highlight. `dragenter`/`dragleave` fire for every child the pointer
+  // crosses, so a depth counter (not the raw events) drives it.
+  const dragDepthRef = useRef(0);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const isFileDrag = (e: React.DragEvent) =>
+    Array.from(e.dataTransfer.types).includes("Files");
 
   const showLibraryPicker = Boolean(mediaLibraryEnabled && onLibrarySelect);
 
@@ -166,14 +232,14 @@ function ImageUploadFormFieldInner({
             type="file"
             accept="image/*"
             className="hidden"
-            disabled={disabled}
+            disabled={busy}
             aria-label={label ?? "Choose image file"}
             onChange={(e) => {
+              // Copy the File out *before* clearing the input — resetting
+              // `value` empties the live FileList, and preparing is async.
               const file = e.target.files?.[0];
-              if (file) {
-                handleFileSelected(file);
-              }
               e.target.value = "";
+              if (file) void prepareAndSelect(file);
             }}
           />
           {previewUrl ? (
@@ -208,8 +274,8 @@ function ImageUploadFormFieldInner({
                 type="button"
                 variant="ghost"
                 size="icon"
-                disabled={disabled}
-                aria-label="Remove image"
+                disabled={busy}
+                aria-label={label ? `Remove image: ${label}` : "Remove image"}
                 className="text-muted-foreground hover:text-destructive shrink-0"
                 onClick={() => {
                   setRemovedExisting(true);
@@ -227,18 +293,28 @@ function ImageUploadFormFieldInner({
             </div>
           ) : null}
           {showLibraryPicker ? (
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  disabled={disabled}
+                  disabled={busy}
                   className="w-full"
                 >
-                  <Upload className="mr-2 h-4 w-4" />
-                  {previewUrl ? "Replace image" : "Choose image"}
-                  <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                  {isPreparing ? (
+                    <>
+                      <span className={SPINNER_CLASS} aria-hidden="true" />
+                      Preparing photo…
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      {previewUrl ? "Replace image" : "Choose image"}
+                      {nameSuffix}
+                      <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                    </>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -246,8 +322,7 @@ function ImageUploadFormFieldInner({
                 className="w-(--radix-dropdown-menu-trigger-width)"
               >
                 <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
+                  onSelect={() => {
                     queueMicrotask(() => triggerFileInput());
                   }}
                 >
@@ -255,8 +330,7 @@ function ImageUploadFormFieldInner({
                   Upload from device
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
+                  onSelect={() => {
                     queueMicrotask(() => setPickerOpen(true));
                   }}
                 >
@@ -270,12 +344,22 @@ function ImageUploadFormFieldInner({
               type="button"
               variant="outline"
               size="sm"
-              disabled={disabled}
+              disabled={busy}
               onClick={triggerFileInput}
               className="w-full"
             >
-              <Upload className="mr-2 h-4 w-4" />
-              {previewUrl ? "Replace image" : "Choose image"}
+              {isPreparing ? (
+                <>
+                  <span className={SPINNER_CLASS} aria-hidden="true" />
+                  Preparing photo…
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  {previewUrl ? "Replace image" : "Choose image"}
+                  {nameSuffix}
+                </>
+              )}
             </Button>
           )}
           <div
@@ -287,23 +371,56 @@ function ImageUploadFormFieldInner({
                 triggerFileInput();
               }
             }}
-            onDrop={(e) => {
+            aria-disabled={busy}
+            data-drag={isDragOver && !disabled && !isPreparing}
+            onDragEnter={(e) => {
+              if (!isFileDrag(e)) return;
               e.preventDefault();
+              dragDepthRef.current += 1;
+              setIsDragOver(true);
+            }}
+            onDragOver={(e) => {
+              if (!isFileDrag(e)) return;
+              // Always cancel so the browser never navigates to a dropped file.
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "copy";
+            }}
+            onDragLeave={(e) => {
+              if (!isFileDrag(e)) return;
+              dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+              if (dragDepthRef.current === 0) setIsDragOver(false);
+            }}
+            onDrop={(e) => {
+              if (!isFileDrag(e)) return;
+              e.preventDefault();
+              dragDepthRef.current = 0;
+              setIsDragOver(false);
               if (disabled) return;
-              const file = e.dataTransfer.files?.[0];
-              if (file && isImageFile(file)) {
-                handleFileSelected(file);
+              if (isPreparing) {
+                toast.info("Still preparing the photo — try again in a moment");
+                return;
+              }
+              // Copy out of the live DataTransfer before awaiting anything.
+              const file = e.dataTransfer.files[0];
+              if (!file) return;
+              if (isImageFile(file)) {
+                void prepareAndSelect(file);
+              } else {
+                toast.error(`Skipped "${file.name}": not an image`);
               }
             }}
-            onDragOver={(e) => e.preventDefault()}
             className={cn(
               "border-border border-muted-foreground/25 rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors",
               "hover:border-muted-foreground/50 hover:bg-muted/50",
-              disabled && "pointer-events-none opacity-50",
+              "data-[drag=true]:border-primary data-[drag=true]:bg-primary/5",
+              busy && "pointer-events-none opacity-50",
             )}
             onClick={triggerFileInput}
           >
-            Drag and drop an image here, or click to browse
+            {isPreparing
+              ? "Preparing photo…"
+              : "Drag and drop an image here, or click to browse"}
+            {nameSuffix}
           </div>
         </div>
       </FormControl>
@@ -355,7 +472,12 @@ export const ImageUploadFormField = <CurrentForm extends FieldValues>({
         url as PathValue<CurrentForm, Path<CurrentForm>>,
         { shouldDirty: true },
       );
-      form.setValue(name, null as PathValue<CurrentForm, Path<CurrentForm>>);
+      // `undefined`, not `null`: consumers read a `null` file as "image
+      // removed" on submit, which would wipe the URL we just picked.
+      form.setValue(
+        name,
+        undefined as PathValue<CurrentForm, Path<CurrentForm>>,
+      );
     },
     [form, name, urlFieldName],
   );
@@ -364,10 +486,19 @@ export const ImageUploadFormField = <CurrentForm extends FieldValues>({
     if (!urlFieldName) return;
     form.setValue(
       urlFieldName,
-      "" as PathValue<CurrentForm, Path<CurrentForm>>,
+      // `null`, not "": consumer URL schemas are `.url().nullable()`, so ""
+      // would fail validation invisibly (FormMessage is bound to the file field).
+      null as PathValue<CurrentForm, Path<CurrentForm>>,
       { shouldDirty: true },
     );
   }, [form, urlFieldName]);
+
+  // `disabled` keeps the hook unconditional when there is no companion field.
+  const urlValue: unknown = useWatch({
+    control: form.control,
+    name: (urlFieldName ?? name) as Path<CurrentForm>,
+    disabled: !urlFieldName,
+  });
 
   return (
     <FormField
@@ -385,6 +516,7 @@ export const ImageUploadFormField = <CurrentForm extends FieldValues>({
           mediaLibraryEnabled={pickerEnabled}
           onLibrarySelect={pickerEnabled ? handleLibrarySelect : undefined}
           onClearUrl={urlFieldName ? handleClearUrl : undefined}
+          urlValue={urlFieldName ? urlValue : undefined}
         />
       )}
     />

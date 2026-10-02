@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Images, Upload, X } from "lucide-react";
+import { toast } from "sonner";
 
+import { prepareImageForUpload } from "~/lib/image-prep";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +13,26 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
+
+/**
+ * Matches the image routes' `maxFileSize` in `src/app/api/upload/route.ts`.
+ * Checked after `prepareImageForUpload` (which only shrinks raster photos —
+ * GIF/SVG/ICO come back unchanged) so an oversized file is rejected on select
+ * instead of failing the whole save with a bare upload error.
+ */
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+const SPINNER_CLASS =
+  "border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2";
+
+function isImageFile(file: File): boolean {
+  return (
+    file.type.startsWith("image/") ||
+    // Some browsers (notably Android Chrome) leave `file.type` empty for
+    // HEIC/HEIF, so fall back to the extension for those.
+    /\.(jpg|jpeg|png|webp|gif|bmp|avif|heic|heif)$/i.test(file.name)
+  );
+}
 
 export function OgImageUploader({
   file,
@@ -39,6 +61,34 @@ export function OgImageUploader({
 }) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
+  const isPreparingRef = useRef(false);
+  const busy = disabled === true || isPreparing;
+
+  // HEIC -> web-safe, oversized photos downscaled, then the 5MB cap. Runs
+  // before the file reaches the caller so it only ever sees an uploadable file.
+  const prepareAndSelect = async (f: File) => {
+    if (isPreparingRef.current) return;
+    if (!isImageFile(f)) {
+      toast.error(`Skipped "${f.name}": not an image`);
+      return;
+    }
+    isPreparingRef.current = true;
+    setIsPreparing(true);
+    try {
+      const prepared = await prepareImageForUpload(f);
+      if (prepared.size > MAX_IMAGE_BYTES) {
+        toast.error(`Skipped "${f.name}": must be less than 5MB`);
+        return;
+      }
+      onFileChange(prepared);
+    } catch {
+      toast.error(`Couldn't process "${f.name}". Try a different image.`);
+    } finally {
+      isPreparingRef.current = false;
+      setIsPreparing(false);
+    }
+  };
 
   useEffect(() => {
     if (!file) {
@@ -53,7 +103,10 @@ export function OgImageUploader({
   const previewUrl = objectUrl ?? existingUrl ?? null;
   const showLibraryPicker = Boolean(mediaLibraryEnabled && onLibrarySelect);
 
-  const triggerFileInput = () => fileInputRef.current?.click();
+  const triggerFileInput = () => {
+    if (busy) return;
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="space-y-2">
@@ -66,11 +119,13 @@ export function OgImageUploader({
         type="file"
         accept="image/*"
         className="hidden"
-        disabled={disabled}
+        disabled={busy}
         onChange={(e) => {
+          // Copy the File out *before* clearing the input — resetting `value`
+          // empties the live FileList, and preparing is async.
           const f = e.target.files?.[0];
-          if (f) onFileChange(f);
           e.target.value = "";
+          if (f) void prepareAndSelect(f);
         }}
       />
       {previewUrl && (
@@ -92,7 +147,7 @@ export function OgImageUploader({
             type="button"
             variant="ghost"
             size="icon"
-            disabled={disabled}
+            disabled={busy}
             aria-label="Remove image"
             className="text-muted-foreground hover:text-destructive shrink-0"
             onClick={onRemove}
@@ -102,18 +157,27 @@ export function OgImageUploader({
         </div>
       )}
       {showLibraryPicker ? (
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              disabled={disabled}
+              disabled={busy}
               className="w-full"
             >
-              <Upload className="mr-2 h-4 w-4" />
-              {previewUrl ? "Replace image" : "Choose image"}
-              <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+              {isPreparing ? (
+                <>
+                  <span className={SPINNER_CLASS} aria-hidden="true" />
+                  Preparing photo…
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  {previewUrl ? "Replace image" : "Choose image"}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                </>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -121,8 +185,7 @@ export function OgImageUploader({
             className="w-(--radix-dropdown-menu-trigger-width)"
           >
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
+              onSelect={() => {
                 queueMicrotask(triggerFileInput);
               }}
             >
@@ -130,8 +193,7 @@ export function OgImageUploader({
               Upload from device
             </DropdownMenuItem>
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
+              onSelect={() => {
                 queueMicrotask(() => setPickerOpen(true));
               }}
             >
@@ -145,12 +207,21 @@ export function OgImageUploader({
           type="button"
           variant="outline"
           size="sm"
-          disabled={disabled}
+          disabled={busy}
           onClick={triggerFileInput}
           className="w-full"
         >
-          <Upload className="mr-2 h-4 w-4" />
-          {previewUrl ? "Replace image" : "Choose image"}
+          {isPreparing ? (
+            <>
+              <span className={SPINNER_CLASS} aria-hidden="true" />
+              Preparing photo…
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              {previewUrl ? "Replace image" : "Choose image"}
+            </>
+          )}
         </Button>
       )}
       {showLibraryPicker && onLibrarySelect ? (

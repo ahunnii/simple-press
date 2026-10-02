@@ -33,6 +33,7 @@ import { isCategoryAwareServiceTemplate } from "~/lib/service-templates";
 import { cn } from "~/lib/utils";
 import { serviceItemFormSchema } from "~/lib/validators/services";
 import { api } from "~/trpc/react";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -233,6 +234,7 @@ function ServiceItemFormDialog({
   sections: SectionRow[];
   embedsEnabled?: boolean;
 }) {
+  const mediaEnabled = useMediaLibraryEnabled();
   const imageFileInputRef = useRef<HTMLInputElement | null>(null);
   // URLs uploaded to S3 during the in-flight submit that aren't yet persisted
   // to the DB. Populated right before addItem/updateItem is called (those are
@@ -558,6 +560,8 @@ function ServiceItemFormDialog({
                   existingPreviewUrl={item?.image ?? undefined}
                   inputRef={imageFileInputRef}
                   disabled={isPending}
+                  mediaLibraryEnabled={mediaEnabled}
+                  urlFieldName="image"
                 />
               </div>
 

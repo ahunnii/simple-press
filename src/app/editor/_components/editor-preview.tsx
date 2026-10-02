@@ -4,6 +4,7 @@ import { ExternalLink, Info, RefreshCw } from "lucide-react";
 
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { PreviewEditTarget } from "~/lib/preview/preview-target";
+import type { PreviewOverlayMode } from "~/lib/preview/use-preview-bridge";
 import { Button } from "~/components/ui/button";
 import { PreviewFrame } from "~/components/preview/preview-frame";
 
@@ -48,6 +49,8 @@ export type EditorPreviewProps = {
    * `width` is ignored.
    */
   compact?: boolean;
+  /** Relabels preview hotspots — "note" while the Notes panel is open. */
+  overlayMode?: PreviewOverlayMode;
 };
 
 /**
@@ -66,6 +69,7 @@ export function EditorPreview({
   onPatched,
   frameRef,
   compact = false,
+  overlayMode = "edit",
 }: EditorPreviewProps) {
   const handleRefresh = () => {
     frameRef.current?.refresh();
@@ -93,6 +97,7 @@ export function EditorPreview({
             isUpdating={isUpdating}
             onEditGroup={onEditGroup}
             onPatched={onPatched}
+            overlayMode={overlayMode}
             // Pinned to the box so the iframe gets a definite height to fill.
             className="bg-background absolute inset-0"
           />
@@ -141,6 +146,7 @@ export function EditorPreview({
         isUpdating={isUpdating}
         onEditGroup={onEditGroup}
         onPatched={onPatched}
+        overlayMode={overlayMode}
         className="bg-background h-full max-w-full overflow-hidden rounded-lg border shadow-sm"
       />
     </div>

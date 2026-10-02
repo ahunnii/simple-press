@@ -48669,6 +48669,8 @@ export namespace Prisma {
     businessId: string | null
     pageKey: string | null
     pageLabel: string | null
+    sectionKey: string | null
+    sectionLabel: string | null
     body: string | null
     status: string | null
     response: string | null
@@ -48683,6 +48685,8 @@ export namespace Prisma {
     businessId: string | null
     pageKey: string | null
     pageLabel: string | null
+    sectionKey: string | null
+    sectionLabel: string | null
     body: string | null
     status: string | null
     response: string | null
@@ -48697,10 +48701,13 @@ export namespace Prisma {
     businessId: number
     pageKey: number
     pageLabel: number
+    sectionKey: number
+    sectionLabel: number
     body: number
     status: number
     response: number
     resolvedAt: number
+    attachmentUrls: number
     createdByUserId: number
     _all: number
   }
@@ -48713,6 +48720,8 @@ export namespace Prisma {
     businessId?: true
     pageKey?: true
     pageLabel?: true
+    sectionKey?: true
+    sectionLabel?: true
     body?: true
     status?: true
     response?: true
@@ -48727,6 +48736,8 @@ export namespace Prisma {
     businessId?: true
     pageKey?: true
     pageLabel?: true
+    sectionKey?: true
+    sectionLabel?: true
     body?: true
     status?: true
     response?: true
@@ -48741,10 +48752,13 @@ export namespace Prisma {
     businessId?: true
     pageKey?: true
     pageLabel?: true
+    sectionKey?: true
+    sectionLabel?: true
     body?: true
     status?: true
     response?: true
     resolvedAt?: true
+    attachmentUrls?: true
     createdByUserId?: true
     _all?: true
   }
@@ -48828,10 +48842,13 @@ export namespace Prisma {
     businessId: string
     pageKey: string | null
     pageLabel: string | null
+    sectionKey: string | null
+    sectionLabel: string | null
     body: string
     status: string
     response: string | null
     resolvedAt: Date | null
+    attachmentUrls: string[]
     createdByUserId: string | null
     _count: EditorNoteCountAggregateOutputType | null
     _min: EditorNoteMinAggregateOutputType | null
@@ -48859,10 +48876,13 @@ export namespace Prisma {
     businessId?: boolean
     pageKey?: boolean
     pageLabel?: boolean
+    sectionKey?: boolean
+    sectionLabel?: boolean
     body?: boolean
     status?: boolean
     response?: boolean
     resolvedAt?: boolean
+    attachmentUrls?: boolean
     createdByUserId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
@@ -48875,10 +48895,13 @@ export namespace Prisma {
     businessId?: boolean
     pageKey?: boolean
     pageLabel?: boolean
+    sectionKey?: boolean
+    sectionLabel?: boolean
     body?: boolean
     status?: boolean
     response?: boolean
     resolvedAt?: boolean
+    attachmentUrls?: boolean
     createdByUserId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
@@ -48891,10 +48914,13 @@ export namespace Prisma {
     businessId?: boolean
     pageKey?: boolean
     pageLabel?: boolean
+    sectionKey?: boolean
+    sectionLabel?: boolean
     body?: boolean
     status?: boolean
     response?: boolean
     resolvedAt?: boolean
+    attachmentUrls?: boolean
     createdByUserId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
@@ -48907,14 +48933,17 @@ export namespace Prisma {
     businessId?: boolean
     pageKey?: boolean
     pageLabel?: boolean
+    sectionKey?: boolean
+    sectionLabel?: boolean
     body?: boolean
     status?: boolean
     response?: boolean
     resolvedAt?: boolean
+    attachmentUrls?: boolean
     createdByUserId?: boolean
   }
 
-  export type EditorNoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "pageKey" | "pageLabel" | "body" | "status" | "response" | "resolvedAt" | "createdByUserId", ExtArgs["result"]["editorNote"]>
+  export type EditorNoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "pageKey" | "pageLabel" | "sectionKey" | "sectionLabel" | "body" | "status" | "response" | "resolvedAt" | "attachmentUrls" | "createdByUserId", ExtArgs["result"]["editorNote"]>
   export type EditorNoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
@@ -48941,10 +48970,13 @@ export namespace Prisma {
       businessId: string
       pageKey: string | null
       pageLabel: string | null
+      sectionKey: string | null
+      sectionLabel: string | null
       body: string
       status: string
       response: string | null
       resolvedAt: Date | null
+      attachmentUrls: string[]
       createdByUserId: string | null
     }, ExtArgs["result"]["editorNote"]>
     composites: {}
@@ -49377,10 +49409,13 @@ export namespace Prisma {
     readonly businessId: FieldRef<"EditorNote", 'String'>
     readonly pageKey: FieldRef<"EditorNote", 'String'>
     readonly pageLabel: FieldRef<"EditorNote", 'String'>
+    readonly sectionKey: FieldRef<"EditorNote", 'String'>
+    readonly sectionLabel: FieldRef<"EditorNote", 'String'>
     readonly body: FieldRef<"EditorNote", 'String'>
     readonly status: FieldRef<"EditorNote", 'String'>
     readonly response: FieldRef<"EditorNote", 'String'>
     readonly resolvedAt: FieldRef<"EditorNote", 'DateTime'>
+    readonly attachmentUrls: FieldRef<"EditorNote", 'String[]'>
     readonly createdByUserId: FieldRef<"EditorNote", 'String'>
   }
     
@@ -85003,10 +85038,13 @@ export namespace Prisma {
     businessId: 'businessId',
     pageKey: 'pageKey',
     pageLabel: 'pageLabel',
+    sectionKey: 'sectionKey',
+    sectionLabel: 'sectionLabel',
     body: 'body',
     status: 'status',
     response: 'response',
     resolvedAt: 'resolvedAt',
+    attachmentUrls: 'attachmentUrls',
     createdByUserId: 'createdByUserId'
   };
 
@@ -89614,10 +89652,13 @@ export namespace Prisma {
     businessId?: StringFilter<"EditorNote"> | string
     pageKey?: StringNullableFilter<"EditorNote"> | string | null
     pageLabel?: StringNullableFilter<"EditorNote"> | string | null
+    sectionKey?: StringNullableFilter<"EditorNote"> | string | null
+    sectionLabel?: StringNullableFilter<"EditorNote"> | string | null
     body?: StringFilter<"EditorNote"> | string
     status?: StringFilter<"EditorNote"> | string
     response?: StringNullableFilter<"EditorNote"> | string | null
     resolvedAt?: DateTimeNullableFilter<"EditorNote"> | Date | string | null
+    attachmentUrls?: StringNullableListFilter<"EditorNote">
     createdByUserId?: StringNullableFilter<"EditorNote"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -89630,10 +89671,13 @@ export namespace Prisma {
     businessId?: SortOrder
     pageKey?: SortOrderInput | SortOrder
     pageLabel?: SortOrderInput | SortOrder
+    sectionKey?: SortOrderInput | SortOrder
+    sectionLabel?: SortOrderInput | SortOrder
     body?: SortOrder
     status?: SortOrder
     response?: SortOrderInput | SortOrder
     resolvedAt?: SortOrderInput | SortOrder
+    attachmentUrls?: SortOrder
     createdByUserId?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
@@ -89649,10 +89693,13 @@ export namespace Prisma {
     businessId?: StringFilter<"EditorNote"> | string
     pageKey?: StringNullableFilter<"EditorNote"> | string | null
     pageLabel?: StringNullableFilter<"EditorNote"> | string | null
+    sectionKey?: StringNullableFilter<"EditorNote"> | string | null
+    sectionLabel?: StringNullableFilter<"EditorNote"> | string | null
     body?: StringFilter<"EditorNote"> | string
     status?: StringFilter<"EditorNote"> | string
     response?: StringNullableFilter<"EditorNote"> | string | null
     resolvedAt?: DateTimeNullableFilter<"EditorNote"> | Date | string | null
+    attachmentUrls?: StringNullableListFilter<"EditorNote">
     createdByUserId?: StringNullableFilter<"EditorNote"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -89665,10 +89712,13 @@ export namespace Prisma {
     businessId?: SortOrder
     pageKey?: SortOrderInput | SortOrder
     pageLabel?: SortOrderInput | SortOrder
+    sectionKey?: SortOrderInput | SortOrder
+    sectionLabel?: SortOrderInput | SortOrder
     body?: SortOrder
     status?: SortOrder
     response?: SortOrderInput | SortOrder
     resolvedAt?: SortOrderInput | SortOrder
+    attachmentUrls?: SortOrder
     createdByUserId?: SortOrderInput | SortOrder
     _count?: EditorNoteCountOrderByAggregateInput
     _max?: EditorNoteMaxOrderByAggregateInput
@@ -89685,10 +89735,13 @@ export namespace Prisma {
     businessId?: StringWithAggregatesFilter<"EditorNote"> | string
     pageKey?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
     pageLabel?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
+    sectionKey?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
+    sectionLabel?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
     body?: StringWithAggregatesFilter<"EditorNote"> | string
     status?: StringWithAggregatesFilter<"EditorNote"> | string
     response?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
     resolvedAt?: DateTimeNullableWithAggregatesFilter<"EditorNote"> | Date | string | null
+    attachmentUrls?: StringNullableListFilter<"EditorNote">
     createdByUserId?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
   }
 
@@ -97178,10 +97231,13 @@ export namespace Prisma {
     updatedAt?: Date | string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
     business: BusinessCreateNestedOneWithoutEditorNotesInput
     createdBy?: UserCreateNestedOneWithoutEditorNotesInput
   }
@@ -97193,10 +97249,13 @@ export namespace Prisma {
     businessId: string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
     createdByUserId?: string | null
   }
 
@@ -97206,10 +97265,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
     business?: BusinessUpdateOneRequiredWithoutEditorNotesNestedInput
     createdBy?: UserUpdateOneWithoutEditorNotesNestedInput
   }
@@ -97221,10 +97283,13 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
     createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -97235,10 +97300,13 @@ export namespace Prisma {
     businessId: string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
     createdByUserId?: string | null
   }
 
@@ -97248,10 +97316,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
   }
 
   export type EditorNoteUncheckedUpdateManyInput = {
@@ -97261,10 +97332,13 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
     createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -103710,10 +103784,13 @@ export namespace Prisma {
     businessId?: SortOrder
     pageKey?: SortOrder
     pageLabel?: SortOrder
+    sectionKey?: SortOrder
+    sectionLabel?: SortOrder
     body?: SortOrder
     status?: SortOrder
     response?: SortOrder
     resolvedAt?: SortOrder
+    attachmentUrls?: SortOrder
     createdByUserId?: SortOrder
   }
 
@@ -103724,6 +103801,8 @@ export namespace Prisma {
     businessId?: SortOrder
     pageKey?: SortOrder
     pageLabel?: SortOrder
+    sectionKey?: SortOrder
+    sectionLabel?: SortOrder
     body?: SortOrder
     status?: SortOrder
     response?: SortOrder
@@ -103738,6 +103817,8 @@ export namespace Prisma {
     businessId?: SortOrder
     pageKey?: SortOrder
     pageLabel?: SortOrder
+    sectionKey?: SortOrder
+    sectionLabel?: SortOrder
     body?: SortOrder
     status?: SortOrder
     response?: SortOrder
@@ -109813,6 +109894,10 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutPagesInput, BusinessUpdateWithoutPagesInput>, BusinessUncheckedUpdateWithoutPagesInput>
   }
 
+  export type EditorNoteCreateattachmentUrlsInput = {
+    set: string[]
+  }
+
   export type BusinessCreateNestedOneWithoutEditorNotesInput = {
     create?: XOR<BusinessCreateWithoutEditorNotesInput, BusinessUncheckedCreateWithoutEditorNotesInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutEditorNotesInput
@@ -109823,6 +109908,11 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutEditorNotesInput, UserUncheckedCreateWithoutEditorNotesInput>
     connectOrCreate?: UserCreateOrConnectWithoutEditorNotesInput
     connect?: UserWhereUniqueInput
+  }
+
+  export type EditorNoteUpdateattachmentUrlsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type BusinessUpdateOneRequiredWithoutEditorNotesNestedInput = {
@@ -111600,10 +111690,13 @@ export namespace Prisma {
     updatedAt?: Date | string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
     business: BusinessCreateNestedOneWithoutEditorNotesInput
   }
 
@@ -111614,10 +111707,13 @@ export namespace Prisma {
     businessId: string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
   }
 
   export type EditorNoteCreateOrConnectWithoutCreatedByInput = {
@@ -111899,10 +111995,13 @@ export namespace Prisma {
     businessId?: StringFilter<"EditorNote"> | string
     pageKey?: StringNullableFilter<"EditorNote"> | string | null
     pageLabel?: StringNullableFilter<"EditorNote"> | string | null
+    sectionKey?: StringNullableFilter<"EditorNote"> | string | null
+    sectionLabel?: StringNullableFilter<"EditorNote"> | string | null
     body?: StringFilter<"EditorNote"> | string
     status?: StringFilter<"EditorNote"> | string
     response?: StringNullableFilter<"EditorNote"> | string | null
     resolvedAt?: DateTimeNullableFilter<"EditorNote"> | Date | string | null
+    attachmentUrls?: StringNullableListFilter<"EditorNote">
     createdByUserId?: StringNullableFilter<"EditorNote"> | string | null
   }
 
@@ -113429,10 +113528,13 @@ export namespace Prisma {
     updatedAt?: Date | string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
     createdBy?: UserCreateNestedOneWithoutEditorNotesInput
   }
 
@@ -113442,10 +113544,13 @@ export namespace Prisma {
     updatedAt?: Date | string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
     createdByUserId?: string | null
   }
 
@@ -144235,10 +144340,13 @@ export namespace Prisma {
     businessId: string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
   }
 
   export type SessionUpdateWithoutUserInput = {
@@ -144576,10 +144684,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
     business?: BusinessUpdateOneRequiredWithoutEditorNotesNestedInput
   }
 
@@ -144590,10 +144701,13 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
   }
 
   export type EditorNoteUncheckedUpdateManyWithoutCreatedByInput = {
@@ -144603,10 +144717,13 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
   }
 
   export type ProductCreateManyBusinessInput = {
@@ -144871,10 +144988,13 @@ export namespace Prisma {
     updatedAt?: Date | string
     pageKey?: string | null
     pageLabel?: string | null
+    sectionKey?: string | null
+    sectionLabel?: string | null
     body: string
     status?: string
     response?: string | null
     resolvedAt?: Date | string | null
+    attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
     createdByUserId?: string | null
   }
 
@@ -146100,10 +146220,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
     createdBy?: UserUpdateOneWithoutEditorNotesNestedInput
   }
 
@@ -146113,10 +146236,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
     createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -146126,10 +146252,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     pageKey?: NullableStringFieldUpdateOperationsInput | string | null
     pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sectionLabel?: NullableStringFieldUpdateOperationsInput | string | null
     body?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     response?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
     createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 

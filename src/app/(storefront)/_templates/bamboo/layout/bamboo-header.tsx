@@ -142,9 +142,18 @@ const BAMBOO_QUICK_ACCOUNT_KEYS = new Set(["orders", "settings", "admin"]);
  * fade-out and immediately on a fade-in) rather than bare `opacity-0`, so focus
  * can never land on something nobody can see.
  *
- * Below lg the bar is a plain row — brand (wordmark, or disc + name) · user
- * button when signed in · cart · hamburger. Everything else (nav links, auth
- * links, wishlist, socials) lives in the mobile sheet.
+ * Below lg the bar becomes a mini version of the same hanging emblem: a
+ * `lg:hidden` hamburger sits in the (now spacer-only) left cell, a centred
+ * brand cell carries the wordmark when set, else a small disc that hangs
+ * below the bar unscrolled (`size-20` at `top-2` of the 64px bar, a 24px
+ * overhang) and docks in place once compact (`size-12`, `ring-2 …/70`,
+ * `shadow-sm` — never migrating, exactly like the desktop seal), else —
+ * with neither uploaded — the business name in the same uppercase tracked
+ * treatment as the desktop no-logo state. The disc never carries the
+ * business name beside it here; the `<Link>`'s `aria-label` still names the
+ * destination. The account button (signed in only) and cart sit on the
+ * right. Everything else (nav links, auth links, wishlist, socials) lives
+ * in the mobile sheet.
  */
 export function BambooHeader({
   business,
@@ -458,51 +467,21 @@ export function BambooHeader({
 
         <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:h-20 lg:px-8">
           {/*
-            Left cell — the sub-lg brand; an empty spacer at lg+. `flex-1
-            basis-0` here and on the actions cell is what pins the nav to the
-            bar's centre in both states.
+            Left cell — the sub-lg hamburger; an empty spacer at lg+ (same as
+            before, when this cell held the brand link instead). `flex-1
+            basis-0` here and on the actions cell is what pins the nav — and,
+            below lg, the centred brand cell — to the bar's true centre.
           */}
           <div className="flex min-w-0 flex-1 basis-0 items-center">
-            {/*
-              Sub-lg identity only: at lg and up the emblem slot in the nav is
-              the one and only brand mark, so this never competes with it and
-              carries no compact styling at all.
-            */}
-            <Link
-              href="/"
-              aria-label={`${businessName} — home`}
-              className="flex min-w-0 items-center gap-3 lg:hidden"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)] lg:hidden"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
             >
-              {/* Decorative in every branch: the wrapping Link already carries
-                  the accessible name via aria-label. */}
-              {wordmarkUrl ? (
-                <Image
-                  src={wordmarkUrl}
-                  alt=""
-                  width={320}
-                  height={64}
-                  sizes="160px"
-                  className="h-8 w-auto max-w-[10rem] object-contain"
-                />
-              ) : (
-                <>
-                  {logoUrl ? (
-                    <span className="relative block size-10 shrink-0 rounded-full bg-[var(--bam-cream)] ring-1 ring-[var(--bam-gold-soft)]/60">
-                      <Image
-                        src={logoUrl}
-                        alt=""
-                        fill
-                        sizes="40px"
-                        className="object-contain p-0.5"
-                      />
-                    </span>
-                  ) : null}
-                  <span className="font-heading truncate text-lg text-[var(--bam-cream)] sm:text-xl">
-                    {businessName}
-                  </span>
-                </>
-              )}
-            </Link>
+              <Menu className="size-5" aria-hidden="true" />
+            </Button>
           </div>
 
           {/*
@@ -692,7 +671,85 @@ export function BambooHeader({
           </nav>
 
           {/*
-            Actions — socials · divider · account, wishlist, cart, menu.
+            Centre brand cell — sub-lg only; the desktop emblem slot inside
+            `nav` above is the one and only brand mark at lg+. This mirrors
+            that slot's construction: a `self-stretch` cell so `h-full`
+            below actually spans the 64px bar, holding either the wordmark
+            (no hang), or a fixed `w-20` slot with the disc's `<Link>`
+            absolutely `top-2`'d inside it (so the hang math — 8 + 80 − 64 =
+            24px unscrolled, 8 + 48 = 56px (inside the bar) once compact —
+            reads directly off this markup), or, with neither uploaded, the
+            business name alone. The two `flex-1 basis-0` cells on either
+            side centre this exactly as they centre the desktop nav.
+          */}
+          <div className="flex shrink-0 items-center self-stretch lg:hidden">
+            {wordmarkUrl ? (
+              <Link
+                href="/"
+                aria-label={`${businessName} — home`}
+                className="flex items-center"
+              >
+                {/* Decorative: the wrapping Link already carries the
+                    accessible name via aria-label. */}
+                <Image
+                  src={wordmarkUrl}
+                  alt=""
+                  width={352}
+                  height={80}
+                  sizes="176px"
+                  className="h-9 w-auto max-w-[11rem] object-contain"
+                />
+              </Link>
+            ) : logoUrl ? (
+              <div className="relative h-full w-20">
+                <Link
+                  href="/"
+                  aria-label={`${businessName} — home`}
+                  className="absolute top-2 left-1/2 z-10 -translate-x-1/2"
+                >
+                  {/* Mini hanging seal — same visual language as the desktop
+                      emblem (cream disc, gold ring, shadow), just smaller and
+                      anchored to the 64px sub-lg bar instead of the 80px
+                      lg+ one. Shrinks IN PLACE on compact, same as desktop:
+                      never migrates position, only size/ring/shadow. */}
+                  <span
+                    className={cn(
+                      "relative block rounded-full bg-[var(--bam-cream)] transition-[width,height,box-shadow] duration-300",
+                      compact
+                        ? "size-12 shadow-sm ring-2 ring-[var(--bam-gold-soft)]/70"
+                        : "size-20 shadow-lg ring-[3px] ring-[var(--bam-gold-soft)]",
+                    )}
+                  >
+                    {/* Decorative: the wrapping Link already carries the
+                        accessible name via aria-label. */}
+                    <Image
+                      src={logoUrl}
+                      alt=""
+                      fill
+                      sizes="80px"
+                      className={cn(
+                        "object-contain transition-[padding] duration-300",
+                        compact ? "p-1" : "p-1.5",
+                      )}
+                    />
+                  </span>
+                </Link>
+              </div>
+            ) : (
+              <Link
+                href="/"
+                aria-label={`${businessName} — home`}
+                className="flex items-center"
+              >
+                <span className="font-heading max-w-[12rem] truncate text-lg text-[var(--bam-cream)] uppercase tracking-[0.18em]">
+                  {businessName}
+                </span>
+              </Link>
+            )}
+          </div>
+
+          {/*
+            Actions — socials · divider · account, wishlist, cart.
             Mirrors the left cell's `flex-1 basis-0` in both states so the nav
             stays centred.
           */}
@@ -773,16 +830,6 @@ export function BambooHeader({
                 </span>
               </Button>
             )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)] lg:hidden"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-            >
-              <Menu className="size-5" aria-hidden="true" />
-            </Button>
           </div>
         </div>
       </header>
@@ -794,6 +841,7 @@ export function BambooHeader({
         session={session}
         isPending={isPending}
         menuTagline={menuTagline}
+        wordmarkUrl={wordmarkUrl}
       />
 
       {isEnabled("cart") && (

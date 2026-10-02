@@ -11,6 +11,7 @@ import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { getServiceTemplatesForStorefront } from "~/lib/service-templates";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import { useSiteHost } from "~/hooks/use-site-host";
 import { Button } from "~/components/ui/button";
 import {
@@ -84,6 +85,7 @@ export function ServiceForm({
   imageFileInputRef,
   disabled,
 }: Props) {
+  const mediaEnabled = useMediaLibraryEnabled();
   const serviceTemplateDefs =
     getServiceTemplatesForStorefront(storefrontTemplateId);
 
@@ -183,6 +185,8 @@ export function ServiceForm({
               existingPreviewUrl={service?.image ?? undefined}
               inputRef={imageFileInputRef}
               disabled={disabled}
+              mediaLibraryEnabled={mediaEnabled}
+              urlFieldName="image"
             />
           </CardContent>
         </Card>
@@ -262,6 +266,11 @@ type SeoProps = {
   ogImageFileInputRef: React.RefObject<HTMLInputElement | null>;
   onOgImageFileChange: (file: File) => void;
   onOgImageRemove: () => void;
+  /**
+   * A library image was picked for the Open Graph slot. `ServiceEditor` writes
+   * the URL to `ogImage` and drops any pending file / removal flag.
+   */
+  onOgImageLibrarySelect: (url: string) => void;
   disabled?: boolean;
 };
 
@@ -278,8 +287,10 @@ export function ServiceSeoFields({
   ogImageFileInputRef,
   onOgImageFileChange,
   onOgImageRemove,
+  onOgImageLibrarySelect,
   disabled,
 }: SeoProps) {
+  const mediaEnabled = useMediaLibraryEnabled();
   const siteHost = useSiteHost();
   const { data: businessInfo } = api.business.simplifiedGet.useQuery();
   // The title-suffix brand — `seoBrandName` when the owner set one, else the
@@ -291,6 +302,7 @@ export function ServiceSeoFields({
   });
 
   const watchedSlug = form.watch("slug") ?? "";
+  const watchedOgImage = form.watch("ogImage");
 
   // SEO preview values. Title is rendered through `renderSeoTitle`, exactly
   // as the storefront `<title>` will, including the " | brand" suffix.
@@ -322,7 +334,7 @@ export function ServiceSeoFields({
 
   const existingOgImage = ogImageRemoved
     ? undefined
-    : (service?.ogImage ?? undefined);
+    : (watchedOgImage ?? undefined);
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -407,7 +419,6 @@ export function ServiceSeoFields({
               }
               descriptionClassName="text-xs text-muted-foreground"
             />
-
           </CardContent>
         </Card>
 
@@ -427,6 +438,8 @@ export function ServiceSeoFields({
               onFileChange={onOgImageFileChange}
               onRemove={onOgImageRemove}
               disabled={disabled}
+              mediaLibraryEnabled={mediaEnabled}
+              onLibrarySelect={onOgImageLibrarySelect}
             />
           </CardContent>
         </Card>

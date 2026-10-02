@@ -33,7 +33,11 @@ import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { parseProductIntervals } from "~/lib/subscriptions/intervals";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
-import { productFormSchema, variantSchema } from "~/lib/validators/product";
+import {
+  MAX_PRODUCT_IMAGES,
+  productFormSchema,
+  variantSchema,
+} from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -1500,7 +1504,7 @@ export function ProductForm({
                       ref={imageUploaderRef}
                       images={images}
                       onImagesChange={setImages}
-                      maxImages={10}
+                      maxImages={MAX_PRODUCT_IMAGES}
                       mediaLibraryEnabled={mediaEnabled}
                     />
 

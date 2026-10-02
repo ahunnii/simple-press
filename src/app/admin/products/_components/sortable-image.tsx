@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
@@ -20,6 +21,7 @@ type Props = {
 export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: image.url });
+  const altInputId = useId();
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -39,8 +41,12 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
           className="mt-2 cursor-move"
           {...attributes}
           {...listeners}
+          aria-label={`Reorder image ${index + 1}`}
         >
-          <GripVertical className="text-muted-foreground h-5 w-5" />
+          <GripVertical
+            className="text-muted-foreground h-5 w-5"
+            aria-hidden="true"
+          />
         </button>
 
         {/* Image Preview */}
@@ -55,8 +61,12 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
 
         {/* Alt Text Input */}
         <div className="flex-1">
-          <Label className="text-xs">Alt Text</Label>
+          <Label htmlFor={altInputId} className="text-xs">
+            Alt Text
+            <span className="sr-only"> for image {index + 1}</span>
+          </Label>
           <Input
+            id={altInputId}
             type="text"
             value={image.altText ?? ""}
             onChange={(e) => onUpdateAlt(e.target.value)}
@@ -69,8 +79,14 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
         </div>
 
         {/* Remove Button */}
-        <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-          <X className="text-destructive h-4 w-4" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          aria-label={`Remove image ${index + 1}`}
+        >
+          <X className="text-destructive h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </div>

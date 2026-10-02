@@ -1,11 +1,23 @@
 "use client";
 
-import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import type {
+  FieldValues,
+  Path,
+  PathValue,
+  UseFormReturn,
+} from "react-hook-form";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Trash, Upload } from "lucide-react";
+import { ChevronDown, Images, Trash, Upload } from "lucide-react";
+import { toast } from "sonner";
 
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   FormControl,
   FormDescription,
@@ -14,6 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
 
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
@@ -24,7 +37,27 @@ type Props<CurrentForm extends FieldValues> = {
   disabled?: boolean;
   existingPreviewUrl?: string;
   inputRef?: React.RefObject<HTMLInputElement | null>;
+  /**
+   * Adds a "Choose from library" option beside "Upload from device". Only pass
+   * `true` when the `media` feature flag is enabled — `media.list` is gated
+   * server-side and throws FORBIDDEN when the flag is off. Requires
+   * `urlFieldName`; without it the picker has nowhere to write and stays off.
+   */
+  mediaLibraryEnabled?: boolean;
+  /**
+   * Companion field holding the persisted URL string. Required with
+   * `mediaLibraryEnabled` — a library video is already in S3, so it is written
+   * straight to this field rather than deferred as a `File` on `name`.
+   */
+  urlFieldName?: Path<CurrentForm>;
 };
+
+/**
+ * Matches the video route's `maxFileSize` in `src/app/api/upload/route.ts`.
+ * Checked on select so an oversized video is rejected up front instead of
+ * failing the whole save with a bare upload error.
+ */
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
 function isVideoFile(file: File): boolean {
   return (
@@ -48,13 +81,18 @@ function useObjectUrl(file: File | null): string | null {
 }
 
 type InnerProps = {
-  field: { value: unknown; onChange: (v: File | null) => void };
+  field: { value: unknown; onChange: (v: File | null | undefined) => void };
   disabled?: boolean;
   existingPreviewUrl?: string;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   className?: string;
   label?: string;
   description?: string;
+  /** Set together with `onLibrarySelect` — see `Props.mediaLibraryEnabled`. */
+  mediaLibraryEnabled?: boolean;
+  onLibrarySelect?: (url: string) => void;
+  /** Set whenever a companion URL field exists, picker or not. */
+  onClearUrl?: () => void;
 };
 
 function VideoUploadFormFieldInner({
@@ -65,17 +103,55 @@ function VideoUploadFormFieldInner({
   className,
   label,
   description,
+  mediaLibraryEnabled,
+  onLibrarySelect,
+  onClearUrl,
 }: InnerProps) {
   const value = field.value as File | null | undefined;
   const hasFile = value instanceof File;
+  const [removedExisting, setRemovedExisting] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  // A library video picked in this session. It is already persisted to the
+  // companion URL field by `onLibrarySelect`, but `existingPreviewUrl` is the
+  // server value from the last render, so the preview needs its own copy.
+  const [libraryUrl, setLibraryUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (value === undefined) setRemovedExisting(false);
+  }, [value]);
+
   const objectUrl = useObjectUrl(hasFile ? value : null);
+  const showExisting =
+    Boolean(existingPreviewUrl) && !hasFile && !removedExisting;
   const previewUrl =
-    objectUrl ?? (existingPreviewUrl && !hasFile ? existingPreviewUrl : null);
+    objectUrl ??
+    (hasFile ? null : libraryUrl) ??
+    (showExisting ? (existingPreviewUrl ?? null) : null);
+  /** Hidden ": <field>" appended to the generic button text so several
+   *  media fields on one page don't announce identically. */
+  const nameSuffix = label ? <span className="sr-only">: {label}</span> : null;
 
   const triggerFileInput = useCallback(() => {
     if (disabled) return;
     fileInputRef.current?.click();
   }, [disabled, fileInputRef]);
+
+  // A device file always wins over a previously picked library video, so the
+  // stale library preview has to go with it.
+  const handleFileSelected = useCallback(
+    (file: File) => {
+      if (file.size > MAX_VIDEO_BYTES) {
+        toast.error(`Skipped "${file.name}": must be less than 50MB`);
+        return;
+      }
+      setRemovedExisting(false);
+      setLibraryUrl(null);
+      field.onChange(file);
+    },
+    [field],
+  );
+
+  const showLibraryPicker = Boolean(mediaLibraryEnabled && onLibrarySelect);
 
   return (
     <FormItem className={cn("col-span-full", className)}>
@@ -95,7 +171,7 @@ function VideoUploadFormFieldInner({
             aria-label={label ?? "Choose video file"}
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) field.onChange(file);
+              if (file) handleFileSelected(file);
               e.target.value = "";
             }}
           />
@@ -116,7 +192,9 @@ function VideoUploadFormFieldInner({
                 <p className="text-muted-foreground text-xs">
                   {hasFile
                     ? "New video selected. Upload on submit."
-                    : "Existing video."}
+                    : previewUrl === libraryUrl
+                      ? "Chosen from your library. Save to apply."
+                      : "Existing video."}
                 </p>
               </div>
               <Button
@@ -124,10 +202,16 @@ function VideoUploadFormFieldInner({
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                aria-label="Remove video"
+                aria-label={label ? `Remove video: ${label}` : "Remove video"}
                 className="text-muted-foreground hover:text-destructive shrink-0"
                 onClick={() => {
+                  setRemovedExisting(true);
+                  setLibraryUrl(null);
                   field.onChange(null);
+                  // Only set when the caller passed `urlFieldName` — clears the
+                  // companion URL so Remove actually unsets the stored video
+                  // on save, instead of only dropping the pending file.
+                  onClearUrl?.();
                   if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
               >
@@ -135,17 +219,58 @@ function VideoUploadFormFieldInner({
               </Button>
             </div>
           ) : null}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={disabled}
-            onClick={triggerFileInput}
-            className="w-full"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            {previewUrl ? "Replace video" : "Choose video"}
-          </Button>
+          {showLibraryPicker ? (
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={disabled}
+                  className="w-full"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {previewUrl ? "Replace video" : "Choose video"}
+                  {nameSuffix}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-(--radix-dropdown-menu-trigger-width)"
+              >
+                <DropdownMenuItem
+                  onSelect={() => {
+                    queueMicrotask(() => triggerFileInput());
+                  }}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload from device
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    queueMicrotask(() => setPickerOpen(true));
+                  }}
+                >
+                  <Images className="mr-2 h-4 w-4" />
+                  Choose from library
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={disabled}
+              onClick={triggerFileInput}
+              className="w-full"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              {previewUrl ? "Replace video" : "Choose video"}
+              {nameSuffix}
+            </Button>
+          )}
           <div
             role="button"
             tabIndex={0}
@@ -159,7 +284,7 @@ function VideoUploadFormFieldInner({
               e.preventDefault();
               if (disabled) return;
               const file = e.dataTransfer.files?.[0];
-              if (file && isVideoFile(file)) field.onChange(file);
+              if (file && isVideoFile(file)) handleFileSelected(file);
             }}
             onDragOver={(e) => e.preventDefault()}
             className={cn(
@@ -170,11 +295,27 @@ function VideoUploadFormFieldInner({
             onClick={triggerFileInput}
           >
             Drag and drop a video here, or click to browse
+            {nameSuffix}
           </div>
         </div>
       </FormControl>
       {description && <FormDescription>{description}</FormDescription>}
       <FormMessage />
+
+      {showLibraryPicker && (
+        <MediaPickerDialog
+          kind="video"
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onSelect={(url) => {
+            // Already in S3 — nothing to defer. `onLibrarySelect` writes the
+            // URL to the companion field and clears the deferred `File` slot.
+            setRemovedExisting(false);
+            setLibraryUrl(url);
+            onLibrarySelect?.(url);
+          }}
+        />
+      )}
     </FormItem>
   );
 }
@@ -188,9 +329,44 @@ export const VideoUploadFormField = <CurrentForm extends FieldValues>({
   disabled,
   existingPreviewUrl,
   inputRef,
+  mediaLibraryEnabled,
+  urlFieldName,
 }: Props<CurrentForm>) => {
   const localInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = inputRef ?? localInputRef;
+
+  // The picker needs both props; clearing the companion URL needs only
+  // `urlFieldName`. Existing call sites pass neither, so both stay off there.
+  const pickerEnabled = Boolean(mediaLibraryEnabled && urlFieldName);
+
+  const handleLibrarySelect = useCallback(
+    (url: string) => {
+      if (!urlFieldName) return;
+      form.setValue(
+        urlFieldName,
+        url as PathValue<CurrentForm, Path<CurrentForm>>,
+        { shouldDirty: true },
+      );
+      // `undefined`, not `null`: consumers read a `null` file as "video
+      // removed" on submit, which would wipe the URL we just picked.
+      form.setValue(
+        name,
+        undefined as PathValue<CurrentForm, Path<CurrentForm>>,
+      );
+    },
+    [form, name, urlFieldName],
+  );
+
+  const handleClearUrl = useCallback(() => {
+    if (!urlFieldName) return;
+    // `null`, not `""`: URL fields are `z.string().url().nullable()`, and `""`
+    // would fail validation on a field the owner can't see an error for.
+    form.setValue(
+      urlFieldName,
+      null as PathValue<CurrentForm, Path<CurrentForm>>,
+      { shouldDirty: true },
+    );
+  }, [form, urlFieldName]);
 
   return (
     <FormField
@@ -205,6 +381,9 @@ export const VideoUploadFormField = <CurrentForm extends FieldValues>({
           className={className}
           label={label}
           description={description}
+          mediaLibraryEnabled={pickerEnabled}
+          onLibrarySelect={pickerEnabled ? handleLibrarySelect : undefined}
+          onClearUrl={urlFieldName ? handleClearUrl : undefined}
         />
       )}
     />

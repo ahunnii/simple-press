@@ -31,12 +31,27 @@ export type PendingFile = {
   file: File;
 };
 
+/**
+ * Anything the grid can show: a staged `PendingFile`, or an already-stored
+ * image (e.g. a Media Library pick) that has no `File` — those pass a `label`
+ * for the accessible name / hover caption, and an optional `badge` (e.g.
+ * "Library") so the owner can tell it apart from a staged upload.
+ */
+export type PendingImageGridItem = {
+  id: string;
+  previewUrl: string;
+  file?: File;
+  label?: string;
+  badge?: string;
+};
+
 type SortableTileProps = {
-  item: PendingFile;
+  item: PendingImageGridItem;
   onRemove: (id: string) => void;
 };
 
 function SortableTile({ item, onRemove }: SortableTileProps) {
+  const name = item.file?.name ?? item.label ?? "image";
   const {
     attributes,
     listeners,
@@ -69,7 +84,7 @@ function SortableTile({ item, onRemove }: SortableTileProps) {
       <div
         {...attributes}
         {...listeners}
-        aria-label={`Drag to reorder ${item.file.name}`}
+        aria-label={`Drag to reorder ${name}`}
         className="absolute top-2 left-2 cursor-grab rounded bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
       >
         <GripVertical className="h-4 w-4 text-white" aria-hidden="true" />
@@ -80,32 +95,38 @@ function SortableTile({ item, onRemove }: SortableTileProps) {
         type="button"
         variant="destructive"
         size="sm"
-        aria-label={`Remove ${item.file.name}`}
+        aria-label={`Remove ${name}`}
         onClick={() => onRemove(item.id)}
         className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </Button>
 
+      {item.badge && (
+        <span className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white transition-opacity group-hover:opacity-0">
+          {item.badge}
+        </span>
+      )}
+
       {/* File name tooltip */}
       <div className="absolute right-0 bottom-0 left-0 truncate bg-black/60 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-        {item.file.name}
+        {name}
       </div>
     </div>
   );
 }
 
-type PendingImageGridProps = {
-  items: PendingFile[];
-  onReorder: (items: PendingFile[]) => void;
+type PendingImageGridProps<T extends PendingImageGridItem> = {
+  items: T[];
+  onReorder: (items: T[]) => void;
   onRemove: (id: string) => void;
 };
 
-export function PendingImageGrid({
+export function PendingImageGrid<T extends PendingImageGridItem>({
   items,
   onReorder,
   onRemove,
-}: PendingImageGridProps) {
+}: PendingImageGridProps<T>) {
   const dndId = useId();
 
   const sensors = useSensors(

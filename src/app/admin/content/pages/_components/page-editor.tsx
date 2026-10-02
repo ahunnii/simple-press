@@ -107,8 +107,9 @@ const pageFormSchema = z.object({
   metaDescription: z.string().optional().nullable(),
   metaKeywords: z.string().optional().nullable(),
   imageFile: z.instanceof(File).optional().nullable(),
-  image: z.string().url().optional().nullable(),
-  ogImage: z.string().url().optional().nullable(),
+  // "" is what the image field's Remove button writes to the URL field.
+  image: z.string().url().optional().nullable().or(z.literal("")),
+  ogImage: z.string().url().optional().nullable().or(z.literal("")),
   ogImageFile: z.instanceof(File).optional().nullable(),
 });
 
@@ -445,8 +446,13 @@ export function PageEditor({
   /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 
   const watchedOgImageFile = form.watch("ogImageFile");
+  // A library pick lands in `ogImage` (file stays undefined), so prefer the
+  // live URL field over the saved one; Remove nulls the file.
+  const watchedOgImageUrl = form.watch("ogImage");
   const existingOgImage =
-    watchedOgImageFile === null ? undefined : (page?.ogImage ?? undefined);
+    watchedOgImageFile === null
+      ? undefined
+      : (firstNonBlank(watchedOgImageUrl) ?? page?.ogImage ?? undefined);
 
   const moreMenuItems: AdminFormMoreMenuItem[] = [];
   if (page?.id && page.published) {
@@ -671,6 +677,8 @@ export function PageEditor({
                       description="Shown as the page hero on supported templates."
                       existingPreviewUrl={page?.image ?? undefined}
                       inputRef={imageFileInputRef}
+                      mediaLibraryEnabled={mediaEnabled}
+                      urlFieldName="image"
                     />
 
                     <MinimalTiptapFormField
@@ -791,7 +799,6 @@ export function PageEditor({
                           descriptionClassName="text-xs text-muted-foreground"
                           rows={3}
                         />
-
                       </CardContent>
                     </Card>
 
@@ -812,6 +819,8 @@ export function PageEditor({
                           description="This is the image that will be used for the Open Graph image"
                           existingPreviewUrl={page?.ogImage ?? undefined}
                           inputRef={ogImageFileInputRef}
+                          mediaLibraryEnabled={mediaEnabled}
+                          urlFieldName="ogImage"
                           disabled={isSubmitting}
                         />
                       </CardContent>

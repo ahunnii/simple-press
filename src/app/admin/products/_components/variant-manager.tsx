@@ -506,6 +506,7 @@ export function VariantManager({
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowOptionsEditor(false)}
+                aria-label="Close variant options"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -527,6 +528,7 @@ export function VariantManager({
                       variant="ghost"
                       size="sm"
                       onClick={() => removeOption(index)}
+                      aria-label={`Remove option ${index + 1}`}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -764,11 +766,15 @@ export function VariantManager({
                               >
                                 None
                               </button>
-                              {images.map((img) => (
+                              {images.map((img, imgIndex) => (
                                 <button
                                   key={img.url}
                                   type="button"
-                                  aria-label={img.altText ?? img.url}
+                                  aria-label={
+                                    img.altText?.trim()
+                                      ? img.altText
+                                      : `Product image ${imgIndex + 1}`
+                                  }
                                   onClick={() =>
                                     updateVariant(index, "imageUrl", img.url)
                                   }
@@ -901,6 +907,7 @@ export function VariantManager({
                         variant="ghost"
                         size="sm"
                         onClick={() => removeVariant(index)}
+                        aria-label={`Remove variant ${variant.name}`}
                         className="shrink-0"
                       >
                         <X className="h-4 w-4" />

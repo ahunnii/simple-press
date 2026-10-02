@@ -10,7 +10,7 @@
  *
  * Field set mirrors the reference source verbatim (hero, intro, closing
  * CTA + booking embed) — the detail page's own visual re-skin (bamboo
- * tokens, `BambooPageShelf` back-link, Outfit merchant-driven h1) lives in
+ * tokens, `BambooPageShelf` back-link, serif merchant-driven h1) lives in
  * `bamboo-service-page.tsx`, not in the field shape.
  *
  * Fields live on `Service.customFields`, edited at `/admin/services/[id]` —

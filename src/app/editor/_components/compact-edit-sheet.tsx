@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
@@ -100,6 +100,19 @@ export function CompactEditSheet({
       ? `${viewportHeight - topInset}px`
       : SHEET_SNAP_HIGH_FALLBACK;
   const snapPoints = useMemo(() => [SHEET_SNAP_LOW, highSnap], [highSnap]);
+
+  // vaul 1.1.2 never forwards `modal` to its Radix Dialog, so Radix mounts the
+  // content as MODAL and sets `body { pointer-events: none }` — which locks
+  // the preview iframe (no tap-to-swap sections, no tap-to-pick for notes).
+  // vaul's own `auto` reset only runs on its first mount and when IT toggles
+  // open, never when the parent opens the sheet via the controlled `open`.
+  useEffect(() => {
+    if (!open) return;
+    const raf = requestAnimationFrame(() => {
+      document.body.style.pointerEvents = "auto";
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
 
   return (
     <DrawerPrimitive.Root

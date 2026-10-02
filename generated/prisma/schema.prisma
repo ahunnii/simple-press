@@ -1400,13 +1400,17 @@ model EditorNote {
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  pageKey   String? // template page key ("homepage"), "cms:<pageId>" for CMS pages, null = whole site
-  pageLabel String? // display snapshot ("Homepage", "Our Story") — survives page rename/delete
+  pageKey      String? // template page key ("homepage"), "cms:<pageId>" for CMS pages, null = whole site
+  pageLabel    String? // display snapshot ("Homepage", "Our Story") — survives page rename/delete
+  sectionKey   String? // section id ("homepage.hero", "global.header"), matches data-sp-group; null = page- or site-wide
+  sectionLabel String? // display snapshot ("Hero") — survives section rename
 
   body       String    @db.Text
   status     String    @default("open") // open | resolved
   response   String?   @db.Text
   resolvedAt DateTime?
+
+  attachmentUrls String[] @default([]) // public storage URLs under {businessId}/editor-notes/, max 3
 
   createdByUserId String?
   createdBy       User?   @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)

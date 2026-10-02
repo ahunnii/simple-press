@@ -35,6 +35,12 @@ type Props = {
    * flier with words on it is never cropped.
    */
   imageFit?: "cover" | "contain";
+  /**
+   * `left` (default): text on the left, optional image/media frame on the
+   * right. `center`: a centered, text-only band — `image` and `media` are
+   * ignored in center mode, no frame is rendered.
+   */
+  align?: "left" | "center";
 };
 
 /**
@@ -44,6 +50,10 @@ type Props = {
  * page share one implementation: `bg-muted/50` band, `container mx-auto px-4`
  * edge, optional leaf badge, serif h1, muted intro and an optional image frame
  * on the right (stacked below the text on phones).
+ *
+ * `align="center"` is the minimal text-only variant (no image frame), used by
+ * Shop, Collections and the Testimonials page — the client prefers those
+ * minimal, and they were centered before the 2026-09-27 parity pass.
  *
  * Body content that follows should sit in the same `container mx-auto px-4`
  * so the h1 and the body share one left edge.
@@ -62,16 +72,27 @@ export function HappyBambooPageShelf({
   image,
   media,
   imageFit = "cover",
+  align = "left",
 }: Props) {
+  const center = align === "center";
   const hasImage = !!image && image.src.trim().length > 0;
-  const hasFrame = media != null || hasImage;
+  const hasFrame = !center && (media != null || hasImage);
   const contain = imageFit === "contain";
 
   return (
     <section className="bg-muted/50 py-16 md:py-24" {...sectionAttrs}>
       <div className="container mx-auto px-4">
         <div className="flex w-full flex-col items-center justify-center gap-12 md:flex-row">
-          <FadeIn className="flex w-full min-w-0 flex-1 flex-col justify-center text-left">
+          <FadeIn
+            className={cn(
+              "flex w-full min-w-0",
+              !center && "flex-1",
+              "flex-col justify-center",
+              center
+                ? "mx-auto max-w-3xl items-center text-center"
+                : "text-left",
+            )}
+          >
             {!!smallLabel?.trim() && (
               <Badge
                 className="mb-4 w-fit"
@@ -91,7 +112,10 @@ export function HappyBambooPageShelf({
             </h1>
             {!!subtitle?.trim() && (
               <p
-                className="text-muted-foreground max-w-2xl text-lg leading-relaxed"
+                className={cn(
+                  "text-muted-foreground max-w-2xl text-lg leading-relaxed",
+                  center && "mx-auto",
+                )}
                 {...(subtitleFieldKey ? fieldAttr(subtitleFieldKey) : {})}
               >
                 {subtitle}

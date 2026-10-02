@@ -213,8 +213,8 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
           className="mx-auto max-w-7xl px-4 py-20 md:py-28 lg:px-8"
         >
           <div className="flex flex-col items-center gap-12 md:flex-row">
-            <FadeIn direction="up" className="flex-1">
-              <div className="relative aspect-3/4 overflow-hidden rounded-2xl border border-[var(--bam-hairline)]">
+            <FadeIn direction="up" className="w-full flex-1">
+              <div className="relative aspect-3/4 w-full overflow-hidden rounded-2xl border border-[var(--bam-hairline)]">
                 <Image
                   src={f["bamboo.about.mission-image"]!}
                   alt=""
@@ -224,7 +224,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 />
               </div>
             </FadeIn>
-            <FadeIn direction="up" delay={0.1} className="flex-1">
+            <FadeIn direction="up" delay={0.1} className="w-full flex-1">
               {f["bamboo.about.mission-eyebrow"] ? (
                 <span
                   className={eyebrowClass}
@@ -316,8 +316,8 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
           className="mx-auto max-w-7xl px-4 py-20 md:py-28 lg:px-8"
         >
           <div className="flex flex-col items-center gap-12 md:flex-row-reverse">
-            <FadeIn direction="up" className="flex-1">
-              <div className="relative aspect-4/3 overflow-hidden rounded-2xl border border-[var(--bam-hairline)]">
+            <FadeIn direction="up" className="w-full flex-1">
+              <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl border border-[var(--bam-hairline)]">
                 <Image
                   src={f["bamboo.about.supplier-image"]!}
                   alt=""
@@ -327,7 +327,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 />
               </div>
             </FadeIn>
-            <FadeIn direction="up" delay={0.1} className="flex-1">
+            <FadeIn direction="up" delay={0.1} className="w-full flex-1">
               {f["bamboo.about.supplier-eyebrow"] ? (
                 <span
                   className={eyebrowClass}
@@ -425,8 +425,8 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
           className="mx-auto max-w-7xl px-4 py-20 md:py-28 lg:px-8"
         >
           <div className="flex flex-col items-center gap-12 md:flex-row">
-            <FadeIn direction="up" className="flex-1">
-              <div className="relative aspect-4/3 overflow-hidden rounded-2xl border border-[var(--bam-hairline)]">
+            <FadeIn direction="up" className="w-full flex-1">
+              <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl border border-[var(--bam-hairline)]">
                 <Image
                   src={f["bamboo.about.nationwide-image"]!}
                   alt=""
@@ -436,7 +436,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 />
               </div>
             </FadeIn>
-            <FadeIn direction="up" delay={0.1} className="flex-1">
+            <FadeIn direction="up" delay={0.1} className="w-full flex-1">
               {f["bamboo.about.nationwide-eyebrow"] ? (
                 <span
                   className={eyebrowClass}

@@ -11,8 +11,16 @@
 export const ROUTE_MAX_FILES: Record<string, number> = {
   images: 10,
   galleryImages: 10,
+  libraryImages: 10,
   testimonials: 5,
+  editorNoteImages: 3,
 };
+
+/**
+ * Max images an owner can upload in a single drop on the Media Library page.
+ * Larger drops are split into batches of `ROUTE_MAX_FILES.libraryImages`.
+ */
+export const MEDIA_LIBRARY_UPLOAD_MAX = 50;
 
 export function getStoredPath(file: {
   objectInfo?: {

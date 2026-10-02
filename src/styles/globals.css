@@ -253,7 +253,14 @@
 
 /* Routes that fall back to Default pages (wishlist, FAQ, order status, ...)
    know nothing about the hanging emblem; bamboo pages mark their first
-   section with .bam-top (shared/bamboo-emblem-clearance.ts). */
+   section with .bam-top (shared/bamboo-emblem-clearance.ts). Below lg the
+   mini hanging disc only overhangs 24px (8 + 80 − 64, see that file), so the
+   base rule below only needs to clear that — the lg+ override then covers
+   the much larger 72px inner-page overhang. */
+.bamboo #bamboo-main-content:not(:has(.bam-top)) {
+  padding-top: 1.5rem;
+}
+
 @media (min-width: 64rem) {
   .bamboo #bamboo-main-content:not(:has(.bam-top)) {
     padding-top: 4.5rem;

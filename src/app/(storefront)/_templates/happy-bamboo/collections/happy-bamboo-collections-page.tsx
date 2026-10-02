@@ -42,6 +42,7 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
   return (
     <PageTransition>
       <HappyBambooPageShelf
+        align="center"
         title={listingHeading}
         titleFieldKey="happy-bamboo.collections-listing-heading"
         smallLabel={smallLabel}

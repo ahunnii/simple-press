@@ -6,12 +6,14 @@ import {
   buildGalleryExternalUsage,
   buildUsedMediaIndex,
   isAlwaysInUseKey,
+  isLibraryOwnedKey,
   normalizeUrl,
 } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { publicUrlToKey } from "~/lib/s3/url";
 import { generateGallerySlug } from "~/lib/slug";
 import {
+  GALLERY_MAX_IMAGES,
   galleryCreateSchema,
   galleryImageCreateSchema,
   galleryReorderImagesSchema,
@@ -45,9 +47,8 @@ import {
  * identical bytes collapse onto one shared key. Removing one image from a
  * gallery could therefore destroy a file a product page was still displaying.
  * `buildUsedMediaIndex` is the platform's one authority on "who references this
- * object" (it gates the Media Library's own delete, and `gallery.delete`'s
- * CONFLICT guard reaches it through `buildGalleryExternalUsage`), so this defers
- * to it rather than growing a second, always-behind copy of that knowledge.
+ * object" (it gates the Media Library's own delete), so this defers to it
+ * rather than growing a second, always-behind copy of that knowledge.
  *
  * Mirrors `deleteUnreferencedImageObjects` in
  * `src/server/api/routers/product.ts` — same semantics, same three deliberate
@@ -58,6 +59,8 @@ import {
  * would look unreferenced here), and logo/favicon fixed-key objects are never
  * touched (`isAlwaysInUseKey`, matching the media router's hard protection —
  * reachable here because MediaPicker can drop the logo into a gallery).
+ * Media Library uploads (`library-` keys, `isLibraryOwnedKey`) are likewise
+ * never touched: only the Media Library's explicit delete may remove them.
  *
  * Non-storage URLs are skipped rather than handed to `deleteStoredObjects`,
  * which would only log an "unrecognised URL shape" error to Sentry.
@@ -96,6 +99,7 @@ async function deleteUnreferencedGalleryObjects(
     if (!key) return false; // external URL — not ours to delete
     if (!key.startsWith(`${businessId}/`)) return false; // another tenant's object
     if (isAlwaysInUseKey(key)) return false; // logo / favicon
+    if (isLibraryOwnedKey(key)) return false; // owner's library upload
     return (usageIndex.get(url) ?? []).length === 0;
   });
 
@@ -264,14 +268,14 @@ export const galleryRouter = createTRPCRouter({
         select: { images: { select: { url: true } } },
       });
 
-      // Usage-aware guard: block deletion if this gallery's images are
-      // referenced anywhere outside the gallery's own listing. TipTap
-      // `gallery` blocks and gallery-type template fields resolve to
-      // per-image usage entries here (see src/lib/media/usage.ts). Mirrors
-      // the usage check in the media router (src/server/api/routers/media.ts)
-      // and shares its dedupe/lookup logic with the `usage` query above via
-      // buildGalleryExternalUsage — the two can never drift.
-      if (gallery && gallery.images.length > 0) {
+      // Embed guard: block deletion while the gallery ITSELF is embedded — a
+      // TipTap `gallery` block or a gallery-type template field holding its ID
+      // (see buildGalleryExternalUsage in src/lib/media/usage.ts). An image
+      // URL the gallery merely shares with a product, page etc. does not
+      // block: deleting the gallery leaves those intact, and
+      // deleteUnreferencedGalleryObjects below keeps the shared file. Shares
+      // its lookup with the `usage` query above — the two can never drift.
+      if (gallery) {
         const externalUsageByGallery =
           await buildGalleryExternalUsage(businessId);
         const list = externalUsageByGallery.get(id) ?? [];
@@ -299,13 +303,11 @@ export const galleryRouter = createTRPCRouter({
       // Clean up S3 objects — best-effort, after the DB delete (the helper's
       // scan must see the cascade-removed rows as already gone).
       //
-      // The CONFLICT guard above already makes an EXTERNAL reference impossible
-      // on this path, so the old per-image `galleryImage.count()` was very
-      // nearly safe — but not entirely, and not cheaply: it issued one query per
-      // image, and it had no `isAlwaysInUseKey` protection, so a gallery that
-      // MediaPicker-ed in the business's logo could take `logo.png` down with
-      // it. Routing both delete paths through one helper also means the guard
-      // can never drift between them.
+      // The CONFLICT guard above only rules out embeds of the gallery itself;
+      // its image URLs can still be shared with products, pages, other
+      // galleries (`gallery.duplicate`) or the logo (MediaPicker). The helper
+      // rescans and deletes only objects nothing references any more, with
+      // `isAlwaysInUseKey` protection, in one scan for the whole batch.
       if (gallery) {
         await deleteUnreferencedGalleryObjects(
           businessId,
@@ -331,6 +333,18 @@ export const galleryRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Gallery not found",
+        });
+      }
+
+      // Count existing images (client caps at 500, this is the backstop)
+      const existingCount = await ctx.db.galleryImage.count({
+        where: { galleryId: input.galleryId },
+      });
+
+      if (existingCount + input.images.length > GALLERY_MAX_IMAGES) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `A gallery can have at most ${GALLERY_MAX_IMAGES} images`,
         });
       }
 

@@ -110,6 +110,7 @@ export function HappyBambooShopClient({
   return (
     <PageTransition>
       <HappyBambooPageShelf
+        align="center"
         title={shopHeading}
         titleFieldKey="happy-bamboo.shop-listing-heading"
         smallLabel={shopSmallLabel}

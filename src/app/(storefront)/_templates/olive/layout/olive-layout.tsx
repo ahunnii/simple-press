@@ -49,8 +49,10 @@ const fontBody = Figtree({
  *
  * The nav is resolved once here too: the owner's saved nav (`??` semantics —
  * a saved empty list means no links) or `OLIVE_DEFAULT_NAV`, then the shared
- * route→flag filter (P-NAV-FLAGS). The header, its mobile overlay and the
- * footer's About column all render this same array.
+ * route→flag filter (P-NAV-FLAGS). The header and its mobile overlay render
+ * this same array; the footer resolves its own owner-editable Quick links
+ * (`resolveFooterQuickLinks`, B10.4) instead, falling back to this same nav
+ * when the owner hasn't set one.
  */
 export async function OliveLayout({
   children,
@@ -120,7 +122,6 @@ export async function OliveLayout({
       <OliveFooter
         business={business}
         collections={navCollections}
-        navItems={navItems}
         initialSession={session ?? null}
       />
 

@@ -754,6 +754,13 @@ export function ServiceEditor({
                     setOgImageFile(null);
                     setOgImageRemoved(true);
                   }}
+                  onOgImageLibrarySelect={(url) => {
+                    form.setValue("ogImage", url, { shouldDirty: true });
+                    setOgImageFile(null);
+                    setOgImageRemoved(false);
+                    if (ogImageFileInputRef.current)
+                      ogImageFileInputRef.current.value = "";
+                  }}
                   disabled={isSubmitting}
                 />
               </TabsContent>
