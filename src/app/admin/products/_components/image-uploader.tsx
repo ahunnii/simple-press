@@ -346,7 +346,7 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
 
     const addButton = (label: string) =>
       showLibraryPicker ? (
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" disabled={isPreparing}>
               {isPreparing ? (
@@ -368,8 +368,7 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
+              onSelect={() => {
                 queueMicrotask(triggerFileInput);
               }}
             >
@@ -377,8 +376,7 @@ export const ImageUploader = forwardRef<ImageUploaderHandle, Props>(
               Upload from device
             </DropdownMenuItem>
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
+              onSelect={() => {
                 queueMicrotask(() => setPickerOpen(true));
               }}
             >

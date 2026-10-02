@@ -53,13 +53,10 @@ const MAX_UPLOAD_LABEL: Record<MediaKind, string> = {
   video: "50MB",
 };
 
-const IMAGE_ITEM_KINDS = new Set([
-  "image",
-  "gallery",
-  "logo",
-  "favicon",
-  "testimonial",
-]);
+// `favicon` is deliberately absent: the favicon route overwrites a fixed key
+// (`{biz}/favicon.<ext>`) in place, so any product/page that picked it would
+// silently change the next time the owner uploads a new favicon.
+const IMAGE_ITEM_KINDS = new Set(["image", "gallery", "logo", "testimonial"]);
 
 function itemMatchesKind(item: MediaItem, kind: MediaKind): boolean {
   return kind === "video"
@@ -228,6 +225,13 @@ type MediaPickerBaseProps = {
   kind: MediaKind;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /**
+   * Show the "Upload new" tab. Off by default: uploads there go to storage
+   * immediately, while every current caller already offers "Upload from
+   * device", which defers the upload until the form is saved. Only opt in
+   * where the picker is the sole way to add a file.
+   */
+  allowUpload?: boolean;
 };
 
 /** Default: pick one file; the dialog closes on pick. */
@@ -258,7 +262,7 @@ export type MediaPickerDialogProps =
 const IMAGES_ROUTE_BATCH_SIZE = ROUTE_MAX_FILES.images ?? 10;
 
 export function MediaPickerDialog(props: MediaPickerDialogProps) {
-  const { kind, open, onOpenChange } = props;
+  const { kind, open, onOpenChange, allowUpload = false } = props;
   const isMulti = props.multiple === true;
   const onSelect = props.multiple ? undefined : props.onSelect;
   const onSelectMany = props.multiple ? props.onSelectMany : undefined;
@@ -528,8 +532,9 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
             <>
               <DialogTitle>Choose images</DialogTitle>
               <DialogDescription>
-                Select one or more images from your media library, or upload new
-                ones.
+                {allowUpload
+                  ? "Select one or more images from your media library, or upload new ones."
+                  : "Select one or more images from your media library."}
               </DialogDescription>
             </>
           ) : (
@@ -538,8 +543,9 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
                 Choose {kind === "image" ? "an image" : "a video"}
               </DialogTitle>
               <DialogDescription>
-                Select an existing file from your media library, or upload a new
-                one.
+                {allowUpload
+                  ? "Select an existing file from your media library, or upload a new one."
+                  : "Select an existing file from your media library."}
               </DialogDescription>
             </>
           )}
@@ -550,10 +556,12 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
           onValueChange={(v) => setTab(v as "library" | "upload")}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <TabsList>
-            <TabsTrigger value="library">Library</TabsTrigger>
-            <TabsTrigger value="upload">Upload new</TabsTrigger>
-          </TabsList>
+          {allowUpload && (
+            <TabsList>
+              <TabsTrigger value="library">Library</TabsTrigger>
+              <TabsTrigger value="upload">Upload new</TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent
             value="library"
@@ -592,7 +600,9 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
                 emptyMessage={
                   q
                     ? "No files match your search."
-                    : "No images in your media library yet. Upload some from the Upload tab."
+                    : allowUpload
+                      ? "No images in your media library yet. Upload some from the Upload tab."
+                      : "No images in your media library yet."
                 }
               />
             ) : (
@@ -602,36 +612,38 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
                 emptyMessage={
                   q
                     ? "No files match your search."
-                    : `No ${kind}s in your media library yet. Upload one from the Upload tab.`
+                    : `No ${kind}s in your media library yet.${allowUpload ? " Upload one from the Upload tab." : ""}`
                 }
               />
             )}
           </TabsContent>
 
-          <TabsContent
-            value="upload"
-            className="min-h-0 flex-1 overflow-y-auto"
-          >
-            {isMulti ? (
-              <UploadDropzone
-                kind="image"
-                multiple
-                isUploading={isUploadingMany}
-                isPreparing={isPreparing}
-                onFiles={handleFilesSelectMany}
-              />
-            ) : (
-              <UploadDropzone
-                kind={kind}
-                isUploading={uploader.isPending}
-                isPreparing={isPreparing}
-                onFiles={(files) => {
-                  const file = files[0];
-                  if (file) handleFileSelect(file);
-                }}
-              />
-            )}
-          </TabsContent>
+          {allowUpload && (
+            <TabsContent
+              value="upload"
+              className="min-h-0 flex-1 overflow-y-auto"
+            >
+              {isMulti ? (
+                <UploadDropzone
+                  kind="image"
+                  multiple
+                  isUploading={isUploadingMany}
+                  isPreparing={isPreparing}
+                  onFiles={handleFilesSelectMany}
+                />
+              ) : (
+                <UploadDropzone
+                  kind={kind}
+                  isUploading={uploader.isPending}
+                  isPreparing={isPreparing}
+                  onFiles={(files) => {
+                    const file = files[0];
+                    if (file) handleFileSelect(file);
+                  }}
+                />
+              )}
+            </TabsContent>
+          )}
         </Tabs>
 
         {isMulti && tab === "library" && (

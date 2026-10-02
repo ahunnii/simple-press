@@ -4,23 +4,43 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ImagePlus, PlusCircle, Save } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Images,
+  PlusCircle,
+  Save,
+  Upload,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { PendingImageGridItem } from "~/components/inputs/pending-image-grid";
 import type { GalleryCreateData } from "~/lib/validators/gallery";
+import { getImageDimensions } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
-import { galleryCreateSchema } from "~/lib/validators/gallery";
+import {
+  GALLERY_MAX_IMAGES,
+  galleryCreateSchema,
+} from "~/lib/validators/gallery";
 import { api } from "~/trpc/react";
 import { useDeferredImageUpload } from "~/hooks/use-deferred-image-upload";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import { Button } from "~/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -44,6 +64,7 @@ import { PendingImageGrid } from "~/components/inputs/pending-image-grid";
 import { SelectFormField } from "~/components/inputs/select-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { GalleryRenderer } from "~/components/gallery-renderer";
+import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
 
 // Mirrors galleryCreateSchema caps in src/lib/validators/gallery.ts
 const NAME_MAX = 120;
@@ -143,6 +164,32 @@ const SAMPLE_IMAGES = SAMPLE_SIZES.map(([width, height], index) => ({
   caption: `Sample caption ${index + 1}`,
 }));
 
+/** An image picked from the Media Library — already stored, never uploaded here. */
+type LibraryImage = {
+  /** Client-only id, so the same URL could never collide with a pending file. */
+  id: string;
+  url: string;
+  width?: number;
+  height?: number;
+};
+
+/** One tile in the unified image grid: a library pick or a staged file. */
+type GridItem = PendingImageGridItem & { source: "library" | "file" };
+
+const isImageFile = (file: File) =>
+  // Some browsers (notably Android Chrome) leave `file.type` empty for
+  // HEIC/HEIF, so fall back to the extension for those.
+  file.type.startsWith("image/") || /\.(heic|heif)$/i.test(file.name);
+
+/** Last path segment of a stored URL, for the tile's accessible name. */
+const urlFilename = (url: string) => {
+  try {
+    return decodeURIComponent(new URL(url).pathname.split("/").pop() ?? "");
+  } catch {
+    return url.split("/").pop() ?? "";
+  }
+};
+
 const NEW_GALLERY_DEFAULTS: GalleryCreateData = {
   name: "",
   description: "",
@@ -167,6 +214,51 @@ export function NewGalleryForm() {
   const [isSaving, setIsSaving] = useState(false);
 
   const upload = useDeferredImageUpload({ route: "galleryImages" });
+  const mediaLibraryEnabled = useMediaLibraryEnabled();
+
+  // Library picks live beside the hook's pending files. `order` holds the
+  // owner's arrangement of BOTH as ids; anything not in it yet (a file still
+  // being prepared when the order was last written) is appended at the end.
+  // The hook's own `pendingFiles` order is kept in step on every reorder, so
+  // `uploadAll()` (which returns results in that order) can be zipped back
+  // into the displayed order on submit.
+  const [libraryImages, setLibraryImages] = useState<LibraryImage[]>([]);
+  const [order, setOrder] = useState<string[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  // Resolving natural dimensions for library picks. Counts as processing so a
+  // submit can't race ahead of picks that haven't landed in state yet.
+  const [isResolvingLibrary, setIsResolvingLibrary] = useState(false);
+  const nextLibraryIdRef = useRef(0);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const items = useMemo<GridItem[]>(() => {
+    const byId = new Map<string, GridItem>();
+    for (const img of libraryImages) {
+      byId.set(img.id, {
+        id: img.id,
+        previewUrl: img.url,
+        label: urlFilename(img.url),
+        badge: "Library",
+        source: "library",
+      });
+    }
+    for (const pf of upload.pendingFiles) {
+      byId.set(pf.id, { ...pf, source: "file" });
+    }
+    const ordered: GridItem[] = [];
+    for (const id of order) {
+      const item = byId.get(id);
+      if (item) {
+        ordered.push(item);
+        byId.delete(id);
+      }
+    }
+    return [...ordered, ...byId.values()];
+  }, [libraryImages, upload.pendingFiles, order]);
+
+  // Latest values for code that runs after an await.
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   const form = useForm<GalleryCreateData>({
     resolver: zodResolver(galleryCreateSchema),
@@ -184,6 +276,8 @@ export function NewGalleryForm() {
       if (createAnotherRef.current) {
         createAnotherRef.current = false;
         upload.clear();
+        setLibraryImages([]);
+        setOrder([]);
         form.reset(NEW_GALLERY_DEFAULTS);
         toast.success("Gallery created — add another");
         router.push("/admin/galleries/new");
@@ -192,49 +286,72 @@ export function NewGalleryForm() {
         router.push(`/admin/galleries/${data.id}`);
       }
     },
-    onError: (error, variables) => {
+    onError: (error) => {
       createAnotherRef.current = false;
       setIsSaving(false);
       toast.dismiss();
       toast.error(error.message || "Failed to create gallery");
-      // If the upload succeeded but the DB write failed, discard the orphaned
-      // S3 objects so they don't accumulate.
-      if (variables.images && variables.images.length > 0) {
-        upload.discard(variables.images.map((img) => img.url));
-      }
+      // Orphaned-upload cleanup lives on the per-call `onError` in onSubmit:
+      // `variables.images` also carries Media Library URLs, which belong to
+      // other content and must never be discarded.
     },
   });
 
   const onSubmit = useCallback(
     async (formData: GalleryCreateData) => {
+      const hasPendingFiles = upload.pendingFiles.length > 0;
       setIsSaving(true);
       toast.loading(
-        upload.pendingFiles.length > 0
-          ? "Uploading images…"
-          : "Creating gallery…",
+        hasPendingFiles ? "Uploading images…" : "Creating gallery…",
       );
 
       try {
-        if (upload.pendingFiles.length > 0) {
-          // uploadAll() handles its own partial-upload cleanup on failure
-          const uploadedInfos = await upload.uploadAll();
-
+        // uploadAll() handles its own partial-upload cleanup on failure, and
+        // returns results in the hook's pendingFiles order — which handleReorder
+        // keeps equal to the files' relative order in the grid.
+        const uploadedInfos = hasPendingFiles ? await upload.uploadAll() : [];
+        if (hasPendingFiles) {
           toast.dismiss();
           toast.loading("Creating gallery…");
-
-          const images = uploadedInfos.map(({ url, width, height }) => ({
-            url,
-            altText: "" as string,
-            caption: "" as string,
-            ...(width !== undefined && height !== undefined
-              ? { width, height }
-              : {}),
-          }));
-
-          createMutation.mutate({ ...formData, images });
-        } else {
-          createMutation.mutate({ ...formData });
         }
+
+        // Zip uploads back into the displayed order: each "file" tile takes
+        // the next upload result, each "library" tile its stored URL.
+        const libraryById = new Map(libraryImages.map((img) => [img.id, img]));
+        const uploadQueue = [...uploadedInfos];
+        const ordered: { url: string; width?: number; height?: number }[] = [];
+        for (const item of items) {
+          if (item.source === "library") {
+            const lib = libraryById.get(item.id);
+            if (lib) ordered.push(lib);
+          } else {
+            const next = uploadQueue.shift();
+            if (next) ordered.push(next);
+          }
+        }
+        // Backstop: never drop an upload the grid somehow didn't account for.
+        ordered.push(...uploadQueue);
+
+        const images = ordered.map(({ url, width, height }) => ({
+          url,
+          altText: "" as string,
+          caption: "" as string,
+          ...(width !== undefined && height !== undefined
+            ? { width, height }
+            : {}),
+        }));
+
+        // ONLY this submit's uploads may be discarded if the create fails —
+        // library URLs are shared with other content.
+        const uploadedUrls = uploadedInfos.map((info) => info.url);
+        createMutation.mutate(
+          images.length > 0 ? { ...formData, images } : { ...formData },
+          {
+            onError: () => {
+              if (uploadedUrls.length > 0) upload.discard(uploadedUrls);
+            },
+          },
+        );
       } catch (err) {
         // uploadAll() threw — it already discarded any partial uploads
         toast.dismiss();
@@ -247,15 +364,111 @@ export function NewGalleryForm() {
         setIsSaving(false);
       }
     },
-    [upload, createMutation],
+    [upload, createMutation, libraryImages, items],
   );
 
+  const limitReachedMessage = `Galleries can have at most ${GALLERY_MAX_IMAGES} images — remove one to add more`;
+
+  const addFiles = (files: File[]) => {
+    const candidates = files.filter(isImageFile);
+    // Non-images still go to the hook, which reports them in its own toast.
+    const nonImages = files.filter((file) => !isImageFile(file));
+    // Truncate before the hook's HEIC prep so nothing is converted only to be
+    // thrown away. (Files still being prepared from an earlier add aren't in
+    // `items` yet; the server's GALLERY_MAX_IMAGES cap backstops that race.)
+    const slots = Math.max(0, GALLERY_MAX_IMAGES - itemsRef.current.length);
+    const kept = candidates.slice(0, slots);
+    const skipped = candidates.length - kept.length;
+    if (skipped > 0) {
+      if (kept.length === 0) {
+        toast.error(limitReachedMessage);
+      } else {
+        toast.warning(
+          `Adding ${kept.length} of ${candidates.length} images — galleries can have at most ${GALLERY_MAX_IMAGES} (${skipped} skipped)`,
+        );
+      }
+    }
+    if (kept.length + nonImages.length > 0) {
+      upload.addFiles([...kept, ...nonImages]);
+    }
+  };
+
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    upload.addFiles(files);
-    // Reset input so the same files can be re-selected
+    // Copy out of the live FileList *before* clearing the input — resetting
+    // `value` empties that list (Chrome), and the hook's async prep would see
+    // nothing.
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
+    if (files.length === 0) return;
+    addFiles(files);
+  };
+
+  const handleReorder = (next: GridItem[]) => {
+    setOrder(next.map((item) => item.id));
+    // Keep the hook's list in the same relative order — see onSubmit.
+    const pendingById = new Map(upload.pendingFiles.map((pf) => [pf.id, pf]));
+    upload.reorder(
+      next.flatMap((item) => {
+        const pf = item.source === "file" ? pendingById.get(item.id) : null;
+        return pf ? [pf] : [];
+      }),
+    );
+  };
+
+  const handleRemove = (id: string) => {
+    if (libraryImages.some((img) => img.id === id)) {
+      setLibraryImages((prev) => prev.filter((img) => img.id !== id));
+    } else {
+      upload.removeFile(id);
+    }
+  };
+
+  // The picker already caps selection at the remaining slots and disables
+  // images already picked; the checks here are a backstop.
+  const handleLibrarySelectMany = (urls: string[]) => {
+    const existing = new Set(
+      itemsRef.current
+        .filter((item) => item.source === "library")
+        .map((item) => item.previewUrl),
+    );
+    const fresh = [...new Set(urls)].filter((url) => !existing.has(url));
+    if (fresh.length < urls.length) {
+      toast.info("Skipped images that are already in the gallery");
+    }
+    const remaining = Math.max(0, GALLERY_MAX_IMAGES - itemsRef.current.length);
+    if (fresh.length > 0 && remaining === 0) {
+      toast.error(limitReachedMessage);
+      return;
+    }
+    const toAdd = fresh.slice(0, remaining);
+    if (toAdd.length < fresh.length) {
+      toast.warning(
+        `Adding ${toAdd.length} of ${fresh.length} images — galleries can have at most ${GALLERY_MAX_IMAGES} (${fresh.length - toAdd.length} skipped)`,
+      );
+    }
+    if (toAdd.length === 0) return;
+
+    setIsResolvingLibrary(true);
+    void (async () => {
+      try {
+        const entries: LibraryImage[] = await Promise.all(
+          toAdd.map(async (url) => ({
+            id: `library-${(nextLibraryIdRef.current++).toString()}`,
+            url,
+            ...(await getImageDimensions(url)),
+          })),
+        );
+        // Pin everything currently shown in place, then append the picks in
+        // pick order.
+        setOrder([
+          ...itemsRef.current.map((item) => item.id),
+          ...entries.map((entry) => entry.id),
+        ]);
+        setLibraryImages((prev) => [...prev, ...entries]);
+      } finally {
+        setIsResolvingLibrary(false);
+      }
+    })();
   };
 
   const layout = form.watch("layout");
@@ -303,23 +516,23 @@ export function NewGalleryForm() {
 
   /**
    * Nothing is saved yet, so the preview runs on whatever is closest to real:
-   * the images already staged for upload (their local object URLs), else inline
-   * sample placeholders. Adapted here rather than in `GalleryRenderer` — the
+   * the images in the grid, in grid order (library picks by their stored URL,
+   * staged files by their local object URL), else inline sample placeholders. Adapted here rather than in `GalleryRenderer` — the
    * renderer's contract is a saved gallery.
    */
   const previewImages = useMemo(
     () =>
-      upload.pendingFiles.length > 0
-        ? upload.pendingFiles.map((file, index) => ({
-            id: file.id,
-            url: file.previewUrl,
+      items.length > 0
+        ? items.map((item, index) => ({
+            id: item.id,
+            url: item.previewUrl,
             altText: "",
             // Per-image captions are only editable after the gallery exists, so
             // there is nothing real to show here — see the note under the card.
             caption: `Sample caption ${index + 1}`,
           }))
         : SAMPLE_IMAGES,
-    [upload.pendingFiles],
+    [items],
   );
 
   /**
@@ -338,12 +551,133 @@ export function NewGalleryForm() {
     images: previewImages,
   };
 
-  const isDirty = form.formState.isDirty || upload.pendingFiles.length > 0;
+  const isDirty = form.formState.isDirty || items.length > 0;
   const isProcessing =
     isSaving ||
     upload.isUploading ||
     upload.isPreparing ||
+    isResolvingLibrary ||
     createMutation.isPending;
+
+  const canAddMore = items.length < GALLERY_MAX_IMAGES;
+
+  const triggerFileInput = () => {
+    if (isProcessing) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleZoneKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    triggerFileInput();
+  };
+
+  // Whole-card drop target. `dragenter`/`dragleave` fire for every child the
+  // pointer crosses, so a depth counter (not the raw events) drives the
+  // highlight. Only OS file drags count — the grid's dnd-kit reorder uses
+  // pointer events, not HTML5 drag.
+  const dragDepthRef = useRef(0);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const isFileDrag = (e: React.DragEvent) =>
+    Array.from(e.dataTransfer.types).includes("Files");
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    e.preventDefault();
+    dragDepthRef.current += 1;
+    setIsDragOver(true);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    // Always cancel so the browser never navigates to a dropped file.
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    e.preventDefault();
+    dragDepthRef.current = 0;
+    setIsDragOver(false);
+    if (isProcessing) {
+      toast.info(
+        upload.isPreparing
+          ? "Still preparing photos — try again in a moment"
+          : "Still working — try again in a moment",
+      );
+      return;
+    }
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+    addFiles(files);
+  };
+
+  const spinner = (
+    <span
+      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+      aria-hidden="true"
+    />
+  );
+
+  const addButtonContent = (label: string, withChevron: boolean) =>
+    upload.isPreparing ? (
+      <>
+        {spinner}
+        Preparing photos…
+      </>
+    ) : (
+      <>
+        <Upload className="mr-2 h-4 w-4" />
+        {label}
+        {withChevron && <ChevronDown className="ml-2 h-4 w-4 opacity-60" />}
+      </>
+    );
+
+  const addButton = (label: string) =>
+    mediaLibraryEnabled ? (
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="outline" disabled={isProcessing}>
+            {addButtonContent(label, true)}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onSelect={() => {
+              queueMicrotask(triggerFileInput);
+            }}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload from device
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              queueMicrotask(() => setPickerOpen(true));
+            }}
+          >
+            <Images className="mr-2 h-4 w-4" />
+            Choose from library
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ) : (
+      <Button
+        type="button"
+        variant="outline"
+        onClick={triggerFileInput}
+        disabled={isProcessing}
+      >
+        {addButtonContent(label, false)}
+      </Button>
+    );
 
   return (
     <Form {...form}>
@@ -477,59 +811,120 @@ export function NewGalleryForm() {
             </CardContent>
           </Card>
 
-          {/* Images — deferred upload */}
-          <Card>
+          {/* Images — deferred upload. The whole card is the file drop
+              target; see handleDrop. */}
+          <Card
+            className="group"
+            data-drag={isDragOver && canAddMore && !isProcessing}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <CardHeader>
               <CardTitle>Images</CardTitle>
               <CardDescription>
-                Select images to add on save. Nothing is uploaded until you
-                click Save.
+                {mediaLibraryEnabled
+                  ? "Add images from your device or your library. New uploads are sent when you click Save."
+                  : "Select images to add on save. Nothing is uploaded until you click Save."}
               </CardDescription>
+              {canAddMore && (
+                <CardAction>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    disabled={isProcessing}
+                    className="hidden"
+                    title="Upload images"
+                    onChange={handleFileInput}
+                  />
+                  {addButton("Add images")}
+                </CardAction>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
-              <label
-                htmlFor="pending-image-input"
-                className={cn(
-                  "border-input text-foreground flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 py-8 transition-colors",
-                  isProcessing
-                    ? "cursor-not-allowed opacity-50"
-                    : "hover:bg-accent",
-                )}
-              >
-                <ImagePlus className="mb-2 h-6 w-6" aria-hidden="true" />
-                <span className="text-sm font-semibold">
-                  Click to select images
-                </span>
-                <span className="text-muted-foreground mt-1 text-xs">
-                  JPEG, PNG, WebP, GIF, AVIF — max 5 MB each
-                </span>
-                <input
-                  id="pending-image-input"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  disabled={isProcessing}
-                  className="sr-only"
-                  onChange={handleFileInput}
-                />
-              </label>
-
-              {upload.pendingFiles.length > 0 && (
+              {items.length > 0 ? (
                 <div className="space-y-2">
                   <p className="text-muted-foreground text-sm">
-                    {upload.pendingFiles.length}{" "}
-                    {upload.pendingFiles.length === 1 ? "image" : "images"}{" "}
-                    selected — drag to reorder
+                    {items.length} {items.length === 1 ? "image" : "images"}{" "}
+                    selected — drag to reorder. The first image leads the
+                    gallery.
                   </p>
                   <PendingImageGrid
-                    items={upload.pendingFiles}
-                    onReorder={upload.reorder}
-                    onRemove={upload.removeFile}
+                    items={items}
+                    onReorder={handleReorder}
+                    onRemove={handleRemove}
                   />
+                </div>
+              ) : (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Select images to upload"
+                  aria-disabled={isProcessing}
+                  className={cn(
+                    "group-data-[drag=true]:border-primary group-data-[drag=true]:bg-primary/5 rounded-lg border-2 border-dashed p-12 text-center transition-colors",
+                    isProcessing
+                      ? "cursor-not-allowed opacity-60"
+                      : "hover:bg-muted/40 cursor-pointer",
+                  )}
+                  onClick={triggerFileInput}
+                  onKeyDown={handleZoneKeyDown}
+                >
+                  <Upload className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                  <p className="text-foreground mb-2">No images yet</p>
+                  <p className="text-muted-foreground mb-4 text-sm">
+                    Drag and drop images here, or click to select multiple
+                    (JPEG, PNG, WebP, GIF, AVIF — max 5 MB each)
+                  </p>
+                  {/* Keep the button/dropdown from also bubbling a click to the zone. */}
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
+                    {addButton("Select images")}
+                  </div>
+                </div>
+              )}
+
+              {canAddMore && items.length > 0 && (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Select more images to upload"
+                  aria-disabled={isProcessing}
+                  className={cn(
+                    "group-data-[drag=true]:border-primary group-data-[drag=true]:bg-primary/5 border-border rounded-lg border-2 border-dashed p-6 text-center transition-colors",
+                    isProcessing
+                      ? "cursor-not-allowed opacity-60"
+                      : "hover:bg-muted/40 cursor-pointer",
+                  )}
+                  onClick={triggerFileInput}
+                  onKeyDown={handleZoneKeyDown}
+                >
+                  <p className="text-muted-foreground text-sm">
+                    Drag and drop more images here, or click to browse
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
+          {/* Outside the Card on purpose: React events bubble through portals,
+              so a file dropped on the picker's upload zone would otherwise also
+              hit the Card's drop handler and be added twice. */}
+          {mediaLibraryEnabled && (
+            <MediaPickerDialog
+              kind="image"
+              multiple
+              open={pickerOpen}
+              onOpenChange={setPickerOpen}
+              maxSelect={Math.max(0, GALLERY_MAX_IMAGES - items.length)}
+              excludeUrls={libraryImages.map((img) => img.url)}
+              onSelectMany={handleLibrarySelectMany}
+            />
+          )}
 
           {/* Settings on the left, the real gallery component on the right. */}
           <div className="grid gap-6 lg:grid-cols-2">
@@ -772,8 +1167,10 @@ export function NewGalleryForm() {
                   </div>
 
                   <p className="text-muted-foreground text-xs">
-                    {upload.pendingFiles.length > 0
-                      ? "Your selected images, not yet uploaded."
+                    {items.length > 0
+                      ? upload.pendingFiles.length > 0
+                        ? "Your selected images. New uploads are sent when you save."
+                        : "Your selected images."
                       : "Sample images — select your own above and they will appear here."}
                   </p>
                   {showCaptions && (

@@ -34,6 +34,7 @@ vi.mock("~/server/db", () => ({
     image: { findMany: vi.fn() },
     page: { findMany: vi.fn() },
     galleryImage: { findMany: vi.fn() },
+    gallery: { findMany: vi.fn() },
     testimonial: { findMany: vi.fn() },
     productReview: { findMany: vi.fn() },
   },
@@ -66,6 +67,7 @@ const EMPTY_TABLES = [
   db.image.findMany,
   db.page.findMany,
   db.galleryImage.findMany,
+  db.gallery.findMany,
   db.testimonial.findMany,
   db.productReview.findMany,
 ];
@@ -185,7 +187,7 @@ describe("buildUsedMediaIndex — Service.customFields", () => {
     expect(index.get(external)).toBeUndefined();
   });
 
-  it("resolves a gallery-type service field to its images, so gallery.delete sees the embed", async () => {
+  it("treats a gallery-type service field as an embed, so gallery.delete sees it", async () => {
     // Guard: if the registry ever loses its gallery-type service fields this
     // test is silently vacuous, so assert the fixture is real.
     const galleryField = (SERVICE_TEMPLATE_FIELDS["service-two"] ?? []).find(
@@ -205,17 +207,23 @@ describe("buildUsedMediaIndex — Service.customFields", () => {
         gallery: { name: "Before & After" },
       },
     ]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
 
     const external = await buildGalleryExternalUsage(BUSINESS_ID);
     const embeds = external.get("gal_1");
 
-    // Without the customFields scan the gallery's only usage is its own
-    // GalleryImage row, which `buildGalleryExternalUsage` skips — so
-    // `gallery.delete` would have destroyed these objects while the service
-    // page still rendered them.
+    // Without the customFields scan nothing references the gallery ID, so
+    // `gallery.delete` would have removed it (and its now-unreferenced S3
+    // objects) while the service page still rendered it.
     expect(embeds).toBeDefined();
     expect(embeds?.[0]?.location).toContain(galleryField!.label);
     expect(embeds?.[0]?.adminHref).toBe("/admin/services/svc_1");
+
+    // The media index still expands the embed to per-image usages.
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+    expect(index.get(url)?.map((u) => u.entityType)).toEqual(
+      expect.arrayContaining(["galleryImage", "service"]),
+    );
   });
 });
 
@@ -459,6 +467,119 @@ describe("buildUsedMediaIndex — Business maintenance page", () => {
     ]);
     expect(index.get(inline)?.[0]?.location).toBe(
       "Maintenance page message (rich text)",
+    );
+  });
+});
+
+// ─── buildGalleryExternalUsage ────────────────────────────────────────────────
+
+describe("buildGalleryExternalUsage", () => {
+  function pageRow(content: unknown, id = "page_1", title = "About") {
+    return {
+      id,
+      title,
+      slug: title.toLowerCase(),
+      image: null,
+      ogImage: null,
+      content,
+      previewDraft: null,
+      type: "page",
+    };
+  }
+  const galleryDoc = (galleryId: string) => ({
+    type: "doc",
+    content: [{ type: "gallery", attrs: { galleryId } }],
+  });
+
+  it("does NOT flag a gallery whose image is merely shared with a product", async () => {
+    // A Media Library pick: the same S3 object is a product image AND a
+    // gallery image. Deleting the gallery leaves the product intact (and
+    // deleteUnreferencedGalleryObjects keeps the file), so it is no embed.
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-shared.jpg`);
+    asMock(db.image.findMany).mockResolvedValue([
+      { id: "img_1", url, productId: "prod_1" },
+    ]);
+    asMock(db.galleryImage.findMany).mockResolvedValue([
+      { id: "gi_1", url, galleryId: "gal_1", gallery: { name: "Lookbook" } },
+    ]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+    expect(external.get("gal_1")).toBeUndefined();
+
+    // ...while the shared file stays referenced for S3 cleanup purposes.
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+    expect(index.get(url)?.map((u) => u.entityType)).toEqual(
+      expect.arrayContaining(["image", "galleryImage"]),
+    );
+  });
+
+  it("does NOT flag a duplicate just because its source gallery is embedded", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-dup.jpg`);
+    asMock(db.page.findMany).mockResolvedValue([
+      pageRow(galleryDoc("gal_src")),
+    ]);
+    asMock(db.galleryImage.findMany).mockResolvedValue([
+      { id: "gi_1", url, galleryId: "gal_src", gallery: { name: "Src" } },
+      {
+        id: "gi_2",
+        url,
+        galleryId: "gal_dup",
+        gallery: { name: "Src (copy)" },
+      },
+    ]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_src" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.get("gal_src")).toHaveLength(1);
+    expect(external.get("gal_dup")).toBeUndefined();
+  });
+
+  it("flags a TipTap gallery block, one entry per page, labelled with the page", async () => {
+    asMock(db.page.findMany).mockResolvedValue([
+      pageRow({
+        type: "doc",
+        content: [
+          { type: "gallery", attrs: { galleryId: "gal_1" } },
+          { type: "gallery", attrs: { galleryId: "gal_1" } },
+        ],
+      }),
+    ]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.get("gal_1")).toEqual([
+      expect.objectContaining({
+        entityLabel: "About",
+        adminHref: "/admin/content/pages/page_1",
+      }),
+    ]);
+  });
+
+  it("flags an embedded gallery even while it has no images", async () => {
+    asMock(db.page.findMany).mockResolvedValue([pageRow(galleryDoc("gal_1"))]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.get("gal_1")).toHaveLength(1);
+  });
+
+  it("drops references to galleries that are not this business's", async () => {
+    asMock(db.page.findMany).mockResolvedValue([
+      pageRow(galleryDoc("gal_gone")),
+    ]);
+    asMock(db.gallery.findMany).mockResolvedValue([]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.size).toBe(0);
+    expect(asMock(db.gallery.findMany).mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({
+        where: { businessId: BUSINESS_ID, id: { in: ["gal_gone"] } },
+      }),
     );
   });
 });

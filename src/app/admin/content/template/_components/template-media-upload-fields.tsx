@@ -58,7 +58,6 @@ function useCoarsePointer(): boolean {
   return isCoarse;
 }
 
-
 // ─── TemplateImageUploadField ─────────────────────────────────────────────────
 
 type TemplateImageUploadFieldProps = {
@@ -221,7 +220,7 @@ export function TemplateImageUploadField({
         ) : null}
 
         {mediaLibraryEnabled ? (
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
@@ -260,8 +259,7 @@ export function TemplateImageUploadField({
               className="w-(--radix-dropdown-menu-trigger-width)"
             >
               <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
+                onSelect={() => {
                   queueMicrotask(() => triggerFileInput());
                 }}
               >
@@ -269,8 +267,7 @@ export function TemplateImageUploadField({
                 Upload from device
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
+                onSelect={() => {
                   queueMicrotask(() => setPickerOpen(true));
                 }}
               >
@@ -517,7 +514,7 @@ export function TemplateVideoUploadField({
         ) : null}
 
         {mediaLibraryEnabled ? (
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
@@ -548,8 +545,7 @@ export function TemplateVideoUploadField({
               className="w-(--radix-dropdown-menu-trigger-width)"
             >
               <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
+                onSelect={() => {
                   queueMicrotask(() => triggerFileInput());
                 }}
               >
@@ -557,8 +553,7 @@ export function TemplateVideoUploadField({
                 Upload from device
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
+                onSelect={() => {
                   queueMicrotask(() => setPickerOpen(true));
                 }}
               >

@@ -25,6 +25,7 @@ import { cn } from "~/lib/utils";
 import { eventFormSchema } from "~/lib/validators/events";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -107,6 +108,7 @@ function timeZoneLabel(timeZone: string): string {
 export function EventForm({ event, timeZone }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
+  const mediaEnabled = useMediaLibraryEnabled();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const coverImageInputRef = useRef<HTMLInputElement | null>(null);
   const coverVideoInputRef = useRef<HTMLInputElement | null>(null);
@@ -669,6 +671,8 @@ export function EventForm({ event, timeZone }: Props) {
                         }
                         inputRef={coverImageInputRef}
                         disabled={isSubmitting}
+                        mediaLibraryEnabled={mediaEnabled}
+                        urlFieldName="coverImage"
                       />
                     ) : (
                       <VideoUploadFormField
@@ -681,6 +685,8 @@ export function EventForm({ event, timeZone }: Props) {
                         }
                         inputRef={coverVideoInputRef}
                         disabled={isSubmitting}
+                        mediaLibraryEnabled={mediaEnabled}
+                        urlFieldName="coverVideo"
                       />
                     )}
                   </div>

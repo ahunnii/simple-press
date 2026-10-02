@@ -2,7 +2,7 @@
 
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { Gallery, GalleryImage } from "generated/prisma";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFiles } from "@better-upload/client";
@@ -23,21 +23,34 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
+  ChevronDown,
   Copy,
+  Images,
   MoreHorizontal,
   RotateCcw,
   Save,
   Trash2,
+  Upload,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { GalleryUpdateData } from "~/lib/validators/gallery";
-import { getImageDimensions, getStoredPath } from "~/lib/uploads";
+import { prepareImageForUpload } from "~/lib/image-prep";
+import {
+  getImageDimensions,
+  getStoredPath,
+  ROUTE_MAX_FILES,
+} from "~/lib/uploads";
 import { cn } from "~/lib/utils";
-import { galleryUpdateSchema } from "~/lib/validators/gallery";
+import { ADMIN_BULK_SELECTION_LIMIT } from "~/lib/validators/admin-table";
+import {
+  GALLERY_MAX_IMAGES,
+  galleryUpdateSchema,
+} from "~/lib/validators/gallery";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +65,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -83,11 +97,11 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import { UploadDropzone } from "~/components/ui/upload-dropzone";
 import { NumberFormField } from "~/components/inputs/number-form-field";
 import { SelectFormField } from "~/components/inputs/select-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { GalleryRenderer } from "~/components/gallery-renderer";
+import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
 
 import {
   dismissLoadingToast,
@@ -99,6 +113,8 @@ import { SortableImage } from "./sortable-image";
 // Mirrors galleryUpdateSchema caps in src/lib/validators/gallery.ts
 const NAME_MAX = 120;
 const DESCRIPTION_MAX = 1000;
+/** Matches the `galleryImages` upload route's maxFileSize. */
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 /**
  * Layout picker options. Kept in step with `new-gallery-form.tsx` — the create
@@ -243,40 +259,6 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   const uploadFiles = useUploadFiles({
     api: "/api/upload",
     route: "galleryImages",
-
-    onBeforeUpload: () => {
-      toast.loading("Uploading images...");
-    },
-    onError: (error) => {
-      toast.dismiss();
-      toast.error(error?.message ?? "Failed to upload images");
-    },
-    onUploadComplete: ({ files }) => {
-      toast.dismiss();
-      toast.success("Images uploaded");
-
-      // Resolve natural dimensions for each uploaded file client-side.
-      // Best-effort: if any image fails to load, we just omit width/height.
-      const imageDataPromises = files.map(async (file) => {
-        const url = getStoredPath(file);
-        const dims = await getImageDimensions(url);
-        return { url, ...dims };
-      });
-
-      void Promise.all(imageDataPromises).then((resolved) => {
-        addImagesMutation.mutate({
-          galleryId: gallery.id,
-          images: resolved.map(({ url, width, height }) => ({
-            url,
-            altText: "",
-            caption: "",
-            ...(width !== undefined && height !== undefined
-              ? { width, height }
-              : {}),
-          })),
-        });
-      });
-    },
   });
 
   const updateMutation = api.gallery.update.useMutation({
@@ -326,30 +308,14 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   });
 
   // Cleans up S3 objects that uploaded successfully but were never persisted.
+  // Only ever handed URLs uploaded by THIS screen — `discardUploads` is not
+  // reference-aware, so a library pick passed here would destroy a file other
+  // content still shows.
   const discardMutation = api.upload.discardUploads.useMutation();
 
-  const addImagesMutation = api.gallery.addImages.useMutation({
-    onSuccess: (result) => {
-      toast.dismiss();
-      toast.success("Images added");
-      setImages(result.images);
-      void utils.gallery.invalidate();
-      router.refresh();
-    },
-    onError: (error, variables) => {
-      toast.dismiss();
-      toast.error(error.message ?? "Failed to add images");
-      // The images uploaded to S3 but the DB write failed — discard the
-      // orphaned objects so they don't accumulate.
-      const urls = variables.images.map((img) => img.url);
-      if (urls.length > 0) {
-        discardMutation.mutate({ urls });
-      }
-    },
-    onMutate: () => {
-      toast.loading("Adding images...");
-    },
-  });
+  // No hook-level callbacks: `persistImages` drives toasts and cleanup per
+  // call, because only it knows which URLs were fresh uploads.
+  const addImagesMutation = api.gallery.addImages.useMutation();
 
   const deleteImageMutation = api.gallery.deleteImage.useMutation({
     onSuccess: () => {
@@ -459,7 +425,382 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
     deleteImageMutation.mutate(idToDelete);
   };
 
-  const isUploading = uploadFiles.isPending || addImagesMutation.isPending;
+  // ── Adding images ──────────────────────────────────────────────────────────
+  // Same UX as the product gallery uploader
+  // (src/app/admin/products/_components/image-uploader.tsx): "Add images"
+  // button (+ "Choose from library" when the media flag is on), a clickable
+  // dashed zone, and the whole Images card as a file drop target. Unlike
+  // products, uploads here are immediate: device files go straight to the
+  // `galleryImages` route and are persisted with `gallery.addImages`.
+
+  const mediaLibraryEnabled = useMediaLibraryEnabled();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
+  // Spans the whole upload → dimensions → addImages pipeline; the upload
+  // hook's own `isPending` drops back to false between batches.
+  const [isAdding, setIsAdding] = useState(false);
+  const isBusy = isPreparing || isAdding;
+  // Latest `images` for code that runs after an await (HEIC prep and uploads
+  // can take seconds) — the closure's `images` would be stale by then.
+  const imagesRef = useRef(images);
+  imagesRef.current = images;
+
+  const limitReachedMessage = `This gallery already has ${GALLERY_MAX_IMAGES} images — remove one to add more`;
+
+  /**
+   * Persists new images in the given order. `addImages` takes at most
+   * ADMIN_BULK_SELECTION_LIMIT per call, so larger adds are chunked
+   * sequentially (the server appends each chunk after the current max
+   * sortOrder, so order is preserved). On failure, only `ownUploads` that never
+   * made it into the DB are discarded — library URLs belong to other content.
+   */
+  const persistImages = async (
+    entries: { url: string; width?: number; height?: number }[],
+    ownUploads: ReadonlySet<string>,
+  ) => {
+    if (entries.length === 0) return;
+    const toastId = toast.loading(
+      `Adding ${entries.length} ${entries.length === 1 ? "image" : "images"}…`,
+    );
+    let persisted = 0;
+    try {
+      for (let i = 0; i < entries.length; i += ADMIN_BULK_SELECTION_LIMIT) {
+        const chunk = entries.slice(i, i + ADMIN_BULK_SELECTION_LIMIT);
+        const result = await addImagesMutation.mutateAsync({
+          galleryId: gallery.id,
+          images: chunk.map(({ url, width, height }) => ({
+            url,
+            altText: "",
+            caption: "",
+            ...(width !== undefined && height !== undefined
+              ? { width, height }
+              : {}),
+          })),
+        });
+        persisted += chunk.length;
+        setImages(result.images);
+      }
+      toast.success(
+        entries.length === 1 ? "Image added" : `${entries.length} images added`,
+        { id: toastId },
+      );
+    } catch (error) {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Failed to add images",
+        { id: toastId },
+      );
+      const orphaned = entries
+        .slice(persisted)
+        .map((entry) => entry.url)
+        .filter((url) => ownUploads.has(url));
+      if (orphaned.length > 0) discardMutation.mutate({ urls: orphaned });
+    } finally {
+      void utils.gallery.invalidate();
+      router.refresh();
+    }
+  };
+
+  const addFiles = async (files: File[]) => {
+    const candidates: File[] = [];
+    for (const file of files) {
+      // Some browsers (notably Android Chrome) leave `file.type` empty for
+      // HEIC/HEIF, so fall back to the extension for those.
+      if (file.type.startsWith("image/") || /\.(heic|heif)$/i.test(file.name)) {
+        candidates.push(file);
+      } else {
+        toast.error(`Skipped "${file.name}": not an image`);
+      }
+    }
+    if (candidates.length === 0) return;
+
+    // Truncate before prep so we don't HEIC-convert files we'd throw away.
+    const slots = GALLERY_MAX_IMAGES - imagesRef.current.length;
+    if (slots <= 0) {
+      toast.error(limitReachedMessage);
+      return;
+    }
+    const kept = candidates.slice(0, slots);
+
+    setIsPreparing(true);
+    let prepared: File[];
+    try {
+      prepared = await Promise.all(
+        kept.map((file) => prepareImageForUpload(file)),
+      );
+    } finally {
+      setIsPreparing(false);
+    }
+
+    const valid: File[] = [];
+    let oversized = 0;
+    for (const file of prepared) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`Skipped "${file.name}": must be less than 5MB`);
+        oversized++;
+        continue;
+      }
+      valid.push(file);
+    }
+
+    // Oversized files already got their own toast, so they aren't counted in
+    // the limit summary.
+    const total = candidates.length - oversized;
+    const skipped = total - valid.length;
+    if (skipped > 0) {
+      toast.warning(
+        `Adding ${valid.length} of ${total} images — galleries can have at most ${GALLERY_MAX_IMAGES} (${skipped} skipped)`,
+      );
+    }
+    if (valid.length === 0) return;
+
+    setIsAdding(true);
+    const toastId = toast.loading(
+      `Uploading ${valid.length} ${valid.length === 1 ? "image" : "images"}…`,
+    );
+    const uploaded: { url: string; width?: number; height?: number }[] = [];
+    const failedNames: string[] = [];
+    try {
+      // Natural dimensions from local object URLs — no network round-trip.
+      const dims = await Promise.all(
+        valid.map(async (file) => {
+          const objectUrl = URL.createObjectURL(file);
+          try {
+            return await getImageDimensions(objectUrl);
+          } finally {
+            URL.revokeObjectURL(objectUrl);
+          }
+        }),
+      );
+
+      // The route accepts at most ROUTE_MAX_FILES.galleryImages per request.
+      const batchSize = ROUTE_MAX_FILES.galleryImages ?? 10;
+      for (let i = 0; i < valid.length; i += batchSize) {
+        const batch = valid.slice(i, i + batchSize);
+        const result = await uploadFiles.uploadAsync(batch);
+        // Correlate by File identity (name as fallback), iterating the
+        // original batch so gallery order follows the owner's file order —
+        // `result.files` order isn't guaranteed.
+        batch.forEach((file, j) => {
+          const match = result.files.find(
+            (uf) => uf.raw === file || uf.name === file.name,
+          );
+          const url = match ? getStoredPath(match) : "";
+          if (url) {
+            uploaded.push({ url, ...dims[i + j] });
+          } else {
+            failedNames.push(file.name);
+          }
+        });
+      }
+    } catch (error) {
+      // A critical upload error — nothing from this add gets persisted, so
+      // clean up whatever did reach storage.
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Failed to upload images",
+        { id: toastId },
+      );
+      if (uploaded.length > 0) {
+        discardMutation.mutate({ urls: uploaded.map((img) => img.url) });
+      }
+      setIsAdding(false);
+      return;
+    }
+    toast.dismiss(toastId);
+
+    if (failedNames.length > 0) {
+      toast.error(
+        `${failedNames.length} ${failedNames.length === 1 ? "image" : "images"} failed to upload: ${failedNames.join(", ")}`,
+      );
+    }
+
+    try {
+      await persistImages(uploaded, new Set(uploaded.map((img) => img.url)));
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Copy out of the live FileList *before* clearing the input — resetting
+    // `value` empties that list, and the async work below would see nothing.
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (files.length === 0) return;
+    void addFiles(files);
+  };
+
+  // Whole-card drop target. `dragenter`/`dragleave` fire for every child the
+  // pointer crosses, so a depth counter (not the raw events) drives the
+  // highlight. Only OS file drags count — dnd-kit's reorder uses pointer
+  // events, not HTML5 drag, so it never reaches these handlers.
+  const dragDepthRef = useRef(0);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const isFileDrag = (e: React.DragEvent) =>
+    Array.from(e.dataTransfer.types).includes("Files");
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    e.preventDefault();
+    dragDepthRef.current += 1;
+    setIsDragOver(true);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    // Always cancel so the browser never navigates to a dropped file.
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    e.preventDefault();
+    dragDepthRef.current = 0;
+    setIsDragOver(false);
+    if (isBusy) {
+      toast.info(
+        isPreparing
+          ? "Still preparing photos — try again in a moment"
+          : "Still adding images — try again in a moment",
+      );
+      return;
+    }
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+    void addFiles(files);
+  };
+
+  const canAddMore = images.length < GALLERY_MAX_IMAGES;
+
+  const triggerFileInput = () => {
+    if (isBusy) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleZoneKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    triggerFileInput();
+  };
+
+  // The picker already caps selection at the remaining slots and disables
+  // images already in the gallery; the checks here are a backstop for a
+  // gallery that changed while the dialog was open.
+  const handleLibrarySelectMany = (urls: string[]) => {
+    const current = imagesRef.current;
+    const existing = new Set(current.map((img) => img.url));
+    const fresh = [...new Set(urls)].filter((url) => !existing.has(url));
+    if (fresh.length < urls.length) {
+      toast.info("Skipped images that are already in the gallery");
+    }
+    const remaining = Math.max(0, GALLERY_MAX_IMAGES - current.length);
+    if (fresh.length > 0 && remaining === 0) {
+      toast.error(limitReachedMessage);
+      return;
+    }
+    const toAdd = fresh.slice(0, remaining);
+    if (toAdd.length < fresh.length) {
+      toast.warning(
+        `Adding ${toAdd.length} of ${fresh.length} images — galleries can have at most ${GALLERY_MAX_IMAGES} (${fresh.length - toAdd.length} skipped)`,
+      );
+    }
+    if (toAdd.length === 0) return;
+
+    setIsAdding(true);
+    void (async () => {
+      try {
+        const entries = await Promise.all(
+          toAdd.map(async (url) => ({
+            url,
+            ...(await getImageDimensions(url)),
+          })),
+        );
+        // Library URLs are never "own uploads": a failed add must not
+        // discard them.
+        await persistImages(entries, new Set());
+      } finally {
+        setIsAdding(false);
+      }
+    })();
+  };
+
+  const spinner = (
+    <span
+      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+      aria-hidden="true"
+    />
+  );
+
+  const addButtonContent = (label: string, withChevron: boolean) =>
+    isPreparing ? (
+      <>
+        {spinner}
+        Preparing photos…
+      </>
+    ) : isAdding ? (
+      <>
+        {spinner}
+        Adding images…
+      </>
+    ) : (
+      <>
+        <Upload className="mr-2 h-4 w-4" />
+        {label}
+        {withChevron && <ChevronDown className="ml-2 h-4 w-4 opacity-60" />}
+      </>
+    );
+
+  const addButton = (label: string) =>
+    mediaLibraryEnabled ? (
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="outline" disabled={isBusy}>
+            {addButtonContent(label, true)}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onSelect={() => {
+              queueMicrotask(triggerFileInput);
+            }}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload from device
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              queueMicrotask(() => setPickerOpen(true));
+            }}
+          >
+            <Images className="mr-2 h-4 w-4" />
+            Choose from library
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ) : (
+      <Button
+        type="button"
+        variant="outline"
+        onClick={triggerFileInput}
+        disabled={isBusy}
+      >
+        {addButtonContent(label, false)}
+      </Button>
+    );
+
+  const isUploading = isBusy || uploadFiles.isPending;
   const isSubmitting = updateMutation.isPending || reorderMutation.isPending;
   const isDeleting = deleteGalleryMutation.isPending;
   const isDeletingImage = deleteImageMutation.isPending;
@@ -642,59 +983,130 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
 
             {/* Images Tab */}
             <TabsContent value="images" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add Images</CardTitle>
-                  <CardDescription>
-                    Images are uploaded immediately. Max 5 MB per image.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <UploadDropzone
-                    control={uploadFiles.control}
-                    accept="image/*"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
+              {/* The whole card is the file drop target; see handleDrop. */}
+              <Card
+                className="group"
+                data-drag={isDragOver && canAddMore && !isBusy}
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <CardHeader>
                   <CardTitle>Images ({images.length})</CardTitle>
                   <CardDescription>
-                    Drag and drop to reorder images
+                    Image changes (adding, removing, reordering) save
+                    immediately. &ldquo;Save changes&rdquo; covers the gallery
+                    settings. Drag to reorder; max 5 MB per image.
                   </CardDescription>
+                  {canAddMore && (
+                    <CardAction>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={isBusy}
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        title="Upload images"
+                      />
+                      {addButton("Add images")}
+                    </CardAction>
+                  )}
                 </CardHeader>
-                <CardContent>
-                  <DndContext
-                    id={dndId}
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext
-                      items={images.map((img) => img.id)}
-                      strategy={rectSortingStrategy}
+                <CardContent className="space-y-4">
+                  {images.length > 0 ? (
+                    <DndContext
+                      id={dndId}
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
                     >
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
-                        {images.map((image) => (
-                          <SortableImage
-                            key={image.id}
-                            image={image}
-                            onDelete={handleDeleteImage}
-                            onEdit={setEditingImage}
-                          />
-                        ))}
+                      <SortableContext
+                        items={images.map((img) => img.id)}
+                        strategy={rectSortingStrategy}
+                      >
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+                          {images.map((image) => (
+                            <SortableImage
+                              key={image.id}
+                              image={image}
+                              onDelete={handleDeleteImage}
+                              onEdit={setEditingImage}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  ) : (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Select images to upload"
+                      aria-disabled={isBusy}
+                      className={cn(
+                        "group-data-[drag=true]:border-primary group-data-[drag=true]:bg-primary/5 rounded-lg border-2 border-dashed p-12 text-center transition-colors",
+                        isBusy
+                          ? "cursor-not-allowed opacity-60"
+                          : "hover:bg-muted/40 cursor-pointer",
+                      )}
+                      onClick={triggerFileInput}
+                      onKeyDown={handleZoneKeyDown}
+                    >
+                      <Upload className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                      <p className="text-foreground mb-2">No images yet</p>
+                      <p className="text-muted-foreground mb-4 text-sm">
+                        Drag and drop images here, or click to select multiple
+                        (JPG, PNG, WebP)
+                      </p>
+                      {/* Keep the button/dropdown from also bubbling a click to the zone. */}
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        {addButton("Select images")}
                       </div>
-                    </SortableContext>
-                  </DndContext>
+                    </div>
+                  )}
 
-                  {images.length === 0 && (
-                    <div className="text-muted-foreground py-12 text-center">
-                      <p>No images yet. Upload some to get started.</p>
+                  {canAddMore && images.length > 0 && (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Select more images to upload"
+                      aria-disabled={isBusy}
+                      className={cn(
+                        "group-data-[drag=true]:border-primary group-data-[drag=true]:bg-primary/5 border-border rounded-lg border-2 border-dashed p-6 text-center transition-colors",
+                        isBusy
+                          ? "cursor-not-allowed opacity-60"
+                          : "hover:bg-muted/40 cursor-pointer",
+                      )}
+                      onClick={triggerFileInput}
+                      onKeyDown={handleZoneKeyDown}
+                    >
+                      <p className="text-muted-foreground text-sm">
+                        Drag and drop more images here, or click to browse
+                      </p>
                     </div>
                   )}
                 </CardContent>
               </Card>
+              {/* Outside the Card on purpose: React events bubble through
+                  portals, so a file dropped on the picker's upload zone would
+                  otherwise also hit the Card's drop handler and be added
+                  twice. */}
+              {mediaLibraryEnabled && (
+                <MediaPickerDialog
+                  kind="image"
+                  multiple
+                  open={pickerOpen}
+                  onOpenChange={setPickerOpen}
+                  maxSelect={Math.max(0, GALLERY_MAX_IMAGES - images.length)}
+                  excludeUrls={images.map((img) => img.url)}
+                  onSelectMany={handleLibrarySelectMany}
+                />
+              )}
             </TabsContent>
 
             {/* Settings Tab */}

@@ -184,6 +184,22 @@ function deepWalkJson(
 // ─── Main scanner ─────────────────────────────────────────────────────────────
 
 /**
+ * A place that embeds a whole gallery BY ID — a gallery-type template field or
+ * a TipTap `gallery` node. Collected WITH the context of where it was found (so
+ * a gallery used on the Modern template's hero field is attributed as such).
+ */
+type GalleryRef = {
+  id: string;
+  location: string;
+  entityType: string;
+  entityId?: string;
+  entityLabel?: string;
+  adminHref?: string;
+  /** Set when the reference came from an inactive template's field value. */
+  inactiveTemplate?: boolean;
+};
+
+/**
  * Build a complete usage index for all S3 objects referenced by `businessId`.
  *
  * All independent DB queries run in parallel via `Promise.all`.
@@ -191,23 +207,22 @@ function deepWalkJson(
 export async function buildUsedMediaIndex(
   businessId: string,
 ): Promise<UsageMap> {
-  const map: UsageMap = new Map();
+  const { map, galleryRefs } = await scanMediaReferences(businessId);
+  await resolveGalleryRefs(businessId, map, galleryRefs);
+  return map;
+}
 
-  // Gallery references found in customFields, previewCustomFields, and TipTap
-  // documents store a gallery ID, not image URLs. We collect each reference
-  // WITH the context of where it was found (so a gallery used on the Modern
-  // template's hero field is attributed as such), then resolve the IDs to image
-  // URLs in one batch query at the end.
-  type GalleryRef = {
-    id: string;
-    location: string;
-    entityType: string;
-    entityId?: string;
-    entityLabel?: string;
-    adminHref?: string;
-    /** Set when the reference came from an inactive template's field value. */
-    inactiveTemplate?: boolean;
-  };
+/**
+ * The scan behind `buildUsedMediaIndex`: every direct URL reference lands in
+ * `map`, while gallery references (customFields, previewCustomFields and TipTap
+ * documents store a gallery ID, not image URLs) are returned unresolved in
+ * `galleryRefs`. `buildUsedMediaIndex` expands those to per-image usages;
+ * `buildGalleryExternalUsage` reads them as-is.
+ */
+async function scanMediaReferences(
+  businessId: string,
+): Promise<{ map: UsageMap; galleryRefs: GalleryRef[] }> {
+  const map: UsageMap = new Map();
   const galleryRefs: GalleryRef[] = [];
 
   // ── 1. SiteContent ─────────────────────────────────────────────────────────
@@ -341,7 +356,6 @@ export async function buildUsedMediaIndex(
               id: value,
               location,
               entityType: "siteContent",
-              entityLabel: fieldLabel,
               adminHref: "/admin/content/template",
               inactiveTemplate,
             });
@@ -379,7 +393,6 @@ export async function buildUsedMediaIndex(
                     id,
                     location: `${location} (rich text)`,
                     entityType: "siteContent",
-                    entityLabel: fieldLabel,
                     adminHref: "/admin/content/template",
                     inactiveTemplate,
                   });
@@ -590,10 +603,10 @@ export async function buildUsedMediaIndex(
         // Library and was one click from deletion while still live on the site.
         //
         // Field labels/types are resolved against SERVICE_TEMPLATE_FIELDS so
-        // gallery-type fields (service-two, vii-*) resolve to their images —
-        // without that, a gallery embedded ONLY on a service page looks
-        // unreferenced to `buildGalleryExternalUsage`, and `gallery.delete`
-        // happily destroys its S3 objects.
+        // gallery-type fields (service-two, vii-*) are recognised as gallery
+        // embeds — without that, a gallery embedded ONLY on a service page
+        // looks unembedded to `buildGalleryExternalUsage`, and `gallery.delete`
+        // happily removes it (and its now-unreferenced S3 objects).
         //
         // NOTE: no `inactiveTemplate` flagging here, unlike SiteContent. That
         // flag means "deletable, and the URL gets scrubbed out of the blob in
@@ -977,6 +990,18 @@ export async function buildUsedMediaIndex(
     reviewsPromise,
   ]);
 
+  return { map, galleryRefs };
+}
+
+/**
+ * Step 11 of `buildUsedMediaIndex`: expand the gallery references accumulated
+ * during the scan into per-image usages in `map`.
+ */
+async function resolveGalleryRefs(
+  businessId: string,
+  map: UsageMap,
+  galleryRefs: GalleryRef[],
+): Promise<void> {
   // ── 11. Resolve gallery references accumulated during the scan ─────────────
   //
   // gallery-type template fields and TipTap gallery nodes store a gallery ID,
@@ -1027,8 +1052,6 @@ export async function buildUsedMediaIndex(
       }
     }
   }
-
-  return map;
 }
 
 // ─── Gallery external-usage helper ────────────────────────────────────────────
@@ -1040,64 +1063,63 @@ export type GalleryExternalUsage = {
 };
 
 /**
- * For every gallery in `businessId`, find where its images are referenced
- * OUTSIDE the gallery's own image listing (i.e. embedded via a gallery-type
- * template field or a TipTap `gallery` node somewhere on the storefront).
+ * For every gallery in `businessId`, find where the gallery ITSELF is embedded
+ * on the storefront — a gallery-type template field or a TipTap `gallery` node
+ * holding its ID. Keyed by gallery ID; an absent key means "not embedded".
  *
- * Semantics are intentionally identical to `gallery.delete`'s usage guard —
- * this is URL-based, not gallery-ID-based, on purpose:
- *  - A gallery with zero images is never flagged (nothing to look up).
- *  - `gallery.duplicate` reuses the same S3 URLs as its source, so a
- *    duplicate of an embedded gallery is ALSO flagged here, because the
- *    lookup is keyed on the shared image URL, not the gallery ID.
- *  - `entityType === "galleryImage"` usages are skipped — that's just a
- *    gallery's own listing of its images (the source gallery's or, via a
- *    duplicate, another gallery's), not an external embed.
+ * Deliberately gallery-ID-based, NOT image-URL-based. Galleries can pull images
+ * from the Media Library, so one of a gallery's image URLs may also be a
+ * product, collection or page image. That shared file is not an embed of the
+ * gallery: deleting the gallery leaves the product page intact, and the file
+ * itself is protected separately — `gallery.delete` only removes S3 objects
+ * that `buildUsedMediaIndex` reports as unreferenced once the gallery's rows
+ * are gone. Likewise a `gallery.duplicate` copy (which shares its source's
+ * image URLs) is not embedded just because its source is.
+ *
+ * Empty galleries count: an embedded gallery with no images yet is still
+ * embedded, and deleting it would leave a dangling reference.
+ *
+ * Usages are deduped to one per entityType+entityId (falling back to location
+ * when entityId is absent), so a page embedding the gallery twice lists once.
  *
  * This is the single source of truth for both `gallery.delete`'s CONFLICT
  * guard and the admin "Embedded" badge — they must never drift apart.
  *
- * `MediaUsage.inactiveTemplate` is deliberately NOT threaded through here: an
- * embed from an inactive template still counts as embedded and still blocks
- * gallery deletion, because switching the template back would restore it.
+ * `inactiveTemplate` is deliberately ignored: an embed from an inactive
+ * template still counts as embedded and still blocks gallery deletion, because
+ * switching the template back would restore it.
  */
 export async function buildGalleryExternalUsage(
   businessId: string,
 ): Promise<Map<string, GalleryExternalUsage[]>> {
-  const index = await buildUsedMediaIndex(businessId);
+  const { galleryRefs } = await scanMediaReferences(businessId);
+  if (galleryRefs.length === 0) return new Map();
 
-  const galleryImages = await db.galleryImage.findMany({
-    where: { gallery: { businessId } },
-    select: { url: true, galleryId: true },
+  // Drop references to galleries that no longer exist (or were never this
+  // business's), so every key is a real gallery of `businessId`.
+  const galleries = await db.gallery.findMany({
+    where: {
+      businessId,
+      id: { in: Array.from(new Set(galleryRefs.map((r) => r.id))) },
+    },
+    select: { id: true },
   });
+  const known = new Set(galleries.map((g) => g.id));
 
-  const urlsByGallery = new Map<string, string[]>();
-  for (const img of galleryImages) {
-    const list = urlsByGallery.get(img.galleryId) ?? [];
-    list.push(img.url);
-    urlsByGallery.set(img.galleryId, list);
+  const deduped = new Map<string, Map<string, GalleryExternalUsage>>();
+  for (const ref of galleryRefs) {
+    if (!known.has(ref.id)) continue;
+    const usages =
+      deduped.get(ref.id) ?? new Map<string, GalleryExternalUsage>();
+    usages.set(`${ref.entityType}:${ref.entityId ?? ref.location}`, {
+      location: ref.location,
+      entityLabel: ref.entityLabel,
+      adminHref: ref.adminHref,
+    });
+    deduped.set(ref.id, usages);
   }
 
-  const result = new Map<string, GalleryExternalUsage[]>();
-  for (const [galleryId, urls] of urlsByGallery) {
-    // Dedupe the same way the delete guard does: one entry per
-    // entityType+entityId (falling back to location when entityId is absent).
-    const externalUsages = new Map<string, GalleryExternalUsage>();
-    for (const url of urls) {
-      const usages = index.get(normalizeUrl(url)) ?? [];
-      for (const u of usages) {
-        if (u.entityType === "galleryImage") continue;
-        externalUsages.set(`${u.entityType}:${u.entityId ?? u.location}`, {
-          location: u.location,
-          entityLabel: u.entityLabel,
-          adminHref: u.adminHref,
-        });
-      }
-    }
-    if (externalUsages.size > 0) {
-      result.set(galleryId, Array.from(externalUsages.values()));
-    }
-  }
-
-  return result;
+  return new Map(
+    Array.from(deduped, ([id, usages]) => [id, Array.from(usages.values())]),
+  );
 }

@@ -30,6 +30,7 @@ import { collectionFormSchema } from "~/lib/validators/collections";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import { useSiteHost } from "~/hooks/use-site-host";
 import {
   AlertDialog,
@@ -119,6 +120,7 @@ export function CollectionForm({ collection }: Props) {
   // orphaned in S3 forever (the collections router never deletes from S3).
   const pendingUploadUrlsRef = useRef<string[]>([]);
   const utils = api.useUtils();
+  const mediaEnabled = useMediaLibraryEnabled();
 
   const siteHost = useSiteHost();
   const { data: businessInfo } = api.business.simplifiedGet.useQuery();
@@ -424,6 +426,7 @@ export function CollectionForm({ collection }: Props) {
     ogImageUploader.isPending;
   const isDeleting = deleteMutation.isPending;
 
+  const watchedOgImage = form.watch("ogImage");
   const isOgImageDirty = ogImageFile !== null || ogImageRemoved;
   const isDirty = form.formState.isDirty || isOgImageDirty;
 
@@ -760,6 +763,8 @@ export function CollectionForm({ collection }: Props) {
                       description="This would be the first thing that people see associated with this collection"
                       existingPreviewUrl={collection?.imageUrl ?? undefined}
                       inputRef={imageFileInputRef}
+                      mediaLibraryEnabled={mediaEnabled}
+                      urlFieldName="imageUrl"
                     />
                   </CardContent>
                 </Card>
@@ -870,7 +875,6 @@ export function CollectionForm({ collection }: Props) {
                           descriptionClassName="text-xs text-muted-foreground"
                           rows={3}
                         />
-
                       </CardContent>
                     </Card>
 
@@ -889,7 +893,7 @@ export function CollectionForm({ collection }: Props) {
                           existingUrl={
                             ogImageRemoved
                               ? undefined
-                              : (collection?.ogImage ?? undefined)
+                              : (watchedOgImage ?? undefined)
                           }
                           fileInputRef={ogImageFileInputRef}
                           onFileChange={(f) => {
@@ -901,6 +905,16 @@ export function CollectionForm({ collection }: Props) {
                             setOgImageRemoved(true);
                           }}
                           disabled={isSubmitting}
+                          mediaLibraryEnabled={mediaEnabled}
+                          onLibrarySelect={(url) => {
+                            form.setValue("ogImage", url, {
+                              shouldDirty: true,
+                            });
+                            setOgImageFile(null);
+                            setOgImageRemoved(false);
+                            if (ogImageFileInputRef.current)
+                              ogImageFileInputRef.current.value = "";
+                          }}
                         />
                       </CardContent>
                     </Card>
@@ -941,7 +955,7 @@ export function CollectionForm({ collection }: Props) {
                           existingOgImage={
                             ogImageRemoved
                               ? undefined
-                              : (collection?.ogImage ?? undefined)
+                              : (watchedOgImage ?? undefined)
                           }
                           siteHost={siteHost}
                         />

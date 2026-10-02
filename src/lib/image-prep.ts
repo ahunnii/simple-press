@@ -14,8 +14,9 @@
  * Orientation is preserved by decoding with `imageOrientation: "from-image"`
  * before the EXIF block is dropped.
  *
- * GIF and SVG files are always returned unchanged (GIF to preserve
- * animation; SVG is vector and canvas re-encoding would rasterize it).
+ * GIF, SVG and ICO files are always returned unchanged (GIF to preserve
+ * animation; SVG is vector and canvas re-encoding would rasterize it; ICO is
+ * the favicon container and holds several sizes that re-encoding would drop).
  *
  * Must only be called in the browser — guarded by a `typeof window` check,
  * it returns the original file unchanged in any non-browser environment.
@@ -58,6 +59,14 @@ function isGifFile(file: File): boolean {
 
 function isSvgFile(file: File): boolean {
   return file.type === "image/svg+xml" || /\.svg$/i.test(file.name);
+}
+
+function isIcoFile(file: File): boolean {
+  return (
+    file.type === "image/x-icon" ||
+    file.type === "image/vnd.microsoft.icon" ||
+    /\.ico$/i.test(file.name)
+  );
 }
 
 function replaceExtension(name: string, newExt: string): string {
@@ -147,7 +156,7 @@ export async function prepareImageForUpload(
   opts?: PrepareImageOptions,
 ): Promise<File> {
   if (typeof window === "undefined") return file;
-  if (isGifFile(file) || isSvgFile(file)) return file;
+  if (isGifFile(file) || isSvgFile(file) || isIcoFile(file)) return file;
 
   const maxEdge = opts?.maxEdge ?? DEFAULT_MAX_EDGE;
   const quality = opts?.quality ?? DEFAULT_QUALITY;

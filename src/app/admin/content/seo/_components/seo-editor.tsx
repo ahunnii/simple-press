@@ -43,6 +43,7 @@ import {
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import {
   Accordion,
   AccordionContent,
@@ -423,6 +424,7 @@ export function SEOEditor({
   initialTab,
 }: Props) {
   const router = useRouter();
+  const mediaLibraryEnabled = useMediaLibraryEnabled();
 
   // Refs
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -575,7 +577,18 @@ export function SEOEditor({
   };
 
   const handleSubmit = async (data: SeoFormValues) => {
-    let ogImageUrl: string | undefined = siteContent.ogImage ?? undefined;
+    // The form's `ogImage` is the source of truth, not the `siteContent` prop:
+    // "Choose from library" writes the picked URL there, and Remove blanks it.
+    // (`ogImageFile` is `null` from the start here, so it can't signal removal.)
+    // A blank value is only sent when it actually clears a stored image, so a
+    // store that never had one doesn't get "" written over its null.
+    const formOgImage = data.ogImage?.trim() ?? "";
+    let ogImageUrl: string | undefined =
+      formOgImage.length > 0
+        ? formOgImage
+        : siteContent.ogImage
+          ? ""
+          : undefined;
 
     const tempOgImageFile = data.ogImageFile;
     if (tempOgImageFile instanceof File) {
@@ -673,6 +686,7 @@ export function SEOEditor({
   const storeDescriptionLength = storeDescription?.length ?? 0;
   const inheritedDescription = firstFilled([storeDescription], "");
   const watchedOgImageFile = form.watch("ogImageFile");
+  const watchedOgImageUrl = form.watch("ogImage");
   const watchedLocalPresence = form.watch("localPresence");
 
   // The brand every rendered `<title>` gets suffixed with — reacts live to the
@@ -975,6 +989,8 @@ export function SEOEditor({
                           description="Uploaded when you save, not when you choose it."
                           existingPreviewUrl={siteContent.ogImage ?? undefined}
                           inputRef={ogImageFileInputRef}
+                          mediaLibraryEnabled={mediaLibraryEnabled}
+                          urlFieldName="ogImage"
                           disabled={isSaving}
                         />
                       </CardContent>
@@ -1475,7 +1491,7 @@ export function SEOEditor({
                             existingOgImage={
                               usesRouteOgImage
                                 ? routeOgImage
-                                : (siteContent.ogImage ?? undefined)
+                                : firstNonBlank(watchedOgImageUrl)
                             }
                             siteHost={storeHost}
                           />

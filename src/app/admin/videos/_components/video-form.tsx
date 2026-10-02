@@ -17,6 +17,7 @@ import { videoUpdateSchema } from "~/lib/validators/videos";
 import { youtubeWatchUrl } from "~/lib/youtube/parse";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -96,6 +97,7 @@ function formatDate(date: Date | string): string {
 export function VideoForm({ video }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
+  const mediaLibraryEnabled = useMediaLibraryEnabled();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   // URLs uploaded to S3 during the in-flight submit that aren't yet persisted
@@ -518,6 +520,8 @@ export function VideoForm({ video }: Props) {
                       form.watch("thumbnailOverride") ?? undefined
                     }
                     inputRef={thumbnailInputRef}
+                    mediaLibraryEnabled={mediaLibraryEnabled}
+                    urlFieldName="thumbnailOverride"
                     disabled={isSubmitting}
                   />
                 </CardContent>

@@ -17,6 +17,7 @@ import { brandingFormSchema } from "~/lib/validators/homepage";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -74,6 +75,7 @@ const colorInputValue = (value: string | null | undefined) =>
 export function BrandingEditor({ business, siteContent }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
+  const mediaLibraryEnabled = useMediaLibraryEnabled();
   const socialLinks = (siteContent.socialLinks as
     | {
         instagram?: string;
@@ -172,13 +174,26 @@ export function BrandingEditor({ business, siteContent }: Props) {
   };
 
   const handleSubmit = async (data: BrandingFormSchema) => {
-    let logoUrl: string | undefined = data.logoUrl ?? undefined;
+    // Remove clears `logoUrl` (null/""); send "" so it reaches the server when
+    // a logo was stored, and omit it when the store never had one.
+    let logoUrl: string | undefined =
+      data.logoUrl === null || data.logoUrl === undefined || data.logoUrl === ""
+        ? siteContent.logoUrl
+          ? ""
+          : undefined
+        : data.logoUrl;
     // `handleReset` seeds this with "" for a store that has no favicon, and the
     // server schema accepts "" — so an empty value would write "" over the null
     // the platform favicon falls back from. Same treatment as `primaryColor`.
+    //
+    // The exception is a Remove on a store that HAD a favicon: the field's
+    // Remove button clears `faviconUrl` to "", and that has to reach the server
+    // (layout.tsx trims it, so "" falls back to the platform icon like null).
     let faviconUrl: string | undefined =
       data.faviconUrl === null || data.faviconUrl === ""
-        ? undefined
+        ? siteContent.faviconUrl
+          ? ""
+          : undefined
         : data.faviconUrl;
 
     const logoFile = data.logoFile;
@@ -448,6 +463,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       disabled={isSubmitting}
                       existingPreviewUrl={siteContent?.logoUrl ?? undefined}
                       inputRef={logoFileInputRef}
+                      mediaLibraryEnabled={mediaLibraryEnabled}
+                      urlFieldName="logoUrl"
                     />
                     <InputFormField
                       form={form}
@@ -465,6 +482,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
                     description="The small icon shown in browser tabs. Recommended: 32x32px or 16x16px .ico, .png, or .svg. Defaults to SimplePress's favicon if no favicon is uploaded."
                     existingPreviewUrl={siteContent.faviconUrl ?? undefined}
                     inputRef={faviconFileInputRef}
+                    mediaLibraryEnabled={mediaLibraryEnabled}
+                    urlFieldName="faviconUrl"
                     className="col-span-1"
                   />
                 </div>

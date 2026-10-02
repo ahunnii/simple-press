@@ -6,6 +6,7 @@ import {
   SERVICE_TEMPLATE_DEFS,
   SERVICE_TEMPLATE_FIELDS,
 } from "~/lib/service-templates";
+import { useMediaLibraryEnabled } from "~/hooks/use-media-library-enabled";
 import { Card, CardContent } from "~/components/ui/card";
 import { FieldGroup } from "~/app/admin/content/template/_components/template-field-widgets";
 
@@ -29,6 +30,7 @@ export function ServiceTemplateFieldsEditor({
   onFieldChange,
   embedsEnabled,
 }: Props) {
+  const mediaEnabled = useMediaLibraryEnabled();
   const fieldsByGroup = getServiceTemplateFieldsByGroup(serviceTemplateId);
   const fieldGroups = getServiceTemplateFieldGroups(serviceTemplateId);
 
@@ -77,6 +79,7 @@ export function ServiceTemplateFieldsEditor({
               onFieldChange={onFieldChange}
               isUngrouped={isUngrouped}
               embedsEnabled={embedsEnabled}
+              mediaLibraryEnabled={mediaEnabled}
             />
           );
         })
